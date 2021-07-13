@@ -3,6 +3,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.worksheet.table import Table
 from openpyxl.utils.cell import cols_from_range, range_boundaries
 
+
 def _read_table(sheet: Worksheet, table: Table):
     table_length = range_boundaries(table.ref)[3] - 1
 
@@ -17,7 +18,8 @@ def _read_table(sheet: Worksheet, table: Table):
                 entry = data[row]
                 entry[header] = value
 
-    return data 
+    return data
+
 
 def _read_list(sheet: Worksheet, table: Table):
     table_length = range_boundaries(table.ref)[3] - 1
@@ -36,19 +38,22 @@ def _read_list(sheet: Worksheet, table: Table):
 
 def read_excel(filename, as_list=None):
     """
-    Opens a workbook and finds all tables in the workbook. Parses these and returns as a dictionary of the tablenames. 
+    Opens a workbook and finds all tables in the workbook. Parses these and
+    returns as a dictionary of the tablenames.
 
     e.g. {"Table1": [{name: 1}, {name: 2}, {name: 3}]}
 
-    Normally tables are parsed so that each row creates a new object with each property named after the column heading.
-    However, it is possibly to read a table where each column is returned as a list, useful for 'category' tables. To do
+    Normally tables are parsed so that each row creates a new object with
+    each property named after the column heading.
+    However, it is possibly to read a table where each column is returned
+    as a list, useful for 'category' tables. To do
     so, specify as_list as a sequence containing the table name.
 
     """
     if as_list is None:
         as_list = set()
 
-    wb = load_workbook(filename = filename)
+    wb = load_workbook(filename=filename)
     tables = {}
     for sheet_name in wb.sheetnames:
         sheet = wb[sheet_name]

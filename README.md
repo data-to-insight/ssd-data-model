@@ -24,3 +24,11 @@ or you can launch VS Code with:
 poetry shell
 code .
 ```
+
+## Linting
+
+To check your codestyle, run:
+
+```
+poetry run flake8
+```
