@@ -1,4 +1,178 @@
+Tables:
+- Table: person
+  Description: table of service users
+- Table: baseline
+- Table: employment
+- Table: housing
+- Table: integration
+Fields:
+- ID: ni_number
+  Name: NI Number
+  Table: person
+  Type: 'String '
+  Modified: Primary Key
+  Description: 'UK National Insurance number. Must be UNIQUE. '
+  Comments: Minimum data collection required to understand enrollement
+- ID: date_of_birth
+  Name: 'Date of brith '
+  Table: person
+  Type: YYYY-MM
+  Description: Date of birth, if known. Otherwise…
+  Comments: 'What do we do in cases where DOB is not known? What will be the value
+    on their identity documents? '
+- ID: gender
+  Name: 'Gender '
+  Table: person
+  Type: 'Categorical '
+  Comments: What do we use as source of acceptable gender types?
+- ID: country_of_origin
+  Name: Nationality (or Country of Origin - tbc)
+  Table: person
+  Type: 'Categorical '
+  Comments: Still need to choose either Nationality or Country of Origin [HO]
+- ID: family_composition
+  Name: 'Family composition '
+  Table: person
+  Type: 'Categorical '
+- ID: dependents
+  Name: 'Dependents '
+  Table: person
+  Type: 'Categorical '
+- ID: date_arrived_in_uk
+  Name: Date arrived in UK
+  Table: person
+  Type: Date
+- ID: data_asylum_status_granted
+  Name: 'Date asylum status granted '
+  Table: person
+  Type: Date
+- ID: dispersal_area
+  Name: Dispersal area
+  Table: person
+  Type: 'String '
+- ID: person_ni_number
+  Name: NI Number
+  Table: baseline
+  Type: Date
+  Modified: Foreign Key
+- ID: language_level_on_entry
+  Name: 'Language level on entry '
+  Table: baseline
+  Type: 'String '
+- ID: highest_qualification_achieved
+  Name: 'Highest qualificaiton level achieved  '
+  Table: baseline
+  Type: 'Categorical '
+- ID: employed_in_home_country
+  Name: 'Employed in home country '
+  Table: baseline
+  Type: 'Categorical '
+- ID: occupation_type
+  Name: 'Occupation type '
+  Table: baseline
+  Type: 'Categorical '
+  Comments: 'HO to revert '
+- ID: occupation_sector ??
+  Name: 'Sector '
+  Table: baseline
+  Type: 'Categorical '
+- ID: referral_source
+  Name: 'Referral source '
+  Table: baseline
+  Type: 'Categorical '
+  Comments: 'Categories TBC [to define with providers Mid-July] '
+- ID: date_started_service
+  Name: 'Date started with service '
+  Table: baseline
+  Type: Date
+- ID: date_last_seen
+  Name: 'Date last seen '
+  Table: baseline
+  Type: Date
+  Comments: 'TBC: Ask providers once, at the end of the programme, to go through list
+    of participants and estimate whether and when participants stopped engaging. We
+    anticipate that they will need to go through case notes and find the date of the
+    last exchange. It will be time-consuming, but we are limiting it to once in the
+    whole programme '
+- ID: economic_status
+  Name: 'Main economic status at baseline '
+  Table: baseline
+  Type: Date
+  Comments: 'HO to revert '
+- Name: 'Date achieved intermediate outcome '
+  Table: employment
+  Type: Date
+- Name: 'Type of intermediate outcome '
+  Table: employment
+  Type: 'List '
+- Name: 'Date entered employment '
+  Table: employment
+  Type: Date
+- Name: 'Details of paid employment '
+  Table: employment
+  Type: 'Categorical '
+  Comments: 'HO to revert '
+- Name: 'Ocupation type '
+  Table: employment
+  Type: 'Categorical '
+  Comments: 'HO to revert '
+- Name: 'Sector '
+  Table: employment
+  Type: 'Categorical '
+- Name: 'Date entered self-employment '
+  Table: employment
+  Type: Date
+- Name: 'Ocupation type '
+  Table: employment
+  Type: 'Categorical '
+  Comments: 'HO to revert '
+- Name: 'Sector '
+  Table: employment
+  Type: 'Categorical '
+- Name: Date employment sustainment outcome achieved
+  Table: employment
+  Type: Date
+- Name: 'Accomodation type '
+  Table: baseline
+  Type: 'Categorical '
+  Comments: 'More detail necessary here [want to align with how providers collect
+    this data] '
+- Name: 'Date of housing entry '
+  Table: housing
+  Type: Date
+- Name: 'Accomodation type '
+  Table: housing
+  Type: 'Categorical '
+  Comments: 'Align with baseline collection '
+- Name: 'Date housing sustainment achieved '
+  Table: housing
+  Type: Date
+- Name: 'Date completed integration plan '
+  Table: integration
+  Type: Date
+- Name: Date achieved 6-month integration progress
+  Table: integration
+  Type: Date
+- Name: 'Date achieved 12-month integration progress '
+  Table: integration
+  Type: Date
+- Name: 'Social bonds / bridges / links '
+  Table: integration
+  Type: 'Categorical '
+  Comments: TBC on catorgies and IP for Outcomes Star - test with HO
+- Name: 'Language and communication '
+  Table: integration
+  Type: 'Categorical '
+  Comments: TBC on catorgies for IP for Outcomes Star - test with HO
+- Name: 'Digital skills '
+  Table: integration
+  Type: 'Categorical '
+  Comments: TBC Ecorys looking to yes/no questions - test with HO
+- {}
 Categories:
+  gender:
+  - source?
+  gender_description: []
   country_of_origin:
   - AD
   - AE
@@ -250,177 +424,3 @@ Categories:
   - ZM
   - ZW
   country_of_origin_description: []
-  gender:
-  - source?
-  gender_description: []
-Fields:
-- Comments: Minimum data collection required to understand enrollement
-  Description: 'UK National Insurance number. Must be UNIQUE. '
-  ID: ni_number
-  Modified: Primary Key
-  Name: NI Number
-  Table: person
-  Type: 'String '
-- Comments: 'What do we do in cases where DOB is not known? What will be the value
-    on their identity documents? '
-  Description: "Date of birth, if known. Otherwise\u2026"
-  ID: date_of_birth
-  Name: 'Date of brith '
-  Table: person
-  Type: YYYY-MM
-- Comments: What do we use as source of acceptable gender types?
-  ID: gender
-  Name: 'Gender '
-  Table: person
-  Type: 'Categorical '
-- Comments: Still need to choose either Nationality or Country of Origin [HO]
-  ID: country_of_origin
-  Name: Nationality (or Country of Origin - tbc)
-  Table: person
-  Type: 'Categorical '
-- ID: family_composition
-  Name: 'Family composition '
-  Table: person
-  Type: 'Categorical '
-- ID: dependents
-  Name: 'Dependents '
-  Table: person
-  Type: 'Categorical '
-- ID: date_arrived_in_uk
-  Name: Date arrived in UK
-  Table: person
-  Type: Date
-- ID: data_asylum_status_granted
-  Name: 'Date asylum status granted '
-  Table: person
-  Type: Date
-- ID: dispersal_area
-  Name: Dispersal area
-  Table: person
-  Type: 'String '
-- ID: person_ni_number
-  Modified: Foreign Key
-  Name: NI Number
-  Table: baseline
-  Type: Date
-- ID: language_level_on_entry
-  Name: 'Language level on entry '
-  Table: baseline
-  Type: 'String '
-- ID: highest_qualification_achieved
-  Name: 'Highest qualificaiton level achieved  '
-  Table: baseline
-  Type: 'Categorical '
-- ID: employed_in_home_country
-  Name: 'Employed in home country '
-  Table: baseline
-  Type: 'Categorical '
-- Comments: 'HO to revert '
-  ID: occupation_type
-  Name: 'Occupation type '
-  Table: baseline
-  Type: 'Categorical '
-- ID: occupation_sector ??
-  Name: 'Sector '
-  Table: baseline
-  Type: 'Categorical '
-- Comments: 'Categories TBC [to define with providers Mid-July] '
-  ID: referral_source
-  Name: 'Referral source '
-  Table: baseline
-  Type: 'Categorical '
-- ID: date_started_service
-  Name: 'Date started with service '
-  Table: baseline
-  Type: Date
-- Comments: 'TBC: Ask providers once, at the end of the programme, to go through list
-    of participants and estimate whether and when participants stopped engaging. We
-    anticipate that they will need to go through case notes and find the date of the
-    last exchange. It will be time-consuming, but we are limiting it to once in the
-    whole programme '
-  ID: date_last_seen
-  Name: 'Date last seen '
-  Table: baseline
-  Type: Date
-- Comments: 'HO to revert '
-  ID: economic_status
-  Name: 'Main economic status at baseline '
-  Table: baseline
-  Type: Date
-- Name: 'Date achieved intermediate outcome '
-  Table: employment
-  Type: Date
-- Name: 'Type of intermediate outcome '
-  Table: employment
-  Type: 'List '
-- Name: 'Date entered employment '
-  Table: employment
-  Type: Date
-- Comments: 'HO to revert '
-  Name: 'Details of paid employment '
-  Table: employment
-  Type: 'Categorical '
-- Comments: 'HO to revert '
-  Name: 'Ocupation type '
-  Table: employment
-  Type: 'Categorical '
-- Name: 'Sector '
-  Table: employment
-  Type: 'Categorical '
-- Name: 'Date entered self-employment '
-  Table: employment
-  Type: Date
-- Comments: 'HO to revert '
-  Name: 'Ocupation type '
-  Table: employment
-  Type: 'Categorical '
-- Name: 'Sector '
-  Table: employment
-  Type: 'Categorical '
-- Name: Date employment sustainment outcome achieved
-  Table: employment
-  Type: Date
-- Comments: 'More detail necessary here [want to align with how providers collect
-    this data] '
-  Name: 'Accomodation type '
-  Table: baseline
-  Type: 'Categorical '
-- Name: 'Date of housing entry '
-  Table: housing
-  Type: Date
-- Comments: 'Align with baseline collection '
-  Name: 'Accomodation type '
-  Table: housing
-  Type: 'Categorical '
-- Name: 'Date housing sustainment achieved '
-  Table: housing
-  Type: Date
-- Name: 'Date completed integration plan '
-  Table: integration
-  Type: Date
-- Name: Date achieved 6-month integration progress
-  Table: integration
-  Type: Date
-- Name: 'Date achieved 12-month integration progress '
-  Table: integration
-  Type: Date
-- Comments: TBC on catorgies and IP for Outcomes Star - test with HO
-  Name: 'Social bonds / bridges / links '
-  Table: integration
-  Type: 'Categorical '
-- Comments: TBC on catorgies for IP for Outcomes Star - test with HO
-  Name: 'Language and communication '
-  Table: integration
-  Type: 'Categorical '
-- Comments: TBC Ecorys looking to yes/no questions - test with HO
-  Name: 'Digital skills '
-  Table: integration
-  Type: 'Categorical '
-- {}
-Tables:
-- Description: table of service users
-  Table: person
-- Table: baseline
-- Table: employment
-- Table: housing
-- Table: integration
