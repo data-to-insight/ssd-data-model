@@ -9,7 +9,7 @@ from rtofdata.yaml import write_yaml
 def main(filename):
     data = read_excel(filename, as_list=["Categories"])
     write_word_specification(data, "output/specification.docx")
-    write_yaml(data, "output/specification.yaml")
+    write_yaml(data, "data/specification.yaml")
     
 
 
