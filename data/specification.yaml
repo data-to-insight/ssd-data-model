@@ -1,14 +1,19 @@
+Intro_table:
+- Introduction: The document outlines the data fields, types and descriptions for
+    all required data collection during the lifetime of the Refugee Tranisition Outcome
+    Fund
+- Introduction: ''
 Tables:
 - Table: person
-  Description: table of service users
+  Description: Table including information for all service users
 - Table: baseline
-  Description: baseline data for service users
+  Description: Table outlining baseline data for all service users
 - Table: employment
-  Description: data related to employment outcomes
+  Description: Table outlining data related to employment outcomes
 - Table: housing
-  Description: data related to housing outcomes
+  Description: Table outlining data related to housing outcomes
 - Table: integration
-  Description: data related to integration outcomes
+  Description: Table outlining data related to integration outcomes
 Fields:
 - ID: ni_number
   Name: NI Number
