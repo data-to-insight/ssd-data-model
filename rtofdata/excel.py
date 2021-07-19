@@ -16,7 +16,7 @@ def _read_table(sheet: Worksheet, table: Table):
             value = sheet[c[row+1]].value
             if value is not None:
                 entry = data[row]
-                entry[header] = value
+                entry[header] = value.strip()
 
     return data
 
@@ -30,7 +30,7 @@ def _read_list(sheet: Worksheet, table: Table):
     for c in cols:
         header = sheet[c[0]].value
         values = [sheet[c[ix+1]].value for ix in range(0, table_length)]
-        values = [v for v in values if v is not None]
+        values = [v.strip() for v in values if v is not None]
         data[header] = values
 
     return data
