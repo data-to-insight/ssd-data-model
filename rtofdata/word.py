@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from docx import Document
 from docx.shared import Cm, Inches
 from docx.enum.table import WD_TABLE_ALIGNMENT
@@ -17,8 +19,9 @@ def write_word_specification(data: dict, filename: str):
     for table_def in data['Intro_table']:
         introduction = table_def.get('Introduction')
         document.add_paragraph(introduction)
-    picture = 'RTOF_program_path .jpg'
-    document.add_picture(picture, width = Cm(18.0))
+
+    picture = Path(__file__).parent / '../data/RTOF_program_path.png'
+    document.add_picture(str(picture.absolute()), width = Cm(18.0))
     last_paragraph = document.paragraphs[-1] 
     last_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
