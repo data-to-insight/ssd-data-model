@@ -10,16 +10,19 @@ def write_word_specification(data: dict, filename: str):
     Creates a detailed Word version of the specification.
     Read more about docx here: https://python-docx.readthedocs.io/en/latest/
     """
+        
     document = Document()
     document.add_heading('RTOF Data Specification', 0)
-    introduction = "The document outlines the data fields, types and descriptions for all required data collection during the lifetime of the Refugee Tranisition Outcome Fund"
-    document.add_paragraph(introduction)
+    for table_def in data['Intro_table']:
+        introduction = table_def.get('Introduction')
+        document.add_paragraph(introduction)
+   
+    
     document.add_page_break()
 
-    document.add_heading('Tables', 1)
+    document.add_heading('Forms', 1)
     document.add_paragraph(
-        'Each table (does table make sense - '
-        'maybe "form" would be clearer?) corresponds to a stage '
+        'Each from corresponds to a stage '
         'in the service.'
     )
     for table_def in data['Tables']:
@@ -37,7 +40,7 @@ def write_word_specification(data: dict, filename: str):
         col1 = table.columns[1]
         col2 = table.columns[2]
         col3 = table.columns[3]
-        col0.width = Cm(5.19)        
+        col0.width = Cm(5.2)        
         col1.width = Cm(2.5)
         col2.width = Cm(2.5)
         col3.width = Cm(6.0)
