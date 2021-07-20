@@ -1,6 +1,7 @@
 from docx import Document
 from docx.shared import Cm, Inches
 from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 
 
@@ -16,7 +17,10 @@ def write_word_specification(data: dict, filename: str):
     for table_def in data['Intro_table']:
         introduction = table_def.get('Introduction')
         document.add_paragraph(introduction)
-   
+    picture = 'RTOF_program_path .jpg'
+    document.add_picture(picture, width = Cm(18.0))
+    last_paragraph = document.paragraphs[-1] 
+    last_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
     document.add_page_break()
 
@@ -25,9 +29,12 @@ def write_word_specification(data: dict, filename: str):
         'Each from corresponds to a stage '
         'in the service.'
     )
+    count = 0
     for table_def in data['Tables']:
         table_name = table_def.get('Table')
-        document.add_heading(table_name.title(), 2)
+        count < 5 
+        count += 1
+        document.add_heading("Form " + str(count) + ": " +  table_name.title(), 2)
         document.add_paragraph(table_def.get('Description', ""))
         
         table = document.add_table(rows=1, cols=4)
