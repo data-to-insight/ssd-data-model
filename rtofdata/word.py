@@ -34,6 +34,8 @@ def write_word_specification(data: dict, filename: str):
     )
     for count, table_def in enumerate(data['Tables']):
         table_name = table_def.get('Table')
+        if not table_name:
+            continue
         document.add_heading(f"Form {count+1}: {table_name.title()}", 2)
         document.add_paragraph(table_def.get('Description', ""))
         
