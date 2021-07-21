@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
+
+from rtofdata.create_validation_rules import generate_validation_rules
 from rtofdata.excel import read_excel
 from rtofdata.word import write_word_specification
 from rtofdata.yaml import write_yaml
@@ -8,8 +10,14 @@ from rtofdata.yaml import write_yaml
 
 def main(filename):
     data = read_excel(filename, as_list=["Categories"])
-    write_word_specification(data, "output/specification.docx")
+
+    rules = generate_validation_rules(data)
+
+    data['rules'] = rules
+
     write_yaml(data, "data/specification.yaml")
+
+    write_word_specification(data, "output/specification.docx")
 
 
 if __name__ == "__main__":
