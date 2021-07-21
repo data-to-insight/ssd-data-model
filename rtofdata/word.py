@@ -29,12 +29,9 @@ def write_word_specification(data: dict, filename: str):
         'Each from corresponds to a stage '
         'in the service.'
     )
-    count = 0
-    for table_def in data['Tables']:
+    for count, table_def in enumerate(data['Tables']):
         table_name = table_def.get('Table')
-        count < 5 
-        count += 1
-        document.add_heading("Form " + str(count) + ": " +  table_name.title(), 2)
+        document.add_heading(f"Form {count+1}: {table_name.title()}", 2)
         document.add_paragraph(table_def.get('Description', ""))
         
         table = document.add_table(rows=1, cols=4)
