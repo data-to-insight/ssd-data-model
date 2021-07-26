@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal", 
-            "args": ["../../5. Data Model and Flows/Data standard/RTOF_data_schema.xlsx"]
+            "args": ["..\\..\\5. Data Model and Flows\\Data standard\\RTOF_data_schema.xlsx"]
         }
     ]
 }

@@ -744,7 +744,7 @@ Categories:
   - Austria
   - Australia
   - Aruba
-  - Ã…land Islands
+  - Åland Islands
   - Azerbaijan
   - Bosnia and Herzegovina
   - Barbados
@@ -755,7 +755,7 @@ Categories:
   - Bahrain
   - Burundi
   - Benin
-  - Saint BarthÃ©lemy
+  - Saint Barthélemy
   - Bermuda
   - Brunei
   - Bolivia
@@ -773,7 +773,7 @@ Categories:
   - Central African Republic
   - Congo (Republic of)
   - Switzerland
-  - CÃ´te d'Ivoire (Ivory Coast)
+  - Côte d'Ivoire (Ivory Coast)
   - Cook Islands
   - Chile
   - Cameroon
@@ -782,7 +782,7 @@ Categories:
   - Costa Rica
   - Cuba
   - Cape Verde
-  - CuraÃ§ao
+  - Curaçao
   - Christmas Island
   - Cyprus
   - Czech Republic
@@ -917,7 +917,7 @@ Categories:
   - Palau
   - Paraguay
   - Qatar
-  - RÃ©union
+  - Réunion
   - Romania
   - Serbia
   - Russian Federation
@@ -938,7 +938,7 @@ Categories:
   - Somalia
   - Suriname
   - South Sudan
-  - SÃ£o Tome and PrÃ­ncipe
+  - São Tome and Príncipe
   - El Salvador
   - Saint Martin (Netherlands)
   - Syria
@@ -1063,7 +1063,7 @@ Table5:
 - intermediate_employment_outcome_type2: Developed business plan for self-employment
 - intermediate_employment_outcome_type2: Registered business for self-employment
 - intermediate_employment_outcome_type2: another specified activity directly relevant
-    to achieving the individualâ€™s employment goals
+    to achieving the individual’s employment goals
 rules:
   person.ni_number.notnull:
     validator: notnull
