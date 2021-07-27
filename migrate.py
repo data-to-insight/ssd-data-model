@@ -20,10 +20,21 @@ def mutate_fields(field_list):
         del f['id']
         del f['table']
 
+        key_type = f.get("keys")
+        if key_type:
+            del f["keys"]
+
+        if key_type == "Primary Key":
+            f['primary_key'] = True
+
+        if key_type == "Foreign Key":
+            f['foreign_keys'] = [dict(record="person", field="ni_number")]
+
         if "y" in f.get("required", "n").lower():
             f.setdefault('validation', {})['required'] = True
 
-        del f["required"]
+        if "required" in f:
+            del f["required"]
 
         if "after date" in f:
             f.setdefault('validation', {})['date_after'] = f["after date"]
@@ -32,6 +43,7 @@ def mutate_fields(field_list):
         if "validationrules" in f:
             f.setdefault('validation', {})['extras'] = f["validationrules"]
             del f["validationrules"]
+
 
     return field_dict
 

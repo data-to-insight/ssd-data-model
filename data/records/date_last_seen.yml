@@ -6,7 +6,9 @@ fields:
   person_ni_number:
     name: NI Number
     type: NINO
-    keys: Foreign Key
+    foreign_keys:
+    - record: person
+      field: ni_number
     validation:
       required: true
       extras: unique

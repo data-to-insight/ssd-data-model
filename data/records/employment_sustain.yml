@@ -7,10 +7,12 @@ fields:
   person_ni_number:
     name: NI Number
     type: NINO
-    keys: Foreign Key
     description: UK National Insurance number. Must be UNIQUE. To be recorded when
       any employmnet data is submitted.
     comments: Minimum data collection required to understand enrollement
+    foreign_keys:
+    - record: person
+      field: ni_number
     validation:
       required: true
       extras: unique

@@ -6,11 +6,11 @@ fields:
   ni_number:
     name: NI Number
     type: NINO
-    keys: Primary Key
     description: UK National Insurance number. Must be unique. To be collected at
       enrolment into the program. All upper case and no spaces [regular expressions
       for NiNos]
     comments: Minimum data collection required to understand enrollement
+    primary_key: true
     validation:
       required: true
 
