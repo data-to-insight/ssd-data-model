@@ -6,9 +6,7 @@ from docxtpl import DocxTemplate, InlineImage
 
 import git
 
-root = Path(__file__).parent / '..'
-input_dir = root / 'data'
-output_dir = root / 'output'
+from rtofdata.config import assets_dir, data_dir, output_dir
 
 
 def write_word_specification(data: dict, filename: str):
@@ -17,7 +15,7 @@ def write_word_specification(data: dict, filename: str):
     Read more about docx here: https://python-docx.readthedocs.io/en/latest/
     """
 
-    tpl = DocxTemplate(input_dir / "template.docx")
+    tpl = DocxTemplate(assets_dir / "template.docx")
 
     repo = git.Repo(search_parent_directories=True)
     git_version = repo.head.object.hexsha[:7]
@@ -35,7 +33,7 @@ def write_word_specification(data: dict, filename: str):
 
     context = dict(git_version=git_version, generation_time=f"{datetime.now():%-d %B %Y}")
 
-    context['milestones_image'] = InlineImage(tpl, image_descriptor=str(input_dir / 'RTOF_program_path.png'),
+    context['milestones_image'] = InlineImage(tpl, image_descriptor=str(assets_dir / 'RTOF_program_path.png'),
                                               width=Cm(16))
 
     context['record_list'] = record_list = [{**t} for t in data['Tables']]
