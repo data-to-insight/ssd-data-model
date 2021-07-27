@@ -29,6 +29,7 @@ def _read_list(sheet: Worksheet, table: Table):
 
     for c in cols:
         header = sheet[c[0]].value
+        header = header.strip()
         values = [sheet[c[ix+1]].value for ix in range(0, table_length)]
         values = [v.strip() for v in values if v is not None]
         data[header] = values

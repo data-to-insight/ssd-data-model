@@ -2,8 +2,12 @@ Intro_table:
 - Introduction: "The document outlines the data fields, types and descriptions for\
     \ all required data collection during the lifetime of the Refugee Tranisition\
     \ Outcome Fund. The description in each field outlines the context for the data\
-    \ field, the frequency and milestone at which it should be collected. \nThe image\
-    \ below outlines the key milestones and data collection points during the program."
+    \ field, the frequency and milestone at which it should be collected.\n\n\nThe\
+    \ validation rules that apply for each field are noted at the end of the document.\
+    \ These will be applied on submission of data, if any validation rules are not\
+    \ met, a report will be produced with details of the fields and specified errors\
+    \ for the given fields. \n \nThe image below outlines the key milestones and data\
+    \ collection points during the program."
 - {}
 Tables:
 - Table: person
@@ -12,19 +16,20 @@ Tables:
 - Table: baseline
   Description: 'This form outlines the required baseline data for all service users,
     the data is to be collected across interactions with participants and submitted
-    either when submitting form: integration_1 or during the annual caseload review.'
+    either when submitting form: integration_plan or during the annual caseload review.'
+- Table: date_last_seen
+  Description: This form outlines the required data for participants who are no longer
+    engaged with the service. Data should be collected during the annual caseload
+    review.
 - Table: employment_intermediate
   Description: This form outlines the required data for participants who achieve the
     intermediate employment outcome. Data should be collected when achieving the intermediate
     outcome.
 - Table: employment_entry
   Description: This form outlines the required data for participants who achieve the
-    employment entry outcome. Data should be collected when achieving the employment
-    entry outcome.
-- Table: self_employment_entry
-  Description: This form outlines the required data for participants who achieve the
-    self-employment entry outcome. Data should be collected when achieving the self-employment
-    entry outcome.
+    employment OR self employment entry outcome. A participant can only achieve either
+    the employment or self-employment outcome. Data should be collected when achieving
+    the employment entry outcome.
 - Table: employment_sustain
   Description: This form outlines the required data for participants who achieve the
     employment sustainment outcome. Data should be collected when achieving the employment
@@ -37,19 +42,11 @@ Tables:
   Description: This form outlines the required data for participants who achieve the
     housing sustainment outcome. Data should be collected when achieving the housing
     sustainment outcome.
-- Table: integration_plan1
-  Description: This form outlines the required data for participants who achieve the
-    creation of an integration plan outcome. Data should be collected when achieving
-    the creation of an integration plan outcome.
-- Table: integration_plan2
-  Description: This form outlines the required data for participants who achieve the
-    6 month integration plan progress outcome. Data should be collected when achieving
-    the 6 month integration plan progress outcome.
-- Table: integration_plan3
-  Description: This form outlines the required data for participants who achieve the
-    12 month integration plan progress outcome. Data should be collected when achieving
-    the 12 month integration plan progress outcome.
-- {}
+- Table: integration_plan
+  Description: This form outlines the required data for participants who achieve each
+    integration plan outcome - one submission for each creation, 6 month progress
+    and 12 month progress. Data should be collected when achieving each integration
+    plan outcome.
 Fields:
 - ID: ni_number
   Name: NI Number
@@ -57,15 +54,15 @@ Fields:
   Type: NINO
   Keys: Primary Key
   Required: y
-  Description: UK National Insurance number. Must be UNIQUE. To be collected at enrolment
-    into the program.
+  Description: UK National Insurance number. Must be unique. To be collected at enrolment
+    into the program. All upper case and no spaces [regular expressions for NiNos]
   Comments: Minimum data collection required to understand enrollement
 - ID: date_of_birth
   Name: Date of brith
   Table: person
   Type: YYYY-MM
   Required: y
-  Description: Date of birth, if known. To be collected once at enrolment
+  Description: Date of birth of participant. To be collected once at enrolment
   Comments: What do we do in cases where DOB is not known? What will be the value
     on their identity documents?
 - ID: gender
@@ -82,8 +79,9 @@ Fields:
   Table: person
   Type: Categorical
   Required: y
-  Description: Nationality list provided. Must selected one of the given categories.
-    To be collected once at enrolment.
+  Description: Nationality of participant. A list of nationalities are provided. Must
+    select one of the given categories, please see nationality descriptions to link
+    with the relevant code. To be collected once at enrolment.
   Comments: To use the same categories used as the HO. Still want to check if we can
     avoid this question and use HO data instead.
 - ID: living_status
@@ -93,7 +91,7 @@ Fields:
   Required: y
   Description: Selection of either single or couple. Couple includes living with more
     than one individual. To be collected once when submitting the initial integration
-    plan or at annual caseload review.
+    plan form or at annual caseload review.
   Comments: Selection of either single or couple - do we need provision for alternative
     couples (+2 living together)
 - ID: current_family_composition
@@ -109,6 +107,7 @@ Fields:
   Name: Current dependents in UK
   Table: baseline
   Type: List
+  Required: y
   Description: Selection of each option that applies to the participant. To be collected
     once when submitting the initial integration plan or at annual caseload review.
 - ID: date_arrived_in_uk
@@ -116,16 +115,18 @@ Fields:
   Table: baseline
   Type: Date
   After Date: date_of_birth
+  Required: y
   Description: Date participant entered the UK, relating to their latest and current
     arrival. To be collected once when submitting the intial integration plan or at
     annual caseload review.
   Comments: To confirm alternative collection route if an integration plan is not
     submitted [eg. Povider caseload review]
-- ID: data_asylum_status_granted
+- ID: date_asylum_status_granted
   Name: Date asylum status granted
   Table: baseline
   Type: Date
   After Date: date_arrived_in_uk
+  Required: y
   Description: Date participant was granted asylum status, relating to their latest
     and current status. To be collected once when submitting the intial integration
     plan or at annual caseload review.
@@ -134,6 +135,7 @@ Fields:
   Name: Dispersal area
   Table: person
   Type: String
+  Required: y
   Description: Local authority where participant was located once asylum status was
     granted. To be collected once at enrolment into the program.
   Comments: Confirm whether this should be string of list of LA (is LA specific enough
@@ -143,6 +145,7 @@ Fields:
   Table: baseline
   Type: NINO
   Keys: Foreign Key
+  Required: y
   ValidationRules: unique
   Description: UK National Insurance number. Must be UNIQUE. To be recorded when submitting
     baseline data.
@@ -151,6 +154,7 @@ Fields:
   Name: Language level on entry
   Table: baseline
   Type: Categorical
+  Required: y
   Description: The language level of participant when entering RTOF. Selection of
     one of the specified category, further information on these levels can be found
     here [https://esol.britishcouncil.org/sites/default/files/attachments/informational-page/ESOL%20level%20descriptors.pdf].
@@ -161,6 +165,7 @@ Fields:
   Name: Highest qualificaiton level achieved
   Table: baseline
   Type: Categorical
+  Required: y
   Description: The highest level of qualification of participant when entering RTOF.
     Selection of one of the specified category, these refer to [https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels#:~:text=Level%205%20qualifications%20are%3A,higher%20national%20diploma%20(%20HND%20)]
     and please see XXX for international qualification comparisons . To be collected
@@ -171,6 +176,7 @@ Fields:
   Name: Employed in home country
   Table: baseline
   Type: Categorical
+  Required: y
   Description: When participant left home country were they in any form of employment.
     To be collected once when submitting the intial integration plan or at annual
     caseload review.
@@ -181,6 +187,8 @@ Fields:
   Name: Occupation type
   Table: baseline
   Type: Free Text (short)
+  Required: n
+  ValidationRules: character_limit
   Description: If answered 'Yes' to employed in home country field, state job role
     [eg. teacher] of their last employment. Max word count 10 words.  To be collected
     once when submitting the intial integration plan or at annual caseload review.
@@ -189,6 +197,8 @@ Fields:
   Name: Sector
   Table: baseline
   Type: Free Text (short)
+  Required: n
+  ValidationRules: character_limit
   Description: If answered 'Yes' to employed in home country field, state the sector
     [eg. education] of their last employment. Max word count 10 words.  To be collected
     once when submitting the intial integration plan or at annual caseload review.
@@ -197,6 +207,7 @@ Fields:
   Name: Referral source
   Table: person
   Type: Categorical
+  Required: y
   Description: Where the participant was referred to your service from. Select one
     of the given options (if unknown please select 'Other'). To be collected at enrolment
     into the program.
@@ -205,13 +216,24 @@ Fields:
   Name: Date started with service
   Table: person
   Type: Date
+  After Date: date_asylum_status_granted
+  Required: y
   Description: Date of participant enrolment onto the program. Month and Year of enrolment
     requried. To be collected once at enrolment into the program
   Comments: To define first interaction - at enrolment meeting with service providers
+- ID: person_ni_number
+  Name: NI Number
+  Table: date_last_seen
+  Type: NINO
+  Keys: Foreign Key
+  Required: y
+  ValidationRules: unique
 - ID: date_last_seen
   Name: Date last seen
-  Table: baseline
+  Table: date_last_seen
   Type: Date
+  After Date: date_started_service
+  Required: y
   Description: Date of last interaction with participant. Month and Year required.
     To be collected annually during annual caseload review.
   Comments: 'TBC: Ask providers once, at the end of the programme, to go through list
@@ -220,6 +242,7 @@ Fields:
   Name: Main economic status at baseline
   Table: baseline
   Type: Categorical
+  Required: y
   Description: Selection of a single category describing the employment status of
     the participant prior to entering RTOF. To be collected once when submitting the
     initial integration plan or at annual caseload review.
@@ -230,6 +253,8 @@ Fields:
   Table: employment_intermediate
   Type: NINO
   Keys: Foreign Key
+  Required: y
+  ValidationRules: unique
   Description: UK National Insurance number. Must be UNIQUE. To be recorded when any
     employmnet data is submitted.
   Comments: Minimum data collection required to understand enrollement
@@ -237,6 +262,7 @@ Fields:
   Name: Date achieved intermediate outcome
   Table: employment_intermediate
   Type: Date
+  Required: y
   Description: Date of intermediate employment outcome achievement. To be collected
     once at intermediate employment outcome submission.
   Comments: Date of completion of the final qualifiying outcome. To confirm how the
@@ -245,6 +271,8 @@ Fields:
   Name: Type of intermediate outcome
   Table: employment_intermediate
   Type: List
+  After Date: date_started_service
+  Required: y
   Description: Selection of at least 3 intermediate outcomes achieved from the provided
     list [link to list]. To be collected once at intermediate employment outcome submission.
   Comments: Selection of (At least ??) 3 of the intermediate outcomes achieved --
@@ -254,21 +282,32 @@ Fields:
   Table: employment_entry
   Type: NINO
   Keys: Foreign Key
+  Required: y
+  ValidationRules: unique
   Description: UK National Insurance number. Must be UNIQUE. To be recorded when any
     employmnet data is submitted.
   Comments: Minimum data collection required to understand enrollement
+- ID: employment_entry_outcome_type
+  Name: Type of employment entry outcome
+  Table: employment_entry
+  Type: Categorical
+  Required: y
+  Description: Employment entry can either be employment or self-employment. To be
+    collected once at entry to employmnet outcome submission.
+  Comments: To confirm this works
 - ID: date_employment_entry
   Name: Date entered employment
   Table: employment_entry
   Type: Date
+  After Date: date_started_service
+  Required: y
   Description: Date of employment entry submission. To be collected once at entry
     to employment outcome submission.
-  Comments: To confirm the definition of this date - employment offer or employment
-    start ?
 - ID: employment_entry_details
   Name: Details of paid employment
   Table: employment_entry
   Type: Categorical
+  Required: y
   Description: Selection of a single category describing the type of employment participant
     is entering for the employment outcome achievement. To be collected once at entry
     to employment outcome submission.
@@ -278,6 +317,8 @@ Fields:
   Name: Ocupation type
   Table: employment_entry
   Type: Free Text (short)
+  Required: y
+  ValidationRules: character_limit
   Description: State participants employment type for the acheivement of entry to
     employment outcome. To be collected once at entry to employment outcome submission.
   Comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
@@ -285,44 +326,18 @@ Fields:
   Name: Sector
   Table: employment_entry
   Type: Free Text (short)
+  Required: y
+  ValidationRules: character_limit
   Description: State the participants employment sector for the acheivement of entry
     to employment outcome. To be collected once at entry to employment outcome submission.
   Comments: To confirm word limit (and possibly add a suggestion ie. Education)
 - ID: person_ni_number
   Name: NI Number
-  Table: self_employment_entry
-  Type: NINO
-  Keys: Foreign Key
-  Description: UK National Insurance number. Must be UNIQUE. To be recorded when any
-    employmnet data is submitted.
-  Comments: Minimum data collection required to understand enrollement
-- ID: self_employment_entry_date
-  Name: Date entered self-employment
-  Table: self_employment_entry
-  Type: Date
-  Description: Date of self-employment entry achievement. To be collected once at
-    entry to employment outcome submission.
-- ID: self_employment_entry_ocupation
-  Name: Ocupation type
-  Table: self_employment_entry
-  Type: Free Text (short)
-  Description: State participants self-employment type for the acheivement of entry
-    to employment outcome. Max word count 10 words. To be collected once at entry
-    to employment outcome submission.
-  Comments: To confirm word limit (and possibly add a suggestion ie. )
-- ID: self_employment_entry_sector
-  Name: Sector
-  Table: self_employment_entry
-  Type: Free Text (short)
-  Description: State the participants self-employment sector for the acheivement of
-    entry to employment outcome. Max word count 10 words. To be collected once at
-    entry to employment outcome submission.
-  Comments: To confirm word limit (and possibly add a suggestion ie. )
-- ID: person_ni_number
-  Name: NI Number
   Table: employment_sustain
   Type: NINO
   Keys: Foreign Key
+  Required: y
+  ValidationRules: unique
   Description: UK National Insurance number. Must be UNIQUE. To be recorded when any
     employmnet data is submitted.
   Comments: Minimum data collection required to understand enrollement
@@ -330,6 +345,8 @@ Fields:
   Name: Date employment sustainment outcome achieved
   Table: employment_sustain
   Type: Date
+  After Date: date_employment_entry
+  Required: y
   Description: Date of employment sustainment outcome achieved. This can be either
     be for the self-employment or employment route. To be collected once at entry
     to employment outcome submission.
@@ -337,6 +354,7 @@ Fields:
   Name: Accomodation type
   Table: baseline
   Type: Categorical
+  Required: y
   Description: tbc
   Comments: Ecorys to provide details
 - ID: person_ni_number
@@ -344,6 +362,8 @@ Fields:
   Table: housing_entry
   Type: NINO
   Keys: Foreign Key
+  Required: y
+  ValidationRules: unique
   Description: UK National Insurance number. Must be UNIQUE. To be recorded when any
     housing data is submitted.
   Comments: Minimum data collection required to understand enrollement
@@ -351,6 +371,8 @@ Fields:
   Name: Date of housing entry
   Table: housing_entry
   Type: Date
+  After Date: date_started_service
+  Required: y
   Description: Date of housing entry outcome achieved. To be collected once at entry
     to housing outcome submission.
   Comments: To confirm the definition of this date - housing contract signed / move
@@ -359,6 +381,7 @@ Fields:
   Name: Accomodation type
   Table: housing_entry
   Type: Categorical
+  Required: y
   Description: tbc
   Comments: Align with baseline collection
 - ID: person_ni_number
@@ -366,6 +389,8 @@ Fields:
   Table: housing_sustain
   Type: NINO
   Keys: Foreign Key
+  Required: y
+  ValidationRules: unique
   Description: UK National Insurance number. Must be UNIQUE. To be collected when
     any integration data is submitted.
   Comments: Minimum data collection required to understand enrollement
@@ -373,102 +398,54 @@ Fields:
   Name: Date housing sustainment achieved
   Table: housing_sustain
   Type: Date
+  After Date: housing_entry_date
+  Required: y
   Description: Date of housing sustainment outcome achieved. To be collected once
     at housing sustainment outcome submission.
 - ID: person_ni_number
   Name: NI Number
-  Table: integration_plan1
+  Table: integration_plan
   Type: NINO
   Keys: Foreign Key
+  Required: y
+  ValidationRules: unique
   Description: UK National Insurance number. Must be UNIQUE. To be collected when
     any integration data is submitted.
   Comments: Minimum data collection required to understand enrollement
-- ID: integration_entry_date
+- ID: integration_outcome_type
+  Name: Integration outcome type
+  Table: integration_plan
+  Type: Categorical
+  Required: y
+  Description: Selection of which integration outcome has been achevied. To be collected
+    at each outcome submission.
+- ID: integration_outcome_achieved_date
   Name: Date completed integration plan
-  Table: integration_plan1
+  Table: integration_plan
   Type: Date
-  Description: Date of completed integration plan outcome is achieved. To be collected
-    once when a creation of an integration plan outcome is submitted.
-- ID: person_ni_number
-  Name: NI Number
-  Table: integration_plan2
-  Type: NINO
-  Keys: Foreign Key
-  Description: UK National Insurance number. Must be UNIQUE. To be collected when
-    any integration data is submitted.
-  Comments: Minimum data collection required to understand enrollement
-- ID: integration_mid_sustainment_date
-  Name: Date achieved 6-month integration progress
-  Table: integration_plan2
-  Type: Date
-  Description: Date of 6-month integration plan progress outcome is achieved. To be
-    collected once when a 6-month integration plan progress outcome is submitted.
-- ID: person_ni_number
-  Name: NI Number
-  Table: integration_plan3
-  Type: NINO
-  Keys: Foreign Key
-  Description: UK National Insurance number. Must be UNIQUE. To be collected when
-    any integration data is submitted.
-  Comments: Minimum data collection required to understand enrollement
-- ID: integration_year_sustainment_date
-  Name: Date achieved 12-month integration progress
-  Table: integration_plan3
-  Type: Date
-  Description: Date of 12-month integration plan progress outcome is achieved. To
-    be collected once when a 12-month integration plan progress outcome is submitted.
-- ID: integration_social1
+  After Date: date_started_service
+  Required: y
+  Description: Date of integration plan outcome achievement. To be collected once
+    when a creation of an integration plan outcome is submitted.
+- ID: integration_social
   Name: Social bonds / bridges / links
-  Table: integration_plan1
+  Table: integration_plan
   Type: Categorical
+  Required: y
   Description: tbc
   Comments: TBC on catorgies and IP for Outcomes Star - test with HO
-- ID: integration_comms_language1
+- ID: integration_comms_language
   Name: Language and communication
-  Table: integration_plan1
+  Table: integration_plan
   Type: Categorical
+  Required: y
   Description: tbc
   Comments: TBC on catorgies for IP for Outcomes Star - test with HO
-- ID: integration_digital1
+- ID: integration_digital
   Name: Digital skills
-  Table: integration_plan1
+  Table: integration_plan
   Type: Categorical
-  Description: tbc
-  Comments: TBC Ecorys looking to yes/no questions - test with HO
-- ID: integration_social2
-  Name: Social bonds / bridges / links
-  Table: integration_plan2
-  Type: Categorical
-  Description: tbc
-  Comments: TBC on catorgies and IP for Outcomes Star - test with HO
-- ID: integration_comms_language2
-  Name: Language and communication
-  Table: integration_plan2
-  Type: Categorical
-  Description: tbc
-  Comments: TBC on catorgies for IP for Outcomes Star - test with HO
-- ID: integration_digital2
-  Name: Digital skills
-  Table: integration_plan2
-  Type: Categorical
-  Description: tbc
-  Comments: TBC Ecorys looking to yes/no questions - test with HO
-- ID: integration_social3
-  Name: Social bonds / bridges / links
-  Table: integration_plan3
-  Type: Categorical
-  Description: tbc
-  Comments: TBC on catorgies and IP for Outcomes Star - test with HO
-- ID: integration_comms_language3
-  Name: Language and communication
-  Table: integration_plan3
-  Type: Categorical
-  Description: tbc
-  Comments: TBC on catorgies for IP for Outcomes Star - test with HO
-- ID: integration_digital3
-  Name: Digital skills
-  Table: integration_plan3
-  Type: Categorical
+  Required: y
   Description: tbc
   Comments: TBC Ecorys looking to yes/no questions - test with HO
 Categories:
@@ -479,7 +456,7 @@ Categories:
   - Transgender
   - Other
   gender_description: []
-  'nationality ':
+  nationality:
   - AD
   - AE
   - AF
@@ -729,7 +706,7 @@ Categories:
   - ZA
   - ZM
   - ZW
-  'nationality_descritpion ':
+  nationality_description:
   - Andorra
   - United Arab Emirates
   - Afghanistan
@@ -1026,43 +1003,64 @@ Categories:
   - Long term sick or disabled
   - Retired
   economic_status_description: []
+  employment_entry_outcome_type:
+  - Employment
+  - Self-employment
+  employment_entry_outcome_type_description: []
   employment_entry_details:
   - PT 0-15 hours per week
   - PT 16-30 hours per week
   - FT 31 hours +
   - Government employment & training programme
   employment_entry_details_description: []
-  'housing_baseline_accomodation ': []
+  housing_baseline_accomodation: []
   housing_baseline_accomodation_description: []
   housing_entry_accomodation: []
   housing_entry_accomodation_description: []
-  'integration_social ': []
+  integration_outcome_type:
+  - Creation
+  - 6 month
+  - 12 month
+  integration_outcome_type_description: []
+  integration_social: []
   integration_social_description: []
   integration_comms_language: []
   integration_comms_language_description: []
   integration_digital: []
   integration_digital_description: []
-Table5:
+lists:
 - current_dependents_uk: (0-4)
-  intermediate_employment_outcome_type2: Successful formal recognition and/or comparison
-    of qualifications or skills
+  intermediate_employment_outcome_type_short: Formal recognition
+  intermediate_employment_outcome_type_long: Successful formal recognition and/or
+    comparison of qualifications or skills
 - current_dependents_uk: (5-11)
-  intermediate_employment_outcome_type2: Completion of relevant training course
+  intermediate_employment_outcome_type_short: Training course
+  intermediate_employment_outcome_type_long: Completion of relevant training course
 - current_dependents_uk: (11-17)
-  intermediate_employment_outcome_type2: Completion of 10 hours+ mentoring and/or
+  intermediate_employment_outcome_type_short: Mentoring or coaching
+  intermediate_employment_outcome_type_long: Completion of 10 hours+ mentoring and/or
     coaching
 - current_dependents_uk: Caring responsibilities for an adult
-  intermediate_employment_outcome_type2: Completion of 10 hours+ employability training
-- intermediate_employment_outcome_type2: 'Volunteering: at least 10 days'
-- intermediate_employment_outcome_type2: 'Work experience: at least 5 days'
-- intermediate_employment_outcome_type2: 'Internship: maximum 10 days, unless paid
-    for at the National Minimum Wage (or above) for people aged 18-22 or the National
-    Living Wage (or above) for people aged 23+*'
-- intermediate_employment_outcome_type2: Completion of sector-specific language training
-    which is additional to the mainstream.
-- intermediate_employment_outcome_type2: Developed business plan for self-employment
-- intermediate_employment_outcome_type2: Registered business for self-employment
-- intermediate_employment_outcome_type2: another specified activity directly relevant
+  intermediate_employment_outcome_type_short: Employability training
+  intermediate_employment_outcome_type_long: Completion of 10 hours+ employability
+    training
+- intermediate_employment_outcome_type_short: Volunteering
+  intermediate_employment_outcome_type_long: 'Volunteering: at least 10 days'
+- intermediate_employment_outcome_type_short: Work experience
+  intermediate_employment_outcome_type_long: 'Work experience: at least 5 days'
+- intermediate_employment_outcome_type_short: Internship
+  intermediate_employment_outcome_type_long: 'Internship: maximum 10 days, unless
+    paid for at the National Minimum Wage (or above) for people aged 18-22 or the
+    National Living Wage (or above) for people aged 23+*'
+- intermediate_employment_outcome_type_short: Language training
+  intermediate_employment_outcome_type_long: Completion of sector-specific language
+    training which is additional to the mainstream.
+- intermediate_employment_outcome_type_short: Business plan
+  intermediate_employment_outcome_type_long: Developed business plan for self-employment
+- intermediate_employment_outcome_type_short: Registered business
+  intermediate_employment_outcome_type_long: Registered business for self-employment
+- intermediate_employment_outcome_type_short: Other activitiy
+  intermediate_employment_outcome_type_long: another specified activity directly relevant
     to achieving the individual’s employment goals
 rules:
   person.ni_number.notnull:
@@ -1108,9 +1106,308 @@ rules:
     validator: notblank
     description: Field baseline.current_family_composition must not be blank non-zero
       length and not just spaces
+  baseline.current_dependents_uk.notnull:
+    validator: notnull
+    description: Field baseline.current_dependents_uk must be present in the record
+  baseline.current_dependents_uk.notblank:
+    validator: notblank
+    description: Field baseline.current_dependents_uk must not be blank non-zero length
+      and not just spaces
+  baseline.date_arrived_in_uk.notnull:
+    validator: notnull
+    description: Field baseline.date_arrived_in_uk must be present in the record
+  baseline.date_arrived_in_uk.notblank:
+    validator: notblank
+    description: Field baseline.date_arrived_in_uk must not be blank non-zero length
+      and not just spaces
+  baseline.date_asylum_status_granted.notnull:
+    validator: notnull
+    description: Field baseline.date_asylum_status_granted must be present in the
+      record
+  baseline.date_asylum_status_granted.notblank:
+    validator: notblank
+    description: Field baseline.date_asylum_status_granted must not be blank non-zero
+      length and not just spaces
+  person.dispersal_area.notnull:
+    validator: notnull
+    description: Field person.dispersal_area must be present in the record
+  person.dispersal_area.notblank:
+    validator: notblank
+    description: Field person.dispersal_area must not be blank non-zero length and
+      not just spaces
+  baseline.person_ni_number.notnull:
+    validator: notnull
+    description: Field baseline.person_ni_number must be present in the record
+  baseline.person_ni_number.notblank:
+    validator: notblank
+    description: Field baseline.person_ni_number must not be blank non-zero length
+      and not just spaces
+  baseline.language_level_on_entry.notnull:
+    validator: notnull
+    description: Field baseline.language_level_on_entry must be present in the record
+  baseline.language_level_on_entry.notblank:
+    validator: notblank
+    description: Field baseline.language_level_on_entry must not be blank non-zero
+      length and not just spaces
+  baseline.highest_qualification_achieved.notnull:
+    validator: notnull
+    description: Field baseline.highest_qualification_achieved must be present in
+      the record
+  baseline.highest_qualification_achieved.notblank:
+    validator: notblank
+    description: Field baseline.highest_qualification_achieved must not be blank non-zero
+      length and not just spaces
+  baseline.employed_in_home_country.notnull:
+    validator: notnull
+    description: Field baseline.employed_in_home_country must be present in the record
+  baseline.employed_in_home_country.notblank:
+    validator: notblank
+    description: Field baseline.employed_in_home_country must not be blank non-zero
+      length and not just spaces
+  person.referral_source.notnull:
+    validator: notnull
+    description: Field person.referral_source must be present in the record
+  person.referral_source.notblank:
+    validator: notblank
+    description: Field person.referral_source must not be blank non-zero length and
+      not just spaces
+  person.date_started_service.notnull:
+    validator: notnull
+    description: Field person.date_started_service must be present in the record
+  person.date_started_service.notblank:
+    validator: notblank
+    description: Field person.date_started_service must not be blank non-zero length
+      and not just spaces
+  date_last_seen.person_ni_number.notnull:
+    validator: notnull
+    description: Field date_last_seen.person_ni_number must be present in the record
+  date_last_seen.person_ni_number.notblank:
+    validator: notblank
+    description: Field date_last_seen.person_ni_number must not be blank non-zero
+      length and not just spaces
+  date_last_seen.date_last_seen.notnull:
+    validator: notnull
+    description: Field date_last_seen.date_last_seen must be present in the record
+  date_last_seen.date_last_seen.notblank:
+    validator: notblank
+    description: Field date_last_seen.date_last_seen must not be blank non-zero length
+      and not just spaces
+  baseline.economic_status.notnull:
+    validator: notnull
+    description: Field baseline.economic_status must be present in the record
+  baseline.economic_status.notblank:
+    validator: notblank
+    description: Field baseline.economic_status must not be blank non-zero length
+      and not just spaces
+  employment_intermediate.person_ni_number.notnull:
+    validator: notnull
+    description: Field employment_intermediate.person_ni_number must be present in
+      the record
+  employment_intermediate.person_ni_number.notblank:
+    validator: notblank
+    description: Field employment_intermediate.person_ni_number must not be blank
+      non-zero length and not just spaces
+  employment_intermediate.date_intermediate_employment_outcome.notnull:
+    validator: notnull
+    description: Field employment_intermediate.date_intermediate_employment_outcome
+      must be present in the record
+  employment_intermediate.date_intermediate_employment_outcome.notblank:
+    validator: notblank
+    description: Field employment_intermediate.date_intermediate_employment_outcome
+      must not be blank non-zero length and not just spaces
+  employment_intermediate.intermediate_employment_outcome_type.notnull:
+    validator: notnull
+    description: Field employment_intermediate.intermediate_employment_outcome_type
+      must be present in the record
+  employment_intermediate.intermediate_employment_outcome_type.notblank:
+    validator: notblank
+    description: Field employment_intermediate.intermediate_employment_outcome_type
+      must not be blank non-zero length and not just spaces
+  employment_entry.person_ni_number.notnull:
+    validator: notnull
+    description: Field employment_entry.person_ni_number must be present in the record
+  employment_entry.person_ni_number.notblank:
+    validator: notblank
+    description: Field employment_entry.person_ni_number must not be blank non-zero
+      length and not just spaces
+  employment_entry.employment_entry_outcome_type.notnull:
+    validator: notnull
+    description: Field employment_entry.employment_entry_outcome_type must be present
+      in the record
+  employment_entry.employment_entry_outcome_type.notblank:
+    validator: notblank
+    description: Field employment_entry.employment_entry_outcome_type must not be
+      blank non-zero length and not just spaces
+  employment_entry.date_employment_entry.notnull:
+    validator: notnull
+    description: Field employment_entry.date_employment_entry must be present in the
+      record
+  employment_entry.date_employment_entry.notblank:
+    validator: notblank
+    description: Field employment_entry.date_employment_entry must not be blank non-zero
+      length and not just spaces
+  employment_entry.employment_entry_details.notnull:
+    validator: notnull
+    description: Field employment_entry.employment_entry_details must be present in
+      the record
+  employment_entry.employment_entry_details.notblank:
+    validator: notblank
+    description: Field employment_entry.employment_entry_details must not be blank
+      non-zero length and not just spaces
+  employment_entry.employment_entry_ocupation.notnull:
+    validator: notnull
+    description: Field employment_entry.employment_entry_ocupation must be present
+      in the record
+  employment_entry.employment_entry_ocupation.notblank:
+    validator: notblank
+    description: Field employment_entry.employment_entry_ocupation must not be blank
+      non-zero length and not just spaces
+  employment_entry.employment_entry_sector.notnull:
+    validator: notnull
+    description: Field employment_entry.employment_entry_sector must be present in
+      the record
+  employment_entry.employment_entry_sector.notblank:
+    validator: notblank
+    description: Field employment_entry.employment_entry_sector must not be blank
+      non-zero length and not just spaces
+  employment_sustain.person_ni_number.notnull:
+    validator: notnull
+    description: Field employment_sustain.person_ni_number must be present in the
+      record
+  employment_sustain.person_ni_number.notblank:
+    validator: notblank
+    description: Field employment_sustain.person_ni_number must not be blank non-zero
+      length and not just spaces
+  employment_sustain.employment_sustainment_date.notnull:
+    validator: notnull
+    description: Field employment_sustain.employment_sustainment_date must be present
+      in the record
+  employment_sustain.employment_sustainment_date.notblank:
+    validator: notblank
+    description: Field employment_sustain.employment_sustainment_date must not be
+      blank non-zero length and not just spaces
+  baseline.housing_baseline_accomodation.notnull:
+    validator: notnull
+    description: Field baseline.housing_baseline_accomodation must be present in the
+      record
+  baseline.housing_baseline_accomodation.notblank:
+    validator: notblank
+    description: Field baseline.housing_baseline_accomodation must not be blank non-zero
+      length and not just spaces
+  housing_entry.person_ni_number.notnull:
+    validator: notnull
+    description: Field housing_entry.person_ni_number must be present in the record
+  housing_entry.person_ni_number.notblank:
+    validator: notblank
+    description: Field housing_entry.person_ni_number must not be blank non-zero length
+      and not just spaces
+  housing_entry.housing_entry_date.notnull:
+    validator: notnull
+    description: Field housing_entry.housing_entry_date must be present in the record
+  housing_entry.housing_entry_date.notblank:
+    validator: notblank
+    description: Field housing_entry.housing_entry_date must not be blank non-zero
+      length and not just spaces
+  housing_entry.housing_entry_accomodation.notnull:
+    validator: notnull
+    description: Field housing_entry.housing_entry_accomodation must be present in
+      the record
+  housing_entry.housing_entry_accomodation.notblank:
+    validator: notblank
+    description: Field housing_entry.housing_entry_accomodation must not be blank
+      non-zero length and not just spaces
+  housing_sustain.person_ni_number.notnull:
+    validator: notnull
+    description: Field housing_sustain.person_ni_number must be present in the record
+  housing_sustain.person_ni_number.notblank:
+    validator: notblank
+    description: Field housing_sustain.person_ni_number must not be blank non-zero
+      length and not just spaces
+  housing_sustain.housing_sustainment_date.notnull:
+    validator: notnull
+    description: Field housing_sustain.housing_sustainment_date must be present in
+      the record
+  housing_sustain.housing_sustainment_date.notblank:
+    validator: notblank
+    description: Field housing_sustain.housing_sustainment_date must not be blank
+      non-zero length and not just spaces
+  integration_plan.person_ni_number.notnull:
+    validator: notnull
+    description: Field integration_plan.person_ni_number must be present in the record
+  integration_plan.person_ni_number.notblank:
+    validator: notblank
+    description: Field integration_plan.person_ni_number must not be blank non-zero
+      length and not just spaces
+  integration_plan.integration_outcome_type.notnull:
+    validator: notnull
+    description: Field integration_plan.integration_outcome_type must be present in
+      the record
+  integration_plan.integration_outcome_type.notblank:
+    validator: notblank
+    description: Field integration_plan.integration_outcome_type must not be blank
+      non-zero length and not just spaces
+  integration_plan.integration_outcome_achieved_date.notnull:
+    validator: notnull
+    description: Field integration_plan.integration_outcome_achieved_date must be
+      present in the record
+  integration_plan.integration_outcome_achieved_date.notblank:
+    validator: notblank
+    description: Field integration_plan.integration_outcome_achieved_date must not
+      be blank non-zero length and not just spaces
+  integration_plan.integration_social.notnull:
+    validator: notnull
+    description: Field integration_plan.integration_social must be present in the
+      record
+  integration_plan.integration_social.notblank:
+    validator: notblank
+    description: Field integration_plan.integration_social must not be blank non-zero
+      length and not just spaces
+  integration_plan.integration_comms_language.notnull:
+    validator: notnull
+    description: Field integration_plan.integration_comms_language must be present
+      in the record
+  integration_plan.integration_comms_language.notblank:
+    validator: notblank
+    description: Field integration_plan.integration_comms_language must not be blank
+      non-zero length and not just spaces
+  integration_plan.integration_digital.notnull:
+    validator: notnull
+    description: Field integration_plan.integration_digital must be present in the
+      record
+  integration_plan.integration_digital.notblank:
+    validator: notblank
+    description: Field integration_plan.integration_digital must not be blank non-zero
+      length and not just spaces
   baseline.date_arrived_in_uk.date_after.date_of_birth:
     validator: notnull
     description: Field baseline.date_arrived_in_uk must be after person.date_of_birth.
-  baseline.data_asylum_status_granted.date_after.date_arrived_in_uk:
+  baseline.date_asylum_status_granted.date_after.date_arrived_in_uk:
     validator: notnull
-    description: Field baseline.data_asylum_status_granted must be after baseline.date_arrived_in_uk.
+    description: Field baseline.date_asylum_status_granted must be after baseline.date_arrived_in_uk.
+  person.date_started_service.date_after.date_asylum_status_granted:
+    validator: notnull
+    description: Field person.date_started_service must be after baseline.date_asylum_status_granted.
+  date_last_seen.date_last_seen.date_after.date_started_service:
+    validator: notnull
+    description: Field date_last_seen.date_last_seen must be after person.date_started_service.
+  employment_intermediate.intermediate_employment_outcome_type.date_after.date_started_service:
+    validator: notnull
+    description: Field employment_intermediate.intermediate_employment_outcome_type
+      must be after person.date_started_service.
+  employment_entry.date_employment_entry.date_after.date_started_service:
+    validator: notnull
+    description: Field employment_entry.date_employment_entry must be after person.date_started_service.
+  employment_sustain.employment_sustainment_date.date_after.date_employment_entry:
+    validator: notnull
+    description: Field employment_sustain.employment_sustainment_date must be after
+      employment_entry.date_employment_entry.
+  housing_entry.housing_entry_date.date_after.date_started_service:
+    validator: notnull
+    description: Field housing_entry.housing_entry_date must be after person.date_started_service.
+  housing_sustain.housing_sustainment_date.date_after.housing_entry_date:
+    validator: notnull
+    description: Field housing_sustain.housing_sustainment_date must be after housing_entry.housing_entry_date.
+  integration_plan.integration_outcome_achieved_date.date_after.date_started_service:
+    validator: notnull
+    description: Field integration_plan.integration_outcome_achieved_date must be
+      after person.date_started_service.
