@@ -1,15 +1,17 @@
+from dataclasses import asdict
 from datetime import datetime
-from pathlib import Path
+from typing import List
 
 from docx.shared import Cm
 from docxtpl import DocxTemplate, InlineImage
 
 import git
 
-from rtofdata.config import assets_dir, data_dir, output_dir
+from rtofdata.config import assets_dir, output_dir
+from rtofdata.spec_parser import Record
 
 
-def write_word_specification(data: dict, filename: str):
+def write_word_specification(record_list: List[Record]):
     """
     Creates a detailed Word version of the specification.
     Read more about docx here: https://python-docx.readthedocs.io/en/latest/
@@ -36,15 +38,14 @@ def write_word_specification(data: dict, filename: str):
     context['milestones_image'] = InlineImage(tpl, image_descriptor=str(assets_dir / 'RTOF_program_path.png'),
                                               width=Cm(16))
 
-    context['record_list'] = record_list = [{**t} for t in data['Tables']]
+    context['record_list'] = record_list
+
+    context['field_list'] = field_list = []
     for record in record_list:
-        record['fields'] = [f for f in data['Fields'] if f['Table'] == record['Table']]
+        for field in record.fields:
+            field_list.append({**asdict(field), "record": record})
 
-    context['field_list'] = field_list = [{**t} for t in data['Fields']]
-    for field in field_list:
-        field['table'] = [t for t in data['Tables'] if t['Table'] == field['Table']]
-
-    field_list.sort(key=lambda f: f"{f['Table']}.{f['ID']}")
+    field_list.sort(key=lambda f: f"{f['record']}.{f['id']}")
 
     tpl.render(context)
     tpl.save(output_dir / "specification.docx")

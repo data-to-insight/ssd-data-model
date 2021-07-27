@@ -2,30 +2,23 @@
 
 import argparse
 
-from rtofdata.create_validation_rules import generate_validation_rules
-from rtofdata.excel import read_excel
+from rtofdata.spec_parser import parse_specification
 from rtofdata.word import write_word_specification
-from rtofdata.yaml import write_yaml
 
 
-def main(filename):
-    data = read_excel(filename, as_list=["Categories"])
+def main():
+    records = parse_specification()
+    # rules = generate_validation_rules(data)
+    #
+    # data['rules'] = rules
+    #
 
-    rules = generate_validation_rules(data)
-
-    data['rules'] = rules
-
-    write_yaml(data, "data/specification.yaml")
-
-    write_word_specification(data, "output/specification.docx")
+    write_word_specification(records)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Process the RTOF data specification'
     )
-    parser.add_argument('filename', type=str, help='The filename to read')
-
-    args = parser.parse_args()
-
-    main(args.filename)
+    parser.parse_args()
+    main()
