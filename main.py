@@ -7,13 +7,13 @@ from rtofdata.word import write_word_specification
 
 
 def main():
-    records = parse_specification()
+    spec = parse_specification()
     # rules = generate_validation_rules(data)
     #
     # data['rules'] = rules
     #
 
-    write_word_specification(records)
+    write_word_specification(spec.records)
 
 
 if __name__ == "__main__":

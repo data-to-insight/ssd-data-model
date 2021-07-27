@@ -7,6 +7,18 @@ from rtofdata.config import data_dir
 
 
 @dataclass
+class Dimension:
+    value: str
+    description: str = None
+
+
+@dataclass
+class DimensionList:
+    id: str
+    dimensions: List[Dimension]
+
+
+@dataclass
 class Field:
     id: str
     name: str
@@ -16,6 +28,7 @@ class Field:
     primary_key: bool = False
     foreign_keys: List = None
     validation: dict = None
+    dimensions: DimensionList = None
 
 
 @dataclass
@@ -25,7 +38,33 @@ class Record:
     fields: List[Field]
 
 
-def parse_specification():
+@dataclass
+class Specification:
+    records: List[Record]
+    dimensions: List[DimensionList]
+
+
+def parse_dimensions():
+    category_file_list = (data_dir / "categories").glob("*.yml")
+
+    all_categories = []
+    for category_file in category_file_list:
+        category_id = category_file.stem
+        category_list = []
+        all_categories.append(DimensionList(id=category_id, dimensions=category_list))
+        with open(category_file, 'rt') as file:
+            data = yaml.safe_load(file)
+        for datum in data:
+            if "value" in datum:
+                category_list.append(Dimension(**datum))
+            else:
+                category_list.append(Dimension(value=datum))
+
+    return all_categories
+
+
+def parse_records(categories):
+    categories = {c.id: c for c in categories}
     record_file_list = (data_dir / "records").glob("*.yml")
 
     record_list = []
@@ -39,7 +78,11 @@ def parse_specification():
         data['fields'] = field_list = []
         for field_id, values in field_dict.items():
             try:
-                field_list.append(Field(id=field_id, **values))
+                field = Field(id=field_id, **values)
+                field_list.append(field)
+                if field.type == "Categorical":
+                    field.dimensions = categories[field.validation['dimension']]
+
             except TypeError:
                 record_errors.append(dict(
                     msg="Exception occurred when creating field from",
@@ -55,3 +98,10 @@ def parse_specification():
         raise ValueError(f"Error in the following fields: {error_fields}")
 
     return record_list
+
+
+def parse_specification():
+    categories = parse_dimensions()
+    records = parse_records(categories)
+
+    return Specification(records=records, dimensions=categories)
