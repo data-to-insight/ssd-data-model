@@ -1,0 +1,51 @@
+description: This form outlines the required data for participants who achieve each
+  integration plan outcome - one submission for each creation, 6 month progress and
+  12 month progress. Data should be collected when achieving each integration plan
+  outcome.
+fields:
+  person_ni_number:
+    name: NI Number
+    type: NINO
+    keys: Foreign Key
+    validationrules: unique
+    description: UK National Insurance number. Must be UNIQUE. To be collected when
+      any integration data is submitted.
+    comments: Minimum data collection required to understand enrollement
+    validation:
+      required: true
+  integration_outcome_type:
+    name: Integration outcome type
+    type: Categorical
+    description: Selection of which integration outcome has been achevied. To be collected
+      at each outcome submission.
+    validation:
+      required: true
+  integration_outcome_achieved_date:
+    name: Date completed integration plan
+    type: Date
+    after date: date_started_service
+    description: Date of integration plan outcome achievement. To be collected once
+      when a creation of an integration plan outcome is submitted.
+    validation:
+      required: true
+  integration_social:
+    name: Social bonds / bridges / links
+    type: Categorical
+    description: tbc
+    comments: TBC on catorgies and IP for Outcomes Star - test with HO
+    validation:
+      required: true
+  integration_comms_language:
+    name: Language and communication
+    type: Categorical
+    description: tbc
+    comments: TBC on catorgies for IP for Outcomes Star - test with HO
+    validation:
+      required: true
+  integration_digital:
+    name: Digital skills
+    type: Categorical
+    description: tbc
+    comments: TBC Ecorys looking to yes/no questions - test with HO
+    validation:
+      required: true

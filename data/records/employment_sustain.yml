@@ -1,0 +1,23 @@
+description: This form outlines the required data for participants who achieve the
+  employment sustainment outcome. Data should be collected when achieving the employment
+  sustainment outcome.
+fields:
+  person_ni_number:
+    name: NI Number
+    type: NINO
+    keys: Foreign Key
+    validationrules: unique
+    description: UK National Insurance number. Must be UNIQUE. To be recorded when
+      any employmnet data is submitted.
+    comments: Minimum data collection required to understand enrollement
+    validation:
+      required: true
+  employment_sustainment_date:
+    name: Date employment sustainment outcome achieved
+    type: Date
+    after date: date_employment_entry
+    description: Date of employment sustainment outcome achieved. This can be either
+      be for the self-employment or employment route. To be collected once at entry
+      to employment outcome submission.
+    validation:
+      required: true
