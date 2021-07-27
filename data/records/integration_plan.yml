@@ -25,6 +25,7 @@ fields:
       at each outcome submission.
     validation:
       required: true
+      dimension: integration_outcome_type
 
   integration_outcome_achieved_date:
     name: Date completed integration plan
@@ -42,6 +43,7 @@ fields:
     comments: TBC on catorgies and IP for Outcomes Star - test with HO
     validation:
       required: true
+      dimension: integration_social
 
   integration_comms_language:
     name: Language and communication
@@ -50,6 +52,7 @@ fields:
     comments: TBC on catorgies for IP for Outcomes Star - test with HO
     validation:
       required: true
+      dimension: integration_comms_language
 
   integration_digital:
     name: Digital skills
@@ -58,4 +61,5 @@ fields:
     comments: TBC Ecorys looking to yes/no questions - test with HO
     validation:
       required: true
+      dimension: integration_digital
 

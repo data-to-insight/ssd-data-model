@@ -32,6 +32,7 @@ fields:
       sufficient as an acceptable list of gender types?
     validation:
       required: true
+      dimension: gender
 
   dispersal_area:
     name: Dispersal area
@@ -52,6 +53,7 @@ fields:
     comments: TBC with providers once selected
     validation:
       required: true
+      dimension: referral_source
 
   date_started_service:
     name: Date started with service

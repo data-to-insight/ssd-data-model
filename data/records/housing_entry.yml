@@ -35,4 +35,5 @@ fields:
     comments: Align with baseline collection
     validation:
       required: true
+      dimension: housing_entry_accomodation
 

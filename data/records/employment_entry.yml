@@ -26,6 +26,7 @@ fields:
     comments: To confirm this works
     validation:
       required: true
+      dimension: employment_entry_outcome_type
 
   date_employment_entry:
     name: Date entered employment
@@ -46,6 +47,7 @@ fields:
       [part time/ full time OR inc. hours - PT 0-15/ PT 16-30 / FT]
     validation:
       required: true
+      dimension: employment_entry_details
 
   employment_entry_ocupation:
     name: Ocupation type

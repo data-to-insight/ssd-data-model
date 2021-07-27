@@ -1,22 +1,19 @@
 #!/usr/bin/env python
 
 import argparse
-import sys
 from itertools import zip_longest
 
 import yaml
 
 from rtofdata.config import data_dir
-from rtofdata.create_validation_rules import generate_validation_rules
 from rtofdata.excel import read_excel
-from rtofdata.word import write_word_specification
-from rtofdata.yaml import write_yaml
 
 
 def mutate_fields(field_list):
     field_list = [{k.lower(): v for k, v in f.items()} for f in field_list]
     field_dict = {f['id']: {**f} for f in field_list}
     for f in field_dict.values():
+        id = f['id']
         del f['id']
         del f['table']
 
@@ -43,6 +40,9 @@ def mutate_fields(field_list):
         if "validationrules" in f:
             f.setdefault('validation', {})['extras'] = f["validationrules"]
             del f["validationrules"]
+
+        if f['type'] == "Categorical":
+            f.setdefault('validation', {})['dimension'] = id
 
 
     return field_dict
