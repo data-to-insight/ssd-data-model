@@ -110,8 +110,6 @@ fields:
       [eg. teacher] of their last employment. Max word count 10 words.  To be collected
       once when submitting the intial integration plan or at annual caseload review.
     comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
-    validation:
-      required: true
   occupation_sector:
     name: Sector
     type: Free Text (short)
@@ -120,14 +118,10 @@ fields:
       [eg. education] of their last employment. Max word count 10 words.  To be collected
       once when submitting the intial integration plan or at annual caseload review.
     comments: To confirm word limit (and possibly add a suggestion ie. Education)
-    validation:
-      required: true
   occupation_goal:
     name: Ocupation goal at baseline
     type: Free Text (short)
     validationrules: character_limit
-    validation:
-      required: true
   economic_status:
     name: Main economic status at baseline
     type: Categorical

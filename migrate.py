@@ -19,9 +19,10 @@ def mutate_fields(field_list):
         del f['id']
         del f['table']
 
-        if "required" in f:
+        if "y" in f.get("required", "n").lower():
             f.setdefault('validation', {})['required'] = True
-            del f["required"]
+
+        del f["required"]
 
         if "date_after" in f:
             f.setdefault('validation', {})['date_after'] = f["date_after"]
@@ -61,11 +62,6 @@ def main(filename):
 
         with open(data_dir / 'categories' / f'{key}.yml', 'wt') as file:
             yaml.dump(values, file, sort_keys=False)
-
-
-
-
-
 
 
 if __name__ == "__main__":
