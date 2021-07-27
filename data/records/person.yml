@@ -56,10 +56,10 @@ fields:
   date_started_service:
     name: Date started with service
     type: Date
-    after date: date_asylum_status_granted
     description: Date of participant enrolment onto the program. Month and Year of
       enrolment requried. To be collected once at enrolment into the program
     comments: To define first interaction - at enrolment meeting with service providers
     validation:
       required: true
+      date_after: date_asylum_status_granted
 

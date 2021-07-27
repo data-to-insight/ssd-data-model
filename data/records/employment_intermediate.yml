@@ -8,12 +8,12 @@ fields:
     name: NI Number
     type: NINO
     keys: Foreign Key
-    validationrules: unique
     description: UK National Insurance number. Must be UNIQUE. To be recorded when
       any employmnet data is submitted.
     comments: Minimum data collection required to understand enrollement
     validation:
       required: true
+      extras: unique
 
   date_intermediate_employment_outcome:
     name: Date achieved intermediate outcome
@@ -28,7 +28,6 @@ fields:
   intermediate_employment_outcome_type:
     name: Type of intermediate outcome
     type: List
-    after date: date_started_service
     description: Selection of at least 3 intermediate outcomes achieved from the provided
       list [link to list]. To be collected once at intermediate employment outcome
       submission.
@@ -36,4 +35,5 @@ fields:
       do we want to allow the selection of more if possible?
     validation:
       required: true
+      date_after: date_started_service
 

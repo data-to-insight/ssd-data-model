@@ -8,23 +8,23 @@ fields:
     name: NI Number
     type: NINO
     keys: Foreign Key
-    validationrules: unique
     description: UK National Insurance number. Must be UNIQUE. To be recorded when
       any housing data is submitted.
     comments: Minimum data collection required to understand enrollement
     validation:
       required: true
+      extras: unique
 
   housing_entry_date:
     name: Date of housing entry
     type: Date
-    after date: date_started_service
     description: Date of housing entry outcome achieved. To be collected once at entry
       to housing outcome submission.
     comments: To confirm the definition of this date - housing contract signed / move
       in date ?
     validation:
       required: true
+      date_after: date_started_service
 
   housing_entry_accomodation:
     name: Accomodation type

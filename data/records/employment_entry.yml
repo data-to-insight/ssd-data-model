@@ -9,12 +9,12 @@ fields:
     name: NI Number
     type: NINO
     keys: Foreign Key
-    validationrules: unique
     description: UK National Insurance number. Must be UNIQUE. To be recorded when
       any employmnet data is submitted.
     comments: Minimum data collection required to understand enrollement
     validation:
       required: true
+      extras: unique
 
   employment_entry_outcome_type:
     name: Type of employment entry outcome
@@ -28,11 +28,11 @@ fields:
   date_employment_entry:
     name: Date entered employment
     type: Date
-    after date: date_started_service
     description: Date of employment entry submission. To be collected once at entry
       to employment outcome submission.
     validation:
       required: true
+      date_after: date_started_service
 
   employment_entry_details:
     name: Details of paid employment
@@ -48,20 +48,20 @@ fields:
   employment_entry_ocupation:
     name: Ocupation type
     type: Free Text (short)
-    validationrules: character_limit
     description: State participants employment type for the acheivement of entry to
       employment outcome. To be collected once at entry to employment outcome submission.
     comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
     validation:
       required: true
+      extras: character_limit
 
   employment_entry_sector:
     name: Sector
     type: Free Text (short)
-    validationrules: character_limit
     description: State the participants employment sector for the acheivement of entry
       to employment outcome. To be collected once at entry to employment outcome submission.
     comments: To confirm word limit (and possibly add a suggestion ie. Education)
     validation:
       required: true
+      extras: character_limit
 

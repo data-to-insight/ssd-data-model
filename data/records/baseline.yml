@@ -47,7 +47,6 @@ fields:
   date_arrived_in_uk:
     name: Date arrived in UK
     type: Date
-    after date: date_of_birth
     description: Date participant entered the UK, relating to their latest and current
       arrival. To be collected once when submitting the intial integration plan or
       at annual caseload review.
@@ -55,28 +54,29 @@ fields:
       submitted [eg. Povider caseload review]
     validation:
       required: true
+      date_after: date_of_birth
 
   date_asylum_status_granted:
     name: Date asylum status granted
     type: Date
-    after date: date_arrived_in_uk
     description: Date participant was granted asylum status, relating to their latest
       and current status. To be collected once when submitting the intial integration
       plan or at annual caseload review.
     comments: Can we use HO data for this - to check with HO.
     validation:
       required: true
+      date_after: date_arrived_in_uk
 
   person_ni_number:
     name: NI Number
     type: NINO
     keys: Foreign Key
-    validationrules: unique
     description: UK National Insurance number. Must be UNIQUE. To be recorded when
       submitting baseline data.
     comments: Minimum data collection required to understand enrollement
     validation:
       required: true
+      extras: unique
 
   language_level_on_entry:
     name: Language level on entry
@@ -117,25 +117,28 @@ fields:
   occupation_type:
     name: Occupation type
     type: Free Text (short)
-    validationrules: character_limit
     description: If answered 'Yes' to employed in home country field, state job role
       [eg. teacher] of their last employment. Max word count 10 words.  To be collected
       once when submitting the intial integration plan or at annual caseload review.
     comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
+    validation:
+      extras: character_limit
 
   occupation_sector:
     name: Sector
     type: Free Text (short)
-    validationrules: character_limit
     description: If answered 'Yes' to employed in home country field, state the sector
       [eg. education] of their last employment. Max word count 10 words.  To be collected
       once when submitting the intial integration plan or at annual caseload review.
     comments: To confirm word limit (and possibly add a suggestion ie. Education)
+    validation:
+      extras: character_limit
 
   occupation_goal:
     name: Ocupation goal at baseline
     type: Free Text (short)
-    validationrules: character_limit
+    validation:
+      extras: character_limit
 
   economic_status:
     name: Main economic status at baseline

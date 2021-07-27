@@ -9,12 +9,12 @@ fields:
     name: NI Number
     type: NINO
     keys: Foreign Key
-    validationrules: unique
     description: UK National Insurance number. Must be UNIQUE. To be collected when
       any integration data is submitted.
     comments: Minimum data collection required to understand enrollement
     validation:
       required: true
+      extras: unique
 
   integration_outcome_type:
     name: Integration outcome type
@@ -27,11 +27,11 @@ fields:
   integration_outcome_achieved_date:
     name: Date completed integration plan
     type: Date
-    after date: date_started_service
     description: Date of integration plan outcome achievement. To be collected once
       when a creation of an integration plan outcome is submitted.
     validation:
       required: true
+      date_after: date_started_service
 
   integration_social:
     name: Social bonds / bridges / links

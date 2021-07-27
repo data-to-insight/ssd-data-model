@@ -7,18 +7,18 @@ fields:
     name: NI Number
     type: NINO
     keys: Foreign Key
-    validationrules: unique
     validation:
       required: true
+      extras: unique
 
   date_last_seen:
     name: Date last seen
     type: Date
-    after date: date_started_service
     description: Date of last interaction with participant. Month and Year required.
       To be collected annually during annual caseload review.
     comments: 'TBC: Ask providers once, at the end of the programme, to go through
       list of participants and estimate whether and when participants stopped engaging.'
     validation:
       required: true
+      date_after: date_started_service
 

@@ -25,9 +25,13 @@ def mutate_fields(field_list):
 
         del f["required"]
 
-        if "date_after" in f:
-            f.setdefault('validation', {})['date_after'] = f["date_after"]
-            del f["date_after"]
+        if "after date" in f:
+            f.setdefault('validation', {})['date_after'] = f["after date"]
+            del f["after date"]
+
+        if "validationrules" in f:
+            f.setdefault('validation', {})['extras'] = f["validationrules"]
+            del f["validationrules"]
 
     return field_dict
 
