@@ -76,7 +76,7 @@ Fields:
     as an acceptable list of gender types?
 - ID: nationality
   Name: Nationality
-  Table: person
+  Table: baseline
   Type: Categorical
   Required: y
   Description: Nationality of participant. A list of nationalities are provided. Must
@@ -721,7 +721,7 @@ Categories:
   - Austria
   - Australia
   - Aruba
-  - Åland Islands
+  - Ã…land Islands
   - Azerbaijan
   - Bosnia and Herzegovina
   - Barbados
@@ -732,7 +732,7 @@ Categories:
   - Bahrain
   - Burundi
   - Benin
-  - Saint Barthélemy
+  - Saint BarthÃ©lemy
   - Bermuda
   - Brunei
   - Bolivia
@@ -750,7 +750,7 @@ Categories:
   - Central African Republic
   - Congo (Republic of)
   - Switzerland
-  - Côte d'Ivoire (Ivory Coast)
+  - CÃ´te d'Ivoire (Ivory Coast)
   - Cook Islands
   - Chile
   - Cameroon
@@ -759,7 +759,7 @@ Categories:
   - Costa Rica
   - Cuba
   - Cape Verde
-  - Curaçao
+  - CuraÃ§ao
   - Christmas Island
   - Cyprus
   - Czech Republic
@@ -894,7 +894,7 @@ Categories:
   - Palau
   - Paraguay
   - Qatar
-  - Réunion
+  - RÃ©union
   - Romania
   - Serbia
   - Russian Federation
@@ -915,7 +915,7 @@ Categories:
   - Somalia
   - Suriname
   - South Sudan
-  - São Tome and Príncipe
+  - SÃ£o Tome and PrÃ­ncipe
   - El Salvador
   - Saint Martin (Netherlands)
   - Syria
@@ -1013,7 +1013,7 @@ Categories:
   - FT 31 hours +
   - Government employment & training programme
   employment_entry_details_description: []
-  housing_baseline_accomodation: []
+  'housing_baseline_accomodation ': []
   housing_baseline_accomodation_description: []
   housing_entry_accomodation: []
   housing_entry_accomodation_description: []
@@ -1022,7 +1022,7 @@ Categories:
   - 6 month
   - 12 month
   integration_outcome_type_description: []
-  integration_social: []
+  'integration_social ': []
   integration_social_description: []
   integration_comms_language: []
   integration_comms_language_description: []
@@ -1061,7 +1061,7 @@ lists:
   intermediate_employment_outcome_type_long: Registered business for self-employment
 - intermediate_employment_outcome_type_short: Other activitiy
   intermediate_employment_outcome_type_long: another specified activity directly relevant
-    to achieving the individual’s employment goals
+    to achieving the individualâ€™s employment goals
 rules:
   person.ni_number.notnull:
     validator: notnull
@@ -1084,13 +1084,13 @@ rules:
     validator: notblank
     description: Field person.gender must not be blank non-zero length and not just
       spaces
-  person.nationality.notnull:
+  baseline.nationality.notnull:
     validator: notnull
-    description: Field person.nationality must be present in the record
-  person.nationality.notblank:
+    description: Field baseline.nationality must be present in the record
+  baseline.nationality.notblank:
     validator: notblank
-    description: Field person.nationality must not be blank non-zero length and not
-      just spaces
+    description: Field baseline.nationality must not be blank non-zero length and
+      not just spaces
   baseline.living_status.notnull:
     validator: notnull
     description: Field baseline.living_status must be present in the record
