@@ -1,6 +1,8 @@
 description: This form outlines the required data for participants who are no longer
   engaged with the service. Data should be collected during the annual caseload review.
+
 fields:
+
   person_ni_number:
     name: NI Number
     type: NINO
@@ -8,6 +10,7 @@ fields:
     validationrules: unique
     validation:
       required: true
+
   date_last_seen:
     name: Date last seen
     type: Date
@@ -18,3 +21,4 @@ fields:
       list of participants and estimate whether and when participants stopped engaging.'
     validation:
       required: true
+

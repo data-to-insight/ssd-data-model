@@ -1,7 +1,9 @@
 description: This form outlines the required data for participants who achieve the
   employment sustainment outcome. Data should be collected when achieving the employment
   sustainment outcome.
+
 fields:
+
   person_ni_number:
     name: NI Number
     type: NINO
@@ -12,6 +14,7 @@ fields:
     comments: Minimum data collection required to understand enrollement
     validation:
       required: true
+
   employment_sustainment_date:
     name: Date employment sustainment outcome achieved
     type: Date
@@ -21,3 +24,4 @@ fields:
       to employment outcome submission.
     validation:
       required: true
+

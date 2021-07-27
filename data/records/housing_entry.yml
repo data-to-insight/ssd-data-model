@@ -1,7 +1,9 @@
 description: This form outlines the required data for participants who achieve the
   housing entry outcome. Data should be collected when achieving the housing entry
   outcome.
+
 fields:
+
   person_ni_number:
     name: NI Number
     type: NINO
@@ -12,6 +14,7 @@ fields:
     comments: Minimum data collection required to understand enrollement
     validation:
       required: true
+
   housing_entry_date:
     name: Date of housing entry
     type: Date
@@ -22,6 +25,7 @@ fields:
       in date ?
     validation:
       required: true
+
   housing_entry_accomodation:
     name: Accomodation type
     type: Categorical
@@ -29,3 +33,4 @@ fields:
     comments: Align with baseline collection
     validation:
       required: true
+

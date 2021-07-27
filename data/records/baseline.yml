@@ -1,7 +1,9 @@
 description: 'This form outlines the required baseline data for all service users,
   the data is to be collected across interactions with participants and submitted
   either when submitting form: integration_plan or during the annual caseload review.'
+
 fields:
+
   nationality:
     name: Nationality
     type: Categorical
@@ -12,6 +14,7 @@ fields:
       can avoid this question and use HO data instead.
     validation:
       required: true
+
   living_status:
     name: Living status
     type: Categorical
@@ -22,6 +25,7 @@ fields:
       couples (+2 living together)
     validation:
       required: true
+
   current_family_composition:
     name: Current family composition
     type: Categorical
@@ -31,6 +35,7 @@ fields:
       UK or living in same HH - to check with Ecorys and HO that is suitable.
     validation:
       required: true
+
   current_dependents_uk:
     name: Current dependents in UK
     type: List
@@ -38,6 +43,7 @@ fields:
       once when submitting the initial integration plan or at annual caseload review.
     validation:
       required: true
+
   date_arrived_in_uk:
     name: Date arrived in UK
     type: Date
@@ -49,6 +55,7 @@ fields:
       submitted [eg. Povider caseload review]
     validation:
       required: true
+
   date_asylum_status_granted:
     name: Date asylum status granted
     type: Date
@@ -59,6 +66,7 @@ fields:
     comments: Can we use HO data for this - to check with HO.
     validation:
       required: true
+
   person_ni_number:
     name: NI Number
     type: NINO
@@ -69,6 +77,7 @@ fields:
     comments: Minimum data collection required to understand enrollement
     validation:
       required: true
+
   language_level_on_entry:
     name: Language level on entry
     type: Categorical
@@ -80,6 +89,7 @@ fields:
     comments: https://esol.britishcouncil.org/sites/default/files/attachments/informational-page/ESOL%20level%20descriptors.pdf
     validation:
       required: true
+
   highest_qualification_achieved:
     name: Highest qualificaiton level achieved
     type: Categorical
@@ -91,6 +101,7 @@ fields:
       the world (https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels)
     validation:
       required: true
+
   employed_in_home_country:
     name: Employed in home country
     type: Categorical
@@ -102,6 +113,7 @@ fields:
       use case of question - understanding if work in UK is comparable to prior experience]
     validation:
       required: true
+
   occupation_type:
     name: Occupation type
     type: Free Text (short)
@@ -110,6 +122,7 @@ fields:
       [eg. teacher] of their last employment. Max word count 10 words.  To be collected
       once when submitting the intial integration plan or at annual caseload review.
     comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
+
   occupation_sector:
     name: Sector
     type: Free Text (short)
@@ -118,10 +131,12 @@ fields:
       [eg. education] of their last employment. Max word count 10 words.  To be collected
       once when submitting the intial integration plan or at annual caseload review.
     comments: To confirm word limit (and possibly add a suggestion ie. Education)
+
   occupation_goal:
     name: Ocupation goal at baseline
     type: Free Text (short)
     validationrules: character_limit
+
   economic_status:
     name: Main economic status at baseline
     type: Categorical
@@ -132,6 +147,7 @@ fields:
       [part time/ full time OR inc. hours - PT 0-15/ PT 16-30 / FT]
     validation:
       required: true
+
   housing_baseline_accomodation:
     name: Accomodation type
     type: Categorical
@@ -139,3 +155,4 @@ fields:
     comments: Ecorys to provide details
     validation:
       required: true
+

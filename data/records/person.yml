@@ -1,6 +1,8 @@
 description: This form outlines the required information for all service users, the
   data is to be collected once at enrolment.
+
 fields:
+
   ni_number:
     name: NI Number
     type: NINO
@@ -11,6 +13,7 @@ fields:
     comments: Minimum data collection required to understand enrollement
     validation:
       required: true
+
   date_of_birth:
     name: Date of brith
     type: YYYY-MM
@@ -19,6 +22,7 @@ fields:
       on their identity documents?
     validation:
       required: true
+
   gender:
     name: Gender
     type: Categorical
@@ -28,6 +32,7 @@ fields:
       sufficient as an acceptable list of gender types?
     validation:
       required: true
+
   dispersal_area:
     name: Dispersal area
     type: String
@@ -37,6 +42,7 @@ fields:
       enough or do we want to include a postcode?)
     validation:
       required: true
+
   referral_source:
     name: Referral source
     type: Categorical
@@ -46,6 +52,7 @@ fields:
     comments: TBC with providers once selected
     validation:
       required: true
+
   date_started_service:
     name: Date started with service
     type: Date
@@ -55,3 +62,4 @@ fields:
     comments: To define first interaction - at enrolment meeting with service providers
     validation:
       required: true
+

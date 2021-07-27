@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import sys
 from itertools import zip_longest
 
 import yaml
@@ -40,6 +41,22 @@ def get_definition(value):
         return dict(value=v, description=d)
 
 
+class SpacedOutDumper(yaml.SafeDumper):
+    # HACK: insert blank lines between top-level objects
+    # inspired by https://stackoverflow.com/a/44284819/3786245
+    def write_line_break(self, data=None):
+        super().write_line_break(data)
+
+        try:
+            if self.events[0].value == "fields":
+                return
+        except:
+            pass
+
+        if len(self.indents) <= 2:
+            super().write_line_break()
+
+
 def main(filename):
     data = read_excel(filename, as_list=["Categories"])
 
@@ -49,7 +66,7 @@ def main(filename):
 
         with open(data_dir / 'records' / f'{record["id"]}.yml', 'wt') as file:
             file_contents = dict(description=record['description'], fields=record['fields'])
-            yaml.dump(file_contents, file, sort_keys=False)
+            yaml.dump(file_contents, file, Dumper=SpacedOutDumper, sort_keys=False, allow_unicode=True)
 
     category_list = data['Categories']
     category_ids = [id for id in category_list.keys() if not id.endswith("_description")]
@@ -61,7 +78,7 @@ def main(filename):
         values = [get_definition(v) for v in values]
 
         with open(data_dir / 'categories' / f'{key}.yml', 'wt') as file:
-            yaml.dump(values, file, sort_keys=False)
+            yaml.dump(values, file, sort_keys=False, allow_unicode=True)
 
 
 if __name__ == "__main__":

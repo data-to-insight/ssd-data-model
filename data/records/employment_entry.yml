@@ -2,7 +2,9 @@ description: This form outlines the required data for participants who achieve t
   employment OR self employment entry outcome. A participant can only achieve either
   the employment or self-employment outcome. Data should be collected when achieving
   the employment entry outcome.
+
 fields:
+
   person_ni_number:
     name: NI Number
     type: NINO
@@ -13,6 +15,7 @@ fields:
     comments: Minimum data collection required to understand enrollement
     validation:
       required: true
+
   employment_entry_outcome_type:
     name: Type of employment entry outcome
     type: Categorical
@@ -21,6 +24,7 @@ fields:
     comments: To confirm this works
     validation:
       required: true
+
   date_employment_entry:
     name: Date entered employment
     type: Date
@@ -29,6 +33,7 @@ fields:
       to employment outcome submission.
     validation:
       required: true
+
   employment_entry_details:
     name: Details of paid employment
     type: Categorical
@@ -39,6 +44,7 @@ fields:
       [part time/ full time OR inc. hours - PT 0-15/ PT 16-30 / FT]
     validation:
       required: true
+
   employment_entry_ocupation:
     name: Ocupation type
     type: Free Text (short)
@@ -48,6 +54,7 @@ fields:
     comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
     validation:
       required: true
+
   employment_entry_sector:
     name: Sector
     type: Free Text (short)
@@ -57,3 +64,4 @@ fields:
     comments: To confirm word limit (and possibly add a suggestion ie. Education)
     validation:
       required: true
+

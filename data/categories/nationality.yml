@@ -27,7 +27,7 @@
 - value: AW
   description: Aruba
 - value: AX
-  description: "\xC5land Islands"
+  description: Åland Islands
 - value: AZ
   description: Azerbaijan
 - value: BA
@@ -49,7 +49,7 @@
 - value: BJ
   description: Benin
 - value: BL
-  description: "Saint Barth\xE9lemy"
+  description: Saint Barthélemy
 - value: BM
   description: Bermuda
 - value: BN
@@ -85,7 +85,7 @@
 - value: CH
   description: Switzerland
 - value: CI
-  description: "C\xF4te d'Ivoire (Ivory Coast)"
+  description: Côte d'Ivoire (Ivory Coast)
 - value: CK
   description: Cook Islands
 - value: CL
@@ -103,7 +103,7 @@
 - value: CV
   description: Cape Verde
 - value: CW
-  description: "Cura\xE7ao"
+  description: Curaçao
 - value: CX
   description: Christmas Island
 - value: CY
@@ -373,7 +373,7 @@
 - value: QA
   description: Qatar
 - value: RE
-  description: "R\xE9union"
+  description: Réunion
 - value: RO
   description: Romania
 - value: RS
@@ -415,7 +415,7 @@
 - value: SS
   description: South Sudan
 - value: ST
-  description: "S\xE3o Tome and Pr\xEDncipe"
+  description: São Tome and Príncipe
 - value: SV
   description: El Salvador
 - value: SX
