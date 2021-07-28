@@ -13,7 +13,7 @@ def main():
     # data['rules'] = rules
     #
 
-    write_word_specification(spec.records)
+    write_word_specification(spec)
 
 
 if __name__ == "__main__":
