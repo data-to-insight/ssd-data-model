@@ -1,0 +1,30 @@
+on: [push]
+
+jobs:
+  build_spec:
+    runs-on: ubuntu-16.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: 🐍 install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8.x'
+
+    - name: Cache poetry
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pypoetry
+        key: ${{ runner.os }}-poetry-${{ hashFiles('pyproject.toml', 'poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-
+
+    - name: Install python dependencies
+      run: |
+        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
+        $HOME/.local/bin/poetry install
+
+    - name: Generate spec
+      run: |
+        poetry run ./main.py
