@@ -5,7 +5,7 @@ description = "Data model for the Refugee Transitions Outcomes Fund (RTOF)"
 authors = ["James Hearn <james.hearn@socialfinance.org.uk>", "Kaj Siebert <kaj.siebert@socialfinance.org.uk>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.8,<4.0"
 openpyxl = "^3.0.7"
 PyYAML = "^5.4.1"
 python-docx = "^0.8.11"
