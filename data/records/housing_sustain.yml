@@ -1,0 +1,28 @@
+description: This form outlines the required data for participants who achieve the
+  housing sustainment outcome. Data should be collected when achieving the housing
+  sustainment outcome.
+
+fields:
+
+  person_ni_number:
+    name: NI Number
+    type: NINO
+    description: UK National Insurance number. Must be UNIQUE. To be collected when
+      any integration data is submitted.
+    comments: Minimum data collection required to understand enrollement
+    foreign_keys:
+    - record: person
+      field: ni_number
+    validation:
+      required: true
+      extras: unique
+
+  housing_sustainment_date:
+    name: Date housing sustainment achieved
+    type: Date
+    description: Date of housing sustainment outcome achieved. To be collected once
+      at housing sustainment outcome submission.
+    validation:
+      required: true
+      date_after: housing_entry_date
+

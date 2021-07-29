@@ -1,0 +1,71 @@
+description: This form outlines the required data for participants who achieve the
+  employment OR self employment entry outcome. A participant can only achieve either
+  the employment or self-employment outcome. Data should be collected when achieving
+  the employment entry outcome.
+
+fields:
+
+  person_ni_number:
+    name: NI Number
+    type: NINO
+    description: UK National Insurance number. Must be UNIQUE. To be recorded when
+      any employmnet data is submitted.
+    comments: Minimum data collection required to understand enrollement
+    foreign_keys:
+    - record: person
+      field: ni_number
+    validation:
+      required: true
+      extras: unique
+
+  employment_entry_outcome_type:
+    name: Type of employment entry outcome
+    type: Categorical
+    description: Employment entry can either be employment or self-employment. To
+      be collected once at entry to employmnet outcome submission.
+    comments: To confirm this works
+    validation:
+      required: true
+      dimension: employment_entry_outcome_type
+
+  date_employment_entry:
+    name: Date entered employment
+    type: Date
+    description: Date of employment entry submission. To be collected once at entry
+      to employment outcome submission.
+    validation:
+      required: true
+      date_after: date_started_service
+
+  employment_entry_details:
+    name: Details of paid employment
+    type: Categorical
+    description: Selection of a single category describing the type of employment
+      participant is entering for the employment outcome achievement. To be collected
+      once at entry to employment outcome submission.
+    comments: Home Office to confirm level of detail required for the category selections
+      [part time/ full time OR inc. hours - PT 0-15/ PT 16-30 / FT]
+    validation:
+      required: true
+      dimension: employment_entry_details
+
+  employment_entry_ocupation:
+    name: Ocupation type
+    type: Free Text (short)
+    description: State participants employment type for the acheivement of entry to
+      employment outcome. To be collected once at entry to employment outcome submission.
+    comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
+    validation:
+      required: true
+      extras: character_limit
+
+  employment_entry_sector:
+    name: Sector
+    type: Free Text (short)
+    description: State the participants employment sector for the acheivement of entry
+      to employment outcome. To be collected once at entry to employment outcome submission.
+    comments: To confirm word limit (and possibly add a suggestion ie. Education)
+    validation:
+      required: true
+      extras: character_limit
+

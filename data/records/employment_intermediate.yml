@@ -1,0 +1,41 @@
+description: This form outlines the required data for participants who achieve the
+  intermediate employment outcome. Data should be collected when achieving the intermediate
+  outcome.
+
+fields:
+
+  person_ni_number:
+    name: NI Number
+    type: NINO
+    description: UK National Insurance number. Must be UNIQUE. To be recorded when
+      any employmnet data is submitted.
+    comments: Minimum data collection required to understand enrollement
+    foreign_keys:
+    - record: person
+      field: ni_number
+    validation:
+      required: true
+      extras: unique
+
+  date_intermediate_employment_outcome:
+    name: Date achieved intermediate outcome
+    type: Date
+    description: Date of intermediate employment outcome achievement. To be collected
+      once at intermediate employment outcome submission.
+    comments: Date of completion of the final qualifiying outcome. To confirm how
+      the lists will work in the data model.
+    validation:
+      required: true
+
+  intermediate_employment_outcome_type:
+    name: Type of intermediate outcome
+    type: List
+    description: Selection of at least 3 intermediate outcomes achieved from the provided
+      list [link to list]. To be collected once at intermediate employment outcome
+      submission.
+    comments: Selection of (At least ??) 3 of the intermediate outcomes achieved --
+      do we want to allow the selection of more if possible?
+    validation:
+      required: true
+      date_after: date_started_service
+

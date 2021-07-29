@@ -1,0 +1,39 @@
+description: This form outlines the required data for participants who achieve the
+  housing entry outcome. Data should be collected when achieving the housing entry
+  outcome.
+
+fields:
+
+  person_ni_number:
+    name: NI Number
+    type: NINO
+    description: UK National Insurance number. Must be UNIQUE. To be recorded when
+      any housing data is submitted.
+    comments: Minimum data collection required to understand enrollement
+    foreign_keys:
+    - record: person
+      field: ni_number
+    validation:
+      required: true
+      extras: unique
+
+  housing_entry_date:
+    name: Date of housing entry
+    type: Date
+    description: Date of housing entry outcome achieved. To be collected once at entry
+      to housing outcome submission.
+    comments: To confirm the definition of this date - housing contract signed / move
+      in date ?
+    validation:
+      required: true
+      date_after: date_started_service
+
+  housing_entry_accomodation:
+    name: Accomodation type
+    type: Categorical
+    description: tbc
+    comments: Align with baseline collection
+    validation:
+      required: true
+      dimension: housing_entry_accomodation
+

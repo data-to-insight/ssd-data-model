@@ -1,0 +1,67 @@
+description: This form outlines the required information for all service users, the
+  data is to be collected once at enrolment.
+
+fields:
+
+  ni_number:
+    name: NI Number
+    type: NINO
+    description: UK National Insurance number. Must be unique. To be collected at
+      enrolment into the program. All upper case and no spaces [regular expressions
+      for NiNos]
+    comments: Minimum data collection required to understand enrollement
+    primary_key: true
+    validation:
+      required: true
+
+  date_of_birth:
+    name: Date of brith
+    type: YYYY-MM
+    description: Date of birth of participant. To be collected once at enrolment
+    comments: What do we do in cases where DOB is not known? What will be the value
+      on their identity documents?
+    validation:
+      required: true
+
+  gender:
+    name: Gender
+    type: Categorical
+    description: Gender of participant. Must be one of the five cateogories provided
+      (if unknown please select 'other'). To be collected once at enrolment.
+    comments: Ecorys have provided list of genders, inc. an other option - is that
+      sufficient as an acceptable list of gender types?
+    validation:
+      required: true
+      dimension: gender
+
+  dispersal_area:
+    name: Dispersal area
+    type: String
+    description: Local authority where participant was located once asylum status
+      was granted. To be collected once at enrolment into the program.
+    comments: Confirm whether this should be string of list of LA (is LA specific
+      enough or do we want to include a postcode?)
+    validation:
+      required: true
+
+  referral_source:
+    name: Referral source
+    type: Categorical
+    description: Where the participant was referred to your service from. Select one
+      of the given options (if unknown please select 'Other'). To be collected at
+      enrolment into the program.
+    comments: TBC with providers once selected
+    validation:
+      required: true
+      dimension: referral_source
+
+  date_started_service:
+    name: Date started with service
+    type: Date
+    description: Date of participant enrolment onto the program. Month and Year of
+      enrolment requried. To be collected once at enrolment into the program
+    comments: To define first interaction - at enrolment meeting with service providers
+    validation:
+      required: true
+      date_after: date_asylum_status_granted
+
