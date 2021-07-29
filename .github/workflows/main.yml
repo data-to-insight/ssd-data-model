@@ -28,3 +28,9 @@ jobs:
     - name: Generate spec
       run: |
         poetry run ./main.py
+
+    - name: Upload spec
+      env:
+        RTOF_UPLOAD_URL: ${{ secrets.SHAREPOINT_UPLOAD_WEBHOOK }}
+      run: |
+        poetry run bin/upload.py output/specification.docx "$RTOF_UPLOAD_URL"
