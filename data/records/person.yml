@@ -9,13 +9,13 @@ fields:
     description: UK National Insurance number. Must be unique. To be collected at
       enrolment into the program. All upper case and no spaces [regular expressions
       for NiNos]
-    comments: Minimum data collection required to understand enrollement
+    comments: Minimum data collection required to understand enrolement
     primary_key: true
     validation:
       required: true
 
   date_of_birth:
-    name: Date of brith
+    name: Date of birth
     type: YYYY-MM
     description: Date of birth of participant. To be collected once at enrolment
     comments: What do we do in cases where DOB is not known? What will be the value
@@ -26,9 +26,9 @@ fields:
   gender:
     name: Gender
     type: Categorical
-    description: Gender of participant. Must be one of the five cateogories provided
+    description: Gender of participant. Must be one of the five categories provided
       (if unknown please select 'other'). To be collected once at enrolment.
-    comments: Ecorys have provided list of genders, inc. an other option - is that
+    comments: Ecorys have provided list of genders, inc. another option - is that
       sufficient as an acceptable list of gender types?
     validation:
       required: true
@@ -59,7 +59,7 @@ fields:
     name: Date started with service
     type: Date
     description: Date of participant enrolment onto the program. Month and Year of
-      enrolment requried. To be collected once at enrolment into the program
+      enrolment required. To be collected once at enrolment into the program
     comments: To define first interaction - at enrolment meeting with service providers
     validation:
       required: true
