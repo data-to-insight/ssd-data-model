@@ -18,5 +18,6 @@ def create_data(x):
     return person_data
 
 test_fake = create_data(10)
-print (pd.DataFrame.from_dict(test_fake)  )  
+person_df = pd.DataFrame.from_dict(test_fake) 
+print(person_df)
 
