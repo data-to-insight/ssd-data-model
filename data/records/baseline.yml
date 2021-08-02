@@ -15,9 +15,16 @@ fields:
     validation:
       required: true
       dimension: nationality
- 
- 
- 
+  
+  gender_follow_up:
+    name: Gender follow-up
+    type: Categorical
+    description: Do you identify as transgender? A gender question which follows on from the question in the person data fields. 
+    comments: To confirm all are happy with this change
+    validation: 
+      required: true 
+      dimension: gender_follow_up 
+
   living_status:
     name: Living status
     type: Categorical
