@@ -15,7 +15,17 @@ fields:
     validation:
       required: true
       dimension: nationality
+ 
+  gender_follow-up:
+    name: Gender 
+    type: Categorical
+    description: Do you identify as transgender? A gender question which follows on from the question in the person data fields. 
+    comments: To confirm all are happy with this change
+    validation: 
+    required: true 
+    dimension: gender_follow-up 
 
+ 
   living_status:
     name: Living status
     type: Categorical
@@ -33,7 +43,7 @@ fields:
     type: Categorical
     description: Selection of one of four given categories. To be collected once when
       submitting the initial integration plan or at annual caseload review.
-    comments: This is seeks to understand whether dependancies are currently in the
+    comments: This is seeks to understand whether dependencies are currently in the
       UK or living in same HH - to check with Ecorys and HO that is suitable.
     validation:
       required: true
@@ -51,10 +61,10 @@ fields:
     name: Date arrived in UK
     type: Date
     description: Date participant entered the UK, relating to their latest and current
-      arrival. To be collected once when submitting the intial integration plan or
+      arrival. To be collected once when submitting the initial integration plan or
       at annual caseload review.
     comments: To confirm alternative collection route if an integration plan is not
-      submitted [eg. Povider caseload review]
+      submitted [eg. Provider caseload review]
     validation:
       required: true
       date_after: date_of_birth
@@ -63,7 +73,7 @@ fields:
     name: Date asylum status granted
     type: Date
     description: Date participant was granted asylum status, relating to their latest
-      and current status. To be collected once when submitting the intial integration
+      and current status. To be collected once when submitting the initial integration
       plan or at annual caseload review.
     comments: Can we use HO data for this - to check with HO.
     validation:
@@ -75,7 +85,7 @@ fields:
     type: NINO
     description: UK National Insurance number. Must be UNIQUE. To be recorded when
       submitting baseline data.
-    comments: Minimum data collection required to understand enrollement
+    comments: Minimum data collection required to understand enrolment
     foreign_keys:
     - record: person
       field: ni_number
@@ -97,13 +107,13 @@ fields:
       dimension: language_level_on_entry
 
   highest_qualification_achieved:
-    name: Highest qualificaiton level achieved
+    name: Highest qualification  level achieved
     type: Categorical
     description: The highest level of qualification of participant when entering RTOF.
       Selection of one of the specified category, these refer to [https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels#:~:text=Level%205%20qualifications%20are%3A,higher%20national%20diploma%20(%20HND%20)]
       and please see XXX for international qualification comparisons . To be collected
-      once when submitting the intial integration plan or at annual caseload review.
-    comments: To provide a relevant link to equilivant qualification levels around
+      once when submitting the initial integration plan or at annual caseload review.
+    comments: To provide a relevant link to equivalent qualification  levels around
       the world (https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels)
     validation:
       required: true
@@ -113,7 +123,7 @@ fields:
     name: Employed in home country
     type: Categorical
     description: When participant left home country were they in any form of employment.
-      To be collected once when submitting the intial integration plan or at annual
+      To be collected once when submitting the initial integration plan or at annual
       caseload review.
     comments: Simple yes / no selection. To confirm whether this refers to 'ever employed
       in home country' or 'within a given time period before arriving in the UK' [explain
@@ -126,8 +136,8 @@ fields:
     name: Occupation type
     type: Free Text (short)
     description: If answered 'Yes' to employed in home country field, state job role
-      [eg. teacher] of their last employment. Max word count 10 words.  To be collected
-      once when submitting the intial integration plan or at annual caseload review.
+      [e.g. teacher] of their last employment. Max word count 10 words.  To be collected
+      once when submitting the initial integration plan or at annual caseload review.
     comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
     validation:
       extras: character_limit
@@ -137,13 +147,13 @@ fields:
     type: Free Text (short)
     description: If answered 'Yes' to employed in home country field, state the sector
       [eg. education] of their last employment. Max word count 10 words.  To be collected
-      once when submitting the intial integration plan or at annual caseload review.
+      once when submitting the initial integration plan or at annual caseload review.
     comments: To confirm word limit (and possibly add a suggestion ie. Education)
     validation:
       extras: character_limit
 
   occupation_goal:
-    name: Ocupation goal at baseline
+    name: Occupation goal at baseline
     type: Free Text (short)
     validation:
       extras: character_limit
@@ -160,12 +170,12 @@ fields:
       required: true
       dimension: economic_status
 
-  housing_baseline_accomodation:
-    name: Accomodation type
+  housing_baseline_accommodation:
+    name: Accommodation type
     type: Categorical
     description: tbc
     comments: Ecorys to provide details
     validation:
       required: true
-      dimension: housing_baseline_accomodation
+      dimension: housing_baseline_accommodation
 
