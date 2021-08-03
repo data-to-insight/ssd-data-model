@@ -9,7 +9,7 @@ fields:
     description: UK National Insurance number. Must be unique. To be collected at
       enrolment into the program. All upper case and no spaces [regular expressions
       for NiNos]
-    comments: Minimum data collection required to understand enrolement
+    comments: Minimum data collection required to understand enrolment
     primary_key: true
     validation:
       required: true
@@ -18,8 +18,7 @@ fields:
     name: Date of birth
     type: YYYY-MM
     description: Date of birth of participant. To be collected once at enrolment
-    comments: What do we do in cases where DOB is not known? What will be the value
-      on their identity documents?
+    comments:
     validation:
       required: true
 
@@ -27,9 +26,9 @@ fields:
     name: Gender
     type: Categorical
     description: Gender of participant. Must be one of the five categories provided
-      (if unknown please select 'other'). To be collected once at enrolment.
-    comments: Ecorys have provided list of genders, inc. another option - is that
-      sufficient as an acceptable list of gender types?
+      (if unknown please select 'other'). To be collected once at enrolment. 
+      Note there is a follow-up gender question as part of the baseline data collection. 
+    comments:
     validation:
       required: true
       dimension: gender
@@ -39,7 +38,7 @@ fields:
     type: String
     description: Local authority where participant was located once asylum status
       was granted. To be collected once at enrolment into the program.
-    comments: Confirm whether this should be string of list of LA (is LA specific
+    comments: Confirm whether this should be string or list of LA (is LA specific
       enough or do we want to include a postcode?)
     validation:
       required: true
@@ -49,7 +48,7 @@ fields:
     type: Categorical
     description: Where the participant was referred to your service from. Select one
       of the given options (if unknown please select 'Other'). To be collected at
-      enrolment into the program.
+      enrolment.
     comments: TBC with providers once selected
     validation:
       required: true
@@ -59,7 +58,7 @@ fields:
     name: Date started with service
     type: Date
     description: Date of participant enrolment onto the program. Month and Year of
-      enrolment required. To be collected once at enrolment into the program
+      enrolment required. To be collected once at enrolment.
     comments: To define first interaction - at enrolment meeting with service providers
     validation:
       required: true

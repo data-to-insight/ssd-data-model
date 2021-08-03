@@ -9,7 +9,7 @@ fields:
     type: NINO
     description: UK National Insurance number. Must be UNIQUE. To be collected when
       any integration data is submitted.
-    comments: Minimum data collection required to understand enrollement
+    comments: Minimum data collection required to understand enrolment
     foreign_keys:
     - record: person
       field: ni_number

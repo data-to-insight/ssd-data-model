@@ -8,8 +8,8 @@ fields:
     name: NI Number
     type: NINO
     description: UK National Insurance number. Must be UNIQUE. To be recorded when
-      any employmnet data is submitted.
-    comments: Minimum data collection required to understand enrollement
+      any employment data is submitted.
+    comments: Minimum data collection required to understand enrolement
     foreign_keys:
     - record: person
       field: ni_number
