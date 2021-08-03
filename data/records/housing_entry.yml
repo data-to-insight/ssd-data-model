@@ -26,12 +26,12 @@ fields:
       required: true
       date_after: date_started_service
 
-  housing_entry_accommodation:
-    name: Accommodation type
+  housing_entry_accomodation:
+    name: Accomodation type
     type: Categorical
     description: tbc
     comments: Align with baseline collection
     validation:
       required: true
-      dimension: housing_entry_accommodation
+      dimension: housing_entry_accomodation
 
