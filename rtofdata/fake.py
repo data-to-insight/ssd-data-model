@@ -68,3 +68,13 @@ def create_baseline_data(x):
 baseline_fake = create_baseline_data(20)
 baseline_df = pd.DataFrame.from_dict(baseline_fake)
 print(transpose(baseline_df))
+
+def create_date_last_seen_data(x):
+    date_last_seen_data = {}
+    for i in range(0, x):
+        date_last_seen_data[i] = {}
+        date_last_seen_data[i]['date_last_seen'] = fake.date_between(start_date = '-1y', end_date = '-3y')
+
+date_last_seen_fake = create_date_last_seen_data(20)
+date_last_seen_df = pd.DataFrame.from_dict(date_last_seen_fake)
+print(transpose(date_last_seen_df))

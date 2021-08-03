@@ -53,8 +53,11 @@ def write_word_specification(spec: Specification):
 
     tpl = DocxTemplate(assets_dir / "template.docx")
     context = create_context(spec)
-    context['milestones_image'] = InlineImage(tpl, image_descriptor=str(assets_dir / 'RTOF_program_path.png'),
+    context['milestones_image'] = InlineImage(tpl, image_descriptor=str(assets_dir / 'submission_and_collecton.png'),
                                               width=Cm(16))
-
+    tpl = DocxTemplate(assets_dir / "template.docx")
+    context = create_context(spec)
+    context['milestones_image'] = InlineImage(tpl, image_descriptor=str(assets_dir / 'Data_forms_to_be_submitted.png'),
+                                              width=Cm(16))
     tpl.render(context)
     tpl.save(output_dir / "specification.docx")
