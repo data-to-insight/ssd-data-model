@@ -4,15 +4,14 @@ description: This form outlines the required data for participants who achieve t
 
 fields:
 
-  person_ni_number:
-    name: NI Number
-    type: NINO
-    description: UK National Insurance number. Must be UNIQUE. To be recorded when
-      any housing data is submitted.
-    comments: Minimum data collection required to understand enrollement
+  unique_id:
+    name: Unique person identifier 
+    type: string
+    description: Person identifier provided in the person form. This can be a NINO or a unique provider ID. This must be unique for each individual supported on RTOF. 
+    comments: Minimum data collection required to understand enrolment
     foreign_keys:
     - record: person
-      field: ni_number
+      field: unique_id
     validation:
       required: true
       extras: unique
@@ -22,18 +21,17 @@ fields:
     type: Date
     description: Date of housing entry outcome achieved. To be collected once at entry
       to housing outcome submission.
-    comments: To confirm the definition of this date - housing contract signed / move
-      in date ?
+    comments: 
     validation:
       required: true
       date_after: date_started_service
 
-  housing_entry_accomodation:
-    name: Accomodation type
+  housing_entry_accommodation:
+    name: Accommodation type
     type: Categorical
     description: tbc
     comments: Align with baseline collection
     validation:
       required: true
-      dimension: housing_entry_accomodation
+      dimension: housing_entry_accommodation
 
