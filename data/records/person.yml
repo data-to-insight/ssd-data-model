@@ -3,6 +3,18 @@ description: This form outlines the required information for all service users, 
 
 fields:
 
+  unique_id:
+    name: Unique person identifier 
+    type: string
+    description: Person identifier provided in the person form. This can be a NINO or a unique provider ID. This must be unique for each individual supported on RTOF. 
+    comments: Minimum data collection required to understand enrolment
+    foreign_keys:
+    - record: person
+      field: unique_id
+    validation:
+      required: true
+      extras: unique
+
   ni_number:
     name: NI Number
     type: NINO
