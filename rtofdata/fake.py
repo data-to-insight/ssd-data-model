@@ -1,11 +1,12 @@
 from faker import Faker
 from numpy import random
 from numpy.core.fromnumeric import transpose
-from numpy.random.mtrand import rand
+from numpy.random.mtrand import rand, random_integers
 import pandas as pd
 from datetime import date, datetime
 import numpy as np
 from pandas.core import base
+from random import randrange
 import yaml
 
 fake = Faker()
@@ -45,6 +46,8 @@ def create_baseline_data(x):
         living_status = yaml.load(f.read())
     with open("data/categories/current_family_composition.yml") as f:
         current_family_composition = yaml.load(f.read())
+    with open("data/categories/current_dependents_uk.yml") as f:
+        current_dependents_uk = yaml.load(f.read())
     with open("data/records/baseline.yml") as f:
         arrived_uk = yaml.load(f.read())
         arrived_uk_start = arrived_uk['fields']['date_arrived_in_uk']['args']['start_date']
@@ -69,6 +72,7 @@ def create_baseline_data(x):
         baseline_data[i]['gender_follow_up'] = np.random.choice(gender_follow_up)
         baseline_data[i]['living_status'] = np.random.choice(living_status)
         baseline_data[i]['current_family_composition'] = np.random.choice(current_family_composition)
+        baseline_data[i]['current_dependents_uk'] = random.choice(current_dependents_uk, randrange(3))
         baseline_data[i]['date_arrived_in_uk'] = fake.date_between(start_date = arrived_uk_start, end_date = arrived_uk_end)
         baseline_data[i]['date_asylum_status_granted'] = fake.date_between(start_date = asylum_granted_start, end_date = asylum_granted_end)
         baseline_data[i]['highest_qualification_achieved'] = np.random.choice(highest_qualification_achieved)
