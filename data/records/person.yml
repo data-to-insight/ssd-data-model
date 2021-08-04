@@ -8,12 +8,9 @@ fields:
     type: string
     description: Person identifier provided in the person form. This can be a NINO or a unique provider ID. This must be unique for each individual supported on RTOF. 
     comments: Minimum data collection required to understand enrolment
-    foreign_keys:
-    - record: person
-      field: unique_id
+    primary_key: true
     validation:
       required: true
-      extras: unique
 
   ni_number:
     name: NI Number
@@ -22,9 +19,9 @@ fields:
       enrolment into the program. All upper case and no spaces [regular expressions
       for NiNos]
     comments: Minimum data collection required to understand enrolment
-    primary_key: true
     validation:
       required: true
+      unique: true
 
   temp_ni_number:
     name: Temp NI number
@@ -33,7 +30,7 @@ fields:
       leaving the ni_number field blank, until the participant receives a permanent NINO. Once a permanent NINO has been received this form should be updated.
     comments: tbc with Kaj 
     validation:
-      extras: unique
+      unique: true
 
   date_of_birth:
     name: Date of birth

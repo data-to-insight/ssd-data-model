@@ -2,12 +2,15 @@
 
 import argparse
 
+from rtofdata.erd import create_erd
 from rtofdata.spec_parser import parse_specification
 from rtofdata.word import write_word_specification
 
 
 def main():
     spec = parse_specification()
+
+    create_erd(spec)
     # rules = generate_validation_rules(data)
     #
     # data['rules'] = rules

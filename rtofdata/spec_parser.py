@@ -31,6 +31,7 @@ class Field:
     dimensions: DimensionList = None
     sample_generator: dict = None
 
+
 @dataclass
 class Record:
     id: str
