@@ -149,3 +149,70 @@ def create_employment_sustain_data(x):
 employment_sustain_fake = create_employment_sustain_data(10)
 employment_sustain_df = pd.DataFrame.from_dict(employment_sustain_fake)
 print(transpose(employment_sustain_df))
+
+def create_housing_entry_data(x):
+    housing_entry_data = {}
+    with open("data/records/housing_entry.yml") as f:
+        housing_entry_date = yaml.load(f.read())
+        housing_entry_start = housing_entry_date['fields']['housing_entry_date']['args']['start_date']
+        housing_entry_end = housing_entry_date['fields']['housing_entry_date']['args']['end_date']
+    with open("data\categories\housing_entry_accomodation.yml") as f:
+        housing_entry_type = yaml.load(f.read())        
+    for i in range(0,x):
+        housing_entry_data[i] = {}
+        housing_entry_data[i]['unique_id'] = fake.bothify('?? ######')
+        housing_entry_data[i]['housing_entry_date'] = fake.date_between(start_date = housing_entry_start, end_date = housing_entry_end)
+        housing_entry_data[i]['housing_entry_accomodation'] = np.random.choice(housing_entry_type)
+    return housing_entry_data
+
+housing_entry_fake = create_housing_entry_data(10)
+housing_entry_df = pd.DataFrame.from_dict(housing_entry_fake)
+print(transpose(housing_entry_df))
+
+
+def create_housing_sustain_data(x):
+    housing_sustain_data = {}
+    with open("data/records/housing_sustain.yml") as f:
+        housing_sustain_date = yaml.load(f.read())
+        housing_sustain_start = housing_sustain_date['fields']['housing_sustainment_date']['args']['start_date']
+        housing_sustain_end = housing_sustain_date['fields']['housing_sustainment_date']['args']['end_date']
+    for i in range(0,x):
+        housing_sustain_data[i] = {}
+        housing_sustain_data[i]['unique_id'] = fake.bothify('?? ######')
+        housing_sustain_data[i]['housing_sustainment_date'] = fake.date_between(start_date = housing_sustain_start, end_date= housing_sustain_end)
+    return housing_sustain_data
+
+housing_sustain_fake = create_housing_sustain_data(10)
+housing_sustain_df = pd.DataFrame.from_dict(housing_sustain_fake)
+print(transpose(housing_sustain_df))
+
+def create_integration_data(x):
+    integration_data = {}
+    with open("data/categories/integration_outcome_type.yml") as f:
+        integration_outcome_type = yaml.load(f.read())
+    with open("data/records/integration_plan.yml") as f:
+        integration_outcome_date = yaml.load(f.read())
+        integration_outcome_start = integration_outcome_date['fields']['integration_outcome_achieved_date']['args']['start_date']
+        integration_outcome_end = integration_outcome_date['fields']['integration_outcome_achieved_date']['args']['end_date']
+    with open("data/categories/integration_comms_language.yml") as f:
+        integration_comms_language = yaml.load(f.read())
+    with open("data/categories/integration_digital.yml") as f:
+        integration_digital = yaml.load(f.read())
+    with open("data/categories/integration_social.yml") as f:
+        integration_social = yaml.load(f.read())
+
+    for i in range(0,x):
+        integration_data[i] = {}
+        integration_data[i]['unique_id'] = fake.bothify('?? ######')
+        integration_data[i]['integration_outcome_type'] = np.random.choice(integration_outcome_type)
+        integration_data[i]['integration_outcome_achieved_date'] = fake.date_between(start_date = integration_outcome_start, end_date = integration_outcome_end)
+        integration_data[i]['integration_comms_language'] = np.random.choice(integration_comms_language)
+        integration_data[i]['integration_digital'] = np.random.choice(integration_digital)
+        integration_data[i]['integration_social'] = np.random.choice(integration_social)
+    return integration_data
+
+integration_data_fake = create_integration_data(10)
+integration_data_df = pd.DataFrame.from_dict(integration_data_fake)
+print(transpose(integration_data_df))
+
+
