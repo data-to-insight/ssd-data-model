@@ -62,6 +62,9 @@ fields:
     validation:
       required: true
       date_after: date_of_birth
+    args:
+      start_date: '-2y'
+      end_date: '-2m'
 
   date_asylum_status_granted:
     name: Date asylum status granted
@@ -72,7 +75,10 @@ fields:
     validation:
       required: true
       date_after: date_arrived_in_uk
-
+    args:
+      start_date: '-1y'
+      end_date:  '-2m'
+    
   unique_id:
     name: Unique person identifier 
     type: string

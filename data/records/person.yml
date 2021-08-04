@@ -33,6 +33,11 @@ fields:
     comments:
     validation:
       required: true
+    sample_generator:
+      method: date_between
+    args: 
+     start_date: -65y
+     end_date: -18y
 
   gender:
     name: Gender

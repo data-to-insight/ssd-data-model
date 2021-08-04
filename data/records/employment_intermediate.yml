@@ -25,6 +25,9 @@ fields:
       the lists will work in the data model.
     validation:
       required: true
+    args:
+      start_date: '+2m'
+      end_date: '+2y'
 
   intermediate_employment_outcome_type:
     name: Type of intermediate outcome
