@@ -24,8 +24,10 @@ fields:
     validation:
       required: true
       date_after: housing_entry_date
-    args:
-      start_date: '+1y'
-      end_date: '+3y'
+    sample_generator:
+      method: date_between
+      args:
+        start_date: '+1y'
+        end_date: '+3y'
       
 

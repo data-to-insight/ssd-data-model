@@ -18,7 +18,8 @@ fields:
   transgender:
     name: Transgender
     type: Categorical
-    description: Do you identify as transgender? A question which follows on from the question in the person data form, with 'identify as transgender', 'do not identify as transgender' or 'prefer not to say'. To be collected once and submitted within 3 months of enrolment.
+    description: Do you identify as transgender? A question which follows on from the question in the person data form, with 'identify as transgender', 
+      'do not identify as transgender' or 'prefer not to say'. To be collected once and submitted within 3 months of enrolment.
     comments: 
     validation: 
       required: true 
@@ -62,9 +63,11 @@ fields:
     validation:
       required: true
       date_after: date_of_birth
-    args:
-      start_date: '-2y'
-      end_date: '-2m'
+    sample_generator:
+      method: date_between
+      args:
+        start_date: '-2y'
+        end_date: '-2m'
 
   date_asylum_status_granted:
     name: Date asylum status granted
@@ -75,9 +78,11 @@ fields:
     validation:
       required: true
       date_after: date_arrived_in_uk
-    args:
-      start_date: '-1y'
-      end_date:  '-2m'
+    sample_generator:
+      method: date_between
+      args:
+        start_date: '-1y'
+        end_date:  '-2m'
     
   unique_id:
     name: Unique person identifier 
