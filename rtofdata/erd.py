@@ -10,7 +10,8 @@ def create_erd(spec: Specification):
     with open(output_file, "wt") as file:
         print("# Entities\n", file=file)
 
-        for r in spec.records:
+        for r in spec.records_by_flow:
+            r = r.record
             print(f"[{r.id}]", file=file)
             for f in r.fields:
                 field_desc = f'{f.id} {{label:"{f.type}"}}'

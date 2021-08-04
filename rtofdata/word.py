@@ -34,18 +34,8 @@ def create_context(spec: Specification):
         "git_version": get_git_version(),
         "generation_time": f"{datetime.now():%d %B %Y}",
         "record_list": spec.records,
+        "records_by_flow": spec.records_by_flow,
     }
-
-    context['records_by_flow'] = flow_records = []
-
-    flow_steps = []
-    for flow in spec.flows:
-        flow_steps += flow.all_steps
-
-    for step in flow_steps:
-        for record in step["step"].records or []:
-            if record not in flow_records:
-                flow_records.append(dict(flow=step["flow"], record=record))
 
     context['field_list'] = field_list = []
     for record in spec.records:
@@ -68,7 +58,10 @@ def write_word_specification(spec: Specification):
                                               width=Cm(16))
     context['milestones_image2'] = InlineImage(tpl, image_descriptor=str(assets_dir / 'Data_forms_to_be_submitted_2.png'),
                                               width=Cm(16))
-    
+
+    context['erd_image'] = InlineImage(tpl, image_descriptor=str(output_dir / 'record-relationships2.png'),
+                                              width=Cm(16))
+
     
 
     tpl.render(context)

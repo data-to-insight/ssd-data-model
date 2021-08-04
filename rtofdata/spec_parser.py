@@ -72,10 +72,32 @@ class WorkflowStep:
 
 
 @dataclass
+class RecordInFlow:
+    flow: Workflow
+    record: Record
+
+
+@dataclass
 class Specification:
     records: List[Record]
     dimensions: List[DimensionList]
     flows: List[Workflow]
+
+    @property
+    def records_by_flow(self):
+        flow_steps = []
+        for flow in self.flows or []:
+            flow_steps += flow.all_steps
+
+        all_keys = set()
+        flow_records = []
+        for step in flow_steps:
+            for record in step["step"].records or []:
+                if record.id not in all_keys:
+                    all_keys.add(record.id)
+                    flow_records.append(RecordInFlow(flow=step["flow"], record=record))
+
+        return flow_records
 
 
 def parse_dimensions():
