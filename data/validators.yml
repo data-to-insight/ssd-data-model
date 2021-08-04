@@ -10,7 +10,7 @@
 required:
   args:
     - name: enabled
-      type: bool
+      type: boolean
       help: true/false value indicating if the current field is required
   description: |
     A field with 'required: true' must be present in the data record, and must have a non-blank value. It is short-hand
@@ -19,7 +19,7 @@ required:
 notnull:
   args:
     - name: enabled
-      type: bool
+      type: boolean
       help: true/false value indicating if the current field is notnull
   description: |
     A field with 'notnull: true' must be present in the data record.
@@ -27,7 +27,7 @@ notnull:
 notblank:
   args:
     - name: enabled
-      type: bool
+      type: boolean
       help: true/false value indicating if the current field is notblank
   description: |
     A field with 'notblank: true' must have a value that's not blank (i.e. an empty string or a string
@@ -45,10 +45,20 @@ dimension:
 date_after:
   args:
     - name: field_id
-      type: string
-      nargs: +
+      type: array
+      items:
+        type: string
       help: The ID of the field that this date has to be after
   description: |
     Only used for fields of type date, this validator ensures that the provided value is after the date indicated. When
     multiple
-    TODO: What is the best way to describe list inputs?
+
+national_insurance_number:
+  args:
+    - name: enabled
+      type: boolean
+      help: true/false value indicating if the current field is a national insurance number
+  description: |
+    UK National Insurance Number - uppercase with all whitespace removed. Validated according to format given in
+    https://github.com/dwp/nino-format-validation
+
