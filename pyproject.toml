@@ -14,6 +14,7 @@ docx = "^0.2.4"
 GitPython = "^3.1.19"
 requests = "^2.26.0"
 ERAlchemy = "^1.2.10"
+dacite = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.2"

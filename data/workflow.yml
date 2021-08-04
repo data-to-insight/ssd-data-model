@@ -1,0 +1,50 @@
+- name: Enrolment
+  steps:
+  - name: Referral
+  - name: Eligibility and onboarding
+  - name: Initial enrolment meeting
+    records:
+      - id: person
+    flows:
+      - name: Housing
+        steps:
+          - name: Housing Support
+          - name: Entry to housing
+            records:
+              - id: housing_entry
+          - name: 6 month housing sustainment
+            records:
+              - id: housing_sustain
+
+      - name: Integration
+        steps:
+          - name: Creating of integration plan
+            records:
+              - id: baseline
+              - id: integration_plan
+          - name: Integration Support
+          - name: 6 month integration plan progress
+            records:
+              - id: integration_plan
+          - name: 12 month integration plan progress
+            records:
+              - id: integration_plan
+
+      - name: Employment
+        steps:
+          - name: Employment Support
+          - name: Intermediate employment outcome
+            records:
+              - id: employment_intermediate
+          - name: Entry to employment or self-employment
+            records:
+              - id: employment_entry
+          - name: 3 month employment sustainment
+            records:
+              - id: employment_sustain
+
+- name: Annual review
+  steps:
+    - name: Annual provider caseload review
+      records:
+      - id: date_last_seen

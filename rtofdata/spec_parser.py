@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Any
+from dacite import from_dict
 
 import yaml
 
@@ -35,14 +36,45 @@ class Field:
 @dataclass
 class Record:
     id: str
-    description: str
-    fields: List[Field]
+    description: str = None
+    fields: List[Field] = None
+
+
+@dataclass
+class Workflow:
+    name: str
+    steps: List["WorkflowStep"]
+
+    @property
+    def all_steps(self):
+        all_steps = []
+        for s in self.steps:
+            all_steps += s.all_steps
+        for s in all_steps:
+            if "flow" not in s:
+                s["flow"] = self
+        return all_steps
+
+
+@dataclass
+class WorkflowStep:
+    name: str
+    records: List[Record] = None
+    flows: List[Workflow] = None
+
+    @property
+    def all_steps(self) -> List[Any]:
+        all_steps = [dict(step=self)]
+        for f in self.flows or []:
+            all_steps += f.all_steps
+        return all_steps
 
 
 @dataclass
 class Specification:
     records: List[Record]
     dimensions: List[DimensionList]
+    flows: List[Workflow]
 
 
 def parse_dimensions():
@@ -101,8 +133,24 @@ def parse_records(categories):
     return record_list
 
 
+def parse_flow(records: List[Record]):
+    records = {r.id : r for r in records}
+    with open(data_dir / "workflow.yml", 'rt') as file:
+        data = yaml.safe_load(file)
+
+    flows = []
+    for flow in data:
+        flow = from_dict(data_class=Workflow, data=flow)
+        for step in flow.all_steps:
+            step["step"].records = [records[r.id] for r in step['step'].records or []]
+        flows.append(flow)
+
+    return flows
+
+
 def parse_specification():
     categories = parse_dimensions()
     records = parse_records(categories)
+    flows = parse_flow(records)
 
-    return Specification(records=records, dimensions=categories)
+    return Specification(records=records, dimensions=categories, flows=flows)

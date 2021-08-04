@@ -36,6 +36,17 @@ def create_context(spec: Specification):
         "record_list": spec.records,
     }
 
+    context['records_by_flow'] = flow_records = []
+
+    flow_steps = []
+    for flow in spec.flows:
+        flow_steps += flow.all_steps
+
+    for step in flow_steps:
+        for record in step["step"].records or []:
+            if record not in flow_records:
+                flow_records.append(dict(flow=step["flow"], record=record))
+
     context['field_list'] = field_list = []
     for record in spec.records:
         for field in record.fields:
