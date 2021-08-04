@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Any
 from dacite import from_dict
+import traceback
 
 import yaml
 
@@ -121,12 +122,19 @@ def parse_records(categories):
                     msg="Exception occurred when creating field from",
                     record=record_id,
                     field=field_id,
-                    values=values
+                    values=values,
+                    exception=traceback.format_exc(),
                 ))
 
         record_list.append(Record(id=record_id, **data))
 
     if len(record_errors) > 0:
+        print("Input validation errors encountered:")
+        for r in record_errors:
+            print(f"*** {r['record']}.{r['field']} ***")
+            print(f"{r['exception']}")
+            print()
+
         error_fields = [f"{r['record']}.{r['field']}" for r in record_errors]
         raise ValueError(f"Error in the following fields: {error_fields}")
 
