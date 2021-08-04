@@ -4,15 +4,14 @@ description: This form outlines the required data for participants who achieve t
 
 fields:
 
-  person_ni_number:
-    name: NI Number
-    type: NINO
-    description: UK National Insurance number. Must be UNIQUE. To be collected when
-      any integration data is submitted.
-    comments: Minimum data collection required to understand enrollement
+  unique_id:
+    name: Unique person identifier 
+    type: string
+    description: Person identifier provided in the person form. This can be a NINO or a unique provider ID. This must be unique for each individual supported on RTOF. 
+    comments: Minimum data collection required to understand enrolment
     foreign_keys:
     - record: person
-      field: ni_number
+      field: unique_id
     validation:
       required: true
       extras: unique
@@ -25,4 +24,10 @@ fields:
     validation:
       required: true
       date_after: housing_entry_date
+    sample_generator:
+      method: date_between
+      args:
+        start_date: '+1y'
+        end_date: '+3y'
+      
 

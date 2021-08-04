@@ -30,7 +30,7 @@ class Field:
     foreign_keys: List = None
     validation: dict = None
     dimensions: DimensionList = None
-
+    sample_generator: dict = None
 
 @dataclass
 class Record:

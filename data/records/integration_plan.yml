@@ -1,19 +1,18 @@
 description: This form outlines the required data for participants who achieve each
-  integration plan outcome - one submission for each creation, 6 month progress and
-  12 month progress. Data should be collected when achieving each integration plan
+  integration plan outcome - one submission for each creation, 6-month progress and
+  12-month progress. Data should be collected when achieving each integration plan
   outcome.
 
 fields:
 
-  person_ni_number:
-    name: NI Number
-    type: NINO
-    description: UK National Insurance number. Must be UNIQUE. To be collected when
-      any integration data is submitted.
-    comments: Minimum data collection required to understand enrollement
+  unique_id:
+    name: Unique person identifier 
+    type: string
+    description: Person identifier provided in the person form. This can be a NINO or a unique provider ID. This must be unique for each individual supported on RTOF. 
+    comments: Minimum data collection required to understand enrolment
     foreign_keys:
     - record: person
-      field: ni_number
+      field: unique_id
     validation:
       required: true
       extras: unique
@@ -21,26 +20,32 @@ fields:
   integration_outcome_type:
     name: Integration outcome type
     type: Categorical
-    description: Selection of which integration outcome has been achevied. To be collected
+    description: Selection of which integration outcome has been achieved. To be collected
       at each outcome submission.
     validation:
       required: true
       dimension: integration_outcome_type
 
   integration_outcome_achieved_date:
-    name: Date completed integration plan
+    name: Date integration plan outcome acheived 
     type: Date
-    description: Date of integration plan outcome achievement. To be collected once
-      when a creation of an integration plan outcome is submitted.
+    description: Date of integration plan outcome achievement. To be collected at each 
+      outcome submission. 
     validation:
       required: true
       date_after: date_started_service
+    sample_generator:
+      method: date_between
+      args:
+        start_date: '+2m'
+        end_date: '+2y'   
 
   integration_social:
     name: Social bonds / bridges / links
     type: Categorical
-    description: tbc
-    comments: TBC on catorgies and IP for Outcomes Star - test with HO
+    description: tbc. To be collected at each 
+      outcome submission.
+    comments: TBC on categories and IP for Outcomes Star - to test with HO
     validation:
       required: true
       dimension: integration_social
@@ -48,8 +53,9 @@ fields:
   integration_comms_language:
     name: Language and communication
     type: Categorical
-    description: tbc
-    comments: TBC on catorgies for IP for Outcomes Star - test with HO
+    description: tbc. To be collected at each 
+      outcome submission.
+    comments: TBC on categories for IP for Outcomes Star - to test with HO
     validation:
       required: true
       dimension: integration_comms_language
@@ -57,8 +63,9 @@ fields:
   integration_digital:
     name: Digital skills
     type: Categorical
-    description: tbc
-    comments: TBC Ecorys looking to yes/no questions - test with HO
+    description: tbc. To be collected at each 
+      outcome submission.
+    comments: TBC Ecorys looking to yes/no questions - to test with HO
     validation:
       required: true
       dimension: integration_digital
