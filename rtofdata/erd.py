@@ -22,10 +22,12 @@ def create_erd(spec: Specification):
 
         print("\n# Relationships\n", file=file)
         for r in spec.records:
+            pk = r.primary_keys
             for f in r.fields:
                 if f.foreign_keys:
                     for fk in f.foreign_keys:
-                        print(f"{r.id:25} *--1   {fk['record']} {{label:\"{fk['field']}\"}}", file=file)
+                        lh = "1" if pk == [f] else "*"
+                        print(f"{r.id:25} {lh}--1   {fk['record']} {{label:\"{fk['field']}\"}}", file=file)
 
     render_er(output_file, str(output_dir / "record-relationships.dot"))
     render_er(output_file, str(output_dir / "record-relationships.png"))

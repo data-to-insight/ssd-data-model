@@ -40,6 +40,10 @@ class Record:
     description: str = None
     fields: List[Field] = None
 
+    @property
+    def primary_keys(self) -> List[Field]:
+        return [f for f in self.fields or [] if f.primary_key]
+
 
 @dataclass
 class Workflow:
