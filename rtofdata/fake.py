@@ -18,8 +18,8 @@ def create_person_data(x):
         genders = yaml.load(f.read())
     with open ("data/records/person.yml") as f:
         date_of_birth = yaml.load(f.read())
-        date_of_birth_start = date_of_birth['fields']['date_of_birth']['args']['start_date']
-        date_of_birth_end = date_of_birth['fields']['date_of_birth']['args']['end_date']
+        date_of_birth_start = date_of_birth['fields']['date_of_birth']['sample_generator']['args']['start_date']
+        date_of_birth_end = date_of_birth['fields']['date_of_birth']['sample_generator']['args']['end_date']
     for i in range(0, x):
         person_data[i] = {}
         person_data[i]['NiNo'] = fake.bothify('?? ######')
@@ -50,12 +50,12 @@ def create_baseline_data(x):
         current_dependents_uk = yaml.load(f.read())
     with open("data/records/baseline.yml") as f:
         arrived_uk = yaml.load(f.read())
-        arrived_uk_start = arrived_uk['fields']['date_arrived_in_uk']['args']['start_date']
-        arrived_uk_end = arrived_uk['fields']['date_arrived_in_uk']['args']['end_date']
+        arrived_uk_start = arrived_uk['fields']['date_arrived_in_uk']['sample_generator']['args']['start_date']
+        arrived_uk_end = arrived_uk['fields']['date_arrived_in_uk']['sample_generator']['args']['end_date']
     with open("data/records/baseline.yml") as f:
         asylum_granted = yaml.load(f.read())
-        asylum_granted_start = asylum_granted['fields']['date_asylum_status_granted']['args']['start_date']
-        asylum_granted_end = asylum_granted['fields']['date_asylum_status_granted']['args']['end_date']
+        asylum_granted_start = asylum_granted['fields']['date_asylum_status_granted']['sample_generator']['args']['start_date']
+        asylum_granted_end = asylum_granted['fields']['date_asylum_status_granted']['sample_generator']['args']['end_date']
     with open("data/categories/highest_qualification_achieved.yml") as f:
         highest_qualification_achieved = yaml.load(f.read())
     with open("data/categories/employed_in_home_country.yml") as f:
@@ -124,8 +124,8 @@ def create_employment_intermediate_data(x):
     employment_intermediate_data = {}
     with open("data/records/employment_intermediate.yml") as f:
         intermediate_employment_outcome = yaml.load(f.read())
-        intermediate_employment_outcome_start = intermediate_employment_outcome['fields']['date_intermediate_employment_outcome']['args']['start_date']
-        intermediate_employment_outcome_end = intermediate_employment_outcome['fields']['date_intermediate_employment_outcome']['args']['end_date']
+        intermediate_employment_outcome_start = intermediate_employment_outcome['fields']['date_intermediate_employment_outcome']['sample_generator']['args']['start_date']
+        intermediate_employment_outcome_end = intermediate_employment_outcome['fields']['date_intermediate_employment_outcome']['sample_generator']['args']['end_date']
     with open("data/categories/intermediate_employment_outcome_type") as f:
         intermediate_employment_outcome_type = yaml.load(f.read())
     for i in range(0,x):
@@ -143,8 +143,8 @@ def create_employment_sustain_data(x):
     employment_sustain_data = {}
     with open("data/records/employment_sustain.yml") as f:
         employment_sustain_date = yaml.load(f.read())
-        employment_sustain_date_start = employment_sustain_date['fields']['employment_sustainment_date']['args']['start_date']
-        employment_sustain_date_end = employment_sustain_date['fields']['employment_sustainment_date']['args']['end_date']
+        employment_sustain_date_start = employment_sustain_date['fields']['employment_sustainment_date']['sample_generator']['args']['start_date']
+        employment_sustain_date_end = employment_sustain_date['fields']['employment_sustainment_date']['sample_generator']['args']['end_date']
     for i in range(0, x):
         employment_sustain_data[i] = {}
         employment_sustain_data[i]['unique_id'] = fake.bothify('?? ######')
@@ -158,8 +158,8 @@ def create_housing_entry_data(x):
     housing_entry_data = {}
     with open("data/records/housing_entry.yml") as f:
         housing_entry_date = yaml.load(f.read())
-        housing_entry_start = housing_entry_date['fields']['housing_entry_date']['args']['start_date']
-        housing_entry_end = housing_entry_date['fields']['housing_entry_date']['args']['end_date']
+        housing_entry_start = housing_entry_date['fields']['housing_entry_date']['sample_generator']['args']['start_date']
+        housing_entry_end = housing_entry_date['fields']['housing_entry_date']['sample_generator']['args']['end_date']
     with open("data\categories\housing_entry_accomodation.yml") as f:
         housing_entry_type = yaml.load(f.read())        
     for i in range(0,x):
@@ -178,8 +178,8 @@ def create_housing_sustain_data(x):
     housing_sustain_data = {}
     with open("data/records/housing_sustain.yml") as f:
         housing_sustain_date = yaml.load(f.read())
-        housing_sustain_start = housing_sustain_date['fields']['housing_sustainment_date']['args']['start_date']
-        housing_sustain_end = housing_sustain_date['fields']['housing_sustainment_date']['args']['end_date']
+        housing_sustain_start = housing_sustain_date['fields']['housing_sustainment_date']['sample_generator']['args']['start_date']
+        housing_sustain_end = housing_sustain_date['fields']['housing_sustainment_date']['sample_generator']['args']['end_date']
     for i in range(0,x):
         housing_sustain_data[i] = {}
         housing_sustain_data[i]['unique_id'] = fake.bothify('?? ######')
@@ -196,8 +196,8 @@ def create_integration_data(x):
         integration_outcome_type = yaml.load(f.read())
     with open("data/records/integration_plan.yml") as f:
         integration_outcome_date = yaml.load(f.read())
-        integration_outcome_start = integration_outcome_date['fields']['integration_outcome_achieved_date']['args']['start_date']
-        integration_outcome_end = integration_outcome_date['fields']['integration_outcome_achieved_date']['args']['end_date']
+        integration_outcome_start = integration_outcome_date['fields']['integration_outcome_achieved_date']['sample_generator']['args']['start_date']
+        integration_outcome_end = integration_outcome_date['fields']['integration_outcome_achieved_date']['sample_generator']['args']['end_date']
     with open("data/categories/integration_comms_language.yml") as f:
         integration_comms_language = yaml.load(f.read())
     with open("data/categories/integration_digital.yml") as f:
