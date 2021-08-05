@@ -1,11 +1,4 @@
 from faker import Faker
-from numpy import random
-from numpy.core.fromnumeric import transpose
-from numpy.random.mtrand import rand, random_integers
-import pandas as pd
-from datetime import date, datetime
-import numpy as np
-from pandas.core import base
 from random import randrange
 import yaml
 
