@@ -12,6 +12,9 @@ jobs:
       with:
         python-version: '3.8.x'
 
+    - name: Setup Graphviz
+      uses: ts-graphviz/setup-graphviz@v1
+
     - name: Cache poetry
       uses: actions/cache@v2
       with:
