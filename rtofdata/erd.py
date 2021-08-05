@@ -12,7 +12,6 @@ def create_erd(spec: Specification):
         loader=FileSystemLoader(assets_dir),
         autoescape=select_autoescape()
     )
-    spec.records_by_flow
     relationships = []
     for r in spec.records:
         pk = r.primary_keys
@@ -20,7 +19,9 @@ def create_erd(spec: Specification):
             if f.foreign_keys:
                 for fk in f.foreign_keys:
                     lh_c = "0,1" if pk == [f] else "0..N"
-                    relationships.append(dict(lh=r.id, rh=fk['record'], lh_c=lh_c, rh_c=1))
+                    relationships.append(
+                        dict(lh=r.id, rh=fk['record'], lh_c=lh_c, rh_c=1)
+                    )
 
     context = dict(spec=spec, relationships=relationships)
 
