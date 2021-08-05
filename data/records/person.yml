@@ -66,17 +66,6 @@ fields:
     validation:
       required: true
 
-  referral_source:
-    name: Referral source
-    type: Categorical
-    description: Where the participant was referred to your service from. Select one
-      of the given options (if unknown please select 'Other'). To be collected at
-      enrolment.
-    comments: Categories TBC after engagement with the selected providers
-    validation:
-      required: true
-      dimension: referral_source
-
   date_started_service:
     name: Date started with service
     type: Date
