@@ -40,4 +40,5 @@ jobs:
         poetry run bin/upload.py output/specification-records.xlsx "$RTOF_UPLOAD_URL"
         poetry run bin/upload.py output/specification-dimensions.xlsx "$RTOF_UPLOAD_URL"
         poetry run bin/upload.py output/record-relationships.png "$RTOF_UPLOAD_URL"
+      if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
 
