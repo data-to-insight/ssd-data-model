@@ -169,10 +169,10 @@ def parse_records(categories):
             try:
                 field = Field(id=field_id, **values)
                 field_list.append(field)
-                if field.type == "Categorical":
+                if "dimension" in field.validation:
                     field.dimensions = categories[field.validation['dimension']]
 
-            except TypeError:
+            except (TypeError, KeyError):
                 record_errors.append(dict(
                     msg="Exception occurred when creating field from",
                     record=record_id,

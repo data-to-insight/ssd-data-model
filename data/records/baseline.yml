@@ -72,6 +72,7 @@ fields:
     description: Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.
     validation:
       required: true
+      dimension: current_dependents_uk
 
   date_arrived_in_uk:
     name: Date arrived in UK
@@ -134,8 +135,7 @@ fields:
     description: This should only be submitted if the response to the field "highest qualification level achieved"
       was "unknown"
     comments:
-    validation:
-      dimension: age_finished_study
+    validation: {}
 
   employed_in_home_country:
     name: Employed in home country
