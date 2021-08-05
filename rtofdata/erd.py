@@ -30,8 +30,8 @@ def create_erd(spec: Specification):
                         print(f"{r.id:25} {lh}--1   {fk['record']} {{label:\"{fk['field']}\"}}", file=file)
 
     render_er(output_file, str(output_dir / "record-relationships.dot"))
-    render_er(output_file, str(output_dir / "record-relationships.png"))
+    render_er(output_file, str(output_dir / "record-relationships-dot.png"))
 
     G = pgv.AGraph(str(output_dir / "record-relationships.dot"))
-    G.draw(str(output_dir / "record-relationships2.png"), prog="circo")
+    G.draw(str(output_dir / "record-relationships.png"), prog="circo")
 
