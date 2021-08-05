@@ -11,8 +11,8 @@ fields:
     comments: Minimum data collection required to understand enrolment
     primary_key: true
     foreign_keys:
-      record: person
-      field: unique_id
+      - record: person
+        field: unique_id
     validation:
       required: true
 
@@ -39,7 +39,8 @@ fields:
   transgender:
     name: Transgender
     type: Categorical
-    description: 'Do you identify as transgender?' A follow-up question from the person data form, three options including - 'identify as transgender', 
+    description: |
+      'Do you identify as transgender?' A follow-up question from the person data form, three options including - 'identify as transgender',
       'do not identify as transgender' and 'prefer not to say'. To be collected once and submitted within 3 months of enrolment.
     comments: 
     validation: 
