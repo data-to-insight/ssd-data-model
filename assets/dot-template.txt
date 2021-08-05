@@ -1,0 +1,19 @@
+graph {
+    graph [rankdir=LR];
+    node [label="\N",
+        shape=plaintext
+    ];
+    edge [color=gray50,
+        minlen=2,
+        style=dashed
+    ];
+
+{% for record in spec.records %}
+"{{record.id}}" [label=<<FONT FACE="Helvetica"><TABLE BORDER="0" CELLBORDER="1" CELLPADDING="4" CELLSPACING="0"><TR><TD COLSPAN="3"><B><FONT POINT-SIZE="16">{{record.id}}</FONT></B></TD></TR>{% for f in record.fields %}<TR><TD>{% if f.primary_key %}PK{% endif %}</TD><TD ALIGN="LEFT">{{ f.id }}</TD><TD ALIGN="CENTER">{{f.type}}</TD></TR>{% endfor %}</TABLE></FONT>>];
+{% endfor %}
+
+{% for rel in relationships %}
+"{{rel.lh}}" -- "{{rel.rh}}" [taillabel=<<FONT>{{rel.lh_c}}</FONT>>, headlabel=<<FONT>{{rel.rh_c}}</FONT>>];
+{% endfor %}
+
+}
