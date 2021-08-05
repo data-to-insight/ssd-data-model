@@ -9,7 +9,7 @@ fields:
     name: Unique person identifier 
     type: string
     description: Person identifier provided in the person form. This can be a NINO or a unique provider ID. This must be unique for each individual supported on RTOF. 
-    comments: Minimum data collection required to understand enrolment
+    comments: 
     primary_key: true
     foreign_keys:
     - record: person
@@ -46,7 +46,7 @@ fields:
     type: Categorical
     description: Selection of a single category describing the type of employment
       participant is entering for the employment outcome achievement. To be collected
-      once at entry to employment outcome submission.
+      once at entry to employment outcome submission. 
     comments: 
     validation:
       required: true
@@ -57,7 +57,7 @@ fields:
     type: Free Text (short)
     description: State participants employment type for the achievement of entry to
       employment outcome. To be collected once at entry to employment outcome submission.
-    comments: To confirm word limit (and possibly add a suggestion e.g. Teacher)
+    comments:
     validation:
       required: true
       character_limit: 255
@@ -65,9 +65,9 @@ fields:
   employment_entry_sector:
     name: Sector
     type: Free Text (short)
-    description: State the participants employment sector for the achievement  of entry
+    description: State the participants employment sector for the achievement of entry
       to employment outcome. To be collected once at entry to employment outcome submission.
-    comments: To confirm word limit (and possibly add a suggestion e.g. Education)
+    comments:
     validation:
       required: true
       character_limit: 255
