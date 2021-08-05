@@ -1,5 +1,5 @@
 graph {
-    graph [rankdir=LR];
+    graph [rankdir=RL];
     node [label="\N",
         shape=plaintext
     ];
@@ -8,12 +8,26 @@ graph {
         style=dashed
     ];
 
-{% for record in spec.records %}
-"{{record.id}}" [label=<<FONT FACE="Helvetica"><TABLE BORDER="0" CELLBORDER="1" CELLPADDING="4" CELLSPACING="0"><TR><TD COLSPAN="3"><B><FONT POINT-SIZE="16">{{record.id}}</FONT></B></TD></TR>{% for f in record.fields %}<TR><TD>{% if f.primary_key %}PK{% endif %}</TD><TD ALIGN="LEFT">{{ f.id }}</TD><TD ALIGN="CENTER">{{f.type}}</TD></TR>{% endfor %}</TABLE></FONT>>];
+{% for flow_record in spec.records_by_flow %}
+{% set record = flow_record.record %}
+"{{record.id}}" [label=<<FONT FACE="Helvetica">
+    <TABLE BORDER="0" CELLBORDER="1" CELLPADDING="4" CELLSPACING="0">
+        <TR>
+            <TD COLSPAN="3"><B><FONT POINT-SIZE="16">{{record.id}}</FONT></B></TD>
+        </TR>
+        {% for f in record.fields %}
+        <TR>
+            <TD>{% if f.primary_key %}PK{% endif %}</TD>
+            <TD ALIGN="LEFT">{{ f.id }}</TD>
+            <TD ALIGN="CENTER">{{f.type}}</TD>
+        </TR>
+        {%- endfor %}
+    </TABLE>
+</FONT>>];
 {% endfor %}
 
 {% for rel in relationships %}
-"{{rel.lh}}" -- "{{rel.rh}}" [taillabel=<<FONT>{{rel.lh_c}}</FONT>>, headlabel=<<FONT>{{rel.rh_c}}</FONT>>];
+"{{rel.lh}}" -- "{{rel.rh}}" [taillabel="{{rel.lh_c}}", headlabel="{{rel.rh_c}}"];
 {% endfor %}
 
 }

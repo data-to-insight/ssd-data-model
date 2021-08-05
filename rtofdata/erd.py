@@ -12,7 +12,7 @@ def create_erd(spec: Specification):
         loader=FileSystemLoader(assets_dir),
         autoescape=select_autoescape()
     )
-
+    spec.records_by_flow
     relationships = []
     for r in spec.records:
         pk = r.primary_keys
@@ -25,7 +25,7 @@ def create_erd(spec: Specification):
     context = dict(spec=spec, relationships=relationships)
 
     template = env.get_template("dot-template.txt")
-    output_filename = output_dir / "test.dot"
+    output_filename = output_dir / "record-relationships.dot"
     with open(output_filename, "wt") as file:
         file.write(template.render(context))
 
