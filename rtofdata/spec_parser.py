@@ -89,10 +89,18 @@ class RecordInFlow:
 
 
 @dataclass
+class ValidationRule:
+    id: str
+    description: str
+    args: List
+
+
+@dataclass
 class Specification:
     records: List[Record]
     dimensions: List[DimensionList]
     flows: List[Workflow]
+    validators: List[ValidationRule]
 
     def record_by_id(self, id):
         return [r for r in self.records if r.id == id][0]
@@ -103,6 +111,9 @@ class Specification:
     def field_by_id(self, record_id, field_id):
         record = self.record_by_id(record_id)
         return record.field_by_id(field_id)
+
+    def validator_by_id(self, id):
+        return [r for r in self.validators if r.id == id][0]
 
     @property
     def records_by_flow(self):
@@ -142,6 +153,7 @@ def parse_dimensions():
 
 def parse_records(categories):
     categories = {c.id: c for c in categories}
+
     record_file_list = (data_dir / "records").glob("*.yml")
 
     record_list = []
@@ -185,7 +197,7 @@ def parse_records(categories):
 
 
 def parse_flow(records: List[Record]):
-    records = {r.id : r for r in records}
+    records = {r.id: r for r in records}
     with open(data_dir / "workflow.yml", 'rt') as file:
         data = yaml.safe_load(file)
 
@@ -199,9 +211,20 @@ def parse_flow(records: List[Record]):
     return flows
 
 
+def parse_validators():
+    with open(data_dir / "validators.yml", 'rt') as file:
+        data = yaml.safe_load(file)
+
+    validators = []
+    for key, value in data.items():
+        validators.append(ValidationRule(id=key, **value))
+    return validators
+
+
 def parse_specification():
+    validators = parse_validators()
     categories = parse_dimensions()
     records = parse_records(categories)
     flows = parse_flow(records)
 
-    return Specification(records=records, dimensions=categories, flows=flows)
+    return Specification(records=records, dimensions=categories, flows=flows, validators=validators)
