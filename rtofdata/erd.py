@@ -19,7 +19,7 @@ def create_erd(spec: Specification):
         for f in r.fields:
             if f.foreign_keys:
                 for fk in f.foreign_keys:
-                    lh_c = "1" if pk == [f] else "0..N"
+                    lh_c = "0,1" if pk == [f] else "0..N"
                     relationships.append(dict(lh=r.id, rh=fk['record'], lh_c=lh_c, rh_c=1))
 
     context = dict(spec=spec, relationships=relationships)
