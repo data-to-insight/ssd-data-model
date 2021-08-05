@@ -1,6 +1,6 @@
 description: 'This form outlines the required baseline data for all service users,
   the data is to be collected across interactions with participants and submitted
-  either when submitting form: integration_plan or within 3 months after enrolment.'
+  either when submitting: integration_plan form or within 3 months of enrolment.'
 
 fields:
 
@@ -11,7 +11,7 @@ fields:
     comments: Minimum data collection required to understand enrolment
     primary_key: true
     foreign_keys:
-    - record: person
+      record: person
       field: unique_id
     validation:
       required: true
@@ -22,16 +22,25 @@ fields:
     description: Nationality of participant. A list of nationalities are provided.
       Must select one of the given categories, please see nationality descriptions
       to link with the relevant code. To be collected once and submitted within 3 months of enrolment.
-    comments: Using the same categories as the HO. 
+    comments: Using the same categories as HO data collection. 
     validation:
       required: true
       dimension: nationality
   
+  referral_source: 
+    name: Referral source
+    type: Categorical 
+    description: The referral source that led the participant to RTOF. 
+    comments: the categories for this are still to be decided and will be a product of engagement with frontline providers during mobilistion. 
+    validation:
+      required: true
+      dimension: referral_source
+    
   transgender:
     name: Transgender
     type: Categorical
-    description: Do you identify as transgender? A question which follows on from the question in the person data form, with 'identify as transgender', 
-      'do not identify as transgender' or 'prefer not to say'. To be collected once and submitted within 3 months of enrolment.
+    description: 'Do you identify as transgender?' A follow-up question from the person data form, three options including - 'identify as transgender', 
+      'do not identify as transgender' and 'prefer not to say'. To be collected once and submitted within 3 months of enrolment.
     comments: 
     validation: 
       required: true 
@@ -42,8 +51,7 @@ fields:
     type: Categorical
     description: Selection of either single or couple. Couple includes living with
       more than one individual. To be collected once and submitted within 3 months of enrolment.
-    comments: Selection of either single or couple - do we need provision for alternative
-      couples (+2 living together)
+    comments: Selection of either single or couple 
     validation:
       required: true
       dimension: living_status
@@ -52,8 +60,8 @@ fields:
     name: Current family composition
     type: Categorical
     description: Selection of one of four given categories. To be collected once and submitted within 3 months of enrolment.
-    comments: This is seeks to understand whether dependencies are currently in the
-      UK or living in same HH. 
+    comments: This looks to answer the question 'are dependencies currently living in the
+      UK and / or living in the same HH?' 
     validation:
       required: true
       dimension: current_family_composition
@@ -61,7 +69,7 @@ fields:
   current_dependents_uk:
     name: Current dependents in UK
     type: List
-    description: Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.
+    description: Selection of each option that describes someone (1 or more) currently dependant on the participant. To be collected once and submitted within 3 months of enrolment.
     validation:
       required: true
 
@@ -70,8 +78,7 @@ fields:
     type: Date
     description: Date participant entered the UK, relating to their latest and current
       arrival. To be collected once and submitted within 3 months of enrolment.
-    comments: To confirm alternative collection route if an integration plan is not
-      submitted [eg. Provider caseload review]
+    comments: 
     validation:
       required: true
       date_after: date_of_birth
@@ -86,7 +93,7 @@ fields:
     type: Date
     description: Date participant was granted asylum status, relating to their latest
       and current asylum status. To be collected once and submitted within 3 months of enrolment.
-    comments: Can we use HO data for this - to check with HO.
+    comments: Can we use HO data for this? To check with HO
     validation:
       required: true
       date_after: date_arrived_in_uk
@@ -100,7 +107,7 @@ fields:
     name: Language level on entry
     type: Categorical
     description: The language level of participant when entering RTOF. Selection of
-      one of the specified category, further information on these levels can be found
+      one of the specified categories, further information on these levels can be found
       here [https://esol.britishcouncil.org/sites/default/files/attachments/informational-page/ESOL%20level%20descriptors.pdf].
       To be collected once and submitted within 3 months of enrolment.
     comments: https://esol.britishcouncil.org/sites/default/files/attachments/informational-page/ESOL%20level%20descriptors.pdf
@@ -112,13 +119,22 @@ fields:
     name: Highest qualification  level achieved
     type: Categorical
     description: The highest level of qualification of participant when entering RTOF.
-      Selection of one of the specified category, these refer to [https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels#:~:text=Level%205%20qualifications%20are%3A,higher%20national%20diploma%20(%20HND%20)]. 
+      Selection of one of the specified categories, these refer to [https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels#:~:text=Level%205%20qualifications%20are%3A,higher%20national%20diploma%20(%20HND%20)]. 
       To be collected once and submitted within 3 months of enrolment.
-    comments: To provide a relevant link to equivalent qualification  levels around
+    comments: tbc - provide a relevant link to equivalent qualification  levels around
       the world (https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels)
     validation:
       required: true
       dimension: highest_qualification_achieved
+
+  age_finished_study:
+    name: Age when finished study 
+    type: Integer
+    description: To be answered if the category "unknown" was selected for the field 'highest_qualificaiton_acheived'. 
+    comments: This data field is not required if the provider knows the participants 'highest level of qualification achieved'
+    validation:
+      dimension: age_finished_study 
+
 
   employed_in_home_country:
     name: Employed in home country
@@ -139,7 +155,7 @@ fields:
       [e.g. teacher] of their last employment. Max word count 10 words. To be collected once and submitted within 3 months of enrolment.
     comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
     validation:
-      character_limit: 255
+      extras: character_limit
 
   occupation_sector:
     name: Sector
@@ -148,15 +164,15 @@ fields:
       [eg. education] of their last employment. Max word count 10 words. To be collected once and submitted within 3 months of enrolment.
     comments: To confirm word limit (and possibly add a suggestion ie. Education)
     validation:
-      character_limit: 255
+      extras: character_limit
 
   occupation_goal:
     name: Occupation goal at baseline
     type: Free Text (short)
-    description: All participants to be asked what their employment goals. This can be sector, job role or employment-type.
+    description: All participants to be asked what their employment goals are. This can be sector, job role or employment-type.
      To be collected once and submitted within 3 months of enrolment.
     validation:
-      character_limit: 255
+      extras: character_limit
 
   economic_status:
     name: Main economic status at baseline
