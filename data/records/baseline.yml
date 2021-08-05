@@ -139,7 +139,7 @@ fields:
       [e.g. teacher] of their last employment. Max word count 10 words. To be collected once and submitted within 3 months of enrolment.
     comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
     validation:
-      extras: character_limit
+      character_limit: 255
 
   occupation_sector:
     name: Sector
@@ -148,7 +148,7 @@ fields:
       [eg. education] of their last employment. Max word count 10 words. To be collected once and submitted within 3 months of enrolment.
     comments: To confirm word limit (and possibly add a suggestion ie. Education)
     validation:
-      extras: character_limit
+      character_limit: 255
 
   occupation_goal:
     name: Occupation goal at baseline
@@ -156,7 +156,7 @@ fields:
     description: All participants to be asked what their employment goals. This can be sector, job role or employment-type.
      To be collected once and submitted within 3 months of enrolment.
     validation:
-      extras: character_limit
+      character_limit: 255
 
   economic_status:
     name: Main economic status at baseline

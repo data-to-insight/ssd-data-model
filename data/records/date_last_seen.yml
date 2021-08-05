@@ -14,7 +14,7 @@ fields:
       field: unique_id
     validation:
       required: true
-      extras: unique
+      unique: true
 
   date_last_seen:
     name: Date last seen

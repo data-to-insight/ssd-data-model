@@ -15,7 +15,7 @@ fields:
       field: unique_id
     validation:
       required: true
-      extras: unique
+      unique: true
 
   housing_sustainment_date:
     name: Date housing sustainment achieved

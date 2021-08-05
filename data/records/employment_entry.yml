@@ -16,7 +16,6 @@ fields:
       field: unique_id
     validation:
       required: true
-      extras: unique
 
   employment_entry_outcome_type:
     name: Type of employment entry outcome
@@ -61,7 +60,7 @@ fields:
     comments: To confirm word limit (and possibly add a suggestion e.g. Teacher)
     validation:
       required: true
-      extras: character_limit
+      character_limit: 255
 
   employment_entry_sector:
     name: Sector
@@ -71,5 +70,5 @@ fields:
     comments: To confirm word limit (and possibly add a suggestion e.g. Education)
     validation:
       required: true
-      extras: character_limit
+      character_limit: 255
 

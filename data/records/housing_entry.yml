@@ -15,7 +15,7 @@ fields:
       field: unique_id
     validation:
       required: true
-      extras: unique
+      unique: true
 
   housing_entry_date:
     name: Date of housing entry

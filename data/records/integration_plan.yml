@@ -16,7 +16,7 @@ fields:
       field: unique_id
     validation:
       required: true
-      extras: unique
+      unique: true
 
   integration_outcome_achieved_date:
     name: Date integration plan outcome acheived

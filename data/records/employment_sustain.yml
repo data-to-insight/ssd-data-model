@@ -15,7 +15,7 @@ fields:
       field: unique_id
     validation:
       required: true
-      extras: unique
+      unique: true
 
   employment_sustainment_date:
     name: Date employment sustainment outcome achieved
