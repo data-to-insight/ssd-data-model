@@ -1,6 +1,5 @@
 from dataclasses import asdict
 from datetime import datetime
-from typing import List
 
 from docx.shared import Cm
 from docxtpl import DocxTemplate, InlineImage
@@ -8,7 +7,7 @@ from docxtpl import DocxTemplate, InlineImage
 import git
 
 from rtofdata.config import assets_dir, output_dir
-from rtofdata.spec_parser import Record, Specification
+from rtofdata.spec_parser import Specification
 
 
 def get_git_version():
@@ -33,6 +32,7 @@ def create_context(spec: Specification):
     context = {
         "git_version": get_git_version(),
         "generation_time": f"{datetime.now():%d %B %Y}",
+        "spec": spec,
         "record_list": spec.records,
         "records_by_flow": spec.records_by_flow,
     }
