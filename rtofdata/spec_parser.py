@@ -19,6 +19,10 @@ class DimensionList:
     id: str
     dimensions: List[Dimension]
 
+    @property
+    def values(self):
+        return [d.value for d in self.dimensions]
+
 
 @dataclass
 class Field:
@@ -43,6 +47,9 @@ class Record:
     @property
     def primary_keys(self) -> List[Field]:
         return [f for f in self.fields or [] if f.primary_key]
+
+    def field_by_id(self, id):
+        return [r for r in self.fields if r.id == id][0]
 
 
 @dataclass
@@ -86,6 +93,16 @@ class Specification:
     records: List[Record]
     dimensions: List[DimensionList]
     flows: List[Workflow]
+
+    def record_by_id(self, id):
+        return [r for r in self.records if r.id == id][0]
+
+    def dimension_by_id(self, id):
+        return [r for r in self.dimensions if r.id == id][0]
+
+    def field_by_id(self, record_id, field_id):
+        record = self.record_by_id(record_id)
+        return record.field_by_id(field_id)
 
     @property
     def records_by_flow(self):
