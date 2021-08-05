@@ -7,7 +7,7 @@ fields:
     name: Unique person identifier 
     type: string
     description: Person identifier provided in the person form. This can be a NINO or a unique provider ID. This must be unique for each individual supported on RTOF. 
-    comments: Minimum data collection required to understand enrolment
+    comments: 
     primary_key: true
     validation:
       required: true
@@ -27,8 +27,9 @@ fields:
     name: Temp NI number
     type: NINO
     description: This field is only relevant if a participant has a temporary NINO. In these cases, you should submit the temporary NINO, in this persons form, 
-      leaving the ni_number field blank, until the participant receives a permanent NINO. Once a permanent NINO has been received this form should be updated.
-    comments: tbc with Kaj 
+      leaving the ni_number field blank, until the participant receives a permanent NINO. Once a permanent NINO has been received this form should be updated. All upper case and no spaces [regular expressions
+      for NiNos]
+    comments: 
     validation:
       unique: true
 
@@ -48,8 +49,8 @@ fields:
   gender:
     name: Gender
     type: Categorical
-    description: Gender of participant. Must be one of the five categories provided
-      (if unknown please select 'other'). To be collected once at enrolment. 
+    description: Gender of participant. Must be one of the five categories provided.
+      To be collected once at enrolment. 
       Note there is a follow-up gender question as part of the baseline data collection. 
     comments:
     validation:
@@ -61,8 +62,7 @@ fields:
     type: String
     description: Local authority where participant was located once asylum status
       was granted. To be collected once at enrolment into the program.
-    comments: Confirm whether this should be string or list of LA (is LA specific
-      enough or do we want to include a postcode?)
+    comments: Confirm whether this should be string or list of LA's
     validation:
       required: true
 
@@ -72,7 +72,7 @@ fields:
     description: Where the participant was referred to your service from. Select one
       of the given options (if unknown please select 'Other'). To be collected at
       enrolment.
-    comments: TBC with providers once selected
+    comments: Categories TBC after engagement with the selected providers
     validation:
       required: true
       dimension: referral_source
@@ -82,7 +82,7 @@ fields:
     type: Date
     description: Date of participant enrolment onto the program. Month and Year of
       enrolment required. To be collected once at enrolment.
-    comments: To define first interaction - at enrolment meeting with service providers
+    comments: 
     validation:
       required: true
       date_after: date_asylum_status_granted
