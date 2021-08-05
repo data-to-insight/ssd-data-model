@@ -22,9 +22,6 @@ def create_person_data(x):
         person_data[i]['date_started_service'] = fake.date_this_month(before_today=False, after_today=True)
     return person_data
 
-person_fake = create_person_data(10)
-person_df = pd.DataFrame.from_dict(person_fake) 
-print(transpose(person_df))
 
 def create_baseline_data(x):
     baseline_data ={}
@@ -77,9 +74,6 @@ def create_baseline_data(x):
         baseline_data[i]['housing_baseline_accommodation'] = np.random.choice(housing_baseline_accommodation)
     return baseline_data
 
-baseline_fake = create_baseline_data(10)
-baseline_df = pd.DataFrame.from_dict(baseline_fake)
-print(transpose(baseline_df))
 
 def create_date_last_seen_data(x):
     date_last_seen_data = {}
@@ -89,9 +83,6 @@ def create_date_last_seen_data(x):
         date_last_seen_data[i]['date_last_seen'] = fake.date_between()
     return date_last_seen_data
 
-date_last_seen_fake = create_date_last_seen_data(20)
-date_last_seen_df = pd.DataFrame.from_dict(date_last_seen_fake)
-print(transpose(date_last_seen_df))
 
 def create_employment_entry_data(x):
     employment_entry__data = {}
@@ -109,9 +100,6 @@ def create_employment_entry_data(x):
         employment_entry__data[i]['employment_entry_sector'] = fake.words(2)
     return employment_entry__data
 
-employment_entry_fake = create_employment_entry_data(10)
-employment_entry_df = pd.DataFrame.from_dict(employment_entry_fake)
-print(transpose(employment_entry_df))
 
 def create_employment_intermediate_data(x):
     employment_intermediate_data = {}
@@ -128,10 +116,6 @@ def create_employment_intermediate_data(x):
         employment_intermediate_data[i]['intermediate_employment_outcome_type'] = random.choice(intermediate_employment_outcome_type, 3)
     return employment_intermediate_data
 
-employment_intermediate_fake = create_employment_intermediate_data(10)
-employment_intermedate_df = pd.DataFrame.from_dict(employment_intermediate_fake)
-print(transpose(employment_intermedate_df))
-
 def create_employment_sustain_data(x):
     employment_sustain_data = {}
     with open("data/records/employment_sustain.yml") as f:
@@ -143,9 +127,6 @@ def create_employment_sustain_data(x):
         employment_sustain_data[i]['unique_id'] = fake.bothify('?? ######')
         employment_sustain_data[i]['employment_sustain_date'] = fake.date_between(start_date= employment_sustain_date_start, end_date = employment_sustain_date_end)
     return employment_sustain_data
-employment_sustain_fake = create_employment_sustain_data(10)
-employment_sustain_df = pd.DataFrame.from_dict(employment_sustain_fake)
-print(transpose(employment_sustain_df))
 
 def create_housing_entry_data(x):
     housing_entry_data = {}
@@ -162,11 +143,6 @@ def create_housing_entry_data(x):
         housing_entry_data[i]['housing_entry_accomodation'] = np.random.choice(housing_entry_type)
     return housing_entry_data
 
-housing_entry_fake = create_housing_entry_data(10)
-housing_entry_df = pd.DataFrame.from_dict(housing_entry_fake)
-print(transpose(housing_entry_df))
-
-
 def create_housing_sustain_data(x):
     housing_sustain_data = {}
     with open("data/records/housing_sustain.yml") as f:
@@ -178,10 +154,6 @@ def create_housing_sustain_data(x):
         housing_sustain_data[i]['unique_id'] = fake.bothify('?? ######')
         housing_sustain_data[i]['housing_sustainment_date'] = fake.date_between(start_date = housing_sustain_start, end_date= housing_sustain_end)
     return housing_sustain_data
-
-housing_sustain_fake = create_housing_sustain_data(10)
-housing_sustain_df = pd.DataFrame.from_dict(housing_sustain_fake)
-print(transpose(housing_sustain_df))
 
 def create_integration_data(x):
     integration_data = {}
@@ -208,8 +180,21 @@ def create_integration_data(x):
         integration_data[i]['integration_social'] = np.random.choice(integration_social)
     return integration_data
 
-integration_data_fake = create_integration_data(10)
-integration_data_df = pd.DataFrame.from_dict(integration_data_fake)
-print(transpose(integration_data_df))
+
+def create_all_data():
+    """
+    By removing the "top-level" code, we can run individual generators without running all the code inbetween
+    """
+    person_fake = create_person_data(10)
+    baseline_fake = create_baseline_data(10)
+    date_last_seen_fake = create_date_last_seen_data(20)
+    employment_entry_fake = create_employment_entry_data(10)
+    employment_intermediate_fake = create_employment_intermediate_data(10)
+    employment_sustain_fake = create_employment_sustain_data(10)
+    housing_entry_fake = create_housing_entry_data(10)
+    housing_sustain_fake = create_housing_sustain_data(10)
+    integration_data_fake = create_integration_data(10)
 
 
+if __name__ == "__main__":
+    create_all_data()
