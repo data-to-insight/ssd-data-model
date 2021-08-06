@@ -31,4 +31,4 @@ def create_erd(spec: Specification):
         file.write(template.render(context))
 
     path = graphviz.render("circo", "png", output_filename)
-    Path(path).rename(output_dir / "record-relationships.png")
+    Path(path).replace(output_dir / "record-relationships.png")
