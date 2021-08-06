@@ -39,13 +39,15 @@ def write_dimensions(spec: Specification):
     for d in spec.dimensions:
         with open(dir / f"{d.id}.md", "wt") as file:
             print("---", file=file)
-            yaml.dump(dict(dimension=asdict(d), layout="record"), file)
+            yaml.dump(dict(dimensions=asdict(d), layout="dimension"), file)
             print("---", file=file)
 
+    dims = [d for d in spec.dimensions]
+    dims.sort(key=lambda d: d.id)
     with open(dir / "index.md", "wt") as file:
         print("""---
 layout: default
 ---        
         """, file=file)
-        for d in spec.dimensions:
+        for d in dims:
             print(f" * [{d.id}]({d.id}.html)", file=file)
