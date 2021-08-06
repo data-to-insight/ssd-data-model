@@ -8,3 +8,6 @@ layout: default
 [Records](./records)
 
 [Dimensions](./dimensions)
+
+You can also download the [Word specification]({% link /assets/spec/specification.docx %}) and 
+[list of categories]({% link /assets/spec/specification-dimensions.xlsx %}) in Excel.

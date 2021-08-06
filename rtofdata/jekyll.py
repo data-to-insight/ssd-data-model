@@ -44,6 +44,14 @@ layout: default
         for r in records:
             print(f" * [{r.id}]({r.id}.html)", file=file)
 
+        print("""
+
+![Entity Relationship Diagram][erd]
+
+
+[erd]: {% link /assets/spec/record-relationships.png %}         
+        """, file=file)
+
 
 def write_dimensions(spec: Specification):
     dir = jekyll_dir / "collections/_dimensions/"
