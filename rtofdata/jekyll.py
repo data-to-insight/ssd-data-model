@@ -1,14 +1,27 @@
+import shutil
 from dataclasses import asdict
 
 import yaml
 
-from rtofdata.config import jekyll_dir
+from rtofdata.config import jekyll_dir, output_dir
 from rtofdata.spec_parser import Specification
 
 
 def write_jekyll_specification(spec: Specification):
     write_records(spec)
     write_dimensions(spec)
+    copy_assets()
+
+
+def copy_assets():
+    assets_dir = jekyll_dir / "assets/spec/"
+    try:
+        shutil.rmtree(assets_dir)
+    except FileNotFoundError:
+        pass
+
+    shutil.copytree(output_dir, assets_dir)
+    (assets_dir / ".gitignore").unlink(missing_ok=True)
 
 
 def write_records(spec: Specification):
