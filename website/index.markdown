@@ -6,3 +6,4 @@ layout: default
 ---
 
 [Records](./records)
+[Dimensions](./dimensions)

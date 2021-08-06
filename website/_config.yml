@@ -30,6 +30,8 @@ collections_dir: collections
 collections:
   records:
     output: true
+  dimensions:
+    output: true
 
 
 # Build settings
