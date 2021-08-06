@@ -49,7 +49,7 @@ layout: default
 ![Entity Relationship Diagram][erd]
 
 
-[erd]: {{ /assets/spec/record-relationships.png | relative_url }}         
+[erd]: {{ '/assets/spec/record-relationships.png' | relative_url }}         
         """, file=file)
 
 
