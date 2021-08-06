@@ -40,7 +40,16 @@ layout: default
 {% if field.validation.required %}
   <tr><th>Required</th><td>True</td></tr>
 {% endif %}
-<tr><th>Validators</th><td>{% for v in field.validation %} {{v[0]}} {% endfor %}</td></tr>
+<tr>
+  <th>Validators</th>
+  <td>
+    <ul>
+      {% for v in field.validation %}
+        <li>{{v[0]}}</li>
+      {% endfor %}
+    </ul>
+  </td>
+</tr>
 
 </table>
 
