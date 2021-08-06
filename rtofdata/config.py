@@ -5,4 +5,6 @@ assets_dir = root / 'assets'
 data_dir = root / 'data'
 output_dir = root / 'output'
 
+jekyll_dir = root / "website"
+
 output_filename_base = "specification"

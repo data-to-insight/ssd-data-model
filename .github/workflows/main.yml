@@ -42,3 +42,13 @@ jobs:
         poetry run bin/upload.py output/record-relationships.png "$RTOF_UPLOAD_URL"
       if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
 
+    - name: Deploy website
+      uses: cpina/github-action-push-to-another-repository@main
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_WEB_REPO }}
+      with:
+        source-directory: 'website'
+        destination-github-username: 'SocialFinanceDigitalLabs'
+        destination-repository-name: 'RTOF-specification'
+        user-email: info@socialfinance.org.uk
+        target-branch: main
