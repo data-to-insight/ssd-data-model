@@ -55,6 +55,7 @@ class Record:
 @dataclass
 class Workflow:
     name: str
+    color: str
     steps: List["WorkflowStep"]
 
     @property

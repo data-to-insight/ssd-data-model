@@ -1,4 +1,5 @@
 - name: Enrolment
+  color: '#b3e2cd'
   steps:
   - name: Referral
   - name: Eligibility and onboarding
@@ -7,6 +8,7 @@
       - id: person
     flows:
       - name: Housing
+        color: '#fdcdac'
         steps:
           - name: Housing Support
           - name: Entry to housing
@@ -17,6 +19,7 @@
               - id: housing_sustain
 
       - name: Integration
+        color: '#cbd5e8'
         steps:
           - name: Creating of integration plan
             records:
@@ -31,6 +34,7 @@
               - id: integration_plan
 
       - name: Employment
+        color: '#f4cae4'
         steps:
           - name: Employment Support
           - name: Intermediate employment outcome
@@ -44,6 +48,7 @@
               - id: employment_sustain
 
 - name: Annual review
+  color: '#e6f5c9'
   steps:
     - name: Annual provider caseload review
       records:
