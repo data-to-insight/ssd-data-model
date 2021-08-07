@@ -18,12 +18,21 @@ fields:
       required: true
       unique: true
 
+  integration_outcome_type:
+    name: Integration outcome type
+    type: Categorical
+    description: Selection of which integration outcome has been achieved. To be collected
+      at each outcome submission.
+    primary_key: true
+    validation:
+      required: true
+      dimension: integration_outcome_type
+
   integration_outcome_achieved_date:
     name: Date integration plan outcome acheived
     type: Date
     description: Date of integration plan outcome achievement. To be collected at each
       outcome submission.
-    primary_key: true
     validation:
       required: true
       date_after: date_started_service
@@ -32,15 +41,6 @@ fields:
       args:
         start_date: '+2m'
         end_date: '+2y'
-
-  integration_outcome_type:
-    name: Integration outcome type
-    type: Categorical
-    description: Selection of which integration outcome has been achieved. To be collected
-      at each outcome submission.
-    validation:
-      required: true
-      dimension: integration_outcome_type
 
   integration_social:
     name: Social bonds / bridges / links
