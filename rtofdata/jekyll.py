@@ -1,20 +1,50 @@
 import shutil
 from dataclasses import asdict
+import xml.etree.ElementTree as ET
 
 import yaml
 
 from rtofdata.config import jekyll_dir, output_dir
 from rtofdata.spec_parser import Specification
 
+assets_dir = jekyll_dir / "assets/spec/"
+
 
 def write_jekyll_specification(spec: Specification):
     write_records(spec)
     write_dimensions(spec)
     copy_assets()
+    add_links_to_chart()
+
+
+def add_links_to_chart():
+    namespaces = {'svg': 'http://www.w3.org/2000/svg'}
+    ET.register_namespace('', 'http://www.w3.org/2000/svg')
+
+    tree = ET.parse(assets_dir / 'record-relationships.svg')
+    root = tree.getroot()
+    root.attrib['width'] = "auto"
+    root.attrib['height'] = "auto"
+
+    root_graph = root.find('svg:g', namespaces)
+    background = root_graph.find('svg:polygon', namespaces)
+    root_graph.remove(background)
+
+    sub_graphs = root_graph.findall('svg:g', namespaces)
+    for sg in sub_graphs:
+        root_graph.remove(sg)
+
+        link = ET.Element("a")
+        link.attrib['href'] = f"./{sg.attrib['id']}.html"
+        root_graph.append(link)
+        link.append(sg)
+
+    (jekyll_dir / '_includes').mkdir(parents=True, exist_ok=True)
+    with open(jekyll_dir / '_includes/record-relationships.svg', 'wb') as f:
+        tree.write(f, encoding='utf-8')
 
 
 def copy_assets():
-    assets_dir = jekyll_dir / "assets/spec/"
     try:
         shutil.rmtree(assets_dir)
     except FileNotFoundError:
@@ -46,10 +76,7 @@ layout: default
 
         print("""
 
-![Entity Relationship Diagram][erd]
-
-
-[erd]: {{ '/assets/spec/record-relationships.png' | relative_url }}         
+{% include record-relationships.svg %}
         """, file=file)
 
 

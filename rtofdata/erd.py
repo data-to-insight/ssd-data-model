@@ -32,3 +32,6 @@ def create_erd(spec: Specification):
 
     path = graphviz.render("circo", "png", output_filename)
     Path(path).replace(output_dir / "record-relationships.png")
+
+    path = graphviz.render("circo", "svg", output_filename)
+    Path(path).replace(output_dir / "record-relationships.svg")
