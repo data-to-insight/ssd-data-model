@@ -26,7 +26,7 @@ layout: default
     <td>{% if field.dimensions %}
         {% for d in site.dimensions %}
           {% if d.dimensions.id == field.dimensions.id %}
-            <a href="{{d.url}}">{{ d.dimensions.id }}</a>
+            <a href="{{site.baseurl}}/{{d.url}}">{{ d.dimensions.id }}</a>
           {% endif %}
         {% endfor %}
       {% endif %}</td>
