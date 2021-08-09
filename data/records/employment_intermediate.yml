@@ -16,6 +16,7 @@ fields:
     validation:
       required: true
       unique: true
+    status: Decided
 
   date_intermediate_employment_outcome:
     name: Date achieved intermediate outcome
@@ -31,7 +32,8 @@ fields:
       args:
         start_date: '+2m'
         end_date: '+2y'
-
+    status: Decided  
+    
   intermediate_employment_outcome_type:
     name: Type of intermediate outcome
     type: List
@@ -42,5 +44,6 @@ fields:
     validation:
       required: true
       dimension: employment_outcome_type
+    status: Decided
       
 

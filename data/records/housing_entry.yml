@@ -16,6 +16,7 @@ fields:
     validation:
       required: true
       unique: true
+    status: Decided
 
   housing_entry_date:
     name: Date of housing entry
@@ -31,6 +32,7 @@ fields:
       args: 
         start_date: '+6m'
         end_date: '+2y'
+    status: Decided
 
   housing_entry_accomodation:
     name: Accomodation type
@@ -40,4 +42,5 @@ fields:
     validation:
       required: true
       dimension: housing_entry_accomodation
+    status: Work in progress
 

@@ -15,6 +15,7 @@ fields:
     validation:
       required: true
       unique: true
+    status: Decided
 
   date_last_seen:
     name: Date last seen
@@ -31,3 +32,4 @@ fields:
       args:
         start_date:
         end_date:
+    status: Decided

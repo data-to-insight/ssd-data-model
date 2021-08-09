@@ -15,6 +15,8 @@ fields:
       field: unique_id
     validation:
       required: true
+    status: Decided 
+
 
   nationality:
     name: Nationality
@@ -26,15 +28,17 @@ fields:
     validation:
       required: true
       dimension: nationality
+    status: Decided
   
   referral_source:
     name: Referral source
     type: Categorical
     description: The referral source that led the participant to RTOF.
-    comments: the categories for this are still to be decided and will be a product of engagement with frontline providers during mobilistion.
+    comments: The categories for this are still to be decided and will be a product of engagement with frontline providers during mobilistion.
     validation:
       required: true
       dimension: referral_source
+    status: Blocked
 
   transgender:
     name: Transgender
@@ -44,7 +48,8 @@ fields:
     comments: 
     validation: 
       required: true 
-      dimension: transgender 
+      dimension: transgender
+    status: Pending consideration 
 
   living_status:
     name: Living status
@@ -55,6 +60,7 @@ fields:
     validation:
       required: true
       dimension: living_status
+    status: Pending consideration
 
   current_family_composition:
     name: Current family composition
@@ -62,17 +68,24 @@ fields:
     description: Selection of one of four given categories. To be collected once and submitted within 3 months of enrolment.
     comments: This is seeks to understand whether dependencies are currently in the
       UK or living in same HH. 
+      "JF: How does this relate to question above? It's unclear what it means and why we're asking for this info"
+      "TR: James - does this replace the old 'family composition' Q?"
     validation:
       required: true
       dimension: current_family_composition
+    status: Pending consideration
 
   current_dependents_uk:
     name: Current dependents in UK
     type: List
     description: Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.
+      "JF: "0-4" option is unhelpful for analysis. If this is an online questionaire, would be better to have this as a routed question (only if with caring reponsibilities) and change to "1-4". Or add a 'no kids' option."
+      "TR: I think 0-4 here is an age bracket rather than a number of children. 
+      Agree re routing - that's for CRM providers/implementers to organise but it's certainly what we'd reccomend to them. "
     validation:
       required: true
       dimension: current_dependents_uk
+    status: Pending consideration
 
   date_arrived_in_uk:
     name: Date arrived in UK
@@ -89,6 +102,7 @@ fields:
       args:
         start_date: '-2y'
         end_date: '-2m'
+    status: Decided
 
   date_asylum_status_granted:
     name: Date asylum status granted
@@ -104,7 +118,8 @@ fields:
       args:
         start_date: '-1y'
         end_date:  '-2m'
-    
+    status: Decided
+  
   language_level_on_entry:
     name: Language level on entry
     type: Categorical
@@ -116,6 +131,7 @@ fields:
     validation:
       required: true
       dimension: language_level_on_entry
+    status: Decided  
 
   highest_qualification_achieved:
     name: Highest qualification  level achieved
@@ -128,7 +144,8 @@ fields:
     validation:
       required: true
       dimension: highest_qualification_achieved
-
+    status: Decided  
+      
   age_finished_study:
     name: Age when finished study
     type: integer
@@ -136,6 +153,7 @@ fields:
       was "unknown"
     comments:
     validation: {}
+    status: Pending consideration
 
   employed_in_home_country:
     name: Employed in home country
@@ -148,6 +166,7 @@ fields:
     validation:
       required: true
       dimension: employed_in_home_country
+    status: Decided
 
   occupation_type:
     name: Occupation type
@@ -157,6 +176,7 @@ fields:
     comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
     validation:
       character_limit: 255
+    status: Decided
 
   occupation_sector:
     name: Sector
@@ -166,6 +186,7 @@ fields:
     comments: To confirm word limit (and possibly add a suggestion ie. Education)
     validation:
       character_limit: 255
+    status: Decided
 
   occupation_goal:
     name: Occupation goal at baseline
@@ -174,16 +195,23 @@ fields:
      To be collected once and submitted within 3 months of enrolment.
     validation:
       character_limit: 255
-
+    status: Pending consideration   
+      
   economic_status:
     name: Main economic status at baseline
     type: Categorical
     description: Selection of a single category describing the employment status of
       the participant prior to entering RTOF. To be collected once and submitted within 3 months of enrolment.
-    comments: 
+    comments: "JF: Why not capture <8 hrs/week? 
+Does this Q relate to status in home country? 
+Suggest change 'unpaid work...' to voluntary work (to include either for family or not)
+Clarify that sick/disabled relates to reason for unemployment (if this is the case)
+These comments also apply to other references to emplyment type"
     validation:
       required: true
       dimension: economic_status
+    status: Work in progress
+    
 
   housing_baseline_accommodation:
     name: Accommodation type
@@ -193,4 +221,4 @@ fields:
     validation:
       required: true
       dimension: housing_baseline_accommodation
-
+    status: Work in progress
