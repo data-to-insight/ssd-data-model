@@ -68,8 +68,7 @@ fields:
   current_dependents_uk:
     name: Current dependents in UK
     type: Categorical
-    description: "Do you currently have any dependents in the UK?" Yes / No to understand whether the participant has any depedents curently in the UK. 
-     To be collected once and submitted within 3 months of enrolment.  
+    description: Do you currently have any dependents in the UK? Yes / No to understand whether the participant has any depedents curently in the UK. To be collected once and submitted within 3 months of enrolment.  
     validation:
       required: true
       dimension: current_dependents_uk
