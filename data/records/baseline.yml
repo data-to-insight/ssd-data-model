@@ -30,6 +30,7 @@ fields:
       dimension: nationality
     status: Decided
   
+
   referral_source:
     name: Referral source
     type: Categorical
@@ -39,6 +40,8 @@ fields:
       required: true
       dimension: referral_source
     status: Blocked
+    latest_comments: Categories tbc after provider engagement
+
 
   transgender:
     name: Transgender
@@ -49,7 +52,8 @@ fields:
     validation: 
       required: true 
       dimension: transgender
-    status: Pending consideration 
+    status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
 
   living_status:
     name: Living status
@@ -61,6 +65,7 @@ fields:
       required: true
       dimension: living_status
     status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
 
   current_family_composition:
     name: Current family composition
@@ -73,6 +78,7 @@ fields:
       required: true
       dimension: current_family_composition
     status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
 
   current_dependents_uk:
     name: Current dependents in UK
@@ -85,6 +91,7 @@ fields:
       required: true
       dimension: current_dependents_uk
     status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
 
   date_arrived_in_uk:
     name: Date arrived in UK
@@ -153,6 +160,7 @@ fields:
     comments:
     validation: {}
     status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
 
   employed_in_home_country:
     name: Employed in home country
@@ -194,23 +202,20 @@ fields:
      To be collected once and submitted within 3 months of enrolment.
     validation:
       character_limit: 255
-    status: Pending consideration   
+    status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
       
   economic_status:
     name: Main economic status at baseline
     type: Categorical
     description: Selection of a single category describing the employment status of
       the participant prior to entering RTOF. To be collected once and submitted within 3 months of enrolment.
-    comments: "JF: Why not capture <8 hrs/week? 
-Does this Q relate to status in home country? 
-Suggest change 'unpaid work...' to voluntary work (to include either for family or not)
-Clarify that sick/disabled relates to reason for unemployment (if this is the case)
-These comments also apply to other references to emplyment type"
+    comments: "JF: Why not capture <8 hrs/week? Does this Q relate to status in home country? Suggest change 'unpaid work...' to voluntary work (to include either for family or not) Clarify that sick/disabled relates to reason for unemployment (if this is the case) These comments also apply to other references to emplyment type"
     validation:
       required: true
       dimension: economic_status
     status: Work in progress
-    
+    latest_comments: "JF: Why not capture <8 hrs/week? Does this Q relate to status in home country? Suggest change 'unpaid work...' to voluntary work (to include either for family or not) Clarify that sick/disabled relates to reason for unemployment (if this is the case) These comments also apply to other references to emplyment type"
 
   housing_baseline_accommodation:
     name: Accommodation type
@@ -221,3 +226,4 @@ These comments also apply to other references to emplyment type"
       required: true
       dimension: housing_baseline_accommodation
     status: Work in progress
+    latest_comments: tbc by Ecorys re. Value for Money assessment

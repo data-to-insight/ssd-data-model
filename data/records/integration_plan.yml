@@ -55,6 +55,7 @@ fields:
       required: true
       dimension: integration_social
     status: Blocked
+    latest_comments: tbc - Ecorys to confirm categories after provider engagement 
 
   integration_comms_language:
     name: Language and communication
@@ -66,6 +67,7 @@ fields:
       required: true
       dimension: integration_comms_language
     status: Blocked
+    latest_comments: tbc - Ecorys to confirm categories after provider engagement 
 
   integration_digital:
     name: Digital skills
@@ -77,4 +79,5 @@ fields:
       required: true
       dimension: integration_digital
     status: Blocked
+    latest_comments: tbc - Ecorys to confirm categories after provider engagement 
 

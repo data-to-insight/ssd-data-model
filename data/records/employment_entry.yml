@@ -55,6 +55,7 @@ fields:
       required: true
       dimension: employment_entry_details
     status: Pending consideration
+    latest_comments: tbc - same comments as baseline 'economic_status', categories to align
 
   employment_entry_occupation:
     name: Occupation type

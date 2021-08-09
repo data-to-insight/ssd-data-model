@@ -43,4 +43,6 @@ fields:
       required: true
       dimension: housing_entry_accomodation
     status: Work in progress
+    latest_comments: tbc - same comments as 'housing_baseline_accommodation', categories to align
+
 

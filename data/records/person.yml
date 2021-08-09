@@ -49,7 +49,8 @@ fields:
         start_date: -65y
         end_date: -18y
     status: Pending consideration
-
+    latest_comments: JF - 'Change to age' TR - 'Would be good to understand who (at HO?) wants age rather than age bracket - what's the purpose? Palladium and Ecorys both happy with bracketing and obviously it minimises the disclosiveness of the data.'
+  
   gender:
     name: Gender
     type: Categorical
