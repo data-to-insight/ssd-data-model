@@ -67,9 +67,8 @@ fields:
     type: Categorical
     description: Selection of one of four given categories. To be collected once and submitted within 3 months of enrolment.
     comments: This is seeks to understand whether dependencies are currently in the
-      UK or living in same HH. 
-      "JF: How does this relate to question above? It's unclear what it means and why we're asking for this info"
-      "TR: James - does this replace the old 'family composition' Q?"
+      UK or living in same HH. JF - How does this relate to question above? It's unclear what it means and why we're asking for this info. 
+      TR - James - does this replace the old 'family composition' Q?"
     validation:
       required: true
       dimension: current_family_composition
@@ -79,9 +78,9 @@ fields:
     name: Current dependents in UK
     type: List
     description: Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.
-      "JF: "0-4" option is unhelpful for analysis. If this is an online questionaire, would be better to have this as a routed question (only if with caring reponsibilities) and change to "1-4". Or add a 'no kids' option."
-      "TR: I think 0-4 here is an age bracket rather than a number of children. 
-      Agree re routing - that's for CRM providers/implementers to organise but it's certainly what we'd reccomend to them. "
+      JF - '0-4' option is unhelpful for analysis. If this is an online questionaire, would be better to have this as a routed question (only if with caring reponsibilities) and change to "1-4". Or add a 'no kids' option."
+      TR - I think 0-4 here is an age bracket rather than a number of children. 
+      Agree re routing - that's for CRM providers/implementers to organise but it's certainly what we'd reccomend to them.
     validation:
       required: true
       dimension: current_dependents_uk

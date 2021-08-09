@@ -40,8 +40,7 @@ fields:
     name: Date of birth
     type: YYYY-MM
     description: Date of birth of participant. To be collected once at enrolment
-    comments: "JF: Change to age" "TR: Would be good to understand who (at HO?) wants age rather than age bracket - what's the purpose? Palladium and Ecorys both happy with bracketing and obviously it minimises the disclosiveness of the data."
-      status = pending consideration  
+    comments: JF - 'Change to age' TR - 'Would be good to understand who (at HO?) wants age rather than age bracket - what's the purpose? Palladium and Ecorys both happy with bracketing and obviously it minimises the disclosiveness of the data.'  
     validation:
       required: true
     sample_generator:
