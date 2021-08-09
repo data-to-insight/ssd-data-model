@@ -23,7 +23,7 @@ fields:
     validation:
       required: true
       unique: true
-    status: decided 
+    status: Decided 
 
   temp_ni_number:
     name: Temp NI number
