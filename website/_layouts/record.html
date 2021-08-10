@@ -31,12 +31,7 @@ layout: default
           {% endif %}
         {% endfor %}
       {% endif %}</td>
-    <td>{% if field.status %}
-        {% for d in site.status %}
-          {% if d.status.id == field.status.id %}
-          {% endif %}
-        {% endfor %}
-      {% endif %}</td>
+    <td>{% field.status %}</td>
   </tr>
 {% endfor %}
 </tbody>
