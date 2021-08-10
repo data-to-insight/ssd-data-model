@@ -78,9 +78,8 @@ fields:
   current_number_of_dependents_uk:
     name: Current dependents in UK
     type: List
-    description: Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.   
+    description: If answered Yes to 'current dependents UK'. Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.   
     validation:
-      required: true
       dimension: current_number_of_dependents_uk
     status: Pending consideration
     latest_comments: tbc with Ecorys, Palladium and HO
