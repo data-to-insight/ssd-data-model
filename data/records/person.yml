@@ -61,7 +61,7 @@ fields:
     validation:
       required: true
       dimension: gender
-    status: Decided
+    status: Pending consideration
 
   dispersal_area:
     name: Dispersal area
