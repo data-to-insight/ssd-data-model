@@ -72,7 +72,7 @@ fields:
     validation:
       required: true
       dimension: current_dependents_uk
-    status: pending consideration
+    status: Pending consideration
     latest_comments: tbc with Ecorys, Palladium and HO
 
   current_number_of_dependents_uk:
