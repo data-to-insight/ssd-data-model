@@ -1,41 +1,61 @@
 on: [push]
 
+env:
+  TOOLS_REPO: rtof-data-model-tools
+
 jobs:
   build_spec:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        path: rtof-data-model
+
+    - name: Check out RTOF Tools
+      uses: actions/checkout@v2
+      with:
+        repository: SocialFinanceDigitalLabs/rtof-data-model-tools
+        path: rtof-data-model-tools
+        token: ${{ secrets.API_TOKEN_WEB_REPO }}
 
     - name: 🐍 install Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.8.x'
 
+    # - name: Setup Graphviz
+    #   uses: ts-graphviz/setup-graphviz@v1
     - name: Setup Graphviz
-      uses: ts-graphviz/setup-graphviz@v1
+      if: ${{ !env.ACT }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install graphviz
 
     - name: Cache poetry
       uses: actions/cache@v2
       with:
         path: ~/.cache/pypoetry
-        key: ${{ runner.os }}-poetry-${{ hashFiles('pyproject.toml', 'poetry.lock') }}
+        key: ${{ runner.os }}-poetry-${{ hashFiles('rtof-data-model-tools/pyproject.toml', 'rtof-data-model-tools/poetry.lock') }}
         restore-keys: |
           ${{ runner.os }}-poetry-
 
     - name: Install python dependencies
       run: |
         curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
+        cd $GITHUB_WORKSPACE/$TOOLS_REPO
         $HOME/.local/bin/poetry install
 
     - name: Generate spec
       run: |
+        cd $GITHUB_WORKSPACE/$TOOLS_REPO
         poetry run ./main.py
 
     - name: Upload spec
       env:
         RTOF_UPLOAD_URL: ${{ secrets.SHAREPOINT_UPLOAD_WEBHOOK }}
       run: |
+        cd $GITHUB_WORKSPACE/$TOOLS_REPO
         poetry run bin/upload.py output/specification.docx "$RTOF_UPLOAD_URL"
         poetry run bin/upload.py output/specification-records.xlsx "$RTOF_UPLOAD_URL"
         poetry run bin/upload.py output/specification-dimensions.xlsx "$RTOF_UPLOAD_URL"
@@ -47,8 +67,8 @@ jobs:
       env:
         API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_WEB_REPO }}
       with:
-        source-directory: 'website'
-        destination-github-username: 'SocialFinanceDigitalLabs'
-        destination-repository-name: 'RTOF-specification'
+        source-directory: rtof-data-model-tools/website
+        destination-github-username: SocialFinanceDigitalLabs
+        destination-repository-name: RTOF-specification
         user-email: info@socialfinance.org.uk
         target-branch: main

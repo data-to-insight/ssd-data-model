@@ -140,6 +140,9 @@ cython_debug/
 ~$
 Graphviz
 
+.actrc
+.secrets
+
 website/_includes
 website/collections/_*
 website/assets/spec
