@@ -19,7 +19,7 @@ fields:
 
   ni_number:
     name: NI Number
-    type: NINO
+    type: string
     description: UK National Insurance number. Must be unique. To be collected at
       enrolment into the program. All upper case and no spaces [regular expressions
       for NiNos]
@@ -27,20 +27,20 @@ fields:
     validation:
       required: true
       unique: true
-    status: Pending consideration
-    latest_comments: tbc with Ecorys and Palladium need for this at enrolment   
+      national_insurance_number: true
+    status: Decided
 
   temp_ni_number:
     name: Temp NI number
-    type: NINO
-    description: This field is only relevant if a participant has a temporary NINO. In these cases, you should submit the temporary NINO, in this persons form, 
+    type: string
+    description: This field is only relevant if a participant has a temporary NINO. In these cases, you should submit the temporary NINO, in this persons form,
       leaving the ni_number field blank, until the participant receives a permanent NINO. Once a permanent NINO has been received this form should be updated. All upper case and no spaces [regular expressions
       for NiNos]
-    comments: 
+    comments:
     validation:
       unique: true
-    status: Pending consideration
-    latest_comments: tbc with Ecorys and Palladium need for this at enrolment 
+      national_insurance_number: true
+    status: Decided
 
   nationality:
     name: Nationality
@@ -70,10 +70,11 @@ fields:
     name: Transgender
     type: categorical
     description: Do you identify as transgender? A question which follows on from the question in the person data form, with 'identify as transgender',
-      'do not identify as transgender' or 'prefer not to say'. To be collected once and submitted within 3 months of enrolment.
+      'do not identify as transgender' or 'prefer not to say'. This is a non-mandatory data field, people have the option to ask this question, but are not forced to answer
+      To be collected once and submitted within 3 months of enrolment. 
+
     comments:
     validation:
-      required: true
       dimension: transgender
     status: Pending consideration
     latest_comments: tbc with Ecorys and Palladium
@@ -102,7 +103,7 @@ fields:
 
   age_profile_of_dependents_uk:
     name: Age profile of dependents in UK
-    type: List
+    type: list
     description: If answered Yes to 'current dependents UK'. Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.   
     validation:
       dimension: current_number_of_dependents_uk

@@ -13,31 +13,6 @@ fields:
       required: true
     status: Decided
 
-  ni_number:
-    name: NI Number
-    type: string
-    description: UK National Insurance number. Must be unique. To be collected at
-      enrolment into the program. All upper case and no spaces [regular expressions
-      for NiNos]
-    comments: Minimum data collection required to understand enrolment
-    validation:
-      required: true
-      unique: true
-      national_insurance_number: true
-    status: Decided
-
-  temp_ni_number:
-    name: Temp NI number
-    type: string
-    description: This field is only relevant if a participant has a temporary NINO. In these cases, you should submit the temporary NINO, in this persons form,
-      leaving the ni_number field blank, until the participant receives a permanent NINO. Once a permanent NINO has been received this form should be updated. All upper case and no spaces [regular expressions
-      for NiNos]
-    comments:
-    validation:
-      unique: true
-      national_insurance_number: true
-    status: Decided
-
   year_of_birth:
     name: Year of birth
     type: year
@@ -50,15 +25,9 @@ fields:
       args:
         start_date: -65y
         end_date: -18y
-<<<<<<< HEAD
     status: Decided
      
   
-=======
-    status: Pending consideration
-    latest_comments: Deleted 'Month of birth' collection, just to collect age (year of birth) - to confirm if this satisfies HO requirements
-
->>>>>>> 47877b4a82697f4fcb9be4360b3252645a0a8a51
   gender:
     name: Gender
     type: categorical
