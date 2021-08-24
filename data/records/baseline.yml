@@ -68,21 +68,12 @@ fields:
 
   transgender:
     name: Transgender
-<<<<<<< HEAD
-    type: Categorical
-    description: Do you identify as transgender? A question which follows on from the question in the person data form, with 'identify as transgender', 
-      'do not identify as transgender' or 'prefer not to say'. To be collected once and submitted within 3 months of enrolment. This is a non-mandatory data field, all have the option to ask, but are not forced to answer
-    comments: 
-    validation: 
-      required:  
-=======
     type: categorical
     description: Do you identify as transgender? A question which follows on from the question in the person data form, with 'identify as transgender',
       'do not identify as transgender' or 'prefer not to say'. To be collected once and submitted within 3 months of enrolment.
     comments:
     validation:
       required: true
->>>>>>> 47877b4a82697f4fcb9be4360b3252645a0a8a51
       dimension: transgender
     status: Pending consideration
     latest_comments: tbc with Ecorys and Palladium
@@ -109,17 +100,10 @@ fields:
     status: Decided
     latest_comments:
 
-<<<<<<< HEAD
   age_profile_of_dependents_uk:
     name: Age profile of dependents in UK
     type: List
     description: If answered Yes to 'current dependents UK'. Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.   
-=======
-  current_number_of_dependents_uk:
-    name: Current dependents in UK
-    type: list
-    description: If answered Yes to 'current dependents UK'. Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.
->>>>>>> 47877b4a82697f4fcb9be4360b3252645a0a8a51
     validation:
       dimension: current_number_of_dependents_uk
     status: Pending consideration
@@ -237,15 +221,9 @@ fields:
      For some providers this may be a categorical data field - please confirm with your nominated data lead. 
     validation:
       character_limit: 255
-<<<<<<< HEAD
     status: Decided
     latest_comments: 
       
-=======
-    status: Pending consideration
-    latest_comments: tbc with Ecorys, Palladium and HO
-
->>>>>>> 47877b4a82697f4fcb9be4360b3252645a0a8a51
   economic_status:
     name: Main economic status at baseline
     type: categorical
@@ -256,11 +234,7 @@ fields:
       required: true
       dimension: economic_status
     status: Work in progress
-<<<<<<< HEAD
     latest_comments: tbc with James W (Ecorys) to confirm requirements of the VfM assessment - decision due 31 August 
-=======
-    latest_comments: tbc with James W (Ecorys) to confirm requirements of the VfM assessment
->>>>>>> 47877b4a82697f4fcb9be4360b3252645a0a8a51
 
   housing_baseline_accommodation:
     name: Accommodation type

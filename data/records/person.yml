@@ -13,8 +13,6 @@ fields:
       required: true
     status: Decided
 
-<<<<<<< HEAD
-=======
   ni_number:
     name: NI Number
     type: string
@@ -40,7 +38,6 @@ fields:
       national_insurance_number: true
     status: Decided
 
->>>>>>> 47877b4a82697f4fcb9be4360b3252645a0a8a51
   year_of_birth:
     name: Year of birth
     type: year
