@@ -20,7 +20,7 @@ fields:
 
   housing_sustainment_date:
     name: Date housing sustainment achieved
-    type: Date
+    type: date
     description: Date of housing sustainment outcome achieved. To be collected once
       at housing sustainment outcome submission.
     validation:
