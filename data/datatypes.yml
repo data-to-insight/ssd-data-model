@@ -1,0 +1,13 @@
+string:
+  description: A string
+String:
+  description: A String
+Date:
+  description: A string
+Categorical: {}
+YYYY: {}
+NINO: {}
+'Free Text (short)': {}
+integer: {}
+list: {}
+List: {}
