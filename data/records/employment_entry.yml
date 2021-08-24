@@ -6,10 +6,10 @@ description: This form outlines the required data for participants who achieve t
 fields:
 
   unique_id:
-    name: Unique person identifier 
+    name: Unique person identifier
     type: string
-    description: Person identifier provided in the person form. This can be a NINO or a unique provider ID. This must be unique for each individual supported on RTOF. 
-    comments: 
+    description: Person identifier provided in the person form. This can be a NINO or a unique provider ID. This must be unique for each individual supported on RTOF.
+    comments:
     primary_key: true
     foreign_keys:
     - record: person
@@ -20,7 +20,7 @@ fields:
 
   employment_entry_outcome_type:
     name: Type of employment entry outcome
-    type: Categorical
+    type: categorical
     description: Employment entry can either be an employment outcome or self-employment outcome. To
       be collected once at entry to employment outcome submission.
     comments:
@@ -31,7 +31,7 @@ fields:
 
   date_employment_entry:
     name: Date entered employment
-    type: Date
+    type: date
     description: Date of employment entry submission. To be collected once at entry
       to employment outcome submission.
     validation:
@@ -46,11 +46,11 @@ fields:
 
   employment_entry_details:
     name: Details of paid employment
-    type: Categorical
+    type: categorical
     description: Selection of a single category describing the type of employment
       participant is entering for the employment outcome achievement. To be collected
-      once at entry to employment outcome submission. 
-    comments: 
+      once at entry to employment outcome submission.
+    comments:
     validation:
       required: true
       dimension: employment_entry_details
@@ -59,7 +59,7 @@ fields:
 
   employment_entry_occupation:
     name: Occupation type
-    type: Free Text (short)
+    type: string
     description: State participants employment type for the achievement of entry to
       employment outcome. To be collected once at entry to employment outcome submission.
     comments:
@@ -70,7 +70,7 @@ fields:
 
   employment_entry_sector:
     name: Sector
-    type: Free Text (short)
+    type: string
     description: State the participants employment sector for the achievement of entry
       to employment outcome. To be collected once at entry to employment outcome submission.
     comments:
@@ -78,4 +78,3 @@ fields:
       required: true
       character_limit: 255
     status: Decided
-

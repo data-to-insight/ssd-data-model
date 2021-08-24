@@ -1,13 +1,34 @@
+# Simple types
 string:
-  description: A string
-String:
-  description: A String
-Date:
-  description: A string
-Categorical: {}
-YYYY: {}
-NINO: {}
-'Free Text (short)': {}
-integer: {}
-list: {}
-List: {}
+  description: >-
+    A string of Unicode characters as defined by the JSON Schema `string` type.
+
+integer:
+  description: >-
+    An integer as defined by the JSON Schema `integer` type.
+
+# Complex types
+date:
+  description: >-
+    Represents a single date. JSON Schema has no direct date representation,
+    but can be considered a restriction on string to match the
+    ISO-8601 format, e.g. 2021-07-20
+
+year:
+  description: >-
+    Represents a single (gregorian) year. Again, there is no JSON Schema
+    equivalent, but this should be considered to have the same meaning as
+    `gYear` in XML Schema Part 2. Encoded as an integer.
+
+categorical:
+  description: >-
+    Restricted to a set of fixed values. Represented as a string, this type must
+    have a `dimension` validator indicating the set of allowed values.
+
+
+list:
+  description: >-
+    Can contain multiple values. Can either be represented as a native list
+    in formats that support them, such as JSON or XML, or encoded as a
+    CSV string. If accompanied by a `dimension` validator, then each item in
+    the list must be in the allowed values.

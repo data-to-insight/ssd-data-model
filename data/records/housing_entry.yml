@@ -20,7 +20,7 @@ fields:
 
   housing_entry_date:
     name: Date of housing entry
-    type: Date
+    type: date
     description: Date of housing entry outcome achieved. To be collected once at entry
       to housing outcome submission.
     comments: 
@@ -36,7 +36,7 @@ fields:
 
   housing_entry_accomodation:
     name: Accomodation type
-    type: Categorical
+    type: categorical
     description: tbc
     comments: tbc - once selected, the categories will align with baseline collection
     validation:

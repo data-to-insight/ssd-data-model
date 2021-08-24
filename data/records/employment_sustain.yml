@@ -20,7 +20,7 @@ fields:
 
   employment_sustainment_date:
     name: Date employment sustainment outcome achieved
-    type: Date
+    type: date
     description: Date of employment sustainment outcome achieved. This can be either
       be for the self-employment or employment route. To be collected once at employment sustained outcome submission.
     validation:

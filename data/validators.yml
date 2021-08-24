@@ -16,6 +16,14 @@ required:
     A field with 'required: true' must be present in the data record, and must have a non-blank value. It is short-hand
     for 'notnull: true' and 'notblank: true'.
 
+unique:
+  args:
+    - name: enabled
+      type: boolean
+      help: true/false value indicating if the current field is required
+  description: |
+    A field with 'unique: true' should be unique within the dataset for this provider.
+
 notnull:
   args:
     - name: enabled
@@ -62,3 +70,10 @@ national_insurance_number:
     UK National Insurance Number - uppercase with all whitespace removed. Validated according to format given in
     https://github.com/dwp/nino-format-validation
 
+character_limit:
+  args:
+    - name: characters
+      type: integer
+      help: The number of characters
+  description: |
+    Maximum number of unicode characters in string.
