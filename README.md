@@ -101,24 +101,17 @@ The format of this file is still in development.
 ## Output Formats
 
 Since the specification is intended to be easy to maintain, it is not necessarily that easy to process for humans, and
-most case management and data management systems aren't YAML aware, we provide a set of tools to convert the YAML into
+most case management and data management systems aren't YAML aware, we provide a [set of tools][tools] to convert the YAML into
 more conventional formats.
 
 The main place to find documentation relating to this specification is
 [sfdl.org.uk/RTOF-specification](https://sfdl.org.uk/RTOF-specification/). The website and associated documentation
-is generated using a set of Python modules as described below. The intention is that these will be split off into
-a separate project.
+is generated using the [tools][tools] mentioned above.
 
-[poetry]: https://python-poetry.org/
 [yaml]: https://yaml.org/
 [vcs]: https://en.wikipedia.org/wiki/Version_control
 [git]: https://git-scm.com/
 [jsc]: https://json-schema.org/
 [csc]: https://digital-preservation.github.io/csv-schema/
 [ssot]: https://en.wikipedia.org/wiki/Single_source_of_truth
-[erd]: https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model
-[graphviz]: http://www.graphviz.org/
-[docxtpl]: https://docxtpl.readthedocs.io/en/latest/
-[jekyll]: https://jekyllrb.com/
-[gha]: https://github.com/features/actions
-[ghp]: https://pages.github.com/
+[tools]: https://github.com/SocialFinanceDigitalLabs/rtof-data-model-tools
