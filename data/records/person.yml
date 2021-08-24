@@ -11,6 +11,7 @@ fields:
     primary_key: true
     validation:
       required: true
+    status: Decided 
 
   ni_number:
     name: NI Number
@@ -22,6 +23,7 @@ fields:
     validation:
       required: true
       unique: true
+    status: Decided 
 
   temp_ni_number:
     name: Temp NI number
@@ -32,12 +34,13 @@ fields:
     comments: 
     validation:
       unique: true
+    status: Decided
 
-  date_of_birth:
-    name: Date of birth
-    type: YYYY-MM
-    description: Date of birth of participant. To be collected once at enrolment
-    comments:
+  year_of_birth:
+    name: Year of birth
+    type: YYYY
+    description: Year of birth of participant. To be collected once at enrolment
+    comments: JF - 'Change to age' TR - 'Would be good to understand who (at HO?) wants age rather than age bracket - what's the purpose? Palladium and Ecorys both happy with bracketing and obviously it minimises the disclosiveness of the data.'  
     validation:
       required: true
     sample_generator:
@@ -45,7 +48,9 @@ fields:
       args: 
         start_date: -65y
         end_date: -18y
-
+    status: Pending consideration
+    latest_comments: Deleted 'Month of birth' collection, just to collect age (year of birth) - to confirm if this satisfies HO requirements 
+  
   gender:
     name: Gender
     type: Categorical
@@ -56,6 +61,7 @@ fields:
     validation:
       required: true
       dimension: gender
+    status: Pending consideration
 
   dispersal_area:
     name: Dispersal area
@@ -65,6 +71,7 @@ fields:
     comments: Confirm whether this should be string or list of LA's
     validation:
       required: true
+    status: Decided
 
   date_started_service:
     name: Date started with service
@@ -80,3 +87,4 @@ fields:
       args: 
         start_date: -65y
         end_date: -18y
+    status: Decided

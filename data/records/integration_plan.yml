@@ -17,6 +17,7 @@ fields:
     validation:
       required: true
       unique: true
+    status: Decided
 
   integration_outcome_type:
     name: Integration outcome type
@@ -27,6 +28,7 @@ fields:
     validation:
       required: true
       dimension: integration_outcome_type
+    status: Decided
 
   integration_outcome_achieved_date:
     name: Date integration plan outcome acheived
@@ -41,6 +43,7 @@ fields:
       args:
         start_date: '+2m'
         end_date: '+2y'
+    status: Decided
 
   integration_social:
     name: Social bonds / bridges / links
@@ -51,6 +54,8 @@ fields:
     validation:
       required: true
       dimension: integration_social
+    status: Blocked
+    latest_comments: tbc - Ecorys to confirm categories after provider engagement 
 
   integration_comms_language:
     name: Language and communication
@@ -61,6 +66,8 @@ fields:
     validation:
       required: true
       dimension: integration_comms_language
+    status: Blocked
+    latest_comments: tbc - Ecorys to confirm categories after provider engagement 
 
   integration_digital:
     name: Digital skills
@@ -71,4 +78,6 @@ fields:
     validation:
       required: true
       dimension: integration_digital
+    status: Blocked
+    latest_comments: tbc - Ecorys to confirm categories after provider engagement 
 

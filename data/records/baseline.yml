@@ -15,6 +15,7 @@ fields:
       field: unique_id
     validation:
       required: true
+    status: Decided
 
   nationality:
     name: Nationality
@@ -26,15 +27,19 @@ fields:
     validation:
       required: true
       dimension: nationality
-  
+    status: Decided  
+
   referral_source:
     name: Referral source
     type: Categorical
     description: The referral source that led the participant to RTOF.
-    comments: the categories for this are still to be decided and will be a product of engagement with frontline providers during mobilistion.
+    comments: The categories for this are still to be decided and will be a product of engagement with frontline providers during mobilistion.
     validation:
       required: true
       dimension: referral_source
+    status: Blocked
+    latest_comments: Categories tbc after provider engagement
+
 
   transgender:
     name: Transgender
@@ -44,7 +49,9 @@ fields:
     comments: 
     validation: 
       required: true 
-      dimension: transgender 
+      dimension: transgender
+    status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
 
   living_status:
     name: Living status
@@ -55,24 +62,27 @@ fields:
     validation:
       required: true
       dimension: living_status
-
-  current_family_composition:
-    name: Current family composition
-    type: Categorical
-    description: Selection of one of four given categories. To be collected once and submitted within 3 months of enrolment.
-    comments: This is seeks to understand whether dependencies are currently in the
-      UK or living in same HH. 
-    validation:
-      required: true
-      dimension: current_family_composition
+    status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
 
   current_dependents_uk:
     name: Current dependents in UK
-    type: List
-    description: Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.
+    type: Categorical
+    description: Do you currently have any dependents in the UK? Yes / No to understand whether the participant has any depedents curently in the UK. To be collected once and submitted within 3 months of enrolment.  
     validation:
       required: true
       dimension: current_dependents_uk
+    status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
+
+  current_number_of_dependents_uk:
+    name: Current dependents in UK
+    type: List
+    description: If answered Yes to 'current dependents UK'. Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.   
+    validation:
+      dimension: current_number_of_dependents_uk
+    status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
 
   date_arrived_in_uk:
     name: Date arrived in UK
@@ -89,6 +99,7 @@ fields:
       args:
         start_date: '-2y'
         end_date: '-2m'
+    status: Decided
 
   date_asylum_status_granted:
     name: Date asylum status granted
@@ -104,7 +115,8 @@ fields:
       args:
         start_date: '-1y'
         end_date:  '-2m'
-    
+    status: Decided
+  
   language_level_on_entry:
     name: Language level on entry
     type: Categorical
@@ -116,6 +128,7 @@ fields:
     validation:
       required: true
       dimension: language_level_on_entry
+    status: Decided  
 
   highest_qualification_achieved:
     name: Highest qualification  level achieved
@@ -128,7 +141,8 @@ fields:
     validation:
       required: true
       dimension: highest_qualification_achieved
-
+    status: Decided  
+      
   age_finished_study:
     name: Age when finished study
     type: integer
@@ -136,6 +150,8 @@ fields:
       was "unknown"
     comments:
     validation: {}
+    status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
 
   employed_in_home_country:
     name: Employed in home country
@@ -148,6 +164,7 @@ fields:
     validation:
       required: true
       dimension: employed_in_home_country
+    status: Decided
 
   occupation_type:
     name: Occupation type
@@ -157,6 +174,7 @@ fields:
     comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
     validation:
       character_limit: 255
+    status: Decided
 
   occupation_sector:
     name: Sector
@@ -166,6 +184,7 @@ fields:
     comments: To confirm word limit (and possibly add a suggestion ie. Education)
     validation:
       character_limit: 255
+    status: Decided
 
   occupation_goal:
     name: Occupation goal at baseline
@@ -174,16 +193,20 @@ fields:
      To be collected once and submitted within 3 months of enrolment.
     validation:
       character_limit: 255
-
+    status: Pending consideration
+    latest_comments: tbc with Ecorys, Palladium and HO
+      
   economic_status:
     name: Main economic status at baseline
     type: Categorical
     description: Selection of a single category describing the employment status of
       the participant prior to entering RTOF. To be collected once and submitted within 3 months of enrolment.
-    comments: 
+    comments: "JF: Why not capture <8 hrs/week? Does this Q relate to status in home country? Suggest change 'unpaid work...' to voluntary work (to include either for family or not) Clarify that sick/disabled relates to reason for unemployment (if this is the case) These comments also apply to other references to emplyment type"
     validation:
       required: true
       dimension: economic_status
+    status: Work in progress
+    latest_comments: tbc with James W (Ecorys) to confirm requirements of the VfM assessment  
 
   housing_baseline_accommodation:
     name: Accommodation type
@@ -193,4 +216,5 @@ fields:
     validation:
       required: true
       dimension: housing_baseline_accommodation
-
+    status: Work in progress
+    latest_comments: tbc by Ecorys re. Value for Money assessment

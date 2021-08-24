@@ -16,6 +16,7 @@ fields:
     validation:
       required: true
       unique: true
+    status: Decided
 
   employment_sustainment_date:
     name: Date employment sustainment outcome achieved
@@ -30,4 +31,5 @@ fields:
       args:
         start_date: '+1y'
         end_date: '+3y'
+    status: Decided
         

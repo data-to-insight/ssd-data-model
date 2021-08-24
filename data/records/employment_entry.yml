@@ -16,6 +16,7 @@ fields:
       field: unique_id
     validation:
       required: true
+    status: Decided
 
   employment_entry_outcome_type:
     name: Type of employment entry outcome
@@ -26,6 +27,7 @@ fields:
     validation:
       required: true
       dimension: employment_entry_outcome_type
+    status: Decided
 
   date_employment_entry:
     name: Date entered employment
@@ -40,6 +42,7 @@ fields:
       args:
         start_date:
         end_date:
+    status: Decided
 
   employment_entry_details:
     name: Details of paid employment
@@ -51,6 +54,8 @@ fields:
     validation:
       required: true
       dimension: employment_entry_details
+    status: Pending consideration
+    latest_comments: tbc - same comments as baseline 'economic_status', categories to align
 
   employment_entry_occupation:
     name: Occupation type
@@ -61,6 +66,7 @@ fields:
     validation:
       required: true
       character_limit: 255
+    status: Decided
 
   employment_entry_sector:
     name: Sector
@@ -71,4 +77,5 @@ fields:
     validation:
       required: true
       character_limit: 255
+    status: Decided
 
