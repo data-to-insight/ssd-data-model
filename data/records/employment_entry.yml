@@ -62,6 +62,7 @@ fields:
     type: Free Text (short)
     description: State participants employment type for the achievement of entry to
       employment outcome. To be collected once at entry to employment outcome submission.
+      For some providers this may be a categorical data field - please confirm with your nominated data lead.
     comments:
     validation:
       required: true
@@ -73,6 +74,7 @@ fields:
     type: Free Text (short)
     description: State the participants employment sector for the achievement of entry
       to employment outcome. To be collected once at entry to employment outcome submission.
+      For some providers this may be a categorical data field - please confirm with your nominated data lead.
     comments:
     validation:
       required: true
