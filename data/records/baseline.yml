@@ -79,17 +79,6 @@ fields:
     status: Pending consideration
     latest_comments: tbc with Ecorys and Palladium
 
-  living_status:
-    name: Living status
-    type: categorical
-    description: Selection of either single or couple. Couple includes living with
-      more than one individual. To be collected once and submitted within 3 months of enrolment.
-    comments:
-    validation:
-      required: true
-      dimension: living_status
-    status: Pending consideration
-    latest_comments: tbc with Ecorys, Palladium and HO
 
   current_dependents_uk:
     name: Current dependents in UK
