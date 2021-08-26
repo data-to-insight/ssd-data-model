@@ -20,14 +20,9 @@ fields:
     comments: JF - 'Change to age' TR - 'Would be good to understand who (at HO?) wants age rather than age bracket - what's the purpose? Palladium and Ecorys both happy with bracketing and obviously it minimises the disclosiveness of the data.'
     validation:
       required: true
-    sample_generator:
-      method: date_between
-      args:
-        start_date: -65y
-        end_date: -18y
     status: Decided
-     
-  
+
+
   gender:
     name: Gender
     type: categorical
@@ -59,9 +54,4 @@ fields:
     validation:
       required: true
       date_after: date_asylum_status_granted
-    sample_generator:
-      method: date_between
-      args:
-        start_date: -65y
-        end_date: -18y
     status: Decided

@@ -71,7 +71,7 @@ fields:
     type: categorical
     description: Do you identify as transgender? A question which follows on from the question in the person data form, with 'identify as transgender',
       'do not identify as transgender' or 'prefer not to say'. This is a non-mandatory data field, people have the option to ask this question, but are not forced to answer
-      To be collected once and submitted within 3 months of enrolment. 
+      To be collected once and submitted within 3 months of enrolment.
 
     comments:
     validation:
@@ -93,7 +93,7 @@ fields:
   age_profile_of_dependents_uk:
     name: Age profile of dependents in UK
     type: list
-    description: If answered Yes to 'current dependents UK'. Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.   
+    description: If answered Yes to 'current dependents UK'. Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.
     validation:
       dimension: current_number_of_dependents_uk
     status: Pending consideration
@@ -109,11 +109,6 @@ fields:
     validation:
       required: true
       date_after: date_of_birth
-    sample_generator:
-      method: date_between
-      args:
-        start_date: '-2y'
-        end_date: '-2m'
     status: Decided
 
   date_asylum_status_granted:
@@ -125,11 +120,6 @@ fields:
     validation:
       required: true
       date_after: date_arrived_in_uk
-    sample_generator:
-      method: date_between
-      args:
-        start_date: '-1y'
-        end_date:  '-2m'
     status: Decided
 
   language_level_on_entry:
@@ -166,7 +156,7 @@ fields:
     comments:
     validation: {}
     status: Decided
-    latest_comments: 
+    latest_comments:
 
   employed_in_home_country:
     name: Employed in home country
@@ -186,7 +176,7 @@ fields:
     type: string
     description: If answered 'Yes' to employed in home country field, state job role
        of their last employment. Max word count 10 words. To be collected once and submitted within 3 months of enrolment.
-       For some providers this may be a categorical data field - please confirm with your nominated data lead. 
+       For some providers this may be a categorical data field - please confirm with your nominated data lead.
     comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
     validation:
       character_limit: 255
@@ -197,7 +187,7 @@ fields:
     type: string
     description: If answered 'Yes' to employed in home country field, state the sector
        of their last employment. Max word count 10 words. To be collected once and submitted within 3 months of enrolment.
-       For some providers this may be a categorical data field - please confirm with your nominated data lead. 
+       For some providers this may be a categorical data field - please confirm with your nominated data lead.
     comments: To confirm word limit (and possibly add a suggestion ie. Education)
     validation:
       character_limit: 255
@@ -207,13 +197,13 @@ fields:
     name: Occupation goal at baseline
     type: string
     description: All participants to be asked what their employment goals. This can be sector, job role or employment-type.
-     To be collected once and submitted within 3 months of enrolment. 
-     For some providers this may be a categorical data field - please confirm with your nominated data lead. 
+     To be collected once and submitted within 3 months of enrolment.
+     For some providers this may be a categorical data field - please confirm with your nominated data lead.
     validation:
       character_limit: 255
     status: Decided
-    latest_comments: 
-      
+    latest_comments:
+
   economic_status:
     name: Main economic status at baseline
     type: categorical
@@ -224,7 +214,7 @@ fields:
       required: true
       dimension: economic_status
     status: Work in progress
-    latest_comments: tbc with James W (Ecorys) to confirm requirements of the VfM assessment - decision due 31 August 
+    latest_comments: tbc with James W (Ecorys) to confirm requirements of the VfM assessment - decision due 31 August
 
   housing_baseline_accommodation:
     name: Accommodation type
@@ -235,4 +225,4 @@ fields:
       required: true
       dimension: housing_baseline_accommodation
     status: Work in progress
-    latest_comments: tbc with James W (Ecorys) to confirm requirements of the VfM assessment - decision due 31 August  
+    latest_comments: tbc with James W (Ecorys) to confirm requirements of the VfM assessment - decision due 31 August

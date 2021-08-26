@@ -27,9 +27,4 @@ fields:
     validation:
       required: true
       date_after: date_started_service
-    sample_generator:
-      method: date_between
-      args:
-        start_date:
-        end_date:
     status: Decided
