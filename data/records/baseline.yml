@@ -25,7 +25,6 @@ fields:
       for NiNos]
     comments: Minimum data collection required to understand enrolment
     validation:
-      required: true
       unique: true
       national_insurance_number: true
     status: Decided
@@ -33,13 +32,11 @@ fields:
   temp_ni_number:
     name: Temp NI number
     type: string
-    description: This field is only relevant if a participant has a temporary NINO. In these cases, you should submit the temporary NINO, in this persons form,
-      leaving the ni_number field blank, until the participant receives a permanent NINO. Once a permanent NINO has been received this form should be updated. All upper case and no spaces [regular expressions
-      for NiNos]
-    comments:
-    validation:
-      unique: true
-      national_insurance_number: true
+    description: >-
+      This field is only relevant if a participant has a temporary NINO.
+      In these cases, you should submit the temporary NINO, in this persons form,
+      leaving the ni_number field blank, until the participant receives a permanent NINO.
+      Once a permanent NINO has been received this form should be updated.
     status: Decided
 
   nationality:
