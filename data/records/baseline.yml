@@ -191,6 +191,15 @@ fields:
     status: Decided
     latest_comments:
 
+  prior_employment:
+    name: Prior employment
+    type: categorical
+    description: Since arriving in the UK, have you ever undertaken any paid employment? 
+    validation:
+      required: true
+      dimension: prior_employment
+    status: Pending consideration
+    
   economic_status:
     name: Main economic status at baseline
     type: categorical
