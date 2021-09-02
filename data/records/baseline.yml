@@ -212,6 +212,16 @@ fields:
     status: Work in progress
     latest_comments: 'What is your current employment status?'. Source - https://www.ons.gov.uk/census/censustransformationprogramme/questiondevelopment/economicactivityandhoursworkedquestiondevelopmentforcensus2021#questions-recommended-for-census-2021 . Required to assess movement from unemployment to employment and to cross reference against admin data sets
 
+  hours_of_employment:
+    name: Hours of employment
+    type: categorical
+    description: In your main job, how many hours a week do you usually work? (Include paid and unpaid overtime). For employed and self-employed. 
+    validation: 
+      required: true
+      dimension: hours_of_employment
+    status: Pending consideration
+    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
+
   housing_baseline_accommodation:
     name: Accommodation type
     type: categorical
