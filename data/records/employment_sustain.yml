@@ -27,3 +27,65 @@ fields:
       required: true
       date_after: date_employment_entry
     status: Decided
+  
+  employment_sustain_status:
+    name: Employment status at sustainment outcome
+    type: categorical
+    description: What is your current employment status?
+    validation:
+      required: true
+      dimension: employment_sustain_status
+    status: Pending consideration
+
+  hours_of_employment_sustain:
+    name: Hours of employment at sustain
+    type: categorical
+    description: In your main job, how many hours a week do you usually work? (Include paid and unpaid overtime). For employed and self-employed. 
+    validation: 
+      required: true
+      dimension: hours_of_employment_sustain
+    status: Pending consideration
+    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
+
+  wage_employment_sustain:
+    name: Wage employment at sustain
+    type: categorical
+    description: Estimated hourly wage 
+    validation:
+      required: true
+      dimension: wage_employment_sustain
+    status: Pending consideration
+    
+  eduction_training_status_sustain:
+    name: Eduction / training status at sustain
+    type: categorical
+    description: What is your education status?
+    validation: 
+      required: true
+      dimension: education_training_status_sustain
+    status: Pending consideration
+    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE
+
+  employment_susatin_occupation:
+    name: Occupation type
+    type: string
+    description: State participants employment type for the achievement of entry to
+      employment outcome. To be collected once at entry to employment outcome submission.
+      For some providers this may be a categorical data field - please confirm with your nominated data lead.
+    comments:
+    validation:
+      required: true
+      character_limit: 255
+    status: Decided
+
+  employment_sustain_sector:
+    name: Sector
+    type: string
+    description: State the participants employment sector for the achievement of entry
+      to employment outcome. To be collected once at entry to employment outcome submission.
+      For some providers this may be a categorical data field - please confirm with your nominated data lead.
+    comments:
+    validation:
+      required: true
+      character_limit: 255
+    status: Decided
