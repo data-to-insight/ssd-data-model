@@ -210,7 +210,7 @@ fields:
       required: true
       dimension: employment_status
     status: Work in progress
-    latest_comments: 'What is your current employment status?'. Source - https://www.ons.gov.uk/census/censustransformationprogramme/questiondevelopment/economicactivityandhoursworkedquestiondevelopmentforcensus2021#questions-recommended-for-census-2021 . Required to assess movement from unemployment to employment and to cross reference against admin data sets
+    latest_comments: What is your current employment status? Source - https://www.ons.gov.uk/census/censustransformationprogramme/questiondevelopment/economicactivityandhoursworkedquestiondevelopmentforcensus2021#questions-recommended-for-census-2021 . Required to assess movement from unemployment to employment and to cross reference against admin data sets
 
   hours_of_employment:
     name: Hours of employment
