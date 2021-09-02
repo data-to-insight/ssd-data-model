@@ -27,3 +27,15 @@ fields:
       required: true
       date_after: housing_entry_date
     status: Decided
+
+  housing_sustain_accomodation:
+    name: Accomodation type sustainment  
+    type: categorical
+    description: 
+    comments: tbc - once selected, the categories will align with baseline collection
+    validation:
+      required: true
+      dimension: housing_sustain_accomodation
+    status: Pending consideration
+    latest_comments: Safe and secure accommodation - defined by compliance with the Decent Homes Standard including the absence of category 1 and 2 hazards under the Housing and Health and Safety Rating System, and with all relevant gas, electricity and fire safety checks in place.
+
