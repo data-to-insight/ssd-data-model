@@ -236,7 +236,7 @@ fields:
     type: categorical
     description: What is your education status?
     validation: 
-      required: true
+      required: true  
       dimension: education_training_status
     status: Pending consideration
     latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE
@@ -251,3 +251,14 @@ fields:
       dimension: housing_baseline_accommodation
     status: Work in progress
     latest_comments: tbc with James W (Ecorys) to confirm requirements of the VfM assessment - decision due 31 August
+
+  homelessness_baseline:
+    name: Homelessness status baseline
+    type: categorical
+    description: Statutory homelessness requires a household to be unintentionally homeless AND demonstrate a priority category need, such as dependent children. Non-statutory homelessness may include single homeless people without specific vulnerabilities, or those people who don’t approach their local authority for help. 
+    comments: More information - https://www.gov.uk/guidance/homelessness-data-notes-and-definitions and https://www.legislation.gov.uk/ukpga/1996/52/section/175?view=plain
+    validation:
+      required: true
+      dimension: homelessness_baseline
+    status: Pending consideration
+    
