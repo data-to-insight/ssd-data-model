@@ -46,10 +46,15 @@ jobs:
         cd $GITHUB_WORKSPACE/$TOOLS_REPO
         $HOME/.local/bin/poetry install
 
+    - name: Generate samples
+      run: |
+        cd $GITHUB_WORKSPACE/$TOOLS_REPO
+        poetry run python -m rtofdata.fake --number 250
+
     - name: Generate spec
       run: |
         cd $GITHUB_WORKSPACE/$TOOLS_REPO
-        poetry run ./main.py
+        poetry run python main.py
 
     - name: Upload spec
       env:

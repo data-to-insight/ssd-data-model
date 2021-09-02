@@ -25,7 +25,6 @@ fields:
       for NiNos]
     comments: Minimum data collection required to understand enrolment
     validation:
-      required: true
       unique: true
       national_insurance_number: true
     status: Decided

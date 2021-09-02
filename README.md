@@ -101,12 +101,24 @@ The format of this file is still in development.
 ## Output Formats
 
 Since the specification is intended to be easy to maintain, it is not necessarily that easy to process for humans, and
-most case management and data management systems aren't YAML aware, we provide a [set of tools][tools] to convert the YAML into
+most case management and data management systems aren't YAML aware, we provide a [set of tools][rtof-tools] to convert the YAML into
 more conventional formats.
 
 The main place to find documentation relating to this specification is
 [sfdl.org.uk/RTOF-specification](https://sfdl.org.uk/RTOF-specification/). The website and associated documentation
-is generated using the [tools][tools] mentioned above.
+is generated using the [tools][rtof-tools] mentioned above.
+
+## Continuous Deployment
+
+The whole specification uses [GitHub Actions][gha] to build and deploy the specification upon every push to the
+code repository. The [workflow file](./.github/workflows/main.yml) runs the python scripts to generate the outputs,
+uploads them to the Social Finance specification webhook, and then pushes the generated Jekyll website to a
+second [GitHub repository](https://github.com/SocialFinanceDigitalLabs/RTOF-specification) that is used to host
+the [GitHub pages][ghp] specification [site](https://sfdl.org.uk/RTOF-specification/).
+
+[rtof-spec]: https://github.com/SocialFinanceDigitalLabs/rtof-data-model
+[rtof-tools]: https://github.com/SocialFinanceDigitalLabs/rtof-data-model-tools
+[rtof-web]: https://sfdl.org.uk/RTOF-specification/
 
 [yaml]: https://yaml.org/
 [vcs]: https://en.wikipedia.org/wiki/Version_control
@@ -114,4 +126,4 @@ is generated using the [tools][tools] mentioned above.
 [jsc]: https://json-schema.org/
 [csc]: https://digital-preservation.github.io/csv-schema/
 [ssot]: https://en.wikipedia.org/wiki/Single_source_of_truth
-[tools]: https://github.com/SocialFinanceDigitalLabs/rtof-data-model-tools
+[ghp]: https://pages.github.com/
