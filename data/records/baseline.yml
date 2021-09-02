@@ -200,7 +200,7 @@ fields:
       dimension: prior_employment
     status: Pending consideration
     
-  economic_status:
+  employment_status:
     name: Main economic status at baseline
     type: categorical
     description: Selection of a single category describing the employment status of
@@ -208,9 +208,9 @@ fields:
     comments: "JF: Why not capture <8 hrs/week? Does this Q relate to status in home country? Suggest change 'unpaid work...' to voluntary work (to include either for family or not) Clarify that sick/disabled relates to reason for unemployment (if this is the case) These comments also apply to other references to emplyment type"
     validation:
       required: true
-      dimension: economic_status
+      dimension: employment_status
     status: Work in progress
-    latest_comments: tbc with James W (Ecorys) to confirm requirements of the VfM assessment - decision due 31 August
+    latest_comments: 'What is your current employment status?'. Source - https://www.ons.gov.uk/census/censustransformationprogramme/questiondevelopment/economicactivityandhoursworkedquestiondevelopmentforcensus2021#questions-recommended-for-census-2021 . Required to assess movement from unemployment to employment and to cross reference against admin data sets
 
   housing_baseline_accommodation:
     name: Accommodation type
