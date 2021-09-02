@@ -49,7 +49,7 @@ fields:
     validation:
       required: true
       dimension: referral_source
-    status: Blocked
+    status: Pending consideration
     latest_comments: Categories tbc after provider engagement
 
 
@@ -209,7 +209,7 @@ fields:
     validation:
       required: true
       dimension: employment_status
-    status: Work in progress
+    status: Pending consideration
     latest_comments: What is your current employment status? Source - https://www.ons.gov.uk/census/censustransformationprogramme/questiondevelopment/economicactivityandhoursworkedquestiondevelopmentforcensus2021#questions-recommended-for-census-2021 . Required to assess movement from unemployment to employment and to cross reference against admin data sets
 
   hours_of_employment:
@@ -242,7 +242,7 @@ fields:
     latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE
 
   housing_baseline_accommodation:
-    name: Accommodation type
+    name: Accommodation type baseline
     type: categorical
     description: tbc
     comments: Ecorys to provide details. To be collected once and submitted within 3 months of enrolment.
