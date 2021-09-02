@@ -221,7 +221,16 @@ fields:
       dimension: hours_of_employment
     status: Pending consideration
     latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
-
+  
+  wage_baseline:
+    name: Wage baseline 
+    type: categorical
+    description: Estimated hourly wage 
+    validation:
+      required: true
+      dimension: wage_baseline
+    status: Pending consideration
+  
   eduction_training_status:
     name: Eduction / training status
     type: categorical

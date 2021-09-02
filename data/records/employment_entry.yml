@@ -58,6 +58,15 @@ fields:
     status: Pending consideration
     latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
 
+  wage_employment_entry:
+    name: Wage employment entry
+    type: categorical
+    description: Estimated hourly wage 
+    validation:
+      required: true
+      dimension: wage_employment_entry
+    status: Pending consideration
+    
   eduction_training_status_entry:
     name: Eduction / training status
     type: categorical
