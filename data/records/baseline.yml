@@ -222,6 +222,16 @@ fields:
     status: Pending consideration
     latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
 
+  eduction_training_status:
+    name: Eduction / training status
+    type: categorical
+    description: What is your education status?
+    validation: 
+      required: true
+      dimension: education_training_status
+    status: Pending consideration
+    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE
+
   housing_baseline_accommodation:
     name: Accommodation type
     type: categorical
