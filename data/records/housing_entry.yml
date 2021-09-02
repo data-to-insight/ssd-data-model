@@ -30,10 +30,10 @@ fields:
     status: Decided
 
   housing_entry_accomodation:
-    name: Accomodation type
+    name: Accomodation type entry
     type: categorical
     description: 
-    comments: tbc - once selected, the categories will align with baseline collection
+    comments: 
     validation:
       required: true
       dimension: housing_entry_accomodation
