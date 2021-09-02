@@ -39,18 +39,34 @@ fields:
       date_after: date_started_service
     status: Decided
 
-  employment_entry_details:
-    name: Details of paid employment
+  employment_entry_status:
+    name: Employment entry status
     type: categorical
-    description: Selection of a single category describing the type of employment
-      participant is entering for the employment outcome achievement. To be collected
-      once at entry to employment outcome submission.
-    comments:
+    description: What is your current employment status?
     validation:
       required: true
-      dimension: employment_entry_details
+      dimension: employment_entry_status
     status: Pending consideration
-    latest_comments: tbc - same comments as baseline 'economic_status', categories to align
+
+  hours_of_employment_entry:
+    name: Hours of employment
+    type: categorical
+    description: In your main job, how many hours a week do you usually work? (Include paid and unpaid overtime). For employed and self-employed. 
+    validation: 
+      required: true
+      dimension: hours_of_employment_entry
+    status: Pending consideration
+    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
+
+  eduction_training_status_entry:
+    name: Eduction / training status
+    type: categorical
+    description: What is your education status?
+    validation: 
+      required: true
+      dimension: education_training_status_entry
+    status: Pending consideration
+    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE
 
   employment_entry_occupation:
     name: Occupation type
