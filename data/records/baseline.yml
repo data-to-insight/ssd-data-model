@@ -45,12 +45,12 @@ fields:
     name: Referral source
     type: categorical
     description: The referral source that led the participant to RTOF.
-    comments: The categories for this are still to be decided and will be a product of engagement with frontline providers during mobilistion.
+    comments: 
     validation:
       required: true
       dimension: referral_source
     status: Pending consideration
-    latest_comments: Categories tbc after provider engagement
+    latest_comments: 
 
 
   transgender:
@@ -59,12 +59,11 @@ fields:
     description: Do you identify as transgender? A question which follows on from the question in the person data form, with 'identify as transgender',
       'do not identify as transgender' or 'prefer not to say'. This is a non-mandatory data field, people have the option to ask this question, but are not forced to answer
       To be collected once and submitted within 3 months of enrolment.
-
     comments:
     validation:
       dimension: transgender
     status: Pending consideration
-    latest_comments: tbc with Ecorys and Palladium
+    latest_comments: 
 
 
   current_dependents_uk:
@@ -84,7 +83,7 @@ fields:
     validation:
       dimension: age_profile_of_dependents_uk
     status: Pending consideration
-    latest_comments: tbc with Ecorys, Palladium and HO
+    latest_comments: 
 
   date_arrived_in_uk:
     name: Date arrived in UK
@@ -245,12 +244,12 @@ fields:
     name: Accommodation type baseline
     type: categorical
     description: tbc
-    comments: Ecorys to provide details. To be collected once and submitted within 3 months of enrolment.
+    comments: Safe and secure accommodation - defined by compliance with the Decent Homes Standard including the absence of category 1 and 2 hazards under the Housing and Health and Safety Rating System, and with all relevant gas, electricity and fire safety checks in place.
     validation:
       required: true
       dimension: housing_baseline_accommodation
-    status: Work in progress
-    latest_comments: tbc with James W (Ecorys) to confirm requirements of the VfM assessment - decision due 31 August
+    status: Pending considation
+    latest_comments: 
 
   homelessness_baseline:
     name: Homelessness status baseline
