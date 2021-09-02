@@ -37,5 +37,5 @@ fields:
     validation:
       required: true
       dimension: housing_entry_accomodation
-    status: Work in progress
+    status: Pending consideration
     latest_comments: Safe and secure accommodation - defined by compliance with the Decent Homes Standard including the absence of category 1 and 2 hazards under the Housing and Health and Safety Rating System, and with all relevant gas, electricity and fire safety checks in place.
