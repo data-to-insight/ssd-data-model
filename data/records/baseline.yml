@@ -49,7 +49,7 @@ fields:
     validation:
       required: true
       dimension: referral_source
-    status: Pending consideration
+    status: Decided
     latest_comments: 
 
   current_dependents_uk:
@@ -61,6 +61,20 @@ fields:
       dimension: current_dependents_uk
     status: Decided
     latest_comments:
+
+  number_u18_HH:
+    name: Number of children under 18 living in HH
+    type: integer
+    description: How many children under the age of 18 are currently living in your household
+    status: Decided
+    validation: {}
+
+  number_over_18_HH:
+    name: Number of adults over 18 living in HH
+    type: integer
+    description: How many adults over the age of 18 are currently living in your household
+    status: Decided
+    validation: {}
 
   age_profile_of_dependents_uk:
     name: Age profile of dependents in UK
