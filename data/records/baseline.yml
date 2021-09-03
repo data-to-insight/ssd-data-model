@@ -52,18 +52,6 @@ fields:
     status: Pending consideration
     latest_comments: 
 
-  transgender:
-    name: Transgender
-    type: categorical
-    description: Do you identify as transgender? A question which follows on from the question in the person data form, with 'identify as transgender',
-      'do not identify as transgender' or 'prefer not to say'. This is a non-mandatory data field, people have the option to ask this question, but are not forced to answer
-      To be collected once and submitted within 3 months of enrolment.
-    comments:
-    validation:
-      dimension: transgender
-    status: Pending consideration
-    latest_comments: 
-    
   current_dependents_uk:
     name: Current dependents in UK
     type: categorical
