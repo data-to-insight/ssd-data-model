@@ -22,13 +22,11 @@ fields:
       required: true
     status: Decided
 
-
   gender:
     name: Gender
     type: categorical
     description: Gender of participant. Must be one of the five categories provided.
-      To be collected once at enrolment.
-      Note there is a follow-up gender question as part of the baseline data collection.
+      To be collected once at enrolment.    
     comments:
     validation:
       required: true
@@ -37,12 +35,13 @@ fields:
 
   dispersal_area:
     name: Dispersal area
-    type: string
+    type: categorical
     description: Local authority where participant was located once asylum status
       was granted. To be collected once at enrolment into the program.
     comments: Confirm whether this should be string or list of LA's
     validation:
       required: true
+      dimension: dispersal_area
     status: Decided
 
   date_started_service:
