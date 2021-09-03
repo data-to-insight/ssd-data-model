@@ -28,3 +28,13 @@ fields:
       required: true
       date_after: date_started_service
     status: Decided
+
+  reason_for_disengagement:
+    name: Reason for disengagement
+    type: string
+    description: Optional field. If the reason for a participant disengagement from RTOF is known, please provide details. ie. 'Moved out of area'
+    validation: 
+      character_limit: 255
+    status: Decided
+
+
