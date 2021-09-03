@@ -39,14 +39,22 @@ fields:
       date_after: date_started_service
     status: Decided
 
-  employment_entry_status:
-    name: Employment entry status
+  primary_employment_entry_status:
+    name: Primary employment entry status
     type: categorical
-    description: What is your current employment status?
+    description: What is your primary current employment status?
     validation:
       required: true
-      dimension: employment_entry_status
-    status: Pending consideration
+      dimension: primary_employment_entry_status
+    status: Decided
+
+  secondary_employment_entry_status:
+    name: Seconday employment entry status
+    type: categorical
+    description: If you have more than one economic status, what is your current secondary employment status?
+    validation:
+      dimension: primary_employment_entry_status
+    status: Decided
 
   hours_of_employment_entry:
     name: Hours of employment
