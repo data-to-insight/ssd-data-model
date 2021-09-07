@@ -201,7 +201,7 @@ fields:
     name: Main economic status at baseline
     type: categorical
     description: What is your current employment status? Selection of a single category describing the employment status of
-      the participant prior to entering RTOF. To be collected once and submitted within 3 months of enrolment.
+      the participant prior to entering RTOF. 
     comments: 
     validation:
       required: true
@@ -213,30 +213,33 @@ fields:
     name: Hours of employment
     type: categorical
     description: In your main job, how many hours a week do you usually work? (Include paid and unpaid overtime). For employed and self-employed. 
+    comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
     validation: 
       required: true
       dimension: hours_of_employment
-    status: Pending consideration
-    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
+    status: Decided
+    latest_comments: 
   
   wage_baseline:
     name: Wage baseline 
     type: categorical
-    description: Estimated hourly wage 
+    description: Estimated hourly wage. 
     validation:
       required: true
       dimension: wage_baseline
     status: Pending consideration
+    latest_comments: Categories are currently pending. Ecorys to confirm. 
   
   eduction_training_status:
     name: Eduction / training status
     type: categorical
-    description: What is your education status?
+    description: What is your education status? 
+    comments:  Ecorys addition (based on Census wording) to ensure emploment questions are MECE
     validation: 
       required: true  
-      dimension: education_training_status
+      dimension: education_training_status_baseline
     status: Pending consideration
-    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE
+    latest_comments:
 
   housing_baseline_accommodation:
     name: Accommodation type baseline
@@ -252,10 +255,9 @@ fields:
   homelessness_baseline:
     name: Homelessness status baseline
     type: categorical
-    description: Statutory homelessness requires a household to be unintentionally homeless AND demonstrate a priority category need, such as dependent children. Non-statutory homelessness may include single homeless people without specific vulnerabilities, or those people who don’t approach their local authority for help. 
-    comments: More information - https://www.gov.uk/guidance/homelessness-data-notes-and-definitions and https://www.legislation.gov.uk/ukpga/1996/52/section/175?view=plain
+    description: This data field is only applicable if either 'Homeless and rough sleeping' or 'Homeless but not rough sleeping (e.g. living with friends or family)' was selected in the housing_baseline_accommodation data field'.  Statutory homelessness requires a household to be unintentionally homeless AND demonstrate a priority category need, such as dependent children. Non-statutory homelessness may include single homeless people without specific vulnerabilities, or those people who don’t approach their local authority for help. 
+    comments: 
     validation:
-      required: true
       dimension: homelessness_baseline
-    status: Pending consideration
-    
+    status: Decided
+    latest_comments: More information - https://www.gov.uk/guidance/homelessness-data-notes-and-definitions and https://www.legislation.gov.uk/ukpga/1996/52/section/175?view=plain
