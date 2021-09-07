@@ -1,11 +1,22 @@
-- LA
-- Home Office
-- Local VCS 
-- Primary Care
-- Other Health
-- HO Asylum Housing Providers (e.g. Serco)
-- Migrant Help
-- Self-referrals
-- DWP
-- Peer to peer referrals
-- Other 
+- value: LA
+  description: Local Authority
+- value: Home Office
+  description: 
+- value: Local VCS
+  description: Local voluntary and community sector 
+- value: Primary Care
+  description: 
+- value: Other Health
+  description:
+- value: HO providers
+  description: Home Office Asylum Housing Providers (e.g. Serco)
+- value: Migrant Help
+  description: 
+- value: Self-referrals
+  description:
+- value: DWP
+  description: Governmentment Departmnet for Work and Pensions 
+- value: Peer
+  description: Peer to peer referrals
+- value: Other
+  description: Any other referral source
