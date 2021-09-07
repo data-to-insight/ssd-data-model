@@ -63,7 +63,7 @@ fields:
     validation: 
       required: true
       dimension: hours_of_employment_entry
-    status: Pending consideration
+    status: Decided
     latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
 
   wage_employment_entry:
@@ -82,7 +82,7 @@ fields:
     validation: 
       required: true
       dimension: education_training_status_entry
-    status: Pending consideration
+    status: Decided
     latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE
 
   employment_entry_occupation:
