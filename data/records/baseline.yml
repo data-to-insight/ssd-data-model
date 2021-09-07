@@ -265,9 +265,20 @@ fields:
   homelessness_baseline:
     name: Homelessness status baseline
     type: categorical
-    description: This data field is only applicable if either 'Homeless and rough sleeping' or 'Homeless but not rough sleeping (e.g. living with friends or family)' was selected in the housing_baseline_accommodation data field'.  Statutory homelessness requires a household to be unintentionally homeless AND demonstrate a priority category need, such as dependent children. Non-statutory homelessness may include single homeless people without specific vulnerabilities, or those people who don’t approach their local authority for help. 
-    comments: 
+    description: >-
+      This data field is only applicable if either 'Homeless and rough sleeping' or
+      'Homeless but not rough sleeping (e.g. living with friends or family)' was selected in the
+      housing_baseline_accommodation data field'.
+
+      Statutory homelessness requires a household to be unintentionally homeless
+      AND demonstrate a priority category need, such as dependent children.
+      Non-statutory homelessness may include single homeless people without specific vulnerabilities,
+      or those people who don’t approach their local authority for help.
     validation:
       dimension: homelessness_baseline
+      conditional:
+        - expression: one_of(housing_baseline_accommodation, ['Homeless and rough sleeping', 'Homeless but not rough sleeping (e.g. living with friends or family)'])
+          validation:
+            required: true
     status: Decided
     latest_comments: More information - https://www.gov.uk/guidance/homelessness-data-notes-and-definitions and https://www.legislation.gov.uk/ukpga/1996/52/section/175?view=plain

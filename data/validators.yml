@@ -85,3 +85,13 @@ count_min:
       help: The number of entries
   description: |
     Minimum numbers of entries in a list
+
+conditional:
+  args:
+    - name: expression
+      type: string
+      help: The evaluation expression
+    - name: validation
+      type: validation
+      help: The validation that should be applied
+  description: Allows for conditional application of validators
