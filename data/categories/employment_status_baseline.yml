@@ -1,0 +1,16 @@
+- value: PC
+  description: Working as an employee on a permanent contract (or on leave from employment, for example maternity or paternity leave)
+- value: TC
+  description: Working as an employee on a temporary contract
+- value: ZHC
+  description: Working as an employee on a zero hours contract
+- value: CIH
+  description: Working as an employee cash in hand
+- value: SE
+  description: Self employed or freelance (Freelance means that you are self-employed and work for different companies or people on particular pieces of work)
+- value: ULA
+  description: Unemployed and looking/available for work immediately (in the next two weeks)
+- value: UNLA
+  description: Unemployed and NOT looking/available for work immediately (for example, retired, looking after family or long term sick or disabled)
+- value: Other
+  description: 
