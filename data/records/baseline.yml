@@ -65,24 +65,24 @@ fields:
   number_u18_HH:
     name: Number of children under 18 living in HH
     type: integer
-    description: How many children under the age of 18 are currently living in your household
+    description: How many children under the age of 18 are currently living in your household? To be collected once and submitted within 3 months of enrolment.
     status: Decided
     validation: {}
 
   number_over_18_HH:
     name: Number of adults over 18 living in HH
     type: integer
-    description: How many adults over the age of 18 are currently living in your household
+    description: How many adults over the age of 18 are currently living in your household? To be collected once and submitted within 3 months of enrolment.
     status: Decided
     validation: {}
 
   age_profile_of_dependents_uk:
     name: Age profile of dependents in UK
     type: list
-    description: If answered Yes to 'current dependents UK'. Selection of each option that applies to the participant. To be collected once and submitted within 3 months of enrolment.
+    description: If answered Yes to 'current dependents UK', select every option that applies to the participants dependents (this does not record how many dependents are in each age bracket.) To be collected once and submitted within 3 months of enrolment.
     validation:
       dimension: age_profile_of_dependents_uk
-    status: Pending consideration
+    status: Decided
     latest_comments: 
 
   date_arrived_in_uk:
@@ -112,27 +112,26 @@ fields:
     name: Language level on entry
     type: categorical
     description: The language level of participant when entering RTOF. Selection of
-      one of the specified category, further information on these levels can be found
-      here [https://esol.britishcouncil.org/sites/default/files/attachments/informational-page/ESOL%20level%20descriptors.pdf].
-      To be collected once and submitted within 3 months of enrolment.
-    comments: https://esol.britishcouncil.org/sites/default/files/attachments/informational-page/ESOL%20level%20descriptors.pdf
+      one of the specified categories. To be collected once and submitted within 3 months of enrolment.
+    comments: 
     validation:
       required: true
       dimension: language_level_on_entry
     status: Decided
+    latest_comments: Information regardimg these levels can be found at the following link - https://esol.britishcouncil.org/sites/default/files/attachments/informational-page/ESOL%20level%20descriptors.pdf
 
   highest_qualification_achieved:
     name: Highest qualification  level achieved
     type: categorical
     description: The highest level of qualification of participant when entering RTOF.
-      Selection of one of the specified category, these refer to [https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels#:~:text=Level%205%20qualifications%20are%3A,higher%20national%20diploma%20(%20HND%20)].
+      Selection of one of the specified categories.
       To be collected once and submitted within 3 months of enrolment.
-    comments: To provide a relevant link to equivalent qualification levels around
-      the world (https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels)
+    comments: 
     validation:
       required: true
       dimension: highest_qualification_achieved
     status: Decided
+    latest_comments: Information regardimg these levels can be found at the following link - https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels#:~:text=Level%205%20qualifications%20are%3A,higher%20national%20diploma%20(%20HND%20)
 
   age_finished_study:
     name: Age when finished study
@@ -149,9 +148,7 @@ fields:
     type: categorical
     description: When participant left home country were they in any form of employment - yes / no response.
       To be collected once and submitted within 3 months of enrolment.
-    comments: Simple yes / no selection. To confirm whether this refers to 'ever employed
-      in home country' or 'within a given time period before arriving in the UK' [explain
-      use case of question - understanding if work in UK is comparable to prior experience]
+    comments: 
     validation:
       required: true
       dimension: employed_in_home_country
@@ -161,9 +158,9 @@ fields:
     name: Occupation type
     type: string
     description: If answered 'Yes' to employed in home country field, state job role
-       of their last employment. Max word count 10 words. To be collected once and submitted within 3 months of enrolment.
+       of their last employment. To be collected once and submitted within 3 months of enrolment.
        For some providers this may be a categorical data field - please confirm with your nominated data lead.
-    comments: To confirm word limit (and possibly add a suggestion ie. Teacher)
+    comments: 
     validation:
       character_limit: 255
     status: Decided
@@ -172,9 +169,9 @@ fields:
     name: Sector
     type: string
     description: If answered 'Yes' to employed in home country field, state the sector
-       of their last employment. Max word count 10 words. To be collected once and submitted within 3 months of enrolment.
+       of their last employment. To be collected once and submitted within 3 months of enrolment.
        For some providers this may be a categorical data field - please confirm with your nominated data lead.
-    comments: To confirm word limit (and possibly add a suggestion ie. Education)
+    comments: 
     validation:
       character_limit: 255
     status: Decided
@@ -187,29 +184,30 @@ fields:
      For some providers this may be a categorical data field - please confirm with your nominated data lead.
     validation:
       character_limit: 255
+      required: true
     status: Decided
     latest_comments:
 
   prior_employment:
     name: Prior employment
     type: categorical
-    description: Since arriving in the UK, have you ever undertaken any paid employment? 
+    description: Since arriving in the UK, have you ever undertaken any paid employment? To be collected once and submitted within 3 months of enrolment.
     validation:
       required: true
       dimension: prior_employment
-    status: Pending consideration
+    status: Decided
     
   employment_status:
     name: Main economic status at baseline
     type: categorical
-    description: Selection of a single category describing the employment status of
+    description: What is your current employment status? Selection of a single category describing the employment status of
       the participant prior to entering RTOF. To be collected once and submitted within 3 months of enrolment.
-    comments: "JF: Why not capture <8 hrs/week? Does this Q relate to status in home country? Suggest change 'unpaid work...' to voluntary work (to include either for family or not) Clarify that sick/disabled relates to reason for unemployment (if this is the case) These comments also apply to other references to emplyment type"
+    comments: 
     validation:
       required: true
-      dimension: employment_status
-    status: Pending consideration
-    latest_comments: What is your current employment status? Source - https://www.ons.gov.uk/census/censustransformationprogramme/questiondevelopment/economicactivityandhoursworkedquestiondevelopmentforcensus2021#questions-recommended-for-census-2021 . Required to assess movement from unemployment to employment and to cross reference against admin data sets
+      dimension: employment_status_baseline
+    status: Decided
+    latest_comments: 
 
   hours_of_employment:
     name: Hours of employment
