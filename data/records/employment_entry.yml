@@ -45,7 +45,7 @@ fields:
     description: What is your primary current employment status?
     validation:
       required: true
-      dimension: primary_employment_entry_status
+      dimension: employment_status
     status: Decided
 
   secondary_employment_entry_status:
@@ -53,7 +53,7 @@ fields:
     type: categorical
     description: If you have more than one economic status, what is your current secondary employment status?
     validation:
-      dimension: primary_employment_entry_status
+      dimension: employment_status
     status: Decided
 
   hours_of_employment_entry:
@@ -62,7 +62,7 @@ fields:
     description: In your main job, how many hours a week do you usually work? (Include paid and unpaid overtime). For employed and self-employed. 
     validation: 
       required: true
-      dimension: hours_of_employment_entry
+      dimension: hours_of_employment
     status: Decided
     latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
 
@@ -72,7 +72,7 @@ fields:
     description: Estimated hourly wage 
     validation:
       required: true
-      dimension: wage_employment_entry
+      dimension: wage
     status: Pending consideration
     
   eduction_training_status_entry:
@@ -81,7 +81,7 @@ fields:
     description: What is your education status?
     validation: 
       required: true
-      dimension: education_training_status_entry
+      dimension: education_training_status
     status: Decided
     latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE
 

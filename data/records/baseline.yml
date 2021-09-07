@@ -226,7 +226,7 @@ fields:
     description: Estimated hourly wage. 
     validation:
       required: true
-      dimension: wage_baseline
+      dimension: wage
     status: Pending consideration
     latest_comments: Categories are currently pending. Ecorys to confirm. 
   
@@ -237,7 +237,7 @@ fields:
     comments:  Ecorys addition (based on Census wording) to ensure emploment questions are MECE
     validation: 
       required: true  
-      dimension: education_training_status_baseline
+      dimension: education_training_status
     status: Decided
     latest_comments:
 

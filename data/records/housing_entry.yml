@@ -42,6 +42,6 @@ fields:
     comments: 
     validation:
       required: true
-      dimension: housing_entry_accomodation
+      dimension: housing_accomodation
     status: Decided
     latest_comments: 

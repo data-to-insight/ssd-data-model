@@ -41,6 +41,6 @@ fields:
     comments: 
     validation:
       required: true
-      dimension: housing_sustain_accomodation
+      dimension: housing_accomodation
     status: Decided
     latest_comments: 
