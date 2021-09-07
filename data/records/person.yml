@@ -37,7 +37,7 @@ fields:
     name: Dispersal area
     type: categorical
     description: Local authority where participant was located once asylum status
-      was granted. To be collected once at enrolment into the program.
+      was granted. A list of all possible dispersal areas are listed within the dimensions. To be collected once at enrolment into the program.
     comments: Confirm whether this should be string or list of LA's
     validation:
       required: true
