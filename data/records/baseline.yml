@@ -87,8 +87,8 @@ fields:
 
   date_arrived_in_uk:
     name: Date arrived in UK
-    type: date
-    description: Date participant entered the UK, relating to their latest and current
+    type: monthyear
+    description: Month and year the participant entered the UK, relating to their latest and current
       arrival. To be collected once and submitted within 3 months of enrolment.
     comments: To confirm alternative collection route if an integration plan is not
       submitted [eg. Provider caseload review]
@@ -99,8 +99,8 @@ fields:
 
   date_asylum_status_granted:
     name: Date asylum status granted
-    type: date
-    description: Date participant was granted asylum status, relating to their latest
+    type: monthyear
+    description: Month and year the participant was granted asylum status, relating to their latest
       and current asylum status. To be collected once and submitted within 3 months of enrolment.
     comments: Can we use HO data for this - to check with HO.
     validation:
