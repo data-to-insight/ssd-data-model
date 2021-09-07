@@ -77,3 +77,11 @@ character_limit:
       help: The number of characters
   description: |
     Maximum number of unicode characters in string.
+
+count_min:
+  args:
+    - name: number
+      type: integer
+      help: The number of entries
+  description: |
+    Minimum numbers of entries in a list
