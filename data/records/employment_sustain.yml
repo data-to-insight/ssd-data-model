@@ -35,7 +35,7 @@ fields:
     validation:
       required: true
       dimension: employment_sustain_status
-    status: Pending consideration
+    status: Decided
 
   hours_of_employment_sustain:
     name: Hours of employment at sustain
@@ -44,7 +44,7 @@ fields:
     validation: 
       required: true
       dimension: hours_of_employment_sustain
-    status: Pending consideration
+    status: Decided
     latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
 
   wage_employment_sustain:
@@ -63,7 +63,7 @@ fields:
     validation: 
       required: true
       dimension: education_training_status_sustain
-    status: Pending consideration
+    status: Decided
     latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE
 
   employment_susatin_occupation:

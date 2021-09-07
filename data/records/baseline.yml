@@ -238,7 +238,7 @@ fields:
     validation: 
       required: true  
       dimension: education_training_status_baseline
-    status: Pending consideration
+    status: Decided
     latest_comments:
 
   housing_baseline_accommodation:
