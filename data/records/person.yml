@@ -46,9 +46,8 @@ fields:
 
   date_started_service:
     name: Date started with service
-    type: date
-    description: Date of participant enrolment onto the program. Month and Year of
-      enrolment required. To be collected once at enrolment.
+    type: monthyear
+    description: Month and year the participant enrolled onto the program. To be collected once at enrolment.
     comments:
     validation:
       required: true

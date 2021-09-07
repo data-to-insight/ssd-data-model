@@ -43,5 +43,5 @@ fields:
     validation:
       required: true
       dimension: housing_entry_accomodation
-    status: Pending consideration
+    status: Decided
     latest_comments: 
