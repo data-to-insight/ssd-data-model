@@ -38,5 +38,6 @@ fields:
     comments: Selection of (at least) 3 intermediate outcomes achieved.
     validation:
       required: true
-      dimension: employment_outcome_type
+      dimension: intermediate_employment_outcome_type
+      count_min: 3
     status: Decided
