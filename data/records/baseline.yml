@@ -21,13 +21,14 @@ fields:
     name: NI Number
     type: string
     description: UK National Insurance number. Must be unique. To be collected at
-      enrolment into the program. All upper case and no spaces [regular expressions
-      for NiNos]
+      once the NINO for a participant is available. All upper case and no spaces [regular expressions
+      for NiNos]. 
     comments: Minimum data collection required to understand enrolment
-    validation:
+    validation:   
       unique: true
       national_insurance_number: true
     status: Decided
+    latest_comments: This data field is not validated as 'required', as we are aware some NINOs may not be available when submitting the baseline record. However, this field is ultimately required to be submitted and missing NINOs will be followed up. 
 
   nationality:
     name: Nationality
@@ -84,6 +85,8 @@ fields:
       dimension: age_profile_of_dependents_uk
       conditional:
         - expression: one_of(current_dependents_uk, ['Yes'])
+          validation:
+            required: true
     status: Decided
     latest_comments: 
 
@@ -143,7 +146,9 @@ fields:
     comments:
     validation:
       conditional:
-         - expression: one_of(highest_qualification_achieved, ['Unknown'])
+        - expression: one_of(highest_qualification_achieved, ['Unknown'])
+          validation:
+            required: true
     status: Decided
     latest_comments:
 
@@ -168,7 +173,9 @@ fields:
     validation:
       character_limit: 255
       conditional:
-         - expression: one_of(employed_in_home_country, ['Yes'])
+        - expression: one_of(employed_in_home_country, ['Yes'])
+          validation:
+            required: true 
     status: Decided
 
   occupation_sector:
@@ -181,7 +188,9 @@ fields:
     validation:
       character_limit: 255
       conditional:
-         - expression: one_of(employed_in_home_country, 'Yes')
+        - expression: one_of(employed_in_home_country, ['Yes'])
+          validation:
+            required: true
     status: Decided
 
   occupation_goal:
