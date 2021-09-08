@@ -11,6 +11,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: rtof-data-model
+        fetch-depth: 0
 
     - name: Check out RTOF Tools
       uses: actions/checkout@v2
@@ -18,7 +19,6 @@ jobs:
         repository: SocialFinanceDigitalLabs/rtof-data-model-tools
         path: rtof-data-model-tools
         token: ${{ secrets.API_TOKEN_WEB_REPO }}
-        fetch-depth: 0
 
     - name: 🐍 install Python
       uses: actions/setup-python@v2
