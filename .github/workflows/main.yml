@@ -18,6 +18,7 @@ jobs:
         repository: SocialFinanceDigitalLabs/rtof-data-model-tools
         path: rtof-data-model-tools
         token: ${{ secrets.API_TOKEN_WEB_REPO }}
+        fetch-depth: 0
 
     - name: 🐍 install Python
       uses: actions/setup-python@v2
