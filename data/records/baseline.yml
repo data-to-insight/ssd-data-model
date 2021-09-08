@@ -83,6 +83,8 @@ fields:
     description: If answered Yes to 'current dependents UK', select every option that applies to the participants dependents (this does not record how many dependents are in each age bracket.) To be collected once and submitted within 3 months of enrolment.
     validation:
       dimension: age_profile_of_dependents_uk
+      conditional:
+        - expression: one_of(current_dependents_uk, ['Yes'])
     status: Decided
     latest_comments: 
 
@@ -140,7 +142,9 @@ fields:
     description: This should only be submitted if the response to the field "highest qualification level achieved"
       was "unknown"
     comments:
-    validation: {}
+    validation:
+      conditional:
+         - expression: one_of(highest_qualification_achieved, ['Unknown'])
     status: Decided
     latest_comments:
 
@@ -164,6 +168,8 @@ fields:
     comments: 
     validation:
       character_limit: 255
+      conditional:
+         - expression: one_of(employed_in_home_country, ['Yes'])
     status: Decided
 
   occupation_sector:
@@ -175,6 +181,8 @@ fields:
     comments: 
     validation:
       character_limit: 255
+      conditional:
+         - expression: one_of(employed_in_home_country, 'Yes')
     status: Decided
 
   occupation_goal:
@@ -216,7 +224,6 @@ fields:
     description: In your main job, how many hours a week do you usually work? (Include paid and unpaid overtime). For employed and self-employed. 
     comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
     validation: 
-      required: true
       dimension: hours_of_employment
     status: Decided
     latest_comments: 
@@ -224,9 +231,8 @@ fields:
   wage_baseline:
     name: Wage baseline 
     type: categorical
-    description: Estimated hourly wage. 
-    validation:
-      required: true
+    description: tbc
+    validation:   
       dimension: wage
     status: Pending consideration
     latest_comments: Categories are currently pending. Ecorys to confirm. 
@@ -234,8 +240,8 @@ fields:
   eduction_training_status:
     name: Eduction / training status
     type: categorical
-    description: What is your education status? 
-    comments:  Ecorys addition (based on Census wording) to ensure emploment questions are MECE
+    description: What is your current education status? 
+    comments:  
     validation: 
       required: true  
       dimension: education_training_status
@@ -245,7 +251,7 @@ fields:
   housing_baseline_accommodation:
     name: Accommodation type baseline
     type: categorical
-    description: Rough sleepers -  Rough sleepers are defined for the purposes of rough sleeping counts and estimates as - 1) People sleeping, about to bed down (sitting on/in or standing next to their bedding) or actually bedded down in the open air (such as on the strEmployments, in tents, doorways, parks, bus shelters or encampments). 2) People in buildings or other places not designed for habitation (such as stairwells, barns, sheds, car parks, cars, derelict boats, stations, or ‘bashes’).
+    description: Rough sleepers -  Rough sleepers are defined for the purposes of rough sleeping counts and estimates as - 1) People sleeping, about to bed down (sitting on/in or standing next to their bedding) or actually bedded down in the open air (such as on the strets, in tents, doorways, parks, bus shelters or encampments). 2) People in buildings or other places not designed for habitation (such as stairwells, barns, sheds, car parks, cars, derelict boats, stations, or bushes).
                 The definition does not include people in hostels or shelters, people in campsites or other sites used for recreational purposes or organised protest, squatters or travellers.
                 Bedded down is taken to mean either lying down or sleeping. About to bed down includes those who are sitting in/on or near a sleeping bag or other bedding.
 
@@ -274,7 +280,7 @@ fields:
       Statutory homelessness requires a household to be unintentionally homeless
       AND demonstrate a priority category need, such as dependent children.
       Non-statutory homelessness may include single homeless people without specific vulnerabilities,
-      or those people who don’t approach their local authority for help.
+      or those people who do not approach their local authority for help.
     validation:
       dimension: homelessness_baseline
       conditional:
