@@ -11,6 +11,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: rtof-data-model
+        fetch-depth: 0
 
     - name: Check out RTOF Tools
       uses: actions/checkout@v2
@@ -56,17 +57,6 @@ jobs:
         cd $GITHUB_WORKSPACE/$TOOLS_REPO
         poetry run python main.py
 
-    - name: Upload spec
-      env:
-        RTOF_UPLOAD_URL: ${{ secrets.SHAREPOINT_UPLOAD_WEBHOOK }}
-      run: |
-        cd $GITHUB_WORKSPACE/$TOOLS_REPO
-        poetry run bin/upload.py output/specification.docx "$RTOF_UPLOAD_URL"
-        poetry run bin/upload.py output/specification-records.xlsx "$RTOF_UPLOAD_URL"
-        poetry run bin/upload.py output/specification-dimensions.xlsx "$RTOF_UPLOAD_URL"
-        poetry run bin/upload.py output/record-relationships.png "$RTOF_UPLOAD_URL"
-      if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
-
     - name: Deploy website
       uses: cpina/github-action-push-to-another-repository@main
       env:
@@ -77,3 +67,4 @@ jobs:
         destination-repository-name: RTOF-specification
         user-email: info@socialfinance.org.uk
         target-branch: main
+      if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
