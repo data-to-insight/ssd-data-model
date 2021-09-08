@@ -25,6 +25,7 @@ fields:
       for NiNos]
     comments: Minimum data collection required to understand enrolment
     validation:
+      required: true
       unique: true
       national_insurance_number: true
     status: Decided
@@ -65,14 +66,14 @@ fields:
   number_u18_HH:
     name: Number of children under 18 living in HH
     type: integer
-    description: How many children under the age of 18 are currently living in your household? To be collected once and submitted within 3 months of enrolment.
+    description: How many children under the age of 18 are currently living in the participants household? To be collected once and submitted within 3 months of enrolment.
     status: Decided
     validation: {}
 
   number_over_18_HH:
     name: Number of adults over 18 living in HH
     type: integer
-    description: How many adults over the age of 18 are currently living in your household? To be collected once and submitted within 3 months of enrolment.
+    description: How many adults over the age of 18 are currently living in the participants household? To be collected once and submitted within 3 months of enrolment.
     status: Decided
     validation: {}
 
