@@ -67,3 +67,4 @@ jobs:
         destination-repository-name: RTOF-specification
         user-email: info@socialfinance.org.uk
         target-branch: main
+      if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
