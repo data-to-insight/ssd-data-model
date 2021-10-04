@@ -31,7 +31,7 @@ fields:
     status: Decided
 
   integration_outcome_achieved_date:
-    name: Date integration plan outcome acheived
+    name: Date integration plan outcome achieved
     type: date
     description: Date of integration plan outcome achievement. To be collected at each
       outcome submission.

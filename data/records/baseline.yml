@@ -53,13 +53,13 @@ fields:
     status: Decided
     latest_comments: 
 
-  current_dependents_uk:
-    name: Current dependents in UK
+  current_dependants_uk:
+    name: Current dependants in UK
     type: categorical
-    description: Do you currently have any dependents in the UK? Yes / No to understand whether the participant has any depedents curently in the UK. To be collected once and submitted within 3 months of enrolment.
+    description: Do you currently have any dependants in the UK? Yes / No to understand whether the participant has any depedents currently in the UK. To be collected once and submitted within 3 months of enrolment.
     validation:
       required: true
-      dimension: current_dependents_uk
+      dimension: current_dependants_uk
     status: Decided
     latest_comments:
 
@@ -77,14 +77,14 @@ fields:
     status: Decided
     validation: {}
 
-  age_profile_of_dependents_uk:
-    name: Age profile of dependents in UK
+  age_profile_of_dependants_uk:
+    name: Age profile of dependants in UK
     type: list
-    description: If answered Yes to 'current dependents UK', select every option that applies to the participants dependents (this does not record how many dependents are in each age bracket.) To be collected once and submitted within 3 months of enrolment.
+    description: If answered Yes to 'current dependants UK', select every option that applies to the participants dependants (this does not record how many dependants are in each age bracket.) To be collected once and submitted within 3 months of enrolment.
     validation:
-      dimension: age_profile_of_dependents_uk
+      dimension: age_profile_of_dependants_uk
       conditional:
-        - expression: one_of(current_dependents_uk, ['Yes'])
+        - expression: one_of(current_dependants_uk, ['Yes'])
           validation:
             required: true
     status: Decided
@@ -123,7 +123,7 @@ fields:
       required: true
       dimension: language_level_on_entry
     status: Decided
-    latest_comments: Information regardimg these levels can be found at the following link - https://esol.britishcouncil.org/sites/default/files/attachments/informational-page/ESOL%20level%20descriptors.pdf
+    latest_comments: Information regarding these levels can be found at the following link - https://esol.britishcouncil.org/sites/default/files/attachments/informational-page/ESOL%20level%20descriptors.pdf
 
   highest_qualification_achieved:
     name: Highest qualification  level achieved
@@ -245,8 +245,8 @@ fields:
     status: Pending consideration
     latest_comments: Categories are currently pending. Ecorys to confirm. 
   
-  eduction_training_status:
-    name: Eduction / training status
+  education_training_status:
+    name: Education / training status
     type: categorical
     description: What is your current education status? 
     comments:  
@@ -286,7 +286,7 @@ fields:
       housing_baseline_accommodation data field'.
 
       Statutory homelessness requires a household to be unintentionally homeless
-      AND demonstrate a priority category need, such as dependent children.
+      AND demonstrate a priority category need, such as dependant children.
       Non-statutory homelessness may include single homeless people without specific vulnerabilities,
       or those people who do not approach their local authority for help.
     validation:

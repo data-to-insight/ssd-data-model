@@ -29,8 +29,8 @@ fields:
       date_after: date_started_service
     status: Decided
 
-  housing_entry_accomodation:
-    name: Accomodation type entry
+  housing_entry_accommodation:
+    name: Accommodation type entry
     type: categorical
     description: Safe and secure accommodation - Safe accommodation is defined by compliance with the Decent Homes Standard including the absence of category 1 and 2 hazards under the Housing Health and Safety Rating System, and with all relevant gas, electricity and fire safety checks in place.
                 Within this safe accommodation, the individual refugee/family must have appropriate individual space. This is defined as one bedroom for - every adult couple; any other adult aged 16 or over; any two children of the same sex; any two children regardless of sex under the age of 10; any other child; and access to self-contained facilities, including bathroom and kitchen, if in a shared facility.
@@ -42,6 +42,6 @@ fields:
     comments: 
     validation:
       required: true
-      dimension: housing_accomodation
+      dimension: housing_accommodation
     status: Decided
     latest_comments: 

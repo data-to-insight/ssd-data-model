@@ -45,7 +45,7 @@ fields:
       required: true
       dimension: hours_of_employment
     status: Decided
-    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
+    latest_comments: Ecorys addition (based on Census wording) to ensure employment questions are MECE / required for CBA
 
   wage_employment_sustain:
     name: Wage employment at sustain
@@ -56,17 +56,17 @@ fields:
       dimension: wage
     status: Pending consideration
     
-  eduction_training_status_sustain:
-    name: Eduction / training status at sustain
+  education_training_status_sustain:
+    name: Education / training status at sustain
     type: categorical
     description: What is your education status?
     validation: 
       required: true
       dimension: education_training_status
     status: Decided
-    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE
+    latest_comments: Ecorys addition (based on Census wording) to ensure employment questions are MECE
 
-  employment_susatin_occupation:
+  employment_sustain_occupation:
     name: Occupation type
     type: string
     description: State participants employment type for the achievement of entry to

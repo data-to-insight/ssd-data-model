@@ -49,7 +49,7 @@ fields:
     status: Decided
 
   secondary_employment_entry_status:
-    name: Seconday employment entry status
+    name: Secondary employment entry status
     type: categorical
     description: If you have more than one economic status, what is your current secondary employment status?
     validation:
@@ -64,7 +64,7 @@ fields:
       required: true
       dimension: hours_of_employment
     status: Decided
-    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
+    latest_comments: Ecorys addition (based on Census wording) to ensure employment questions are MECE / required for CBA
 
   wage_employment_entry:
     name: Wage employment entry
@@ -75,15 +75,15 @@ fields:
       dimension: wage
     status: Pending consideration
     
-  eduction_training_status_entry:
-    name: Eduction / training status
+  education_training_status_entry:
+    name: Education / training status
     type: categorical
     description: What is your education status?
     validation: 
       required: true
       dimension: education_training_status
     status: Decided
-    latest_comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE
+    latest_comments: Ecorys addition (based on Census wording) to ensure employment questions are MECE
 
   employment_entry_occupation:
     name: Occupation type
