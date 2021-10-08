@@ -13,6 +13,24 @@ fields:
       required: true
     status: Decided
 
+  first_name:
+    name: First name 
+    type: string
+    description: Participants first name 
+    comments:
+    validation:
+      required: true
+    status: Pending consideration 
+
+  last_name:
+    name: Last name 
+    type: string
+    description: Participants last name 
+    comments:
+    validation:
+      required: true
+    status: Pending consideration 
+      
   year_of_birth:
     name: Year of birth
     type: year
