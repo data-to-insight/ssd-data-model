@@ -18,6 +18,14 @@ fields:
       unique: true
     status: Decided
 
+  provider_id_empl_inter:
+    name: Provider identifer 
+    type: string
+    description: Provider identifer for the given provider who completed the employment intermediate form. This must be unique for each individual provider offering services on RTOF
+    comments:
+    primary_key: true
+    status: Decided
+
   date_intermediate_employment_outcome:
     name: Date achieved intermediate outcome
     type: date

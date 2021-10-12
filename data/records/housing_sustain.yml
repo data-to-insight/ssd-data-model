@@ -18,6 +18,14 @@ fields:
       unique: true
     status: Decided
 
+  provider_id_housing_sustain:
+    name: Provider identifer 
+    type: string
+    description: Provider identifer for the given provider who completed the hosuing sustain form. This must be unique for each individual provider offering services on RTOF
+    comments:
+    primary_key: true
+    status: Decided
+
   housing_sustainment_date:
     name: Date housing sustainment achieved
     type: date

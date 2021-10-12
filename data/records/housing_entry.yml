@@ -18,6 +18,14 @@ fields:
       unique: true
     status: Decided
 
+  provider_id_housing_entry:
+    name: Provider identifer 
+    type: string
+    description: Provider identifer for the given provider who completed the housing entry form. This must be unique for each individual provider offering services on RTOF
+    comments:
+    primary_key: true
+    status: Decided
+
   housing_entry_date:
     name: Date of housing entry
     type: date

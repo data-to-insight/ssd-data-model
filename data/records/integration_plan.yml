@@ -19,6 +19,14 @@ fields:
       unique: true
     status: Decided
 
+  provider_id_integration:
+    name: Provider identifer 
+    type: string
+    description: Provider identifer for the given provider who completed the integration plan form. This must be unique for each individual provider offering services on RTOF
+    comments:
+    primary_key: true
+    status: Decided
+
   integration_outcome_type:
     name: Integration outcome type
     type: categorical

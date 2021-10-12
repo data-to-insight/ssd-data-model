@@ -18,6 +18,14 @@ fields:
       required: true
     status: Decided
 
+  provider_id_empl_entry:
+    name: Provider identifer 
+    type: string
+    description: Provider identifer for the given provider who completed the employment entry form. This must be unique for each individual provider offering services on RTOF
+    comments:
+    primary_key: true
+    status: Decided
+
   employment_entry_outcome_type:
     name: Type of employment entry outcome
     type: categorical
