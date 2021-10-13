@@ -18,7 +18,6 @@ fields:
     type: string
     description: Provider identifer for the given provider who completed the person form. This must be unique for each individual provider offering services on RTOF
     comments:
-    primary_key: true
     status: Decided
 
   first_name:

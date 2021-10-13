@@ -22,16 +22,13 @@ fields:
     type: string
     description: Provider identifer for the given provider who completed the baseline form. This must be unique for each individual provider offering services on RTOF
     comments:
-    primary_key: true
     status: Decided
 
   ni_number:
     name: NI Number
     type: string
-    description: UK National Insurance number. Must be unique. To be collected at
-      once the NINO for a participant is available. All upper case and no spaces [regular expressions
+    description: UK National Insurance number. Must be unique. To be collected when the NINO for a participant is available. All upper case and no spaces [regular expressions
       for NiNos]. 
-    comments: Minimum data collection required to understand enrolment
     validation:   
       unique: true
       national_insurance_number: true

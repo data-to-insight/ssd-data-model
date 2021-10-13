@@ -23,7 +23,6 @@ fields:
     type: string
     description: Provider identifer for the given provider who completed the employment intermediate form. This must be unique for each individual provider offering services on RTOF
     comments:
-    primary_key: true
     status: Decided
 
   date_intermediate_employment_outcome:

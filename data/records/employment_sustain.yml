@@ -23,7 +23,6 @@ fields:
     type: string
     description: Provider identifer for the given provider who completed the employment sustain form. This must be unique for each individual provider offering services on RTOF
     comments:
-    primary_key: true
     status: Decided
 
   employment_sustainment_date:
@@ -58,7 +57,7 @@ fields:
   wage_employment_sustain:
     name: Wage at employment sustain
     type: integer
-    description: In your main job, what is your hourly wage? Please record the average hourly wage to the nearest &pound1. If the participant is paid a daily, weekly, monthly or annually, please provide an estimated hourly rate based on hours and weeks worked (eg. &pound15.6K - &pound19.5K FTE can map to 8 GBP - &pound10 an hour). Only relevant for those participants that are employed and self-employed. 
+    description: In your main job, what is your hourly wage? Please record the average hourly wage to the nearest &pound1. If the participant is paid a daily, weekly, monthly or annual rate, please provide an estimated hourly rate based on hours and weeks worked (eg. &pound15.6K - &pound19.5K FTE can map to 8 GBP - &pound10 an hour). Only relevant for those participants that are employed and self-employed. 
     validation:
       required: true
     status: Decided
