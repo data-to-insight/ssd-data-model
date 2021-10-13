@@ -247,7 +247,7 @@ fields:
   wage_baseline:
     name: Wage baseline 
     type: integer
-    description: In your main job, what is your hourly wage? Please record the average hourly wage to the nearest £1. If the participant is paid a daily, weekly, monthly or annual rate, please provide an estimated hourly rate based on hours and weeks worked (eg. £15.6K - £19.5K FTE can map to £8 - £10 an hour). Only relevant for those participants that are employed and self-employed.      
+    description: In your main job, what is your hourly wage? Please record the average hourly wage to the nearest &pound1. If the participant is paid a daily, weekly, monthly or annual rate, please provide an estimated hourly rate based on hours and weeks worked (eg. &pound15.6K - &pound19.5K FTE can map to &pound8- &pound10 an hour). Only relevant for those participants that are employed and self-employed.      
     status: Decided
     latest_comments: Ecorys confirmed integar for hourly wage is the preferred option to record wage.  
   
