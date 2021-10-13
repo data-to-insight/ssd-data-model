@@ -14,16 +14,16 @@ fields:
     status: Decided
 
   provider_id_person:
-    name: Provider identifer 
+    name: Provider identifier 
     type: string
-    description: Provider identifer for the given provider who completed the person form. This must be unique for each individual provider offering services on RTOF
+    description: Provider identifier for the given provider who completed the person form. This must be unique for each individual provider offering services on RTOF
     comments:
     status: Decided
 
   first_name:
     name: First name 
     type: string
-    description: Participants first name 
+    description: Participant's first name 
     comments:
     validation:
       required: true
@@ -32,7 +32,7 @@ fields:
   last_name:
     name: Last name 
     type: string
-    description: Participants last name 
+    description: Participant's last name 
     comments:
     validation:
       required: true

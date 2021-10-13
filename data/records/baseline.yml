@@ -246,7 +246,7 @@ fields:
     type: integer
     description: In your main job, what is your hourly wage? Please record the average hourly wage to the nearest &pound1. If the participant is paid a daily, weekly, monthly or annual rate, please provide an estimated hourly rate based on hours and weeks worked (eg. &pound15.6K - &pound19.5K FTE can map to &pound8- &pound10 an hour). Only relevant for those participants that are employed and self-employed.      
     status: Decided
-    latest_comments: Ecorys confirmed integar for hourly wage is the preferred option to record wage.  
+    latest_comments: Ecorys confirmed integer for hourly wage is the preferred option to record wage.  
   
   education_training_status:
     name: Education / training status
@@ -262,7 +262,7 @@ fields:
   housing_baseline_accommodation:
     name: Accommodation type baseline
     type: categorical
-    description: Rough sleepers -  Rough sleepers are defined for the purposes of rough sleeping counts and estimates as - 1) People sleeping, about to bed down (sitting on/in or standing next to their bedding) or actually bedded down in the open air (such as on the strets, in tents, doorways, parks, bus shelters or encampments). 2) People in buildings or other places not designed for habitation (such as stairwells, barns, sheds, car parks, cars, derelict boats, stations, or bushes).
+    description: Rough sleepers -  Rough sleepers are defined for the purposes of rough sleeping counts and estimates as - 1) People sleeping, about to bed down (sitting on/in or standing next to their bedding) or actually bedded down in the open air (such as on the streets, in tents, doorways, parks, bus shelters or encampments). 2) People in buildings or other places not designed for habitation (such as stairwells, barns, sheds, car parks, cars, derelict boats, stations, or bushes).
                 The definition does not include people in hostels or shelters, people in campsites or other sites used for recreational purposes or organised protest, squatters or travellers.
                 Bedded down is taken to mean either lying down or sleeping. About to bed down includes those who are sitting in/on or near a sleeping bag or other bedding.
 
@@ -289,7 +289,7 @@ fields:
       housing_baseline_accommodation data field'.
 
       Statutory homelessness requires a household to be unintentionally homeless
-      AND demonstrate a priority category need, such as dependant children.
+      AND demonstrate a priority category need, such as dependent children.
       Non-statutory homelessness may include single homeless people without specific vulnerabilities,
       or those people who do not approach their local authority for help.
     validation:

@@ -20,9 +20,9 @@ fields:
     status: Decided
 
   provider_id_integration:
-    name: Provider identifer 
+    name: Provider identifier 
     type: string
-    description: Provider identifer for the given provider who completed the integration plan form. This must be unique for each individual provider offering services on RTOF
+    description: Provider identifier for the given provider who completed the integration plan form. This must be unique for each individual provider offering services on RTOF
     comments:
     status: Decided
 
