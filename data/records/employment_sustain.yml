@@ -56,13 +56,13 @@ fields:
     latest_comments: Ecorys addition (based on Census wording) to ensure employment questions are MECE / required for CBA
 
   wage_employment_sustain:
-    name: Wage employment at sustain
-    type: categorical
-    description: Estimated hourly wage 
+    name: Wage at employment sustain
+    type: integer
+    description: In your main job, what is your hourly wage? Please record the average hourly wage to the nearest £1. If the participant is paid a daily, weekly, monthly or annual rate, please provide an estimated hourly rate based on hours and weeks worked (eg. £15.6K - £19.5K FTE can map to £8 - £10 an hour). Only relevant for those participants that are employed and self-employed. 
     validation:
       required: true
-      dimension: wage
-    status: Pending consideration
+    status: Decided
+    latest_comments: Ecorys confirmed integar for hourly wage is the preferred option to record wage.
     
   education_training_status_sustain:
     name: Education / training status at sustain

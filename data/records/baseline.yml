@@ -237,7 +237,7 @@ fields:
   hours_of_employment:
     name: Hours of employment
     type: categorical
-    description: In your main job, how many hours a week do you usually work? (Include paid and unpaid overtime). For employed and self-employed. 
+    description: In your main job, how many hours a week do you usually work? (Include paid and unpaid overtime). Only relevant for those participants that are employed and self-employed. 
     comments: Ecorys addition (based on Census wording) to ensure emploment questions are MECE / required for CBA
     validation: 
       dimension: hours_of_employment
@@ -246,12 +246,10 @@ fields:
   
   wage_baseline:
     name: Wage baseline 
-    type: categorical
-    description: tbc
-    validation:   
-      dimension: wage
-    status: Pending consideration
-    latest_comments: Categories are currently pending. Ecorys to confirm. 
+    type: integer
+    description: In your main job, what is your hourly wage? Please record the average hourly wage to the nearest £1. If the participant is paid a daily, weekly, monthly or annual rate, please provide an estimated hourly rate based on hours and weeks worked (eg. £15.6K - £19.5K FTE can map to £8 - £10 an hour). Only relevant for those participants that are employed and self-employed.      
+    status: Decided
+    latest_comments: Ecorys confirmed integar for hourly wage is the preferred option to record wage.  
   
   education_training_status:
     name: Education / training status
