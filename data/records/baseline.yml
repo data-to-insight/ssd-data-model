@@ -61,7 +61,7 @@ fields:
   current_dependants_uk:
     name: Current dependants in UK
     type: categorical
-    description: Do you currently have any dependants in the UK? Yes / No to understand whether the participant has any depedents currently in the UK. To be collected once and submitted within 3 months of enrolment.
+    description: Do you currently have any dependants in the UK? Yes / No to understand whether the participant has any dependants currently in the UK. To be collected once and submitted within 3 months of enrolment.
     validation:
       required: true
       dimension: current_dependants_uk
@@ -141,7 +141,7 @@ fields:
       required: true
       dimension: highest_qualification_achieved
     status: Decided
-    latest_comments: Information regardimg these levels can be found at the following link - https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels#:~:text=Level%205%20qualifications%20are%3A,higher%20national%20diploma%20(%20HND%20)
+    latest_comments: Information regarding these levels can be found at the following link - https://www.gov.uk/what-different-qualification-levels-mean/list-of-qualification-levels#:~:text=Level%205%20qualifications%20are%3A,higher%20national%20diploma%20(%20HND%20)
 
   age_finished_study:
     name: Age when finished study

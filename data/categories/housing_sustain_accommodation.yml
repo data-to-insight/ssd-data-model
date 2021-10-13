@@ -1,3 +1,6 @@
-- Renting - private sector
-- Renting - Local authority or housing association
-- Other safe and secure accommodation
+- value: RPC
+  description: Renting - private sector
+- value: RLA
+  description: Renting - Local authority or housing association
+- value: other
+  description: Other safe and secure accommodation
