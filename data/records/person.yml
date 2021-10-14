@@ -13,6 +13,31 @@ fields:
       required: true
     status: Decided
 
+  provider_id_person:
+    name: Provider identifier 
+    type: string
+    description: Provider identifier for the given provider who completed the person form. This must be unique for each individual provider offering services on RTOF
+    comments:
+    status: Decided
+
+  first_name:
+    name: First name 
+    type: string
+    description: Participant's first name 
+    comments:
+    validation:
+      required: true
+    status: Pending consideration 
+
+  last_name:
+    name: Last name 
+    type: string
+    description: Participant's last name 
+    comments:
+    validation:
+      required: true
+    status: Pending consideration 
+      
   year_of_birth:
     name: Year of birth
     type: year
