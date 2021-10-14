@@ -50,35 +50,32 @@ fields:
   integration_social:
     name: Social bonds / bridges / links
     type: categorical
-    description: tbc. To be collected at each
-      outcome submission.
-    comments: TBC on categories - waiting for engagement with providers
+    description: To be collected at each outcome achievement event (creation, 6 months and 12 months integration plan).
+    comments: 
     validation:
       required: true
       dimension: integration_social
     status: Blocked
-    latest_comments: tbc - Ecorys to confirm categories after provider engagement
+    latest_comments: tbc - Ecorys to confirm which integration tool/ indicators will be used for measurement.
 
   integration_comms_language:
     name: Language and communication
     type: categorical
-    description: tbc. To be collected at each
-      outcome submission.
-    comments: TBC on categories - waiting for engagement with providers
+    description: To be collected at each outcome achievement event (creation, 6 months and 12 months integration plan). 
+    comments: 
     validation:
       required: true
       dimension: integration_comms_language
     status: Blocked
-    latest_comments: tbc - Ecorys to confirm categories after provider engagement
+    latest_comments: tbc - Ecorys to confirm which integration tool/ indicators will be used for measurement.  
 
   integration_digital:
     name: Digital skills
     type: categorical
-    description: tbc. To be collected at each
-      outcome submission.
-    comments: TBC on categories - waiting for engagement with providers
+    description: To be collected at each outcome achievement event (creation, 6 months and 12 months integration plan).
+    comments: 
     validation:
       required: true
       dimension: integration_digital
     status: Blocked
-    latest_comments: tbc - Ecorys to confirm categories after provider engagement
+    latest_comments: tbc - Ecorys to confirm which integration tool/ indicators will be used for measurement.
