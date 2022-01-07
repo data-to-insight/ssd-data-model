@@ -27,7 +27,7 @@ fields:
     comments:
     validation:
       required: true
-    status: Pending consideration 
+    status: Decided 
 
   last_name:
     name: Last name 
@@ -36,7 +36,7 @@ fields:
     comments:
     validation:
       required: true
-    status: Pending consideration 
+    status: Decided 
       
   year_of_birth:
     name: Year of birth
