@@ -1,0 +1,32 @@
+description: 'This form outlines the required information for contact details.'
+fields:
+  child_id:
+    name: 'Child ID'
+    type: 'string'
+    description: 'Unique identifier for the child. This must be unique for each child.'
+    comments: ''
+    validation:
+      required: true
+    status: 'Decided'
+  contact_dttm:
+    name: 'Contact Datetime'
+    type: 'datetime'
+    description: 'Date and time of contact'
+    comments: ''
+    validation:
+      required: true
+    status: 'Decided'
+  dim_lookup_cont_sorc_id_desc:
+    name: 'Source of Contact'
+    type: 'string'
+    description: 'Description of the source of contact'
+    comments: ''
+    status: 'Decided'
+  contact_id:
+    name: 'Contact ID'
+    type: 'string'
+    description: 'Identifier for the contact'
+    comments: ''
+    validation:
+      required: true
+    status: 'Decided'
