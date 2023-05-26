@@ -1,11 +1,11 @@
-# Data model for the Refugee Transitions Outcomes Fund (RTOF)
+# Data model
 
-This is the source repository for the RTOF data model and includes tools for generating different outputs from the core
-specification.
+This is the source repository for the SSD data model and includes tools for generating different outputs from the core
+specification. The basis for this work was cloned from SocialFinanceDigitalLabs/rtof-data-model.
 
 ## Data Model
 
-The RTOF data model defines a set of Records (facts) capturing data during the different stages of an individual's progress
+The data model defines a set of Records (facts) capturing data during the different stages of an individual's progress
 through the programme. The data model also includes a number of Categories (dimensions) that are referenced from
 the Fields within a Record.
 
@@ -20,10 +20,8 @@ The datamodel is described using [YAML][yaml], which, despite the website, is de
 "human friendly" data format. The main reason for capturing the standard in YAML is that, because it is a text-based
 format, it provides a proper audit trail of changes and can be tracked in a [Version Control System][vcs] (VCS).
 
-It is also intended to be a [single source of truth][ssot] to facilitate better collaboration between the programme
-partners and make the specification as useful and easy to follow as possible.
 
-As the RTOF programme progresses, we will use [GIT][git] to track and approve proposed changes to the data standard.
+As the programme progresses, we will use [GIT][git] to track and approve proposed changes to the data standard.
 
 ### Specification Components
 
@@ -105,20 +103,16 @@ most case management and data management systems aren't YAML aware, we provide a
 more conventional formats.
 
 The main place to find documentation relating to this specification is
-[sfdl.org.uk/RTOF-specification](https://sfdl.org.uk/RTOF-specification/). The website and associated documentation
-is generated using the [tools][rtof-tools] mentioned above.
+-tbc- The website and associated documentation is generated using the [tools][rtof-tools] mentioned above.
 
 ## Continuous Deployment
 
-The whole specification uses [GitHub Actions][gha] to build and deploy the specification upon every push to the
-code repository. The [workflow file](./.github/workflows/main.yml) runs the python scripts to generate the outputs,
-uploads them to the Social Finance specification webhook, and then pushes the generated Jekyll website to a
-second [GitHub repository](https://github.com/SocialFinanceDigitalLabs/RTOF-specification) that is used to host
-the [GitHub pages][ghp] specification [site](https://sfdl.org.uk/RTOF-specification/).
+-tbc-
 
-[rtof-spec]: https://github.com/SocialFinanceDigitalLabs/rtof-data-model
-[rtof-tools]: https://github.com/SocialFinanceDigitalLabs/rtof-data-model-tools
-[rtof-web]: https://sfdl.org.uk/RTOF-specification/
+
+[ssd-spec]: https://github.com/data-to-insight/ssd-data-model
+[ssd-tools]: https://github.com/data-to-insight/ssd-data-model-tools
+[ssd-web]: https://sfdl.org.uk/SSD-specification/
 
 [yaml]: https://yaml.org/
 [vcs]: https://en.wikipedia.org/wiki/Version_control
