@@ -12,7 +12,7 @@ fields:
     name: 'Contact Datetime'
     type: 'datetime'
     description: 'Date and time of contact'
-    comments: ''
+    comments: 'Format: DD/MM/YY HH:MM'
     validation:
       required: true
     status: 'Decided'
@@ -20,13 +20,13 @@ fields:
     name: 'Source of Contact'
     type: 'string'
     description: 'Description of the source of contact'
-    comments: ''
+    comments: 'Provide the source organization or department responsible for the contact.'
     status: 'Decided'
   contact_id:
     name: 'Contact ID'
     type: 'string'
     description: 'Identifier for the contact'
-    comments: ''
+    comments: 'Social Worker ID / HR relevant reference'
     validation:
       required: true
     status: 'Decided'
@@ -34,7 +34,7 @@ fields:
     name: 'Contact Outcome'
     type: 'string'
     description: 'Outcome of this contact. ref EH/CIN'
-    comments: ''
+    comments: 'Describe the outcome or result of the contact.'
     validation:
       required: true
     status: 'Decided'
