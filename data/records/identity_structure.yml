@@ -24,6 +24,14 @@ fields:
     validation:
       required: true
     status: 'Decided'
+   sex:
+    name: 'Gender'
+    type: 'string'
+    description: 'Sex of the child'
+    comments: ''
+    validation:
+      required: true
+    status: 'Decided'
   sex:
     name: 'Sex'
     type: 'string'
@@ -39,6 +47,12 @@ fields:
     comments: ''
     validation:
       required: true
+    status: 'Decided'
+  expected_birthdate:
+    name: 'Expected child Date of Birth'
+    type: 'date'
+    description: "Expected child's date of birth"
+    comments: ''
     status: 'Decided'
   ethnic:
     name: 'Ethnic'
@@ -56,22 +70,35 @@ fields:
     validation:
       required: true
     status: 'Decided'
-  mother:
-    name: 'Mother'
-    type: 'string'
-    description: "Mother's name"
-    comments: ''
-    status: 'Decided'
-  mc_dob:
-    name: 'Mother/Carer Date of Birth'
-    type: 'date'
-    description: "Mother's or Carer's date of birth"
-    comments: ''
-    status: 'Decided'
+
   family_id:
     name: 'Family ID'
     type: 'string'
     description: 'Unique identifier for the family'
     comments: ''
+    status: 'Decided'
+  send_flag:
+    name: 'send'
+    type: 'boolean'
+    description: 'Indicates if the child has sen'
+    comments: ''
+    validation:
+      required: true
+    status: 'Decided'
+  immigration_status:
+    name: 'Immigration Status Code'
+    type: 'string'
+    description: 'Indicates the immigration status code'
+    comments: ''
+    validation:
+      required: true
+    status: 'Decided'
+  postcode:
+    name: 'Postcode'
+    type: 'string'
+    description: 'Current Postcode'
+    comments: ''
+    validation:
+      required: true
     status: 'Decided'
 # Add more fields as needed
