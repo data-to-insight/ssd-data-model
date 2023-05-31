@@ -30,3 +30,11 @@ fields:
     validation:
       required: true
     status: 'Decided'
+  contact_outcome:
+    name: 'Contact Outcome'
+    type: 'string'
+    description: 'Outcome of this contact. ref EH/CIN'
+    comments: ''
+    validation:
+      required: true
+    status: 'Decided'
