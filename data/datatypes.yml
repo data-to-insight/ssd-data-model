@@ -1,4 +1,3 @@
-# Simple types
 string:
   description: "A string of Unicode characters."
 
@@ -6,16 +5,16 @@ integer:
   description: "An integer."
 
 date:
-  description: "Represents a single date in ISO-8601 format (YYYY-MM-DD)."
+  description: "Represents a single date in dd/mm/yy format."
+  format: "dd/mm/yy"
 
-# Complex types
 year:
   extends: integer
   description: "Represents a single (Gregorian) year as an integer."
 
 monthyear:
   extends: string
-  description: "Represents a Gregorian month in ISO-8601 format (YYYY-MM)."
+  description: "Represents a Gregorian month in dd/mm/yy format."
 
 categorical:
   extends: string
