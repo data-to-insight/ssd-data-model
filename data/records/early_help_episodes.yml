@@ -1,5 +1,21 @@
 description: 'This form outlines the required information for EH (Education and Health) episode details.'
 fields:
+  child_id:
+    name: 'Child ID'
+    type: 'string'
+    description: 'Unique identifier for the child. This must be unique for each child.'
+    comments: 'Leave this field empty if the child is not yet assigned an ID.'
+    validation:
+      required: true
+    status: 'Decided'
+   family_id:
+    name: 'Family ID'
+    type: 'string'
+    description: 'Unique identifier for the family. This must be unique for each family.'
+    comments: 
+    validation:
+      required: false
+    status: 'Unconfirmed'
   eh_episode_start_date:
     name: 'EH Episode Start Date'
     type: 'date'
