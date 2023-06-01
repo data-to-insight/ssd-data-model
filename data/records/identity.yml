@@ -24,14 +24,6 @@ fields:
     validation:
       required: true
     status: 'Decided'
-   sex:
-    name: 'Gender'
-    type: 'string'
-    description: 'Sex of the child'
-    comments: ''
-    validation:
-      required: true
-    status: 'Decided'
   sex:
     name: 'Sex'
     type: 'string'
@@ -70,7 +62,6 @@ fields:
     validation:
       required: true
     status: 'Decided'
-
   family_id:
     name: 'Family ID'
     type: 'string'
@@ -80,7 +71,7 @@ fields:
   send_flag:
     name: 'send'
     type: 'boolean'
-    description: 'Indicates if the child has sen'
+    description: 'Indicates if the child has SEN (Special Educational Needs)'
     comments: ''
     validation:
       required: true
@@ -101,4 +92,17 @@ fields:
     validation:
       required: true
     status: 'Decided'
-# Add more fields as needed
+  mother:
+    name: 'Mother'
+    type: 'boolean'
+    description: 'Indicates if the child is considered as a mother'
+    comments: ''
+    status: 'Decided'
+  mc_date:
+    name: 'Mother/Carer Date of Birth'
+    type: 'date'
+    description: 'Date of birth of the child or carer'
+    comments: ''
+    validation:
+      required: true
+    status: 'Decided'
