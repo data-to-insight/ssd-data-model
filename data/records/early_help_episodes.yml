@@ -1,0 +1,44 @@
+description: 'This form outlines the required information for EH (Education and Health) episode details.'
+fields:
+  eh_episode_start_date:
+    name: 'EH Episode Start Date'
+    type: 'date'
+    description: 'The start date of the EH episode.'
+    comments: 'Format: dd/mm/yy'
+    validation:
+      required: true
+    status: 'Decided'
+  eh_episode_end_date:
+    name: 'EH Episode End Date'
+    type: 'date'
+    description: 'The end date of the EH episode.'
+    comments: 'Format: dd/mm/yy'
+    validation:
+      required: true
+    status: 'Decided'
+  eh_episode_end_reason:
+    name: 'EH Episode End Reason'
+    type: 'string'
+    description: 'The reason for ending the EH episode.'
+    comments: 'Possible values: Outcomes Met/Step-up/NFA'
+    validation:
+      required: true
+    status: 'Decided'
+  eh_episode_allocated_organisation:
+    name: 'EH Episode Allocated Organisation'
+    type: 'string'
+    description: 'The organization responsible for allocating the EH episode.'
+    comments: ''
+    status: 'Decided'
+  eh_episode_allocated_worker:
+    name: 'EH Episode Allocated Worker'
+    type: 'string'
+    description: 'The worker assigned to the EH episode.'
+    comments: ''
+    status: 'Decided'
+  eh_episode_reason_for_involvement:
+    name: 'EH Episode Reason for Involvement'
+    type: 'string'
+    description: 'The reason for the involvement in the EH episode.'
+    comments: ''
+    status: 'Decided'
