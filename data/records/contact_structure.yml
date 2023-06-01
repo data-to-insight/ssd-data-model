@@ -8,6 +8,14 @@ fields:
     validation:
       required: true
     status: 'Decided'
+  family_id:
+    name: 'Family ID'
+    type: 'string'
+    description: 'Unique identifier for the family. This must be unique for each family.'
+    comments: 
+    validation:
+      required: false
+    status: 'Unconfirmed'
   contact_dttm:
     name: 'Contact Datetime'
     type: 'datetime'
