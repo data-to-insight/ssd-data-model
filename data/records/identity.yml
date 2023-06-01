@@ -14,7 +14,7 @@ fields:
     description: 'Unique Personal Identifier for the child'
     comments: ''
     validation:
-      required: true
+      required: false
     status: 'Decided'
   gender:
     name: 'Gender'
@@ -30,7 +30,7 @@ fields:
     description: 'Sex of the child'
     comments: ''
     validation:
-      required: true
+      required: false
     status: 'Decided'
   dob:
     name: 'Date of Birth'
@@ -38,7 +38,7 @@ fields:
     description: 'Date of birth of the child'
     comments: ''
     validation:
-      required: true
+      required: false
     status: 'Decided'
   expected_birthdate:
     name: 'Expected child Date of Birth'
@@ -52,7 +52,7 @@ fields:
     description: 'Ethnicity of the child'
     comments: ''
     validation:
-      required: true
+      required: false
     status: 'Decided'
   hasdisability:
     name: 'Has Disability'
@@ -60,13 +60,15 @@ fields:
     description: 'Indicates if the child has a disability'
     comments: ''
     validation:
-      required: true
+      required: false
     status: 'Decided'
   family_id:
     name: 'Family ID'
     type: 'string'
     description: 'Unique identifier for the family'
     comments: ''
+    validation:
+      required: true
     status: 'Decided'
   send_flag:
     name: 'send'
@@ -74,7 +76,7 @@ fields:
     description: 'Indicates if the child has SEN (Special Educational Needs)'
     comments: ''
     validation:
-      required: true
+      required: false
     status: 'Decided'
   immigration_status:
     name: 'Immigration Status Code'
@@ -82,7 +84,7 @@ fields:
     description: 'Indicates the immigration status code'
     comments: ''
     validation:
-      required: true
+      required: false
     status: 'Decided'
   postcode:
     name: 'Postcode'
@@ -90,13 +92,15 @@ fields:
     description: 'Current Postcode'
     comments: ''
     validation:
-      required: true
+      required: false
     status: 'Decided'
   mother:
     name: 'Mother'
     type: 'boolean'
     description: 'Indicates if the child is considered as a mother'
     comments: ''
+    validation:
+      required: false
     status: 'Decided'
   mc_date:
     name: 'Mother/Carer Date of Birth'
@@ -104,5 +108,5 @@ fields:
     description: 'Date of birth of the child or carer'
     comments: ''
     validation:
-      required: true
+      required: false
     status: 'Decided'
