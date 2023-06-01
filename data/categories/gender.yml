@@ -1,5 +1,8 @@
-- Man
-- Woman
-- Non-binary
-- Other
-- Prefer not to say
+- value: 0
+  description: Not yet born
+- value: 1
+  description: Male
+- value: 2
+  description: Female
+- value: 9
+  description: Indeterminate / Unable to be classed as male / female
