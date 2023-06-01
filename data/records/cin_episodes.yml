@@ -1,0 +1,50 @@
+description: 'This form outlines the required information for CIN episodes.'
+fields:
+  child_id:
+    name: 'Child ID'
+    type: 'string'
+    description: 'Unique identifier for the child. This must be unique for each child.'
+    comments: 'Leave this field empty if the child is not yet assigned an ID.'
+    validation:
+      required: true
+    status: 'Decided'
+  family_id:
+    name: 'Family ID'
+    type: 'string'
+    description: 'Unique identifier for the family. This must be unique for each family.'
+    comments: 'Leave this field empty if the family is not yet assigned an ID.'
+    validation:
+      required: true
+    status: 'Unconfirmed'
+  referral_date:
+    name: 'Referral Date'
+    type: 'date'
+    description: 'Date of the referral'
+    comments: 'Enter the date in the format dd/mm/yy.'
+    validation:
+      required: true
+    status: 'Decided'
+  referral_completed_by_team:
+    name: 'Referral Completed by Team'
+    type: 'string'
+    description: 'Team that completed the referral'
+    comments: ''
+    status: 'Decided'
+  referral_outcome:
+    name: 'Referral Outcome'
+    type: 'string'
+    description: 'Outcome of the referral (NFA/Assessment/Step-down)'
+    comments: ''
+    status: 'Decided'
+  referral_source:
+    name: 'Referral Source'
+    type: 'string'
+    description: 'Source of the referral'
+    comments: ''
+    status: 'Decided'
+  referral_completed_by_worker:
+    name: 'Referral Completed by Worker'
+    type: 'string'
+    description: 'Worker who completed the referral'
+    comments: ''
+    status: 'Decided'
