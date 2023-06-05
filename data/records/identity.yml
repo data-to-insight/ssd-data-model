@@ -15,7 +15,8 @@ fields:
     comments: ''
     status: 'Decided'
   contacts:
-    $ref: 'contacts.yml'  # Reference the contacts.yml file
+    - $ref: 'family.yml'  # Reference the family.yml file for family details
+    - $ref: 'contacts.yml'  # Reference the contacts.yml file
     
   upn:
     name: 'UPN'
