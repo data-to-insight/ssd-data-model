@@ -15,10 +15,10 @@ fields:
     comments: ''
     status: 'Decided'
   contacts:
-    - $ref: 'contacts.yml'  # Reference the family.yml file for family details
-    - $ref: 'assessments.yml'  # Reference the contacts.yml file
-    - $ref: 'cin_episodes.yml'  # Reference the contacts.yml file
-    - $ref: 'early_help_episodes.yml'  # Reference the family.yml file for family details
+    - $ref: 'contacts.yml'              # Reference contacts file for details
+    - $ref: 'assessments.yml'           #  Reference assessments file for details
+    - $ref: 'cin_episodes.yml'          #  Reference cin episodes file for details
+    - $ref: 'early_help_episodes.yml'   #  Reference early help file for details
     
   upn:
     name: 'UPN'
@@ -34,7 +34,7 @@ fields:
     description: 'Gender of the child'
     comments: ''
     validation:
-      required: true
+      required: false
     status: 'Decided'
   sex:
     name: 'Sex'
@@ -42,7 +42,7 @@ fields:
     description: 'Sex of the child'
     comments: ''
     validation:
-      required: false
+      required: true
     status: 'Decided'
   dob:
     name: 'Date of Birth'
@@ -57,6 +57,8 @@ fields:
     type: 'date'
     description: "Expected child's date of birth"
     comments: ''
+     validation:
+      required: false
     status: 'Decided'
   ethnic:
     name: 'Ethnic'
@@ -66,6 +68,15 @@ fields:
     validation:
       required: false
     status: 'Decided'
+  postcode:
+    name: 'Postcode'
+    type: 'string'
+    description: 'Current Postcode'
+    comments: ''
+    validation:
+      required: false
+    status: 'Decided'
+   
   hasdisability:
     name: 'Has Disability'
     type: 'boolean'
@@ -73,14 +84,6 @@ fields:
     comments: ''
     validation:
       required: false
-    status: 'Decided'
-  family_id:
-    name: 'Family ID'
-    type: 'string'
-    description: 'Unique identifier for the family'
-    comments: ''
-    validation:
-      required: true
     status: 'Decided'
   send_flag:
     name: 'send'
@@ -98,14 +101,7 @@ fields:
     validation:
       required: false
     status: 'Decided'
-  postcode:
-    name: 'Postcode'
-    type: 'string'
-    description: 'Current Postcode'
-    comments: ''
-    validation:
-      required: false
-    status: 'Decided'
+
   mother:
     name: 'Mother'
     type: 'boolean'
