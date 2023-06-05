@@ -19,6 +19,8 @@ fields:
     type: 'string'
     description: 'Unique identifier for the family'
     comments: ''
+    validation:
+      required: false
     status: 'Decided'
   upn:
     name: 'UPN'
@@ -66,7 +68,7 @@ fields:
     description: 'Ethnicity of the child'
     comments: ''
     validation:
-      required: false
+      required: true
     status: 'Decided'
   postcode:
     name: 'Postcode'
@@ -74,7 +76,7 @@ fields:
     description: 'Current Postcode'
     comments: ''
     validation:
-      required: false
+      required: true
     status: 'Decided'
    
   hasdisability:
@@ -108,12 +110,12 @@ fields:
     description: 'Indicates if the child is considered as a mother'
     comments: ''
     validation:
-      required: false
+      required: true
     status: 'Decided'
   mc_date:
-    name: 'Mother/Carer Date of Birth'
+    name: 'Mother's child Date of Birth'
     type: 'date'
-    description: 'Date of birth of the child or carer'
+    description: 'Date of birth of the child IF the child/person in question is a mother. 
     comments: ''
     validation:
       required: false
