@@ -8,6 +8,15 @@ fields:
     validation:
       required: true
     status: 'Decided'
+  family_id:
+    name: 'Family ID'
+    type: 'string'
+    description: 'Unique identifier for the family'
+    comments: ''
+    status: 'Decided'
+  contacts:
+    $ref: 'contacts.yml'  # Reference the contacts.yml file
+    
   upn:
     name: 'UPN'
     type: 'string'
