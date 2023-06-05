@@ -8,18 +8,18 @@ fields:
     validation:
       required: true
     status: 'Decided'
+    
+    - $ref: 'contacts.yml'              # Reference contacts file for details
+    - $ref: 'assessments.yml'           #  Reference assessments file for details
+    - $ref: 'cin_episodes.yml'          #  Reference cin episodes file for details
+    - $ref: 'early_help_episodes.yml'   #  Reference early help file for details
+    
   family_id:
     name: 'Family ID'
     type: 'string'
     description: 'Unique identifier for the family'
     comments: ''
     status: 'Decided'
-  contacts:
-    - $ref: 'contacts.yml'              # Reference contacts file for details
-    - $ref: 'assessments.yml'           #  Reference assessments file for details
-    - $ref: 'cin_episodes.yml'          #  Reference cin episodes file for details
-    - $ref: 'early_help_episodes.yml'   #  Reference early help file for details
-    
   upn:
     name: 'UPN'
     type: 'string'
