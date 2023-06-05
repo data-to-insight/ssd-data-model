@@ -14,6 +14,26 @@ fields:
     - $ref: 'cin_episodes.yml'          #  Reference cin episodes file for details
     - $ref: 'early_help_episodes.yml'   #  Reference early help file for details
     
+    
+  child: # USed in case child_id not directly used
+    name: 'Child'
+    type: 'string'
+    description: 'Child ID'
+    comments: ''
+    validation:
+      required: false
+    status: 'Pending'
+
+  child_la_code: # Used in case child_id not directly used, or seperate LA code in use.
+    name: 'Child LA Code'
+    type: 'string'
+    description: 'Child local authority code'
+    comments: ''
+    validation:
+      required: false
+    status: 'Pending'
+  
+  
   family_id:
     name: 'Family ID'
     type: 'string'
