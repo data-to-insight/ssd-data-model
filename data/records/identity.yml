@@ -144,7 +144,7 @@ fields:
   mc_date:
     name: 'Mother's child Date of Birth'
     type: 'date'
-    description: 'Date of birth of the child IF the child/person in question is a mother. 
+    description: 'Date of birth of the child IF the child/person in question is a mother' 
     comments: ''
     validation:
       required: false
