@@ -42,7 +42,8 @@ fields:
     validation:
       required: false
     status: 'Decided'
-   nhs_id:
+    
+  nhs_id:
     name: 'NHS ID'
     type: 'string'
     description: 'Unique identifier into medical records/NHS'
