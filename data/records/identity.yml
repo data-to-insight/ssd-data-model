@@ -9,10 +9,10 @@ fields:
       required: true
     status: 'Decided'
     
-    - $ref: 'contacts.yml'              # Reference contacts file for details
-    - $ref: 'assessments.yml'           #  Reference assessments file for details
-    - $ref: 'cin_episodes.yml'          #  Reference cin episodes file for details
-    - $ref: 'early_help_episodes.yml'   #  Reference early help file for details
+#     - $ref: 'contacts.yml'              # Reference contacts file for details
+#     - $ref: 'assessments.yml'           #  Reference assessments file for details
+#     - $ref: 'cin_episodes.yml'          #  Reference cin episodes file for details
+#     - $ref: 'early_help_episodes.yml'   #  Reference early help file for details
     
     
   child: # USed in case child_id not directly used
