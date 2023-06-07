@@ -14,7 +14,6 @@ fields:
 #     - $ref: 'cin_episodes.yml'          #  Reference cin episodes file for details
 #     - $ref: 'early_help_episodes.yml'   #  Reference early help file for details
     
-    
   child: # USed in case child_id not directly used
     name: 'Child'
     type: 'string'
@@ -89,7 +88,7 @@ fields:
     type: 'date'
     description: "Expected child's date of birth"
     comments: ''
-     validation:
+    validation:
       required: false
     status: 'Decided'
   ethnic:
