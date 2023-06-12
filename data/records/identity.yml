@@ -14,14 +14,6 @@ fields:
 #     - $ref: 'cin_episodes.yml'          #  Reference cin episodes file for details
 #     - $ref: 'early_help_episodes.yml'   #  Reference early help file for details
     
-  child: # USed in case child_id not directly used
-    name: 'Child'
-    type: 'string'
-    description: 'Child ID'
-    comments: ''
-    validation:
-      required: false
-    status: 'Pending'
 
   child_la_code: # Used in case child_id not directly used, or seperate LA code in use.
     name: 'Child LA Code'
@@ -142,7 +134,7 @@ fields:
       required: true
     status: 'Decided'
   mc_date:
-    name: 'Mother's child Date of Birth'
+    name: 'Mothers child Date of Birth'
     type: 'date'
     description: 'Date of birth of the child IF the child/person in question is a mother' 
     comments: ''
