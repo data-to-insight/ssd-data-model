@@ -1,3 +1,5 @@
+# streamlit run /workspaces/ssd-data-model/ssd_upload.py [ARGUMENTS]
+
 import streamlit as st
 import pandas as pd
 

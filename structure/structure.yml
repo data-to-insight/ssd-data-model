@@ -1,0 +1,145 @@
+nodes:
+  - name: Child
+    fields: [child_id, sex, gender, dob, ethnicity, date_of_birth, send_flag, upn, expected_birth_date, date_of_death, mother, country_of_origin]
+  - name: Family_identifier
+    fields: [family_identifier, child_id]
+  - name: Address
+    fields: [address, child_id, postcode, date_from, date_to]
+  - name: Disability_Code
+    fields: [child_id, disability_code]
+  - name: Immigration_Status
+    fields: [child_id, immigration_status, immigration_status_start, immigration_status_end]
+  - name: Mothers_Child_DOB
+    fields: [mothers_child_dob, mother_child_unique_id, child_unique_id]
+  - name: Legal_Status
+    fields: [legal_status_id, child_unique_id, legal_status, legal_status_start_date, legal_status_end_date]
+  - name: Contacts
+    fields: [contact_id, child_unique_id, date_of_contact, contact_source, contact_outcome]
+  - name: Early_Help_Episodes
+    fields: [eh_episode_id, child_unique_id, eh_episode_start_date, eh_episode_end_date, eh_episode_reason_for_involvement, eh_episode_end_reason, eh_episode_allocated_organisation, eh_episode_allocated_worker]
+  - name: CIN_Episodes
+    fields: [cin_referral_id, child_unique_id, cin_referral_date, cin_referral_completed_by_team, cin_referral_outcome, cin_referral_source, cin_referral_completed_by_worker]
+  - name: Assessments
+    fields: [assessment_id, child_unique_id, assessment_start_date, child_seen_during_assessment, assessment_authorised_date, assessment_outcome, assessment_completed_by_team, assessment_completed_by_worker]
+  - name: CIN_Plans
+    fields: [cin_plan_id, child_unique_id, cin_plan_start_date, cin_plan_end_date, cin_closure_reason, cin_closure_date, cin_allocated_team, cin_allocated_worker]
+  - name: CIN_Visits
+    fields: [cin_visit_id, cin_plan_id, cin_visit_date, child_seen, child_seen_alone, child_bedroom_seen]
+  - name: S47_Enquiry_ICPC
+    fields: [s47_enquiry_id, child_unique_id, strategy_discussion_initiating_s47_enquiry_start_date, s47_start_date, s47_outcome, date_of_initial_child_protection_conference, outcome_of_initial_child_protection_conference, s47_icpc_allocated_team, s47_icpc_allocated_worker]
+  - name: CP_Plans
+    fields: [cp_plan_id, child_unique_id, cp_plan_start_date, cp_plan_end_date, cp_plan_allocated_team, cp_plan_allocated_worker]
+  - name: Category_of_Abuse
+    fields: [cp_plan_id, category_of_abuse, category_of_abuse_start_date]
+  - name: CP_Visits
+    fields: [cp_plan_id, cp_visit_id, date_of_visit, child_seen, child_seen_alone, child_bedroom_seen]
+  - name: CP_Reviews
+    fields: [review_id, cp_plan_id, review_due_date, date_of_review, cp_plan_to_continue, quorate, child_participation, quality_of_representation, sufficient_progress]
+  - name: Risks_to_child_at_this_conference
+    fields: [review_id, risks_to_child_at_this_conference]
+  - name: CLA_Episodes
+    fields: [episode_id, child_unique_id, date_episode_commenced, reason_for_new_cla_episode, date_ceased_to_be_looked_after, reason_ceased_to_be_looked_after, allocated_team, allocated_worker]
+  - name: Placement
+    fields: [placement_id, episode_id, placement_start_date, placement_type, urn_of_placement, la_of_placement, placement_provider, placement_postcode, placement_end_date, reason_for_placement_change]
+  - name: CLA_Reviews
+    fields: [review_id, episode_id, cla_review_due_date, cla_review_date, child_involved_in_care_plan, social_worker_met_with_child, participation_code, previously_adopted_left_care, care_plan_meeting_child_needs, permanence_plan_in_place, date_of_last_iro_visit, date_of_previous_permanence_order, previous_permanence_option, previous_permanence_arranged_la, child_convicted, health_surveillance_checks_up_to_date, date_of_last_health_assessment, date_of_last_dental_check, immunisations_up_to_date, identified_substance_misuse_problem, intervention_for_substance_misuse_problem]
+  - name: Care_Plan
+    fields: [review_id, chosen_plan]
+  - name: CLA_Visits
+    fields: [visit_id, episode_id, date_of_visit, child_seen, child_seen_alone]
+  - name: SDQ_Scores
+    fields: [sdq_id, child_unique_id, sdq_completed_date, sdq_score]
+  - name: Missing
+    fields: [missing_episode_id, episode_id, missing_episode_start, episode_type, missing_episode_end, rhi_offered, rhi_accepted]
+  - name: Care_Leavers
+    fields: [care_leaver_table_id, child_unique_id, eligibility_status, in_touch_category, latest_date_of_contact, accommodation, suitability_of_accommodation, activity_status, latest_pathway_plan_review_date, allocated_personal_advisor, allocated_team, allocated_worker]
+  - name: Permanence
+    fields: [child_unique_id, date_of_adm_decision, date_of_ffa_cp_decision, date_entered_care, date_of_placement_freeing_order, date_placed_for_adoption, date_matched_to_prospective_adopters, date_placed_in_ffa_cp_placement, date_decision_no_longer_placed_for_adoption, date_originally_placed_with_foster_carers, sibling_group, num_children_placed_together, num_siblings_placed_separately, urn_placement_provider_agency, reason_no_longer_placed_for_adoption, date_of_order, type_of_order, status_of_special_guardian, age_of_special_guardian]
+  - name: Worker
+    fields: [swe_registration_number, agency_worker, role_within_organisation, num_cases_held, qualification_level]
+
+edges:
+  - from: Child
+    to: Identity
+    relation: 1:1
+  - from: Child
+    to: Family_identifier
+    relation: 1:M
+  - from: Child
+    to: Address
+    relation: 1:M
+  - from: Child
+    to: Disability_Code
+    relation: 1:M
+  - from: Child
+    to: Immigration_Status
+    relation: 1:M
+  - from: Child
+    to: Mothers_Child_DOB
+    relation: 1:M
+  - from: Child
+    to: Legal_Status
+    relation: 1:M
+  - from: Child
+    to: Contacts
+    relation: 1:M
+  - from: Child
+    to: Early_Help_Episodes
+    relation: 1:M
+  - from: Child
+    to: CIN_Episodes
+    relation: 1:M
+  - from: Child
+    to: Assessments
+    relation: 1:M
+  - from: Child
+    to: CIN_Plans
+    relation: 1:M
+  - from: Child
+    to: CIN_Visits
+    relation: 1:M
+  - from: Child
+    to: S47_Enquiry_ICPC
+    relation: 1:M
+  - from: Child
+    to: CP_Plans
+    relation: 1:M
+  - from: Child
+    to: Category_of_Abuse
+    relation: 1:M
+  - from: Child
+    to: CP_Visits
+    relation: 1:M
+  - from: Child
+    to: CP_Reviews
+    relation: 1:M
+  - from: Child
+    to: Risks_to_child_at_this_conference
+    relation: 1:M
+  - from: CLA_Episodes
+    to: Placement
+    relation: 1:M
+  - from: CLA_Episodes
+    to: CLA_Reviews
+    relation: 1:M
+  - from: CLA_Episodes
+    to: Care_Plan
+    relation: 1:M
+  - from: CLA_Episodes
+    to: CLA_Visits
+    relation: 1:M
+  - from: CLA_Episodes
+    to: SDQ_Scores
+    relation: 1:M
+  - from: CLA_Episodes
+    to: Missing
+    relation: 1:M
+  - from: Child
+    to: Care_Leavers
+    relation: 1:M
+  - from: Child
+    to: Permanence
+    relation: 1:M
+  - from: Worker
+    to: Worker
+    relation: 1:M
