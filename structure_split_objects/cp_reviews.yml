@@ -1,48 +1,60 @@
 nodes:
   - name: CP_Reviews
+    categories:
+    # - identity
     fields: 
       - name: review_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        constraints: [Unique]
+        description: The ID of the CP review
       - name: cp_plan_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the associated CP plan
       - name: review_due_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The due date of the CP review
       - name: date_of_review
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date of the CP review
       - name: cp_plan_to_continue
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates whether the CP plan is to continue
       - name: quorate
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates whether the review was quorate
       - name: child_participation
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates child participation in the review
       - name: quality_of_representation
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates the quality of representation
       - name: sufficient_progress
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates whether sufficient progress has been made

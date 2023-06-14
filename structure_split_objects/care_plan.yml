@@ -1,13 +1,18 @@
 nodes:
   - name: Care_Plan
+    categories:
+
     fields: 
       - name: review_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the care plan review
+        constraints: [Unique]
       - name: chosen_plan
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The chosen plan for the care plan

@@ -1,108 +1,117 @@
 nodes:
   - name: CLA_Reviews
+    categories:
+    # - identity
+
     fields: 
       - name: review_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        constraints: [Unique]
+        description: The ID of the CLA review
       - name: episode_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the CLA episode associated with the review
       - name: cla_review_due_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The due date for the CLA review
       - name: cla_review_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date of the CLA review
       - name: child_involved_in_care_plan
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates if the child was involved in the care plan
       - name: social_worker_met_with_child
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates if the social worker met with the child
       - name: participation_code
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: The participation code for the review
       - name: previously_adopted_left_care
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates if the child was previously adopted or left care
       - name: care_plan_meeting_child_needs
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates if the care plan is meeting the child's needs
       - name: permanence_plan_in_place
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates if a permanence plan is in place
       - name: date_of_last_iro_visit
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date of the last IRO visit
       - name: date_of_previous_permanence_order
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date of the previous permanence order
       - name: previous_permanence_option
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The previous permanence option
       - name: previous_permanence_arranged_la
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The local authority that arranged the previous permanence
       - name: child_convicted
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates if the child was convicted
       - name: health_surveillance_checks_up_to_date
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates if the health surveillance checks are up to date
       - name: date_of_last_health_assessment
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date of the last health assessment
       - name: date_of_last_dental_check
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date of the last dental check
       - name: immunisations_up_to_date
-        type: BOOLEAN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: identified_substance_misuse_problem
-        type: BOOLEAN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: intervention_for_substance_misuse_problem
-        type: BOOLEAN
-        cms:
-          - liquid_logic
-          - mosaic
+        type:

@@ -1,5 +1,8 @@
 nodes:
   - name: Child
+    categories:
+    - identity
+
     fields: 
       - name: child_id
         type: VARCHAR(11)
@@ -7,61 +10,75 @@ nodes:
           - liquid_logic
           - mosaic
         group: [SSD903, CIN, ANNEXA]
+        constraints: [Unique]
+        description: The ID of the child
       - name: sex
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
         group: [SSD903, CIN, ANNEXA]
+        description: The sex of the child
       - name: gender
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
         group: [CIN]
+        description: The gender of the child
       - name: dob
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date of birth of the child
       - name: ethnicity
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
         group: [SSD903, ANNEXA]
+        description: The ethnicity of the child
       - name: date_of_birth
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date of birth of the child
       - name: send_flag
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Flag indicating if the child has SEND (Special Educational Needs and Disabilities)
       - name: upn
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The Unique Pupil Number (UPN) of the child
+        constraints: [Unique]
       - name: expected_birth_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The expected birth date of the child (if not yet born)
       - name: date_of_death
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date of death of the child (if applicable)
       - name: mother
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The name of the child's mother
       - name: country_of_origin
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The country of origin of the child

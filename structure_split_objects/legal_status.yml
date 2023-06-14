@@ -1,28 +1,35 @@
 nodes:
   - name: Legal_Status
+    categories:
+    # - identity
     fields: 
       - name: legal_status_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the legal status
       - name: child_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the associated child
       - name: legal_status
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The legal status of the child
       - name: legal_status_start_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The start date of the legal status
       - name: legal_status_end_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The end date of the legal status

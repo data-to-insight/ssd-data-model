@@ -1,33 +1,41 @@
 nodes:
   - name: CP_Visits
+    categories:
+    # - identity
     fields: 
       - name: cp_plan_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the associated CP plan
       - name: cp_visit_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the CP visit
       - name: date_of_visit
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date of the CP visit
       - name: child_seen
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates whether the child was seen during the visit
       - name: child_seen_alone
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates whether the child was seen alone during the visit
       - name: child_bedroom_seen
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates whether the child's bedroom was seen during the visit

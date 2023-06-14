@@ -1,38 +1,47 @@
 nodes:
   - name: Missing
+    categories:
+    # - identity
     fields: 
       - name: missing_episode_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the missing episode
       - name: episode_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the associated episode
       - name: missing_episode_start
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The start date of the missing episode
       - name: episode_type
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The type of the episode
       - name: missing_episode_end
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The end date of the missing episode
       - name: rhi_offered
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates if RHI (Return Home Interview) was offered
       - name: rhi_accepted
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates if RHI (Return Home Interview) was accepted

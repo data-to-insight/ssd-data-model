@@ -1,13 +1,17 @@
 nodes:
   - name: Family_identifier
+    categories:
+    # - identity
     fields: 
       - name: family_identifier
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The identifier for the family
       - name: child_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the associated child

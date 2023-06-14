@@ -1,43 +1,54 @@
 nodes:
   - name: CLA_Episodes
+    categories:
+
     fields: 
       - name: episode_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        constraints: [Unique]
+        description: The ID of the CLA episode
       - name: child_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the child associated with the episode
       - name: date_episode_commenced
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date when the CLA episode commenced
       - name: reason_for_new_cla_episode
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The reason for starting a new CLA episode
       - name: date_ceased_to_be_looked_after
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date when the child ceased to be looked after
       - name: reason_ceased_to_be_looked_after
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The reason for the child ceasing to be looked after
       - name: allocated_team
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The team allocated to the CLA episode
       - name: allocated_worker
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The worker allocated to the CLA episode

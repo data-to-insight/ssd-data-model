@@ -1,53 +1,65 @@
 nodes:
   - name: Placement
+    categories:
+    # - identity
     fields: 
       - name: placement_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: ID of the placement
       - name: episode_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: ID of the episode
       - name: placement_start_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Start date of the placement
       - name: placement_type
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: Type of the placement
       - name: urn_of_placement
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: URN of the placement
       - name: la_of_placement
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: Local authority of the placement
       - name: placement_provider
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: Provider of the placement
       - name: placement_postcode
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: Postcode of the placement
       - name: placement_end_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: End date of the placement
       - name: reason_for_placement_change
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: Reason for the placement change

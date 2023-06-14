@@ -1,18 +1,24 @@
 nodes:
   - name: Category_of_Abuse
+    categories:
+
     fields: 
       - name: cp_plan_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the child protection plan
+        constraints: [Unique]
       - name: category_of_abuse
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The category of abuse
       - name: category_of_abuse_start_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The start date of the category of abuse

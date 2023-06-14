@@ -1,98 +1,119 @@
 nodes:
   - name: Permanence
+    categories:
+    # - identity
     fields: 
       - name: child_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: ID of the child
       - name: date_of_adm_decision
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Date of the adoption decision
       - name: date_of_ffa_cp_decision
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Date of the FFA/CP decision
       - name: date_entered_care
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Date the child entered care
       - name: date_of_placement_freeing_order
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Date of the placement freeing order
       - name: date_placed_for_adoption
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Date the child was placed for adoption
       - name: date_matched_to_prospective_adopters
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Date the child was matched to prospective adopters
       - name: date_placed_in_ffa_cp_placement
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Date the child was placed in FFA/CP placement
       - name: date_decision_no_longer_placed_for_adoption
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Date the decision was made to no longer place the child for adoption
       - name: date_originally_placed_with_foster_carers
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Date the child was originally placed with foster carers
       - name: sibling_group
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicator if the child is part of a sibling group
       - name: num_children_placed_together
         type: INTEGER
         cms:
           - liquid_logic
           - mosaic
+        description: Number of children placed together
       - name: num_siblings_placed_separately
         type: INTEGER
         cms:
           - liquid_logic
           - mosaic
+        description: Number of siblings placed separately
       - name: urn_placement_provider_agency
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: URN of the placement provider agency
       - name: reason_no_longer_placed_for_adoption
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: Reason the child is no longer placed for adoption
       - name: date_of_order
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Date of the order
       - name: type_of_order
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: Type of the order
       - name: status_of_special_guardian
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: Status of the special guardian
       - name: age_of_special_guardian
         type: INTEGER
         cms:
           - liquid_logic
           - mosaic
+        description: Age of the special guardian

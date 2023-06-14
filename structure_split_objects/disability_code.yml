@@ -1,13 +1,17 @@
 nodes:
   - name: Disability_Code
+    categories:
+    - identity
     fields: 
       - name: child_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the associated child
       - name: disability_code
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The code representing the disability

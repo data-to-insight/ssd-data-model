@@ -1,23 +1,29 @@
 nodes:
   - name: Immigration_Status
+    categories:
+    # - identity
     fields: 
       - name: child_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the associated child
       - name: immigration_status
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The immigration status of the child
       - name: immigration_status_start
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The start date of the immigration status
       - name: immigration_status_end
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The end date of the immigration status

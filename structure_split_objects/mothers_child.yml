@@ -1,18 +1,23 @@
 nodes:
   - name: Mothers_Child_DOB
+    categories:
+    # - identity
     fields: 
       - name: mothers_child_dob
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: Date of birth of the child in relation to the mother
       - name: mother_child_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: ID of the relationship between the mother and child
       - name: child_unique_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: Unique identifier of the child

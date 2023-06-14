@@ -1,63 +1,78 @@
 nodes:
   - name: Care_Leavers
+    categories:
+    - location
     fields: 
       - name: care_leaver_table_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the care leaver table
+        constraints: [Unique]
       - name: child_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the child associated with the care leaver
       - name: eligibility_status
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The eligibility status of the care leaver
       - name: in_touch_category
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The category of in-touch status for the care leaver
       - name: latest_date_of_contact
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The latest date of contact with the care leaver
       - name: accommodation
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The accommodation status of the care leaver
       - name: suitability_of_accommodation
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The suitability of the accommodation for the care leaver
       - name: activity_status
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The activity status of the care leaver
       - name: latest_pathway_plan_review_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The latest date of the pathway plan review for the care leaver
       - name: allocated_personal_advisor
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The allocated personal advisor for the care leaver
       - name: allocated_team
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The allocated team for the care leaver
       - name: allocated_worker
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The allocated worker for the care leaver

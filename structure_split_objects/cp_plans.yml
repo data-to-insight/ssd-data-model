@@ -1,33 +1,42 @@
 nodes:
   - name: CP_Plans
+    categories:
+    # - identity
     fields: 
       - name: cp_plan_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        constraints: [Unique]
+        description: The ID of the CP plan
       - name: child_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the child associated with the CP plan
       - name: cp_plan_start_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The start date of the CP plan
       - name: cp_plan_end_date
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The end date of the CP plan
       - name: cp_plan_allocated_team
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The allocated team for the CP plan
       - name: cp_plan_allocated_worker
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: The allocated worker for the CP plan

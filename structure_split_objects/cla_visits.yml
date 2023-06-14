@@ -1,28 +1,36 @@
 nodes:
   - name: CLA_Visits
+    categories:
+    # - identity
     fields: 
       - name: visit_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        constraints: [Unique]
+        description: The ID of the CLA visit
       - name: episode_id
         type: VARCHAR(11)
         cms:
           - liquid_logic
           - mosaic
+        description: The ID of the CLA episode associated with the visit
       - name: date_of_visit
         type: DATE
         cms:
           - liquid_logic
           - mosaic
+        description: The date of the CLA visit
       - name: child_seen
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates if the child was seen during the visit
       - name: child_seen_alone
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: Indicates if the child was seen alone during the visit

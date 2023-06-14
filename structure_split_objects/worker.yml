@@ -1,28 +1,36 @@
 nodes:
   - name: Worker
+    categories:
+    # - identity
     fields: 
       - name: swe_registration_number
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        constraints: [Unique]
+        description: "The registration number of the social worker."
       - name: agency_worker
         type: BOOLEAN
         cms:
           - liquid_logic
           - mosaic
+        description: "Indicates whether the worker is an agency worker."
       - name: role_within_organisation
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: "The role of the worker within the organisation."
       - name: num_cases_held
         type: INTEGER
         cms:
           - liquid_logic
           - mosaic
+        description: "The number of cases currently held by the worker."
       - name: qualification_level
         type: VARCHAR(255)
         cms:
           - liquid_logic
           - mosaic
+        description: "The qualification level of the worker."
