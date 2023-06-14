@@ -1,5 +1,10 @@
 
 
+# await pyodide.loadPackage("micropip")
+# import micropip
+# await micropip.install("pyyaml") 
+
+
 import yaml
 import pygraphviz as pgv
 import streamlit as st
