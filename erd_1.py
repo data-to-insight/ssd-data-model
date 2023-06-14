@@ -1,3 +1,5 @@
+
+
 import yaml
 import pygraphviz as pgv
 import streamlit as st
@@ -23,16 +25,16 @@ for edge in data['edges']:
     G.add_edge(edge['from'], edge['to'], label=edge['relation'])
 
 # Render the graph to a file
-G.draw('assets/erd.png', prog='dot', format='png')
+G.draw('assets/ssd_erd.png', prog='dot', format='png')
 
-# # Load and display image
-# image = Image.open('erd.png')
-# st.image(image, caption='ssd initial erd')
+# Load and display image
+image = Image.open('assets/ssd_erd.png')
+st.image(image, caption='ssd initial erd')
 
-# # Markdown text
-# st.markdown("""
-# ### SSD
-# A work ***in progress*** erd-mapping
+# Markdown text
+st.markdown("""
+### SSD
+A work ***in progress*** erd-mapping
 
-# Primary repo [🔗 here](https://github.com/data-to-insight/ssd-data-model/).
-# """)
+Primary repo [🔗 here](https://github.com/data-to-insight/ssd-data-model/).
+""")
