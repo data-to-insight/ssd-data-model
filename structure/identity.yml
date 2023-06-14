@@ -1,4 +1,0 @@
-identity:
-  child_id: "PK"  # Primary key
-  name: "string"
-  date_of_birth: "date"

@@ -58,6 +58,8 @@ nodes:
   - name: Worker
     fields: [swe_registration_number, agency_worker, role_within_organisation, num_cases_held, qualification_level]
 
+
+    
 edges:
   - from: Child
     to: Identity

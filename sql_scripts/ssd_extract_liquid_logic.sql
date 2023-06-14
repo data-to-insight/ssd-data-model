@@ -1,3 +1,3 @@
 USE PLACEHOLDER_DB_NAME;
-SELECT id, name FROM Users;
-SELECT id, description, product_type FROM Products;
+SELECT child_id, sex, gender, dob FROM Child;
+SELECT family_identifier, child_id FROM Family_identifier;

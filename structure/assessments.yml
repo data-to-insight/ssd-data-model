@@ -1,5 +1,0 @@
-assessments:
-  assessment_id: "PK"  # Primary key
-  child_id: "FK"  # Foreign key
-  assessment_date: "date"
-  assessment_score: "integer"

@@ -15,15 +15,15 @@ with open("structure/schema.yaml", 'r') as stream:
 # Start generating the SQL script
 sql_script = f"USE {db_name};\n"
 
-for table in schema['tables']:
+for node in schema['nodes']:
     field_names = []
-    for field in table['fields']:
+    for field in node['fields']:
         # If we have a "cms" metadata field and cms_type is not in it, skip this field
         if 'cms' in field and cms_type not in field['cms']:
             continue
         field_names.append(field['name'])
     fields_str = ', '.join(field_names)
-    sql_script += f"SELECT {fields_str} FROM {table['name']};\n"
+    sql_script += f"SELECT {fields_str} FROM {node['name']};\n"
 
 # Write the generated SQL script to a file
 file_path = f"sql_scripts/ssd_extract_{cms_type}.sql"
