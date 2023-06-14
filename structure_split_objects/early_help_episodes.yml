@@ -1,0 +1,43 @@
+nodes:
+  - name: Early_Help_Episodes
+    fields: 
+      - name: eh_episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_end_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_reason_for_involvement
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_end_reason
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_allocated_organisation
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_allocated_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic

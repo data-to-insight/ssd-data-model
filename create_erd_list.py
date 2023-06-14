@@ -24,7 +24,7 @@ from PIL import Image
 # st.title("sdd initial structure definition / erd")
 
 # Load the data from the YAML file
-with open('structure/structure_fieldlists.yml') as f:
+with open('structure_grouped_objects/structure_fieldlists.yml') as f:
     data = yaml.safe_load(f)
 
 # Create a new directed graph

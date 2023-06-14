@@ -1,0 +1,13 @@
+nodes:
+  - name: Care_Plan
+    fields: 
+      - name: review_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: chosen_plan
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic

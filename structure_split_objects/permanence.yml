@@ -1,0 +1,98 @@
+nodes:
+  - name: Permanence
+    fields: 
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_adm_decision
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_ffa_cp_decision
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_entered_care
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_placement_freeing_order
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_placed_for_adoption
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_matched_to_prospective_adopters
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_placed_in_ffa_cp_placement
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_decision_no_longer_placed_for_adoption
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_originally_placed_with_foster_carers
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sibling_group
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: num_children_placed_together
+        type: INTEGER
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: num_siblings_placed_separately
+        type: INTEGER
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: urn_placement_provider_agency
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: reason_no_longer_placed_for_adoption
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_order
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: type_of_order
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: status_of_special_guardian
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: age_of_special_guardian
+        type: INTEGER
+        cms:
+          - liquid_logic
+          - mosaic

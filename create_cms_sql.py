@@ -6,7 +6,7 @@ cms_type = 'liquid_logic'  # set this to the CMS you want to include
 db_name = 'PLACEHOLDER_DB_NAME'  # replace this with your database name
 
 # Read the YAML file
-with open("structure/schema.yaml", 'r') as stream:
+with open("structure_grouped_objects/schema.yaml", 'r') as stream:
     try:
         schema = yaml.safe_load(stream)
     except yaml.YAMLError as exc:

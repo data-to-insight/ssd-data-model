@@ -1,0 +1,63 @@
+nodes:
+  - name: Care_Leavers
+    fields: 
+      - name: care_leaver_table_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eligibility_status
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: in_touch_category
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: latest_date_of_contact
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: accommodation
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: suitability_of_accommodation
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: activity_status
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: latest_pathway_plan_review_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: allocated_personal_advisor
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: allocated_team
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: allocated_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic

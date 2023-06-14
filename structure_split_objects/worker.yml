@@ -1,0 +1,28 @@
+nodes:
+  - name: Worker
+    fields: 
+      - name: swe_registration_number
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: agency_worker
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: role_within_organisation
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: num_cases_held
+        type: INTEGER
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: qualification_level
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic

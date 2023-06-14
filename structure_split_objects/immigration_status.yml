@@ -1,0 +1,23 @@
+nodes:
+  - name: Immigration_Status
+    fields: 
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: immigration_status
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: immigration_status_start
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: immigration_status_end
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic

@@ -1,0 +1,18 @@
+nodes:
+  - name: Category_of_Abuse
+    fields: 
+      - name: cp_plan_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: category_of_abuse
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: category_of_abuse_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic

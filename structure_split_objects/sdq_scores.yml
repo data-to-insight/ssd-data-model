@@ -1,0 +1,23 @@
+nodes:
+  - name: SDQ_Scores
+    fields: 
+      - name: sdq_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sdq_completed_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sdq_score
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic

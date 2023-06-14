@@ -1,0 +1,43 @@
+nodes:
+  - name: CIN_Plans
+    fields: 
+      - name: cin_plan_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_plan_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_plan_end_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_closure_reason
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_closure_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_allocated_team
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_allocated_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic

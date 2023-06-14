@@ -1,0 +1,18 @@
+nodes:
+  - name: Mothers_Child_DOB
+    fields: 
+      - name: mothers_child_dob
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: mother_child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic

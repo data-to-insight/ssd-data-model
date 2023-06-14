@@ -1,0 +1,43 @@
+nodes:
+  - name: CLA_Episodes
+    fields: 
+      - name: episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_episode_commenced
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: reason_for_new_cla_episode
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_ceased_to_be_looked_after
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: reason_ceased_to_be_looked_after
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: allocated_team
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: allocated_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic

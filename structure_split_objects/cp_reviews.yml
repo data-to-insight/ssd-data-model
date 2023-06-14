@@ -1,0 +1,48 @@
+nodes:
+  - name: CP_Reviews
+    fields: 
+      - name: review_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cp_plan_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: review_due_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_review
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cp_plan_to_continue
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: quorate
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_participation
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: quality_of_representation
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sufficient_progress
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic

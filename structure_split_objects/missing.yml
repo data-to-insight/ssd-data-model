@@ -1,0 +1,38 @@
+nodes:
+  - name: Missing
+    fields: 
+      - name: missing_episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: missing_episode_start
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_type
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: missing_episode_end
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: rhi_offered
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: rhi_accepted
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic

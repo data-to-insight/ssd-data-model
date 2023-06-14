@@ -1,0 +1,48 @@
+nodes:
+  - name: S47_Enquiry_ICPC
+    fields: 
+      - name: s47_enquiry_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: strategy_discussion_initiating_s47_enquiry_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: s47_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: s47_outcome
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_initial_child_protection_conference
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: outcome_of_initial_child_protection_conference
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: s47_icpc_allocated_team
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: s47_icpc_allocated_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic

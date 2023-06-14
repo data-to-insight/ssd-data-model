@@ -1,0 +1,28 @@
+nodes:
+  - name: CLA_Visits
+    fields: 
+      - name: visit_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_visit
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_seen
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_seen_alone
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic

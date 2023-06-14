@@ -1,0 +1,13 @@
+nodes:
+  - name: Risks_to_child_at_this_conference
+    fields: 
+      - name: review_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: risks_to_child_at_this_conference
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic

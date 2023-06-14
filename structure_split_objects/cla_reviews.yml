@@ -1,0 +1,108 @@
+nodes:
+  - name: CLA_Reviews
+    fields: 
+      - name: review_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cla_review_due_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cla_review_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_involved_in_care_plan
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: social_worker_met_with_child
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: participation_code
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: previously_adopted_left_care
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: care_plan_meeting_child_needs
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: permanence_plan_in_place
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_last_iro_visit
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_previous_permanence_order
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: previous_permanence_option
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: previous_permanence_arranged_la
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_convicted
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: health_surveillance_checks_up_to_date
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_last_health_assessment
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_last_dental_check
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: immunisations_up_to_date
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: identified_substance_misuse_problem
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: intervention_for_substance_misuse_problem
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic

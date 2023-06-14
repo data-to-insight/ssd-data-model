@@ -1,0 +1,13 @@
+nodes:
+  - name: Family_identifier
+    fields: 
+      - name: family_identifier
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic

@@ -1,0 +1,28 @@
+nodes:
+  - name: Legal_Status
+    fields: 
+      - name: legal_status_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: legal_status
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: legal_status_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: legal_status_end_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
