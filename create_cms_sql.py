@@ -1,32 +1,31 @@
 import yaml
 
-liquid_logic_flag = True  # set this flag to False if you don't want to include liquid_logic fields
+cms_type = 'liquid_logic'  # set this to the CMS you want to include
+# cms_type = 'mosaic'  # set this to the CMS you want to include
+
+db_name = 'PLACEHOLDER_DB_NAME'  # replace this with your database name
 
 # Read the YAML file
-with open("schema.yaml", 'r') as stream:
+with open("structure/schema.yaml", 'r') as stream:
     try:
         schema = yaml.safe_load(stream)
     except yaml.YAMLError as exc:
         print(exc)
 
 # Start generating the SQL script
-sql_script = f"CREATE DATABASE {schema['database']['name']};\nUSE {schema['database']['name']};\n"
+sql_script = f"USE {db_name};\n"
 
-for table in schema['database']['tables']:
-    sql_script += f"CREATE TABLE {table['name']} ("
-    field_lines = []
+for table in schema['tables']:
+    field_names = []
     for field in table['fields']:
-        # If we have a "cms" metadata field and "liquid_logic" is not in it, skip this field if liquid_logic_flag is False
-        if 'cms' in field and 'liquid_logic' not in field['cms'] and not liquid_logic_flag:
+        # If we have a "cms" metadata field and cms_type is not in it, skip this field
+        if 'cms' in field and cms_type not in field['cms']:
             continue
-        field_lines.append(f"{field['name']} {field['type']}")
-    sql_script += ", ".join(field_lines)
-    sql_script += ");\n"
-
-# Print the generated SQL script
-print(sql_script)
-
+        field_names.append(field['name'])
+    fields_str = ', '.join(field_names)
+    sql_script += f"SELECT {fields_str} FROM {table['name']};\n"
 
 # Write the generated SQL script to a file
-with open("/sql_scripts/ssd_extract.sql", 'w') as f:
+file_path = f"sql_scripts/ssd_extract_{cms_type}.sql"
+with open(file_path, 'w') as f:
     f.write(sql_script)
