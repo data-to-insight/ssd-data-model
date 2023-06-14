@@ -1,0 +1,19 @@
+[identity]
+  * child_id
+  + name
+  + date_of_birth
+  + gender
+
+[address]
+  * id
+  - child_id -> identity.child_id
+  + street
+  + city
+  + zip_code
+
+[contacts]
+  * id
+  - child_id -> identity.child_id
+  + contact_type
+  + contact_value
+  + is_primary

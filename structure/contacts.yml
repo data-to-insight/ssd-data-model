@@ -1,0 +1,5 @@
+contacts:
+  contact_id: "PK"  # Primary key
+  child_id: "FK"  # Foreign key
+  contact_date: "date"
+  contact_type: "string"

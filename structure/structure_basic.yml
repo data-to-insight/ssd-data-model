@@ -1,0 +1,24 @@
+nodes:
+  - name: Identity
+    fields: [child_id, sex, dob]
+  - name: Address
+    fields: [child_id, postcode, date_from, date_to]
+  - name: Contacts
+    fields: [Contact_ID, child_id, Date_of_Contact, Contact_Source, Contact_Outcome]
+  - name: Early_Help_Episodes
+    fields: [EH_Episode_ID, child_id, EH_Episode_Start_Date, EH_Episode_End_Date, EH_Episode_Reason_for_Involvement, EH_Episode_End_Reason, EH_Episode_Allocated_Organisation, EH_Episode_Allocated_Worker]
+  - name: CIN_Episodes
+    fields: [CIN_Referral_ID, child_id, CIN_Referral_Date, CIN_Referral_Completed_by_Team, CIN_Referral_Outcome, CIN_Referral_Source, CIN_Referral_Completed_by_Worker]
+edges:
+  - from: Identity
+    to: Address
+    relation: 1:M
+  - from: Identity
+    to: Contacts
+    relation: 1:M
+  - from: Identity
+    to: Early_Help_Episodes
+    relation: 1:M
+  - from: Identity
+    to: CIN_Episodes
+    relation: 1:M
