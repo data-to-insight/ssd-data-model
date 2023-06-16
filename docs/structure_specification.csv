@@ -1,0 +1,8 @@
+object_name,name,type,description,categories,constraints,returns,cms
+Child,child_id,VARCHAR(11),The ID of the child,identity,Unique,SSD903|CIN,liquid_logic|mosaic,test|not_test
+Child,sex,VARCHAR(255),The sex of the child,identity,,CIN,liquid_logic|mosaic,not_test
+Child,gender,VARCHAR(255),The gender of the child,identity,,SSD903,liquid_logic, 
+address,child_id,VARCHAR(11),The ID of the child,identity,Unique,SSD903 | CIN,liquid_logic,test
+address,address,VARCHAR(255),,identity,,CIN,liquid_logic|mosaic,
+address,date_from,VARCHAR(255),blah blah,identity,,SSD903 | CIN,liquid_logic,
+address,date_to,VARCHAR(255),,identity,,CIN,liquid_logic|mosaic,

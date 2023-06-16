@@ -1,9 +1,33 @@
+"""
+This script generates an SQL script based on a YAML schema file for extracting data from a database.
+
+The script does:
+
+- Define the CMS type and database name for the SQL script.
+- Read the YAML schema file.
+- Initialize the SQL script.
+- Iterate over each node in the schema:
+    - Extract relevant field names.
+    - Append a SELECT statement to the SQL script.
+- Write the generated SQL script to a file.
+
+Note: The script assumes specific file paths and output file name. 
+It also needs the correct database name adding.
+"""
+
+
 import yaml
 
-cms_type = 'liquid_logic'  # set this to the CMS you want to include
-# cms_type = 'mosaic'  # set this to the CMS you want to include
+
+# Generate SQL for which CMS? 
+# cms_type = 'liquid_logic' 
+cms_type = 'mosaic'  
 
 db_name = 'PLACEHOLDER_DB_NAME'  # replace this with your database name
+
+
+
+
 
 # Read the YAML file
 with open("structure_grouped_objects/schema.yaml", 'r') as stream:
@@ -26,6 +50,6 @@ for node in schema['nodes']:
     sql_script += f"SELECT {fields_str} FROM {node['name']};\n"
 
 # Write the generated SQL script to a file
-file_path = f"sql_scripts/ssd_extract_{cms_type}.sql"
+file_path = f"sql_generated_scripts/ssd_extract_{cms_type}.sql"
 with open(file_path, 'w') as f:
     f.write(sql_script)

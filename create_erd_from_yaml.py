@@ -37,6 +37,7 @@ G = pgv.AGraph(directed=True)
 
 # Load and combine YAML files
 for file_path in glob.glob('structure_split_objects/*.yml'):
+
     with open(file_path) as f:
         data = yaml.safe_load(f)
         nodes = data.get('nodes', [])
@@ -58,4 +59,4 @@ for file_path in glob.glob('structure_split_objects/*.yml'):
             G.add_edge(relation['from'], relation['to'], label=relation['relation'])
 
 # Render the graph to a file
-G.draw('assets/ssd_erd_multiyaml.png', prog='dot', format='png')
+G.draw('assets/ssd_erd_multiyaml_testing.png', prog='dot', format='png')
