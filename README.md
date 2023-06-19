@@ -121,3 +121,12 @@ The main place to find documentation relating to this specification is
 [csc]: https://digital-preservation.github.io/csv-schema/
 [ssot]: https://en.wikipedia.org/wiki/Single_source_of_truth
 [ghp]: https://pages.github.com/
+
+
+
+## Running notes:
+Ensure that you run the requirements file to set up before running scripts:
+[$] pip install -r requirements.txt
+Some of the .py scripts have package dependencies. To run the create_erd_from_yml.py ensure the following:
+[$] sudo apt-get update
+[$] sudo apt-get install graphviz libgraphviz-dev pkg-config

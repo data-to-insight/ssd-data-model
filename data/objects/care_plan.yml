@@ -1,0 +1,21 @@
+nodes:
+  - name: care_plan
+    fields:
+      - name: Review_ID
+        type: VARCHAR()
+        description: Review ID
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: What_is_the_chosen_plan_for_this_child/young_person?
+        type: 
+        description: What is the chosen plan for this child/young person?
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic

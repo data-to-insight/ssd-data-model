@@ -1,0 +1,31 @@
+nodes:
+  - name: family
+    fields:
+      - name: Family_identifier
+        type: 
+        description: Family identifier
+        categories:
+          - identity
+          - family_identifier
+        constraints:
+          - unique
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Child_Unique_ID
+        type: VARCHAR(10)
+        description: Child Unique ID
+        categories:
+          - identity
+          - family_identifier
+        constraints:
+          - unique
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic

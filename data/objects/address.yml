@@ -1,0 +1,53 @@
+nodes:
+  - name: address
+    fields:
+      - name: Address
+        type: 
+        description: Address
+        categories:
+          - identity
+          - address
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Child_Unique_ID
+        type: VARCHAR(10)
+        description: Child Unique ID
+        categories:
+          - identity
+          - address
+        constraints:
+          - unique
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Address_Start_Date/_From
+        type: DATE
+        description: Address Start Date/ From
+        categories:
+          - identity
+          - address
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Address_End_Date/_To
+        type: DATE
+        description: Address End Date/ To
+        categories:
+          - identity
+          - address
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic

@@ -19,22 +19,19 @@ The script performs the following steps:
 # File handling input/output
 
 # Data Structure spec
-csv_file = 'docs/structure_specification.csv'     # import from repo
-output_directory = 'data/structure_objects/'
+csv_file = 'docs/data_objects_specification.csv'     #  import from repo
+output_directory = 'data/objects/'
 
 
 import csv
 import os
 import yaml
 
-# Define the list of field names
-field_names = ['name', 'type', 'description']
+# Full list of field names
+field_names = ['object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 'cms']
 
-# Define the multi-part fields
+# Those that are multi-part/list fields
 multi_part_fields = ['categories', 'constraints', 'returns', 'cms']
-
-# Define the fields to be appended at the end
-end_fields = ['returns', 'cms']
 
 def process_csv_file(csv_file, output_directory):
     """
@@ -44,7 +41,7 @@ def process_csv_file(csv_file, output_directory):
         csv_file (str): Path to the input CSV file.
         output_directory (str): Directory to save the generated YAML files.
     """
-    with open(csv_file, 'r') as file:
+    with open(csv_file, 'r', newline='', encoding='utf-8-sig') as file:
         reader = csv.DictReader(file)
         nodes = []
 
@@ -53,24 +50,21 @@ def process_csv_file(csv_file, output_directory):
             field = {}
 
             for name in field_names:
-                value = row[name]
+                value = row[name].strip('"')
+                if name == 'name':
+                    value = value.lower()  # Force name element to lowercase
+                    value = value.replace(' ', '_')  # Replace spaces with underscores in the name field
+                else:
+                    value = value.replace('\t', ' ')  # Replace tab characters with spaces in lead/trail positions
+
                 field[name] = value
 
             # Append multi-part fields to the field dictionary
             for name in multi_part_fields:
-                value = row[name]
-                field[name] = (
-                    [v.strip() for v in value[1:-1].split(',')] if value else []
-                )
+                value = field[name]
+                field[name] = [v.strip().replace(' ', '') for v in value.split('|')] if value else []
 
-            node_index = next(
-                (
-                    i
-                    for i, node in enumerate(nodes)
-                    if node['name'] == object_name
-                ),
-                None,
-            )
+            node_index = next((i for i, node in enumerate(nodes) if node['name'] == object_name), None)
 
             if node_index is None:
                 nodes.append({'name': object_name, 'fields': [field]})
@@ -107,12 +101,6 @@ def save_node_yaml(node, output_directory):
                     for value in field[name]:
                         file.write("          - " + value + "\n")
 
-            for name in end_fields:
-                if field[name] and name not in multi_part_fields:
-                    file.write("        " + name + ":\n")
-                    for value in field[name]:
-                        file.write("          - " + value + "\n")
-
 
 process_csv_file(csv_file, output_directory)
 
@@ -125,11 +113,6 @@ process_csv_file(csv_file, output_directory)
 
 
 
-# # File handling input/output
-
-# # Data Structure spec
-# csv_file = 'docs/structure_specification.csv'     #  import from repo
-# output_directory = 'data/structure_objects/'
 
 
 # import csv
@@ -137,13 +120,10 @@ process_csv_file(csv_file, output_directory)
 # import yaml
 
 # # Define the list of field names
-# field_names = ['name', 'type', 'description']
+# field_names = ['object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 'cms']
 
 # # Define the multi-part fields
-# multi_part_fields = ['categories', 'constraints', 'returns', 'cms']
-
-# # Define the fields to be appended at the end
-# end_fields = ['returns', 'cms']
+# multi_part_fields = ['categories', 'constraints', 'on_returns', 'cms']
 
 # def process_csv_file(csv_file, output_directory):
 #     """
@@ -154,28 +134,30 @@ process_csv_file(csv_file, output_directory)
 #         output_directory (str): Directory to save the generated YAML files.
 #     """
 #     with open(csv_file, 'r') as file:
-#         reader = csv.DictReader(file)
+#         reader = csv.reader(file)
+#         next(reader)  # Skip header row
 #         nodes = []
 
 #         for row in reader:
-#             object_name = row['object_name']
-#             field = {}
-            
-#             for name in field_names:
-#                 value = row[name]
-#                 field[name] = value
-            
-#             # Append multi-part fields to the field dictionary
-#             for name in multi_part_fields:
-#                 value = row[name]
-#                 field[name] = [v.strip() for v in value.split('|')] if value else []
+#             if len(row) >= len(field_names) + 1:
+#                 object_name = row[0]
+#                 field = {}
 
-#             node_index = next((i for i, node in enumerate(nodes) if node['name'] == object_name), None)
+#                 for i, name in enumerate(field_names):
+#                     value = row[i + 1].strip('"')  # Remove surrounding double quotes
+#                     field[name] = value
 
-#             if node_index is None:
-#                 nodes.append({'name': object_name, 'fields': [field]})
-#             else:
-#                 nodes[node_index]['fields'].append(field)
+#                 # Append multi-part fields to the field dictionary
+#                 for name in multi_part_fields:
+#                     value = field[name]
+#                     field[name] = [v.strip() for v in value.split('|')] if value else []
+
+#                 node_index = next((i for i, node in enumerate(nodes) if node['name'] == object_name), None)
+
+#                 if node_index is None:
+#                     nodes.append({'name': object_name, 'fields': [field]})
+#                 else:
+#                     nodes[node_index]['fields'].append(field)
 
 #         # Save YAML files for each node
 #         for node in nodes:
@@ -191,24 +173,20 @@ process_csv_file(csv_file, output_directory)
 #     """
 #     yaml_file = os.path.join(output_directory, f"{node['name']}.yml")
 
+#     print(yaml_file)
+
 #     with open(yaml_file, 'w') as file:
 #         file.write("nodes:\n")
 #         file.write("  - name: " + node['name'] + "\n")
 #         file.write("    fields:\n")
-        
+
 #         for field in node['fields']:
 #             file.write("      - name: " + field['name'] + "\n")
 #             file.write("        type: " + field['type'] + "\n")
 #             file.write("        description: " + field['description'] + "\n")
-            
+
 #             for name in multi_part_fields:
 #                 if field[name]:
-#                     file.write("        " + name + ":\n")
-#                     for value in field[name]:
-#                         file.write("          - " + value + "\n")
-            
-#             for name in end_fields:
-#                 if field[name] and name not in multi_part_fields:
 #                     file.write("        " + name + ":\n")
 #                     for value in field[name]:
 #                         file.write("          - " + value + "\n")
@@ -216,6 +194,7 @@ process_csv_file(csv_file, output_directory)
 
 
 # process_csv_file(csv_file, output_directory)
+
 
 
 

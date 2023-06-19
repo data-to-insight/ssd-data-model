@@ -1,0 +1,59 @@
+nodes:
+  - name: cp_visits
+    fields:
+      - name: CP_Plan_ID
+        type: VARCHAR()
+        description: CP Plan ID
+        constraints:
+          - unique
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: CP_Visit_ID
+        type: VARCHAR()
+        description: CP Visit ID
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Date_of_Visit
+        type: DATE
+        description: Date of Visit
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Child_Seen
+        type: BOOLEAN
+        description: Child Seen
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Child_Seen_Alone
+        type: BOOLEAN
+        description: Child Seen Alone
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Child_Bedroon_Seen
+        type: BOOLEAN
+        description: Child Bedroon Seen
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
