@@ -15,13 +15,12 @@ The script performs the following steps:
 """
 
 
+
 # File handling input/output
 
 # Data Structure spec
-csv_file = 'docs/structure_specification.csv'     #  import from repo
+csv_file = 'docs/structure_specification.csv'     # import from repo
 output_directory = 'data/structure_objects/'
-
-
 
 
 import csv
@@ -52,17 +51,26 @@ def process_csv_file(csv_file, output_directory):
         for row in reader:
             object_name = row['object_name']
             field = {}
-            
+
             for name in field_names:
                 value = row[name]
                 field[name] = value
-            
+
             # Append multi-part fields to the field dictionary
             for name in multi_part_fields:
                 value = row[name]
-                field[name] = [v.strip() for v in value.split('|')] if value else []
+                field[name] = (
+                    [v.strip() for v in value[1:-1].split(',')] if value else []
+                )
 
-            node_index = next((i for i, node in enumerate(nodes) if node['name'] == object_name), None)
+            node_index = next(
+                (
+                    i
+                    for i, node in enumerate(nodes)
+                    if node['name'] == object_name
+                ),
+                None,
+            )
 
             if node_index is None:
                 nodes.append({'name': object_name, 'fields': [field]})
@@ -87,18 +95,18 @@ def save_node_yaml(node, output_directory):
         file.write("nodes:\n")
         file.write("  - name: " + node['name'] + "\n")
         file.write("    fields:\n")
-        
+
         for field in node['fields']:
             file.write("      - name: " + field['name'] + "\n")
             file.write("        type: " + field['type'] + "\n")
             file.write("        description: " + field['description'] + "\n")
-            
+
             for name in multi_part_fields:
                 if field[name]:
                     file.write("        " + name + ":\n")
                     for value in field[name]:
                         file.write("          - " + value + "\n")
-            
+
             for name in end_fields:
                 if field[name] and name not in multi_part_fields:
                     file.write("        " + name + ":\n")
@@ -106,16 +114,36 @@ def save_node_yaml(node, output_directory):
                         file.write("          - " + value + "\n")
 
 
-
 process_csv_file(csv_file, output_directory)
 
 
-# The below is working version prior to introduction of lists for field names to improve updates etc
+
+
+
+
+
+
+
+
+# # File handling input/output
+
+# # Data Structure spec
+# csv_file = 'docs/structure_specification.csv'     #  import from repo
+# output_directory = 'data/structure_objects/'
 
 
 # import csv
 # import os
 # import yaml
+
+# # Define the list of field names
+# field_names = ['name', 'type', 'description']
+
+# # Define the multi-part fields
+# multi_part_fields = ['categories', 'constraints', 'returns', 'cms']
+
+# # Define the fields to be appended at the end
+# end_fields = ['returns', 'cms']
 
 # def process_csv_file(csv_file, output_directory):
 #     """
@@ -131,15 +159,16 @@ process_csv_file(csv_file, output_directory)
 
 #         for row in reader:
 #             object_name = row['object_name']
-#             field = {
-#                 'name': row['name'],
-#                 'type': row['type'],
-#                 'description': row['description'],
-#                 'categories': [c.strip() for c in row['categories'].split('|')],
-#                 'constraints': [c.strip() for c in row['constraints'].split('|')] if row['constraints'] else [],
-#                 'returns': [r.strip() for r in row['returns'].split('|')] if row['returns'] else [],
-#                 'cms': [c.strip() for c in row['cms'].split('|')]
-#             }
+#             field = {}
+            
+#             for name in field_names:
+#                 value = row[name]
+#                 field[name] = value
+            
+#             # Append multi-part fields to the field dictionary
+#             for name in multi_part_fields:
+#                 value = row[name]
+#                 field[name] = [v.strip() for v in value.split('|')] if value else []
 
 #             node_index = next((i for i, node in enumerate(nodes) if node['name'] == object_name), None)
 
@@ -160,35 +189,33 @@ process_csv_file(csv_file, output_directory)
 #         node (dict): Dictionary representing the node with 'name' and 'fields' keys.
 #         output_directory (str): Directory to save the generated YAML files.
 #     """
-#     yaml_data = yaml.dump(node, sort_keys=False)
 #     yaml_file = os.path.join(output_directory, f"{node['name']}.yml")
 
 #     with open(yaml_file, 'w') as file:
 #         file.write("nodes:\n")
 #         file.write("  - name: " + node['name'] + "\n")
 #         file.write("    fields:\n")
+        
 #         for field in node['fields']:
 #             file.write("      - name: " + field['name'] + "\n")
 #             file.write("        type: " + field['type'] + "\n")
 #             file.write("        description: " + field['description'] + "\n")
-#             file.write("        categories:\n")
-#             for category in field['categories']:
-#                 file.write("          - " + category + "\n")
-#             if field['constraints']:
-#                 file.write("        constraints:\n")
-#                 for constraint in field['constraints']:
-#                     file.write("          - " + constraint + "\n")
-#             if field['returns']:
-#                 file.write("        returns:\n")
-#                 for ret in field['returns']:
-#                     file.write("          - " + ret + "\n")
-#             file.write("        cms:\n")
-#             for cms in field['cms']:
-#                 file.write("          - " + cms + "\n")
+            
+#             for name in multi_part_fields:
+#                 if field[name]:
+#                     file.write("        " + name + ":\n")
+#                     for value in field[name]:
+#                         file.write("          - " + value + "\n")
+            
+#             for name in end_fields:
+#                 if field[name] and name not in multi_part_fields:
+#                     file.write("        " + name + ":\n")
+#                     for value in field[name]:
+#                         file.write("          - " + value + "\n")
 
-# # Specify the input CSV file and output directory
-# csv_file = 'docs/structure_specification.csv'
-# output_directory = 'structure_objects_test/'
+
 
 # process_csv_file(csv_file, output_directory)
+
+
 
