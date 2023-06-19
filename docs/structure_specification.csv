@@ -1,148 +1,148 @@
-﻿,,,,,object_name,categories,constraints,type,name,description,guidance,returns,cms,,
-> Child,> Identity,,,,child,identity,unique,VARCHAR(10),LAchildID,Child Unique ID,"This must be a unique ID for each child (no longer than 10 characters) and should be retained from year to year. A child ID should not be reused after a period of time, it should be unique to a single child in your local authority. It can include alphabetic and numeric characters. Do not use non-numeric or non-alphabetic characters. 
+﻿object_name,categories,constraints,type,name,description,guidance,returns,cms
+child,identity,unique,VARCHAR(10),LAchildID,Child Unique ID,"This must be a unique ID for each child (no longer than 10 characters) and should be retained from year to year. A child ID should not be reused after a period of time, it should be unique to a single child in your local authority. It can include alphabetic and numeric characters. Do not use non-numeric or non-alphabetic characters. 
 This item is the sole means of DfE computer identification of each child record. The system is currently set to strip out any leading zeros in child identifiers. We would therefore ask local authorities not to use leading zeros in child identifiers.
 If you are planning to change child identifiers, for example as part of a new computer scheme, DfE must be advised at an early stage.
-If a looked-after child is adopted, and subsequently becomes looked-after again later, they should have two separate unlinked records – one for pre-adoption and one for post-adoption – with two different child identifiers.",SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,,,,child,identity,,,Sex,Sex,"Children looked after must be classified as being male or female. In exceptional circumstances, a local authority may be unsure as to which gender should be recorded for a particular child. Where this occurs, sex should be recorded according to the wishes of the child.",SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,,,,child,identity,,,Gender,Gender,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,,,,child,identity,,VARCHAR(4),Ethnicity,Ethnicity,"We require data on ethnicity for all children. The local authority must not ascribe any ethnicity to the pupil. This information must come from the child, or the parent, guardian or carer.
+If a looked-after child is adopted, and subsequently becomes looked-after again later, they should have two separate unlinked records – one for pre-adoption and one for post-adoption – with two different child identifiers.",SSDA903 | CIN,liquid_logic | mosaic
+child,identity,,,Sex,Sex,"Children looked after must be classified as being male or female. In exceptional circumstances, a local authority may be unsure as to which gender should be recorded for a particular child. Where this occurs, sex should be recorded according to the wishes of the child.",SSDA903 | CIN,liquid_logic | mosaic
+child,identity,,,Gender,Gender,,SSDA903 | CIN,liquid_logic | mosaic
+child,identity,,VARCHAR(4),Ethnicity,Ethnicity,"We require data on ethnicity for all children. The local authority must not ascribe any ethnicity to the pupil. This information must come from the child, or the parent, guardian or carer.
 Where the ethnicity has not yet been collected, this is recorded as ‘NOBT’ (information not yet obtained). Where a child, parent, guardian or carer declines to provide ethnicity data, code ‘REFU’ (refused) is recorded and returned.
-Ethnicity should be recorded using one of the DfE main categories shown on the 'Lists' tab, which replicates those used in the school census and the children in need (CIN) return.",SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,,,,child,identity,,DATE,PersonBirthDate,Date of Birth,"The date of birth should be recorded in a DD/MM/YYYY format.
+Ethnicity should be recorded using one of the DfE main categories shown on the 'Lists' tab, which replicates those used in the school census and the children in need (CIN) return.",SSDA903 | CIN,liquid_logic | mosaic
+child,identity,,DATE,PersonBirthDate,Date of Birth,"The date of birth should be recorded in a DD/MM/YYYY format.
 If the exact day of birth is not known:
 Unknown dates can be a problem for unaccompanied asylum-seeking children, If the day of birth is not known then assume that it was the 15th of the month. Do not use first day of the month as a dummy date of birth.
 If the date of birth of an unaccompanied asylum-seeking child is reassessed, and:
 • if the age of the child is assessed to be over 18 years, then please report the original date of birth recorded on entry into care rather than amend it to the reassessed date of birth.
-• if the age of the child is assessed to be under 18 years, then please report the reassessed date of birth.",SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,,,,child,identity,unique,CHAR(13),UPN,UPN,"The UPN must be 13 characters long. The first character is a letter (but cannot be I, O or S). The remaining characters are numeric. For example, H801200001001. If the UPN is temporary, then the last character must be a letter. The UPN field cannot be left blank unless the child is looked-after under an agreed series of short-term 
-placements.For children looked after that have been adopted and subsequently return to being looked-after, the UPN on the child’s pre- and post- adoption records should be different.",SSDA903 | CIN,liquid_logic | mosaic,,
-,,,,,child,identity,,CHAR(3),UPNunknown,UPN Unknown,"If the UPN is unknown, then one of the codes below should be used. These codes are to be used within the UPN field where it is not possible to provide a UPN. They are not entered into a separate field as they are in the CIN Census.If a child is educated outside England, please use UPN unknown code UN3, unless the child has a UPN from previously attending a school in England. If the child is home educated and has previously attended a mainstream school, please provide the UPN allocated earlier.",SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,,,,child,identity,,BOOLEAN,SENDFlag,SEND Flag,Young people who have an EHC plan or had an EHC plan or statement of SEN at the time of completing compulsory education,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,,,,child,identity,,DATE,ExpectedPersonBirthDate,Expected Birth Date,"Record the expected date of birth (due date) for a child who is unborn at the time of referral and who remains unborn at 31 March or when the case is closed. 
+• if the age of the child is assessed to be under 18 years, then please report the reassessed date of birth.",SSDA903 | CIN,liquid_logic | mosaic
+child,identity,unique,CHAR(13),UPN,UPN,"The UPN must be 13 characters long. The first character is a letter (but cannot be I, O or S). The remaining characters are numeric. For example, H801200001001. If the UPN is temporary, then the last character must be a letter. The UPN field cannot be left blank unless the child is looked-after under an agreed series of short-term 
+placements.For children looked after that have been adopted and subsequently return to being looked-after, the UPN on the child’s pre- and post- adoption records should be different.",SSDA903 | CIN,liquid_logic | mosaic
+child,identity,,CHAR(3),UPNunknown,UPN Unknown,"If the UPN is unknown, then one of the codes below should be used. These codes are to be used within the UPN field where it is not possible to provide a UPN. They are not entered into a separate field as they are in the CIN Census.If a child is educated outside England, please use UPN unknown code UN3, unless the child has a UPN from previously attending a school in England. If the child is home educated and has previously attended a mainstream school, please provide the UPN allocated earlier.",SSDA903 | CIN,liquid_logic | mosaic
+child,identity,,BOOLEAN,SENDFlag,SEND Flag,Young people who have an EHC plan or had an EHC plan or statement of SEN at the time of completing compulsory education,SSDA903 | CIN,liquid_logic | mosaic
+child,identity,,DATE,ExpectedPersonBirthDate,Expected Birth Date,"Record the expected date of birth (due date) for a child who is unborn at the time of referral and who remains unborn at 31 March or when the case is closed. 
 If the child is born before 31 March 2023 or before the case is closed, then the return for 
 that child should not include both the date of birth and the expected date of birth.
 Please note that users may wish to retain the expected date of birth on their systems, but it must not be included within the census return if the date of birth is present. It will be possible for us to assess whether the child was unborn at the time of the referral if the date of birth is later than the referral date. See section general notes, date fields for date formats.
-If a child is stillborn, or the mother suffers a miscarriage (including a chemical pregnancy) or a phantom pregnancy, or there is a termination of the pregnancy, please record the expected date of birth and leave the date of birth blank. The children in need closure date does not need to match the date on the death certificate. The date of death and the final closure date can both be recorded. The reason for closure should be recorded as ‘RC2 died’.",SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,,,,child,identity,,DATE,PersonDeathDate,Date of Death,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,,,,child,identity,,BOOLEAN,MOTHER,Mother,Currently collected for CLA only,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,,,,child,identity,,,Country of Origin,Country of Origin,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Family identifier,,,family,identity|family_identifier,unique,,Family identifier,Family identifier,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Family identifier,,,family,identity|family_identifier,unique,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Address,,,address,identity|address,,,Address,Address,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Address,,,address,identity|address,unique,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Address,,,address,identity|address,,DATE,Address Start Date/ From,Address Start Date/ From,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Address,,,address,identity|address,,DATE,Address End Date/ To,Address End Date/ To,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Disability Code,,,disability,identity|disability_code,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Disability Code,,,disability,identity|disability_code,,,Disability Code,Disability Code,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Immigration Status,,,immigration_status,identity,unique,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Immigration Status,,,immigration_status,identity,,,Immigration Status,Immigration Status,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Immigration Status,,,immigration_status,identity,,DATE,Immigration Status Start,Immigration Status Start,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Immigration Status,,,immigration_status,identity,,DATE,Immigration Status End,Immigration Status End,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Mother's Child DOB,,,mother,identity,unique,VARCHAR(10),Mother's Child Unique ID,Mother's Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Mother's Child DOB,,,mother,identity,,VARCHAR(10),Child Unique ID (Mother),Child Unique ID (Mother),,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Mother's Child DOB,,,mother,identity,,DATE,MC_DOB,Date of birth of mother’s child,"Currently collected for CLA only, only first child dob collected",SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Legal Status,,,legal_status,identity,unique,,Legal Status ID,Legal Status ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Legal Status,,,legal_status,identity,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Legal Status,,,legal_status,,,,Legal Status,Legal Status,"The legal status code on the SSDA903 records the legal status underlying being ‘looked-after’. If a child is looked-after because it is accommodated, the legal status goes some way to describe (in legal terms at least) why the child is being looked after. There are many legal statuses arising from the Children Act, or the Youth Justice System, to which a child can be subject, but which have no bearing on whether a child is ‘looked-after’ or not. These are not recorded on the SSDA903, and no legal status codes are provided for them.
+If a child is stillborn, or the mother suffers a miscarriage (including a chemical pregnancy) or a phantom pregnancy, or there is a termination of the pregnancy, please record the expected date of birth and leave the date of birth blank. The children in need closure date does not need to match the date on the death certificate. The date of death and the final closure date can both be recorded. The reason for closure should be recorded as ‘RC2 died’.",SSDA903 | CIN,liquid_logic | mosaic
+child,identity,,DATE,PersonDeathDate,Date of Death,,SSDA903 | CIN,liquid_logic | mosaic
+child,identity,,BOOLEAN,MOTHER,Mother,Currently collected for CLA only,SSDA903 | CIN,liquid_logic | mosaic
+child,identity,,,Country of Origin,Country of Origin,,SSDA903 | CIN,liquid_logic | mosaic
+family,identity|family_identifier,unique,,Family identifier,Family identifier,,SSDA903 | CIN,liquid_logic | mosaic
+family,identity|family_identifier,unique,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+address,identity|address,,,Address,Address,,SSDA903 | CIN,liquid_logic | mosaic
+address,identity|address,unique,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+address,identity|address,,DATE,Address Start Date/ From,Address Start Date/ From,,SSDA903 | CIN,liquid_logic | mosaic
+address,identity|address,,DATE,Address End Date/ To,Address End Date/ To,,SSDA903 | CIN,liquid_logic | mosaic
+disability,identity|disability_code,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+disability,identity|disability_code,,,Disability Code,Disability Code,,SSDA903 | CIN,liquid_logic | mosaic
+immigration_status,identity,unique,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+immigration_status,identity,,,Immigration Status,Immigration Status,,SSDA903 | CIN,liquid_logic | mosaic
+immigration_status,identity,,DATE,Immigration Status Start,Immigration Status Start,,SSDA903 | CIN,liquid_logic | mosaic
+immigration_status,identity,,DATE,Immigration Status End,Immigration Status End,,SSDA903 | CIN,liquid_logic | mosaic
+mother,identity,unique,VARCHAR(10),Mother's Child Unique ID,Mother's Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+mother,identity,,VARCHAR(10),Child Unique ID (Mother),Child Unique ID (Mother),,SSDA903 | CIN,liquid_logic | mosaic
+mother,identity,,DATE,MC_DOB,Date of birth of mother’s child,"Currently collected for CLA only, only first child dob collected",SSDA903 | CIN,liquid_logic | mosaic
+legal_status,identity,unique,,Legal Status ID,Legal Status ID,,SSDA903 | CIN,liquid_logic | mosaic
+legal_status,identity,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+legal_status,,,,Legal Status,Legal Status,"The legal status code on the SSDA903 records the legal status underlying being ‘looked-after’. If a child is looked-after because it is accommodated, the legal status goes some way to describe (in legal terms at least) why the child is being looked after. There are many legal statuses arising from the Children Act, or the Youth Justice System, to which a child can be subject, but which have no bearing on whether a child is ‘looked-after’ or not. These are not recorded on the SSDA903, and no legal status codes are provided for them.
 The renewal of an existing legal status does not automatically generate a new episode. If the legal status code does not change, a new episode is not required (unless there happens to be a change of placement at the same time).
 Example: If a child is already looked-after under an interim care order, a renewal of the interim care order does not change the legal status and no new episode is required. However, if a child looked-after under an interim care order becomes the subject of a full care order, then a new episode is required to record the start of the full care order.
 In certain circumstances a child being looked-after can have more than one ‘lookedafter’ legal status. In general, this happens when a child who is already ‘looked-after’ under a Children Act care order comes into contact with the Youth Justice System, and as a result is detained in local authority accommodation under a second legal status. Two legal statuses cannot be shown as current on SSDA903. In such cases the latest legal status should be recorded and the episode under the previous status should be closed
 Example: A child who is already subject to a care order is remanded to local authority accommodation under Section 23 (1) of CYPA 1969. The care order episode should be closed, and a new episode should start under the “remanded to local authority accommodation” legal status code. When the episode under the remand status ends, a further episode under the care order legal status will start, unless the care order has been discharged.
 We have attempted to identify and provide a code for every legal status which theoretically could underpin a child being ‘looked-after’. If future changes in legislation lead to new ‘looked-after’ legal statuses, we will provide new legal status codes. Our analysis of the use of the former legal status code 98 showed that in most cases such children were either not looked-after, or that another existing legal status was appropriate.
-The ‘wardship’ legal status code was a possible legal status identified by some local authorities in the consultation exercise on the future of the SSDA903 codes for which we did not have an existing legal status. However, the use of this code was restricted to just a few exceptional cases where the High Court has exercised its residual power to make a child a ward of the High Court, and has directed that the child should be accommodated by a local authority. In practice such cases werefound to be so extremely rare, it was felt that the use of a separate code could not be warranted. If such a case should arise, it should be coded C2, as the practical effects are the same.",SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Legal Status,,,legal_status,,,DATE,Legal Status Start Date,Legal Status Start Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Identity,> Legal Status,,,legal_status,,,DATE,Legal Status End Date,Legal Status End Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Contacts,Contact ID,,,contacts,,unique,VARCHAR(),Contact ID,Contact ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Contacts,Child Unique ID,,,contacts,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Contacts,Date of Contact,,,contacts,,,DATE,Date of Contact,Date of Contact,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Contacts,Contact Source,,,contacts,,,,Contact Source,Contact Source,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Contacts,Contact Outcome ,,,contacts,,,,Contact Outcome ,Contact Outcome ,(EH Referral/ CIN Referral),SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Early Help Episodes,EH Episode ID,,,early_help_episodes,,unique,VARCHAR(),EH Episode ID,EH Episode ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Early Help Episodes,Child Unique ID,,,early_help_episodes,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Early Help Episodes,EH Episode Start Date,,,early_help_episodes,,,DATE,EH Episode Start Date,EH Episode Start Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Early Help Episodes,EH Episode End Date,,,early_help_episodes,,,DATE,EH Episode End Date,EH Episode End Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Early Help Episodes,EH Episode Reason for Involvement,,,early_help_episodes,,,,EH Episode Reason for Involvement,EH Episode Reason for Involvement,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Early Help Episodes,EH Episode End Reason,,,early_help_episodes,,,,EH Episode End Reason,EH Episode End Reason, (Outcomes Met/ Step-up/ NFA),SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Early Help Episodes,EH Episode Allocated Organisation,,,early_help_episodes,,,,EH Episode Allocated Organisation,EH Episode Allocated Organisation,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Early Help Episodes,EH Episode Allocated Worker,,,early_help_episodes,,,,EH Episode Allocated Worker,EH Episode Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,CIN Referral ID,,,cin_episodes,,unique,VARCHAR(),CIN Referral ID,CIN Referral ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,Child Unique ID,,,cin_episodes,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,CIN Referral Date,,,cin_episodes,,,DATE,CIN Referral Date,CIN Referral Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,CIN Referral Source,,,cin_episodes,,,,CIN Referral Source,CIN Referral Source,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,CIN Referral Outcome,,,cin_episodes,,,,CIN Referral Outcome,CIN Referral Outcome, (NFA/ Assessment/ Step-down),SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,CIN Closure Reason,,,cin_episodes,,,,CIN Closure Reason,CIN Closure Reason,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,CIN Closure Date,,,cin_episodes,,,DATE,CIN Closure Date,CIN Closure Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,CIN Referral Completed by Team,,,cin_episodes,,,,CIN Referral Completed by Team,CIN Referral Completed by Team,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,CIN Referral Completed by Worker,,,cin_episodes,,,,CIN Referral Completed by Worker,CIN Referral Completed by Worker,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> Assessments,,,assessments,,unique,VARCHAR(),Assessment ID,Assessment ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> Assessments,,,assessments,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> Assessments,,,assessments,,,DATE,Assessment Start Date,Assessment Start Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> Assessments,,,assessments,,,BOOLEAN,Child Seen During Assessment,Child Seen During Assessment,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> Assessments,,,assessments,,,DATE,Assessment Authorised Date,Assessment Authorised Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> Assessments,,,assessments,,,,Assessment Outcome,Assessment Outcome, (Step-down/ Social Care/ NFA),SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> Assessments,,,assessments,,,,Assessment Completed by Team,Assessment Completed by Team,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> Assessments,,,assessments,,,,Assessment Completed by Worker,Assessment Completed by Worker,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> Assessments,> Assessment Factors,,assessment_factors,,unique,VARCHAR(),Assessment ID,Assessment ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> Assessments,> Assessment Factors,,assessment_factors,,,,Assessment Factors,Assessment Factors,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CIN Plans,,,cin_plans,,unique,VARCHAR(),CIN Plan ID,CIN Plan ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CIN Plans,,,cin_plans,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CIN Plans,,,cin_plans,,,DATE,CINPlanStartDate,CIN Plan Start Date,,SSDA903 | CIN,liquid_logic | mosaic,CINPlanStartDate,
-> Child,> CIN Episodes,> CIN Plans,,,cin_plans,,,DATE,CIN Plan End Date,CIN Plan End Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CIN Plans,,,cin_plans,,,,CIN Allocated Team,CIN Allocated Team,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CIN Plans,,,cin_plans,,,,CIN Allocated Worker,CIN Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CIN Plans,> CIN Visits,,cin_visits,,unique,VARCHAR(),CIN Visit ID,CIN Visit ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CIN Plans,> CIN Visits,,cin_visits,,,VARCHAR(),CIN Plan ID,CIN Plan ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CIN Plans,> CIN Visits,,cin_visits,,,DATE,CIN Visit Date,CIN Visit Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CIN Plans,> CIN Visits,,cin_visits,,,BOOLEAN,Child Seen,Child Seen,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CIN Plans,> CIN Visits,,cin_visits,,,BOOLEAN,Child Seen Alone,Child Seen Alone,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CIN Plans,> CIN Visits,,cin_visits,,,BOOLEAN,Child Bedroom Seen,Child Bedroom Seen,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> S47 Enquiry/ ICPC,,,s47_enquiry,,unique,VARCHAR(),S47 Enquiry ID,S47 Enquiry ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> S47 Enquiry/ ICPC,,,s47_enquiry,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> S47 Enquiry/ ICPC,,,s47_enquiry,,,DATE,s47 equiry start,Strategy Discussion initiating S47 Enquiry Start Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> S47 Enquiry/ ICPC,,,s47_enquiry,,,DATE,S47 Start Date,S47 Start Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> S47 Enquiry/ ICPC,,,s47_enquiry,,,DATE,S47 Completed Date,S47 Completed Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> S47 Enquiry/ ICPC,,,s47_enquiry,,,,S47 Outcome,S47 Outcome, (ICPC Required/ ICPC Not Required),SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> S47 Enquiry/ ICPC,,,s47_enquiry,,,,cp conf date,Date of Initial Child Protection Conference,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> S47 Enquiry/ ICPC,,,s47_enquiry,,,,cp conf outcome,Outcome of Initial Child Protection Conference, (CP Plan?),SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> S47 Enquiry/ ICPC,,,s47_enquiry,,,,s47 allocated team,S47/ ICPC Allocated Team,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> S47 Enquiry/ ICPC,,,s47_enquiry,,,,s47 allocated worker,S47/ ICPC Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,,,cp_plans,,unique,VARCHAR(),CP Plan ID,CP Plan ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,,,cp_plans,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,,,cp_plans,,,DATE,CP Plan Start Date,CP Plan Start Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,,,cp_plans,,,DATE,CP Plan End Date,CP Plan End Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,,,cp_plans,,,,CP Plan Allocated Team,CP Plan Allocated Team,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,,,cp_plans,,,,CP Plan Allocated Worker,CP Plan Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> Category of Abuse,,category_of_abuse,,unique,VARCHAR(),CP Plan ID,CP Plan ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> Category of Abuse,,category_of_abuse,,,,Category of Abuse,Category of Abuse,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> Category of Abuse,,category_of_abuse,,,,Category of Abuse Start Date,Category of Abuse Start Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Visits,,cp_visits,,unique,VARCHAR(),CP Plan ID,CP Plan ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Visits,,cp_visits,,,VARCHAR(),CP Visit ID,CP Visit ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Visits,,cp_visits,,,DATE,Date of Visit,Date of Visit,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Visits,,cp_visits,,,BOOLEAN,Child Seen,Child Seen,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Visits,,cp_visits,,,BOOLEAN,Child Seen Alone,Child Seen Alone,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Visits,,cp_visits,,,BOOLEAN,Child Bedroon Seen,Child Bedroon Seen,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Reviews,,cp_reviews,,unique,VARCHAR(),Review ID,Review ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Reviews,,cp_reviews,,,VARCHAR(),CP Plan ID,CP Plan ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Reviews,,cp_reviews,,,DATE,Review Due Date,Review Due Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Reviews,,cp_reviews,,,DATE,Date of Review,Date of Review,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Reviews,,cp_reviews,,,BOOLEAN,cp plan continues,CP Plan to Continue?,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Reviews,,cp_reviews,,,BOOLEAN,quorate,Quorate?,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Reviews,,cp_reviews,,,,Child's Participation,Child's Participation,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Reviews,,cp_reviews,,,,quality of representation,Quality of representation of CYP views/ experience,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Reviews,,cp_reviews,,,,cp progress made,"Sufficient progress made against the CP Plan to improve outcomes for the child?	",,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Reviews,> Risks to child at this conference,risks_to_child_at_this_conference,,,VARCHAR(),Review ID,Review ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CIN Episodes,> CP Plans,> CP Reviews,> Risks to child at this conference,risks_to_child_at_this_conference,,,,Risks to child at this conference,Risks to child at this conference,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,,,,cla_episodes,,unique,VARCHAR(),Episode ID,Episode ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,,,,cla_episodes,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,,,,cla_episodes,,,DATE,Date Episode Commenced,Date Episode Commenced,"This item records the date that each episode began. For the first episode in the year, this date can be in the current data year, or an earlier data year. When loading data using CSV or XML, dates must be recorded in a DD/MM/YYYY format. Example: 4 November 2023 should be entered as 04/11/2023.
+The ‘wardship’ legal status code was a possible legal status identified by some local authorities in the consultation exercise on the future of the SSDA903 codes for which we did not have an existing legal status. However, the use of this code was restricted to just a few exceptional cases where the High Court has exercised its residual power to make a child a ward of the High Court, and has directed that the child should be accommodated by a local authority. In practice such cases werefound to be so extremely rare, it was felt that the use of a separate code could not be warranted. If such a case should arise, it should be coded C2, as the practical effects are the same.",SSDA903 | CIN,liquid_logic | mosaic
+legal_status,,,DATE,Legal Status Start Date,Legal Status Start Date,,SSDA903 | CIN,liquid_logic | mosaic
+legal_status,,,DATE,Legal Status End Date,Legal Status End Date,,SSDA903 | CIN,liquid_logic | mosaic
+contacts,,unique,VARCHAR(),Contact ID,Contact ID,,SSDA903 | CIN,liquid_logic | mosaic
+contacts,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+contacts,,,DATE,Date of Contact,Date of Contact,,SSDA903 | CIN,liquid_logic | mosaic
+contacts,,,,Contact Source,Contact Source,,SSDA903 | CIN,liquid_logic | mosaic
+contacts,,,,Contact Outcome ,Contact Outcome ,(EH Referral/ CIN Referral),SSDA903 | CIN,liquid_logic | mosaic
+early_help_episodes,,unique,VARCHAR(),EH Episode ID,EH Episode ID,,SSDA903 | CIN,liquid_logic | mosaic
+early_help_episodes,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+early_help_episodes,,,DATE,EH Episode Start Date,EH Episode Start Date,,SSDA903 | CIN,liquid_logic | mosaic
+early_help_episodes,,,DATE,EH Episode End Date,EH Episode End Date,,SSDA903 | CIN,liquid_logic | mosaic
+early_help_episodes,,,,EH Episode Reason for Involvement,EH Episode Reason for Involvement,,SSDA903 | CIN,liquid_logic | mosaic
+early_help_episodes,,,,EH Episode End Reason,EH Episode End Reason, (Outcomes Met/ Step-up/ NFA),SSDA903 | CIN,liquid_logic | mosaic
+early_help_episodes,,,,EH Episode Allocated Organisation,EH Episode Allocated Organisation,,SSDA903 | CIN,liquid_logic | mosaic
+early_help_episodes,,,,EH Episode Allocated Worker,EH Episode Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic
+cin_episodes,,unique,VARCHAR(),CIN Referral ID,CIN Referral ID,,SSDA903 | CIN,liquid_logic | mosaic
+cin_episodes,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+cin_episodes,,,DATE,CIN Referral Date,CIN Referral Date,,SSDA903 | CIN,liquid_logic | mosaic
+cin_episodes,,,,CIN Referral Source,CIN Referral Source,,SSDA903 | CIN,liquid_logic | mosaic
+cin_episodes,,,,CIN Referral Outcome,CIN Referral Outcome, (NFA/ Assessment/ Step-down),SSDA903 | CIN,liquid_logic | mosaic
+cin_episodes,,,,CIN Closure Reason,CIN Closure Reason,,SSDA903 | CIN,liquid_logic | mosaic
+cin_episodes,,,DATE,CIN Closure Date,CIN Closure Date,,SSDA903 | CIN,liquid_logic | mosaic
+cin_episodes,,,,CIN Referral Completed by Team,CIN Referral Completed by Team,,SSDA903 | CIN,liquid_logic | mosaic
+cin_episodes,,,,CIN Referral Completed by Worker,CIN Referral Completed by Worker,,SSDA903 | CIN,liquid_logic | mosaic
+assessments,,unique,VARCHAR(),Assessment ID,Assessment ID,,SSDA903 | CIN,liquid_logic | mosaic
+assessments,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+assessments,,,DATE,Assessment Start Date,Assessment Start Date,,SSDA903 | CIN,liquid_logic | mosaic
+assessments,,,BOOLEAN,Child Seen During Assessment,Child Seen During Assessment,,SSDA903 | CIN,liquid_logic | mosaic
+assessments,,,DATE,Assessment Authorised Date,Assessment Authorised Date,,SSDA903 | CIN,liquid_logic | mosaic
+assessments,,,,Assessment Outcome,Assessment Outcome, (Step-down/ Social Care/ NFA),SSDA903 | CIN,liquid_logic | mosaic
+assessments,,,,Assessment Completed by Team,Assessment Completed by Team,,SSDA903 | CIN,liquid_logic | mosaic
+assessments,,,,Assessment Completed by Worker,Assessment Completed by Worker,,SSDA903 | CIN,liquid_logic | mosaic
+assessment_factors,,unique,VARCHAR(),Assessment ID,Assessment ID,,SSDA903 | CIN,liquid_logic | mosaic
+assessment_factors,,,,Assessment Factors,Assessment Factors,,SSDA903 | CIN,liquid_logic | mosaic
+cin_plans,,unique,VARCHAR(),CIN Plan ID,CIN Plan ID,,SSDA903 | CIN,liquid_logic | mosaic
+cin_plans,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+cin_plans,,,DATE,CINPlanStartDate,CIN Plan Start Date,,SSDA903 | CIN,liquid_logic | mosaic
+cin_plans,,,DATE,CIN Plan End Date,CIN Plan End Date,,SSDA903 | CIN,liquid_logic | mosaic
+cin_plans,,,,CIN Allocated Team,CIN Allocated Team,,SSDA903 | CIN,liquid_logic | mosaic
+cin_plans,,,,CIN Allocated Worker,CIN Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic
+cin_visits,,unique,VARCHAR(),CIN Visit ID,CIN Visit ID,,SSDA903 | CIN,liquid_logic | mosaic
+cin_visits,,,VARCHAR(),CIN Plan ID,CIN Plan ID,,SSDA903 | CIN,liquid_logic | mosaic
+cin_visits,,,DATE,CIN Visit Date,CIN Visit Date,,SSDA903 | CIN,liquid_logic | mosaic
+cin_visits,,,BOOLEAN,Child Seen,Child Seen,,SSDA903 | CIN,liquid_logic | mosaic
+cin_visits,,,BOOLEAN,Child Seen Alone,Child Seen Alone,,SSDA903 | CIN,liquid_logic | mosaic
+cin_visits,,,BOOLEAN,Child Bedroom Seen,Child Bedroom Seen,,SSDA903 | CIN,liquid_logic | mosaic
+s47_enquiry,,unique,VARCHAR(),S47 Enquiry ID,S47 Enquiry ID,,SSDA903 | CIN,liquid_logic | mosaic
+s47_enquiry,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+s47_enquiry,,,DATE,s47 equiry start,Strategy Discussion initiating S47 Enquiry Start Date,,SSDA903 | CIN,liquid_logic | mosaic
+s47_enquiry,,,DATE,S47 Start Date,S47 Start Date,,SSDA903 | CIN,liquid_logic | mosaic
+s47_enquiry,,,DATE,S47 Completed Date,S47 Completed Date,,SSDA903 | CIN,liquid_logic | mosaic
+s47_enquiry,,,,S47 Outcome,S47 Outcome, (ICPC Required/ ICPC Not Required),SSDA903 | CIN,liquid_logic | mosaic
+s47_enquiry,,,,cp conf date,Date of Initial Child Protection Conference,,SSDA903 | CIN,liquid_logic | mosaic
+s47_enquiry,,,,cp conf outcome,Outcome of Initial Child Protection Conference, (CP Plan?),SSDA903 | CIN,liquid_logic | mosaic
+s47_enquiry,,,,s47 allocated team,S47/ ICPC Allocated Team,,SSDA903 | CIN,liquid_logic | mosaic
+s47_enquiry,,,,s47 allocated worker,S47/ ICPC Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic
+cp_plans,,unique,VARCHAR(),CP Plan ID,CP Plan ID,,SSDA903 | CIN,liquid_logic | mosaic
+cp_plans,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+cp_plans,,,DATE,CP Plan Start Date,CP Plan Start Date,,SSDA903 | CIN,liquid_logic | mosaic
+cp_plans,,,DATE,CP Plan End Date,CP Plan End Date,,SSDA903 | CIN,liquid_logic | mosaic
+cp_plans,,,,CP Plan Allocated Team,CP Plan Allocated Team,,SSDA903 | CIN,liquid_logic | mosaic
+cp_plans,,,,CP Plan Allocated Worker,CP Plan Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic
+category_of_abuse,,unique,VARCHAR(),CP Plan ID,CP Plan ID,,SSDA903 | CIN,liquid_logic | mosaic
+category_of_abuse,,,,Category of Abuse,Category of Abuse,,SSDA903 | CIN,liquid_logic | mosaic
+category_of_abuse,,,,Category of Abuse Start Date,Category of Abuse Start Date,,SSDA903 | CIN,liquid_logic | mosaic
+cp_visits,,unique,VARCHAR(),CP Plan ID,CP Plan ID,,SSDA903 | CIN,liquid_logic | mosaic
+cp_visits,,,VARCHAR(),CP Visit ID,CP Visit ID,,SSDA903 | CIN,liquid_logic | mosaic
+cp_visits,,,DATE,Date of Visit,Date of Visit,,SSDA903 | CIN,liquid_logic | mosaic
+cp_visits,,,BOOLEAN,Child Seen,Child Seen,,SSDA903 | CIN,liquid_logic | mosaic
+cp_visits,,,BOOLEAN,Child Seen Alone,Child Seen Alone,,SSDA903 | CIN,liquid_logic | mosaic
+cp_visits,,,BOOLEAN,Child Bedroon Seen,Child Bedroon Seen,,SSDA903 | CIN,liquid_logic | mosaic
+cp_reviews,,unique,VARCHAR(),Review ID,Review ID,,SSDA903 | CIN,liquid_logic | mosaic
+cp_reviews,,,VARCHAR(),CP Plan ID,CP Plan ID,,SSDA903 | CIN,liquid_logic | mosaic
+cp_reviews,,,DATE,Review Due Date,Review Due Date,,SSDA903 | CIN,liquid_logic | mosaic
+cp_reviews,,,DATE,Date of Review,Date of Review,,SSDA903 | CIN,liquid_logic | mosaic
+cp_reviews,,,BOOLEAN,cp plan continues,CP Plan to Continue?,,SSDA903 | CIN,liquid_logic | mosaic
+cp_reviews,,,BOOLEAN,quorate,Quorate?,,SSDA903 | CIN,liquid_logic | mosaic
+cp_reviews,,,,Child's Participation,Child's Participation,,SSDA903 | CIN,liquid_logic | mosaic
+cp_reviews,,,,quality of representation,Quality of representation of CYP views/ experience,,SSDA903 | CIN,liquid_logic | mosaic
+cp_reviews,,,,cp progress made,"Sufficient progress made against the CP Plan to improve outcomes for the child?	",,SSDA903 | CIN,liquid_logic | mosaic
+risks_to_child_at_this_conference,,,VARCHAR(),Review ID,Review ID,,SSDA903 | CIN,liquid_logic | mosaic
+risks_to_child_at_this_conference,,,,Risks to child at this conference,Risks to child at this conference,,SSDA903 | CIN,liquid_logic | mosaic
+cla_episodes,,unique,VARCHAR(),Episode ID,Episode ID,,SSDA903 | CIN,liquid_logic | mosaic
+cla_episodes,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+cla_episodes,,,DATE,Date Episode Commenced,Date Episode Commenced,"This item records the date that each episode began. For the first episode in the year, this date can be in the current data year, or an earlier data year. When loading data using CSV or XML, dates must be recorded in a DD/MM/YYYY format. Example: 4 November 2023 should be entered as 04/11/2023.
 Exceptionally, once loaded, the dates in the episode fields will appear as DD/MM/YY (year as a 2-digit number). Manual amendments to episode dates may be made using either format DD/MM/YY or DD/MM/YYYY, though the latter will appear as DD/MM/YY when saved). This is intended to make the episodes easier to read and manually amend, particularly when a record contains several episodes.
 Where episodes are consecutive, the new episode must start on the same day that the previous episode finished.
 When recording an agreement to provide a series of short-term placements (legal status V3/V4), enter in this field the date the first placement under the agreement began. For further information about children being looked-after under a series of short-term placements see Section 1.10.
 Where an episode began in a previous statistical year, but is still open on 31 March, do not complete ‘Reason Episode Ceased’ or ‘Date Episode Ceased’. The following year’s record must then start with the same episode details showing the actual date the episode commenced if the episode subsequently closes, both the ‘Reason 
 Episode Ceased’ and the ‘Date Episode Ceased’ should be recorded).
 Episodes cannot start and end on the same day. If a child has two changes of legal status in one day only the second legal status is recorded. Similarly, in the unlikely event of two placements starting on the same day, only the status at the end of the day should be recorded. In such cases we no longer regard the first move of the day 
-as being a placement. It follows from this that an essential component of a placement for SSDA903 purposes is that a placement must involve an overnight stay. A ‘placement’ that does not include an overnight stay should be regarded as a ‘visit’ and not shown on the SSDA903.",SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,,,,cla_episodes,,,,Reason for New CLA Episode,Reason for New CLA Episode,"Use Code S where a child is starting to be looked-after for the first time, or had previously ceased to be looked-after, and is now starting to be looked-after again. 
+as being a placement. It follows from this that an essential component of a placement for SSDA903 purposes is that a placement must involve an overnight stay. A ‘placement’ that does not include an overnight stay should be regarded as a ‘visit’ and not shown on the SSDA903.",SSDA903 | CIN,liquid_logic | mosaic
+cla_episodes,,,,Reason for New CLA Episode,Reason for New CLA Episode,"Use Code S where a child is starting to be looked-after for the first time, or had previously ceased to be looked-after, and is now starting to be looked-after again. 
 Also use code S when recording agreements to provide short-term placements (legal status V4), and for individual breaks under such an agreement, if these are being recorded separately (legal status V3).
 Use Code L where there is a change of legal status, but the placement does not change. By ‘legal status’ we mean the legal status underlying the fact that the child is looked-after.
 Use Code P where there is a change of placement and carer, but the legal status does not change. This would include the following scenarios:
@@ -155,116 +155,116 @@ Use Code T where there is a change of placement, but the child remains with the 
 semi independent setting registering with Ofsted).
 In both scenarios, the child has remained with the same carer, but for some other reason, a new placement is required on the SSDA903.
 Use Code B where both legal status and placement change, with a change of carer, on the same day. The two changes do not need to be simultaneous or consequent one upon the other. The code simply reflects that there was a change in carer and a change in legal status, for whatever reason, on the same day.
-Use Code U where both legal status and placement change on the same day, but the child remains with the same carer. The two changes do not need to be simultaneous or consequent one upon the other. The code simply reflects that there was a change in placement and a change in legal status, for whatever reason, on the same day.",SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,,,,cla_episodes,,,DATE,DEC,Date Episode Ceased,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,,,,cla_episodes,,,,REC,Reason Episode Ceased,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,,,,cla_episodes,,,,Allocated Team,Allocated Team,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,,,,cla_episodes,,,,Allocated Worker,Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> Placement,,,placement,,unique,VARCHAR(),Placement ID,Placement ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> Placement,,,placement,,,VARCHAR(),Episode ID,Episode ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> Placement,,,placement,,,DATE,Placement Start Date,Placement Start Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> Placement,,,placement,,,,Placement Type,Placement Type,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> Placement,,,placement,,,VARCHAR(8),URN of Placement,URN of Placement,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> Placement,,,placement,,,,LA of Placement,LA of Placement,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> Placement,,,placement,,,,Placement Provider,Placement Provider,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> Placement,,,placement,,,,Placement Postcode,Placement Postcode,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> Placement,,,placement,,,DATE,Placement End Date,Placement End Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> Placement,,,placement,,,,Reason for Placement Change,Reason for Placement Change,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,,Review ID,Review ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,,Episode ID,Episode ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,DATE,CLA Review Due Date,CLA Review Due Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,DATE,CLA Review Date,CLA Review Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,,child involved,Has the child/young person been involved in formulating this Care Plan?,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,,sw met child,"Has the Social Worker met with the child on their own to undertake direct work to establish their wishes and views	",,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,,Participation code,Participation code,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,,CP meets childs need,Is the Care Plan meeting the child's needs?,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,BOOLEAN,permanence plan in place,Is a Permanence Plan in place?,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,DATE,last_iro,Date of Last IRO Visit / Contact to the Child,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,,previously_Adopted,Has the child / young person previously been adopted or left care for special guardianship or residence order?,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,DATE,Date of Previous Permanence Order,Date of Previous Permanence Order,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,,Previous Permanence Option,Previous Permanence Option,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,,Previous Permanence Arranged LA,Previous Permanence Arranged LA,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,BOOLEAN,Child convicted during the year,Child convicted during the year,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,BOOLEAN,Health surveillance checks up to date,Health surveillance checks up to date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,DATE,Date of Last Health Assessment,Date of Last Health Assessment,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,DATE,Date of Last Dental Check,Date of Last Dental Check,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,BOOLEAN,Immunisations up to Date,Immunisations up to Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,BOOLEAN,substance_misuse,Identified as having a substance misuse problem,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,,,cla_reviews,,,BOOLEAN,substance_invevention,Child received intervention for substance misuse problem,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> Care Plan,,care_plan,,,VARCHAR(),Review ID,Review ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> Care Plan,,care_plan,,,,What is the chosen plan for this child/young person?,What is the chosen plan for this child/young person?,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> CLA Visits,,cla_visits,,unique,VARCHAR(), Visit ID, Visit ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> CLA Visits,,cla_visits,,,VARCHAR(),Episode ID,Episode ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> CLA Visits,,cla_visits,,,DATE,Date of Visit,Date of Visit,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> CLA Visits,,cla_visits,,,BOOLEAN,Child Seen,Child Seen,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> CLA Visits,,cla_visits,,,BOOLEAN,Child Seen Alone,Child Seen Alone,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> SDQ Scores,,sdq_scores,,unique,VARCHAR(),SDQ ID,SDQ ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> SDQ Scores,,sdq_scores,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> SDQ Scores,,sdq_scores,,,DATE,SDQ Completed Date,SDQ Completed Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> SDQ Scores,,sdq_scores,,,,SDQ Score,SDQ Score,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> Missing,,missing,,unique,VARCHAR(),Missing Episode ID,Missing Episode ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> Missing,,missing,,,VARCHAR(),Episode ID,Episode ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> Missing,,missing,,,DATE,Missing Episode Start,Missing Episode Start,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> Missing,,missing,,,,Episode Type (Missing/ Absent),Episode Type (Missing/ Absent),,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> Missing,,missing,,,DATE,Missing Episode End,Missing Episode End,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> Missing,,missing,,,BOOLEAN,RHI Offered,RHI Offered,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> CLA Episodes,> CLA Reviews,> Missing,,missing,,,BOOLEAN,RHI Accepted,RHI Accepted,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,unique,VARCHAR(),Care Leaver Table ID,Care Leaver Table ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,,,Eligibility Status/ Category,Eligibility Status/ Category,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,,,In Touch Category,In Touch Category,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,,DATE,Latest Date of Contact,Latest Date of Contact,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,,,Accommodation,Accommodation,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,,,Suitability of Accommodation,Suitability of Accommodation,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,,,Activity Status,Activity Status,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,,,Latest Pathway Plan Review Date,Latest Pathway Plan Review Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,,,Allocated Personal Advisor,Allocated Personal Advisor,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,,,Allocated Team,Allocated Team,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Care Leavers,,,,care_leavers,,,,Allocated Worker,Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,DATE,Date of ADM Decision ,Date of ADM Decision ,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,DATE,Date of FFA/ CP Decision,Date of FFA/ CP Decision,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,DATE,Date the entered Care,Date the entered Care,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,DATE,Date of Placement/ Freeing Order,Date of Placement/ Freeing Order,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,DATE,Date Placed for Adoption,Date Placed for Adoption,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,DATE,Date_matched,Date Matched to Prospective Adopters,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,DATE,Date_placed,Date Placed in FFA/ CP Placement ,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,DATE,Decision_date,Date of Decision that Child Should No Longer be Placed for Adoption,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,DATE,foster_date,Date originally placed with foster carer(s) (if adopted by foster carer/s),,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,BOOLEAN,sibling_group,Is the child a part of a sibling group?,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,TINYINT(2),number_siblings_placed_together,"Number of children placed, or planned to be placed, for adoption together as sibling group INCLUDING this child",,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,TINYINT(2),number_siblings_placed_seperate,"Number of siblings placed, or planned to be placed, for adoption separately from the child",,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,VARCHAR(8),URN of Placement,URN of the placement provider agency,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,,Not_placed_reason,Reason No Longer Placed for Adoption,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,DATE,Date of Order ,Date of Order ,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,,Type of Order,Type of Order,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,,Status of Special Guardian,Status of Special Guardian,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> Permanence,,,,permanence,,,TINYINT(2),Age of Special Guardian,Age of Special Guardian,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,,,,send,,unique,,UPN,UPN,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,,,,send,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,,,requests,,unique,VARCHAR(),Request ID,Request ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,,,requests,,,CHAR(13),UPN,UPN,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,,,requests,,,DATE,Received Date,Received Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,,,requests,,,DATE,Request Outcome Date,Request Outcome Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,,,requests,,,,Request Outcome,Request Outcome,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Assessment,,assessment,,unique,VARCHAR(),Assessment ID,Assessment ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Assessment,,assessment,,,VARCHAR(),Request ID,Request ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Assessment,,assessment,,,DATE,Assessment Outcome Date,Assessment Outcome Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Assessment,,assessment,,,,Assessment Outcome,Assessment Outcome,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Assessment,> Named Plan,named_plan,,unique,VARCHAR(),Named Plan ID,Named Plan ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Assessment,> Named Plan,named_plan,,,VARCHAR(),Assessment ID,Assessment ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Assessment,> Named Plan,named_plan,,,DATE,Start Date,Start Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Assessment,> Named Plan,named_plan,,,DATE,Cease Date,Cease Date,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Assessment,> Named Plan,named_plan,,,,Cease Reason,Cease Reason,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Active Plans,,active_plans,,unique,VARCHAR(),Plan ID,Plan ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Active Plans,,active_plans,,,VARCHAR(),Request ID,Request ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Active Plans,,active_plans,,,,Last Review,Last Review,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Active Plans,> SEN Need,sen_need,,unique,VARCHAR(),SEN Need ID,SEN Need ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Active Plans,> SEN Need,sen_need,,,VARCHAR(),Plan ID,Plan ID,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Active Plans,> SEN Need,sen_need,,,,SEN Type,SEN Type,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Child,> SEND,> Requests,> Active Plans,> SEN Need,sen_need,,,,SEN Type Rank,SEN Type Rank,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Workforce,> Worker,,,,worker,,unique,VARCHAR(),sw_reg_number,Social Work England (SWE) registration number,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Workforce,> Worker,,,,worker,,,VARCHAR(),Agency worker,Agency worker,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Workforce,> Worker,,,,worker,,,VARCHAR(),Role within the organisation,Role within the organisation,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Workforce,> Worker,,,,worker,,,TINYINT(),num_cases,Number of cases held,,SSDA903 | CIN,liquid_logic | mosaic,,
-> Workforce,> Worker,,,,worker,,,VARCHAR(),Qualification level,Qualification level,,SSDA903 | CIN,liquid_logic | mosaic,,
+Use Code U where both legal status and placement change on the same day, but the child remains with the same carer. The two changes do not need to be simultaneous or consequent one upon the other. The code simply reflects that there was a change in placement and a change in legal status, for whatever reason, on the same day.",SSDA903 | CIN,liquid_logic | mosaic
+cla_episodes,,,DATE,DEC,Date Episode Ceased,,SSDA903 | CIN,liquid_logic | mosaic
+cla_episodes,,,,REC,Reason Episode Ceased,,SSDA903 | CIN,liquid_logic | mosaic
+cla_episodes,,,,Allocated Team,Allocated Team,,SSDA903 | CIN,liquid_logic | mosaic
+cla_episodes,,,,Allocated Worker,Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic
+placement,,unique,VARCHAR(),Placement ID,Placement ID,,SSDA903 | CIN,liquid_logic | mosaic
+placement,,,VARCHAR(),Episode ID,Episode ID,,SSDA903 | CIN,liquid_logic | mosaic
+placement,,,DATE,Placement Start Date,Placement Start Date,,SSDA903 | CIN,liquid_logic | mosaic
+placement,,,,Placement Type,Placement Type,,SSDA903 | CIN,liquid_logic | mosaic
+placement,,,VARCHAR(8),URN of Placement,URN of Placement,,SSDA903 | CIN,liquid_logic | mosaic
+placement,,,,LA of Placement,LA of Placement,,SSDA903 | CIN,liquid_logic | mosaic
+placement,,,,Placement Provider,Placement Provider,,SSDA903 | CIN,liquid_logic | mosaic
+placement,,,,Placement Postcode,Placement Postcode,,SSDA903 | CIN,liquid_logic | mosaic
+placement,,,DATE,Placement End Date,Placement End Date,,SSDA903 | CIN,liquid_logic | mosaic
+placement,,,,Reason for Placement Change,Reason for Placement Change,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,,Review ID,Review ID,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,,Episode ID,Episode ID,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,DATE,CLA Review Due Date,CLA Review Due Date,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,DATE,CLA Review Date,CLA Review Date,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,,child involved,Has the child/young person been involved in formulating this Care Plan?,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,,sw met child,"Has the Social Worker met with the child on their own to undertake direct work to establish their wishes and views	",,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,,Participation code,Participation code,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,,CP meets childs need,Is the Care Plan meeting the child's needs?,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,BOOLEAN,permanence plan in place,Is a Permanence Plan in place?,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,DATE,last_iro,Date of Last IRO Visit / Contact to the Child,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,,previously_Adopted,Has the child / young person previously been adopted or left care for special guardianship or residence order?,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,DATE,Date of Previous Permanence Order,Date of Previous Permanence Order,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,,Previous Permanence Option,Previous Permanence Option,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,,Previous Permanence Arranged LA,Previous Permanence Arranged LA,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,BOOLEAN,Child convicted during the year,Child convicted during the year,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,BOOLEAN,Health surveillance checks up to date,Health surveillance checks up to date,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,DATE,Date of Last Health Assessment,Date of Last Health Assessment,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,DATE,Date of Last Dental Check,Date of Last Dental Check,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,BOOLEAN,Immunisations up to Date,Immunisations up to Date,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,BOOLEAN,substance_misuse,Identified as having a substance misuse problem,,SSDA903 | CIN,liquid_logic | mosaic
+cla_reviews,,,BOOLEAN,substance_invevention,Child received intervention for substance misuse problem,,SSDA903 | CIN,liquid_logic | mosaic
+care_plan,,,VARCHAR(),Review ID,Review ID,,SSDA903 | CIN,liquid_logic | mosaic
+care_plan,,,,What is the chosen plan for this child/young person?,What is the chosen plan for this child/young person?,,SSDA903 | CIN,liquid_logic | mosaic
+cla_visits,,unique,VARCHAR(), Visit ID, Visit ID,,SSDA903 | CIN,liquid_logic | mosaic
+cla_visits,,,VARCHAR(),Episode ID,Episode ID,,SSDA903 | CIN,liquid_logic | mosaic
+cla_visits,,,DATE,Date of Visit,Date of Visit,,SSDA903 | CIN,liquid_logic | mosaic
+cla_visits,,,BOOLEAN,Child Seen,Child Seen,,SSDA903 | CIN,liquid_logic | mosaic
+cla_visits,,,BOOLEAN,Child Seen Alone,Child Seen Alone,,SSDA903 | CIN,liquid_logic | mosaic
+sdq_scores,,unique,VARCHAR(),SDQ ID,SDQ ID,,SSDA903 | CIN,liquid_logic | mosaic
+sdq_scores,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+sdq_scores,,,DATE,SDQ Completed Date,SDQ Completed Date,,SSDA903 | CIN,liquid_logic | mosaic
+sdq_scores,,,,SDQ Score,SDQ Score,,SSDA903 | CIN,liquid_logic | mosaic
+missing,,unique,VARCHAR(),Missing Episode ID,Missing Episode ID,,SSDA903 | CIN,liquid_logic | mosaic
+missing,,,VARCHAR(),Episode ID,Episode ID,,SSDA903 | CIN,liquid_logic | mosaic
+missing,,,DATE,Missing Episode Start,Missing Episode Start,,SSDA903 | CIN,liquid_logic | mosaic
+missing,,,,Episode Type (Missing/ Absent),Episode Type (Missing/ Absent),,SSDA903 | CIN,liquid_logic | mosaic
+missing,,,DATE,Missing Episode End,Missing Episode End,,SSDA903 | CIN,liquid_logic | mosaic
+missing,,,BOOLEAN,RHI Offered,RHI Offered,,SSDA903 | CIN,liquid_logic | mosaic
+missing,,,BOOLEAN,RHI Accepted,RHI Accepted,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,unique,VARCHAR(),Care Leaver Table ID,Care Leaver Table ID,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,,,Eligibility Status/ Category,Eligibility Status/ Category,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,,,In Touch Category,In Touch Category,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,,DATE,Latest Date of Contact,Latest Date of Contact,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,,,Accommodation,Accommodation,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,,,Suitability of Accommodation,Suitability of Accommodation,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,,,Activity Status,Activity Status,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,,,Latest Pathway Plan Review Date,Latest Pathway Plan Review Date,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,,,Allocated Personal Advisor,Allocated Personal Advisor,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,,,Allocated Team,Allocated Team,,SSDA903 | CIN,liquid_logic | mosaic
+care_leavers,,,,Allocated Worker,Allocated Worker,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,DATE,Date of ADM Decision ,Date of ADM Decision ,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,DATE,Date of FFA/ CP Decision,Date of FFA/ CP Decision,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,DATE,Date the entered Care,Date the entered Care,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,DATE,Date of Placement/ Freeing Order,Date of Placement/ Freeing Order,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,DATE,Date Placed for Adoption,Date Placed for Adoption,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,DATE,Date_matched,Date Matched to Prospective Adopters,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,DATE,Date_placed,Date Placed in FFA/ CP Placement ,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,DATE,Decision_date,Date of Decision that Child Should No Longer be Placed for Adoption,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,DATE,foster_date,Date originally placed with foster carer(s) (if adopted by foster carer/s),,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,BOOLEAN,sibling_group,Is the child a part of a sibling group?,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,TINYINT(2),number_siblings_placed_together,"Number of children placed, or planned to be placed, for adoption together as sibling group INCLUDING this child",,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,TINYINT(2),number_siblings_placed_seperate,"Number of siblings placed, or planned to be placed, for adoption separately from the child",,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,VARCHAR(8),URN of Placement,URN of the placement provider agency,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,,Not_placed_reason,Reason No Longer Placed for Adoption,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,DATE,Date of Order ,Date of Order ,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,,Type of Order,Type of Order,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,,Status of Special Guardian,Status of Special Guardian,,SSDA903 | CIN,liquid_logic | mosaic
+permanence,,,TINYINT(2),Age of Special Guardian,Age of Special Guardian,,SSDA903 | CIN,liquid_logic | mosaic
+send,,unique,,UPN,UPN,,SSDA903 | CIN,liquid_logic | mosaic
+send,,,VARCHAR(10),Child Unique ID,Child Unique ID,,SSDA903 | CIN,liquid_logic | mosaic
+requests,,unique,VARCHAR(),Request ID,Request ID,,SSDA903 | CIN,liquid_logic | mosaic
+requests,,,CHAR(13),UPN,UPN,,SSDA903 | CIN,liquid_logic | mosaic
+requests,,,DATE,Received Date,Received Date,,SSDA903 | CIN,liquid_logic | mosaic
+requests,,,DATE,Request Outcome Date,Request Outcome Date,,SSDA903 | CIN,liquid_logic | mosaic
+requests,,,,Request Outcome,Request Outcome,,SSDA903 | CIN,liquid_logic | mosaic
+assessment,,unique,VARCHAR(),Assessment ID,Assessment ID,,SSDA903 | CIN,liquid_logic | mosaic
+assessment,,,VARCHAR(),Request ID,Request ID,,SSDA903 | CIN,liquid_logic | mosaic
+assessment,,,DATE,Assessment Outcome Date,Assessment Outcome Date,,SSDA903 | CIN,liquid_logic | mosaic
+assessment,,,,Assessment Outcome,Assessment Outcome,,SSDA903 | CIN,liquid_logic | mosaic
+named_plan,,unique,VARCHAR(),Named Plan ID,Named Plan ID,,SSDA903 | CIN,liquid_logic | mosaic
+named_plan,,,VARCHAR(),Assessment ID,Assessment ID,,SSDA903 | CIN,liquid_logic | mosaic
+named_plan,,,DATE,Start Date,Start Date,,SSDA903 | CIN,liquid_logic | mosaic
+named_plan,,,DATE,Cease Date,Cease Date,,SSDA903 | CIN,liquid_logic | mosaic
+named_plan,,,,Cease Reason,Cease Reason,,SSDA903 | CIN,liquid_logic | mosaic
+active_plans,,unique,VARCHAR(),Plan ID,Plan ID,,SSDA903 | CIN,liquid_logic | mosaic
+active_plans,,,VARCHAR(),Request ID,Request ID,,SSDA903 | CIN,liquid_logic | mosaic
+active_plans,,,,Last Review,Last Review,,SSDA903 | CIN,liquid_logic | mosaic
+sen_need,,unique,VARCHAR(),SEN Need ID,SEN Need ID,,SSDA903 | CIN,liquid_logic | mosaic
+sen_need,,,VARCHAR(),Plan ID,Plan ID,,SSDA903 | CIN,liquid_logic | mosaic
+sen_need,,,,SEN Type,SEN Type,,SSDA903 | CIN,liquid_logic | mosaic
+sen_need,,,,SEN Type Rank,SEN Type Rank,,SSDA903 | CIN,liquid_logic | mosaic
+worker,,unique,VARCHAR(),sw_reg_number,Social Work England (SWE) registration number,,SSDA903 | CIN,liquid_logic | mosaic
+worker,,,VARCHAR(),Agency worker,Agency worker,,SSDA903 | CIN,liquid_logic | mosaic
+worker,,,VARCHAR(),Role within the organisation,Role within the organisation,,SSDA903 | CIN,liquid_logic | mosaic
+worker,,,TINYINT(),num_cases,Number of cases held,,SSDA903 | CIN,liquid_logic | mosaic
+worker,,,VARCHAR(),Qualification level,Qualification level,,SSDA903 | CIN,liquid_logic | mosaic
