@@ -1,0 +1,50 @@
+nodes:
+  - name: worker
+    fields:
+      - name: sw_reg_number
+        type: VARCHAR()
+        description: Social Work England (SWE) registration number
+        constraints:
+          - unique
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Agency_worker
+        type: VARCHAR()
+        description: Agency worker
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Role_within_the_organisation
+        type: VARCHAR()
+        description: Role within the organisation
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: num_cases
+        type: TINYINT()
+        description: Number of cases held
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Qualification_level
+        type: VARCHAR()
+        description: Qualification level
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
