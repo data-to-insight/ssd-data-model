@@ -1,0 +1,27 @@
+nodes:
+  - name: Disability_Code
+
+    fields:
+      - name: child_id
+        type: VARCHAR(11)
+        description: The ID of the associated child
+        categories:
+          - identity
+        constraints:
+          - unique
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: disability_code
+        type: VARCHAR(255)
+        description: The code representing the disability
+        categories:
+          - identity
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic

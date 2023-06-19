@@ -1,0 +1,54 @@
+nodes:
+  - name: Child
+    fields: 
+      - name: child_id
+        type: INTEGER
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sex
+        type: VARCHAR(10)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: gender
+        type: VARCHAR(10)
+        cms:
+          - liquid_logic
+          #- mosaic
+      - name: dob
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      # Add remaining fields in similar format
+  - name: Family_identifier
+    fields: 
+      - name: family_identifier
+        type: INTEGER
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: INTEGER
+        cms:
+          - liquid_logic
+          - mosaic
+  # Add remaining tables in similar format
+    
+edges:
+  - from: Child
+    to: Identity
+    relation: 1:1
+  - from: Child
+    to: Family_identifier
+    relation: 1:M
+  - from: Child
+    to: Address
+    relation: 1:M
+  - from: Child
+    to: Disability_Code
+    relation: 1:M
+  - from: Child
+    to: Immigration_Status
+    relation: 1:M

@@ -1,0 +1,57 @@
+nodes:
+  - name: Address
+    fields:
+      - name: address
+        type: VARCHAR(255)
+        description: Child's address
+        categories:
+          - identity
+        constraints:
+          - Unique
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        description: The unique ID of the child
+        categories:
+          - identity
+        constraints:
+          - Unique
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: postcode
+        type: VARCHAR(255)
+        description: The postcode of the child's address
+        categories:
+          - identity
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_from
+        type: DATE
+        description: The start date of the address validity
+        categories:
+          - identity
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_to
+        type: DATE
+        description: The end date of the address validity
+        categories:
+          - identity
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic

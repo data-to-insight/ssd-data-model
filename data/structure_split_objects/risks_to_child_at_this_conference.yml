@@ -1,0 +1,28 @@
+nodes:
+  - name: Risks_to_child_at_this_conference
+    categories:
+      - cat_tmp1
+    fields: 
+      - name: review_id
+        type: VARCHAR(11)
+        description: ID of the review
+        categories:
+          - cat_tmp1
+        constraints:
+          - unique
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: risks_to_child_at_this_conference
+        type: VARCHAR(255)
+        description: Risks to the child identified at this conference
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic

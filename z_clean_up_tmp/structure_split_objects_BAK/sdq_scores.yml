@@ -1,0 +1,33 @@
+nodes:
+  - name: SDQ_Scores
+    fields:
+      - name: sdq_id
+        type: VARCHAR(11)
+        description: ID of the SDQ score
+        categories:
+          - cat_tmp1
+        constraints:
+          - Unique
+        returns:
+      - name: child_id
+        type: VARCHAR(11)
+        description: ID of the child
+        categories:
+          - cat_tmp1
+        constraints:
+          - Unique
+        returns:
+      - name: sdq_completed_date
+        type: DATE
+        description: Date when the SDQ was completed
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+      - name: sdq_score
+        type: VARCHAR(255)
+        description: Score of the SDQ assessment
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:

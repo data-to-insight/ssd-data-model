@@ -1,0 +1,103 @@
+nodes:
+  - name: Placement
+    fields:
+      - name: placement_id
+        type: VARCHAR(11)
+        description: ID of the placement
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_id
+        type: VARCHAR(11)
+        description: ID of the episode
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: placement_start_date
+        type: DATE
+        description: Start date of the placement
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: placement_type
+        type: VARCHAR(255)
+        description: Type of the placement
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: urn_of_placement
+        type: VARCHAR(255)
+        description: URN of the placement
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: la_of_placement
+        type: VARCHAR(255)
+        description: Local authority of the placement
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: placement_provider
+        type: VARCHAR(255)
+        description: Provider of the placement
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: placement_postcode
+        type: VARCHAR(255)
+        description: Postcode of the placement
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: placement_end_date
+        type: DATE
+        description: End date of the placement
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: reason_for_placement_change
+        type: VARCHAR(255)
+        description: Reason for the placement change
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic

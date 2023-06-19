@@ -1,0 +1,137 @@
+nodes:
+  - name: Child
+    fields:
+      - name: child_id
+        type: VARCHAR(11)
+        description: The ID of the child
+        categories:
+          - identity
+        constraints:
+          - Unique
+        returns:
+          - SSD903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sex
+        type: VARCHAR(255)
+        description: The sex of the child
+        categories:
+          - identity
+        constraints:
+        returns: 
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: gender
+        type: VARCHAR(255)
+        description: The gender of the child
+        categories:
+          - identity
+        constraints:
+        returns:
+          - SSD903
+        cms:
+          - liquid_logic
+
+      - name: dob
+        type: DATE
+        description: The date of birth of the child
+        categories:
+          - identity
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: ethnicity
+        type: VARCHAR(255)
+        description: The ethnicity of the child
+        categories:
+          - identity
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_birth
+        type: DATE
+        description: The date of birth of the child
+        categories:
+          - identity
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: send_flag
+        type: BOOLEAN
+        description: Flag indicating if the child has SEND (Special Educational Needs and Disabilities)
+        categories:
+          - identity
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: upn
+        type: VARCHAR(255)
+        description: The Unique Pupil Number (UPN) of the child
+        categories:
+          - identity
+        constraints:
+          - Unique
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: expected_birth_date
+        type: DATE
+        description: The expected birth date of the child (if not yet born)
+        categories:
+          - identity
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_death
+        type: DATE
+        description: The date of death of the child (if applicable)
+        categories:
+          - identity
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: mother
+        type: VARCHAR(255)
+        description: The name of the child's mother
+        categories:
+          - identity
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: country_of_origin
+        type: VARCHAR(255)
+        description: The country of origin of the child
+        categories:
+          - identity
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic

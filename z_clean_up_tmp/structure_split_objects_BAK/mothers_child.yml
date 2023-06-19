@@ -1,0 +1,33 @@
+nodes:
+  - name: Mothers_Child_DOB
+    fields:
+      - name: mothers_child_dob
+        type: DATE
+        description: Date of birth of the child in relation to the mother
+        categories:
+          - identity
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: mother_child_id
+        type: VARCHAR(11)
+        description: ID of the relationship between the mother and child
+        categories:
+          - identity
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        description: Unique identifier of the child
+        categories:
+          - identity
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic

@@ -1,0 +1,73 @@
+nodes:
+  - name: Missing
+    fields:
+      - name: missing_episode_id
+        type: VARCHAR(11)
+        description: The ID of the missing episode
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_id
+        type: VARCHAR(11)
+        description: The ID of the associated episode
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: missing_episode_start
+        type: DATE
+        description: The start date of the missing episode
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_type
+        type: VARCHAR(255)
+        description: The type of the episode
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: missing_episode_end
+        type: DATE
+        description: The end date of the missing episode
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: rhi_offered
+        type: BOOLEAN
+        description: Indicates if RHI (Return Home Interview) was offered
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: rhi_accepted
+        type: BOOLEAN
+        description: Indicates if RHI (Return Home Interview) was accepted
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+        cms:
+          - liquid_logic
+          - mosaic

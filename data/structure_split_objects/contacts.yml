@@ -1,0 +1,60 @@
+nodes:
+  - name: Contacts
+
+    fields:
+      - name: contact_id
+        type: VARCHAR(11)
+        description: The ID of the contact
+        categories:
+          - cat_tmp1
+        constraints:
+          - Unique
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        description: The ID of the child associated with the contact
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_contact
+        type: DATE
+        description: The date of the contact
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: contact_source
+        type: VARCHAR(255)
+        description: The source of the contact
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: contact_outcome
+        type: VARCHAR(255)
+        description: The outcome of the contact
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic

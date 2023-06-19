@@ -1,0 +1,1161 @@
+nodes:
+  - name: Child
+    fields: 
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sex
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: gender
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: dob
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: ethnicity
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_birth
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: send_flag
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: upn
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: expected_birth_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_death
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: mother
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: country_of_origin
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Family_identifier
+    fields: 
+      - name: family_identifier
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Address
+    fields: 
+      - name: address
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: postcode
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_from
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_to
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Disability_Code
+    fields: 
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: disability_code
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Immigration_Status
+    fields: 
+      - name: child_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: immigration_status
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: immigration_status_start
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: immigration_status_end
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Mothers_Child_DOB
+    fields: 
+      - name: mothers_child_dob
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: mother_child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Legal_Status
+    fields: 
+      - name: legal_status_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: legal_status
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: legal_status_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: legal_status_end_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Contacts
+    fields: 
+      - name: contact_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_contact
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: contact_source
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: contact_outcome
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Early_Help_Episodes
+    fields: 
+      - name: eh_episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_end_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_reason_for_involvement
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_end_reason
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_allocated_organisation
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eh_episode_allocated_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: CIN_Episodes
+    fields: 
+      - name: cin_referral_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_referral_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_referral_completed_by_team
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_referral_outcome
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_referral_source
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_referral_completed_by_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Assessments
+    fields: 
+      - name: assessment_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: assessment_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_seen_during_assessment
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: assessment_authorised_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: assessment_outcome
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: assessment_completed_by_team
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: assessment_completed_by_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: CIN_Plans
+    fields: 
+      - name: cin_plan_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_plan_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_plan_end_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_closure_reason
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_closure_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_allocated_team
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_allocated_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: CIN_Visits
+    fields: 
+      - name: cin_visit_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_plan_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_visit_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_seen
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_seen_alone
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_bedroom_seen
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: S47_Enquiry_ICPC
+    fields: 
+      - name: s47_enquiry_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: strategy_discussion_initiating_s47_enquiry_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: s47_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: s47_outcome
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_initial_child_protection_conference
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: outcome_of_initial_child_protection_conference
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: s47_icpc_allocated_team
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: s47_icpc_allocated_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: CP_Plans
+    fields: 
+      - name: cp_plan_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cp_plan_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cp_plan_end_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cp_plan_allocated_team
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cp_plan_allocated_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Category_of_Abuse
+    fields: 
+      - name: cp_plan_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: category_of_abuse
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: category_of_abuse_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: CP_Visits
+    fields: 
+      - name: cp_plan_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cp_visit_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_visit
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_seen
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_seen_alone
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_bedroom_seen
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: CP_Reviews
+    fields: 
+      - name: review_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cp_plan_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: review_due_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_review
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cp_plan_to_continue
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: quorate
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_participation
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: quality_of_representation
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sufficient_progress
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Risks_to_child_at_this_conference
+    fields: 
+      - name: review_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: risks_to_child_at_this_conference
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: CLA_Episodes
+    fields: 
+      - name: episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_episode_commenced
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: reason_for_new_cla_episode
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_ceased_to_be_looked_after
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: reason_ceased_to_be_looked_after
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: allocated_team
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: allocated_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Placement
+    fields: 
+      - name: placement_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: placement_start_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: placement_type
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: urn_of_placement
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: la_of_placement
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: placement_provider
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: placement_postcode
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: placement_end_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: reason_for_placement_change
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: CLA_Reviews
+    fields: 
+      - name: review_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cla_review_due_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cla_review_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_involved_in_care_plan
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: social_worker_met_with_child
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: participation_code
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: previously_adopted_left_care
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: care_plan_meeting_child_needs
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: permanence_plan_in_place
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_last_iro_visit
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_previous_permanence_order
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: previous_permanence_option
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: previous_permanence_arranged_la
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_convicted
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: health_surveillance_checks_up_to_date
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_last_health_assessment
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_last_dental_check
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: immunisations_up_to_date
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: identified_substance_misuse_problem
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: intervention_for_substance_misuse_problem
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Care_Plan
+    fields: 
+      - name: review_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: chosen_plan
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: CLA_Visits
+    fields: 
+      - name: visit_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_visit
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_seen
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_seen_alone
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: SDQ_Scores
+    fields: 
+      - name: sdq_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sdq_completed_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sdq_score
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Missing
+    fields: 
+      - name: missing_episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: missing_episode_start
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: episode_type
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: missing_episode_end
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: rhi_offered
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: rhi_accepted
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Care_Leavers
+    fields: 
+      - name: care_leaver_table_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eligibility_status
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: in_touch_category
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: latest_date_of_contact
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: accommodation
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: suitability_of_accommodation
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: activity_status
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: latest_pathway_plan_review_date
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: allocated_personal_advisor
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: allocated_team
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: allocated_worker
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Permanence
+    fields: 
+      - name: child_unique_id
+        type: VARCHAR(11)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_adm_decision
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_ffa_cp_decision
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_entered_care
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_placement_freeing_order
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_placed_for_adoption
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_matched_to_prospective_adopters
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_placed_in_ffa_cp_placement
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_decision_no_longer_placed_for_adoption
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_originally_placed_with_foster_carers
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sibling_group
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: num_children_placed_together
+        type: INTEGER
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: num_siblings_placed_separately
+        type: INTEGER
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: urn_placement_provider_agency
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: reason_no_longer_placed_for_adoption
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: date_of_order
+        type: DATE
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: type_of_order
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: status_of_special_guardian
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: age_of_special_guardian
+        type: INTEGER
+        cms:
+          - liquid_logic
+          - mosaic
+  - name: Worker
+    fields: 
+      - name: swe_registration_number
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: agency_worker
+        type: BOOLEAN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: role_within_organisation
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: num_cases_held
+        type: INTEGER
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: qualification_level
+        type: VARCHAR(255)
+        cms:
+          - liquid_logic
+          - mosaic
+
+
+edges:
+  - from: Child
+    to: Identity
+    relation: 1:1
+  - from: Child
+    to: Family_identifier
+    relation: 1:M
+  - from: Child
+    to: Address
+    relation: 1:M
+  - from: Child
+    to: Disability_Code
+    relation: 1:M
+  - from: Child
+    to: Immigration_Status
+    relation: 1:M
+  - from: Child
+    to: Mothers_Child_DOB
+    relation: 1:M
+  - from: Child
+    to: Legal_Status
+    relation: 1:M
+  - from: Child
+    to: Contacts
+    relation: 1:M
+  - from: Child
+    to: Early_Help_Episodes
+    relation: 1:M
+  - from: Child
+    to: CIN_Episodes
+    relation: 1:M
+  - from: Child
+    to: Assessments
+    relation: 1:M
+  - from: Child
+    to: CIN_Plans
+    relation: 1:M
+  - from: Child
+    to: CIN_Visits
+    relation: 1:M
+  - from: Child
+    to: S47_Enquiry_ICPC
+    relation: 1:M
+  - from: Child
+    to: CP_Plans
+    relation: 1:M
+  - from: Child
+    to: Category_of_Abuse
+    relation: 1:M
+  - from: Child
+    to: CP_Visits
+    relation: 1:M
+  - from: Child
+    to: CP_Reviews
+    relation: 1:M
+  - from: Child
+    to: Risks_to_child_at_this_conference
+    relation: 1:M
+  - from: CLA_Episodes
+    to: Placement
+    relation: 1:M
+  - from: CLA_Episodes
+    to: CLA_Reviews
+    relation: 1:M
+  - from: CLA_Episodes
+    to: Care_Plan
+    relation: 1:M
+  - from: CLA_Episodes
+    to: CLA_Visits
+    relation: 1:M
+  - from: CLA_Episodes
+    to: SDQ_Scores
+    relation: 1:M
+  - from: CLA_Episodes
+    to: Missing
+    relation: 1:M
+  - from: Child
+    to: Care_Leavers
+    relation: 1:M
+  - from: Child
+    to: Permanence
+    relation: 1:M
+  - from: Worker
+    to: Worker
+    relation: 1:M

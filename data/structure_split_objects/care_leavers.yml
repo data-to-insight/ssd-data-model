@@ -1,0 +1,96 @@
+nodes:
+  - name: Care_Leavers
+    fields:
+      - name: care_leaver_table_id
+        type: VARCHAR(11)
+        description: The ID of the care leaver table
+        categories:
+          - cat_tmp1
+        constraints:
+          - Unique
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        description: The ID of the child associated with the care leaver
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: eligibility_status
+        type: VARCHAR(255)
+        description: The eligibility status of the care leaver
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: in_touch_category
+        type: VARCHAR(255)
+        description: The category of in-touch status for the care leaver
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: latest_date_of_contact
+        type: DATE
+        description: The latest date of contact with the care leaver
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: accommodation
+        type: VARCHAR(255)
+        description: The accommodation status of the care leaver
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: suitability_of_accommodation
+        type: VARCHAR(255)
+        description: The suitability of the accommodation for the care leaver
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: activity_status
+        type: VARCHAR(255)
+        description: The activity status of the care leaver
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: latest_pathway_plan_review_date
+        type: DATE
+        description: The latest date of the pathway plan review for the care leaver
+       

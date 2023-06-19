@@ -1,0 +1,49 @@
+nodes:
+  - name: Immigration_Status
+    categories:
+      - identity
+    fields:
+      - name: child_id
+        type: VARCHAR(11)
+        description: The ID of the associated child
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: immigration_status
+        type: VARCHAR(255)
+        description: The immigration status of the child
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: immigration_status_start
+        type: DATE
+        description: The start date of the immigration status
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: immigration_status_end
+        type: DATE
+        description: The end date of the immigration status
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic

@@ -1,0 +1,94 @@
+nodes:
+  - name: CIN_Plans
+
+    fields:
+      - name: cin_plan_id
+        type: VARCHAR(11)
+        description: The ID of the CIN plan
+        categories:
+          - cat_tmp1
+        constraints:
+          - Unique
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: child_id
+        type: VARCHAR(11)
+        description: The ID of the child associated with the CIN plan
+        categories:
+          - cat_tmp1
+        constraints:
+          - Unique
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_plan_start_date
+        type: DATE
+        description: The start date of the CIN plan
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_plan_end_date
+        type: DATE
+        description: The end date of the CIN plan
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_closure_reason
+        type: VARCHAR(255)
+        description: The reason for closure of the CIN plan
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_closure_date
+        type: DATE
+        description: The closure date of the CIN plan
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_allocated_team
+        type: VARCHAR(255)
+        description: The team allocated to the CIN plan
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: cin_allocated_worker
+        type: VARCHAR(255)
+        description: The worker allocated to the CIN plan
+        categories:
+          - cat_tmp1
+        constraints:
+        returns:
+          - 
+        cms:
+          - liquid_logic
+          - mosaic

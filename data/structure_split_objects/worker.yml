@@ -1,0 +1,39 @@
+nodes:
+  - name: Worker
+    fields:
+      - name: swe_registration_number
+        type: VARCHAR(255)
+        description: "The registration number of the social worker."
+        categories:
+          - cat_tmp1
+        constraints:
+          - Unique
+        returns:
+      - name: agency_worker
+        type: BOOLEAN
+        description: "Indicates whether the worker is an agency worker."
+        categories:
+          - cat_tmp1
+        constraints: 
+        returns:
+      - name: role_within_organisation
+        type: VARCHAR(255)
+        description: "The role of the worker within the organisation."
+        categories:
+          - cat_tmp1
+        constraints: 
+        returns:
+      - name: num_cases_held
+        type: INTEGER
+        description: "The number of cases currently held by the worker."
+        categories:
+          - cat_tmp1
+        constraints: 
+        returns:
+      - name: qualification_level
+        type: VARCHAR(255)
+        description: "The qualification level of the worker."
+        categories:
+          - cat_tmp1
+        constraints: 
+        returns:
