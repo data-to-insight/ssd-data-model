@@ -14,6 +14,16 @@ The script performs the following steps:
 - The output YAML file includes the node name, fields, and their respective properties.
 """
 
+
+# File handling input/output
+
+# Data Structure spec
+csv_file = 'docs/structure_specification.csv'     #  import from repo
+output_directory = 'data/structure_objects/'
+
+
+
+
 import csv
 import os
 import yaml
@@ -95,9 +105,7 @@ def save_node_yaml(node, output_directory):
                     for value in field[name]:
                         file.write("          - " + value + "\n")
 
-# Specify the input CSV file and output directory
-csv_file = 'docs/structure_specification.csv'
-output_directory = 'structure_objects_test/'
+
 
 process_csv_file(csv_file, output_directory)
 
