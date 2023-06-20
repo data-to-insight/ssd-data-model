@@ -1,0 +1,96 @@
+nodes:
+  - name: child
+    fields:
+      - name: Child_Unique_ID
+        type: VARCHAR(10)
+        description: Child Unique ID
+        categories:
+          - identity
+        constraints:
+          - primary_key
+          - not_null
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Sex
+        type: 
+        description: Sex
+        categories:
+          - identity
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Gender
+        type: 
+        description: Gender
+        categories:
+          - identity
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Ethnicity
+        type: VARCHAR(4)
+        description: Ethnicity
+        categories:
+          - identity
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: PersonBirthDate
+        type: DATE
+        description: Date of Birth
+        categories:
+          - identity
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: UPN
+        type: CHAR(13)
+        description: UPN
+        categories:
+          - identity
+        constraints:
+          - unique
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: UPNunknown
+        type: CHAR(3)
+        description: UPN Unknown
+        categories:
+          - identity
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: SENDFlag
+        type: BOOLEAN
+        description: SEND Flag
+        categories:
+          - identity
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic

@@ -1,0 +1,41 @@
+nodes:
+  - name: assessment
+    fields:
+      - name: Assessment_ID
+        type: VARCHAR()
+        description: Assessment ID
+        constraints:
+          - unique
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Request_ID
+        type: VARCHAR()
+        description: Request ID
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Assessment_Outcome_Date
+        type: DATE
+        description: Assessment Outcome Date
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Assessment_Outcome
+        type: 
+        description: Assessment Outcome
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic

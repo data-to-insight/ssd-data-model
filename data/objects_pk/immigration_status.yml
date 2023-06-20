@@ -1,0 +1,49 @@
+nodes:
+  - name: immigration_status
+    fields:
+      - name: Child_Unique_ID
+        type: VARCHAR(10)
+        description: Child Unique ID
+        categories:
+          - identity
+        constraints:
+          - unique
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Immigration_Status
+        type: 
+        description: Immigration Status
+        categories:
+          - identity
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Immigration_Status_Start
+        type: DATE
+        description: Immigration Status Start
+        categories:
+          - identity
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Immigration_Status_End
+        type: DATE
+        description: Immigration Status End
+        categories:
+          - identity
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic

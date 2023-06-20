@@ -1,0 +1,32 @@
+nodes:
+  - name: category_of_abuse
+    fields:
+      - name: CP_Plan_ID
+        type: VARCHAR()
+        description: CP Plan ID
+        constraints:
+          - unique
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Category_of_Abuse
+        type: 
+        description: Category of Abuse
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Category_of_Abuse_Start_Date
+        type: 
+        description: Category of Abuse Start Date
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
