@@ -1,8 +1,5 @@
 relations:
   - from: child
-    to: identity
-    relation: 1:1
-  - from: child
     to: family_identifier
     relation: 1:M
   - from: child

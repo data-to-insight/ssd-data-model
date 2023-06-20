@@ -7,7 +7,7 @@ import pygraphviz as pgv
 G = pgv.AGraph(directed=True)
 
 # Load and combine YAML files
-for file_path in glob.glob('data/objects_pk/*.yml'):
+for file_path in glob.glob('data/objects/*.yml'):
     with open(file_path) as f:
         data = yaml.safe_load(f)
         nodes = data.get('nodes', [])
@@ -25,7 +25,7 @@ for file_path in glob.glob('data/objects_pk/*.yml'):
             G.add_node(node['name'], shape='record', label=label)
 
 # Load relationships from the relationships.yml file
-relationships_file = 'data/objects_pk/relationships.yml'
+relationships_file = 'data/objects/relationships.yml'
 with open(relationships_file) as rf:
     relationships_data = yaml.safe_load(rf)
 
@@ -48,4 +48,4 @@ for relation in relationships_data['relations']:
         edge.attr['arrowhead'] = 'normal'
 
 # Render the graph to a file
-G.draw('assets/ssd_erd_yml_pk.png', prog='dot', format='png')
+G.draw('assets/ssd_erd_yml.png', prog='dot', format='png')
