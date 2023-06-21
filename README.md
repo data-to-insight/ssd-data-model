@@ -1,41 +1,29 @@
-# Data model
+# Standard Safeguarding Dataset
 
-This is the source repository for the SSD data model and includes tools for generating different outputs from the core
-specification. The basis for this work was cloned from SocialFinanceDigitalLabs/rtof-data-model.
+This is the source repository for the SSD data model and includes tools for both creating a standardised data set and providing a set of tools for manipulating and generating different outputs from the core specification. 
 
 ## Data Model
 
-The data model defines a set of Records (facts) capturing data during the different stages of an individual's progress
-through the programme. The data model also includes a number of Categories (dimensions) that are referenced from
-the Fields within a Record.
+The data model defines a set of Objects capturing LA Childrens Services data during the different stages of an individual's progress
+through the system(s). The data model also includes a number of Categories (dimensions) that are referenced from the Fields within a Record.
 
-Because records are captured as part of a programme workflow, we also store the "ideal" workflow so we can indicate
-records in the order they are likely to be captured. However, we do recognise that this may not always be the case.
+We define a number of validators that will be used to check data quality. These may be structural validators, such as a field is required or has to be in a defined set (dimension), or relational validators, such as a date should be after another date as events should happen sequentially.
 
-Finally, we define a number of validators that will be used to check data quality. These may be structural validators,
-such as a field is required or has to be in a defined set (dimension), or relational validators, such as a date should
-be after another date as events should happen sequentially.
+The datamodel is described using [YAML][yaml], which, despite the website, is designed to be a "human friendly" data format. YAML has been used, as text-based format it offers a more human readable structure than such as XML/JSON, a reduced storage/processing footprint and tt provides also offers a proper audit trail of changes that can be tracked in a [Version Control System][vcs] (VCS).
 
-The datamodel is described using [YAML][yaml], which, despite the website, is designed to be a
-"human friendly" data format. The main reason for capturing the standard in YAML is that, because it is a text-based
-format, it provides a proper audit trail of changes and can be tracked in a [Version Control System][vcs] (VCS).
-
-
-As the programme progresses, we will use [GIT][git] to track and approve proposed changes to the data standard.
+The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
 
 ### Specification Components
 
-The standard itself can be found in the [data](./data) subfolder. We purposefully did not want to start of with an
-existing data Schema format, such as XML schemas as they are tightly coupled to the transfer format. For this project,
-the data model defines the conceptual data model. However, the specification aims to capture details of both conceptual
+The standard itself can be found in the [data](./data) subfolder. The specification aims to capture details of both conceptual
 and logical data models, as well as data interchange formats.
 
 #### Records
 
-The [records](./data/records) folder contains definition for all the specification records (facts) as well as details
-of synthetic data parameters and validation rules that apply to each field within the record.
+The [objects](./data/objects) folder contains definition for all the specification entity/objects as well as details
+of synthetic data parameters and validation rules that apply to each field within the object.
 
-An example record contains a description and a set of fields for that record. The fields have an ID (the key), a name,
+An example data object contains a description and a set of fields for that record. The fields have an ID (the key), a name,
 type, description, comments,
 
 ```yaml
@@ -82,9 +70,7 @@ or a list of objects:
 ```
 
 #### Workflow
-
-The [workflow file](./data/workflow.yml) describes the order in which the records are expected to be captured and is
-mostly used to provide a useful ordering in documentation.
+- tbc - 
 
 The format of this file is still in development.
 
@@ -98,21 +84,18 @@ The format of this file is still in development.
 
 ## Output Formats
 
-Since the specification is intended to be easy to maintain, it is not necessarily that easy to process for humans, and
-most case management and data management systems aren't YAML aware, we provide a [set of tools][rtof-tools] to convert the YAML into
-more conventional formats.
+Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, we provide a set of [tools][ssd-tools] to perform the needed processing tasks, incl. extract the required data items from current/known CMS systems, create ERD diagrams of the current structure, convert the YAML into more conventional formats.
 
 The main place to find documentation relating to this specification is
--tbc- The website and associated documentation is generated using the [tools][rtof-tools] mentioned above.
+-tbc- The website and associated documentation is generated using the [tools][ssd-tools] mentioned above.
 
 ## Continuous Deployment
 
 -tbc-
 
-
+## Relevant Links
 [ssd-spec]: https://github.com/data-to-insight/ssd-data-model
 [ssd-tools]: https://github.com/data-to-insight/ssd-data-model-tools
-[ssd-web]: https://sfdl.org.uk/SSD-specification/
 
 [yaml]: https://yaml.org/
 [vcs]: https://en.wikipedia.org/wiki/Version_control
@@ -124,19 +107,10 @@ The main place to find documentation relating to this specification is
 
 
 
-## Running notes:
-### Poetry set up
-scripts can now be run as such
-$ poetry run python create_cms_extract_sql.py
-$ poetry run python create_erd_from_yml.py
-
-
-### Otherwise use
+## [Temp] Running notes:
 Ensure that you run the requirements file to set up before running scripts:
-$ sudo apt-get update
-$ sudo apt-get install graphviz libgraphviz-dev pkg-config
-$ pip install -r requirements.txt
-
-#### Ref
-$ pip install pygraphviz
-$ pip freeze > requirements.txt
+[$] pip install -r requirements.txt
+Some of the .py scripts have package dependencies. To run the create_erd_from_yml.py ensure the following:
+[$] sudo apt-get update
+[$] sudo apt-get install graphviz libgraphviz-dev pkg-config
+[$] pip install pygraphviz
