@@ -1,0 +1,174 @@
+nodes:
+  - name: permanence
+    fields:
+      - name: Child_Unique_ID
+        type: VARCHAR(10)
+        description: Child Unique ID
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Date_of_ADM_Decision_
+        type: DATE
+        description: Date of ADM Decision 
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Date_of_FFA/_CP_Decision
+        type: DATE
+        description: Date of FFA/ CP Decision
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Date_the_entered_Care
+        type: DATE
+        description: Date the entered Care
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Date_of_Placement/_Freeing_Order
+        type: DATE
+        description: Date of Placement/ Freeing Order
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Date_Placed_for_Adoption
+        type: DATE
+        description: Date Placed for Adoption
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Date_matched
+        type: DATE
+        description: Date Matched to Prospective Adopters
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Date_placed
+        type: DATE
+        description: Date Placed in FFA/ CP Placement 
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Decision_date
+        type: DATE
+        description: Date of Decision that Child Should No Longer be Placed for Adoption
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: foster_date
+        type: DATE
+        description: Date originally placed with foster carer(s) (if adopted by foster carer/s)
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: sibling_group
+        type: BOOLEAN
+        description: Is the child a part of a sibling group?
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: number_siblings_placed_together
+        type: TINYINT(2)
+        description: Number of children placed, or planned to be placed, for adoption together as sibling group INCLUDING this child
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: number_siblings_placed_seperate
+        type: TINYINT(2)
+        description: Number of siblings placed, or planned to be placed, for adoption separately from the child
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: URN_of_Placement
+        type: VARCHAR(8)
+        description: URN of the placement provider agency
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Not_placed_reason
+        type: 
+        description: Reason No Longer Placed for Adoption
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Date_of_Order 
+        type: DATE
+        description: Date of Order 
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Type_of_Order
+        type: 
+        description: Type of Order
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Status_of_Special_Guardian
+        type: 
+        description: Status of Special Guardian
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Age_of_Special_Guardian
+        type: TINYINT(2)
+        description: Age of Special Guardian
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic

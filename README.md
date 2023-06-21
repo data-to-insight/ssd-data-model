@@ -130,3 +130,4 @@ Ensure that you run the requirements file to set up before running scripts:
 Some of the .py scripts have package dependencies. To run the create_erd_from_yml.py ensure the following:
 [$] sudo apt-get update
 [$] sudo apt-get install graphviz libgraphviz-dev pkg-config
+[$] pip install pygraphviz

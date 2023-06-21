@@ -1,5 +1,5 @@
 object_name,categories,constraints,type,name,description,returns,cms
-child,identity,unique,VARCHAR(10),LAchildID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
+child,identity,primary_key|unique,VARCHAR(10),LAchildID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
 child,identity,,,Sex,Sex,SSDA903|CIN,liquid_logic|mosaic
 child,identity,,,Gender,Gender,SSDA903|CIN,liquid_logic|mosaic
 child,identity,,VARCHAR(4),Ethnicity,Ethnicity,SSDA903|CIN,liquid_logic|mosaic
@@ -7,7 +7,7 @@ child,identity,,DATE,PersonBirthDate,Date of Birth,SSDA903|CIN,liquid_logic|mosa
 child,identity,unique,CHAR(13),UPN,UPN,SSDA903|CIN,liquid_logic|mosaic
 child,identity,,CHAR(3),UPNunknown,UPN Unknown,SSDA903|CIN,liquid_logic|mosaic
 child,identity,,BOOLEAN,SENDFlag,SEND Flag,SSDA903|CIN,liquid_logic|mosaic
-family,identity|family_identifier,unique,,Family identifier,Family identifier,SSDA903|CIN,liquid_logic|mosaic
+family,identity|family_identifier,primary_key|unique,,Family identifier,Family identifier,SSDA903|CIN,liquid_logic|mosaic
 family,identity|family_identifier,unique,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
 address,identity|address,,,Address,Address,SSDA903|CIN,liquid_logic|mosaic
 address,identity|address,unique,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic

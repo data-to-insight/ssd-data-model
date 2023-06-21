@@ -1,0 +1,54 @@
+nodes:
+  - name: legal_status
+    fields:
+      - name: Legal_Status_ID
+        type: 
+        description: Legal Status ID
+        categories:
+          - identity
+        constraints:
+          - unique
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Child_Unique_ID
+        type: VARCHAR(10)
+        description: Child Unique ID
+        categories:
+          - identity
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Legal_Status
+        type: 
+        description: Legal Status
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Legal_Status_Start_Date
+        type: DATE
+        description: Legal Status Start Date
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic
+      - name: Legal_Status_End_Date
+        type: DATE
+        description: Legal Status End Date
+        returns:
+          - SSDA903
+          - CIN
+        cms:
+          - liquid_logic
+          - mosaic

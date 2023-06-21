@@ -1,0 +1,88 @@
+relations:
+  - from: child
+    to: family_identifier
+    relation: 1:M
+  - from: child
+    to: address
+    relation: 1:M
+  - from: child
+    to: disability
+    relation: 1:M
+  - from: child
+    to: immigration_status
+    relation: 1:M
+  - from: child
+    to: mothers_child_dob
+    relation: 1:M
+  - from: child
+    to: legal_status
+    relation: 1:M
+  - from: child
+    to: contacts
+    relation: 1:M
+  - from: child
+    to: early_help_episodes
+    relation: 1:M
+  - from: child
+    to: cin_episodes
+    relation: 1:M
+  - from: child
+    to: assessments
+    relation: 1:M
+  - from: child
+    to: cin_plans
+    relation: 1:M
+  - from: child
+    to: cin_visits
+    relation: 1:M
+  - from: child
+    to: s47_enquiry_icpc
+    relation: 1:M
+  - from: child
+    to: cp_plans
+    relation: 1:M
+  - from: child
+    to: category_of_abuse
+    relation: 1:M
+  - from: child
+    to: cp_visits
+    relation: 1:M
+  - from: child
+    to: cp_reviews
+    relation: 1:M
+  - from: child
+    to: risks_to_child_at_this_conference
+    relation: 1:M
+  - from: cla_episodes
+    to: placement
+    relation: 1:M
+  - from: cla_episodes
+    to: cla_reviews
+    relation: 1:M
+  - from: cla_episodes
+    to: care_plan
+    relation: 1:M
+  - from: cla_episodes
+    to: cla_visits
+    relation: 1:M
+  - from: cla_episodes
+    to: sdq_scores
+    relation: 1:M
+  - from: cla_episodes
+    to: missing
+    relation: 1:M
+  - from: child
+    to: care_leavers
+    relation: 1:M
+  - from: child
+    to: permanence
+    relation: 1:M
+  - from: worker
+    to: worker
+    relation: 1:M
+  - from: child
+    to: send
+    relation: 1:M
+  - from: child
+    to: sen_need
+    relation: 1:M
