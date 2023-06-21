@@ -2,9 +2,13 @@ import glob
 import yaml
 import pygraphviz as pgv
 
-
-# Create a new directed graph
+# Output size options
 G = pgv.AGraph(directed=True)
+G.graph_attr['size'] = '1280,800'  # Set page size to 1280x800 pixels (common screen)
+# G.graph_attr['size'] = '595,842'  # Set page size to A4 dimensions (595x842 pixels)
+
+G.graph_attr['rankdir'] = 'TB'  # Set the graph direction from left to right (or use TB)
+G.edge_attr['splines'] = 'ortho'  # Use orthogonal edges for a more compact layout
 
 # Load and combine YAML files
 for file_path in glob.glob('data/objects/*.yml'):
