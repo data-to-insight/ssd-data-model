@@ -32,6 +32,6 @@ for schema_file in schema_files:
             sql_script += f"SELECT {fields_str} FROM {node['name']};\n"
 
 # Write the generated SQL script to a file
-file_path = f"sql_generated_scripts/ssd_extract_{cms_type}.sql"
+file_path = f"sql/ssd_extract_{cms_type}.sql"
 with open(file_path, 'w') as f:
     f.write(sql_script)
