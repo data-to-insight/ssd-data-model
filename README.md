@@ -125,9 +125,18 @@ The main place to find documentation relating to this specification is
 
 
 ## Running notes:
+### Poetry set up
+scripts can now be run as such
+$ poetry run python create_cms_extract_sql.py
+$ poetry run python create_erd_from_yml.py
+
+
+### Otherwise use
 Ensure that you run the requirements file to set up before running scripts:
-[$] pip install -r requirements.txt
-Some of the .py scripts have package dependencies. To run the create_erd_from_yml.py ensure the following:
-[$] sudo apt-get update
-[$] sudo apt-get install graphviz libgraphviz-dev pkg-config
-[$] pip install pygraphviz
+$ sudo apt-get update
+$ sudo apt-get install graphviz libgraphviz-dev pkg-config
+$ pip install -r requirements.txt
+
+#### Ref
+$ pip install pygraphviz
+$ pip freeze > requirements.txt
