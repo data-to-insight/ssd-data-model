@@ -1,21 +1,44 @@
-import subprocess
-import pandas as pd
+import os
+from openpyxl import Workbook
 
-# Run the tree command and capture the output
-result = subprocess.run(['tree', '-L', '2', '-I', '.git|z_clean_up_tmp'], capture_output=True, text=True)
+IGNORE_FOLDERS = ["z_clean_up_tmp", ".git"]
 
-# Split the output into lines
-lines = result.stdout.strip().split('\n')
+def generate_file_tree(root_directory):
+    file_tree = []
 
-# Process the lines to extract directory information
-directories = []
-for line in lines:
-    path = line.split('├── ')[-1].strip()  # Modify the delimiter based on your system
-    level = line.count('│   ')  # Modify the delimiter based on your system
-    directories.append((path, level))
+    stack = [(root_directory, 0)]
+    while stack:
+        directory, depth = stack.pop()
 
-# Create a DataFrame from the directory information
-df = pd.DataFrame(directories, columns=['Path', 'Level'])
+        if any(directory.endswith(folder) for folder in IGNORE_FOLDERS):
+            continue
 
-# Print the DataFrame
-print(df)
+        for dir_name, sub_dirs, filenames in os.walk(directory):
+            sub_dirs[:] = [sub_dir for sub_dir in sub_dirs if not sub_dir.startswith(".git")]
+
+            indent = "\t" * depth
+            file_tree.append((indent + dir_name, filenames))
+
+            for sub_dir in sub_dirs:
+                stack.append((os.path.join(dir_name, sub_dir), depth + 1))
+
+    return file_tree
+
+# Specify the root directory for the file tree
+root_directory = '/workspaces/ssd-data-model/'
+
+# Generate the file tree
+file_tree = generate_file_tree(root_directory)
+
+# Create a new workbook
+workbook = Workbook()
+sheet = workbook.active
+
+# Write the file tree data
+for folder, files in file_tree:
+    row = [folder] + files if files else [folder]
+    sheet.append(row)
+
+# Save the workbook as an Excel file
+output_file = "docs/file_tree.xlsx"
+workbook.save(output_file)

@@ -44,4 +44,4 @@ with open('/workspaces/ssd-data-model/docs/index.html', 'w') as f:
     f.write(html_content)
 
 # Run create_erd_from_yml.py script
-subprocess.run(['python3', '/workspaces/ssd-data-model/create_erd_from_yml.py'])
+subprocess.run(['python3', '/workspaces/ssd-data-model/tools/create_erd_from_yml.py'])

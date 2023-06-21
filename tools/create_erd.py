@@ -52,4 +52,4 @@ for relation in relationships_data['relations']:
         edge.attr['arrowhead'] = 'normal'
 
 # Render the graph to a file
-G.draw('assets/ssd_erd_yml.png', prog='dot', format='png')
+G.draw('assets/ssd_erd.png', prog='dot', format='png')
