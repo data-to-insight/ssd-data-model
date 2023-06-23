@@ -1,0 +1,25 @@
+# item ref: SSD224
+- value: SPLD
+  description: Specific learning difficulty
+- value: MLD
+  description: Moderate learning difficulty
+- value: SLD
+  description: Severe learning difficulty
+- value: PMLD
+  description: Profound and multiple learning difficulty
+- value: SEMH
+  description: Social, emotional and mental health
+- value: SLCN
+  description: Speech, language and communication needs
+- value: HI
+  description: Hearing impairment
+- value: VI
+  description: Vision impairment
+- value: MSI
+  description: Multi-sensory impairment
+- value: PD
+  description: Physical disability
+- value: ASD
+  description: Autistic spectrum disorder
+- value: OTH
+  description: Other difficulty

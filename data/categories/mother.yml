@@ -1,2 +1,5 @@
-- Yes
-- No
+# item ref: SSD011
+- value: 0
+  description: 'Female child is not a mother'
+- value: 1
+  description: 'Female child is a mother'

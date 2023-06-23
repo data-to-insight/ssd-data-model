@@ -1,18 +1,4 @@
-- value: WBRI
-  description: White British
-- value: WIRI
-  description: White Irish
-- value: WOTH
-  description: Any other White background
-- value: WIRT
-  description: Traveller of Irish Heritage
-- value: WROM
-  description: Gypsy/Roma
-- value: MWBC
-  description: White and Black Caribbean
-- value: MWBA
-  description: White and Black African
-- value: MWAS
+# item ref: 
   description: White and Asian
 - value: MOTH
   description: Any other Mixed background
@@ -38,4 +24,4 @@
   description: Refused
 - value: NOBT
   description: Information not yet obtained
-# Add more values as needed
+
