@@ -1,59 +1,63 @@
+---
 nodes:
-  - name: cin_visits
-    fields:
-      - name: CIN_Visit_ID
-        type: VARCHAR()
-        description: CIN Visit ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Plan_ID
-        type: VARCHAR()
-        description: CIN Plan ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Visit_Date
-        type: DATE
-        description: CIN Visit Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Seen
-        type: BOOLEAN
-        description: Child Seen
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Seen_Alone
-        type: BOOLEAN
-        description: Child Seen Alone
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Bedroom_Seen
-        type: BOOLEAN
-        description: Child Bedroom Seen
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: cin_visits
+  fields:
+  - name: cin_visit_id
+    type: VARCHAR()
+    description: CIN Visit ID
+    field_ref: SSD072
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cin_plan_id
+    type: VARCHAR()
+    description: CIN Plan ID
+    field_ref: SSD073
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cin_visit_date
+    type: DATE
+    description: CIN Visit Date
+    field_ref: SSD074
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: child_seen
+    type: BOOLEAN
+    description: Child Seen
+    field_ref: SSD075
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: child_seen_alone
+    type: BOOLEAN
+    description: Child Seen Alone
+    field_ref: SSD076
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: child_bedroom_seen
+    type: BOOLEAN
+    description: Child Bedroom Seen
+    field_ref: SSD077
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic

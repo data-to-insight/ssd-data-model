@@ -1,19 +1,19 @@
 # item ref: SSD052
-- value: RC1
-  description: Adopted.
-- value: RC2
-  description: Died.
-- value: RC3
-  description: Child arrangements order.
-- value: RC4
-  description: Special guardianship order.
-- value: RC5
-  description: Transferred to services of another local authority.
-- value: RC6
-  description: Transferred to adult social care services.
-- value: RC7
-  description: Services ceased for any other reason, including child no longer in need.
-- value: RC8
-  description: Case closed after assessment, no further action.
-- value: RC9
-  description: Case closed after assessment, referred to early help.
+- value: 'RC1'
+  description: 'Adopted.'
+- value: 'RC2'
+  description: 'Died.'
+- value: 'RC3'
+  description: 'Child arrangements order.'
+- value: 'RC4'
+  description: 'Special guardianship order.'
+- value: 'RC5'
+  description: 'Transferred to services of another local authority.'
+- value: 'RC6'
+  description: 'Transferred to adult social care services.'
+- value: 'RC7'
+  description: 'Services ceased for any other reason, including child no longer in need.'
+- value: 'RC8'
+  description: 'Case closed after assessment, no further action.'
+- value: 'RC9'
+  description: 'Case closed after assessment, referred to early help.'

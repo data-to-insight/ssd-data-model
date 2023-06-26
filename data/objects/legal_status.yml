@@ -1,54 +1,68 @@
+---
 nodes:
+- name: legal_status
+  fields:
+  - name: legal_status_id
+    type: null
+    description: Legal Status ID
+    field_ref: SSD029
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD030
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - identity
+    constraints:
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
   - name: legal_status
-    fields:
-      - name: Legal_Status_ID
-        type: 
-        description: Legal Status ID
-        categories:
-          - identity
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Legal_Status
-        type: 
-        description: Legal Status
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Legal_Status_Start_Date
-        type: DATE
-        description: Legal Status Start Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Legal_Status_End_Date
-        type: DATE
-        description: Legal Status End Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+    type: null
+    description: Legal Status
+    field_ref: SSD031
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: legal_status_start_date
+    type: DATE
+    description: Legal Status Start Date
+    field_ref: SSD032
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: legal_status_end_date
+    type: DATE
+    description: Legal Status End Date
+    field_ref: SSD033
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic

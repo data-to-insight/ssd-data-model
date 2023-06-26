@@ -1,50 +1,100 @@
+---
 nodes:
-  - name: worker
-    fields:
-      - name: sw_reg_number
-        type: VARCHAR()
-        description: Social Work England (SWE) registration number
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Agency_worker
-        type: VARCHAR()
-        description: Agency worker
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Role_within_the_organisation
-        type: VARCHAR()
-        description: Role within the organisation
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: num_cases
-        type: TINYINT()
-        description: Number of cases held
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Qualification_level
-        type: VARCHAR()
-        description: Qualification level
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: worker
+  fields:
+  - name: social_work_england_(swe)_registration_number
+    type: VARCHAR()
+    description: Social Work England (SWE) registration number
+    field_ref: SSD226
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sw_id
+    type: VARCHAR()
+    description: Social worker ID
+    field_ref: SSD227
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sw_decom
+    type: DATE
+    description: Social worker episode start date
+    field_ref: SSD228
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sw_dec
+    type: DATE
+    description: Social worker episode end date
+    field_ref: SSD229
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sw_reason
+    type: VARCHAR()
+    description: Reason for social worker change
+    field_ref: SSD230
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: agency_worker
+    type: BOOLEAN
+    description: Agency worker
+    field_ref: SSD231
+    returns:
+    - CSCWF
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: role_within_the_organisation
+    type: VARCHAR()
+    description: Role within the organisation
+    field_ref: SSD232
+    returns:
+    - CSCWF
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: number_of_cases_held
+    type: TINYINT()
+    description: Number of cases held
+    field_ref: SSD233
+    returns:
+    - CSCWF
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: qualification_level
+    type: VARCHAR()
+    description: Qualification level
+    field_ref: SSD234
+    returns:
+    - CSCWF
+    cms:
+    - liquid_logic
+    - mosaic

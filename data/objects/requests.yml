@@ -1,50 +1,59 @@
+---
 nodes:
-  - name: requests
-    fields:
-      - name: Request_ID
-        type: VARCHAR()
-        description: Request ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: UPN
-        type: CHAR(13)
-        description: UPN
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Received_Date
-        type: DATE
-        description: Received Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Request_Outcome_Date
-        type: DATE
-        description: Request Outcome Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Request_Outcome
-        type: 
-        description: Request Outcome
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: requests
+  fields:
+  - name: request_id
+    type: VARCHAR()
+    description: Request ID
+    field_ref: SSD205
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: upn
+    type: CHAR(13)
+    description: UPN
+    field_ref: SSD206
+    foreign_key: upn.upn
+    constraints:
+    - foreign_key:upn.upn
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: receiveddate
+    type: DATE
+    description: Received Date
+    field_ref: SSD207
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: requestoutcomedate
+    type: DATE
+    description: Request Outcome Date
+    field_ref: SSD208
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: requestoutcome
+    type: null
+    description: Request Outcome
+    field_ref: SSD209
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic

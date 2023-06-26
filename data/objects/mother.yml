@@ -1,38 +1,54 @@
+---
 nodes:
-  - name: mother
-    fields:
-      - name: Mother's_Child_Unique_ID
-        type: VARCHAR(10)
-        description: Mother's Child Unique ID
-        categories:
-          - identity
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Unique_ID_(Mother)
-        type: VARCHAR(10)
-        description: Child Unique ID (Mother)
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: MC_DOB
-        type: DATE
-        description: Date of birth of mother’s child
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: mother
+  fields:
+  - name: mothers_child_unique_id
+    type: VARCHAR(10)
+    description: Mother's Child Unique ID
+    field_ref: SSD026
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    constraints:
+    - unique
+    - primary_key
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID (Mother)
+    field_ref: SSD027
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - identity
+    constraints:
+    - unique
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: mc_dob
+    type: DATE
+    description: "Date of birth of mother\u2019s child"
+    field_ref: SSD028
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic

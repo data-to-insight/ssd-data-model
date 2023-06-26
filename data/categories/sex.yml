@@ -1,5 +1,5 @@
 # item ref: ssd002
 - value: 1
-  description: Male
+  description: 'Male'
 - value: 2
-  description: Female
+  description: 'Female'

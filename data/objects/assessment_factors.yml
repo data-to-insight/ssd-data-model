@@ -1,23 +1,29 @@
+---
 nodes:
-  - name: assessment_factors
-    fields:
-      - name: Assessment_ID
-        type: VARCHAR()
-        description: Assessment ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Assessment_Factors
-        type: 
-        description: Assessment Factors
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: assessment_factors
+  fields:
+  - name: assessment_id
+    type: VARCHAR()
+    description: Assessment ID
+    field_ref: SSD064
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: assessmentfactors
+    type: null
+    description: Assessment Factors
+    field_ref: SSD065
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic

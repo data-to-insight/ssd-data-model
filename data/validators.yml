@@ -61,14 +61,6 @@ date_after:
     Only used for fields of type date, this validator ensures that the provided value is after the date indicated. When
     multiple
 
-national_insurance_number:
-  args:
-    - name: enabled
-      type: boolean
-      help: true/false value indicating if the current field is a national insurance number
-  description: |
-    UK National Insurance Number - uppercase with all whitespace removed. Validated according to format given in
-    https://github.com/dwp/nino-format-validation
 
 character_limit:
   args:

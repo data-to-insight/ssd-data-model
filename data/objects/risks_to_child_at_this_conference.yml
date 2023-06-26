@@ -1,21 +1,30 @@
+---
 nodes:
+- name: risks_to_child_at_this_conference
+  fields:
+  - name: review_id
+    type: VARCHAR()
+    description: Review ID
+    field_ref: SSD112
+    primary_key: true
+    foreign_key: cp_reviews.Review_ID
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - foreign_key:cp_reviews.Review_ID
+    cms:
+    - liquid_logic
+    - mosaic
   - name: risks_to_child_at_this_conference
-    fields:
-      - name: Review_ID
-        type: VARCHAR()
-        description: Review ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Risks_to_child_at_this_conference
-        type: 
-        description: Risks to child at this conference
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+    type: null
+    description: Risks to child at this conference
+    field_ref: SSD113
+    returns:
+    - 1a
+    - draft
+    cms:
+    - liquid_logic
+    - mosaic

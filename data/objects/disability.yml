@@ -1,27 +1,41 @@
+---
 nodes:
+- name: disability
+  fields:
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD020
+    primary_key: true
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - disability_code
+    constraints:
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
   - name: disability
-    fields:
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        categories:
-          - identity
-          - disability_code
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Disability_Code
-        type: 
-        description: Disability Code
-        categories:
-          - identity
-          - disability_code
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+    type: null
+    description: Disability Code
+    field_ref: SSD021
+    categories:
+    - identity
+    - disability_code
+    constraints:
+    - unique
+    - primary_key
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic

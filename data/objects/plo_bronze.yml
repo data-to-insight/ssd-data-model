@@ -1,0 +1,63 @@
+---
+nodes:
+- name: plo_bronze
+  fields:
+  - name: plo_familyid
+    type: null
+    description: PLO Family ID
+    field_ref: PLOBronze2
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: dec_enter_pp
+    type: DATE
+    description: Date decision made to enter Pre Proceedings
+    field_ref: PLOBronze11
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: pp_initial_meeting
+    type: DATE
+    description: Date of Initial Pre Proceedings Meeting
+    field_ref: PLOBronze12
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: pp_outcome
+    type: null
+    description: What is the Outcome of Pre-Proceedings
+    field_ref: PLOBronze13
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: date_sd_issue
+    type: DATE
+    description: Date Agreed to Step downissue
+    field_ref: PLOBronze14
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic

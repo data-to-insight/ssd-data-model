@@ -1,32 +1,39 @@
+---
 nodes:
-  - name: active_plans
-    fields:
-      - name: Plan_ID
-        type: VARCHAR()
-        description: Plan ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Request_ID
-        type: VARCHAR()
-        description: Request ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Last_Review
-        type: 
-        description: Last Review
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: active_plans
+  fields:
+  - name: plan_id
+    type: VARCHAR()
+    description: Plan ID
+    field_ref: SSD219
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: request_id
+    type: VARCHAR()
+    description: Request ID
+    field_ref: SSD220
+    foreign_key: requests.request_id
+    constraints:
+    - foreign_key:requests.request_id
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lastreview
+    type: null
+    description: Last Review
+    field_ref: SSD221
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic

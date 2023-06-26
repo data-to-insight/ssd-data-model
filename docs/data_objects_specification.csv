@@ -1,225 +1,257 @@
-object_name,categories,constraints,type,name,description,returns,cms
-child,identity,primary_key|unique,VARCHAR(10),LAchildID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-child,identity,,,Sex,Sex,SSDA903|CIN,liquid_logic|mosaic
-child,identity,,,Gender,Gender,SSDA903|CIN,liquid_logic|mosaic
-child,identity,,VARCHAR(4),Ethnicity,Ethnicity,SSDA903|CIN,liquid_logic|mosaic
-child,identity,,DATE,PersonBirthDate,Date of Birth,SSDA903|CIN,liquid_logic|mosaic
-child,identity,unique,CHAR(13),UPN,UPN,SSDA903|CIN,liquid_logic|mosaic
-child,identity,,CHAR(3),UPNunknown,UPN Unknown,SSDA903|CIN,liquid_logic|mosaic
-child,identity,,BOOLEAN,SENDFlag,SEND Flag,SSDA903|CIN,liquid_logic|mosaic
-family,identity|family_identifier,primary_key|unique,,Family identifier,Family identifier,SSDA903|CIN,liquid_logic|mosaic
-family,identity|family_identifier,unique,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-address,identity|address,,,Address,Address,SSDA903|CIN,liquid_logic|mosaic
-address,identity|address,unique,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-address,identity|address,,DATE,Address Start Date/ From,Address Start Date/ From,SSDA903|CIN,liquid_logic|mosaic
-address,identity|address,,DATE,Address End Date/ To,Address End Date/ To,SSDA903|CIN,liquid_logic|mosaic
-disability,identity|disability_code,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-disability,identity|disability_code,,,Disability Code,Disability Code,SSDA903|CIN,liquid_logic|mosaic
-immigration_status,identity,unique,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-immigration_status,identity,,,Immigration Status,Immigration Status,SSDA903|CIN,liquid_logic|mosaic
-immigration_status,identity,,DATE,Immigration Status Start,Immigration Status Start,SSDA903|CIN,liquid_logic|mosaic
-immigration_status,identity,,DATE,Immigration Status End,Immigration Status End,SSDA903|CIN,liquid_logic|mosaic
-mother,identity,unique,VARCHAR(10),Mother's Child Unique ID,Mother's Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-mother,identity,,VARCHAR(10),Child Unique ID (Mother),Child Unique ID (Mother),SSDA903|CIN,liquid_logic|mosaic
-mother,identity,,DATE,MC_DOB,Date of birth of mother’s child,SSDA903|CIN,liquid_logic|mosaic
-legal_status,identity,unique,,Legal Status ID,Legal Status ID,SSDA903|CIN,liquid_logic|mosaic
-legal_status,identity,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-legal_status,,,,Legal Status,Legal Status,SSDA903|CIN,liquid_logic|mosaic
-legal_status,,,DATE,Legal Status Start Date,Legal Status Start Date,SSDA903|CIN,liquid_logic|mosaic
-legal_status,,,DATE,Legal Status End Date,Legal Status End Date,SSDA903|CIN,liquid_logic|mosaic
-contacts,,unique,VARCHAR(),Contact ID,Contact ID,SSDA903|CIN,liquid_logic|mosaic
-contacts,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-contacts,,,DATE,Date of Contact,Date of Contact,SSDA903|CIN,liquid_logic|mosaic
-contacts,,,,Contact Source,Contact Source,SSDA903|CIN,liquid_logic|mosaic
-contacts,,,,Contact Outcome ,Contact Outcome ,SSDA903|CIN,liquid_logic|mosaic
-early_help_episodes,,unique,VARCHAR(),EH Episode ID,EH Episode ID,SSDA903|CIN,liquid_logic|mosaic
-early_help_episodes,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-early_help_episodes,,,DATE,EH Episode Start Date,EH Episode Start Date,SSDA903|CIN,liquid_logic|mosaic
-early_help_episodes,,,DATE,EH Episode End Date,EH Episode End Date,SSDA903|CIN,liquid_logic|mosaic
-early_help_episodes,,,,EH Episode Reason for Involvement,EH Episode Reason for Involvement,SSDA903|CIN,liquid_logic|mosaic
-early_help_episodes,,,,EH Episode End Reason,EH Episode End Reason,SSDA903|CIN,liquid_logic|mosaic
-early_help_episodes,,,,EH Episode Allocated Organisation,EH Episode Allocated Organisation,SSDA903|CIN,liquid_logic|mosaic
-early_help_episodes,,,,EH Episode Allocated Worker,EH Episode Allocated Worker,SSDA903|CIN,liquid_logic|mosaic
-cin_episodes,,unique,VARCHAR(),CIN Referral ID,CIN Referral ID,SSDA903|CIN,liquid_logic|mosaic
-cin_episodes,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-cin_episodes,,,DATE,CIN Referral Date,CIN Referral Date,SSDA903|CIN,liquid_logic|mosaic
-cin_episodes,,,,CIN Referral Source,CIN Referral Source,SSDA903|CIN,liquid_logic|mosaic
-cin_episodes,,,,CIN Referral Outcome,CIN Referral Outcome,SSDA903|CIN,liquid_logic|mosaic
-cin_episodes,,,,CIN Closure Reason,CIN Closure Reason,SSDA903|CIN,liquid_logic|mosaic
-cin_episodes,,,DATE,CIN Closure Date,CIN Closure Date,SSDA903|CIN,liquid_logic|mosaic
-cin_episodes,,,,CIN Referral Completed by Team,CIN Referral Completed by Team,SSDA903|CIN,liquid_logic|mosaic
-cin_episodes,,,,CIN Referral Completed by Worker,CIN Referral Completed by Worker,SSDA903|CIN,liquid_logic|mosaic
-assessments,,unique,VARCHAR(),Assessment ID,Assessment ID,SSDA903|CIN,liquid_logic|mosaic
-assessments,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-assessments,,,DATE,Assessment Start Date,Assessment Start Date,SSDA903|CIN,liquid_logic|mosaic
-assessments,,,BOOLEAN,Child Seen During Assessment,Child Seen During Assessment,SSDA903|CIN,liquid_logic|mosaic
-assessments,,,DATE,Assessment Authorised Date,Assessment Authorised Date,SSDA903|CIN,liquid_logic|mosaic
-assessments,,,,Assessment Outcome,Assessment Outcome,SSDA903|CIN,liquid_logic|mosaic
-assessments,,,,Assessment Completed by Team,Assessment Completed by Team,SSDA903|CIN,liquid_logic|mosaic
-assessments,,,,Assessment Completed by Worker,Assessment Completed by Worker,SSDA903|CIN,liquid_logic|mosaic
-assessment_factors,,unique,VARCHAR(),Assessment ID,Assessment ID,SSDA903|CIN,liquid_logic|mosaic
-assessment_factors,,,,Assessment Factors,Assessment Factors,SSDA903|CIN,liquid_logic|mosaic
-cin_plans,,unique,VARCHAR(),CIN Plan ID,CIN Plan ID,SSDA903|CIN,liquid_logic|mosaic
-cin_plans,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-cin_plans,,,DATE,CINPlanStartDate,CIN Plan Start Date,SSDA903|CIN,liquid_logic|mosaic
-cin_plans,,,DATE,CIN Plan End Date,CIN Plan End Date,SSDA903|CIN,liquid_logic|mosaic
-cin_plans,,,,CIN Allocated Team,CIN Allocated Team,SSDA903|CIN,liquid_logic|mosaic
-cin_plans,,,,CIN Allocated Worker,CIN Allocated Worker,SSDA903|CIN,liquid_logic|mosaic
-cin_visits,,unique,VARCHAR(),CIN Visit ID,CIN Visit ID,SSDA903|CIN,liquid_logic|mosaic
-cin_visits,,,VARCHAR(),CIN Plan ID,CIN Plan ID,SSDA903|CIN,liquid_logic|mosaic
-cin_visits,,,DATE,CIN Visit Date,CIN Visit Date,SSDA903|CIN,liquid_logic|mosaic
-cin_visits,,,BOOLEAN,Child Seen,Child Seen,SSDA903|CIN,liquid_logic|mosaic
-cin_visits,,,BOOLEAN,Child Seen Alone,Child Seen Alone,SSDA903|CIN,liquid_logic|mosaic
-cin_visits,,,BOOLEAN,Child Bedroom Seen,Child Bedroom Seen,SSDA903|CIN,liquid_logic|mosaic
-s47_enquiry,,unique,VARCHAR(),S47 Enquiry ID,S47 Enquiry ID,SSDA903|CIN,liquid_logic|mosaic
-s47_enquiry,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-s47_enquiry,,,DATE,s47 equiry start,Strategy Discussion initiating S47 Enquiry Start Date,SSDA903|CIN,liquid_logic|mosaic
-s47_enquiry,,,DATE,S47 Start Date,S47 Start Date,SSDA903|CIN,liquid_logic|mosaic
-s47_enquiry,,,DATE,S47 Completed Date,S47 Completed Date,SSDA903|CIN,liquid_logic|mosaic
-s47_enquiry,,,,S47 Outcome,S47 Outcome,SSDA903|CIN,liquid_logic|mosaic
-s47_enquiry,,,,cp conf date,Date of Initial Child Protection Conference,SSDA903|CIN,liquid_logic|mosaic
-s47_enquiry,,,,cp conf outcome,Outcome of Initial Child Protection Conference,SSDA903|CIN,liquid_logic|mosaic
-s47_enquiry,,,,s47 allocated team,S47/ ICPC Allocated Team,SSDA903|CIN,liquid_logic|mosaic
-s47_enquiry,,,,s47 allocated worker,S47/ ICPC Allocated Worker,SSDA903|CIN,liquid_logic|mosaic
-cp_plans,,unique,VARCHAR(),CP Plan ID,CP Plan ID,SSDA903|CIN,liquid_logic|mosaic
-cp_plans,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-cp_plans,,,DATE,CP Plan Start Date,CP Plan Start Date,SSDA903|CIN,liquid_logic|mosaic
-cp_plans,,,DATE,CP Plan End Date,CP Plan End Date,SSDA903|CIN,liquid_logic|mosaic
-cp_plans,,,,CP Plan Allocated Team,CP Plan Allocated Team,SSDA903|CIN,liquid_logic|mosaic
-cp_plans,,,,CP Plan Allocated Worker,CP Plan Allocated Worker,SSDA903|CIN,liquid_logic|mosaic
-category_of_abuse,,unique,VARCHAR(),CP Plan ID,CP Plan ID,SSDA903|CIN,liquid_logic|mosaic
-category_of_abuse,,,,Category of Abuse,Category of Abuse,SSDA903|CIN,liquid_logic|mosaic
-category_of_abuse,,,,Category of Abuse Start Date,Category of Abuse Start Date,SSDA903|CIN,liquid_logic|mosaic
-cp_visits,,unique,VARCHAR(),CP Plan ID,CP Plan ID,SSDA903|CIN,liquid_logic|mosaic
-cp_visits,,,VARCHAR(),CP Visit ID,CP Visit ID,SSDA903|CIN,liquid_logic|mosaic
-cp_visits,,,DATE,Date of Visit,Date of Visit,SSDA903|CIN,liquid_logic|mosaic
-cp_visits,,,BOOLEAN,Child Seen,Child Seen,SSDA903|CIN,liquid_logic|mosaic
-cp_visits,,,BOOLEAN,Child Seen Alone,Child Seen Alone,SSDA903|CIN,liquid_logic|mosaic
-cp_visits,,,BOOLEAN,Child Bedroon Seen,Child Bedroon Seen,SSDA903|CIN,liquid_logic|mosaic
-cp_reviews,,unique,VARCHAR(),Review ID,Review ID,SSDA903|CIN,liquid_logic|mosaic
-cp_reviews,,,VARCHAR(),CP Plan ID,CP Plan ID,SSDA903|CIN,liquid_logic|mosaic
-cp_reviews,,,DATE,Review Due Date,Review Due Date,SSDA903|CIN,liquid_logic|mosaic
-cp_reviews,,,DATE,Date of Review,Date of Review,SSDA903|CIN,liquid_logic|mosaic
-cp_reviews,,,BOOLEAN,cp plan continues,CP Plan to Continue?,SSDA903|CIN,liquid_logic|mosaic
-cp_reviews,,,BOOLEAN,quorate,Quorate?,SSDA903|CIN,liquid_logic|mosaic
-cp_reviews,,,,Child's Participation,Child's Participation,SSDA903|CIN,liquid_logic|mosaic
-cp_reviews,,,,quality of representation,Quality of representation of CYP views/ experience,SSDA903|CIN,liquid_logic|mosaic
-cp_reviews,,,,cp progress made,"Sufficient progress made against the CP Plan to improve outcomes for the child?	",SSDA903|CIN,liquid_logic|mosaic
-risks_to_child_at_this_conference,,,VARCHAR(),Review ID,Review ID,SSDA903|CIN,liquid_logic|mosaic
-risks_to_child_at_this_conference,,,,Risks to child at this conference,Risks to child at this conference,SSDA903|CIN,liquid_logic|mosaic
-cla_episodes,,unique,VARCHAR(),Episode ID,Episode ID,SSDA903|CIN,liquid_logic|mosaic
-cla_episodes,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-cla_episodes,,,DATE,Date Episode Commenced,Date Episode Commenced,SSDA903|CIN,liquid_logic|mosaic
-cla_episodes,,,,Reason for New CLA Episode,Reason for New CLA Episode,SSDA903|CIN,liquid_logic|mosaic
-cla_episodes,,,DATE,DEC,Date Episode Ceased,SSDA903|CIN,liquid_logic|mosaic
-cla_episodes,,,,REC,Reason Episode Ceased,SSDA903|CIN,liquid_logic|mosaic
-cla_episodes,,,,Allocated Team,Allocated Team,SSDA903|CIN,liquid_logic|mosaic
-cla_episodes,,,,Allocated Worker,Allocated Worker,SSDA903|CIN,liquid_logic|mosaic
-placement,,unique,VARCHAR(),Placement ID,Placement ID,SSDA903|CIN,liquid_logic|mosaic
-placement,,,VARCHAR(),Episode ID,Episode ID,SSDA903|CIN,liquid_logic|mosaic
-placement,,,DATE,Placement Start Date,Placement Start Date,SSDA903|CIN,liquid_logic|mosaic
-placement,,,,Placement Type,Placement Type,SSDA903|CIN,liquid_logic|mosaic
-placement,,,VARCHAR(8),URN of Placement,URN of Placement,SSDA903|CIN,liquid_logic|mosaic
-placement,,,,LA of Placement,LA of Placement,SSDA903|CIN,liquid_logic|mosaic
-placement,,,,Placement Provider,Placement Provider,SSDA903|CIN,liquid_logic|mosaic
-placement,,,,Placement Postcode,Placement Postcode,SSDA903|CIN,liquid_logic|mosaic
-placement,,,DATE,Placement End Date,Placement End Date,SSDA903|CIN,liquid_logic|mosaic
-placement,,,,Reason for Placement Change,Reason for Placement Change,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,,Review ID,Review ID,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,,Episode ID,Episode ID,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,DATE,CLA Review Due Date,CLA Review Due Date,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,DATE,CLA Review Date,CLA Review Date,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,,child involved,Has the child/young person been involved in formulating this Care Plan?,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,,sw met child,"Has the Social Worker met with the child on their own to undertake direct work to establish their wishes and views	",SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,,Participation code,Participation code,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,,CP meets childs need,Is the Care Plan meeting the child's needs?,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,BOOLEAN,permanence plan in place,Is a Permanence Plan in place?,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,DATE,last_iro,Date of Last IRO Visit / Contact to the Child,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,,previously_Adopted,Has the child / young person previously been adopted or left care for special guardianship or residence order?,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,DATE,Date of Previous Permanence Order,Date of Previous Permanence Order,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,,Previous Permanence Option,Previous Permanence Option,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,,Previous Permanence Arranged LA,Previous Permanence Arranged LA,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,BOOLEAN,Child convicted during the year,Child convicted during the year,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,BOOLEAN,Health surveillance checks up to date,Health surveillance checks up to date,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,DATE,Date of Last Health Assessment,Date of Last Health Assessment,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,DATE,Date of Last Dental Check,Date of Last Dental Check,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,BOOLEAN,Immunisations up to Date,Immunisations up to Date,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,BOOLEAN,substance_misuse,Identified as having a substance misuse problem,SSDA903|CIN,liquid_logic|mosaic
-cla_reviews,,,BOOLEAN,substance_invevention,Child received intervention for substance misuse problem,SSDA903|CIN,liquid_logic|mosaic
-care_plan,,,VARCHAR(),Review ID,Review ID,SSDA903|CIN,liquid_logic|mosaic
-care_plan,,,,What is the chosen plan for this child/young person?,What is the chosen plan for this child/young person?,SSDA903|CIN,liquid_logic|mosaic
-cla_visits,,unique,VARCHAR(), Visit ID, Visit ID,SSDA903|CIN,liquid_logic|mosaic
-cla_visits,,,VARCHAR(),Episode ID,Episode ID,SSDA903|CIN,liquid_logic|mosaic
-cla_visits,,,DATE,Date of Visit,Date of Visit,SSDA903|CIN,liquid_logic|mosaic
-cla_visits,,,BOOLEAN,Child Seen,Child Seen,SSDA903|CIN,liquid_logic|mosaic
-cla_visits,,,BOOLEAN,Child Seen Alone,Child Seen Alone,SSDA903|CIN,liquid_logic|mosaic
-sdq_scores,,unique,VARCHAR(),SDQ ID,SDQ ID,SSDA903|CIN,liquid_logic|mosaic
-sdq_scores,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-sdq_scores,,,DATE,SDQ Completed Date,SDQ Completed Date,SSDA903|CIN,liquid_logic|mosaic
-sdq_scores,,,,SDQ Score,SDQ Score,SSDA903|CIN,liquid_logic|mosaic
-missing,,unique,VARCHAR(),Missing Episode ID,Missing Episode ID,SSDA903|CIN,liquid_logic|mosaic
-missing,,,VARCHAR(),Episode ID,Episode ID,SSDA903|CIN,liquid_logic|mosaic
-missing,,,DATE,Missing Episode Start,Missing Episode Start,SSDA903|CIN,liquid_logic|mosaic
-missing,,,,Episode Type (Missing/ Absent),Episode Type (Missing/ Absent),SSDA903|CIN,liquid_logic|mosaic
-missing,,,DATE,Missing Episode End,Missing Episode End,SSDA903|CIN,liquid_logic|mosaic
-missing,,,BOOLEAN,RHI Offered,RHI Offered,SSDA903|CIN,liquid_logic|mosaic
-missing,,,BOOLEAN,RHI Accepted,RHI Accepted,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,unique,VARCHAR(),Care Leaver Table ID,Care Leaver Table ID,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,,,Eligibility Status/ Category,Eligibility Status/ Category,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,,,In Touch Category,In Touch Category,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,,DATE,Latest Date of Contact,Latest Date of Contact,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,,,Accommodation,Accommodation,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,,,Suitability of Accommodation,Suitability of Accommodation,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,,,Activity Status,Activity Status,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,,,Latest Pathway Plan Review Date,Latest Pathway Plan Review Date,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,,,Allocated Personal Advisor,Allocated Personal Advisor,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,,,Allocated Team,Allocated Team,SSDA903|CIN,liquid_logic|mosaic
-care_leavers,,,,Allocated Worker,Allocated Worker,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,DATE,Date of ADM Decision ,Date of ADM Decision ,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,DATE,Date of FFA/ CP Decision,Date of FFA/ CP Decision,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,DATE,Date the entered Care,Date the entered Care,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,DATE,Date of Placement/ Freeing Order,Date of Placement/ Freeing Order,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,DATE,Date Placed for Adoption,Date Placed for Adoption,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,DATE,Date_matched,Date Matched to Prospective Adopters,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,DATE,Date_placed,Date Placed in FFA/ CP Placement ,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,DATE,Decision_date,Date of Decision that Child Should No Longer be Placed for Adoption,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,DATE,foster_date,Date originally placed with foster carer(s) (if adopted by foster carer/s),SSDA903|CIN,liquid_logic|mosaic
-permanence,,,BOOLEAN,sibling_group,Is the child a part of a sibling group?,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,TINYINT(2),number_siblings_placed_together,"Number of children placed, or planned to be placed, for adoption together as sibling group INCLUDING this child",SSDA903|CIN,liquid_logic|mosaic
-permanence,,,TINYINT(2),number_siblings_placed_seperate,"Number of siblings placed, or planned to be placed, for adoption separately from the child",SSDA903|CIN,liquid_logic|mosaic
-permanence,,,VARCHAR(8),URN of Placement,URN of the placement provider agency,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,,Not_placed_reason,Reason No Longer Placed for Adoption,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,DATE,Date of Order ,Date of Order ,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,,Type of Order,Type of Order,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,,Status of Special Guardian,Status of Special Guardian,SSDA903|CIN,liquid_logic|mosaic
-permanence,,,TINYINT(2),Age of Special Guardian,Age of Special Guardian,SSDA903|CIN,liquid_logic|mosaic
-send,,unique,,UPN,UPN,SSDA903|CIN,liquid_logic|mosaic
-send,,,VARCHAR(10),Child Unique ID,Child Unique ID,SSDA903|CIN,liquid_logic|mosaic
-requests,,unique,VARCHAR(),Request ID,Request ID,SSDA903|CIN,liquid_logic|mosaic
-requests,,,CHAR(13),UPN,UPN,SSDA903|CIN,liquid_logic|mosaic
-requests,,,DATE,Received Date,Received Date,SSDA903|CIN,liquid_logic|mosaic
-requests,,,DATE,Request Outcome Date,Request Outcome Date,SSDA903|CIN,liquid_logic|mosaic
-requests,,,,Request Outcome,Request Outcome,SSDA903|CIN,liquid_logic|mosaic
-assessment,,unique,VARCHAR(),Assessment ID,Assessment ID,SSDA903|CIN,liquid_logic|mosaic
-assessment,,,VARCHAR(),Request ID,Request ID,SSDA903|CIN,liquid_logic|mosaic
-assessment,,,DATE,Assessment Outcome Date,Assessment Outcome Date,SSDA903|CIN,liquid_logic|mosaic
-assessment,,,,Assessment Outcome,Assessment Outcome,SSDA903|CIN,liquid_logic|mosaic
-named_plan,,unique,VARCHAR(),Named Plan ID,Named Plan ID,SSDA903|CIN,liquid_logic|mosaic
-named_plan,,,VARCHAR(),Assessment ID,Assessment ID,SSDA903|CIN,liquid_logic|mosaic
-named_plan,,,DATE,Start Date,Start Date,SSDA903|CIN,liquid_logic|mosaic
-named_plan,,,DATE,Cease Date,Cease Date,SSDA903|CIN,liquid_logic|mosaic
-named_plan,,,,Cease Reason,Cease Reason,SSDA903|CIN,liquid_logic|mosaic
-active_plans,,unique,VARCHAR(),Plan ID,Plan ID,SSDA903|CIN,liquid_logic|mosaic
-active_plans,,,VARCHAR(),Request ID,Request ID,SSDA903|CIN,liquid_logic|mosaic
-active_plans,,,,Last Review,Last Review,SSDA903|CIN,liquid_logic|mosaic
-sen_need,,unique,VARCHAR(),SEN Need ID,SEN Need ID,SSDA903|CIN,liquid_logic|mosaic
-sen_need,,,VARCHAR(),Plan ID,Plan ID,SSDA903|CIN,liquid_logic|mosaic
-sen_need,,,,SEN Type,SEN Type,SSDA903|CIN,liquid_logic|mosaic
-sen_need,,,,SEN Type Rank,SEN Type Rank,SSDA903|CIN,liquid_logic|mosaic
-worker,,unique,VARCHAR(),sw_reg_number,Social Work England (SWE) registration number,SSDA903|CIN,liquid_logic|mosaic
-worker,,,VARCHAR(),Agency worker,Agency worker,SSDA903|CIN,liquid_logic|mosaic
-worker,,,VARCHAR(),Role within the organisation,Role within the organisation,SSDA903|CIN,liquid_logic|mosaic
-worker,,,TINYINT(),num_cases,Number of cases held,SSDA903|CIN,liquid_logic|mosaic
-worker,,,VARCHAR(),Qualification level,Qualification level,SSDA903|CIN,liquid_logic|mosaic
+field_ref,object_name,categories,constraints,type,,name,description,returns,cms,required_enabled,unique_enabled,primary_key,foreign_key
+SSD001,child,identity,unique|primary_key,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD002,child,identity,,,ChSex,Sex,Sex,SSDA903,liquid_logic|mosaic,,,,
+SSD003,child,identity,,,ChGender,Gender,Gender,CINcensus,liquid_logic|mosaic,,,,
+SSD004,child,identity,,VARCHAR(4),ChEthnicity,Ethnicity,Ethnicity,SSDA903|CINcensus,liquid_logic|mosaic,,,,
+SSD005,child,identity,,DATE,ChBirthDate,PersonBirthDate,Date of Birth,SSDA903|CINcensus,liquid_logic|mosaic,,,,
+SSD006,child,identity,unique|foreign_key: upn.upn,CHAR(13),ChUPN,UPN,UPN,SSDA903,liquid_logic|mosaic,,,,
+SSD007,child,identity,,CHAR(3),ChUPNunknown,UPNunknown,UPN Unknown,SSDA903,liquid_logic|mosaic,,,,
+SSD008,child,identity,,BOOLEAN,ChSENDflag,SENDFlag,SEND Flag,NEETandparticipation,liquid_logic|mosaic,,,,
+SSD009,child,identity,,DATE,ChExpectedDOB,ExpectedPersonBirthDate,Expected Birth Date,CINcensus,liquid_logic|mosaic,,,,
+SSD010,child,identity,,DATE,ChDeathDate,PersonDeathDate,Date of Death,CINcensus,liquid_logic|mosaic,,,,
+SSD011,child,identity,,BOOLEAN,ChIsMother,MOTHER,Mother,SSDA903,liquid_logic|mosaic,,,,
+SSD012,child,identity,,,ChNationality,Country of Origin (UASC),Country of Origin (UASC),ADCS_SP,liquid_logic|mosaic,,,,
+SSD013,family,identity|family_identifier,unique|primary_key,,FamilyID,Family identifier,Family identifier,ASGLB|AnnexA,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD014,family,identity|family_identifier,unique|foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD015,address,identity|address,,,Address,Address,Address,Local,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD016,address,identity|address,unique|foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,,,,child.Child_Unique_ID
+SSD017,address,identity|address,,,AddressType,Address Type,Address Type,Local,liquid_logic|mosaic,,,,
+SSD018,address,identity|address,,DATE,AddressStart,Address Start Date/ From,Address Start Date/ From,Local,liquid_logic|mosaic,,,,
+SSD019,address,identity|address,,DATE,AddressEnd,Address End Date/ To,Address End Date/ To,Local,liquid_logic|mosaic,,,,
+SSD020,disability,identity|disability_code,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,TRUE,TRUE,child.Child_Unique_ID
+SSD021,disability,identity|disability_code,unique|primary_key,,ChDisability,Disability,Disability Code,CINcensus,liquid_logic|mosaic,,,,
+SSD022,immigration_status,identity,unique|foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,TRUE,TRUE,child.Child_Unique_ID
+SSD023,immigration_status,identity,,,,Immigration Status,Immigration Status,Local,liquid_logic|mosaic,,,,
+SSD024,immigration_status,identity,,DATE,,Immigration Status Start,Immigration Status Start,Local,liquid_logic|mosaic,,,,
+SSD025,immigration_status,identity,,DATE,,Immigration Status End,Immigration Status End,Local,liquid_logic|mosaic,,,,
+SSD026,mother,identity,unique|primary_key,VARCHAR(10),,Mothers Child Unique ID,Mother's Child Unique ID,Local,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD027,mother,identity,unique|foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID (Mother),SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD028,mother,identity,,DATE,,MC_DOB,Date of birth of mother’s child,SSDA903,liquid_logic|mosaic,,,,
+SSD029,legal_status,identity,unique|primary_key,,,Legal Status ID,Legal Status ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD030,legal_status,identity,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD031,legal_status,,,,,Legal_status,Legal Status,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD032,legal_status,,,DATE,,Legal Status Start Date,Legal Status Start Date,Local,liquid_logic|mosaic,,,,
+SSD033,legal_status,,,DATE,,Legal Status End Date,Legal Status End Date,Local,liquid_logic|mosaic,,,,
+SSD034,contacts,,unique|primary_key,VARCHAR(),,Contact ID,Contact ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD035,contacts,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD036,contacts,,,DATE,,ContactDate,Date of Contact,AnnexA,liquid_logic|mosaic,,,,
+SSD037,contacts,,,,,ContactSource,Contact Source,AnnexA,liquid_logic|mosaic,,,,
+SSD038,contacts,,,,,Contact Outcome ,Contact Outcome ,ADCS_SP,liquid_logic|mosaic,,,,
+SSD039,early_help_episodes,,unique|primary_key,VARCHAR(),,EH Episode ID,EH Episode ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD040,early_help_episodes,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD041,early_help_episodes,,,DATE,,EH Episode Start Date,EH Episode Start Date,AnnexA,liquid_logic|mosaic,,,,
+SSD042,early_help_episodes,,,DATE,,EH Episode End Date,EH Episode End Date,AnnexA,liquid_logic|mosaic,,,,
+SSD043,early_help_episodes,,,,,EH Episode Reason for Involvement,EH Episode Reason for Involvement,ADCS_SP,liquid_logic|mosaic,,,,
+SSD044,early_help_episodes,,,,,EH Episode End Reason,EH Episode End Reason,ADCS_SP,liquid_logic|mosaic,,,,
+SSD045,early_help_episodes,,,,,EH Episode Allocated Organisation,EH Episode Allocated Organisation,AnnexA,liquid_logic|mosaic,,,,
+SSD046,early_help_episodes,,,,,EH Episode Allocated Worker,EH Episode Allocated Worker,Local,liquid_logic|mosaic,,,,
+SSD047,cin_episodes,,unique|primary_key,VARCHAR(),,CIN Referral ID,CIN Referral ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD048,cin_episodes,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD049,cin_episodes,,,DATE,,CINreferralDate,CIN Referral Date,CINcensus|AnnexA,liquid_logic|mosaic,,,,
+SSD050,cin_episodes,,,,,ReferralSource,CIN Referral Source,CINcensus|AnnexA,liquid_logic|mosaic,,,,
+SSD051,cin_episodes,,,,,CIN Referral Outcome,CIN Referral Outcome,CINcensus|AnnexA,liquid_logic|mosaic,,,,
+SSD052,cin_episodes,,,,,ReasonForClosure,CIN Closure Reason,CINcensus,liquid_logic|mosaic,,,,
+SSD053,cin_episodes,,,DATE,,CINclosureDate,CIN Closure Date,CINcensus,liquid_logic|mosaic,,,,
+SSD054,cin_episodes,,,,,CIN Referral Completed by Team,CIN Referral Completed by Team,AnnexA,liquid_logic|mosaic,,,,
+SSD055,cin_episodes,,,,,CIN Referral Completed by Worker,CIN Referral Completed by Worker,AnnexA,liquid_logic|mosaic,,,,
+SSD056,assessments,,unique|primary_key,VARCHAR(),,Assessment ID,Assessment ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD057,assessments,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD058,assessments,,,DATE,,AssessmentActualStartDate,Assessment Start Date,CINcensus,liquid_logic|mosaic,,,,
+SSD059,assessments,,,BOOLEAN,,Child Seen During Assessment,Child Seen During Assessment,AnnexA,liquid_logic|mosaic,,,,
+SSD060,assessments,,,DATE,,AssessmentAuthorisationDate,Assessment Authorised Date,CINcensus,liquid_logic|mosaic,,,,
+SSD061,assessments,,,,,Assessment Outcome,Assessment Outcome,AnnexA,liquid_logic|mosaic,,,,
+SSD062,assessments,,,,,Assessment Completed by Team,Assessment Completed by Team,AnnexA,liquid_logic|mosaic,,,,
+SSD063,assessments,,,,,Assessment Completed by Worker,Assessment Completed by Worker,AnnexA,liquid_logic|mosaic,,,,
+SSD064,assessment_factors,,unique|primary_key,VARCHAR(),,Assessment ID,Assessment ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD065,assessment_factors,,,,,AssessmentFactors,Assessment Factors,CINcensus,liquid_logic|mosaic,,,,
+SSD066,cin_plans,,unique|primary_key,VARCHAR(),,CIN Plan ID,CIN Plan ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD067,cin_plans,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD068,cin_plans,,,DATE,,CINPlanStartDate,CIN Plan Start Date,CINcensus,liquid_logic|mosaic,,,,
+SSD069,cin_plans,,,DATE,,CINPlanEndDate,CIN Plan End Date,CINcensus,liquid_logic|mosaic,,,,
+SSD070,cin_plans,,,,,CIN Allocated Team,CIN Allocated Team,AnnexA,liquid_logic|mosaic,,,,
+SSD071,cin_plans,,,,,CIN Allocated Worker,CIN Allocated Worker,AnnexA,liquid_logic|mosaic,,,,
+SSD072,cin_visits,,unique|primary_key,VARCHAR(),,CIN Visit ID,CIN Visit ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD073,cin_visits,,,VARCHAR(),,CIN Plan ID,CIN Plan ID,,liquid_logic|mosaic,,,,
+SSD074,cin_visits,,,DATE,,CIN Visit Date,CIN Visit Date,Local,liquid_logic|mosaic,,,,
+SSD075,cin_visits,,,BOOLEAN,,Child Seen,Child Seen,AnnexA,liquid_logic|mosaic,,,,
+SSD076,cin_visits,,,BOOLEAN,,Child Seen Alone,Child Seen Alone,Local,liquid_logic|mosaic,,,,
+SSD077,cin_visits,,,BOOLEAN,,Child Bedroom Seen,Child Bedroom Seen,Local,liquid_logic|mosaic,,,,
+SSD078,s47_enquiry,,unique|primary_key,VARCHAR(),,S47 Enquiry ID,S47 Enquiry ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD079,s47_enquiry,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD080,s47_enquiry,,,DATE,,S47 Discussion Start Date,Strategy Discussion initiating S47 Enquiry Start Date,AnnexA,liquid_logic|mosaic,,,,
+SSD081,s47_enquiry,,,DATE,,S47 Actual Start Date,S47 Start Date,CINcensus,liquid_logic|mosaic,,,,
+SSD082,s47_enquiry,,,DATE,,S47 Completed Date,S47 Completed Date,,liquid_logic|mosaic,,,,
+SSD083,s47_enquiry,,,,,ICPC not Required,S47 Outcome,CINcensus,liquid_logic|mosaic,,,,
+SSD084,s47_enquiry,,,DATE,,Date Of Initial CPC,Date of Initial CP Conference,CINcensus,liquid_logic|mosaic,,,,
+SSD085,s47_enquiry,,,,,Outcome of Initial CP Conference,Outcome of Initial CP Conference,AnnexA,liquid_logic|mosaic,,,,
+SSD086,s47_enquiry,,,,,S47 Allocated Team,S47/ ICPC Allocated Team,AnnexA,liquid_logic|mosaic,,,,
+SSD087,s47_enquiry,,,,,S47 Allocated Worker,S47/ ICPC Allocated Worker,AnnexA,liquid_logic|mosaic,,,,
+SSD088,cp_plans,,unique|primary_key,VARCHAR(),,CP Plan ID,CP Plan ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD089,cp_plans,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD090,cp_plans,,,DATE,,CPPstartDate,CP Plan Start Date,CINcensus|AnnexA,liquid_logic|mosaic,,,,
+SSD091,cp_plans,,,DATE,,CPPendDate,CP Plan End Date,CINcensus|AnnexA,liquid_logic|mosaic,,,,
+SSD092,cp_plans,,,,,CP Plan Allocated Team,CP Plan Allocated Team,AnnexA,liquid_logic|mosaic,,,,
+SSD093,cp_plans,,,,,CP Plan Allocated Worker,CP Plan Allocated Worker,AnnexA,liquid_logic|mosaic,,,,
+SSD094,category_of_abuse,,unique|primary_key,VARCHAR(),,CP Plan ID,CP Plan ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD095,category_of_abuse,,,,,CategoryOfAbuse,Category of Abuse,CINcensus,liquid_logic|mosaic,,,,
+SSD096,category_of_abuse,,,,,Category of Abuse Start Date,Category of Abuse Start Date,Local,liquid_logic|mosaic,,,,
+SSD097,cp_visits,,foreign_key: cp_plans.CP_Plan_ID,VARCHAR(),,CP Plan ID,CP Plan ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,cp_plans.CP_Plan_ID
+SSD098,cp_visits,,unique|primary_key,VARCHAR(),,CP Visit ID,CP Visit ID,,liquid_logic|mosaic,,,,
+SSD099,cp_visits,,,DATE,,Date of Visit,Date of Visit,AnnexA,liquid_logic|mosaic,,,,
+SSD100,cp_visits,,,BOOLEAN,,Child Seen,Child Seen,Local,liquid_logic|mosaic,,,,
+SSD101,cp_visits,,,BOOLEAN,,Child Seen Alone,Child Seen Alone,AnnexA,liquid_logic|mosaic,,,,
+SSD102,cp_visits,,,BOOLEAN,,Child Bedroom Seen,Child Bedroom Seen,Local,liquid_logic|mosaic,,,,
+SSD103,cp_reviews,,unique|primary_key,VARCHAR(),,Review ID,Review ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD104,cp_reviews,,foreign_key: cp_plans.CP_Plan_ID,VARCHAR(),,CP Plan ID,CP Plan ID,,liquid_logic|mosaic,,,,cp_plans.CP_Plan_ID
+SSD105,cp_reviews,,,DATE,,Review Due Date,Review Due Date,Local,liquid_logic|mosaic,,,,
+SSD106,cp_reviews,,,DATE,,CPPreviewDate,Date of Review,CINcensus|AnnexA,liquid_logic|mosaic,,,,
+SSD107,cp_reviews,,,BOOLEAN,,CP Plan to Continue?,CP Plan to Continue?,Local,liquid_logic|mosaic,,,,
+SSD108,cp_reviews,,,BOOLEAN,,Quorate?,Quorate?,Local,liquid_logic|mosaic,,,,
+SSD109,cp_reviews,,,,,Childs Participation,Child's Participation,Local,liquid_logic|mosaic,,,,
+SSD110,cp_reviews,,,,,Quality of representation of CYP views/ experience,Quality of representation of CYP views/ experience,1a|draft,liquid_logic|mosaic,,,,
+SSD111,cp_reviews,,,,,"Sufficient progress made against the CP Plan to improve outcomes for the child?	","Sufficient progress made against the CP Plan to improve outcomes for the child?	",1a|draft,liquid_logic|mosaic,,,,
+SSD112,risks_to_child_at_this_conference,,foreign_key: cp_reviews.Review_ID,VARCHAR(),,Review ID,Review ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,cp_reviews.Review_ID
+SSD113,risks_to_child_at_this_conference,,,,,Risks to child at this conference,Risks to child at this conference,1a|draft,liquid_logic|mosaic,,,,
+SSD114,cla_episodes,,unique|primary_key,VARCHAR(),,Episode ID,Episode ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD115,cla_episodes,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD116,cla_episodes,,,DATE,,DECOM,Date Episode Commenced,SSDA903,liquid_logic|mosaic,,,,
+SSD117,cla_episodes,,,,,RNE,Reason for New CLA Episode,SSDA903,liquid_logic|mosaic,,,,
+SSD118,cla_episodes,,,DATE,,DEC,Date Episode Ceased,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD119,cla_episodes,,,,,REC,Reason Episode Ceased,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD120,cla_episodes,,,,,Allocated Team,Allocated Team,AnnexA,liquid_logic|mosaic,,,,
+SSD121,cla_episodes,,,,,Allocated Worker,Allocated Worker,AnnexA,liquid_logic|mosaic,,,,
+SSD122,placement,,unique|primary_key,VARCHAR(),,Placement ID,Placement ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD123,placement,,foreign_key: cla_episodes.Episode_ID,VARCHAR(),,Episode ID,Episode ID,,liquid_logic|mosaic,,,,cla_episodes.Episode_ID
+SSD124,placement,,,DATE,,Placement Start Date,Placement Start Date,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD125,placement,,,,,PL,Placement Type,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD126,placement,,,VARCHAR(8),,URN,URN of Placement,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD127,placement,,,,,PL_LA,LA of Placement,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD128,placement,,,,,PLACE_PROVIDER,Placement Provider,SSDA903,liquid_logic|mosaic,,,,
+SSD129,placement,,,,,PL_POST,Placement Postcode,AnnexA,liquid_logic|mosaic,,,,
+SSD130,placement,,,DATE,,Placement End Date,Placement End Date,SSDA903,liquid_logic|mosaic,,,,
+SSD131,placement,,,,,REASON_PLACE_CHANGE,Reason for Placement Change,SSDA903,liquid_logic|mosaic,,,,
+SSD132,cla_reviews,,unique|primary_key,,,Review ID,Review ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD133,cla_reviews,,foreign_key: cla_episodes.Episode_ID,,,Episode ID,Episode ID,,liquid_logic|mosaic,,,,cla_episodes.Episode_ID
+SSD134,cla_reviews,,,DATE,,CLA Review Due Date,CLA Review Due Date,Local,liquid_logic|mosaic,,,,
+SSD135,cla_reviews,,,DATE,,REVIEW,CLA Review Date,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD136,cla_reviews,,,,,child involved in CP,Has the child/young person been involved in formulating this Care Plan?,1a|draft,liquid_logic|mosaic,,,,
+SSD137,cla_reviews,,,,,Social Worker met with the child,"Has the Social Worker met with the child on their own to undertake direct work to establish their wishes and views	",1a|draft,liquid_logic|mosaic,,,,
+SSD138,cla_reviews,,,,,REVIEW_CODE,Participation code,SSDA903,liquid_logic|mosaic,,,,
+SSD139,cla_reviews,,,,,CP meeting the childs needs,Is the Care Plan meeting the child's needs?,1a|draft,liquid_logic|mosaic,,,,
+SSD140,cla_reviews,,,,,Permanence Plan in place,Is a Permanence Plan in place?,AnnexA,liquid_logic|mosaic,,,,
+SSD141,cla_reviews,,,DATE,,Date of Last IRO Visit,Date of Last IRO Visit / Contact to the Child,AnnexA,liquid_logic|mosaic,,,,
+SSD142,cla_reviews,,,,,previously adopted or left care,Has the child / young person previously been adopted or left care for special guardianship or residence order?,SSDA903,liquid_logic|mosaic,,,,
+SSD143,cla_reviews,,,DATE,,DATE_PERM,Date of Previous Permanence Order,SSDA903,liquid_logic|mosaic,,,,
+SSD144,cla_reviews,,,,,PREV_PERM,Previous Permanence Option,SSDA903,liquid_logic|mosaic,,,,
+SSD145,cla_reviews,,,,,LA_PERM,Previous Permanence Arranged LA,SSDA903,liquid_logic|mosaic,,,,
+SSD146,cla_reviews,,,BOOLEAN,,CONVICTED,Child convicted during the year,SSDA903,liquid_logic|mosaic,,,,
+SSD147,cla_reviews,,,BOOLEAN,,HEALTH_CHECK,Health surveillance checks up to date,SSDA903,liquid_logic|mosaic,,,,
+SSD148,cla_reviews,,,DATE,,HEALTH_ASSESSMENT,Date of Last Health Assessment,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD149,cla_reviews,,,DATE,,TEETH_CHECK,Date of Last Dental Check,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD150,cla_reviews,,,BOOLEAN,,IMMUNISATIONS,Immunisations up to Date,SSDA903,liquid_logic|mosaic,,,,
+SSD151,cla_reviews,,,BOOLEAN,,SUBSTANCE_MISUSE,Identified as having a substance misuse problem,SSDA903,liquid_logic|mosaic,,,,
+SSD152,cla_reviews,,,BOOLEAN,,INTERVENTION_RECEIVED,Child received intervention for substance misuse problem,SSDA903,liquid_logic|mosaic,,,,
+SSD153,care_plan,,unique|primary_key,VARCHAR(),,Review ID,Review ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD154,care_plan,,,,,chosen plan for child,What is the chosen plan for this child/young person?,AnnexA,liquid_logic|mosaic,,,,
+SSD155,cla_visits,,unique|primary_key,VARCHAR(),,Visit ID,Visit ID,,liquid_logic|mosaic,,,,
+SSD156,cla_visits,,foreign_key: cla_episodes.Episode_ID,VARCHAR(),,Episode ID,Episode ID,,liquid_logic|mosaic,,,,cla_episodes.Episode_ID
+SSD157,cla_visits,,,DATE,,Date of Visit,Date of Visit,AnnexA,liquid_logic|mosaic,,,,
+SSD158,cla_visits,,,BOOLEAN,,Child Seen,Child Seen,Local,liquid_logic|mosaic,,,,
+SSD159,cla_visits,,,BOOLEAN,,Child Seen Alone,Child Seen Alone,Local,liquid_logic|mosaic,,,,
+SSD160,sdq_scores,,unique|primary_key,VARCHAR(),,SDQ ID,SDQ ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD161,sdq_scores,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD162,sdq_scores,,,DATE,,SDQ Completed Date,SDQ Completed Date,Local,liquid_logic|mosaic,,,,
+SSD163,sdq_scores,,,,,SDQ_REASON,SDQ Reason,SSDA903,liquid_logic|mosaic,,,,
+SSD164,sdq_scores,,,,,SDQ_SCORE,SDQ Score,SSDA903,liquid_logic|mosaic,,,,
+SSD165,missing,,unique|primary_key,VARCHAR(),,Missing Episode ID,Missing Episode ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD166,missing,,foreign_key: cla_episodes.Episode_ID,VARCHAR(),,Episode ID,Episode ID,,liquid_logic|mosaic,,,,cla_episodes.Episode_ID
+SSD167,missing,,,DATE,,MIS_START,Missing Episode Start,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD168,missing,,,,,MISSING,Episode Type (Missing/ Absent),SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD169,missing,,,DATE,,MIS_END,Missing Episode End,SSDA903|AnnexA,liquid_logic|mosaic,,,,
+SSD170,missing,,,BOOLEAN,,RHI Offered,RHI Offered,AnnexA,liquid_logic|mosaic,,,,
+SSD171,missing,,,BOOLEAN,,RHI Accepted,RHI Accepted,AnnexA,liquid_logic|mosaic,,,,
+SSD172,care_leavers,,unique|primary_key,VARCHAR(),,Care Leaver Table ID,Care Leaver Table ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD173,care_leavers,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD174,care_leavers,,,,,Eligibility Status Category,Eligibility Status/ Category,AnnexA,liquid_logic|mosaic,,,,
+SSD175,care_leavers,,,,,IN_TOUCH,In Touch Category,AnnexA,liquid_logic|mosaic,,,,
+SSD176,care_leavers,,,DATE,,Latest Date of Contact,Latest Date of Contact,AnnexA,liquid_logic|mosaic,,,,
+SSD177,care_leavers,,,,,Accommodation,Accommodation,AnnexA,liquid_logic|mosaic,,,,
+SSD178,care_leavers,,,,,ACCOM,Suitability of Accommodation,AnnexA,liquid_logic|mosaic,,,,
+SSD179,care_leavers,,,,,ACTIV,Activity Status,AnnexA,liquid_logic|mosaic,,,,
+SSD180,care_leavers,,,,,Latest Pathway Plan Review Date,Latest Pathway Plan Review Date,AnnexA,liquid_logic|mosaic,,,,
+SSD181,care_leavers,,,,,Allocated Personal Advisor,Allocated Personal Advisor,AnnexA,liquid_logic|mosaic,,,,
+SSD182,care_leavers,,,,,Allocated Team,Allocated Team,AnnexA,liquid_logic|mosaic,,,,
+SSD183,care_leavers,,,,,Allocated Worker,Allocated Worker,AnnexA,liquid_logic|mosaic,,,,
+SSD184,permanence,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD185,permanence,,,DATE,,DATE_INT,Date of ADM Decision ,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,,,,
+SSD186,permanence,,,DATE,,Date of FFA/ CP Decision,Date of FFA/ CP Decision,ASGLB,liquid_logic|mosaic,,,,
+SSD187,permanence,,,DATE,,Date the entered Care,Date the entered Care,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,,,,
+SSD188,permanence,,,DATE,,Date of Placement/ Freeing Order,Date of Placement/ Freeing Order,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,,,,
+SSD189,permanence,,,DATE,,Date Placed for Adoption,Date Placed for Adoption,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,,,,
+SSD190,permanence,,,DATE,,DATE_MATCH,Date Matched to Prospective Adopters,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,,,,
+SSD191,permanence,,,DATE,,Date Placed in FFA/ CP Placement ,Date Placed in FFA/ CP Placement ,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,,,,
+SSD192,permanence,,,DATE,,DATE_PLACED_CEASED,Date of Decision that Child Should No Longer be Placed for Adoption,AnnexA|ASGLB,liquid_logic|mosaic,,,,
+SSD193,permanence,,,DATE,,Date originally placed with foster carer(s) (if adopted by foster carer/s),Date originally placed with foster carer(s) (if adopted by foster carer/s),SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,,,,
+SSD194,permanence,,,BOOLEAN,,Is the child a part of a sibling group?,Is the child a part of a sibling group?,ASGLB,liquid_logic|mosaic,,,,
+SSD195,permanence,,,TINYINT(2),,"Number of children placed, or planned to be placed, for adoption together as sibling group INCLUDING this child","Number of children placed, or planned to be placed, for adoption together as sibling group INCLUDING this child",ASGLB,liquid_logic|mosaic,,,,
+SSD196,permanence,,,TINYINT(2),,"Number of siblings placed, or planned to be placed, for adoption separately from the child","Number of siblings placed, or planned to be placed, for adoption separately from the child",ASGLB,liquid_logic|mosaic,,,,
+SSD197,permanence,,,VARCHAR(8),,URN of the placement provider agency,URN of the placement provider agency,SSDA903,liquid_logic|mosaic,,,,
+SSD198,permanence,,,,,REASON_PLACED_CEASED,Reason No Longer Placed for Adoption,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,,,,
+SSD199,permanence,,,DATE,,Date of Order ,Date of Order ,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,,,,
+SSD200,permanence,,,,,Type of Order,Type of Order,SSDA903|ASGLB,liquid_logic|mosaic,,,,
+SSD201,permanence,,,,,Status of Special Guardian,Status of Special Guardian,ASGLB,liquid_logic|mosaic,,,,
+SSD202,permanence,,,TINYINT(2),,Age of Special Guardian,Age of Special Guardian,ASGLB,liquid_logic|mosaic,,,,
+SSD203,send,,unique|primary_key,,,UPN,UPN,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD204,send,,foreign_key: child.Child_Unique_ID,VARCHAR(10),LAchildID,LAchildID,Child Unique ID,SSDA903|CINcensus,liquid_logic|mosaic,TRUE,,,child.Child_Unique_ID
+SSD205,requests,,unique|primary_key,VARCHAR(),,Request ID,Request ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD206,requests,,foreign_key: upn.upn,CHAR(13),,UPN,UPN,SEN2,liquid_logic|mosaic,,,,upn.upn
+SSD207,requests,,,DATE,,ReceivedDate,Received Date,SEN2,liquid_logic|mosaic,,,,
+SSD208,requests,,,DATE,,RequestOutcomeDate,Request Outcome Date,SEN2,liquid_logic|mosaic,,,,
+SSD209,requests,,,,,RequestOutcome,Request Outcome,SEN2,liquid_logic|mosaic,,,,
+SSD210,assessment,,unique|primary_key,VARCHAR(),,Assessment ID,Assessment ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD211,assessment,,foreign_key: requests.request_id,VARCHAR(),,Request ID,Request ID,,liquid_logic|mosaic,,,,requests.request_id
+SSD212,assessment,,,DATE,,AssessmentOutcomeDate,Assessment Outcome Date,SEN2,liquid_logic|mosaic,,,,
+SSD213,assessment,,,,,AssessmentOutcome,Assessment Outcome,SEN2,liquid_logic|mosaic,,,,
+SSD214,named_plan,,unique|primary_key,VARCHAR(),,Named Plan ID,Named Plan ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD215,named_plan,,,VARCHAR(),,Assessment ID,Assessment ID,,liquid_logic|mosaic,,,,
+SSD216,named_plan,,,DATE,,StartDate,Start Date,SEN2,liquid_logic|mosaic,,,,
+SSD217,named_plan,,,DATE,,CeaseDate,Cease Date,SEN2,liquid_logic|mosaic,,,,
+SSD218,named_plan,,,,,CeaseReason,Cease Reason,SEN2,liquid_logic|mosaic,,,,
+SSD219,active_plans,,unique|primary_key,VARCHAR(),,Plan ID,Plan ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD220,active_plans,,foreign_key: requests.request_id,VARCHAR(),,Request ID,Request ID,,liquid_logic|mosaic,,,,requests.request_id
+SSD221,active_plans,,,,,LastReview,Last Review,SEN2,liquid_logic|mosaic,,,,
+SSD222,sen_need,,unique|primary_key,VARCHAR(),,SEN Need ID,SEN Need ID,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD223,sen_need,,foreign_key: cp_plans.plan_id,VARCHAR(),,Plan ID,Plan ID,,liquid_logic|mosaic,,,,cp_plans.plan_id
+SSD224,sen_need,,,,,SENtype,SEN Type,SEN2,liquid_logic|mosaic,,,,
+SSD225,sen_need,,,,,SENtypeRank,SEN Type Rank,SEN2,liquid_logic|mosaic,,,,
+SSD226,worker,,unique,VARCHAR(),,Social Work England (SWE) registration number,Social Work England (SWE) registration number,,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD227,worker,,unique|primary_key,VARCHAR(),,SW_ID,Social worker ID,SSDA903,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+SSD228,worker,,,DATE,,SW_DECOM,Social worker episode start date,SSDA903,liquid_logic|mosaic,,,,
+SSD229,worker,,,DATE,,SW_DEC,Social worker episode end date,SSDA903,liquid_logic|mosaic,,,,
+SSD230,worker,,,VARCHAR(),,SW_REASON,Reason for social worker change,SSDA903,liquid_logic|mosaic,,,,
+SSD231,worker,,,BOOLEAN,,Agency worker,Agency worker,CSCWF,liquid_logic|mosaic,,,,
+SSD232,worker,,,VARCHAR(),,Role within the organisation,Role within the organisation,CSCWF,liquid_logic|mosaic,,,,
+SSD233,worker,,,TINYINT(),,Number of cases held,Number of cases held,CSCWF,liquid_logic|mosaic,,,,
+SSD234,worker,,,VARCHAR(),,Qualification level,Qualification level,CSCWF,liquid_logic|mosaic,,,,
+PLOBronze2,plo_bronze,,unique|primary_key,,,PLO_FamilyID,PLO Family ID,1b|specified,liquid_logic|mosaic,TRUE,TRUE,TRUE,
+PLOBronze11,plo_bronze,,,DATE,,DEC_Enter_PP,Date decision made to enter Pre Proceedings,1b|specified,liquid_logic|mosaic,,,,
+PLOBronze12,plo_bronze,,,DATE,,PP_Initial_Meeting,Date of Initial Pre Proceedings Meeting,1b|specified,liquid_logic|mosaic,,,,
+PLOBronze13,plo_bronze,,,,,PP_Outcome,What is the Outcome of Pre-Proceedings,1b|specified,liquid_logic|mosaic,,,,
+PLOBronze14,plo_bronze,,,DATE,,Date_SD_Issue,Date Agreed to Step down/issue,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver1,plo_silver,,,TINYINT(3),,How many times has the child been subject to a Child Protection Plan during this referral period?,How many times has the child been subject to a Child Protection Plan during this referral period?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver2,plo_silver,,,,,What was the outcome of legal gateway / panel / meeting after panel?,What was the outcome of legal gateway / panel / meeting after panel?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver3,plo_silver,,,TINYINT(3),,How many previous periods of pre-proceedings have there been in the child’s lifetime?,How many previous periods of pre-proceedings have there been in the child’s lifetime?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver4,plo_silver,,,TINYINT(3),,How many previous periods of care proceedings have there been in the child’s lifetime?,How many previous periods of care proceedings have there been in the child’s lifetime?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver5,plo_silver,,,DATE,,What is the date that the pre-proceedings letter and plan was sent to parents?,What is the date that the pre-proceedings letter and plan was sent to parents?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver6,plo_silver,,,DATE,,What is the date that the letter to issue care proceedings was sent to parents?,What is the date that the letter to issue care proceedings was sent to parents?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver7,plo_silver,,,TINYINT(3),,How many review pre-proceeding meetings have been held with parents following the initial meeting?,How many review pre-proceeding meetings have been held with parents following the initial meeting?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver8,plo_silver,,,BOOLEAN,,Did parents have legal representation during pre-proceedings?,Did parents have legal representation during pre-proceedings?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver9,plo_silver,,,BOOLEAN,,Did parents have legal representation at the point of issue?,Did parents have legal representation at the point of issue?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver10,plo_silver,,,,,"If in Care Proceedings, what is the Court reference number?","If in Care Proceedings, what is the Court reference number?",1b|specified,liquid_logic|mosaic,,,,
+PLOSilver11,plo_silver,,,TINYINT(3),,How many Court hearings have taken place whilst in care proceedings?,How many Court hearings have taken place whilst in care proceedings?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver12,plo_silver,,,BOOLEAN,,Were Care Proceedings issued on a short notice application?,Were Care Proceedings issued on a short notice application?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver13,plo_silver,,,,,What was the reason for any short notice applications?,What was the reason for any short notice applications?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver14,plo_silver,,,BOOLEAN,,Was the LA’s initial plan approved at the initial hearing?,Was the LA’s initial plan approved at the initial hearing?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver15,plo_silver,,,,,What was the LA’s initial care plan for the child at the initial hearing?,What was the LA’s initial care plan for the child at the initial hearing?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver16,plo_silver,,,,,Was the LA’s final plan approved at the final hearing?,Was the LA’s final plan approved at the final hearing?,1b|specified,liquid_logic|mosaic,,,,
+PLOSilver17,plo_silver,,,,,What was the LA’s final care plan for the child at the final hearing?,What was the LA’s final care plan for the child at the final hearing?,1b|specified,liquid_logic|mosaic,,,,

@@ -1,174 +1,205 @@
+---
 nodes:
-  - name: permanence
-    fields:
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Date_of_ADM_Decision_
-        type: DATE
-        description: Date of ADM Decision 
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Date_of_FFA/_CP_Decision
-        type: DATE
-        description: Date of FFA/ CP Decision
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Date_the_entered_Care
-        type: DATE
-        description: Date the entered Care
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Date_of_Placement/_Freeing_Order
-        type: DATE
-        description: Date of Placement/ Freeing Order
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Date_Placed_for_Adoption
-        type: DATE
-        description: Date Placed for Adoption
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Date_matched
-        type: DATE
-        description: Date Matched to Prospective Adopters
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Date_placed
-        type: DATE
-        description: Date Placed in FFA/ CP Placement 
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Decision_date
-        type: DATE
-        description: Date of Decision that Child Should No Longer be Placed for Adoption
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: foster_date
-        type: DATE
-        description: Date originally placed with foster carer(s) (if adopted by foster carer/s)
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: sibling_group
-        type: BOOLEAN
-        description: Is the child a part of a sibling group?
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: number_siblings_placed_together
-        type: TINYINT(2)
-        description: Number of children placed, or planned to be placed, for adoption together as sibling group INCLUDING this child
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: number_siblings_placed_seperate
-        type: TINYINT(2)
-        description: Number of siblings placed, or planned to be placed, for adoption separately from the child
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: URN_of_Placement
-        type: VARCHAR(8)
-        description: URN of the placement provider agency
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Not_placed_reason
-        type: 
-        description: Reason No Longer Placed for Adoption
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Date_of_Order 
-        type: DATE
-        description: Date of Order 
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Type_of_Order
-        type: 
-        description: Type of Order
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Status_of_Special_Guardian
-        type: 
-        description: Status of Special Guardian
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Age_of_Special_Guardian
-        type: TINYINT(2)
-        description: Age of Special Guardian
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: permanence
+  fields:
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD184
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    constraints:
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: date_int
+    type: DATE
+    description: 'Date of ADM Decision '
+    field_ref: SSD185
+    returns:
+    - SSDA903
+    - AnnexA
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: date_of_ffa_cp_decision
+    type: DATE
+    description: Date of FFA CP Decision
+    field_ref: SSD186
+    returns:
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: date_the_entered_care
+    type: DATE
+    description: Date the entered Care
+    field_ref: SSD187
+    returns:
+    - SSDA903
+    - AnnexA
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: date_of_placement_freeing_order
+    type: DATE
+    description: Date of Placement Freeing Order
+    field_ref: SSD188
+    returns:
+    - SSDA903
+    - AnnexA
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: date_placed_for_adoption
+    type: DATE
+    description: Date Placed for Adoption
+    field_ref: SSD189
+    returns:
+    - SSDA903
+    - AnnexA
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: date_match
+    type: DATE
+    description: Date Matched to Prospective Adopters
+    field_ref: SSD190
+    returns:
+    - SSDA903
+    - AnnexA
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: "date_placed_in_ffa_cp_placement\_"
+    type: DATE
+    description: "Date Placed in FFA CP Placement\_"
+    field_ref: SSD191
+    returns:
+    - SSDA903
+    - AnnexA
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: date_placed_ceased
+    type: DATE
+    description: Date of Decision that Child Should No Longer be Placed for Adoption
+    field_ref: SSD192
+    returns:
+    - AnnexA
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: date_originally_placed_with_foster_carer(s)_(if_adopted_by_foster_carers)
+    type: DATE
+    description: Date originally placed with foster carer(s) (if adopted by foster
+      carers)
+    field_ref: SSD193
+    returns:
+    - SSDA903
+    - AnnexA
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: is_the_child_a_part_of_a_sibling_group?
+    type: BOOLEAN
+    description: Is the child a part of a sibling group?
+    field_ref: SSD194
+    returns:
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: number_of_children_placed,_or_planned_to_be_placed,_for_adoption_together_as_sibling_group_including_this_child
+    type: TINYINT(2)
+    description: Number of children placed, or planned to be placed, for adoption
+      together as sibling group INCLUDING this child
+    field_ref: SSD195
+    returns:
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: number_of_siblings_placed,_or_planned_to_be_placed,_for_adoption_separately_from_the_child
+    type: TINYINT(2)
+    description: Number of siblings placed, or planned to be placed, for adoption
+      separately from the child
+    field_ref: SSD196
+    returns:
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: urn_of_the_placement_provider_agency
+    type: VARCHAR(8)
+    description: URN of the placement provider agency
+    field_ref: SSD197
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: reason_placed_ceased
+    type: null
+    description: Reason No Longer Placed for Adoption
+    field_ref: SSD198
+    returns:
+    - SSDA903
+    - AnnexA
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: "date_of_order\_"
+    type: DATE
+    description: "Date of Order\_"
+    field_ref: SSD199
+    returns:
+    - SSDA903
+    - AnnexA
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: type_of_order
+    type: null
+    description: Type of Order
+    field_ref: SSD200
+    returns:
+    - SSDA903
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: status_of_special_guardian
+    type: null
+    description: Status of Special Guardian
+    field_ref: SSD201
+    returns:
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: age_of_special_guardian
+    type: TINYINT(2)
+    description: Age of Special Guardian
+    field_ref: SSD202
+    returns:
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic

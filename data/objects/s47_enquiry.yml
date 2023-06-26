@@ -1,95 +1,106 @@
+---
 nodes:
-  - name: s47_enquiry
-    fields:
-      - name: S47_Enquiry_ID
-        type: VARCHAR()
-        description: S47 Enquiry ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: s47_equiry_start
-        type: DATE
-        description: Strategy Discussion initiating S47 Enquiry Start Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: S47_Start_Date
-        type: DATE
-        description: S47 Start Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: S47_Completed_Date
-        type: DATE
-        description: S47 Completed Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: S47_Outcome
-        type: 
-        description: S47 Outcome
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: cp_conf_date
-        type: 
-        description: Date of Initial Child Protection Conference
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: cp_conf_outcome
-        type: 
-        description: Outcome of Initial Child Protection Conference
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: s47_allocated_team
-        type: 
-        description: S47/ ICPC Allocated Team
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: s47_allocated_worker
-        type: 
-        description: S47/ ICPC Allocated Worker
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: s47_enquiry
+  fields:
+  - name: s47_enquiry_id
+    type: VARCHAR()
+    description: S47 Enquiry ID
+    field_ref: SSD078
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD079
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    constraints:
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: s47_discussion_start_date
+    type: DATE
+    description: Strategy Discussion initiating S47 Enquiry Start Date
+    field_ref: SSD080
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: s47_actual_start_date
+    type: DATE
+    description: S47 Start Date
+    field_ref: SSD081
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: s47_completed_date
+    type: DATE
+    description: S47 Completed Date
+    field_ref: SSD082
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: icpc_not_required
+    type: null
+    description: S47 Outcome
+    field_ref: SSD083
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: date_of_initial_cpc
+    type: DATE
+    description: Date of Initial CP Conference
+    field_ref: SSD084
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: outcome_of_initial_cp_conference
+    type: null
+    description: Outcome of Initial CP Conference
+    field_ref: SSD085
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: s47_allocated_team
+    type: null
+    description: S47 ICPC Allocated Team
+    field_ref: SSD086
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: s47_allocated_worker
+    type: null
+    description: S47 ICPC Allocated Worker
+    field_ref: SSD087
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic

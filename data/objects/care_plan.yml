@@ -1,21 +1,29 @@
+---
 nodes:
-  - name: care_plan
-    fields:
-      - name: Review_ID
-        type: VARCHAR()
-        description: Review ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: What_is_the_chosen_plan_for_this_child/young_person?
-        type: 
-        description: What is the chosen plan for this child/young person?
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: care_plan
+  fields:
+  - name: review_id
+    type: VARCHAR()
+    description: Review ID
+    field_ref: SSD153
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: chosen_plan_for_child
+    type: null
+    description: What is the chosen plan for this childyoung person?
+    field_ref: SSD154
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic

@@ -1,59 +1,72 @@
+---
 nodes:
-  - name: cin_plans
-    fields:
-      - name: CIN_Plan_ID
-        type: VARCHAR()
-        description: CIN Plan ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CINPlanStartDate
-        type: DATE
-        description: CIN Plan Start Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Plan_End_Date
-        type: DATE
-        description: CIN Plan End Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Allocated_Team
-        type: 
-        description: CIN Allocated Team
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Allocated_Worker
-        type: 
-        description: CIN Allocated Worker
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: cin_plans
+  fields:
+  - name: cin_plan_id
+    type: VARCHAR()
+    description: CIN Plan ID
+    field_ref: SSD066
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD067
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    constraints:
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cinplanstartdate
+    type: DATE
+    description: CIN Plan Start Date
+    field_ref: SSD068
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cinplanenddate
+    type: DATE
+    description: CIN Plan End Date
+    field_ref: SSD069
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cin_allocated_team
+    type: null
+    description: CIN Allocated Team
+    field_ref: SSD070
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cin_allocated_worker
+    type: null
+    description: CIN Allocated Worker
+    field_ref: SSD071
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic

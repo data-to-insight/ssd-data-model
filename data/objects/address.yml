@@ -1,53 +1,75 @@
+---
 nodes:
+- name: address
+  fields:
   - name: address
-    fields:
-      - name: Address
-        type: 
-        description: Address
-        categories:
-          - identity
-          - address
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        categories:
-          - identity
-          - address
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Address_Start_Date/_From
-        type: DATE
-        description: Address Start Date/ From
-        categories:
-          - identity
-          - address
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Address_End_Date/_To
-        type: DATE
-        description: Address End Date/ To
-        categories:
-          - identity
-          - address
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+    type: null
+    description: Address
+    field_ref: SSD015
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD016
+    foreign_key: child.Child_Unique_ID
+    categories:
+    - identity
+    - address
+    constraints:
+    - unique
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: address_type
+    type: null
+    description: Address Type
+    field_ref: SSD017
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: address_start_date_from
+    type: DATE
+    description: Address Start Date From
+    field_ref: SSD018
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: address_end_date_to
+    type: DATE
+    description: Address End Date To
+    field_ref: SSD019
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
