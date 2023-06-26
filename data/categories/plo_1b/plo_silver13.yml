@@ -1,0 +1,7 @@
+# item ref: PLOSilver13
+- value: 'A'
+  description: 'Applications under the Children Act 1989 where without such an order a child''s immediate safety would be compromised, including where there is an immediate threat of child abduction.'
+- value: 'B'
+  description: 'Applications for Emergency Protection Orders where the criteria for such or order is met.'
+- value: 'C'
+  description: 'Other'

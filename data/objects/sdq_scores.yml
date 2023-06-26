@@ -1,41 +1,63 @@
+---
 nodes:
-  - name: sdq_scores
-    fields:
-      - name: SDQ_ID
-        type: VARCHAR()
-        description: SDQ ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: SDQ_Completed_Date
-        type: DATE
-        description: SDQ Completed Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: SDQ_Score
-        type: 
-        description: SDQ Score
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: sdq_scores
+  fields:
+  - name: sdq_id
+    type: VARCHAR()
+    description: SDQ ID
+    field_ref: SSD160
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD161
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    constraints:
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sdq_completed_date
+    type: DATE
+    description: SDQ Completed Date
+    field_ref: SSD162
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sdq_reason
+    type: null
+    description: SDQ Reason
+    field_ref: SSD163
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sdq_score
+    type: null
+    description: SDQ Score
+    field_ref: SSD164
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic

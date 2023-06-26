@@ -1,50 +1,63 @@
+---
 nodes:
-  - name: contacts
-    fields:
-      - name: Contact_ID
-        type: VARCHAR()
-        description: Contact ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Date_of_Contact
-        type: DATE
-        description: Date of Contact
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Contact_Source
-        type: 
-        description: Contact Source
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Contact_Outcome_
-        type: 
-        description: Contact Outcome 
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: contacts
+  fields:
+  - name: contact_id
+    type: VARCHAR()
+    description: Contact ID
+    field_ref: SSD034
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD035
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    constraints:
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: contactdate
+    type: DATE
+    description: Date of Contact
+    field_ref: SSD036
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: contactsource
+    type: null
+    description: Contact Source
+    field_ref: SSD037
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: contact_outcome_
+    type: null
+    description: 'Contact Outcome '
+    field_ref: SSD038
+    returns:
+    - ADCS_SP
+    cms:
+    - liquid_logic
+    - mosaic

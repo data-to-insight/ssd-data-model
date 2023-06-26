@@ -1,0 +1,184 @@
+---
+nodes:
+- name: plo_silver
+  fields:
+  - name: how_many_times_has_the_child_been_subject_to_a_child_protection_plan_during_this_referral_period?
+    type: TINYINT(3)
+    description: How many times has the child been subject to a Child Protection Plan
+      during this referral period?
+    field_ref: PLOSilver1
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: what_was_the_outcome_of_legal_gateway__panel__meeting_after_panel?
+    type: null
+    description: What was the outcome of legal gateway  panel  meeting after panel?
+    field_ref: PLOSilver2
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: "how_many_previous_periods_of_pre-proceedings_have_there_been_in_the_child\u2019\
+      s_lifetime?"
+    type: TINYINT(3)
+    description: "How many previous periods of pre-proceedings have there been in\
+      \ the child\u2019s lifetime?"
+    field_ref: PLOSilver3
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: "how_many_previous_periods_of_care_proceedings_have_there_been_in_the_child\u2019\
+      s_lifetime?"
+    type: TINYINT(3)
+    description: "How many previous periods of care proceedings have there been in\
+      \ the child\u2019s lifetime?"
+    field_ref: PLOSilver4
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: what_is_the_date_that_the_pre-proceedings_letter_and_plan_was_sent_to_parents?
+    type: DATE
+    description: What is the date that the pre-proceedings letter and plan was sent
+      to parents?
+    field_ref: PLOSilver5
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: what_is_the_date_that_the_letter_to_issue_care_proceedings_was_sent_to_parents?
+    type: DATE
+    description: What is the date that the letter to issue care proceedings was sent
+      to parents?
+    field_ref: PLOSilver6
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: how_many_review_pre-proceeding_meetings_have_been_held_with_parents_following_the_initial_meeting?
+    type: TINYINT(3)
+    description: How many review pre-proceeding meetings have been held with parents
+      following the initial meeting?
+    field_ref: PLOSilver7
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: did_parents_have_legal_representation_during_pre-proceedings?
+    type: BOOLEAN
+    description: Did parents have legal representation during pre-proceedings?
+    field_ref: PLOSilver8
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: did_parents_have_legal_representation_at_the_point_of_issue?
+    type: BOOLEAN
+    description: Did parents have legal representation at the point of issue?
+    field_ref: PLOSilver9
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: if_in_care_proceedings,_what_is_the_court_reference_number?
+    type: null
+    description: If in Care Proceedings, what is the Court reference number?
+    field_ref: PLOSilver10
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: how_many_court_hearings_have_taken_place_whilst_in_care_proceedings?
+    type: TINYINT(3)
+    description: How many Court hearings have taken place whilst in care proceedings?
+    field_ref: PLOSilver11
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: were_care_proceedings_issued_on_a_short_notice_application?
+    type: BOOLEAN
+    description: Were Care Proceedings issued on a short notice application?
+    field_ref: PLOSilver12
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: what_was_the_reason_for_any_short_notice_applications?
+    type: null
+    description: What was the reason for any short notice applications?
+    field_ref: PLOSilver13
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: "was_the_la\u2019s_initial_plan_approved_at_the_initial_hearing?"
+    type: BOOLEAN
+    description: "Was the LA\u2019s initial plan approved at the initial hearing?"
+    field_ref: PLOSilver14
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: "what_was_the_la\u2019s_initial_care_plan_for_the_child_at_the_initial_hearing?"
+    type: null
+    description: "What was the LA\u2019s initial care plan for the child at the initial\
+      \ hearing?"
+    field_ref: PLOSilver15
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: "was_the_la\u2019s_final_plan_approved_at_the_final_hearing?"
+    type: null
+    description: "Was the LA\u2019s final plan approved at the final hearing?"
+    field_ref: PLOSilver16
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: "what_was_the_la\u2019s_final_care_plan_for_the_child_at_the_final_hearing?"
+    type: null
+    description: "What was the LA\u2019s final care plan for the child at the final\
+      \ hearing?"
+    field_ref: PLOSilver17
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic

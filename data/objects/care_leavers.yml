@@ -1,113 +1,126 @@
+---
 nodes:
-  - name: care_leavers
-    fields:
-      - name: Care_Leaver_Table_ID
-        type: VARCHAR()
-        description: Care Leaver Table ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Eligibility_Status/_Category
-        type: 
-        description: Eligibility Status/ Category
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: In_Touch_Category
-        type: 
-        description: In Touch Category
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Latest_Date_of_Contact
-        type: DATE
-        description: Latest Date of Contact
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Accommodation
-        type: 
-        description: Accommodation
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Suitability_of_Accommodation
-        type: 
-        description: Suitability of Accommodation
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Activity_Status
-        type: 
-        description: Activity Status
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Latest_Pathway_Plan_Review_Date
-        type: 
-        description: Latest Pathway Plan Review Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Allocated_Personal_Advisor
-        type: 
-        description: Allocated Personal Advisor
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Allocated_Team
-        type: 
-        description: Allocated Team
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Allocated_Worker
-        type: 
-        description: Allocated Worker
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: care_leavers
+  fields:
+  - name: care_leaver_table_id
+    type: VARCHAR()
+    description: Care Leaver Table ID
+    field_ref: SSD172
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD173
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    constraints:
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: eligibility_status_category
+    type: null
+    description: Eligibility Status Category
+    field_ref: SSD174
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: in_touch
+    type: null
+    description: In Touch Category
+    field_ref: SSD175
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: latest_date_of_contact
+    type: DATE
+    description: Latest Date of Contact
+    field_ref: SSD176
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: accommodation
+    type: null
+    description: Accommodation
+    field_ref: SSD177
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: accom
+    type: null
+    description: Suitability of Accommodation
+    field_ref: SSD178
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: activ
+    type: null
+    description: Activity Status
+    field_ref: SSD179
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: latest_pathway_plan_review_date
+    type: null
+    description: Latest Pathway Plan Review Date
+    field_ref: SSD180
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: allocated_personal_advisor
+    type: null
+    description: Allocated Personal Advisor
+    field_ref: SSD181
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: allocated_team
+    type: null
+    description: Allocated Team
+    field_ref: SSD182
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: allocated_worker
+    type: null
+    description: Allocated Worker
+    field_ref: SSD183
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic

@@ -1,95 +1,151 @@
+---
 nodes:
-  - name: child
-    fields:
-      - name: LAchildID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        categories:
-          - identity
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Sex
-        type: 
-        description: Sex
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Gender
-        type: 
-        description: Gender
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Ethnicity
-        type: VARCHAR(4)
-        description: Ethnicity
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: PersonBirthDate
-        type: DATE
-        description: Date of Birth
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: UPN
-        type: CHAR(13)
-        description: UPN
-        categories:
-          - identity
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: UPNunknown
-        type: CHAR(3)
-        description: UPN Unknown
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: SENDFlag
-        type: BOOLEAN
-        description: SEND Flag
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: child
+  fields:
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD001
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    constraints:
+    - unique
+    - primary_key
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sex
+    type: null
+    description: Sex
+    field_ref: SSD002
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: gender
+    type: null
+    description: Gender
+    field_ref: SSD003
+    categories:
+    - identity
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: ethnicity
+    type: VARCHAR(4)
+    description: Ethnicity
+    field_ref: SSD004
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: personbirthdate
+    type: DATE
+    description: Date of Birth
+    field_ref: SSD005
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: upn
+    type: CHAR(13)
+    description: UPN
+    field_ref: SSD006
+    categories:
+    - identity
+    constraints:
+    - unique
+    - foreign_key:upn.upn
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: upnunknown
+    type: CHAR(3)
+    description: UPN Unknown
+    field_ref: SSD007
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sendflag
+    type: BOOLEAN
+    description: SEND Flag
+    field_ref: SSD008
+    categories:
+    - identity
+    returns:
+    - NEETandparticipation
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: expectedpersonbirthdate
+    type: DATE
+    description: Expected Birth Date
+    field_ref: SSD009
+    categories:
+    - identity
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: persondeathdate
+    type: DATE
+    description: Date of Death
+    field_ref: SSD010
+    categories:
+    - identity
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: mother
+    type: BOOLEAN
+    description: Mother
+    field_ref: SSD011
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: country_of_origin_(uasc)
+    type: null
+    description: Country of Origin (UASC)
+    field_ref: SSD012
+    categories:
+    - identity
+    returns:
+    - ADCS_SP
+    cms:
+    - liquid_logic
+    - mosaic

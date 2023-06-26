@@ -1,95 +1,106 @@
+---
 nodes:
-  - name: placement
-    fields:
-      - name: Placement_ID
-        type: VARCHAR()
-        description: Placement ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Episode_ID
-        type: VARCHAR()
-        description: Episode ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Placement_Start_Date
-        type: DATE
-        description: Placement Start Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Placement_Type
-        type: 
-        description: Placement Type
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: URN_of_Placement
-        type: VARCHAR(8)
-        description: URN of Placement
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: LA_of_Placement
-        type: 
-        description: LA of Placement
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Placement_Provider
-        type: 
-        description: Placement Provider
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Placement_Postcode
-        type: 
-        description: Placement Postcode
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Placement_End_Date
-        type: DATE
-        description: Placement End Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Reason_for_Placement_Change
-        type: 
-        description: Reason for Placement Change
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: placement
+  fields:
+  - name: placement_id
+    type: VARCHAR()
+    description: Placement ID
+    field_ref: SSD122
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: episode_id
+    type: VARCHAR()
+    description: Episode ID
+    field_ref: SSD123
+    foreign_key: cla_episodes.Episode_ID
+    constraints:
+    - foreign_key:cla_episodes.Episode_ID
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: placement_start_date
+    type: DATE
+    description: Placement Start Date
+    field_ref: SSD124
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: pl
+    type: null
+    description: Placement Type
+    field_ref: SSD125
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: urn
+    type: VARCHAR(8)
+    description: URN of Placement
+    field_ref: SSD126
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: pl_la
+    type: null
+    description: LA of Placement
+    field_ref: SSD127
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: place_provider
+    type: null
+    description: Placement Provider
+    field_ref: SSD128
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: pl_post
+    type: null
+    description: Placement Postcode
+    field_ref: SSD129
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: placement_end_date
+    type: DATE
+    description: Placement End Date
+    field_ref: SSD130
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: reason_place_change
+    type: null
+    description: Reason for Placement Change
+    field_ref: SSD131
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic

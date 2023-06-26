@@ -2,6 +2,10 @@
 
 This is the source repository for the SSD data model and includes tools for both creating a standardised data set and providing a set of tools for manipulating and generating different outputs from the core specification. 
 
+## Entity Definitions
+
+
+
 ## Data Model
 
 The data model defines a set of Objects capturing LA Childrens Services data during the different stages of an individual's progress
@@ -108,6 +112,11 @@ The main place to find documentation relating to this specification is
 
 
 ## [Temp] Running notes:
+./setup.sh
+
+or.... 
+pip install poetry
+
 Ensure that you run the requirements file to set up before running scripts:
 [$] pip install -r requirements.txt
 Some of the .py scripts have package dependencies. To run the create_erd_from_yml.py ensure the following:

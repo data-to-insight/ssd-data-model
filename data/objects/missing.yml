@@ -1,68 +1,78 @@
+---
 nodes:
+- name: missing
+  fields:
+  - name: missing_episode_id
+    type: VARCHAR()
+    description: Missing Episode ID
+    field_ref: SSD165
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: episode_id
+    type: VARCHAR()
+    description: Episode ID
+    field_ref: SSD166
+    foreign_key: cla_episodes.Episode_ID
+    constraints:
+    - foreign_key:cla_episodes.Episode_ID
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: mis_start
+    type: DATE
+    description: Missing Episode Start
+    field_ref: SSD167
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
   - name: missing
-    fields:
-      - name: Missing_Episode_ID
-        type: VARCHAR()
-        description: Missing Episode ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Episode_ID
-        type: VARCHAR()
-        description: Episode ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Missing_Episode_Start
-        type: DATE
-        description: Missing Episode Start
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Episode_Type_(Missing/_Absent)
-        type: 
-        description: Episode Type (Missing/ Absent)
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Missing_Episode_End
-        type: DATE
-        description: Missing Episode End
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: RHI_Offered
-        type: BOOLEAN
-        description: RHI Offered
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: RHI_Accepted
-        type: BOOLEAN
-        description: RHI Accepted
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+    type: null
+    description: Episode Type (Missing Absent)
+    field_ref: SSD168
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: mis_end
+    type: DATE
+    description: Missing Episode End
+    field_ref: SSD169
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: rhi_offered
+    type: BOOLEAN
+    description: RHI Offered
+    field_ref: SSD170
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: rhi_accepted
+    type: BOOLEAN
+    description: RHI Accepted
+    field_ref: SSD171
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic

@@ -1,86 +1,102 @@
+---
 nodes:
-  - name: cin_episodes
-    fields:
-      - name: CIN_Referral_ID
-        type: VARCHAR()
-        description: CIN Referral ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Referral_Date
-        type: DATE
-        description: CIN Referral Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Referral_Source
-        type: 
-        description: CIN Referral Source
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Referral_Outcome
-        type: 
-        description: CIN Referral Outcome
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Closure_Reason
-        type: 
-        description: CIN Closure Reason
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Closure_Date
-        type: DATE
-        description: CIN Closure Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Referral_Completed_by_Team
-        type: 
-        description: CIN Referral Completed by Team
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CIN_Referral_Completed_by_Worker
-        type: 
-        description: CIN Referral Completed by Worker
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: cin_episodes
+  fields:
+  - name: cin_referral_id
+    type: VARCHAR()
+    description: CIN Referral ID
+    field_ref: SSD047
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD048
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    constraints:
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cinreferraldate
+    type: DATE
+    description: CIN Referral Date
+    field_ref: SSD049
+    returns:
+    - CINcensus
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: referralsource
+    type: null
+    description: CIN Referral Source
+    field_ref: SSD050
+    returns:
+    - CINcensus
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cin_referral_outcome
+    type: null
+    description: CIN Referral Outcome
+    field_ref: SSD051
+    returns:
+    - CINcensus
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: reasonforclosure
+    type: null
+    description: CIN Closure Reason
+    field_ref: SSD052
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cinclosuredate
+    type: DATE
+    description: CIN Closure Date
+    field_ref: SSD053
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cin_referral_completed_by_team
+    type: null
+    description: CIN Referral Completed by Team
+    field_ref: SSD054
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cin_referral_completed_by_worker
+    type: null
+    description: CIN Referral Completed by Worker
+    field_ref: SSD055
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic

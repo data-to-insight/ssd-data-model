@@ -1,50 +1,54 @@
+---
 nodes:
-  - name: named_plan
-    fields:
-      - name: Named_Plan_ID
-        type: VARCHAR()
-        description: Named Plan ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Assessment_ID
-        type: VARCHAR()
-        description: Assessment ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Start_Date
-        type: DATE
-        description: Start Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Cease_Date
-        type: DATE
-        description: Cease Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Cease_Reason
-        type: 
-        description: Cease Reason
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: named_plan
+  fields:
+  - name: named_plan_id
+    type: VARCHAR()
+    description: Named Plan ID
+    field_ref: SSD214
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: assessment_id
+    type: VARCHAR()
+    description: Assessment ID
+    field_ref: SSD215
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: startdate
+    type: DATE
+    description: Start Date
+    field_ref: SSD216
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: ceasedate
+    type: DATE
+    description: Cease Date
+    field_ref: SSD217
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: ceasereason
+    type: null
+    description: Cease Reason
+    field_ref: SSD218
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic

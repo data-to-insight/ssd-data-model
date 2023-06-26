@@ -1,0 +1,27 @@
+# item ref: 
+  description: White and Asian
+- value: MOTH
+  description: Any other Mixed background
+- value: AIND
+  description: Indian
+- value: APKN
+  description: Pakistani
+- value: ABAN
+  description: Bangladeshi
+- value: CHNE
+  description: Chinese
+- value: AOTH
+  description: Any other Asian background
+- value: BCRB
+  description: Caribbean
+- value: BAFR
+  description: African
+- value: BOTH
+  description: Any other Black background
+- value: OOTH
+  description: Any other ethnic group
+- value: REFU
+  description: Refused
+- value: NOBT
+  description: Information not yet obtained
+

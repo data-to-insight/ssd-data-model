@@ -1,77 +1,90 @@
+---
 nodes:
-  - name: assessments
-    fields:
-      - name: Assessment_ID
-        type: VARCHAR()
-        description: Assessment ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Assessment_Start_Date
-        type: DATE
-        description: Assessment Start Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Seen_During_Assessment
-        type: BOOLEAN
-        description: Child Seen During Assessment
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Assessment_Authorised_Date
-        type: DATE
-        description: Assessment Authorised Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Assessment_Outcome
-        type: 
-        description: Assessment Outcome
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Assessment_Completed_by_Team
-        type: 
-        description: Assessment Completed by Team
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Assessment_Completed_by_Worker
-        type: 
-        description: Assessment Completed by Worker
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: assessments
+  fields:
+  - name: assessment_id
+    type: VARCHAR()
+    description: Assessment ID
+    field_ref: SSD056
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD057
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    constraints:
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: assessmentactualstartdate
+    type: DATE
+    description: Assessment Start Date
+    field_ref: SSD058
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: child_seen_during_assessment
+    type: BOOLEAN
+    description: Child Seen During Assessment
+    field_ref: SSD059
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: assessmentauthorisationdate
+    type: DATE
+    description: Assessment Authorised Date
+    field_ref: SSD060
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: assessment_outcome
+    type: null
+    description: Assessment Outcome
+    field_ref: SSD061
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: assessment_completed_by_team
+    type: null
+    description: Assessment Completed by Team
+    field_ref: SSD062
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: assessment_completed_by_worker
+    type: null
+    description: Assessment Completed by Worker
+    field_ref: SSD063
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic

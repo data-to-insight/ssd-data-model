@@ -1,41 +1,48 @@
+---
 nodes:
-  - name: assessment
-    fields:
-      - name: Assessment_ID
-        type: VARCHAR()
-        description: Assessment ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Request_ID
-        type: VARCHAR()
-        description: Request ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Assessment_Outcome_Date
-        type: DATE
-        description: Assessment Outcome Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Assessment_Outcome
-        type: 
-        description: Assessment Outcome
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: assessment
+  fields:
+  - name: assessment_id
+    type: VARCHAR()
+    description: Assessment ID
+    field_ref: SSD210
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: request_id
+    type: VARCHAR()
+    description: Request ID
+    field_ref: SSD211
+    foreign_key: requests.request_id
+    constraints:
+    - foreign_key:requests.request_id
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: assessmentoutcomedate
+    type: DATE
+    description: Assessment Outcome Date
+    field_ref: SSD212
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: assessmentoutcome
+    type: null
+    description: Assessment Outcome
+    field_ref: SSD213
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic

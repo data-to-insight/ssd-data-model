@@ -1,77 +1,92 @@
+---
 nodes:
-  - name: cla_episodes
-    fields:
-      - name: Episode_ID
-        type: VARCHAR()
-        description: Episode ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Date_Episode_Commenced
-        type: DATE
-        description: Date Episode Commenced
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Reason_for_New_CLA_Episode
-        type: 
-        description: Reason for New CLA Episode
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: DEC
-        type: DATE
-        description: Date Episode Ceased
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: REC
-        type: 
-        description: Reason Episode Ceased
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Allocated_Team
-        type: 
-        description: Allocated Team
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Allocated_Worker
-        type: 
-        description: Allocated Worker
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: cla_episodes
+  fields:
+  - name: episode_id
+    type: VARCHAR()
+    description: Episode ID
+    field_ref: SSD114
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD115
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    constraints:
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: decom
+    type: DATE
+    description: Date Episode Commenced
+    field_ref: SSD116
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: rne
+    type: null
+    description: Reason for New CLA Episode
+    field_ref: SSD117
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: dec
+    type: DATE
+    description: Date Episode Ceased
+    field_ref: SSD118
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: rec
+    type: null
+    description: Reason Episode Ceased
+    field_ref: SSD119
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: allocated_team
+    type: null
+    description: Allocated Team
+    field_ref: SSD120
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: allocated_worker
+    type: null
+    description: Allocated Worker
+    field_ref: SSD121
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic

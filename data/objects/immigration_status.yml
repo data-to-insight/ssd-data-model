@@ -1,49 +1,59 @@
+---
 nodes:
+- name: immigration_status
+  fields:
+  - name: lachildid
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD022
+    primary_key: true
+    foreign_key: child.Child_Unique_ID
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    constraints:
+    - unique
+    - foreign_key:child.Child_Unique_ID
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
   - name: immigration_status
-    fields:
-      - name: Child_Unique_ID
-        type: VARCHAR(10)
-        description: Child Unique ID
-        categories:
-          - identity
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Immigration_Status
-        type: 
-        description: Immigration Status
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Immigration_Status_Start
-        type: DATE
-        description: Immigration Status Start
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Immigration_Status_End
-        type: DATE
-        description: Immigration Status End
-        categories:
-          - identity
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+    type: null
+    description: Immigration Status
+    field_ref: SSD023
+    categories:
+    - identity
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: immigration_status_start
+    type: DATE
+    description: Immigration Status Start
+    field_ref: SSD024
+    categories:
+    - identity
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: immigration_status_end
+    type: DATE
+    description: Immigration Status End
+    field_ref: SSD025
+    categories:
+    - identity
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic

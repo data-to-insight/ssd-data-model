@@ -1,86 +1,97 @@
+---
 nodes:
-  - name: cp_reviews
-    fields:
-      - name: Review_ID
-        type: VARCHAR()
-        description: Review ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: CP_Plan_ID
-        type: VARCHAR()
-        description: CP Plan ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Review_Due_Date
-        type: DATE
-        description: Review Due Date
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Date_of_Review
-        type: DATE
-        description: Date of Review
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: cp_plan_continues
-        type: BOOLEAN
-        description: CP Plan to Continue?
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: quorate
-        type: BOOLEAN
-        description: Quorate?
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Child's_Participation
-        type: 
-        description: Child's Participation
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: quality_of_representation
-        type: 
-        description: Quality of representation of CYP views/ experience
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: cp_progress_made
-        type: 
-        description: Sufficient progress made against the CP Plan to improve outcomes for the child? 
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: cp_reviews
+  fields:
+  - name: review_id
+    type: VARCHAR()
+    description: Review ID
+    field_ref: SSD103
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cp_plan_id
+    type: VARCHAR()
+    description: CP Plan ID
+    field_ref: SSD104
+    foreign_key: cp_plans.CP_Plan_ID
+    constraints:
+    - foreign_key:cp_plans.CP_Plan_ID
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: review_due_date
+    type: DATE
+    description: Review Due Date
+    field_ref: SSD105
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cppreviewdate
+    type: DATE
+    description: Date of Review
+    field_ref: SSD106
+    returns:
+    - CINcensus
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cp_plan_to_continue?
+    type: BOOLEAN
+    description: CP Plan to Continue?
+    field_ref: SSD107
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: quorate?
+    type: BOOLEAN
+    description: Quorate?
+    field_ref: SSD108
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: childs_participation
+    type: null
+    description: Child's Participation
+    field_ref: SSD109
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: quality_of_representation_of_cyp_views_experience
+    type: null
+    description: Quality of representation of CYP views experience
+    field_ref: SSD110
+    returns:
+    - 1a
+    - draft
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sufficient_progress_made_against_the_cp_plan_to_improve_outcomes_for_the_child?_
+    type: null
+    description: 'Sufficient progress made against the CP Plan to improve outcomes
+      for the child? '
+    field_ref: SSD111
+    returns:
+    - 1a
+    - draft
+    cms:
+    - liquid_logic
+    - mosaic

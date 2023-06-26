@@ -1,41 +1,48 @@
+---
 nodes:
-  - name: sen_need
-    fields:
-      - name: SEN_Need_ID
-        type: VARCHAR()
-        description: SEN Need ID
-        constraints:
-          - unique
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: Plan_ID
-        type: VARCHAR()
-        description: Plan ID
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: SEN_Type
-        type: 
-        description: SEN Type
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
-      - name: SEN_Type_Rank
-        type: 
-        description: SEN Type Rank
-        returns:
-          - SSDA903
-          - CIN
-        cms:
-          - liquid_logic
-          - mosaic
+- name: sen_need
+  fields:
+  - name: sen_need_id
+    type: VARCHAR()
+    description: SEN Need ID
+    field_ref: SSD222
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    constraints:
+    - unique
+    - primary_key
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: plan_id
+    type: VARCHAR()
+    description: Plan ID
+    field_ref: SSD223
+    foreign_key: cp_plans.plan_id
+    constraints:
+    - foreign_key:cp_plans.plan_id
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sentype
+    type: null
+    description: SEN Type
+    field_ref: SSD224
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: sentyperank
+    type: null
+    description: SEN Type Rank
+    field_ref: SSD225
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic
