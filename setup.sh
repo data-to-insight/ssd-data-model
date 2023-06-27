@@ -7,3 +7,7 @@ pip install -r requirements.txt
 sudo apt-get update
 sudo apt-get install graphviz libgraphviz-dev pkg-config
 pip install pygraphviz
+
+
+# Install the Python extension for Visual Studio Code
+code --install-extension ms-python.python
