@@ -5,20 +5,20 @@ import subprocess
 import datetime
 
 # Image width (adjust as needed)
-image_width = 300
+image_width = 200
 
 # Generate HTML content
 html_content = "<html><head><style>"
 html_content += "table { border-collapse: collapse; width: 80%; margin: auto; }"
 html_content += "th, td { text-align: left; padding: 8px; word-wrap: break-word; }"
 html_content += "th { background-color: #f2f2f2; }"
-html_content += "th.field-ref-column { width: 20%; }"
+html_content += "th.field-ref-column { width: 100px; }"
 html_content += "th.data-item-column { width: 30%; }"
 html_content += "th.field-column { width: 20%; }"
 html_content += "th.cms-column { width: 15%; }"
 html_content += "th.categories-column { width: 15%; }"
 html_content += "th.returns-column { width: 20%; }"
-html_content += f"</style></head><body>"
+html_content += "</style></head><body>"
 html_content += f"<h1>SSD Data Model Documentation</h1>"
 html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%Y-%m-%d')}</h3>"
 html_content += "<p>Intro paragraph placeholder text.</p>"
