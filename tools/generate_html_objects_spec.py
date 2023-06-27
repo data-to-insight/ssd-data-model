@@ -5,7 +5,7 @@ import subprocess
 import datetime
 
 # Image width (adjust as needed)
-image_width = "150px"
+image_width = "300px"
 
 # Define page title and intro text
 page_title_str = "SSD Data Model Documentation"
@@ -31,7 +31,7 @@ html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%Y-%m-%d'
 # Add Objects Overview section
 html_content += "<h2>Objects Overview</h2>"
 html_content += "<div>"
-html_content += f'<img src="assets/ssd_erd.png" alt="Objects Overview" style="width: {image_width};">'
+html_content += f'<img src="ssd_erd.png" alt="Objects Overview" style="width: {image_width};">'
 html_content += "</div>"
 
 # Read the YAML files
