@@ -10,7 +10,7 @@ image_width = 200
 # Generate HTML content
 html_content = "<html><head><style>"
 html_content += "table { border-collapse: collapse; width: 80%; margin: auto; }"
-html_content += "th, td { text-align: left; padding: 8px; word-wrap: break-word; }"
+html_content += "th, td { text-align: left; padding: 8px; word-wrap: break-word; border: 1px solid #ddd; }"
 html_content += "th { background-color: #f2f2f2; }"
 html_content += "th.field-ref-column { width: 100px; }"
 html_content += "th.data-item-column { width: 30%; }"
@@ -37,8 +37,8 @@ for file_path in glob.glob('data/objects/*.yml'):
             for field in nodes[0]['fields']:
                 field_ref = field.get('field_ref', '')
                 field_name = field['name']
-                cms = field.get('cms', '')
-                categories = field.get('categories', '')
+                cms = ', '.join(field.get('cms', []))
+                categories = ', '.join(field.get('categories', []))
                 returns_data = ', '.join(field.get('returns', []))
                 html_content += f"<tr><td></td><td>{field_ref}</td><td>{field_name}</td><td>{field_name}</td><td>{cms}</td><td>{categories}</td><td>{returns_data}</td></tr>"
             html_content += "</table>"
