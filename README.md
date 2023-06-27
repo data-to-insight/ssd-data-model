@@ -2,14 +2,14 @@
 
 This is the source repository for the SSD data model and includes tools for both creating a standardised data set and providing a set of tools for manipulating and generating different outputs from the core specification. 
 
-## Entity Definitions
-
+## Data Item and Entity Definitions
+Towards the overall data model, published for iterative review  [current data object/entity model](./docs/index.html).
 
 
 ## Data Model
 
 The data model defines a set of Objects capturing LA Childrens Services data during the different stages of an individual's progress
-through the system(s). We publish for review the most [current data model](./docs/index.html). The data model also includes a number of Categories (dimensions) that are referenced from the Fields within a Record.
+through the system(s). The data model also includes a number of Categories (dimensions) that are referenced from the Fields within a Record.
 
 We define a number of validators that will be used to check data quality. These may be structural validators, such as a field is required or has to be in a defined set (dimension), or relational validators, such as a date should be after another date as events should happen sequentially.
 
