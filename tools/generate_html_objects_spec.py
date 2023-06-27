@@ -15,7 +15,7 @@ html_content += "th.categories-column { width: 30%; }"
 html_content += "</style></head><body>"
 html_content += f"<h1>SSD Data Model Documentation</h1>"
 html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%Y-%m-%d')}</h3>"
-html_content += "<p>This is the initial draft specification for 1a SSD.</p>"
+html_content += "<p>Intro paragraph placeholder text.</p>"
 
 # Read the YAML files
 for file_path in glob.glob('data/objects/*.yml'):
