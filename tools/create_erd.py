@@ -12,7 +12,7 @@ def generate_individual_images():
 
     for file_path in glob.glob('data/objects/*.yml'):
         G = pgv.AGraph(directed=True)
-        G.graph_attr['size'] = '400,300'
+        G.graph_attr['size'] = '300,'
         G.graph_attr['rankdir'] = 'TB'
         G.edge_attr['splines'] = 'ortho'
 
