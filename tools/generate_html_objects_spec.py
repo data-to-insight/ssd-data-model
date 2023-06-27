@@ -25,7 +25,7 @@ site_root_folder = 'docs/'
 main_image_width = "calc(100% - 40px)"  # Adjust the padding as needed
 
 # Sub-Image width (adjust as needed)
-image_width = "300px"
+image_width = "310px"
 
 # Define page title and intro text
 page_title_str = "SSD Data Model Documentation"
