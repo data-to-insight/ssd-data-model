@@ -4,7 +4,10 @@ import base64
 import subprocess
 import datetime
 
-# Image width (adjust as needed)
+# Calculate main image width
+main_image_width = "calc(100% - 40px)"  # Adjust the padding as needed
+
+# Sub-Image width (adjust as needed)
 image_width = "300px"
 
 # Define page title and intro text
@@ -28,13 +31,12 @@ html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
 html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%Y-%m-%d')}</h3>"
 
-# Calculate main image width
-main_image_width = "calc(100% - 40px)"  # Adjust the padding as needed
+
 
 # Add Objects Overview section
 html_content += "<h2>Objects Overview</h2>"
 html_content += "<div style='padding: 20px;'>"
-html_content += f'<img src="assets/ssd_erd.png" alt="Objects Overview" style="width: {main_image_width};">'
+html_content += f'<img src="ssd_erd.png" alt="Objects Overview" style="width: {main_image_width};">'
 html_content += "</div>"
 
 # Read the YAML files
