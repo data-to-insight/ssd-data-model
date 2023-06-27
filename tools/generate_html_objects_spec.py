@@ -39,6 +39,11 @@ html_content += "<div style='padding: 20px;'>"
 html_content += f'<img src="docs/ssd_erd.png" alt="Objects Overview" style="width: {main_image_width};">'
 html_content += "</div>"
 
+
+# Add Object Data Points Overview section
+html_content += "<h2>Object Data Points Overview</h2>"
+
+
 # Read the YAML files
 for file_path in glob.glob('data/objects/*.yml'):
     with open(file_path) as f:
