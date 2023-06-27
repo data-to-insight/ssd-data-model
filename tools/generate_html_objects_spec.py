@@ -54,7 +54,7 @@ html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y'
 # Add Objects Overview section
 html_content += "<h2>Objects Overview</h2>"
 html_content += "<div style='padding: 20px;'>"
-html_content += f'<img src="docs/ssd_erd.png" alt="Objects Overview" style="width: {main_image_width};">'
+html_content += f'<img src="ssd_erd.png" alt="Objects Overview" style="width: {main_image_width};">'
 html_content += "</div>"
 
 # Add Object Data Points Overview section
