@@ -113,7 +113,8 @@ def generate_full_erd():
     # Render the main graph to a file
     G.draw('assets/ssd_erd.png', prog='dot', format='png')
 
-
+    # Render the main graph to a file
+    G.draw('docs/ssd_erd.png', prog='dot', format='png')
 
 
 generate_full_erd()

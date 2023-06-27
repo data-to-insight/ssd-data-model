@@ -8,7 +8,7 @@ import datetime
 main_image_width = "calc(100% - 40px)"  # Adjust the padding as needed
 
 # Sub-Image width (adjust as needed)
-image_width = "300px"
+image_width = "310px"
 
 # Define page title and intro text
 page_title_str = "SSD Data Model Documentation"
@@ -29,7 +29,7 @@ html_content += "th.returns-column { width: 20%; }"
 html_content += "</style></head><body>"
 html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
-html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%Y-%m-%d')}</h3>"
+html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y')}</h3>"
 
 # Add Objects Overview section
 html_content += "<h2>Objects Overview</h2>"
