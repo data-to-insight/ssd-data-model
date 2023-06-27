@@ -7,6 +7,9 @@ import datetime
 # Image width (adjust as needed)
 image_width = 300
 
+page_title_str = "SSD Data Model Documentation"
+page_intro_str = "Data Item and Entity Definitions published for iterative review. Objects/data fields capturing LA Childrens Services data towards 1a SSD." 
+
 # Generate HTML content
 html_content = "<html><head><style>"
 html_content += "table { border-collapse: collapse; width: 80%; margin: auto; }"
@@ -20,9 +23,9 @@ html_content += "th.cms-column { width: 15%; }"
 html_content += "th.categories-column { width: 15%; }"
 html_content += "th.returns-column { width: 20%; }"
 html_content += "</style></head><body>"
-html_content += f"<h1>SSD Data Model Documentation</h1>"
+html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%Y-%m-%d')}</h3>"
-html_content += "<p>Intro paragraph placeholder text.</p>"
+html_content += "<p>{page_intro_str}</p>"
 
 # Read the YAML files
 for file_path in glob.glob('data/objects/*.yml'):
