@@ -40,8 +40,8 @@ html_content += f'<img src="docs/ssd_erd.png" alt="Objects Overview" style="widt
 html_content += "</div>"
 
 
-# Add Object Data Points Overview section
-html_content += "<h2>Object Data Points Overview</h2>"
+# # Add Object Data Points Overview section
+# html_content += "<h2>Object Data Points Overview</h2>"
 
 
 # Read the YAML files
