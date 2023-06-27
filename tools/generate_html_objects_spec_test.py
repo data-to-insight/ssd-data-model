@@ -3,8 +3,8 @@ from PIL import Image
 from IPython.display import display
 
 def create_entity_webpage():
-    image_folder = 'docs/publish/web/'
-    output_folder = 'docs/publish/web/'
+    image_folder = 'docs/erd_images/'
+    output_folder = 'docs/'
     os.makedirs(output_folder, exist_ok=True)
     image_files = os.listdir(image_folder)
     image_files.sort()
