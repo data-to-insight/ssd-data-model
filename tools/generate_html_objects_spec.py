@@ -5,7 +5,7 @@ import subprocess
 import datetime
 
 # Image width (adjust as needed)
-image_width = 200
+image_width = 300
 
 # Generate HTML content
 html_content = "<html><head><style>"
