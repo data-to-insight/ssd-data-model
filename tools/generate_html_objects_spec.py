@@ -28,11 +28,15 @@ html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
 html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%Y-%m-%d')}</h3>"
 
-# Add Objects Overview image
+# Add Objects Overview image table
+html_content += "<table>"
+html_content += "<tr><th class='image-column' colspan='6'>"
 html_content += "<h2 style='text-align: left;'>Objects Overview</h2>"
 html_content += "<div style='padding: 10px;'>"
 html_content += f'<img src="assets/ssd_erd.png" alt="Objects Overview" style="width: {image_width};">'
 html_content += "</div>"
+html_content += "</th></tr>"
+html_content += "</table>"
 
 # Read the YAML files
 for file_path in glob.glob('data/objects/*.yml'):
@@ -44,17 +48,17 @@ for file_path in glob.glob('data/objects/*.yml'):
             html_content += f"<h2>Object name: {entity_name}</h2>"
             html_content += "<div style='display: flex;'>"
             html_content += f'<img src="erd_images/{entity_name}.png" alt="{entity_name}" style="width: {image_width}; margin-right: 20px;">'
+            html_content += "</div>"
             html_content += "<table>"
             html_content += "<tr><th class='field-ref-column'>Field Ref</th><th class='data-item-column'>Data Item Name / Field</th><th class='field-column'>Field</th><th class='cms-column'>CMS</th><th class='categories-column'>Categories</th><th class='returns-column'>Returns</th></tr>"
             for field in nodes[0]['fields']:
                 field_ref = field.get('field_ref', '')
                 field_name = field['name']
-                cms = ', '.join(field.get('cms', []))
-                categories = ', '.join(field.get('categories', []))
+                cms_data = ', '.join(field.get('cms', []))
+                categories_data = ', '.join(field.get('categories', []))
                 returns_data = ', '.join(field.get('returns', []))
-                html_content += f"<tr><td>{field_ref}</td><td>{field_name}</td><td>{field_name}</td><td>{cms}</td><td>{categories}</td><td>{returns_data}</td></tr>"
+                html_content += f"<tr><td>{field_ref}</td><td>{field_name}</td><td>{field_name}</td><td>{cms_data}</td><td>{categories_data}</td><td>{returns_data}</td></tr>"
             html_content += "</table>"
-            html_content += "</div>"
             html_content += "<div style='clear: both;'></div>"
 
 # Write HTML content to file
