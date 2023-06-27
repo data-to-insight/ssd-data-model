@@ -64,6 +64,8 @@ def generate_full_erd():
     G.graph_attr['rankdir'] = 'TB'  # Set the graph direction from left to right (or use TB)
     G.edge_attr['splines'] = 'ortho'  # Use orthogonal edges for a more compact layout
 
+
+
     # Load and combine YAML files
     for file_path in glob.glob('data/objects/*.yml'):
         with open(file_path) as f:
@@ -115,11 +117,27 @@ def generate_full_erd():
                 G.add_edge(from_node, to_node, label=relation_type)
 
 
+
     # Render the main graph to a file
     G.draw('assets/ssd_erd.png', prog='dot', format='png')
         
-    # Render an additional copy of the main graph to be web published
+    # Render a copy of the main graph as local web published copy
     G.draw('docs/ssd_erd.png', prog='dot', format='png')
+
+
+    # Other / In progress / Testing
+
+    # Render an additional copy of the main graph to be web published
+    # G.layout(prog='sfdp', args='-Goverlap=scale -Gsplines=ortho -Gsep=0.1') # Not great
+    G.layout(prog='sfdp', args='-Goverlap=false -Gsplines=line') # Current preference
+
+    G.draw('docs/ssd_erd_sfdp.png', format='png')
+
+    # Working but nodes too far apart
+    # Render an additional copy of the main graph to be web published
+    # G.graph_attr['overlap'] = 'scale'  # Adjust overlap attribute (options: 'scale', 'compress', 'vpsc', or 'ortho')
+    # G.graph_attr['scale'] = 0.1  # Adjust scale attribute 
+    # G.draw('docs/ssd_erd_twopi.png', prog='twopi', format='png')
 
 
 generate_full_erd()
