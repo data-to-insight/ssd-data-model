@@ -4,6 +4,8 @@ import glob
 import yaml
 import pygraphviz as pgv
 import os
+import html
+import re
 
 
 def generate_individual_images():
@@ -32,16 +34,19 @@ def generate_individual_images():
                         field_name = f"[FK] {field_name}"
                     if field.get('field_ref'):
                         field_name += f" [{field['field_ref']}]"
-                    if field.get('returns'):
-                        returns_data = ', '.join(field['returns'])
-                        field_name += f" [{returns_data}]"
+                    # Removed to reduce dup data & requ column width on resultant image
+                    # if field.get('returns'):
+                    #     returns_data = ', '.join(field['returns'])
+                    #     field_name += f" [{returns_data}]"
+
                     field_labels.append(field_name)
                     
                     if 'foreign_key' in field:
                         fk = field['foreign_key']
                         G.add_edge(fk, node['name'], label='FK')
 
-                label = '{' + node['name'] + '|' + '|'.join(field_labels) + '}'
+                label = '{' + node['name'] + '|' + '|'.join(field_labels) + '}' # Original / functional version
+
                 G.add_node(node['name'], shape='record', label=label)
 
         file_name = os.path.splitext(os.path.basename(file_path))[0]
@@ -53,7 +58,7 @@ def generate_individual_images():
 def generate_full_erd():
     # Output size options
     G = pgv.AGraph(directed=True)
-    G.graph_attr['size'] = '1280,800'  # Set page size to 1280x800 pixels (common screen)
+    G.graph_attr['size'] = '1280,'  # Set page size to 1280x800 pixels (common screen)
     # G.graph_attr['size'] = '595,842'  # Set page size to A4 dimensions (595x842 pixels)
 
     G.graph_attr['rankdir'] = 'TB'  # Set the graph direction from left to right (or use TB)
@@ -112,8 +117,8 @@ def generate_full_erd():
 
     # Render the main graph to a file
     G.draw('assets/ssd_erd.png', prog='dot', format='png')
-
-    # Render the main graph to a file
+        
+    # Render an additional copy of the main graph to be web published
     G.draw('docs/ssd_erd.png', prog='dot', format='png')
 
 

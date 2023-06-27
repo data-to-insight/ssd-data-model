@@ -3,6 +3,23 @@ import yaml
 import base64
 import subprocess
 import datetime
+from PIL import Image
+import os
+
+
+def resize_images(folder_path, target_width, quality=90):
+    for file_path in glob.glob(os.path.join(folder_path, '*.png')):
+        img = Image.open(file_path)
+        current_width, current_height = img.size
+        target_height = int((current_height / current_width) * target_width)
+        resized_img = img.resize((target_width, target_height), resample=Image.LANCZOS)
+        resized_img.save(file_path, format='PNG', optimize=True, quality=quality)
+
+
+
+# location of 
+erd_folder = 'docs/erd_images/'
+site_root_folder = 'docs/'
 
 # Calculate main image width
 main_image_width = "calc(100% - 40px)"  # Adjust the padding as needed
@@ -13,6 +30,9 @@ image_width = "310px"
 # Define page title and intro text
 page_title_str = "SSD Data Model Documentation"
 page_intro_str = "Data Item and Entity Definitions published for iterative review. Objects/data fields capturing LA Childrens Services data towards 1a SSD."
+
+
+
 
 # Generate HTML content
 html_content = "<html><head><style>"
@@ -34,7 +54,7 @@ html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y'
 # Add Objects Overview section
 html_content += "<h2>Objects Overview</h2>"
 html_content += "<div style='padding: 20px;'>"
-html_content += f'<img src="docs/ssd_erd.png" alt="Objects Overview" style="width: {main_image_width};">'
+html_content += f'<img src="ssd_erd.png" alt="Objects Overview" style="width: {main_image_width};">'
 html_content += "</div>"
 
 # Add Object Data Points Overview section
@@ -68,5 +88,11 @@ for file_path in glob.glob('data/objects/*.yml'):
 with open('docs/index.html', 'w') as f:
     f.write(html_content)
 
-# Run create_erd_from_yml.py script
+# Run create_erd.py script to re-create the individual object diagram images
 subprocess.run(['python3', 'tools/create_erd.py'])
+
+
+# Resize the images specifically for web publishing. 
+# Other/above methods only reduce to size of longest text data on row(s)
+resize_images(erd_folder, target_width=300, quality=80)
+resize_images(site_root_folder, target_width=1000, quality=80)
