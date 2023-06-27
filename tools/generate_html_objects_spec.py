@@ -24,8 +24,8 @@ html_content += "th.categories-column { width: 15%; }"
 html_content += "th.returns-column { width: 20%; }"
 html_content += "</style></head><body>"
 html_content += f"<h1>{page_title_str}</h1>"
-html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%Y-%m-%d')}</h3>"
-html_content += "<p>{page_intro_str}</p>"
+html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y')}</h3>"
+html_content += f"<p>{page_intro_str}</p>"
 
 # Read the YAML files
 for file_path in glob.glob('data/objects/*.yml'):
