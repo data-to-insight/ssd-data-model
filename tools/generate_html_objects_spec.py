@@ -25,12 +25,11 @@ site_root_folder = 'docs/'
 main_image_width = "calc(100% - 40px)"  # Adjust the padding as needed
 
 # Sub-Image width (adjust as needed)
-image_width = "310px"
+image_width = "300px"
 
 # Define page title and intro text
 page_title_str = "SSD Data Model Documentation"
 page_intro_str = "Data Item and Entity Definitions published for iterative review. Objects/data fields capturing LA Childrens Services data towards 1a SSD."
-
 
 
 
