@@ -53,7 +53,7 @@ html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y'
 # Add Objects Overview section
 html_content += "<h2>Objects Overview</h2>"
 html_content += "<div style='padding: 20px;'>"
-html_content += f'<img src="ssd_erd.png" alt="Objects Overview" style="width: {main_image_width};">'
+html_content += f'<img src="ssd_erd.svg" alt="Objects Overview" style="width: {main_image_width};">'
 html_content += "</div>"
 
 # Add Object Data Points Overview section
@@ -94,4 +94,4 @@ subprocess.run(['python3', 'tools/create_erd.py'])
 # Resize the images specifically for web publishing. 
 # Other/above methods only reduce to size of longest text data on row(s)
 resize_images(erd_folder, target_width=300, quality=80)
-resize_images(site_root_folder, target_width=1000, quality=80)
+# resize_images(site_root_folder, target_width=3000, quality=100)
