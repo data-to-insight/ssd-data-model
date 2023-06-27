@@ -7,7 +7,7 @@ import os
 
 
 def generate_individual_images():
-    erd_folder = 'docs/publish/web/'
+    erd_folder = 'docs/erd_images/'
     os.makedirs(erd_folder, exist_ok=True)
 
     for file_path in glob.glob('data/objects/*.yml'):
@@ -110,7 +110,7 @@ def generate_full_erd():
                 G.add_edge(from_node, to_node, label=relation_type)
 
 
-    # Render the graph to a file
+    # Render the main graph to a file
     G.draw('assets/ssd_erd.png', prog='dot', format='png')
 
 
