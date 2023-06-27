@@ -9,7 +9,7 @@ This is the source repository for the SSD data model and includes tools for both
 ## Data Model
 
 The data model defines a set of Objects capturing LA Childrens Services data during the different stages of an individual's progress
-through the system(s). The data model also includes a number of Categories (dimensions) that are referenced from the Fields within a Record.
+through the system(s). We publish for review the most [current data model](./docs/index.html). The data model also includes a number of Categories (dimensions) that are referenced from the Fields within a Record.
 
 We define a number of validators that will be used to check data quality. These may be structural validators, such as a field is required or has to be in a defined set (dimension), or relational validators, such as a date should be after another date as events should happen sequentially.
 
@@ -28,7 +28,7 @@ The [objects](./data/objects) folder contains definition for all the specificati
 of synthetic data parameters and validation rules that apply to each field within the object.
 
 An example data object contains a description and a set of fields for that record. The fields have an ID (the key), a name,
-type, description, comments,
+type, description, which cms systems the data item/field is available on and any comments,
 
 ```yaml
 
