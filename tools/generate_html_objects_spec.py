@@ -31,8 +31,6 @@ html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
 html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%Y-%m-%d')}</h3>"
 
-
-
 # Add Objects Overview section
 html_content += "<h2>Objects Overview</h2>"
 html_content += "<div style='padding: 20px;'>"
@@ -40,8 +38,8 @@ html_content += f'<img src="docs/ssd_erd.png" alt="Objects Overview" style="widt
 html_content += "</div>"
 
 
-# # Add Object Data Points Overview section
-# html_content += "<h2>Object Data Points Overview</h2>"
+# Add Object Data Points Overview section
+html_content += "<h2>Object Data Points Overview</h2>"
 
 
 # Read the YAML files
