@@ -32,6 +32,7 @@ for file_path in glob.glob('data/objects/*.yml'):
         if nodes:
             entity_name = nodes[0]['name']
             html_content += f"<h2>Object name: {entity_name}</h2>"
+            html_content += "<div style='display: flex;'>"
             html_content += f'<img src="erd_images/{entity_name}.png" alt="{entity_name}" style="width: {image_width}px; margin-right: 20px;">'
             html_content += "<table>"
             html_content += "<tr><th class='field-ref-column'>Field Ref</th><th class='data-item-column'>Data Item Name / Field</th><th class='field-column'>Field</th><th class='cms-column'>CMS</th><th class='categories-column'>Categories</th><th class='returns-column'>Returns</th></tr>"
@@ -43,6 +44,7 @@ for file_path in glob.glob('data/objects/*.yml'):
                 returns_data = ', '.join(field.get('returns', []))
                 html_content += f"<tr><td>{field_ref}</td><td>{field_name}</td><td>{field_name}</td><td>{cms}</td><td>{categories}</td><td>{returns_data}</td></tr>"
             html_content += "</table>"
+            html_content += "</div>"
             html_content += "<div style='clear: both;'></div>"
 
 # Write HTML content to file
