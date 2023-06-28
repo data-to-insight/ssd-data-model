@@ -10,7 +10,6 @@ from admin.admin_tools import get_paths # get project defined file paths
 from admin.admin_tools import resize_images
 
 
-
 paths = get_paths()
 erd_objects_path = paths['wsite_sub_images']
 erd_overview_path = paths['wsite_main_images']
@@ -21,7 +20,7 @@ overview_erd_filename = "ssd_erd.png"
 
 
 # Calculate main image width
-main_image_width = "calc(100% - 40px)"  # Adjust the padding as needed
+main_image_width = "85%"  # Adjust the padding as needed
 
 # Sub-Image width (adjust as needed)
 image_width = "300px"
@@ -30,28 +29,13 @@ image_width = "300px"
 page_title_str = "SSD Data Model Documentation"
 page_intro_str = "Data Item and Entity Definitions published for iterative review. Objects/data fields capturing LA Childrens Services data towards 1a SSD."
 
+notes_str = "Right click and open the image in a new table to zoom/magnify object detail."
 repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 
 
-css_styles = """
-<style>
-.img-zoom-lens {
-  position: absolute;
-  border: 1px solid #d4d4d4;
-  width: 40px;
-  height: 40px;
-}
-.img-zoom-result {
-  border: 1px solid #d4d4d4;
-  width: 300px;
-  height: 300px;
-}
-</style>
-"""
-
-# Generate HTML content
 html_content = "<html><head><style>"
+html_content += "body { margin: 20px; }"
 html_content += "table { border-collapse: collapse; width: 80%; margin: auto; }"
 html_content += "th, td { text-align: left; padding: 8px; word-wrap: break-word; border: 1px solid #ddd; }"
 html_content += "th { background-color: #f2f2f2; }"
@@ -62,23 +46,26 @@ html_content += "th.field-column { width: 20%; }"
 html_content += "th.cms-column { width: 15%; }"
 html_content += "th.categories-column { width: 15%; }"
 html_content += "th.returns-column { width: 20%; }"
-html_content += ".img-zoom-lens { position: absolute; border: 1px solid #d4d4d4; width: 40px; height: 40px; }"  # Added CSS rule
 html_content += "</style></head><body>"
 html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
-html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y')}</h3>"
-
-
-html_content += "<h2>Objects Overview:</h2>"
+html_content += f"<h4>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}</h4><a href='{repo_link_back_str}'> | SSD Github</a>"
+html_content += f"<p>{notes_str}</p>"
 html_content += "<div style='padding: 20px;'>"
-html_content += "<div class='img-zoom-container'>"
+html_content += "<h1>Objects Overview:</h1>"
+html_content += "<div>"
 html_content += f'<img id="main-image" src="{erd_overview_path}{overview_erd_filename}" alt="Data Objects Overview" style="width: {main_image_width};">'
-html_content += "<div id='zoom-result' class='img-zoom-result'></div>"
 html_content += "</div>"
+html_content += "</div>"
+
+
+html_content += "<h1>Object Data Points Overview:</h1>"
+html_content += "<div>"
+html_content += f'<img id="main-image" src="{erd_overview_path}{overview_erd_filename}" alt="Data Objects Overview" style="width: {main_image_width};">'
 html_content += "</div>"
 
 # Add Object Data Points Overview section
-html_content += "<h2>Object Data Points Overview:</h2>"
+html_content += "<h1>Object Data Points Overview:</h1>"
 
 
 # Read the YAML files
@@ -89,10 +76,10 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
         if nodes:
             entity_name = nodes[0]['name']
             html_content += "<div>"
-            html_content += f"<h2>Object name: {entity_name}</h2>"
-            html_content += "<div style='text-align: center;'>"
-
+            html_content += f"<h2 style='text-align: left;'>Object name: {entity_name}</h2>"
+            html_content += "<div style='display: flex; align-items: flex-start;'>"
             html_content += f'<img src="{erd_objects_path}{entity_name}.png" alt="{entity_name}" style="width: {image_width}; margin-right: 20px;">'
+            html_content += "<div>"
             html_content += "<table>"
             html_content += "<tr><th class='field-ref-column'>Field Ref</th><th class='data-item-column'>Data Item Name / Field</th><th class='field-column'>Field</th><th class='cms-column'>Exists in CMS</th><th class='categories-column'>Data Category Group(s)</th><th class='returns-column'>Returns</th></tr>"
             for field in nodes[0]['fields']:
@@ -105,60 +92,14 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
             html_content += "</table>"
             html_content += "</div>"
             html_content += "</div>"
-
-html_content += "<script>"
-html_content += "function imageZoom(imgID, resultID) {"
-html_content += "var img, lens, result, cx, cy;"
-html_content += "img = document.getElementById(imgID);"
-html_content += "result = document.getElementById(resultID);"
-html_content += "lens = document.createElement('DIV');"
-html_content += "lens.setAttribute('class', 'img-zoom-lens');"
-html_content += "img.parentElement.insertBefore(lens, img);"
-html_content += "cx = result.offsetWidth / lens.offsetWidth;"
-html_content += "cy = result.offsetHeight / lens.offsetHeight;"
-html_content += "result.style.backgroundImage = 'url(' + img.src + ')';"
-html_content += "result.style.backgroundSize = (img.width * cx) + 'px ' + (img.height * cy) + 'px';"
-html_content += "lens.addEventListener('mousemove', moveLens);"
-html_content += "img.addEventListener('mousemove', moveLens);"
-html_content += "lens.addEventListener('touchmove', moveLens);"
-html_content += "img.addEventListener('touchmove', moveLens);"
-html_content += "function moveLens(e) {"
-html_content += "var pos, x, y;"
-html_content += "e.preventDefault();"
-html_content += "pos = getCursorPos(e);"
-html_content += "x = pos.x - (lens.offsetWidth / 2);"
-html_content += "y = pos.y - (lens.offsetHeight / 2);"
-html_content += "if (x > img.width - lens.offsetWidth) {x = img.width - lens.offsetWidth;}"
-html_content += "if (x < 0) {x = 0;}"
-html_content += "if (y > img.height - lens.offsetHeight) {y = img.height - lens.offsetHeight;}"
-html_content += "if (y < 0) {y = 0;}"
-html_content += "lens.style.left = x + 'px';"
-html_content += "lens.style.top = y + 'px';"
-html_content += "result.style.backgroundPosition = '-' + (x * cx) + 'px -' + (y * cy) + 'px';"
-html_content += "}"
-html_content += "function getCursorPos(e) {"
-html_content += "var a, x = 0, y = 0;"
-html_content += "e = e || window.event;"
-html_content += "a = img.getBoundingClientRect();"
-html_content += "x = e.pageX - a.left;"
-html_content += "y = e.pageY - a.top;"
-html_content += "x = x - window.pageXOffset;"
-html_content += "y = y - window.pageYOffset;"
-html_content += "return {x : x, y : y};"
-html_content += "}"
-html_content += "}"
-
-# Call imageZoom function for main image
-html_content += "imageZoom('main-image', 'zoom-result');"
-html_content += "</script>"
-
+            html_content += "</div>"
 
 # Close HTML tags
 html_content += "</body></html>"
 
 
 with open(paths['wsite_root'] + 'index.html', 'w') as f:
-    f.write(css_styles + html_content)
+    f.write(html_content)
 
 
 # # Run create_erd.py script to re-create the individual object diagram images
