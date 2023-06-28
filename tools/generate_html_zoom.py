@@ -12,8 +12,8 @@ from admin.admin_tools import resize_images
 
 
 paths = get_paths()
-erd_objects_path = paths['erd_objects_publish']
-erd_overview_path = paths['erd_publish']
+erd_objects_path = paths['wsite_sub_images']
+erd_overview_path = paths['wsite_main_images']
 yml_import_path = paths['yml_data']
 
 overview_erd_filename = "ssd_erd.png"
