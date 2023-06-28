@@ -2,7 +2,7 @@
 nodes:
 - name: family
   fields:
-  - name: family_identifier
+  - name: family_id
     type: null
     description: Family identifier
     field_ref: SSD013
@@ -14,30 +14,24 @@ nodes:
         enabled: true
     categories:
     - identity
-    - family_identifier
-    constraints:
-    - unique
-    - primary_key
+    - family
     returns:
     - ASGLB
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID
     field_ref: SSD014
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     validators:
     - required:
         enabled: true
     categories:
     - identity
-    - family_identifier
-    constraints:
-    - unique
-    - foreign_key:child.Child_Unique_ID
+    - family
     returns:
     - SSDA903
     - CINcensus

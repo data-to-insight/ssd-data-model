@@ -2,26 +2,41 @@
 nodes:
 - name: permanence
   fields:
-  - name: lachildid
+  - name: permanence_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD184
-    foreign_key: child.Child_Unique_ID
+    description: permanence_table_id
+    field_ref: SSD184A
+    primary_key: true
     validators:
     - required:
         enabled: true
-    constraints:
-    - foreign_key:child.Child_Unique_ID
+    categories:
+    - permanence
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: la_person_id
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD184
+    foreign_key: person.la_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - permanence
     returns:
     - SSDA903
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: date_int
+  - name: adm_decision_date
     type: DATE
     description: 'Date of ADM Decision '
     field_ref: SSD185
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
@@ -29,19 +44,23 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: date_of_ffa_cp_decision
+  - name: ffa_cp_decision_date
     type: DATE
     description: Date of FFA CP Decision
     field_ref: SSD186
+    categories:
+    - permanence
     returns:
     - ASGLB
     cms:
     - liquid_logic
     - mosaic
-  - name: date_the_entered_care
+  - name: entered_care_date
     type: DATE
     description: Date the entered Care
     field_ref: SSD187
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
@@ -49,10 +68,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: date_of_placement_freeing_order
+  - name: placement_order_date
     type: DATE
     description: Date of Placement Freeing Order
     field_ref: SSD188
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
@@ -60,10 +81,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: date_placed_for_adoption
+  - name: placed_for_adoption_date
     type: DATE
     description: Date Placed for Adoption
     field_ref: SSD189
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
@@ -71,10 +94,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: date_match
+  - name: matched_date
     type: DATE
     description: Date Matched to Prospective Adopters
     field_ref: SSD190
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
@@ -82,10 +107,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: "date_placed_in_ffa_cp_placement\_"
+  - name: placed_ffa_cp_date
     type: DATE
     description: "Date Placed in FFA CP Placement\_"
     field_ref: SSD191
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
@@ -93,21 +120,25 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: date_placed_ceased
+  - name: decision_reversed_date
     type: DATE
     description: Date of Decision that Child Should No Longer be Placed for Adoption
     field_ref: SSD192
+    categories:
+    - permanence
     returns:
     - AnnexA
     - ASGLB
     cms:
     - liquid_logic
     - mosaic
-  - name: date_originally_placed_with_foster_carer(s)_(if_adopted_by_foster_carers)
+  - name: placed_foster_carer_date
     type: DATE
     description: Date originally placed with foster carer(s) (if adopted by foster
       carers)
     field_ref: SSD193
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
@@ -115,48 +146,58 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: is_the_child_a_part_of_a_sibling_group?
+  - name: sibling_group
     type: BOOLEAN
     description: Is the child a part of a sibling group?
     field_ref: SSD194
+    categories:
+    - permanence
     returns:
     - ASGLB
     cms:
     - liquid_logic
     - mosaic
-  - name: number_of_children_placed,_or_planned_to_be_placed,_for_adoption_together_as_sibling_group_including_this_child
+  - name: siblings_placed_together
     type: TINYINT(2)
     description: Number of children placed, or planned to be placed, for adoption
       together as sibling group INCLUDING this child
     field_ref: SSD195
+    categories:
+    - permanence
     returns:
     - ASGLB
     cms:
     - liquid_logic
     - mosaic
-  - name: number_of_siblings_placed,_or_planned_to_be_placed,_for_adoption_separately_from_the_child
+  - name: siblings_placed_apart
     type: TINYINT(2)
     description: Number of siblings placed, or planned to be placed, for adoption
       separately from the child
     field_ref: SSD196
+    categories:
+    - permanence
     returns:
     - ASGLB
     cms:
     - liquid_logic
     - mosaic
-  - name: urn_of_the_placement_provider_agency
+  - name: place_provider_urn
     type: VARCHAR(8)
     description: URN of the placement provider agency
     field_ref: SSD197
+    categories:
+    - permanence
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: reason_placed_ceased
+  - name: decision_reversed_reason
     type: null
     description: Reason No Longer Placed for Adoption
     field_ref: SSD198
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
@@ -164,10 +205,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: "date_of_order\_"
+  - name: permanence_order_date
     type: DATE
     description: "Date of Order\_"
     field_ref: SSD199
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
@@ -175,29 +218,35 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: type_of_order
+  - name: permanence_order_type
     type: null
     description: Type of Order
     field_ref: SSD200
+    categories:
+    - permanence
     returns:
     - SSDA903
     - ASGLB
     cms:
     - liquid_logic
     - mosaic
-  - name: status_of_special_guardian
+  - name: guardian_status
     type: null
     description: Status of Special Guardian
     field_ref: SSD201
+    categories:
+    - permanence
     returns:
     - ASGLB
     cms:
     - liquid_logic
     - mosaic
-  - name: age_of_special_guardian
+  - name: guardian_age
     type: TINYINT(2)
     description: Age of Special Guardian
     field_ref: SSD202
+    categories:
+    - permanence
     returns:
     - ASGLB
     cms:

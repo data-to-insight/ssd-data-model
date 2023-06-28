@@ -13,8 +13,10 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - foreign_key:cp_plans.CP_Plan_ID
+    categories:
+    - cp
+    - sw
+    - child_contact
     cms:
     - liquid_logic
     - mosaic
@@ -22,43 +24,60 @@ nodes:
     type: VARCHAR()
     description: CP Visit ID
     field_ref: SSD098
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - cp
+    - sw
+    - child_contact
     cms:
     - liquid_logic
     - mosaic
-  - name: date_of_visit
+  - name: cp_visit_date
     type: DATE
     description: Date of Visit
     field_ref: SSD099
+    categories:
+    - cp
+    - sw
+    - child_contact
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: child_seen
+  - name: cp_visit_seen
     type: BOOLEAN
     description: Child Seen
     field_ref: SSD100
+    categories:
+    - cp
+    - sw
+    - child_contact
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
-  - name: child_seen_alone
+  - name: cp_visit_seen_alone
     type: BOOLEAN
     description: Child Seen Alone
     field_ref: SSD101
+    categories:
+    - cp
+    - sw
+    - child_contact
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: child_bedroom_seen
+  - name: cp_visit_bedroom
     type: BOOLEAN
     description: Child Bedroom Seen
     field_ref: SSD102
+    categories:
+    - cp
+    - sw
+    - child_contact
     returns:
     - Local
     cms:

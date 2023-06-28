@@ -12,65 +12,74 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - permanence
     cms:
     - liquid_logic
     - mosaic
-  - name: episode_id
+  - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
     field_ref: SSD166
     foreign_key: cla_episodes.Episode_ID
-    constraints:
-    - foreign_key:cla_episodes.Episode_ID
+    categories:
+    - permanence
     cms:
     - liquid_logic
     - mosaic
-  - name: mis_start
+  - name: mis_epi_start
     type: DATE
     description: Missing Episode Start
     field_ref: SSD167
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: missing
+  - name: mis_epi_type
     type: null
     description: Episode Type (Missing Absent)
     field_ref: SSD168
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: mis_end
+  - name: mis_epi_end
     type: DATE
     description: Missing Episode End
     field_ref: SSD169
+    categories:
+    - permanence
     returns:
     - SSDA903
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: rhi_offered
+  - name: mis_epi_rhi_offered
     type: BOOLEAN
     description: RHI Offered
     field_ref: SSD170
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: rhi_accepted
+  - name: mis_epi_rhi_accepted
     type: BOOLEAN
     description: RHI Accepted
     field_ref: SSD171
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:

@@ -2,7 +2,7 @@
 nodes:
 - name: care_leavers
   fields:
-  - name: care_leaver_table_id
+  - name: care_leaver_id
     type: VARCHAR()
     description: Care Leaver Table ID
     field_ref: SSD172
@@ -12,113 +12,132 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - permanence
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID
     field_ref: SSD173
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     validators:
     - required:
         enabled: true
-    constraints:
-    - foreign_key:child.Child_Unique_ID
+    categories:
+    - permanence
     returns:
     - SSDA903
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: eligibility_status_category
+  - name: cl_eligibility
     type: null
     description: Eligibility Status Category
     field_ref: SSD174
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: in_touch
+  - name: cl_in_touch
     type: null
     description: In Touch Category
     field_ref: SSD175
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: latest_date_of_contact
+  - name: cl_latest_contact
     type: DATE
     description: Latest Date of Contact
     field_ref: SSD176
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: accommodation
+  - name: cl_accommodation
     type: null
     description: Accommodation
     field_ref: SSD177
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: accom
+  - name: cl_accom_suitable
     type: null
     description: Suitability of Accommodation
     field_ref: SSD178
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: activ
+  - name: cl_activity
     type: null
     description: Activity Status
     field_ref: SSD179
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: latest_pathway_plan_review_date
+  - name: cl_pathway_plan_rev_date
     type: null
     description: Latest Pathway Plan Review Date
     field_ref: SSD180
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: allocated_personal_advisor
+  - name: cl_personal_advisor
     type: null
     description: Allocated Personal Advisor
     field_ref: SSD181
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: allocated_team
+  - name: cl_team
     type: null
     description: Allocated Team
     field_ref: SSD182
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: allocated_worker
+  - name: cl_worker
     type: null
     description: Allocated Worker
     field_ref: SSD183
+    categories:
+    - permanence
     returns:
     - AnnexA
     cms:

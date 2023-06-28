@@ -2,7 +2,7 @@
 nodes:
 - name: worker
   fields:
-  - name: social_work_england_(swe)_registration_number
+  - name: sw_reg_number
     type: VARCHAR()
     description: Social Work England (SWE) registration number
     field_ref: SSD226
@@ -12,8 +12,8 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
+    categories:
+    - sw
     cms:
     - liquid_logic
     - mosaic
@@ -27,72 +27,85 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: sw_decom
+  - name: sw_epi_start_date
     type: DATE
     description: Social worker episode start date
     field_ref: SSD228
+    categories:
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: sw_dec
+  - name: sw_epi_end_date
     type: DATE
     description: Social worker episode end date
     field_ref: SSD229
+    categories:
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: sw_reason
+  - name: sw_change_reason
     type: VARCHAR()
     description: Reason for social worker change
     field_ref: SSD230
+    categories:
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: agency_worker
+  - name: sw_agency
     type: BOOLEAN
     description: Agency worker
     field_ref: SSD231
+    categories:
+    - sw
     returns:
     - CSCWF
     cms:
     - liquid_logic
     - mosaic
-  - name: role_within_the_organisation
+  - name: sw_role
     type: VARCHAR()
     description: Role within the organisation
     field_ref: SSD232
+    categories:
+    - sw
     returns:
     - CSCWF
     cms:
     - liquid_logic
     - mosaic
-  - name: number_of_cases_held
+  - name: sw_caseload
     type: TINYINT()
     description: Number of cases held
     field_ref: SSD233
+    categories:
+    - sw
     returns:
     - CSCWF
     cms:
     - liquid_logic
     - mosaic
-  - name: qualification_level
+  - name: sw_qualification
     type: VARCHAR()
     description: Qualification level
     field_ref: SSD234
+    categories:
+    - sw
     returns:
     - CSCWF
     cms:

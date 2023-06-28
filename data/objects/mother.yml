@@ -2,9 +2,9 @@
 nodes:
 - name: mother
   fields:
-  - name: mothers_child_unique_id
+  - name: person_child_id
     type: VARCHAR(10)
-    description: Mother's Child Unique ID
+    description: Mothers Child Unique ID
     field_ref: SSD026
     primary_key: true
     validators:
@@ -14,36 +14,30 @@ nodes:
         enabled: true
     categories:
     - identity
-    constraints:
-    - unique
-    - primary_key
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID (Mother)
     field_ref: SSD027
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     validators:
     - required:
         enabled: true
     categories:
     - identity
-    constraints:
-    - unique
-    - foreign_key:child.Child_Unique_ID
     returns:
     - SSDA903
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: mc_dob
+  - name: person_child_dob
     type: DATE
-    description: "Date of birth of mother\u2019s child"
+    description: Date of birth of mothers child
     field_ref: SSD028
     categories:
     - identity

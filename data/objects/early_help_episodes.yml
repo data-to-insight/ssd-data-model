@@ -12,29 +12,24 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID
     field_ref: SSD040
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     validators:
     - required:
         enabled: true
-    constraints:
-    - foreign_key:child.Child_Unique_ID
     returns:
     - SSDA903
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: eh_episode_start_date
+  - name: eh_epi_start_date
     type: DATE
     description: EH Episode Start Date
     field_ref: SSD041
@@ -43,7 +38,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: eh_episode_end_date
+  - name: eh_epi_end_date
     type: DATE
     description: EH Episode End Date
     field_ref: SSD042
@@ -52,7 +47,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: eh_episode_reason_for_involvement
+  - name: eh_epi_reason
     type: null
     description: EH Episode Reason for Involvement
     field_ref: SSD043
@@ -61,7 +56,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: eh_episode_end_reason
+  - name: eh_epi_end_reason
     type: null
     description: EH Episode End Reason
     field_ref: SSD044
@@ -70,7 +65,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: eh_episode_allocated_organisation
+  - name: eh_epi_org
     type: null
     description: EH Episode Allocated Organisation
     field_ref: SSD045
@@ -79,7 +74,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: eh_episode_allocated_worker
+  - name: eh_epi_worker
     type: null
     description: EH Episode Allocated Worker
     field_ref: SSD046

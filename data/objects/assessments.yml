@@ -12,77 +12,88 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - assessment
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID
     field_ref: SSD057
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     validators:
     - required:
         enabled: true
-    constraints:
-    - foreign_key:child.Child_Unique_ID
+    categories:
+    - assessment
     returns:
     - SSDA903
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: assessmentactualstartdate
+  - name: asmt_start_date
     type: DATE
     description: Assessment Start Date
     field_ref: SSD058
+    categories:
+    - assessment
     returns:
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: child_seen_during_assessment
+  - name: asmt_child_seen
     type: BOOLEAN
     description: Child Seen During Assessment
     field_ref: SSD059
+    categories:
+    - assessment
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: assessmentauthorisationdate
+  - name: asmt_auth_date
     type: DATE
     description: Assessment Authorised Date
     field_ref: SSD060
+    categories:
+    - assessment
     returns:
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: assessment_outcome
+  - name: asmt_outcome
     type: null
     description: Assessment Outcome
     field_ref: SSD061
+    categories:
+    - assessment
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: assessment_completed_by_team
+  - name: asmt_team
     type: null
     description: Assessment Completed by Team
     field_ref: SSD062
+    categories:
+    - assessment
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: assessment_completed_by_worker
+  - name: asmt_worker
     type: null
     description: Assessment Completed by Worker
     field_ref: SSD063
+    categories:
+    - assessment
     returns:
     - AnnexA
     cms:

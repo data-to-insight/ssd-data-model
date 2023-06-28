@@ -2,7 +2,7 @@
 nodes:
 - name: cp_reviews
   fields:
-  - name: review_id
+  - name: cp_review_id
     type: VARCHAR()
     description: Review ID
     field_ref: SSD103
@@ -12,9 +12,9 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - cp
+    - sw
     cms:
     - liquid_logic
     - mosaic
@@ -23,72 +23,94 @@ nodes:
     description: CP Plan ID
     field_ref: SSD104
     foreign_key: cp_plans.CP_Plan_ID
-    constraints:
-    - foreign_key:cp_plans.CP_Plan_ID
+    categories:
+    - cp
+    - sw
     cms:
     - liquid_logic
     - mosaic
-  - name: review_due_date
+  - name: cp_rev_due
     type: DATE
     description: Review Due Date
     field_ref: SSD105
+    categories:
+    - cp
+    - sw
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
-  - name: cppreviewdate
+  - name: cp_rev_date
     type: DATE
     description: Date of Review
     field_ref: SSD106
+    categories:
+    - cp
+    - sw
     returns:
     - CINcensus
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: cp_plan_to_continue?
+  - name: cp_rev_outcome
     type: BOOLEAN
     description: CP Plan to Continue?
     field_ref: SSD107
+    categories:
+    - cp
+    - sw
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
-  - name: quorate?
+  - name: cp_rev_quorate
     type: BOOLEAN
     description: Quorate?
     field_ref: SSD108
+    categories:
+    - cp
+    - sw
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
-  - name: childs_participation
+  - name: cp_rev_participation
     type: null
-    description: Child's Participation
+    description: Childs Participation
     field_ref: SSD109
+    categories:
+    - cp
+    - sw
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
-  - name: quality_of_representation_of_cyp_views_experience
+  - name: cp_rev_cyp_views_quality
     type: null
     description: Quality of representation of CYP views experience
     field_ref: SSD110
+    categories:
+    - cp
+    - sw
     returns:
     - 1a
     - draft
     cms:
     - liquid_logic
     - mosaic
-  - name: sufficient_progress_made_against_the_cp_plan_to_improve_outcomes_for_the_child?_
+  - name: cp_rev_sufficient_prog
     type: null
     description: 'Sufficient progress made against the CP Plan to improve outcomes
       for the child? '
     field_ref: SSD111
+    categories:
+    - cp
+    - sw
     returns:
     - 1a
     - draft

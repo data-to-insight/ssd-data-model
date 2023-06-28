@@ -12,29 +12,24 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID
     field_ref: SSD035
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     validators:
     - required:
         enabled: true
-    constraints:
-    - foreign_key:child.Child_Unique_ID
     returns:
     - SSDA903
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: contactdate
+  - name: contact_date
     type: DATE
     description: Date of Contact
     field_ref: SSD036
@@ -43,7 +38,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: contactsource
+  - name: contact_source
     type: null
     description: Contact Source
     field_ref: SSD037
@@ -52,7 +47,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: contact_outcome_
+  - name: contact_outcome
     type: null
     description: 'Contact Outcome '
     field_ref: SSD038

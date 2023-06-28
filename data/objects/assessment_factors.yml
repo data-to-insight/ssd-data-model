@@ -2,7 +2,7 @@
 nodes:
 - name: assessment_factors
   fields:
-  - name: assessment_id
+  - name: asmt_id
     type: VARCHAR()
     description: Assessment ID
     field_ref: SSD064
@@ -12,16 +12,17 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - assessment
     cms:
     - liquid_logic
     - mosaic
-  - name: assessmentfactors
+  - name: asmt_factors
     type: null
     description: Assessment Factors
     field_ref: SSD065
+    categories:
+    - assessment
     returns:
     - CINcensus
     cms:

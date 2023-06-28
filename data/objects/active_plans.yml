@@ -2,7 +2,7 @@
 nodes:
 - name: active_plans
   fields:
-  - name: plan_id
+  - name: active_ehcp_id
     type: VARCHAR()
     description: Plan ID
     field_ref: SSD219
@@ -12,24 +12,19 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
     cms:
     - liquid_logic
     - mosaic
-  - name: request_id
+  - name: ehcp_request_id
     type: VARCHAR()
     description: Request ID
     field_ref: SSD220
     foreign_key: requests.request_id
-    constraints:
-    - foreign_key:requests.request_id
     cms:
     - liquid_logic
     - mosaic
-  - name: lastreview
-    type: null
+  - name: active_ehcp_last_review
+    type: DATE
     description: Last Review
     field_ref: SSD221
     returns:

@@ -2,7 +2,7 @@
 nodes:
 - name: risks_to_child_at_this_conference
   fields:
-  - name: review_id
+  - name: cp_review_id
     type: VARCHAR()
     description: Review ID
     field_ref: SSD112
@@ -13,15 +13,17 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - foreign_key:cp_reviews.Review_ID
+    categories:
+    - cp
     cms:
     - liquid_logic
     - mosaic
-  - name: risks_to_child_at_this_conference
+  - name: cp_review_risks
     type: null
     description: Risks to child at this conference
     field_ref: SSD113
+    categories:
+    - cp
     returns:
     - 1a
     - draft

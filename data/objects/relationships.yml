@@ -1,94 +1,99 @@
 ---
 relationships:
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: family
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: address
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: disability
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: immigration_status
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: mother
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: legal_status
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: contacts
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: early_help_episodes
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: cin_episodes
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: assessments
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: cin_plans
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: s47_enquiry
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: cp_plans
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: cla_episodes
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: sdq_scores
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: care_leavers
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: permanence
-  child_key: lachildid
+  child_key: la_person_id
   relation: 1:M
-- parent_object: child
-  parent_key: Child_Unique_ID
+- parent_object: person
+  parent_key: la_person_id
   child_object: send
-  child_key: lachildid
+  child_key: la_person_id
+  relation: 1:M
+- parent_object: cp_plans
+  parent_key: cp_plan_id
+  child_object: category_of_abuse
+  child_key: cp_plan_id
   relation: 1:M
 - parent_object: cp_plans
   parent_key: CP_Plan_ID
@@ -103,45 +108,45 @@ relationships:
 - parent_object: cp_plans
   parent_key: plan_id
   child_object: sen_need
-  child_key: plan_id
+  child_key: active_ehcp_id
   relation: 1:M
 - parent_object: cp_reviews
   parent_key: Review_ID
   child_object: risks_to_child_at_this_conference
-  child_key: review_id
+  child_key: cp_review_id
   relation: 1:M
 - parent_object: cla_episodes
   parent_key: Episode_ID
   child_object: placement
-  child_key: episode_id
+  child_key: cla_episode_id
   relation: 1:M
 - parent_object: cla_episodes
   parent_key: Episode_ID
   child_object: cla_reviews
-  child_key: episode_id
+  child_key: cla_episode_id
   relation: 1:M
 - parent_object: cla_episodes
   parent_key: Episode_ID
   child_object: cla_visits
-  child_key: episode_id
+  child_key: cla_episode_id
   relation: 1:M
 - parent_object: cla_episodes
   parent_key: Episode_ID
   child_object: missing
-  child_key: episode_id
-  relation: 1:M
-- parent_object: upn
-  parent_key: upn
-  child_object: requests
-  child_key: upn
+  child_key: cla_episode_id
   relation: 1:M
 - parent_object: requests
   parent_key: request_id
   child_object: assessment
-  child_key: request_id
+  child_key: ehcp_request_id
   relation: 1:M
 - parent_object: requests
   parent_key: request_id
   child_object: active_plans
-  child_key: request_id
+  child_key: ehcp_request_id
+  relation: 1:M
+- parent_object: assessments
+  parent_key: assessment_id
+  child_object: named_plan
+  child_key: ehcp_asmt_id
   relation: 1:M

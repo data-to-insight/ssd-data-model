@@ -2,7 +2,7 @@
 nodes:
 - name: cla_episodes
   fields:
-  - name: episode_id
+  - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
     field_ref: SSD114
@@ -12,79 +12,98 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - cp
+    - sw
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID
     field_ref: SSD115
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     validators:
     - required:
         enabled: true
-    constraints:
-    - foreign_key:child.Child_Unique_ID
+    categories:
+    - cp
+    - sw
     returns:
     - SSDA903
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: decom
+  - name: cla_epi_start
     type: DATE
     description: Date Episode Commenced
     field_ref: SSD116
+    categories:
+    - cp
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: rne
-    type: null
+  - name: cla_epi_start_reason
+    type: VARCHAR(255)
     description: Reason for New CLA Episode
     field_ref: SSD117
+    categories:
+    - cp
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: dec
+  - name: cla_epi_ceased
     type: DATE
     description: Date Episode Ceased
     field_ref: SSD118
+    categories:
+    - cp
+    - sw
     returns:
     - SSDA903
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: rec
-    type: null
+  - name: cla_epi_cease_reason
+    type: VARCHAR(255)
     description: Reason Episode Ceased
     field_ref: SSD119
+    categories:
+    - cp
+    - sw
     returns:
     - SSDA903
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: allocated_team
+  - name: cla_team
     type: null
     description: Allocated Team
     field_ref: SSD120
+    categories:
+    - cp
+    - sw
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: allocated_worker
+  - name: cla_worker
     type: null
     description: Allocated Worker
     field_ref: SSD121
+    categories:
+    - cp
+    - sw
     returns:
     - AnnexA
     cms:

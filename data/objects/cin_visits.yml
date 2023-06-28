@@ -12,9 +12,8 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - cin
     cms:
     - liquid_logic
     - mosaic
@@ -22,6 +21,8 @@ nodes:
     type: VARCHAR()
     description: CIN Plan ID
     field_ref: SSD073
+    categories:
+    - cin
     cms:
     - liquid_logic
     - mosaic
@@ -29,33 +30,41 @@ nodes:
     type: DATE
     description: CIN Visit Date
     field_ref: SSD074
+    categories:
+    - cin
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
-  - name: child_seen
+  - name: cin_visit_seen
     type: BOOLEAN
     description: Child Seen
     field_ref: SSD075
+    categories:
+    - cin
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: child_seen_alone
+  - name: cin_visit_seen_alone
     type: BOOLEAN
     description: Child Seen Alone
     field_ref: SSD076
+    categories:
+    - cin
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
-  - name: child_bedroom_seen
+  - name: cin_visit_bedroom
     type: BOOLEAN
     description: Child Bedroom Seen
     field_ref: SSD077
+    categories:
+    - cin
     returns:
     - Local
     cms:
