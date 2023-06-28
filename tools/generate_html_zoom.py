@@ -33,6 +33,23 @@ page_intro_str = "Data Item and Entity Definitions published for iterative revie
 repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 
+
+css_styles = """
+<style>
+.img-zoom-lens {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  width: 40px;
+  height: 40px;
+}
+.img-zoom-result {
+  border: 1px solid #d4d4d4;
+  width: 300px;
+  height: 300px;
+}
+</style>
+"""
+
 # Generate HTML content
 html_content = "<html><head><style>"
 html_content += "table { border-collapse: collapse; width: 80%; margin: auto; }"
@@ -52,7 +69,6 @@ html_content += f"<p>{page_intro_str}</p>"
 html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y')}</h3>"
 
 
-# Add Objects Overview section
 html_content += "<h2>Objects Overview:</h2>"
 html_content += "<div style='padding: 20px;'>"
 html_content += "<div class='img-zoom-container'>"
@@ -90,7 +106,6 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
             html_content += "</div>"
             html_content += "</div>"
 
-# Add image zoom JavaScript
 html_content += "<script>"
 html_content += "function imageZoom(imgID, resultID) {"
 html_content += "var img, lens, result, cx, cy;"
@@ -137,13 +152,14 @@ html_content += "}"
 html_content += "imageZoom('main-image', 'zoom-result');"
 html_content += "</script>"
 
+
 # Close HTML tags
 html_content += "</body></html>"
 
 
-# Write HTML content to file
-with open(paths['wsite_root'] +'index.html', 'w') as f:
-    f.write(html_content)
+with open(paths['wsite_root'] + 'index.html', 'w') as f:
+    f.write(css_styles + html_content)
+
 
 # # Run create_erd.py script to re-create the individual object diagram images
 # subprocess.run(['python3', paths['tools'] + 'create_erd_imgs.py'])
