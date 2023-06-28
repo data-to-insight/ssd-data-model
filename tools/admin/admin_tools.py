@@ -14,6 +14,8 @@ def get_paths():
         'erd_objects_publish': 'docs/imgs/erd_data_objects/',
         'yml_data': 'data/objects/',  # yml imports
         'wsite_root':'docs/',
+        'wsite_main_images': 'imgs/',
+        'wsite_sub_images': 'imgs/erd_data_objects/',
         'data_specification': 'docs/admin/data_objects_specification.csv'  
     }
     return paths
