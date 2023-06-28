@@ -13,8 +13,8 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
     cms:
     - liquid_logic
     - mosaic
@@ -27,8 +27,8 @@ nodes:
     - required:
         enabled: true
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
     returns:
     - SSDA903
     - CINcensus
@@ -40,8 +40,8 @@ nodes:
     description: CP Plan Start Date
     field_ref: SSD090
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
     returns:
     - CINcensus
     - AnnexA
@@ -53,8 +53,8 @@ nodes:
     description: CP Plan End Date
     field_ref: SSD091
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
     returns:
     - CINcensus
     - AnnexA
@@ -66,8 +66,8 @@ nodes:
     description: CP Plan Allocated Team
     field_ref: SSD092
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
     returns:
     - AnnexA
     cms:
@@ -78,8 +78,8 @@ nodes:
     description: CP Plan Allocated Worker
     field_ref: SSD093
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
     returns:
     - AnnexA
     cms:

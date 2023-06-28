@@ -13,6 +13,8 @@ nodes:
         enabled: true
     categories:
     - identity
+    - immigration
+    - uasc
     returns:
     - SSDA903
     - CINcensus
@@ -25,6 +27,8 @@ nodes:
     field_ref: SSD023
     categories:
     - identity
+    - immigration
+    - uasc
     returns:
     - Local
     cms:
@@ -36,6 +40,8 @@ nodes:
     field_ref: SSD024
     categories:
     - identity
+    - immigration
+    - uasc
     returns:
     - Local
     cms:
@@ -47,6 +53,8 @@ nodes:
     field_ref: SSD025
     categories:
     - identity
+    - immigration
+    - uasc
     returns:
     - Local
     cms:

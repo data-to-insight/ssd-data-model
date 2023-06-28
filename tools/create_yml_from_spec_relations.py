@@ -1,10 +1,15 @@
+from admin.admin_tools import get_paths # get project defined file paths
 
 
 # File handling input/output
 
+paths = get_paths()
+
 # Data Structure spec
-csv_file = 'docs/data_objects_specification.csv'     #  import from repo
-output_directory = 'data/objects/'
+data_spec_csv = paths['data_specification']
+output_directory = paths['yml_data']
+
+
 
 import csv
 import os
@@ -209,7 +214,7 @@ def save_node_yaml(node, output_directory):
 
 
 
-process_csv_file(csv_file, output_directory)
+process_csv_file(data_spec_csv, output_directory)
 
 
 

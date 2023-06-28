@@ -12,6 +12,8 @@ nodes:
         enabled: true
     - unique:
         enabled: true
+    categories:
+    - contact
     cms:
     - liquid_logic
     - mosaic
@@ -23,6 +25,8 @@ nodes:
     validators:
     - required:
         enabled: true
+    categories:
+    - contact
     returns:
     - SSDA903
     - CINcensus
@@ -33,6 +37,8 @@ nodes:
     type: DATE
     description: Date of Contact
     field_ref: SSD036
+    categories:
+    - contact
     returns:
     - AnnexA
     cms:
@@ -42,6 +48,8 @@ nodes:
     type: null
     description: Contact Source
     field_ref: SSD037
+    categories:
+    - contact
     returns:
     - AnnexA
     cms:
@@ -51,6 +59,8 @@ nodes:
     type: null
     description: 'Contact Outcome '
     field_ref: SSD038
+    categories:
+    - contact
     returns:
     - ADCS_SP
     cms:

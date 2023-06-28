@@ -13,8 +13,9 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
+    - review
     cms:
     - liquid_logic
     - mosaic
@@ -22,10 +23,11 @@ nodes:
     type: VARCHAR()
     description: CP Plan ID
     field_ref: SSD104
-    foreign_key: cp_plans.CP_Plan_ID
+    foreign_key: cp_plans.cp_plan_id
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
+    - review
     cms:
     - liquid_logic
     - mosaic
@@ -34,8 +36,9 @@ nodes:
     description: Review Due Date
     field_ref: SSD105
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
+    - review
     returns:
     - Local
     cms:
@@ -46,8 +49,9 @@ nodes:
     description: Date of Review
     field_ref: SSD106
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
+    - review
     returns:
     - CINcensus
     - AnnexA
@@ -59,8 +63,9 @@ nodes:
     description: CP Plan to Continue?
     field_ref: SSD107
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
+    - review
     returns:
     - Local
     cms:
@@ -71,8 +76,9 @@ nodes:
     description: Quorate?
     field_ref: SSD108
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
+    - review
     returns:
     - Local
     cms:
@@ -83,8 +89,9 @@ nodes:
     description: Childs Participation
     field_ref: SSD109
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
+    - review
     returns:
     - Local
     cms:
@@ -95,8 +102,9 @@ nodes:
     description: Quality of representation of CYP views experience
     field_ref: SSD110
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
+    - review
     returns:
     - 1a
     - draft
@@ -109,8 +117,9 @@ nodes:
       for the child? '
     field_ref: SSD111
     categories:
-    - cp
-    - sw
+    - child_protection
+    - cp_plan
+    - review
     returns:
     - 1a
     - draft

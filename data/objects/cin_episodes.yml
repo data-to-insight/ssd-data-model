@@ -12,6 +12,9 @@ nodes:
         enabled: true
     - unique:
         enabled: true
+    categories:
+    - child_in_need
+    - referral
     cms:
     - liquid_logic
     - mosaic
@@ -23,6 +26,8 @@ nodes:
     validators:
     - required:
         enabled: true
+    categories:
+    - child_in_need
     returns:
     - SSDA903
     - CINcensus
@@ -33,6 +38,9 @@ nodes:
     type: DATE
     description: CIN Referral Date
     field_ref: SSD049
+    categories:
+    - child_in_need
+    - referral
     returns:
     - CINcensus
     - AnnexA
@@ -43,6 +51,9 @@ nodes:
     type: null
     description: CIN Referral Source
     field_ref: SSD050
+    categories:
+    - child_in_need
+    - referral
     returns:
     - CINcensus
     - AnnexA
@@ -53,6 +64,9 @@ nodes:
     type: null
     description: CIN Referral Outcome
     field_ref: SSD051
+    categories:
+    - child_in_need
+    - referral
     returns:
     - CINcensus
     - AnnexA
@@ -63,6 +77,8 @@ nodes:
     type: null
     description: CIN Closure Reason
     field_ref: SSD052
+    categories:
+    - child_in_need
     returns:
     - CINcensus
     cms:
@@ -72,6 +88,8 @@ nodes:
     type: DATE
     description: CIN Closure Date
     field_ref: SSD053
+    categories:
+    - child_in_need
     returns:
     - CINcensus
     cms:
@@ -81,6 +99,9 @@ nodes:
     type: null
     description: CIN Referral Completed by Team
     field_ref: SSD054
+    categories:
+    - child_in_need
+    - referral
     returns:
     - AnnexA
     cms:
@@ -90,6 +111,9 @@ nodes:
     type: null
     description: CIN Referral Completed by Worker
     field_ref: SSD055
+    categories:
+    - child_in_need
+    - referral
     returns:
     - AnnexA
     cms:

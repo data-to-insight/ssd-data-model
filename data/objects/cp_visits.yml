@@ -7,16 +7,16 @@ nodes:
     description: CP Plan ID
     field_ref: SSD097
     primary_key: true
-    foreign_key: cp_plans.CP_Plan_ID
+    foreign_key: cp_plans.cp_plan_id
     validators:
     - required:
         enabled: true
     - unique:
         enabled: true
     categories:
-    - cp
-    - sw
-    - child_contact
+    - child_protection
+    - cp_plan
+    - visit
     cms:
     - liquid_logic
     - mosaic
@@ -25,9 +25,9 @@ nodes:
     description: CP Visit ID
     field_ref: SSD098
     categories:
-    - cp
-    - sw
-    - child_contact
+    - child_protection
+    - cp_plan
+    - visit
     cms:
     - liquid_logic
     - mosaic
@@ -36,9 +36,9 @@ nodes:
     description: Date of Visit
     field_ref: SSD099
     categories:
-    - cp
-    - sw
-    - child_contact
+    - child_protection
+    - cp_plan
+    - visit
     returns:
     - AnnexA
     cms:
@@ -49,9 +49,9 @@ nodes:
     description: Child Seen
     field_ref: SSD100
     categories:
-    - cp
-    - sw
-    - child_contact
+    - child_protection
+    - cp_plan
+    - visit
     returns:
     - Local
     cms:
@@ -62,9 +62,9 @@ nodes:
     description: Child Seen Alone
     field_ref: SSD101
     categories:
-    - cp
-    - sw
-    - child_contact
+    - child_protection
+    - cp_plan
+    - visit
     returns:
     - AnnexA
     cms:
@@ -75,9 +75,9 @@ nodes:
     description: Child Bedroom Seen
     field_ref: SSD102
     categories:
-    - cp
-    - sw
-    - child_contact
+    - child_protection
+    - cp_plan
+    - visit
     returns:
     - Local
     cms:

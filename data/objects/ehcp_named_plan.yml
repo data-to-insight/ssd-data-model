@@ -1,6 +1,6 @@
 ---
 nodes:
-- name: named_plan
+- name: ehcp_named_plan
   fields:
   - name: named_plan_id
     type: VARCHAR()
@@ -13,8 +13,9 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - assessment
-    - outcomes
+    - send
+    - ehcp_request
+    - ehcp_assessment
     cms:
     - liquid_logic
     - mosaic
@@ -22,10 +23,11 @@ nodes:
     type: VARCHAR()
     description: Assessment ID
     field_ref: SSD215
-    foreign_key: assessments.assessment_id
+    foreign_key: ehcp_assessment.ehcp_asmt_id
     categories:
-    - assessment
-    - outcomes
+    - send
+    - ehcp_request
+    - ehcp_assessment
     cms:
     - liquid_logic
     - mosaic
@@ -34,8 +36,9 @@ nodes:
     description: Start Date
     field_ref: SSD216
     categories:
-    - assessment
-    - outcomes
+    - send
+    - ehcp_request
+    - ehcp_assessment
     returns:
     - SEN2
     cms:
@@ -46,8 +49,9 @@ nodes:
     description: Cease Date
     field_ref: SSD217
     categories:
-    - assessment
-    - outcomes
+    - send
+    - ehcp_request
+    - ehcp_assessment
     returns:
     - SEN2
     cms:
@@ -58,8 +62,9 @@ nodes:
     description: Cease Reason
     field_ref: SSD218
     categories:
-    - assessment
-    - outcomes
+    - send
+    - ehcp_request
+    - ehcp_assessment
     returns:
     - SEN2
     cms:

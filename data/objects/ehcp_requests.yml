@@ -1,6 +1,6 @@
 ---
 nodes:
-- name: requests
+- name: ehcp_requests
   fields:
   - name: ehcp_request_id
     type: VARCHAR()
@@ -13,7 +13,8 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - education
+    - send
+    - ehcp_request
     cms:
     - liquid_logic
     - mosaic
@@ -22,7 +23,8 @@ nodes:
     description: UPN
     field_ref: SSD206
     categories:
-    - education
+    - send
+    - ehcp_request
     returns:
     - SEN2
     cms:
@@ -33,7 +35,8 @@ nodes:
     description: Received Date
     field_ref: SSD207
     categories:
-    - education
+    - send
+    - ehcp_request
     returns:
     - SEN2
     cms:
@@ -44,7 +47,8 @@ nodes:
     description: Request Outcome Date
     field_ref: SSD208
     categories:
-    - education
+    - send
+    - ehcp_request
     returns:
     - SEN2
     cms:
@@ -55,7 +59,8 @@ nodes:
     description: Request Outcome
     field_ref: SSD209
     categories:
-    - education
+    - send
+    - ehcp_request
     returns:
     - SEN2
     cms:

@@ -13,8 +13,7 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - cp
-    - sw
+    - looked_after
     cms:
     - liquid_logic
     - mosaic
@@ -27,8 +26,7 @@ nodes:
     - required:
         enabled: true
     categories:
-    - cp
-    - sw
+    - looked_after
     returns:
     - SSDA903
     - CINcensus
@@ -40,20 +38,18 @@ nodes:
     description: Date Episode Commenced
     field_ref: SSD116
     categories:
-    - cp
-    - sw
+    - looked_after
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
   - name: cla_epi_start_reason
-    type: VARCHAR(255)
+    type: null
     description: Reason for New CLA Episode
     field_ref: SSD117
     categories:
-    - cp
-    - sw
+    - looked_after
     returns:
     - SSDA903
     cms:
@@ -64,8 +60,7 @@ nodes:
     description: Date Episode Ceased
     field_ref: SSD118
     categories:
-    - cp
-    - sw
+    - looked_after
     returns:
     - SSDA903
     - AnnexA
@@ -73,12 +68,11 @@ nodes:
     - liquid_logic
     - mosaic
   - name: cla_epi_cease_reason
-    type: VARCHAR(255)
+    type: null
     description: Reason Episode Ceased
     field_ref: SSD119
     categories:
-    - cp
-    - sw
+    - looked_after
     returns:
     - SSDA903
     - AnnexA
@@ -90,8 +84,7 @@ nodes:
     description: Allocated Team
     field_ref: SSD120
     categories:
-    - cp
-    - sw
+    - looked_after
     returns:
     - AnnexA
     cms:
@@ -102,8 +95,7 @@ nodes:
     description: Allocated Worker
     field_ref: SSD121
     categories:
-    - cp
-    - sw
+    - looked_after
     returns:
     - AnnexA
     cms:

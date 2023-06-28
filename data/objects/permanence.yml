@@ -11,7 +11,9 @@ nodes:
     - required:
         enabled: true
     categories:
+    - looked_after
     - permanence
+    - adoption
     cms:
     - liquid_logic
     - mosaic
@@ -24,7 +26,9 @@ nodes:
     - required:
         enabled: true
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - SSDA903
     - CINcensus
@@ -36,7 +40,9 @@ nodes:
     description: 'Date of ADM Decision '
     field_ref: SSD185
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - SSDA903
     - AnnexA
@@ -49,7 +55,9 @@ nodes:
     description: Date of FFA CP Decision
     field_ref: SSD186
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - ASGLB
     cms:
@@ -60,7 +68,9 @@ nodes:
     description: Date the entered Care
     field_ref: SSD187
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - SSDA903
     - AnnexA
@@ -73,7 +83,9 @@ nodes:
     description: Date of Placement Freeing Order
     field_ref: SSD188
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - SSDA903
     - AnnexA
@@ -86,7 +98,9 @@ nodes:
     description: Date Placed for Adoption
     field_ref: SSD189
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - SSDA903
     - AnnexA
@@ -99,7 +113,9 @@ nodes:
     description: Date Matched to Prospective Adopters
     field_ref: SSD190
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - SSDA903
     - AnnexA
@@ -112,7 +128,9 @@ nodes:
     description: "Date Placed in FFA CP Placement\_"
     field_ref: SSD191
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - SSDA903
     - AnnexA
@@ -125,7 +143,9 @@ nodes:
     description: Date of Decision that Child Should No Longer be Placed for Adoption
     field_ref: SSD192
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - AnnexA
     - ASGLB
@@ -138,7 +158,9 @@ nodes:
       carers)
     field_ref: SSD193
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - SSDA903
     - AnnexA
@@ -151,7 +173,9 @@ nodes:
     description: Is the child a part of a sibling group?
     field_ref: SSD194
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - ASGLB
     cms:
@@ -163,7 +187,9 @@ nodes:
       together as sibling group INCLUDING this child
     field_ref: SSD195
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - ASGLB
     cms:
@@ -175,7 +201,9 @@ nodes:
       separately from the child
     field_ref: SSD196
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - ASGLB
     cms:
@@ -186,7 +214,9 @@ nodes:
     description: URN of the placement provider agency
     field_ref: SSD197
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - SSDA903
     cms:
@@ -197,7 +227,9 @@ nodes:
     description: Reason No Longer Placed for Adoption
     field_ref: SSD198
     categories:
+    - looked_after
     - permanence
+    - adoption
     returns:
     - SSDA903
     - AnnexA
@@ -210,6 +242,7 @@ nodes:
     description: "Date of Order\_"
     field_ref: SSD199
     categories:
+    - looked_after
     - permanence
     returns:
     - SSDA903
@@ -223,6 +256,7 @@ nodes:
     description: Type of Order
     field_ref: SSD200
     categories:
+    - looked_after
     - permanence
     returns:
     - SSDA903
@@ -235,7 +269,9 @@ nodes:
     description: Status of Special Guardian
     field_ref: SSD201
     categories:
+    - looked_after
     - permanence
+    - SGO
     returns:
     - ASGLB
     cms:
@@ -246,7 +282,9 @@ nodes:
     description: Age of Special Guardian
     field_ref: SSD202
     categories:
+    - looked_after
     - permanence
+    - SGO
     returns:
     - ASGLB
     cms:

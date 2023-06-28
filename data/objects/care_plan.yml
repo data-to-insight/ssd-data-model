@@ -12,6 +12,9 @@ nodes:
         enabled: true
     - unique:
         enabled: true
+    categories:
+    - looked_after
+    - review
     cms:
     - liquid_logic
     - mosaic
@@ -19,6 +22,9 @@ nodes:
     type: null
     description: What is the chosen plan for this childyoung person?
     field_ref: SSD154
+    categories:
+    - looked_after
+    - review
     returns:
     - AnnexA
     cms:
