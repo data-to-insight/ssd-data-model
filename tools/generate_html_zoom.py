@@ -151,6 +151,6 @@ with open(paths['wsite_root'] +'index.html', 'w') as f:
 # Resize & optimise images for web publishing.
 # Other/above methods only reduce to width/size of longest text data on row(s)
 resize_images(paths['erd_objects_publish'], target_width=300, quality=80)         # each entity object
-# resize_images(paths['wsite_root'], target_width=3000, quality=100)    # overview erd image
+resize_images(paths['wsite_root'], target_width=5000, quality=100)    # overview erd image
 
 

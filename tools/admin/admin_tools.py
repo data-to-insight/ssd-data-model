@@ -1,3 +1,7 @@
+import glob
+from PIL import Image
+import os
+
 def get_paths():
     """
     Return a dictionary of paths used in the application.
