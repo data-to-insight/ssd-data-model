@@ -24,10 +24,11 @@ image_width = "300px"
 
 # Define page title and intro text
 page_title_str = "SSD Data Model Documentation"
-page_intro_str = "Data Item and Entity Definitions published for iterative review. Objects/data fields capturing LA Childrens Services data towards 1a SSD."
+page_intro_str = "Project 1a. Standard Safeguarding Dataset. Data objects/item definitions published towards iterative review."
 
-notes_str = "Right click and open the image in a new table to zoom/magnify object detail."
+notes_str = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item reference numbers [SSD0000] enable referencing specific data points/fields."
 repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
+
 
 html_content = "<html><head><style>"
 html_content += "body { margin: 20px; }"
@@ -41,11 +42,20 @@ html_content += "th.field-column { width: 20%; }"
 html_content += "th.cms-column { width: 15%; }"
 html_content += "th.categories-column { width: 15%; }"
 html_content += "th.returns-column { width: 20%; }"
+html_content += ".last-updated-container { display: flex; align-items: center; }"
+html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
+html_content += ".repo-link { text-decoration: none; }"
 html_content += "</style></head><body>"
 html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
-html_content += f"<h4>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}</h4><a href='{repo_link_back_str}'> | SSD Github</a>"
-html_content += "<div style='padding: 20px;'>"
+html_content += "<div style='padding: 2px;'>"
+
+# Last updated and link section
+html_content += "<div class='last-updated-container'>"
+html_content += f"<span class='last-updated-text'>Last updated:</span>"
+html_content += f"<span class='last-updated-date'>{datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}</span>"
+html_content += f"<a href='{repo_link_back_str}' class='repo-link'>| SSD Github</a>"
+html_content += "</div>"
 
 # Object Overview section
 html_content += "<h1>Objects Overview:</h1>"
