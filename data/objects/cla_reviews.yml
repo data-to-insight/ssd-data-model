@@ -13,8 +13,8 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
     cms:
     - liquid_logic
     - mosaic
@@ -22,13 +22,13 @@ nodes:
     type: null
     description: Episode ID
     field_ref: SSD133
-    foreign_key: cla_episodes.Episode_ID
+    foreign_key: cla_episodes.cla_episode_id
     validators:
     - required:
         enabled: true
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
     cms:
     - liquid_logic
     - mosaic
@@ -37,8 +37,8 @@ nodes:
     description: CLA Review Due Date
     field_ref: SSD134
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
     returns:
     - Local
     cms:
@@ -49,8 +49,8 @@ nodes:
     description: CLA Review Date
     field_ref: SSD135
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
     returns:
     - SSDA903
     - AnnexA
@@ -58,13 +58,13 @@ nodes:
     - liquid_logic
     - mosaic
   - name: rev_cyp_involved_care_plan
-    type: VARCHAR(255)
+    type: null
     description: Has the childyoung person been involved in formulating this Care
       Plan?
     field_ref: SSD136
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
     returns:
     - 1a
     - draft
@@ -72,13 +72,13 @@ nodes:
     - liquid_logic
     - mosaic
   - name: rev_sw_met_child_views
-    type: VARCHAR(255)
+    type: null
     description: 'Has the Social Worker met with the child on their own to undertake
       direct work to establish their wishes and views '
     field_ref: SSD137
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
     returns:
     - 1a
     - draft
@@ -90,8 +90,8 @@ nodes:
     description: Participation code
     field_ref: SSD138
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
     returns:
     - SSDA903
     cms:
@@ -102,8 +102,8 @@ nodes:
     description: Is the Care Plan meeting the childs needs?
     field_ref: SSD139
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
     returns:
     - 1a
     - draft
@@ -115,8 +115,8 @@ nodes:
     description: Is a Permanence Plan in place?
     field_ref: SSD140
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
     returns:
     - AnnexA
     cms:
@@ -127,8 +127,8 @@ nodes:
     description: Date of Last IRO Visit  Contact to the Child
     field_ref: SSD141
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
     returns:
     - AnnexA
     cms:
@@ -140,8 +140,8 @@ nodes:
       for special guardianship or residence order?
     field_ref: SSD142
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
     returns:
     - SSDA903
     cms:
@@ -152,8 +152,9 @@ nodes:
     description: Date of Previous Permanence Order
     field_ref: SSD143
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
+    - permanence
     returns:
     - SSDA903
     cms:
@@ -164,8 +165,9 @@ nodes:
     description: Previous Permanence Option
     field_ref: SSD144
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
+    - permanence
     returns:
     - SSDA903
     cms:
@@ -176,8 +178,9 @@ nodes:
     description: Previous Permanence Arranged LA
     field_ref: SSD145
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
+    - permanence
     returns:
     - SSDA903
     cms:
@@ -188,8 +191,9 @@ nodes:
     description: Child convicted during the year
     field_ref: SSD146
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
+    - offending
     returns:
     - SSDA903
     cms:
@@ -200,8 +204,9 @@ nodes:
     description: Health surveillance checks up to date
     field_ref: SSD147
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
+    - health
     returns:
     - SSDA903
     cms:
@@ -212,8 +217,9 @@ nodes:
     description: Date of Last Health Assessment
     field_ref: SSD148
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
+    - health
     returns:
     - SSDA903
     - AnnexA
@@ -225,8 +231,9 @@ nodes:
     description: Date of Last Dental Check
     field_ref: SSD149
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
+    - health
     returns:
     - SSDA903
     - AnnexA
@@ -238,8 +245,9 @@ nodes:
     description: Immunisations up to Date
     field_ref: SSD150
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
+    - health
     returns:
     - SSDA903
     cms:
@@ -250,8 +258,9 @@ nodes:
     description: Identified as having a substance misuse problem
     field_ref: SSD151
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
+    - health
     returns:
     - SSDA903
     cms:
@@ -262,8 +271,9 @@ nodes:
     description: Child received intervention for substance misuse problem
     field_ref: SSD152
     categories:
-    - cla
-    - sw
+    - looked_after
+    - review
+    - health
     returns:
     - SSDA903
     cms:

@@ -1,6 +1,6 @@
 ---
 nodes:
-- name: active_plans
+- name: ehcp_active_plans
   fields:
   - name: active_ehcp_id
     type: VARCHAR()
@@ -12,6 +12,10 @@ nodes:
         enabled: true
     - unique:
         enabled: true
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
     cms:
     - liquid_logic
     - mosaic
@@ -19,7 +23,11 @@ nodes:
     type: VARCHAR()
     description: Request ID
     field_ref: SSD220
-    foreign_key: requests.request_id
+    foreign_key: ehcp_requests.ehcp_request_id
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
     cms:
     - liquid_logic
     - mosaic
@@ -27,6 +35,10 @@ nodes:
     type: DATE
     description: Last Review
     field_ref: SSD221
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
     returns:
     - SEN2
     cms:

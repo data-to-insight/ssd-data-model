@@ -1,6 +1,6 @@
 ---
 nodes:
-- name: s47_enquiry
+- name: s47_enquiry_icpc
   fields:
   - name: s47_enquiry_id
     type: VARCHAR()
@@ -13,8 +13,8 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - s47
-    - cp
+    - s47_enquiry
+    - child_protection
     cms:
     - liquid_logic
     - mosaic
@@ -27,8 +27,8 @@ nodes:
     - required:
         enabled: true
     categories:
-    - s47
-    - cp
+    - s47_enquiry
+    - child_protection
     returns:
     - SSDA903
     - CINcensus
@@ -40,8 +40,8 @@ nodes:
     description: Strategy Discussion initiating S47 Enquiry Start Date
     field_ref: SSD080
     categories:
-    - s47
-    - cp
+    - s47_enquiry
+    - child_protection
     returns:
     - AnnexA
     cms:
@@ -52,8 +52,8 @@ nodes:
     description: S47 Start Date
     field_ref: SSD081
     categories:
-    - s47
-    - cp
+    - s47_enquiry
+    - child_protection
     returns:
     - CINcensus
     cms:
@@ -64,8 +64,8 @@ nodes:
     description: S47 Completed Date
     field_ref: SSD082
     categories:
-    - s47
-    - cp
+    - s47_enquiry
+    - child_protection
     cms:
     - liquid_logic
     - mosaic
@@ -74,8 +74,8 @@ nodes:
     description: S47 Outcome
     field_ref: SSD083
     categories:
-    - s47
-    - cp
+    - s47_enquiry
+    - child_protection
     returns:
     - CINcensus
     cms:
@@ -86,8 +86,8 @@ nodes:
     description: Date of Initial CP Conference
     field_ref: SSD084
     categories:
-    - s47
-    - cp
+    - initial_cp_conference
+    - child_protection
     returns:
     - CINcensus
     cms:
@@ -98,8 +98,8 @@ nodes:
     description: Outcome of Initial CP Conference
     field_ref: SSD085
     categories:
-    - s47
-    - cp
+    - initial_cp_conference
+    - child_protection
     returns:
     - AnnexA
     cms:
@@ -110,8 +110,8 @@ nodes:
     description: S47 ICPC Allocated Team
     field_ref: SSD086
     categories:
-    - s47
-    - cp
+    - initial_cp_conference
+    - child_protection
     returns:
     - AnnexA
     cms:
@@ -122,8 +122,8 @@ nodes:
     description: S47 ICPC Allocated Worker
     field_ref: SSD087
     categories:
-    - s47
-    - cp
+    - initial_cp_conference
+    - child_protection
     returns:
     - AnnexA
     cms:

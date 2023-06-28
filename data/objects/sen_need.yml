@@ -12,6 +12,11 @@ nodes:
         enabled: true
     - unique:
         enabled: true
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
+    - need
     cms:
     - liquid_logic
     - mosaic
@@ -19,7 +24,11 @@ nodes:
     type: VARCHAR()
     description: Plan ID
     field_ref: SSD223
-    foreign_key: cp_plans.plan_id
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
+    - need
     cms:
     - liquid_logic
     - mosaic
@@ -27,6 +36,11 @@ nodes:
     type: null
     description: SEN Type
     field_ref: SSD224
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
+    - need
     returns:
     - SEN2
     cms:
@@ -36,6 +50,11 @@ nodes:
     type: null
     description: SEN Type Rank
     field_ref: SSD225
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
+    - need
     returns:
     - SEN2
     cms:

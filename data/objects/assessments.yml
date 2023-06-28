@@ -13,6 +13,7 @@ nodes:
     - unique:
         enabled: true
     categories:
+    - child_in_need
     - assessment
     cms:
     - liquid_logic
@@ -26,6 +27,7 @@ nodes:
     - required:
         enabled: true
     categories:
+    - child_in_need
     - assessment
     returns:
     - SSDA903
@@ -38,6 +40,7 @@ nodes:
     description: Assessment Start Date
     field_ref: SSD058
     categories:
+    - child_in_need
     - assessment
     returns:
     - CINcensus
@@ -49,6 +52,7 @@ nodes:
     description: Child Seen During Assessment
     field_ref: SSD059
     categories:
+    - child_in_need
     - assessment
     returns:
     - AnnexA
@@ -60,6 +64,7 @@ nodes:
     description: Assessment Authorised Date
     field_ref: SSD060
     categories:
+    - child_in_need
     - assessment
     returns:
     - CINcensus
@@ -71,6 +76,7 @@ nodes:
     description: Assessment Outcome
     field_ref: SSD061
     categories:
+    - child_in_need
     - assessment
     returns:
     - AnnexA
@@ -82,6 +88,7 @@ nodes:
     description: Assessment Completed by Team
     field_ref: SSD062
     categories:
+    - child_in_need
     - assessment
     returns:
     - AnnexA
@@ -93,6 +100,7 @@ nodes:
     description: Assessment Completed by Worker
     field_ref: SSD063
     categories:
+    - child_in_need
     - assessment
     returns:
     - AnnexA

@@ -14,6 +14,8 @@ nodes:
         enabled: true
     categories:
     - identity
+    - looked_after
+    - mother
     returns:
     - Local
     cms:
@@ -29,6 +31,8 @@ nodes:
         enabled: true
     categories:
     - identity
+    - looked_after
+    - mother
     returns:
     - SSDA903
     - CINcensus
@@ -41,6 +45,8 @@ nodes:
     field_ref: SSD028
     categories:
     - identity
+    - looked_after
+    - mother
     returns:
     - SSDA903
     cms:

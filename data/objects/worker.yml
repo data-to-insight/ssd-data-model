@@ -13,7 +13,7 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - sw
+    - social_worker
     cms:
     - liquid_logic
     - mosaic
@@ -28,7 +28,7 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - sw
+    - social_worker
     returns:
     - SSDA903
     cms:
@@ -39,7 +39,7 @@ nodes:
     description: Social worker episode start date
     field_ref: SSD228
     categories:
-    - sw
+    - social_worker
     returns:
     - SSDA903
     cms:
@@ -50,7 +50,7 @@ nodes:
     description: Social worker episode end date
     field_ref: SSD229
     categories:
-    - sw
+    - social_worker
     returns:
     - SSDA903
     cms:
@@ -61,7 +61,7 @@ nodes:
     description: Reason for social worker change
     field_ref: SSD230
     categories:
-    - sw
+    - social_worker
     returns:
     - SSDA903
     cms:
@@ -72,7 +72,7 @@ nodes:
     description: Agency worker
     field_ref: SSD231
     categories:
-    - sw
+    - social_worker
     returns:
     - CSCWF
     cms:
@@ -83,7 +83,7 @@ nodes:
     description: Role within the organisation
     field_ref: SSD232
     categories:
-    - sw
+    - social_worker
     returns:
     - CSCWF
     cms:
@@ -94,7 +94,7 @@ nodes:
     description: Number of cases held
     field_ref: SSD233
     categories:
-    - sw
+    - social_worker
     returns:
     - CSCWF
     cms:
@@ -105,7 +105,7 @@ nodes:
     description: Qualification level
     field_ref: SSD234
     categories:
-    - sw
+    - social_worker
     returns:
     - CSCWF
     cms:

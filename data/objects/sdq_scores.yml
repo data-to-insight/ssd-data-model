@@ -12,6 +12,9 @@ nodes:
         enabled: true
     - unique:
         enabled: true
+    categories:
+    - looked_after
+    - sdq
     cms:
     - liquid_logic
     - mosaic
@@ -23,6 +26,9 @@ nodes:
     validators:
     - required:
         enabled: true
+    categories:
+    - looked_after
+    - sdq
     returns:
     - SSDA903
     - CINcensus
@@ -33,6 +39,9 @@ nodes:
     type: DATE
     description: SDQ Completed Date
     field_ref: SSD162
+    categories:
+    - looked_after
+    - sdq
     returns:
     - Local
     cms:
@@ -42,6 +51,9 @@ nodes:
     type: null
     description: SDQ Reason
     field_ref: SSD163
+    categories:
+    - looked_after
+    - sdq
     returns:
     - SSDA903
     cms:
@@ -51,6 +63,9 @@ nodes:
     type: null
     description: SDQ Score
     field_ref: SSD164
+    categories:
+    - looked_after
+    - sdq
     returns:
     - SSDA903
     cms:

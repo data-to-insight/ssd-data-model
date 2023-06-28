@@ -13,6 +13,7 @@ nodes:
     - unique:
         enabled: true
     categories:
+    - child_in_need
     - assessment
     cms:
     - liquid_logic
@@ -22,6 +23,7 @@ nodes:
     description: Assessment Factors
     field_ref: SSD065
     categories:
+    - child_in_need
     - assessment
     returns:
     - CINcensus

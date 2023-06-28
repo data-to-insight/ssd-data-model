@@ -7,9 +7,8 @@ nodes:
     description: Visit ID
     field_ref: SSD155
     categories:
-    - cla
-    - sw
-    - child_contact
+    - looked_after
+    - visit
     cms:
     - liquid_logic
     - mosaic
@@ -17,11 +16,10 @@ nodes:
     type: VARCHAR()
     description: Episode ID
     field_ref: SSD156
-    foreign_key: cla_episodes.Episode_ID
+    foreign_key: cla_episodes.cla_episode_id
     categories:
-    - cla
-    - sw
-    - child_contact
+    - looked_after
+    - visit
     cms:
     - liquid_logic
     - mosaic
@@ -30,9 +28,8 @@ nodes:
     description: Date of Visit
     field_ref: SSD157
     categories:
-    - cla
-    - sw
-    - child_contact
+    - looked_after
+    - visit
     returns:
     - AnnexA
     cms:
@@ -43,9 +40,8 @@ nodes:
     description: Child Seen
     field_ref: SSD158
     categories:
-    - cla
-    - sw
-    - child_contact
+    - looked_after
+    - visit
     returns:
     - Local
     cms:
@@ -56,9 +52,8 @@ nodes:
     description: Child Seen Alone
     field_ref: SSD159
     categories:
-    - cla
-    - sw
-    - child_contact
+    - looked_after
+    - visit
     returns:
     - Local
     cms:

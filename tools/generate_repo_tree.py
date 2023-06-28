@@ -46,5 +46,5 @@ for folder, files in file_tree:
     sheet.append(row)
 
 # Save the workbook as an Excel file
-output_file = "docs/publish/ssd_repo_tree.xlsx"
+output_file = "docs/admin/ssd_repo_tree.xlsx"
 workbook.save(output_file)

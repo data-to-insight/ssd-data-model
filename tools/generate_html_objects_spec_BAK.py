@@ -17,10 +17,12 @@ def resize_images(folder_path, target_width, quality=90):
 
 
 
-# location of
-root_folder = 'docs/'
-erd_folder = root_folder+'erd_images/'
-tools_folder = 'tools/'
+# File paths
+site_root_path = 'docs/'
+erd_path = site_root_path +'imgs/'
+erd_objects_path = site_root_path +'imgs/erd_data_objects/'
+
+tools_path = 'tools/'
 
 # Calculate main image width
 main_image_width = "calc(100% - 40px)"  # Adjust the padding as needed
@@ -55,7 +57,7 @@ html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y'
 # Add Objects Overview section
 html_content += "<h2>Objects Overview:</h2>"
 html_content += "<div style='padding: 20px;'>"
-html_content += f'<img src="ssd_erd.png" alt="Data Objects Overview" style="width: {main_image_width};">'
+html_content += f'<img src="imgs/ssd_erd.png" alt="Data Objects Overview" style="width: {main_image_width};">'
 html_content += "</div>"
 
 # Add Object Data Points Overview section
@@ -73,7 +75,7 @@ for file_path in glob.glob('data/objects/*.yml'):
             # html_content += "<div style='display: flex;'>" # (removed) flex img to fit...
             html_content += "<div style='text-align: center;'>"
 
-            html_content += f'<img src="erd_images/{entity_name}.png" alt="{entity_name}" style="width: {image_width}; margin-right: 20px;">'
+            html_content += f'<img src="imgs/erd_data_objects/{entity_name}.png" alt="{entity_name}" style="width: {image_width}; margin-right: 20px;">'
             html_content += "<table>"
             html_content += "<tr><th class='field-ref-column'>Field Ref</th><th class='data-item-column'>Data Item Name / Field</th><th class='field-column'>Field</th><th class='cms-column'>Exists in CMS</th><th class='categories-column'>Data Category Group(s)</th><th class='returns-column'>Returns</th></tr>"
             for field in nodes[0]['fields']:
@@ -88,14 +90,14 @@ for file_path in glob.glob('data/objects/*.yml'):
             html_content += "</div>"
 
 # Write HTML content to file
-with open(root_folder+'index.html', 'w') as f:
+with open(site_root_pathroot_path+'index.html', 'w') as f:
     f.write(html_content)
 
 # Run create_erd.py script to re-create the individual object diagram images
-subprocess.run(['python3', tools_folder+'create_erd.py'])
+subprocess.run(['python3', tools_path+'create_erd_imgs.py'])
 
 
 # Resize & optimise images for web publishing. 
 # Other/above methods only reduce to width/size of longest text data on row(s)
-resize_images(erd_folder, target_width=300, quality=80)         # each entity object
-# resize_images(root_folder, target_width=3000, quality=100)    # overview erd image
+resize_images(erd_objects_path, target_width=300, quality=80)         # each entity object
+# resize_images(erd_path, target_width=3000, quality=100)    # overview erd image

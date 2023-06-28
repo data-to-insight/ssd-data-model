@@ -13,8 +13,8 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - abuse
-    - cp
+    - child_protection
+    - cp_plan
     cms:
     - liquid_logic
     - mosaic
@@ -26,9 +26,11 @@ nodes:
     validators:
     - required:
         enabled: true
+    - unique:
+        enabled: true
     categories:
-    - abuse
-    - cp
+    - child_protection
+    - cp_plan
     cms:
     - liquid_logic
     - mosaic
@@ -37,8 +39,8 @@ nodes:
     description: Category of Abuse
     field_ref: SSD095
     categories:
-    - abuse
-    - cp
+    - child_protection
+    - cp_plan
     returns:
     - CINcensus
     cms:
@@ -49,8 +51,8 @@ nodes:
     description: Category of Abuse Start Date
     field_ref: SSD096
     categories:
-    - abuse
-    - cp
+    - child_protection
+    - cp_plan
     returns:
     - Local
     cms:

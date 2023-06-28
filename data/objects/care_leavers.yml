@@ -13,7 +13,7 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - permanence
+    - care_leavers
     cms:
     - liquid_logic
     - mosaic
@@ -26,7 +26,7 @@ nodes:
     - required:
         enabled: true
     categories:
-    - permanence
+    - care_leavers
     returns:
     - SSDA903
     - CINcensus
@@ -38,7 +38,7 @@ nodes:
     description: Eligibility Status Category
     field_ref: SSD174
     categories:
-    - permanence
+    - care_leavers
     returns:
     - AnnexA
     cms:
@@ -49,7 +49,7 @@ nodes:
     description: In Touch Category
     field_ref: SSD175
     categories:
-    - permanence
+    - care_leavers
     returns:
     - AnnexA
     cms:
@@ -60,7 +60,7 @@ nodes:
     description: Latest Date of Contact
     field_ref: SSD176
     categories:
-    - permanence
+    - care_leavers
     returns:
     - AnnexA
     cms:
@@ -71,7 +71,7 @@ nodes:
     description: Accommodation
     field_ref: SSD177
     categories:
-    - permanence
+    - care_leavers
     returns:
     - AnnexA
     cms:
@@ -82,7 +82,7 @@ nodes:
     description: Suitability of Accommodation
     field_ref: SSD178
     categories:
-    - permanence
+    - care_leavers
     returns:
     - AnnexA
     cms:
@@ -93,7 +93,7 @@ nodes:
     description: Activity Status
     field_ref: SSD179
     categories:
-    - permanence
+    - care_leavers
     returns:
     - AnnexA
     cms:
@@ -104,7 +104,7 @@ nodes:
     description: Latest Pathway Plan Review Date
     field_ref: SSD180
     categories:
-    - permanence
+    - care_leavers
     returns:
     - AnnexA
     cms:
@@ -115,7 +115,7 @@ nodes:
     description: Allocated Personal Advisor
     field_ref: SSD181
     categories:
-    - permanence
+    - care_leavers
     returns:
     - AnnexA
     cms:
@@ -126,7 +126,7 @@ nodes:
     description: Allocated Team
     field_ref: SSD182
     categories:
-    - permanence
+    - care_leavers
     returns:
     - AnnexA
     cms:
@@ -137,7 +137,7 @@ nodes:
     description: Allocated Worker
     field_ref: SSD183
     categories:
-    - permanence
+    - care_leavers
     returns:
     - AnnexA
     cms:

@@ -57,7 +57,7 @@ relationships:
   relation: 1:M
 - parent_object: person
   parent_key: la_person_id
-  child_object: s47_enquiry
+  child_object: s47_enquiry_icpc
   child_key: la_person_id
   relation: 1:M
 - parent_object: person
@@ -96,57 +96,52 @@ relationships:
   child_key: cp_plan_id
   relation: 1:M
 - parent_object: cp_plans
-  parent_key: CP_Plan_ID
+  parent_key: cp_plan_id
   child_object: cp_visits
   child_key: cp_plan_id
   relation: 1:M
 - parent_object: cp_plans
-  parent_key: CP_Plan_ID
+  parent_key: cp_plan_id
   child_object: cp_reviews
   child_key: cp_plan_id
   relation: 1:M
-- parent_object: cp_plans
-  parent_key: plan_id
-  child_object: sen_need
-  child_key: active_ehcp_id
-  relation: 1:M
 - parent_object: cp_reviews
-  parent_key: Review_ID
-  child_object: risks_to_child_at_this_conference
+  parent_key: cp_review_id
+  child_object: cp_reviews_risks
   child_key: cp_review_id
   relation: 1:M
 - parent_object: cla_episodes
-  parent_key: Episode_ID
+  parent_key: cla_episode_id
   child_object: placement
   child_key: cla_episode_id
   relation: 1:M
 - parent_object: cla_episodes
-  parent_key: Episode_ID
+  parent_key: cla_episode_id
   child_object: cla_reviews
   child_key: cla_episode_id
   relation: 1:M
 - parent_object: cla_episodes
-  parent_key: Episode_ID
+  parent_key: cla_episode_id
   child_object: cla_visits
   child_key: cla_episode_id
   relation: 1:M
 - parent_object: cla_episodes
-  parent_key: Episode_ID
+  parent_key: cla_episode_id
   child_object: missing
   child_key: cla_episode_id
   relation: 1:M
-- parent_object: requests
-  parent_key: request_id
-  child_object: assessment
+- parent_object: ehcp_requests
+  parent_key: ehcp_request_id
+  child_object: ehcp_assessment
   child_key: ehcp_request_id
   relation: 1:M
-- parent_object: requests
-  parent_key: request_id
-  child_object: active_plans
+- parent_object: ehcp_requests
+  parent_key: ehcp_request_id
+  child_object: ehcp_active_plans
   child_key: ehcp_request_id
   relation: 1:M
-- parent_object: assessments
-  parent_key: assessment_id
-  child_object: named_plan
+- parent_object: ehcp_assessment
+  parent_key: ehcp_asmt_id
+  child_object: ehcp_named_plan
   child_key: ehcp_asmt_id
   relation: 1:M

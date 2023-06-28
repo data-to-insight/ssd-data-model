@@ -14,6 +14,8 @@ nodes:
         enabled: true
     categories:
     - identity
+    - looked_after
+    - permanence
     cms:
     - liquid_logic
     - mosaic
@@ -27,6 +29,8 @@ nodes:
         enabled: true
     categories:
     - identity
+    - looked_after
+    - permanence
     returns:
     - SSDA903
     - CINcensus
@@ -39,6 +43,8 @@ nodes:
     field_ref: SSD031
     categories:
     - identity
+    - looked_after
+    - permanence
     returns:
     - SSDA903
     - AnnexA
@@ -51,6 +57,8 @@ nodes:
     field_ref: SSD032
     categories:
     - identity
+    - looked_after
+    - permanence
     returns:
     - Local
     cms:
@@ -62,6 +70,8 @@ nodes:
     field_ref: SSD033
     categories:
     - identity
+    - looked_after
+    - permanence
     returns:
     - Local
     cms:

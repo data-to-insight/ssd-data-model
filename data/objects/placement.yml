@@ -13,8 +13,8 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - cp
-    - permanence
+    - looked_after
+    - placement
     cms:
     - liquid_logic
     - mosaic
@@ -22,10 +22,10 @@ nodes:
     type: VARCHAR()
     description: Episode ID
     field_ref: SSD123
-    foreign_key: cla_episodes.Episode_ID
+    foreign_key: cla_episodes.cla_episode_id
     categories:
-    - cp
-    - permanence
+    - looked_after
+    - placement
     cms:
     - liquid_logic
     - mosaic
@@ -34,8 +34,8 @@ nodes:
     description: Placement Start Date
     field_ref: SSD124
     categories:
-    - cp
-    - permanence
+    - looked_after
+    - placement
     returns:
     - SSDA903
     - AnnexA
@@ -47,8 +47,8 @@ nodes:
     description: Placement Type
     field_ref: SSD125
     categories:
-    - cp
-    - permanence
+    - looked_after
+    - placement
     returns:
     - SSDA903
     - AnnexA
@@ -60,8 +60,8 @@ nodes:
     description: URN of Placement
     field_ref: SSD126
     categories:
-    - cp
-    - permanence
+    - looked_after
+    - placement
     returns:
     - SSDA903
     - AnnexA
@@ -73,8 +73,8 @@ nodes:
     description: LA of Placement
     field_ref: SSD127
     categories:
-    - cp
-    - permanence
+    - looked_after
+    - placement
     returns:
     - SSDA903
     - AnnexA
@@ -86,8 +86,8 @@ nodes:
     description: Placement Provider
     field_ref: SSD128
     categories:
-    - cp
-    - permanence
+    - looked_after
+    - placement
     returns:
     - SSDA903
     cms:
@@ -98,8 +98,8 @@ nodes:
     description: Placement Postcode
     field_ref: SSD129
     categories:
-    - cp
-    - permanence
+    - looked_after
+    - placement
     returns:
     - AnnexA
     cms:
@@ -110,8 +110,8 @@ nodes:
     description: Placement End Date
     field_ref: SSD130
     categories:
-    - cp
-    - permanence
+    - looked_after
+    - placement
     returns:
     - SSDA903
     cms:
@@ -122,8 +122,8 @@ nodes:
     description: Reason for Placement Change
     field_ref: SSD131
     categories:
-    - cp
-    - permanence
+    - looked_after
+    - placement
     returns:
     - SSDA903
     cms:

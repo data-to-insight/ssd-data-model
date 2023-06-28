@@ -13,7 +13,8 @@ nodes:
     - unique:
         enabled: true
     categories:
-    - permanence
+    - looked_after
+    - missing
     cms:
     - liquid_logic
     - mosaic
@@ -21,9 +22,10 @@ nodes:
     type: VARCHAR()
     description: Episode ID
     field_ref: SSD166
-    foreign_key: cla_episodes.Episode_ID
+    foreign_key: cla_episodes.cla_episode_id
     categories:
-    - permanence
+    - looked_after
+    - missing
     cms:
     - liquid_logic
     - mosaic
@@ -32,7 +34,8 @@ nodes:
     description: Missing Episode Start
     field_ref: SSD167
     categories:
-    - permanence
+    - looked_after
+    - missing
     returns:
     - SSDA903
     - AnnexA
@@ -44,7 +47,8 @@ nodes:
     description: Episode Type (Missing Absent)
     field_ref: SSD168
     categories:
-    - permanence
+    - looked_after
+    - missing
     returns:
     - SSDA903
     - AnnexA
@@ -56,7 +60,8 @@ nodes:
     description: Missing Episode End
     field_ref: SSD169
     categories:
-    - permanence
+    - looked_after
+    - missing
     returns:
     - SSDA903
     - AnnexA
@@ -68,7 +73,8 @@ nodes:
     description: RHI Offered
     field_ref: SSD170
     categories:
-    - permanence
+    - looked_after
+    - missing
     returns:
     - AnnexA
     cms:
@@ -79,7 +85,8 @@ nodes:
     description: RHI Accepted
     field_ref: SSD171
     categories:
-    - permanence
+    - looked_after
+    - missing
     returns:
     - AnnexA
     cms:

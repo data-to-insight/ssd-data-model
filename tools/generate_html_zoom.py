@@ -6,20 +6,19 @@ import datetime
 from PIL import Image
 import os
 
-
-def resize_images(folder_path, target_width, quality=90):
-    for file_path in glob.glob(os.path.join(folder_path, '*.png')):
-        img = Image.open(file_path)
-        current_width, current_height = img.size
-        target_height = int((current_height / current_width) * target_width)
-        resized_img = img.resize((target_width, target_height), resample=Image.LANCZOS)
-        resized_img.save(file_path, format='PNG', optimize=True, quality=quality)
+from admin.admin_tools import get_paths # get project defined file paths
+from admin.admin_tools import resize_images
 
 
-# File paths
-root_folder = 'docs/'
-erd_folder = root_folder+'erd_images/'
-tools_folder = 'tools/'
+
+paths = get_paths()
+erd_objects_path = paths['erd_objects_publish']
+erd_overview_path = paths['erd_publish']
+yml_import_path = paths['yml_data']
+
+overview_erd_filename = "ssd_erd.png"
+
+
 
 # Calculate main image width
 main_image_width = "calc(100% - 40px)"  # Adjust the padding as needed
@@ -52,11 +51,12 @@ html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
 html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y')}</h3>"
 
+
 # Add Objects Overview section
 html_content += "<h2>Objects Overview:</h2>"
 html_content += "<div style='padding: 20px;'>"
 html_content += "<div class='img-zoom-container'>"
-html_content += f'<img id="main-image" src="ssd_erd.png" alt="Data Objects Overview" style="width: {main_image_width};">'
+html_content += f'<img id="main-image" src=f"{erd_overview_path}{overview_erd_filename}" alt="Data Objects Overview" style="width: {main_image_width};">'
 html_content += "<div id='zoom-result' class='img-zoom-result'></div>"
 html_content += "</div>"
 html_content += "</div>"
@@ -64,8 +64,9 @@ html_content += "</div>"
 # Add Object Data Points Overview section
 html_content += "<h2>Object Data Points Overview:</h2>"
 
+
 # Read the YAML files
-for file_path in glob.glob('data/objects/*.yml'):
+for file_path in glob.glob(f'{yml_import_path}*.yml'):
     with open(file_path) as f:
         data = yaml.safe_load(f)
         nodes = data.get('nodes', [])
@@ -75,7 +76,7 @@ for file_path in glob.glob('data/objects/*.yml'):
             html_content += f"<h2>Object name: {entity_name}</h2>"
             html_content += "<div style='text-align: center;'>"
 
-            html_content += f'<img src="erd_images/{entity_name}.png" alt="{entity_name}" style="width: {image_width}; margin-right: 20px;">'
+            html_content += f'<img src="{erd_objects_path}{entity_name}.png" alt="{entity_name}" style="width: {image_width}; margin-right: 20px;">'
             html_content += "<table>"
             html_content += "<tr><th class='field-ref-column'>Field Ref</th><th class='data-item-column'>Data Item Name / Field</th><th class='field-column'>Field</th><th class='cms-column'>Exists in CMS</th><th class='categories-column'>Data Category Group(s)</th><th class='returns-column'>Returns</th></tr>"
             for field in nodes[0]['fields']:
@@ -139,14 +140,17 @@ html_content += "</script>"
 # Close HTML tags
 html_content += "</body></html>"
 
+
 # Write HTML content to file
-with open(root_folder+'index.html', 'w') as f:
+with open(paths['wsite_root'] +'index.html', 'w') as f:
     f.write(html_content)
 
-# Run create_erd.py script to re-create the individual object diagram images
-subprocess.run(['python3', tools_folder+'create_erd.py'])
+# # Run create_erd.py script to re-create the individual object diagram images
+# subprocess.run(['python3', paths['tools'] + 'create_erd_imgs.py'])
 
 # Resize & optimise images for web publishing.
 # Other/above methods only reduce to width/size of longest text data on row(s)
-resize_images(erd_folder, target_width=300, quality=80)         # each entity object
-# resize_images(root_folder, target_width=3000, quality=100)    # overview erd image
+resize_images(paths['erd_objects_publish'], target_width=300, quality=80)         # each entity object
+# resize_images(paths['wsite_root'], target_width=3000, quality=100)    # overview erd image
+
+
