@@ -50,7 +50,7 @@ html_content += "<div style='padding: 20px;'>"
 # Object Overview section
 html_content += "<h1>Objects Overview:</h1>"
 html_content += f"<p>{notes_str}</p>"
-html_content += "<div id='table-container'>"  # Add id attribute to the table container
+html_content += "<div>"
 html_content += f'<img id="main-image" src="{erd_overview_path}{overview_erd_filename}" alt="Data Objects Overview" style="max-width: 100%; margin-bottom: 20px;">'  # Set max-width to 100% and remove margin-right
 html_content += "</div>"
 html_content += "</div>"
@@ -93,21 +93,14 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
             html_content += "</div>"
             html_content += "<hr style='border: none; border-top: 1px solid #ddd; margin-bottom: 20px;'>"
 
+
 # Close HTML tags
 html_content += "</body></html>"
-
-html_content += "<script>"
-html_content += "window.addEventListener('load', function() {"
-html_content += "  var tableContainer = document.getElementById('table-container');"
-html_content += "  var mainImage = document.getElementById('main-image');"
-html_content += "  mainImage.style.maxWidth = tableContainer.offsetWidth + 'px';"
-html_content += "});"
-html_content += "</script>"
 
 with open(paths['wsite_root'] + 'index.html', 'w') as f:
     f.write(html_content)
 
 # Resize & optimise images for web publishing.
 # Other/above methods only reduce to width/size of longest text data on row(s)
-resize_images(paths['erd_objects_publish'], target_width=300, quality=80)  # each entity object
-resize_images(paths['wsite_root'], target_width=5000, quality=100)  # overview erd image
+resize_images(paths['erd_objects_publish'], target_width=300, quality=80)         # each entity object
+resize_images(paths['wsite_root'], target_width=5000, quality=100)    # overview erd image
