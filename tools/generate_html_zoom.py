@@ -16,8 +16,7 @@ def resize_images(folder_path, target_width, quality=90):
         resized_img.save(file_path, format='PNG', optimize=True, quality=quality)
 
 
-
-# location of
+# File paths
 root_folder = 'docs/'
 erd_folder = root_folder+'erd_images/'
 tools_folder = 'tools/'
@@ -32,7 +31,7 @@ image_width = "300px"
 page_title_str = "SSD Data Model Documentation"
 page_intro_str = "Data Item and Entity Definitions published for iterative review. Objects/data fields capturing LA Childrens Services data towards 1a SSD."
 
-repo_link_back_Str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
+repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 
 # Generate HTML content
@@ -55,7 +54,10 @@ html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y'
 # Add Objects Overview section
 html_content += "<h2>Objects Overview:</h2>"
 html_content += "<div style='padding: 20px;'>"
-html_content += f'<img src="ssd_erd.png" alt="Data Objects Overview" style="width: {main_image_width};">'
+html_content += "<div class='img-zoom-container'>"
+html_content += f'<img id="main-image" src="ssd_erd.png" alt="Data Objects Overview" style="width: {main_image_width};">'
+html_content += "<div id='zoom-result' class='img-zoom-result'></div>"
+html_content += "</div>"
 html_content += "</div>"
 
 # Add Object Data Points Overview section
@@ -85,6 +87,53 @@ for file_path in glob.glob('data/objects/*.yml'):
             html_content += "</div>"
             html_content += "</div>"
 
+# Add image zoom JavaScript
+html_content += "<script>"
+html_content += "function imageZoom(imgID, resultID) {"
+html_content += "var img, lens, result, cx, cy;"
+html_content += "img = document.getElementById(imgID);"
+html_content += "result = document.getElementById(resultID);"
+html_content += "lens = document.createElement('DIV');"
+html_content += "lens.setAttribute('class', 'img-zoom-lens');"
+html_content += "img.parentElement.insertBefore(lens, img);"
+html_content += "cx = result.offsetWidth / lens.offsetWidth;"
+html_content += "cy = result.offsetHeight / lens.offsetHeight;"
+html_content += "result.style.backgroundImage = 'url(' + img.src + ')';"
+html_content += "result.style.backgroundSize = (img.width * cx) + 'px ' + (img.height * cy) + 'px';"
+html_content += "lens.addEventListener('mousemove', moveLens);"
+html_content += "img.addEventListener('mousemove', moveLens);"
+html_content += "lens.addEventListener('touchmove', moveLens);"
+html_content += "img.addEventListener('touchmove', moveLens);"
+html_content += "function moveLens(e) {"
+html_content += "var pos, x, y;"
+html_content += "e.preventDefault();"
+html_content += "pos = getCursorPos(e);"
+html_content += "x = pos.x - (lens.offsetWidth / 2);"
+html_content += "y = pos.y - (lens.offsetHeight / 2);"
+html_content += "if (x > img.width - lens.offsetWidth) {x = img.width - lens.offsetWidth;}"
+html_content += "if (x < 0) {x = 0;}"
+html_content += "if (y > img.height - lens.offsetHeight) {y = img.height - lens.offsetHeight;}"
+html_content += "if (y < 0) {y = 0;}"
+html_content += "lens.style.left = x + 'px';"
+html_content += "lens.style.top = y + 'px';"
+html_content += "result.style.backgroundPosition = '-' + (x * cx) + 'px -' + (y * cy) + 'px';"
+html_content += "}"
+html_content += "function getCursorPos(e) {"
+html_content += "var a, x = 0, y = 0;"
+html_content += "e = e || window.event;"
+html_content += "a = img.getBoundingClientRect();"
+html_content += "x = e.pageX - a.left;"
+html_content += "y = e.pageY - a.top;"
+html_content += "x = x - window.pageXOffset;"
+html_content += "y = y - window.pageYOffset;"
+html_content += "return {x : x, y : y};"
+html_content += "}"
+html_content += "}"
+
+# Call imageZoom function for main image
+html_content += "imageZoom('main-image', 'zoom-result');"
+html_content += "</script>"
+
 # Write HTML content to file
 with open(root_folder+'index.html', 'w') as f:
     f.write(html_content)
@@ -92,8 +141,7 @@ with open(root_folder+'index.html', 'w') as f:
 # Run create_erd.py script to re-create the individual object diagram images
 subprocess.run(['python3', tools_folder+'create_erd.py'])
 
-
-# Resize & optimise images for web publishing. 
+# Resize & optimise images for web publishing.
 # Other/above methods only reduce to width/size of longest text data on row(s)
 resize_images(erd_folder, target_width=300, quality=80)         # each entity object
 # resize_images(root_folder, target_width=3000, quality=100)    # overview erd image
