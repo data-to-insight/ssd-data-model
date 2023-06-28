@@ -26,7 +26,7 @@ image_width = "300px"
 page_title_str = "SSD Data Model Documentation"
 page_intro_str = "Project 1a. Standard Safeguarding Dataset. Data objects/item definitions published towards iterative review."
 
-notes_str = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item reference numbers [SSD0000] enable referencing specific data points/fields."
+notes_str = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item/field reference numbers [SSD0000] enable specific referencing."
 repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 
