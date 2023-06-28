@@ -1,11 +1,15 @@
-
+from admin.admin_tools import get_paths # get project defined file paths
 
 
 # File handling input/output
 
+paths = get_paths()
+
 # Data Structure spec
-csv_file = 'docs/data_objects_specification.csv'     #  import from repo
-output_directory = 'data/objects/'
+data_spec_csv = paths['data_specification']
+output_directory = paths['yml_data']
+
+
 
 import csv
 import os
@@ -13,10 +17,15 @@ import yaml
 import re
 
 # Full list of field names
-field_names = ['field_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 'cms','required_enabled','unique_enabled','primary_key','foreign_key']
+field_names = ['field_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 'cms', 'cms_fields','required_enabled','unique_enabled','primary_key','foreign_key']
 
 # Those that are multi-part/list fields
-multi_part_fields = ['categories', 'constraints', 'returns', 'cms']
+multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_fields']
+
+
+# Creating a new dictionary to store relationships
+relationships = {}
+
 
 def clean_fieldname_data(value, is_name=False):
     """
@@ -56,14 +65,8 @@ def clean_fieldname_data(value, is_name=False):
 
 
 
-def process_csv_file(csv_file, output_directory):
-    """
-    Processes the CSV file and generates separate YAML files for each node.
 
-    Args:
-        csv_file (str): Path to the input CSV file.
-        output_directory (str): Directory to save the generated YAML files.
-    """
+def process_csv_file(csv_file, output_directory):
     with open(csv_file, 'r', newline='', encoding='utf-8-sig') as file:
         reader = csv.DictReader(file)
         nodes = []
@@ -77,7 +80,6 @@ def process_csv_file(csv_file, output_directory):
                 value = clean_fieldname_data(value, is_name=(name == 'name'))
                 field[name] = value
 
-            # Append multi-part fields to the field dictionary
             for name in multi_part_fields:
                 value = field[name]
                 field[name] = [v.strip().replace(' ', '') for v in value.split('|')] if value else []
@@ -89,9 +91,56 @@ def process_csv_file(csv_file, output_directory):
             else:
                 nodes[node_index]['fields'].append(field)
 
-        # Save YAML files for each node
+            # Parse the foreign_key relationship and add to the dictionary
+            if field['foreign_key']:
+                # Split the relationship string into parent object and key
+                parent_object, parent_key = field['foreign_key'].split('.')
+                if parent_object not in relationships:
+                    relationships[parent_object] = []
+                relationships[parent_object].append({
+                    'child_object': object_name,
+                    'parent_key': parent_key,
+                    'child_key': field['name']
+                })
+
         for node in nodes:
             save_node_yaml(node, output_directory)
+
+        save_relationships_yaml(relationships, output_directory)
+
+def save_relationships_yaml(relationships, output_directory):
+    """
+    Saves the relationships of data objects into a YAML file.
+    
+    Args:
+        relationships (dict): A dictionary of relationships.
+        output_directory (str): The directory to save the YAML file.
+    
+    Returns:
+        None. Writes to 'relationships_test.yml' in the specified directory.
+    """
+    yaml_file = os.path.join(output_directory, 'relationships.yml')
+
+    with open(yaml_file, 'w') as file:
+        data = {
+            'relationships': []
+        }
+
+        for parent_object, relations in relationships.items():
+            for relation in relations:
+                relationship_data = {
+                    'parent_object': parent_object,
+                    'parent_key': relation['parent_key'],
+                    'child_object': relation['child_object'],
+                    'child_key': relation['child_key'],
+                    'relation': '1:M'  # Hardcoded relationship type
+                }
+
+                data['relationships'].append(relationship_data)
+
+        yaml.dump(data, file, sort_keys=False, default_flow_style=False, explicit_start=True, default_style='')
+
+
 
 def save_node_yaml(node, output_directory):
     """
@@ -164,6 +213,8 @@ def save_node_yaml(node, output_directory):
         yaml.dump(data, file, sort_keys=False, default_flow_style=False, explicit_start=True, default_style='')
 
 
-process_csv_file(csv_file, output_directory)
+
+process_csv_file(data_spec_csv, output_directory)
+
 
 
