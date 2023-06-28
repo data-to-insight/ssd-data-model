@@ -14,24 +14,19 @@ nodes:
         enabled: true
     categories:
     - identity
-    constraints:
-    - unique
-    - primary_key
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID
     field_ref: SSD030
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     validators:
     - required:
         enabled: true
     categories:
     - identity
-    constraints:
-    - foreign_key:child.Child_Unique_ID
     returns:
     - SSDA903
     - CINcensus
@@ -42,25 +37,31 @@ nodes:
     type: null
     description: Legal Status
     field_ref: SSD031
+    categories:
+    - identity
     returns:
     - SSDA903
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: legal_status_start_date
+  - name: legal_status_start
     type: DATE
     description: Legal Status Start Date
     field_ref: SSD032
+    categories:
+    - identity
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
-  - name: legal_status_end_date
+  - name: legal_status_end
     type: DATE
     description: Legal Status End Date
     field_ref: SSD033
+    categories:
+    - identity
     returns:
     - Local
     cms:

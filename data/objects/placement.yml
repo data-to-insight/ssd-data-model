@@ -12,56 +12,69 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - cp
+    - permanence
     cms:
     - liquid_logic
     - mosaic
-  - name: episode_id
+  - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
     field_ref: SSD123
     foreign_key: cla_episodes.Episode_ID
-    constraints:
-    - foreign_key:cla_episodes.Episode_ID
+    categories:
+    - cp
+    - permanence
     cms:
     - liquid_logic
     - mosaic
-  - name: placement_start_date
+  - name: place_start
     type: DATE
     description: Placement Start Date
     field_ref: SSD124
+    categories:
+    - cp
+    - permanence
     returns:
     - SSDA903
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: pl
+  - name: place_type
     type: null
     description: Placement Type
     field_ref: SSD125
+    categories:
+    - cp
+    - permanence
     returns:
     - SSDA903
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: urn
+  - name: place_urn
     type: VARCHAR(8)
     description: URN of Placement
     field_ref: SSD126
+    categories:
+    - cp
+    - permanence
     returns:
     - SSDA903
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: pl_la
+  - name: place_la
     type: null
     description: LA of Placement
     field_ref: SSD127
+    categories:
+    - cp
+    - permanence
     returns:
     - SSDA903
     - AnnexA
@@ -72,33 +85,45 @@ nodes:
     type: null
     description: Placement Provider
     field_ref: SSD128
+    categories:
+    - cp
+    - permanence
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: pl_post
+  - name: place_postcode
     type: null
     description: Placement Postcode
     field_ref: SSD129
+    categories:
+    - cp
+    - permanence
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: placement_end_date
+  - name: place_end
     type: DATE
     description: Placement End Date
     field_ref: SSD130
+    categories:
+    - cp
+    - permanence
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: reason_place_change
+  - name: place_change_reason
     type: null
     description: Reason for Placement Change
     field_ref: SSD131
+    categories:
+    - cp
+    - permanence
     returns:
     - SSDA903
     cms:

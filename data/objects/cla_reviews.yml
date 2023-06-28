@@ -12,141 +12,184 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - cla
+    - sw
     cms:
     - liquid_logic
     - mosaic
-  - name: episode_id
+  - name: cla_episode_id
     type: null
     description: Episode ID
     field_ref: SSD133
     foreign_key: cla_episodes.Episode_ID
-    constraints:
-    - foreign_key:cla_episodes.Episode_ID
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - cla
+    - sw
     cms:
     - liquid_logic
     - mosaic
-  - name: cla_review_due_date
+  - name: rev_due_date
     type: DATE
     description: CLA Review Due Date
     field_ref: SSD134
+    categories:
+    - cla
+    - sw
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
-  - name: review
+  - name: rev_date
     type: DATE
     description: CLA Review Date
     field_ref: SSD135
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: child_involved_in_cp
-    type: null
+  - name: rev_cyp_involved_care_plan
+    type: VARCHAR(255)
     description: Has the childyoung person been involved in formulating this Care
       Plan?
     field_ref: SSD136
+    categories:
+    - cla
+    - sw
     returns:
     - 1a
     - draft
     cms:
     - liquid_logic
     - mosaic
-  - name: social_worker_met_with_the_child
-    type: null
+  - name: rev_sw_met_child_views
+    type: VARCHAR(255)
     description: 'Has the Social Worker met with the child on their own to undertake
       direct work to establish their wishes and views '
     field_ref: SSD137
+    categories:
+    - cla
+    - sw
     returns:
     - 1a
     - draft
     cms:
     - liquid_logic
     - mosaic
-  - name: review_code
+  - name: rev_participation
     type: null
     description: Participation code
     field_ref: SSD138
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: cp_meeting_the_childs_needs
+  - name: rev_care_plan_meet_needs
     type: null
-    description: Is the Care Plan meeting the child's needs?
+    description: Is the Care Plan meeting the childs needs?
     field_ref: SSD139
+    categories:
+    - cla
+    - sw
     returns:
     - 1a
     - draft
     cms:
     - liquid_logic
     - mosaic
-  - name: permanence_plan_in_place
+  - name: rev_perm_plan
     type: null
     description: Is a Permanence Plan in place?
     field_ref: SSD140
+    categories:
+    - cla
+    - sw
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: date_of_last_iro_visit
+  - name: rev_last_iro_contact
     type: DATE
     description: Date of Last IRO Visit  Contact to the Child
     field_ref: SSD141
+    categories:
+    - cla
+    - sw
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: previously_adopted_or_left_care
+  - name: prev_permanence
     type: null
     description: Has the child  young person previously been adopted or left care
       for special guardianship or residence order?
     field_ref: SSD142
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: date_perm
+  - name: prev_perm_order_date
     type: DATE
     description: Date of Previous Permanence Order
     field_ref: SSD143
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: prev_perm
+  - name: prev_perm_option
     type: null
     description: Previous Permanence Option
     field_ref: SSD144
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: la_perm
+  - name: prev_perm_la
     type: null
     description: Previous Permanence Arranged LA
     field_ref: SSD145
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: convicted
+  - name: convicted_in_year
     type: BOOLEAN
     description: Child convicted during the year
     field_ref: SSD146
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     cms:
@@ -156,25 +199,34 @@ nodes:
     type: BOOLEAN
     description: Health surveillance checks up to date
     field_ref: SSD147
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     cms:
     - liquid_logic
     - mosaic
-  - name: health_assessment
+  - name: health_asmt_date
     type: DATE
     description: Date of Last Health Assessment
     field_ref: SSD148
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: teeth_check
+  - name: dental_check_date
     type: DATE
     description: Date of Last Dental Check
     field_ref: SSD149
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     - AnnexA
@@ -185,6 +237,9 @@ nodes:
     type: BOOLEAN
     description: Immunisations up to Date
     field_ref: SSD150
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     cms:
@@ -194,6 +249,9 @@ nodes:
     type: BOOLEAN
     description: Identified as having a substance misuse problem
     field_ref: SSD151
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     cms:
@@ -203,6 +261,9 @@ nodes:
     type: BOOLEAN
     description: Child received intervention for substance misuse problem
     field_ref: SSD152
+    categories:
+    - cla
+    - sw
     returns:
     - SSDA903
     cms:

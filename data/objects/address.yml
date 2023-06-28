@@ -20,17 +20,14 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID
     field_ref: SSD016
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     categories:
     - identity
     - address
-    constraints:
-    - unique
-    - foreign_key:child.Child_Unique_ID
     returns:
     - SSDA903
     - CINcensus
@@ -49,7 +46,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: address_start_date_from
+  - name: address_start
     type: DATE
     description: Address Start Date From
     field_ref: SSD018
@@ -61,7 +58,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: address_end_date_to
+  - name: address_end
     type: DATE
     description: Address End Date To
     field_ref: SSD019

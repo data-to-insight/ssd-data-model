@@ -2,35 +2,55 @@
 nodes:
 - name: category_of_abuse
   fields:
-  - name: cp_plan_id
+  - name: cpp_category_id
     type: VARCHAR()
-    description: CP Plan ID
-    field_ref: SSD094
+    description: Category of Abuse id
+    field_ref: SSD095A
     primary_key: true
     validators:
     - required:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - abuse
+    - cp
     cms:
     - liquid_logic
     - mosaic
-  - name: categoryofabuse
+  - name: cp_plan_id
+    type: VARCHAR()
+    description: CP Plan ID
+    field_ref: SSD094
+    foreign_key: cp_plans.cp_plan_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - abuse
+    - cp
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: cpp_category
     type: null
     description: Category of Abuse
     field_ref: SSD095
+    categories:
+    - abuse
+    - cp
     returns:
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: category_of_abuse_start_date
+  - name: cpp_category_start
     type: null
     description: Category of Abuse Start Date
     field_ref: SSD096
+    categories:
+    - abuse
+    - cp
     returns:
     - Local
     cms:

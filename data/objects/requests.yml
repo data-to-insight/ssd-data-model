@@ -2,7 +2,7 @@
 nodes:
 - name: requests
   fields:
-  - name: request_id
+  - name: ehcp_request_id
     type: VARCHAR()
     description: Request ID
     field_ref: SSD205
@@ -12,46 +12,50 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - education
     cms:
     - liquid_logic
     - mosaic
-  - name: upn
+  - name: person_upn
     type: CHAR(13)
     description: UPN
     field_ref: SSD206
-    foreign_key: upn.upn
-    constraints:
-    - foreign_key:upn.upn
+    categories:
+    - education
     returns:
     - SEN2
     cms:
     - liquid_logic
     - mosaic
-  - name: receiveddate
+  - name: ehcp_req_date
     type: DATE
     description: Received Date
     field_ref: SSD207
+    categories:
+    - education
     returns:
     - SEN2
     cms:
     - liquid_logic
     - mosaic
-  - name: requestoutcomedate
+  - name: ehcp_req_outcome_date
     type: DATE
     description: Request Outcome Date
     field_ref: SSD208
+    categories:
+    - education
     returns:
     - SEN2
     cms:
     - liquid_logic
     - mosaic
-  - name: requestoutcome
+  - name: ehcp_req_outcome
     type: null
     description: Request Outcome
     field_ref: SSD209
+    categories:
+    - education
     returns:
     - SEN2
     cms:

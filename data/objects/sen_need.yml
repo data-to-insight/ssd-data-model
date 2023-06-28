@@ -2,9 +2,9 @@
 nodes:
 - name: sen_need
   fields:
-  - name: sen_need_id
+  - name: sen_need_table_id
     type: VARCHAR()
-    description: SEN Need ID
+    description: SEN Need Table ID
     field_ref: SSD222
     primary_key: true
     validators:
@@ -12,23 +12,18 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
     cms:
     - liquid_logic
     - mosaic
-  - name: plan_id
+  - name: active_ehcp_id
     type: VARCHAR()
     description: Plan ID
     field_ref: SSD223
     foreign_key: cp_plans.plan_id
-    constraints:
-    - foreign_key:cp_plans.plan_id
     cms:
     - liquid_logic
     - mosaic
-  - name: sentype
+  - name: active_ehcp_need
     type: null
     description: SEN Type
     field_ref: SSD224
@@ -37,7 +32,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: sentyperank
+  - name: active_ehcp_need_rank
     type: null
     description: SEN Type Rank
     field_ref: SSD225

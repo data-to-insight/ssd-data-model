@@ -12,41 +12,54 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - assessment
+    - outcomes
     cms:
     - liquid_logic
     - mosaic
-  - name: assessment_id
+  - name: ehcp_asmt_id
     type: VARCHAR()
     description: Assessment ID
     field_ref: SSD215
+    foreign_key: assessments.assessment_id
+    categories:
+    - assessment
+    - outcomes
     cms:
     - liquid_logic
     - mosaic
-  - name: startdate
+  - name: named_plan_start_date
     type: DATE
     description: Start Date
     field_ref: SSD216
+    categories:
+    - assessment
+    - outcomes
     returns:
     - SEN2
     cms:
     - liquid_logic
     - mosaic
-  - name: ceasedate
+  - name: named_plan_cease_date
     type: DATE
     description: Cease Date
     field_ref: SSD217
+    categories:
+    - assessment
+    - outcomes
     returns:
     - SEN2
     cms:
     - liquid_logic
     - mosaic
-  - name: ceasereason
+  - name: named_plan_cease_reason
     type: null
     description: Cease Reason
     field_ref: SSD218
+    categories:
+    - assessment
+    - outcomes
     returns:
     - SEN2
     cms:

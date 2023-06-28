@@ -46,6 +46,7 @@ html_content += "th.field-column { width: 20%; }"
 html_content += "th.cms-column { width: 15%; }"
 html_content += "th.categories-column { width: 15%; }"
 html_content += "th.returns-column { width: 20%; }"
+html_content += ".img-zoom-lens { position: absolute; border: 1px solid #d4d4d4; width: 40px; height: 40px; }"  # Added CSS rule
 html_content += "</style></head><body>"
 html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
@@ -72,7 +73,6 @@ for file_path in glob.glob('data/objects/*.yml'):
             entity_name = nodes[0]['name']
             html_content += "<div>"
             html_content += f"<h2>Object name: {entity_name}</h2>"
-            # html_content += "<div style='display: flex;'>" # (removed) flex img to fit...
             html_content += "<div style='text-align: center;'>"
 
             html_content += f'<img src="erd_images/{entity_name}.png" alt="{entity_name}" style="width: {image_width}; margin-right: 20px;">'
@@ -135,6 +135,9 @@ html_content += "}"
 # Call imageZoom function for main image
 html_content += "imageZoom('main-image', 'zoom-result');"
 html_content += "</script>"
+
+# Close HTML tags
+html_content += "</body></html>"
 
 # Write HTML content to file
 with open(root_folder+'index.html', 'w') as f:

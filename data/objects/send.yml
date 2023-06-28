@@ -2,32 +2,45 @@
 nodes:
 - name: send
   fields:
-  - name: upn
+  - name: send_table_id
     type: null
-    description: UPN
-    field_ref: SSD203
+    description: send_table_id
+    field_ref: SSD203A
     primary_key: true
     validators:
     - required:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - sen
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
-    type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD204
-    foreign_key: child.Child_Unique_ID
+  - name: send_upn
+    type: null
+    description: UPN
+    field_ref: SSD203
     validators:
     - required:
         enabled: true
-    constraints:
-    - foreign_key:child.Child_Unique_ID
+    - unique:
+        enabled: true
+    categories:
+    - sen
+    cms:
+    - liquid_logic
+    - mosaic
+  - name: la_person_id
+    type: VARCHAR(10)
+    description: Child Unique ID
+    field_ref: SSD204
+    foreign_key: person.la_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - sen
     returns:
     - SSDA903
     - CINcensus

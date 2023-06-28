@@ -12,41 +12,48 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - s47
+    - cp
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID
     field_ref: SSD079
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     validators:
     - required:
         enabled: true
-    constraints:
-    - foreign_key:child.Child_Unique_ID
+    categories:
+    - s47
+    - cp
     returns:
     - SSDA903
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: s47_discussion_start_date
+  - name: strat_initiating_s47_date
     type: DATE
     description: Strategy Discussion initiating S47 Enquiry Start Date
     field_ref: SSD080
+    categories:
+    - s47
+    - cp
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: s47_actual_start_date
+  - name: s47_start_date
     type: DATE
     description: S47 Start Date
     field_ref: SSD081
+    categories:
+    - s47
+    - cp
     returns:
     - CINcensus
     cms:
@@ -56,49 +63,67 @@ nodes:
     type: DATE
     description: S47 Completed Date
     field_ref: SSD082
+    categories:
+    - s47
+    - cp
     cms:
     - liquid_logic
     - mosaic
-  - name: icpc_not_required
+  - name: s47outcome
     type: null
     description: S47 Outcome
     field_ref: SSD083
+    categories:
+    - s47
+    - cp
     returns:
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: date_of_initial_cpc
+  - name: icpc_date
     type: DATE
     description: Date of Initial CP Conference
     field_ref: SSD084
+    categories:
+    - s47
+    - cp
     returns:
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: outcome_of_initial_cp_conference
+  - name: icpc_outcome
     type: null
     description: Outcome of Initial CP Conference
     field_ref: SSD085
+    categories:
+    - s47
+    - cp
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: s47_allocated_team
+  - name: icpc_team
     type: null
     description: S47 ICPC Allocated Team
     field_ref: SSD086
+    categories:
+    - s47
+    - cp
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: s47_allocated_worker
+  - name: icpc_worker
     type: null
     description: S47 ICPC Allocated Worker
     field_ref: SSD087
+    categories:
+    - s47
+    - cp
     returns:
     - AnnexA
     cms:

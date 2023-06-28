@@ -2,48 +2,63 @@
 nodes:
 - name: cla_visits
   fields:
-  - name: visit_id
+  - name: cla_visit_id
     type: VARCHAR()
     description: Visit ID
     field_ref: SSD155
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - cla
+    - sw
+    - child_contact
     cms:
     - liquid_logic
     - mosaic
-  - name: episode_id
+  - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
     field_ref: SSD156
     foreign_key: cla_episodes.Episode_ID
-    constraints:
-    - foreign_key:cla_episodes.Episode_ID
+    categories:
+    - cla
+    - sw
+    - child_contact
     cms:
     - liquid_logic
     - mosaic
-  - name: date_of_visit
+  - name: cla_visit_date
     type: DATE
     description: Date of Visit
     field_ref: SSD157
+    categories:
+    - cla
+    - sw
+    - child_contact
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: child_seen
+  - name: cla_visit_seen
     type: BOOLEAN
     description: Child Seen
     field_ref: SSD158
+    categories:
+    - cla
+    - sw
+    - child_contact
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
-  - name: child_seen_alone
+  - name: cla_visit_seen_alone
     type: BOOLEAN
     description: Child Seen Alone
     field_ref: SSD159
+    categories:
+    - cla
+    - sw
+    - child_contact
     returns:
     - Local
     cms:

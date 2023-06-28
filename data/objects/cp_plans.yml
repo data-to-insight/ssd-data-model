@@ -12,61 +12,74 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
+    categories:
+    - cp
+    - sw
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID
     field_ref: SSD089
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     validators:
     - required:
         enabled: true
-    constraints:
-    - foreign_key:child.Child_Unique_ID
+    categories:
+    - cp
+    - sw
     returns:
     - SSDA903
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: cppstartdate
+  - name: cpp_start_date
     type: DATE
     description: CP Plan Start Date
     field_ref: SSD090
+    categories:
+    - cp
+    - sw
     returns:
     - CINcensus
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: cppenddate
+  - name: cpp_end_date
     type: DATE
     description: CP Plan End Date
     field_ref: SSD091
+    categories:
+    - cp
+    - sw
     returns:
     - CINcensus
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: cp_plan_allocated_team
+  - name: cpp_team
     type: null
     description: CP Plan Allocated Team
     field_ref: SSD092
+    categories:
+    - cp
+    - sw
     returns:
     - AnnexA
     cms:
     - liquid_logic
     - mosaic
-  - name: cp_plan_allocated_worker
+  - name: cpp_worker
     type: null
     description: CP Plan Allocated Worker
     field_ref: SSD093
+    categories:
+    - cp
+    - sw
     returns:
     - AnnexA
     cms:

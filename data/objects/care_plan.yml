@@ -12,13 +12,10 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
     cms:
     - liquid_logic
     - mosaic
-  - name: chosen_plan_for_child
+  - name: chosen_plan
     type: null
     description: What is the chosen plan for this childyoung person?
     field_ref: SSD154

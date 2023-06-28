@@ -12,29 +12,24 @@ nodes:
         enabled: true
     - unique:
         enabled: true
-    constraints:
-    - unique
-    - primary_key
     cms:
     - liquid_logic
     - mosaic
-  - name: lachildid
+  - name: la_person_id
     type: VARCHAR(10)
     description: Child Unique ID
     field_ref: SSD048
-    foreign_key: child.Child_Unique_ID
+    foreign_key: person.la_person_id
     validators:
     - required:
         enabled: true
-    constraints:
-    - foreign_key:child.Child_Unique_ID
     returns:
     - SSDA903
     - CINcensus
     cms:
     - liquid_logic
     - mosaic
-  - name: cinreferraldate
+  - name: cin_ref_date
     type: DATE
     description: CIN Referral Date
     field_ref: SSD049
@@ -44,7 +39,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: referralsource
+  - name: cin_ref_source
     type: null
     description: CIN Referral Source
     field_ref: SSD050
@@ -54,7 +49,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: cin_referral_outcome
+  - name: cin_ref_outcome
     type: null
     description: CIN Referral Outcome
     field_ref: SSD051
@@ -64,7 +59,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: reasonforclosure
+  - name: cin_close_reason
     type: null
     description: CIN Closure Reason
     field_ref: SSD052
@@ -73,7 +68,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: cinclosuredate
+  - name: cin_close_date
     type: DATE
     description: CIN Closure Date
     field_ref: SSD053
@@ -82,7 +77,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: cin_referral_completed_by_team
+  - name: cin_ref_team
     type: null
     description: CIN Referral Completed by Team
     field_ref: SSD054
@@ -91,7 +86,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-  - name: cin_referral_completed_by_worker
+  - name: cin_ref_worker
     type: null
     description: CIN Referral Completed by Worker
     field_ref: SSD055
