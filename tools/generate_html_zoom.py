@@ -56,7 +56,7 @@ html_content += f"<h3>Last updated: {datetime.datetime.now().strftime('%d-%m-%Y'
 html_content += "<h2>Objects Overview:</h2>"
 html_content += "<div style='padding: 20px;'>"
 html_content += "<div class='img-zoom-container'>"
-html_content += f'<img id="main-image" src=f"{erd_overview_path}{overview_erd_filename}" alt="Data Objects Overview" style="width: {main_image_width};">'
+html_content += f'<img id="main-image" src="{erd_overview_path}{overview_erd_filename}" alt="Data Objects Overview" style="width: {main_image_width};">'
 html_content += "<div id='zoom-result' class='img-zoom-result'></div>"
 html_content += "</div>"
 html_content += "</div>"
