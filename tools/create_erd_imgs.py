@@ -8,12 +8,13 @@ from admin.admin_tools import get_paths # get project defined file paths
 
 
 # output filenames (non-dynamic)
-erd_overview_fname = 'ssd_erd.png'
+output_filetype = 'png'
+erd_overview_fname = 'ssd_erd_sfdp'
 
 
 
 
-def generate_individual_images(yml_data_path, output_path):
+def generate_individual_images(yml_data_path, output_path, output_filetype):
     """
     Generate individual images for each yml file.
 
@@ -62,8 +63,8 @@ def generate_individual_images(yml_data_path, output_path):
                 G.add_node(node['name'], shape='record', label=label)
 
         file_name = os.path.splitext(os.path.basename(file_path))[0]
-        image_path = os.path.join(output_path, f"{file_name}.png")
-        G.draw(image_path, prog='dot', format='png')
+        image_path = os.path.join(output_path, f"{file_name}.{output_filetype}")
+        G.draw(image_path, prog='dot', format=output_filetype)
 
 
 
@@ -141,16 +142,16 @@ def generate_full_erd(yml_data_path, assets_path, erd_publish_path):
 
 
     # Render the main graph to a file
-    G.draw(assets_path + erd_overview_fname, prog='dot', format='png')
+    G.draw(assets_path + erd_overview_fname + "." + output_filetype, prog='dot', format=output_filetype)
         
     # 1
     # Render copy of the main graph to be web published
     G.layout(prog='sfdp', args='-Goverlap=false -Gsplines=line') 
-    G.draw(erd_publish_path + erd_overview_fname, format='png')
+    G.draw(erd_publish_path + erd_overview_fname + "." + output_filetype, format=output_filetype)
 
     # 2
     # Render an additional copy(alternative layout) of the main graph as local web published copy
-    G.draw(erd_publish_path + erd_overview_fname + "_dot", prog='dot', format='png')
+    G.draw(erd_publish_path + erd_overview_fname + "_dot" + "." + output_filetype, prog='dot', format=output_filetype)
 
 
     # Alternative render options for ref
@@ -164,4 +165,4 @@ def generate_full_erd(yml_data_path, assets_path, erd_publish_path):
 paths = get_paths()
     
 generate_full_erd(paths['yml_data'], paths['assets'], paths['erd_publish'])
-generate_individual_images(paths['yml_data'], paths['erd_objects_publish'])
+generate_individual_images(paths['yml_data'], paths['erd_objects_publish'], output_filetype)

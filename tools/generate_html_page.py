@@ -14,7 +14,7 @@ erd_objects_path = paths['wsite_sub_images']
 erd_overview_path = paths['wsite_main_images']
 yml_import_path = paths['yml_data']
 
-overview_erd_filename = "ssd_erd.png"
+overview_erd_filename = "ssd_erd_sfdp.png"
 
 # Calculate main image width
 main_image_width = "85%"  # Adjust the padding as needed
