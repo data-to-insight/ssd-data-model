@@ -143,18 +143,18 @@ def generate_full_erd(yml_data_path, assets_path, erd_publish_path):
     # Render the main graph to a file
     G.draw(assets_path + erd_overview_fname, prog='dot', format='png')
         
-    # Render a copy of the main graph as local web published copy
-    G.draw(erd_publish_path + erd_overview_fname, prog='dot', format='png')
-
-
-
-    # Alternative renders
-
-    # Render an additional copy of the main graph to be web published
+    # 1
+    # Render copy of the main graph to be web published
     G.layout(prog='sfdp', args='-Goverlap=false -Gsplines=line') 
-    G.draw(erd_publish_path + 'ssd_erd_sfdp.png', format='png')
+    G.draw(erd_publish_path + erd_overview_fname, format='png')
 
-    # Nodes too far apart...?
+    # 2
+    # Render an additional copy(alternative layout) of the main graph as local web published copy
+    G.draw(erd_publish_path + erd_overview_fname + "_dot", prog='dot', format='png')
+
+
+    # Alternative render options for ref
+    # 
     # G.graph_attr['overlap'] = 'scale'  # Adjust overlap attribute (options: 'scale', 'compress', 'vpsc', or 'ortho')
     # G.graph_attr['scale'] = 0.1  # Adjust scale attribute 
     # G.draw('docs/ssd_erd_twopi.png', prog='twopi', format='png')
