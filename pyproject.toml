@@ -1,11 +1,15 @@
 [tool.poetry]
 name = "ssd-data-model-3-9"
 version = "0.1.0"
-description = "standard safeguarding dataset"
-authors = ["data to insight"]
+description = "Standard Safeguarding Dataset"
+authors = ["Data to Insight"]
 license = "MIT License"
 readme = "README.md"
 packages = [{ include = "ssd_data_model_3" }]
+
+[tool.poetry]
+urls = { homepage = "https://github.com/data-to-insight/ssd-data-model", specification = "https://data-to-insight.github.io/ssd-data-model/" }
+
 
 [tool.poetry.dependencies]
 python = "^3.10"

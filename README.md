@@ -113,13 +113,14 @@ The main place to find documentation relating to this specification is
 
 ## [Temp] Running notes:
 ./setup.sh
+  Within Git Codespace will set up the needed environment incl. needed extensions, e.g
+  [$] pip install -r requirements.txt
+  [$] sudo apt-get update
+  [$] sudo apt-get install graphviz libgraphviz-dev pkg-config
+  [$] pip install pygraphviz
 
-or.... 
-pip install poetry
+And incase the preferred working option, it also adds
+  [$] pip install poetry
+ 
 
-Ensure that you run the requirements file to set up before running scripts:
-[$] pip install -r requirements.txt
-Some of the .py scripts have package dependencies. To run the create_erd_from_yml.py ensure the following:
-[$] sudo apt-get update
-[$] sudo apt-get install graphviz libgraphviz-dev pkg-config
-[$] pip install pygraphviz
+

@@ -26,7 +26,7 @@ image_width = "300px"
 page_title_str = "SSD Data Model Documentation"
 page_intro_str = "Project 1a. Standard Safeguarding Dataset. Data objects/item definitions published towards iterative review."
 
-notes_str = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item/field reference numbers [SSD0000] enable specific referencing."
+notes_str = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item/field reference numbers [AAA000A] enable specific referencing."
 repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 
@@ -54,7 +54,7 @@ html_content += "<div style='padding: 2px;'>"
 html_content += "<div class='last-updated-container'>"
 html_content += f"<span class='last-updated-text'>Last updated:</span>"
 html_content += f"<span class='last-updated-date'>{datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}</span>"
-html_content += f"<a href='{repo_link_back_str}' class='repo-link'>| SSD Github</a>"
+html_content += f"<a href='{repo_link_back_str}' class='repo-link'> | SSD Github</a>"
 html_content += "</div>"
 
 # Object Overview section
@@ -117,7 +117,12 @@ html_content += "</script>"
 with open(paths['wsite_root'] + 'index.html', 'w') as f:
     f.write(html_content)
 
-# Resize & optimise images for web publishing.
+# 
+# # Run script to re-create the individual object diagram images
+# subprocess.run(['python3', paths['tools'] + 'create_erd_imgs.py'])
+
+
+# Resize & optimise image files for web publishing.
 # Other/above methods only reduce to width/size of longest text data on row(s)
 resize_images(paths['erd_objects_publish'], target_width=300, quality=80)  # each entity object
 resize_images(paths['wsite_root'], target_width=5000, quality=100)  # overview erd image
