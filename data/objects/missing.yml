@@ -15,9 +15,15 @@ nodes:
     categories:
     - looked_after
     - missing
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:missing_episode_id
     - mosaic:missing_episode_id
+    cms_table:
+    - liquid_logic:missing
+    - mosaic:missing
   - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
@@ -26,9 +32,15 @@ nodes:
     categories:
     - looked_after
     - missing
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_episode_id
     - mosaic:cla_episode_id
+    cms_table:
+    - liquid_logic:missing
+    - mosaic:missing
   - name: mis_epi_start
     type: DATE
     description: Missing Episode Start
@@ -39,9 +51,15 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:mis_epi_start
     - mosaic:mis_epi_start
+    cms_table:
+    - liquid_logic:missing
+    - mosaic:missing
   - name: mis_epi_type
     type: null
     description: Episode Type (Missing Absent)
@@ -52,9 +70,15 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:mis_epi_type
     - mosaic:mis_epi_type
+    cms_table:
+    - liquid_logic:missing
+    - mosaic:missing
   - name: mis_epi_end
     type: DATE
     description: Missing Episode End
@@ -65,9 +89,15 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:mis_epi_end
     - mosaic:mis_epi_end
+    cms_table:
+    - liquid_logic:missing
+    - mosaic:missing
   - name: mis_epi_rhi_offered
     type: BOOLEAN
     description: RHI Offered
@@ -77,9 +107,15 @@ nodes:
     - missing
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:mis_epi_rhi_offered
     - mosaic:mis_epi_rhi_offered
+    cms_table:
+    - liquid_logic:missing
+    - mosaic:missing
   - name: mis_epi_rhi_accepted
     type: BOOLEAN
     description: RHI Accepted
@@ -89,6 +125,12 @@ nodes:
     - missing
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:mis_epi_rhi_accepted
     - mosaic:mis_epi_rhi_accepted
+    cms_table:
+    - liquid_logic:missing
+    - mosaic:missing

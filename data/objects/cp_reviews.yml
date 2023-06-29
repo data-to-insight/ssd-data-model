@@ -16,9 +16,15 @@ nodes:
     - child_protection
     - cp_plan
     - review
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_review_id
     - mosaic:cp_review_id
+    cms_table:
+    - liquid_logic:cp_reviews
+    - mosaic:cp_reviews
   - name: cp_plan_id
     type: VARCHAR()
     description: CP Plan ID
@@ -28,9 +34,15 @@ nodes:
     - child_protection
     - cp_plan
     - review
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_plan_id
     - mosaic:cp_plan_id
+    cms_table:
+    - liquid_logic:cp_reviews
+    - mosaic:cp_reviews
   - name: cp_rev_due
     type: DATE
     description: Review Due Date
@@ -41,9 +53,15 @@ nodes:
     - review
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_rev_due
     - mosaic:cp_rev_due
+    cms_table:
+    - liquid_logic:cp_reviews
+    - mosaic:cp_reviews
   - name: cp_rev_date
     type: DATE
     description: Date of Review
@@ -55,9 +73,15 @@ nodes:
     returns:
     - CINcensus
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_rev_date
     - mosaic:cp_rev_date
+    cms_table:
+    - liquid_logic:cp_reviews
+    - mosaic:cp_reviews
   - name: cp_rev_outcome
     type: BOOLEAN
     description: CP Plan to Continue?
@@ -68,9 +92,15 @@ nodes:
     - review
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_rev_outcome
     - mosaic:cp_rev_outcome
+    cms_table:
+    - liquid_logic:cp_reviews
+    - mosaic:cp_reviews
   - name: cp_rev_quorate
     type: BOOLEAN
     description: Quorate?
@@ -81,9 +111,15 @@ nodes:
     - review
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_rev_quorate
     - mosaic:cp_rev_quorate
+    cms_table:
+    - liquid_logic:cp_reviews
+    - mosaic:cp_reviews
   - name: cp_rev_participation
     type: null
     description: Child Participation at Review
@@ -94,9 +130,15 @@ nodes:
     - review
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_rev_participation
     - mosaic:cp_rev_participation
+    cms_table:
+    - liquid_logic:cp_reviews
+    - mosaic:cp_reviews
   - name: cp_rev_cyp_views_quality
     type: null
     description: Quality of representation of CYP views experience
@@ -108,9 +150,15 @@ nodes:
     returns:
     - 1a
     - draft
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_rev_cyp_views_quality
     - mosaic:cp_rev_cyp_views_quality
+    cms_table:
+    - liquid_logic:cp_reviews
+    - mosaic:cp_reviews
   - name: cp_rev_sufficient_prog
     type: null
     description: 'Sufficient progress made against the CP Plan to improve outcomes
@@ -123,6 +171,12 @@ nodes:
     returns:
     - 1a
     - draft
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_rev_sufficient_prog
     - mosaic:cp_rev_sufficient_prog
+    cms_table:
+    - liquid_logic:cp_reviews
+    - mosaic:cp_reviews

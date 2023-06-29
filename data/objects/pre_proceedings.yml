@@ -1,0 +1,438 @@
+---
+nodes:
+- name: pre_proceedings
+  fields:
+  - name: la_person_id
+    type: VARCHAR(10)
+    description: Person Unique ID
+    field_ref: PLB001A
+    foreign_key: person.la_person_id
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - pre_proceedings
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: plo_family_id
+    type: null
+    description: PLO Family ID
+    field_ref: PLB002A
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:plo_family_id
+    - mosaic:plo_family_id
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: pre_pro_decision_date
+    type: DATE
+    description: Date decision made to enter Pre Proceedings
+    field_ref: PLB011A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:pre_pro_decision_date
+    - mosaic:pre_pro_decision_date
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: initial_pre_pro_meeting
+    type: DATE
+    description: Date of Initial Pre Proceedings Meeting
+    field_ref: PLB012A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:initial_pre_pro_meeting
+    - mosaic:initial_pre_pro_meeting
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: pre_pro_outcome
+    type: null
+    description: What is the Outcome of Pre-Proceedings
+    field_ref: PLB013A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:pre_pro_outcome
+    - mosaic:pre_pro_outcome
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: date_agree_stepdown_issue
+    type: DATE
+    description: Date Agreed to Step downissue
+    field_ref: PLB014A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:date_agree_stepdown_issue
+    - mosaic:date_agree_stepdown_issue
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: cp_plans_referral_period
+    type: null
+    description: How many times has the child been subject to a Child Protection Plan
+      during this referral period?
+    field_ref: PLS001A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cp_plans_referral_period
+    - mosaic:cp_plans_referral_period
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: legal_gateway_outcome
+    type: null
+    description: What was the outcome of legal gateway  panel  meeting after panel?
+    field_ref: PLS002A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:legal_gateway_outcome
+    - mosaic:legal_gateway_outcome
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: prev_pre_proc_child
+    type: null
+    description: "How many previous periods of pre-proceedings have there been in\
+      \ the child\u2019s lifetime?"
+    field_ref: PLS003A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prev_pre_proc_child
+    - mosaic:prev_pre_proc_child
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: prev_care_proc_child
+    type: null
+    description: "How many previous periods of care proceedings have there been in\
+      \ the child\u2019s lifetime?"
+    field_ref: PLS004A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prev_care_proc_child
+    - mosaic:prev_care_proc_child
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: pre_pro_letter_date
+    type: DATE
+    description: What is the date that the pre-proceedings letter and plan was sent
+      to parents?
+    field_ref: PLS005A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:pre_pro_letter_date
+    - mosaic:pre_pro_letter_date
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: care_pro_letter_date
+    type: DATE
+    description: What is the date that the letter to issue care proceedings was sent
+      to parents?
+    field_ref: PLS006A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:care_pro_letter_date
+    - mosaic:care_pro_letter_date
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: pre_pro_meetings_num
+    type: null
+    description: How many review pre-proceeding meetings have been held with parents
+      following the initial meeting?
+    field_ref: PLS007A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:pre_pro_meetings_num
+    - mosaic:pre_pro_meetings_num
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: pre_pro_parents_legal_rep
+    type: null
+    description: Did parents have legal representation during pre-proceedings?
+    field_ref: PLS008A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:pre_pro_parents_legal_rep
+    - mosaic:pre_pro_parents_legal_rep
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: parents_legal_rep_point_of_issue
+    type: null
+    description: Did parents have legal representation at the point of issue?
+    field_ref: PLS009A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:parents_legal_rep_point_of_issue
+    - mosaic:parents_legal_rep_point_of_issue
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: court_reference
+    type: null
+    description: If in Care Proceedings, what is the Court reference number?
+    field_ref: PLS010A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:court_reference
+    - mosaic:court_reference
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: care_proc_court_hearings
+    type: null
+    description: How many Court hearings have taken place whilst in care proceedings?
+    field_ref: PLS011A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:care_proc_court_hearings
+    - mosaic:care_proc_court_hearings
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: care_proc_short_notice
+    type: null
+    description: Were Care Proceedings issued on a short notice application?
+    field_ref: PLS012A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:care_proc_short_notice
+    - mosaic:care_proc_short_notice
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: care_proc_short_notice_reason
+    type: null
+    description: What was the reason for any short notice applications?
+    field_ref: PLS013A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:care_proc_short_notice_reason
+    - mosaic:care_proc_short_notice_reason
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: la_inital__plan_approved
+    type: null
+    description: "Was the LA\u2019s initial plan approved at the initial hearing?"
+    field_ref: PLS014A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:la_inital_plan_approved
+    - mosaic:la_inital_plan_approved
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: la_initial_care_plan
+    type: null
+    description: "What was the LA\u2019s initial care plan for the child at the initial\
+      \ hearing?"
+    field_ref: PLS015A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:la_initial_care_plan
+    - mosaic:la_initial_care_plan
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: la_final_plan_approved
+    type: null
+    description: "Was the LA\u2019s final plan approved at the final hearing?"
+    field_ref: PLS016A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:la_final_plan_approved
+    - mosaic:la_final_plan_approved
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings
+  - name: la_final_care_plan
+    type: null
+    description: "What was the LA\u2019s final care plan for the child at the final\
+      \ hearing?"
+    field_ref: PLS017A
+    categories:
+    - pre_proceedings
+    returns:
+    - 1b
+    - specified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:la_final_care_plan
+    - mosaic:la_final_care_plan
+    cms_table:
+    - liquid_logic:pre_proceedings
+    - mosaic:pre_proceedings

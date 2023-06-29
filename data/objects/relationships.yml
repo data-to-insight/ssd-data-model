@@ -97,7 +97,7 @@ relationships:
   relation: 1:M
 - parent_object: person
   parent_key: la_person_id
-  child_object: plo_bronze
+  child_object: pre_proceedings
   child_key: la_person_id
   relation: 1:M
 - parent_object: assessments

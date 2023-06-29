@@ -14,9 +14,15 @@ nodes:
         enabled: true
     categories:
     - early_help
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:eh_episode_id
     - mosaic:eh_episode_id
+    cms_table:
+    - liquid_logic:early_help_episodes
+    - mosaic:early_help_episodes
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -33,9 +39,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:early_help_episodes
+    - mosaic:early_help_episodes
   - name: eh_epi_start_date
     type: DATE
     description: EH Episode Start Date
@@ -44,9 +53,15 @@ nodes:
     - early_help
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:eh_epi_start_date
     - mosaic:eh_epi_start_date
+    cms_table:
+    - liquid_logic:early_help_episodes
+    - mosaic:early_help_episodes
   - name: eh_epi_end_date
     type: DATE
     description: EH Episode End Date
@@ -55,9 +70,15 @@ nodes:
     - early_help
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:eh_epi_end_date
     - mosaic:eh_epi_end_date
+    cms_table:
+    - liquid_logic:early_help_episodes
+    - mosaic:early_help_episodes
   - name: eh_epi_reason
     type: null
     description: EH Episode Reason for Involvement
@@ -66,9 +87,15 @@ nodes:
     - early_help
     returns:
     - ADCS_SP
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:eh_epi_reason
     - mosaic:eh_epi_reason
+    cms_table:
+    - liquid_logic:early_help_episodes
+    - mosaic:early_help_episodes
   - name: eh_epi_end_reason
     type: null
     description: EH Episode End Reason
@@ -77,9 +104,15 @@ nodes:
     - early_help
     returns:
     - ADCS_SP
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:eh_epi_end_reason
     - mosaic:eh_epi_end_reason
+    cms_table:
+    - liquid_logic:early_help_episodes
+    - mosaic:early_help_episodes
   - name: eh_epi_org
     type: null
     description: EH Episode Allocated Organisation
@@ -88,9 +121,15 @@ nodes:
     - early_help
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:eh_epi_org
     - mosaic:eh_epi_org
+    cms_table:
+    - liquid_logic:early_help_episodes
+    - mosaic:early_help_episodes
   - name: eh_epi_worker
     type: null
     description: EH Episode Allocated Worker
@@ -99,6 +138,12 @@ nodes:
     - early_help
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:eh_epi_worker
     - mosaic:eh_epi_worker
+    cms_table:
+    - liquid_logic:early_help_episodes
+    - mosaic:early_help_episodes

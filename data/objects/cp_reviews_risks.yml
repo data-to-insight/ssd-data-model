@@ -17,9 +17,15 @@ nodes:
     - child_protection
     - cp_plan
     - review
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_review_id
     - mosaic:cp_review_id
+    cms_table:
+    - liquid_logic:cp_reviews_risks
+    - mosaic:cp_reviews_risks
   - name: cp_review_risks
     type: null
     description: Risks to child at this conference
@@ -31,6 +37,12 @@ nodes:
     returns:
     - 1a
     - draft
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_review_risks
     - mosaic:cp_review_risks
+    cms_table:
+    - liquid_logic:cp_reviews_risks
+    - mosaic:cp_reviews_risks

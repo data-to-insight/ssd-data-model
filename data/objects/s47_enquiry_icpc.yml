@@ -15,9 +15,15 @@ nodes:
     categories:
     - s47_enquiry
     - child_protection
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:s47_enquiry_id
     - mosaic:s47_enquiry_id
+    cms_table:
+    - liquid_logic:s47_enquiry_icpc
+    - mosaic:s47_enquiry_icpc
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -35,9 +41,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:s47_enquiry_icpc
+    - mosaic:s47_enquiry_icpc
   - name: strat_initiating_s47_date
     type: DATE
     description: Strategy Discussion initiating S47 Enquiry Start Date
@@ -47,9 +56,15 @@ nodes:
     - child_protection
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:strat_initiating_s47_date
     - mosaic:strat_initiating_s47_date
+    cms_table:
+    - liquid_logic:s47_enquiry_icpc
+    - mosaic:s47_enquiry_icpc
   - name: s47_start_date
     type: DATE
     description: S47 Start Date
@@ -59,9 +74,15 @@ nodes:
     - child_protection
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:s47_start_date
     - mosaic:s47_start_date
+    cms_table:
+    - liquid_logic:s47_enquiry_icpc
+    - mosaic:s47_enquiry_icpc
   - name: s47_completed_date
     type: DATE
     description: S47 Completed Date
@@ -69,9 +90,15 @@ nodes:
     categories:
     - s47_enquiry
     - child_protection
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:s47_completed_date
     - mosaic:s47_completed_date
+    cms_table:
+    - liquid_logic:s47_enquiry_icpc
+    - mosaic:s47_enquiry_icpc
   - name: s47outcome
     type: null
     description: S47 Outcome
@@ -81,9 +108,15 @@ nodes:
     - child_protection
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:s47outcome
     - mosaic:s47outcome
+    cms_table:
+    - liquid_logic:s47_enquiry_icpc
+    - mosaic:s47_enquiry_icpc
   - name: icpc_date
     type: DATE
     description: Date of Initial CP Conference
@@ -93,9 +126,15 @@ nodes:
     - child_protection
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:icpc_date
     - mosaic:icpc_date
+    cms_table:
+    - liquid_logic:s47_enquiry_icpc
+    - mosaic:s47_enquiry_icpc
   - name: icpc_outcome
     type: null
     description: Outcome of Initial CP Conference
@@ -105,9 +144,15 @@ nodes:
     - child_protection
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:icpc_outcome
     - mosaic:icpc_outcome
+    cms_table:
+    - liquid_logic:s47_enquiry_icpc
+    - mosaic:s47_enquiry_icpc
   - name: icpc_team
     type: null
     description: S47 ICPC Allocated Team
@@ -117,9 +162,15 @@ nodes:
     - child_protection
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:icpc_team
     - mosaic:icpc_team
+    cms_table:
+    - liquid_logic:s47_enquiry_icpc
+    - mosaic:s47_enquiry_icpc
   - name: icpc_worker
     type: null
     description: S47 ICPC Allocated Worker
@@ -129,6 +180,12 @@ nodes:
     - child_protection
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:icpc_worker
     - mosaic:icpc_worker
+    cms_table:
+    - liquid_logic:s47_enquiry_icpc
+    - mosaic:s47_enquiry_icpc

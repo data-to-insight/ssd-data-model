@@ -16,9 +16,15 @@ nodes:
     - identity
     - looked_after
     - permanence
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:legal_status_id
     - mosaic:legal_status_id
+    cms_table:
+    - liquid_logic:legal_status
+    - mosaic:legal_status
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -37,9 +43,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:legal_status
+    - mosaic:legal_status
   - name: legal_status
     type: null
     description: Legal Status
@@ -51,7 +60,13 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:legal_status
+    - mosaic:legal_status
+    cms_table:
     - liquid_logic:legal_status
     - mosaic:legal_status
   - name: legal_status_start
@@ -64,9 +79,15 @@ nodes:
     - permanence
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:legal_status_start
     - mosaic:legal_status_start
+    cms_table:
+    - liquid_logic:legal_status
+    - mosaic:legal_status
   - name: legal_status_end
     type: DATE
     description: Legal Status End Date
@@ -77,6 +98,12 @@ nodes:
     - permanence
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:legal_status_end
     - mosaic:legal_status_end
+    cms_table:
+    - liquid_logic:legal_status
+    - mosaic:legal_status

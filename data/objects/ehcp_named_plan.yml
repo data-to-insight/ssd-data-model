@@ -16,9 +16,15 @@ nodes:
     - send
     - ehcp_request
     - ehcp_assessment
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:named_plan_id
     - mosaic:named_plan_id
+    cms_table:
+    - liquid_logic:ehcp_named_plan
+    - mosaic:ehcp_named_plan
   - name: ehcp_asmt_id
     type: VARCHAR()
     description: Assessment ID
@@ -28,9 +34,15 @@ nodes:
     - send
     - ehcp_request
     - ehcp_assessment
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:ehcp_asmt_id
     - mosaic:ehcp_asmt_id
+    cms_table:
+    - liquid_logic:ehcp_named_plan
+    - mosaic:ehcp_named_plan
   - name: named_plan_start_date
     type: DATE
     description: Start Date
@@ -41,9 +53,15 @@ nodes:
     - ehcp_assessment
     returns:
     - SEN2
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:named_plan_start_date
     - mosaic:named_plan_start_date
+    cms_table:
+    - liquid_logic:ehcp_named_plan
+    - mosaic:ehcp_named_plan
   - name: named_plan_cease_date
     type: DATE
     description: Cease Date
@@ -54,9 +72,15 @@ nodes:
     - ehcp_assessment
     returns:
     - SEN2
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:named_plan_cease_date
     - mosaic:named_plan_cease_date
+    cms_table:
+    - liquid_logic:ehcp_named_plan
+    - mosaic:ehcp_named_plan
   - name: named_plan_cease_reason
     type: null
     description: Cease Reason
@@ -67,6 +91,12 @@ nodes:
     - ehcp_assessment
     returns:
     - SEN2
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:named_plan_cease_reason
     - mosaic:named_plan_cease_reason
+    cms_table:
+    - liquid_logic:ehcp_named_plan
+    - mosaic:ehcp_named_plan

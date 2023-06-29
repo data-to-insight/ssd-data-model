@@ -15,9 +15,15 @@ nodes:
     categories:
     - child_in_need
     - referral
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_referral_id
     - mosaic:cin_referral_id
+    cms_table:
+    - liquid_logic:cin_episodes
+    - mosaic:cin_episodes
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -34,9 +40,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:cin_episodes
+    - mosaic:cin_episodes
   - name: cin_ref_date
     type: DATE
     description: CIN Referral Date
@@ -47,9 +56,15 @@ nodes:
     returns:
     - CINcensus
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_ref_date
     - mosaic:cin_ref_date
+    cms_table:
+    - liquid_logic:cin_episodes
+    - mosaic:cin_episodes
   - name: cin_ref_source
     type: null
     description: CIN Referral Source
@@ -60,9 +75,15 @@ nodes:
     returns:
     - CINcensus
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_ref_source
     - mosaic:cin_ref_source
+    cms_table:
+    - liquid_logic:cin_episodes
+    - mosaic:cin_episodes
   - name: cin_ref_outcome
     type: null
     description: CIN Referral Outcome
@@ -73,9 +94,15 @@ nodes:
     returns:
     - CINcensus
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_ref_outcome
     - mosaic:cin_ref_outcome
+    cms_table:
+    - liquid_logic:cin_episodes
+    - mosaic:cin_episodes
   - name: cin_close_reason
     type: null
     description: CIN Closure Reason
@@ -84,9 +111,15 @@ nodes:
     - child_in_need
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_close_reason
     - mosaic:cin_close_reason
+    cms_table:
+    - liquid_logic:cin_episodes
+    - mosaic:cin_episodes
   - name: cin_close_date
     type: DATE
     description: CIN Closure Date
@@ -95,9 +128,15 @@ nodes:
     - child_in_need
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_close_date
     - mosaic:cin_close_date
+    cms_table:
+    - liquid_logic:cin_episodes
+    - mosaic:cin_episodes
   - name: cin_ref_team
     type: null
     description: CIN Referral Completed by Team
@@ -107,9 +146,15 @@ nodes:
     - referral
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_ref_team
     - mosaic:cin_ref_team
+    cms_table:
+    - liquid_logic:cin_episodes
+    - mosaic:cin_episodes
   - name: cin_ref_worker
     type: null
     description: CIN Referral Completed by Worker
@@ -119,6 +164,12 @@ nodes:
     - referral
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_ref_worker
     - mosaic:cin_ref_worker
+    cms_table:
+    - liquid_logic:cin_episodes
+    - mosaic:cin_episodes

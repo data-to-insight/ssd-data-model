@@ -18,9 +18,15 @@ nodes:
     - mother
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_child_id
     - mosaic:person_child_id
+    cms_table:
+    - liquid_logic:mother
+    - mosaic:mother
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID (Mother)
@@ -39,9 +45,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:mother
+    - mosaic:mother
   - name: person_child_dob
     type: DATE
     description: Date of birth of mothers child
@@ -52,6 +61,12 @@ nodes:
     - mother
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_child_dob
     - mosaic:person_child_dob
+    cms_table:
+    - liquid_logic:mother
+    - mosaic:mother

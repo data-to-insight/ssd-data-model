@@ -9,9 +9,15 @@ nodes:
     categories:
     - looked_after
     - visit
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_visit_id
     - mosaic:cla_visit_id
+    cms_table:
+    - liquid_logic:cla_visits
+    - mosaic:cla_visits
   - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
@@ -20,9 +26,15 @@ nodes:
     categories:
     - looked_after
     - visit
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_episode_id
     - mosaic:cla_episode_id
+    cms_table:
+    - liquid_logic:cla_visits
+    - mosaic:cla_visits
   - name: cla_visit_date
     type: DATE
     description: Date of Visit
@@ -32,9 +44,15 @@ nodes:
     - visit
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_visit_date
     - mosaic:cla_visit_date
+    cms_table:
+    - liquid_logic:cla_visits
+    - mosaic:cla_visits
   - name: cla_visit_seen
     type: BOOLEAN
     description: Child Seen
@@ -44,9 +62,15 @@ nodes:
     - visit
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_visit_seen
     - mosaic:cla_visit_seen
+    cms_table:
+    - liquid_logic:cla_visits
+    - mosaic:cla_visits
   - name: cla_visit_seen_alone
     type: BOOLEAN
     description: Child Seen Alone
@@ -56,6 +80,12 @@ nodes:
     - visit
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_visit_seen_alone
     - mosaic:cla_visit_seen_alone
+    cms_table:
+    - liquid_logic:cla_visits
+    - mosaic:cla_visits

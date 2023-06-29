@@ -16,9 +16,15 @@ nodes:
     categories:
     - looked_after
     - review
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:review_id
     - mosaic:review_id
+    cms_table:
+    - liquid_logic:care_plan
+    - mosaic:care_plan
   - name: permanence_plan
     type: null
     description: What is the permanence plan for this child young person?
@@ -28,6 +34,12 @@ nodes:
     - review
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:permanence_plan
     - mosaic:permanence_plan
+    cms_table:
+    - liquid_logic:care_plan
+    - mosaic:care_plan

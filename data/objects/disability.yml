@@ -22,9 +22,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:disability
+    - mosaic:disability
   - name: person_disability
     type: null
     description: Disability Code
@@ -40,6 +43,12 @@ nodes:
     - disability
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_disability
     - mosaic:person_disability
+    cms_table:
+    - liquid_logic:disability
+    - mosaic:disability

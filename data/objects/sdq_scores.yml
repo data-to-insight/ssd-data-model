@@ -15,9 +15,15 @@ nodes:
     categories:
     - looked_after
     - sdq
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:sdq_id
     - mosaic:sdq_id
+    cms_table:
+    - liquid_logic:sdq_scores
+    - mosaic:sdq_scores
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -35,9 +41,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:sdq_scores
+    - mosaic:sdq_scores
   - name: sdq_completed_date
     type: DATE
     description: SDQ Completed Date
@@ -47,9 +56,15 @@ nodes:
     - sdq
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:sdq_completed_date
     - mosaic:sdq_completed_date
+    cms_table:
+    - liquid_logic:sdq_scores
+    - mosaic:sdq_scores
   - name: sdq_reason
     type: null
     description: SDQ Reason
@@ -59,9 +74,15 @@ nodes:
     - sdq
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:sdq_reason
     - mosaic:sdq_reason
+    cms_table:
+    - liquid_logic:sdq_scores
+    - mosaic:sdq_scores
   - name: sdq_score
     type: null
     description: SDQ Score
@@ -71,6 +92,12 @@ nodes:
     - sdq
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:sdq_score
     - mosaic:sdq_score
+    cms_table:
+    - liquid_logic:sdq_scores
+    - mosaic:sdq_scores

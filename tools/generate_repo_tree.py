@@ -4,6 +4,19 @@ from openpyxl import Workbook
 IGNORE_FOLDERS = ["z_clean_up_tmp", ".git", ".vscode"]
 
 def generate_file_tree(root_directory):
+    """
+    Generates a list representing the file tree of a root directory.
+    
+    Args:
+        root_directory (str): Path to the root directory.
+    
+    Returns:
+        list: A list of tuples, each containing the relative path of a directory 
+        and a list of filenames in that directory.
+    
+    Note:
+        This function skips directories listed in the global IGNORE_FOLDERS and ".git" directories.
+    """
     file_tree = []
 
     stack = [(root_directory, 0)]

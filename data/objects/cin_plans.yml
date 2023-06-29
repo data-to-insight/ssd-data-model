@@ -15,9 +15,15 @@ nodes:
     categories:
     - child_in_need
     - cin_plan
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_plan_id
     - mosaic:cin_plan_id
+    cms_table:
+    - liquid_logic:cin_plans
+    - mosaic:cin_plans
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -35,9 +41,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:cin_plans
+    - mosaic:cin_plans
   - name: cin_plan_start
     type: DATE
     description: CIN Plan Start Date
@@ -47,9 +56,15 @@ nodes:
     - cin_plan
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_plan_Start
     - mosaic:cin_plan_Start
+    cms_table:
+    - liquid_logic:cin_plans
+    - mosaic:cin_plans
   - name: cin_plan_end
     type: DATE
     description: CIN Plan End Date
@@ -59,9 +74,15 @@ nodes:
     - cin_plan
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_plan_end
     - mosaic:cin_plan_end
+    cms_table:
+    - liquid_logic:cin_plans
+    - mosaic:cin_plans
   - name: cin_team
     type: null
     description: CIN Allocated Team
@@ -71,9 +92,15 @@ nodes:
     - cin_plan
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_team
     - mosaic:cin_team
+    cms_table:
+    - liquid_logic:cin_plans
+    - mosaic:cin_plans
   - name: cin_worker
     type: null
     description: CIN Allocated Worker
@@ -83,6 +110,12 @@ nodes:
     - cin_plan
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_worker
     - mosaic:cin_worker
+    cms_table:
+    - liquid_logic:cin_plans
+    - mosaic:cin_plans

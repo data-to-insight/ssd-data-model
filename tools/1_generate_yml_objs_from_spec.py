@@ -17,10 +17,11 @@ import yaml
 import re
 
 # Full list of field names
-field_names = ['field_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 'cms', 'cms_fields','required_enabled','unique_enabled','primary_key','foreign_key']
+# If there are non-required fields in the spec csv, just dont include them here
+field_names = ['field_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 'cms', 'cms_field','cms_table','required_enabled','unique_enabled','primary_key','foreign_key']
 
 # Those that are multi-part/list fields
-multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_fields']
+multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_field', 'cms_table']
 
 
 # Creating a new dictionary to store relationships
@@ -67,6 +68,19 @@ def clean_fieldname_data(value, is_name=False):
 
 
 def process_csv_file(csv_file, output_directory):
+    """
+    Processes a CSV file, extracting and storing data nodes and their relationships in YAML format.
+    
+    Args:
+        csv_file (str): Path to the input CSV file.
+        output_directory (str): Path to the output directory to store the YAML files.
+    
+    Returns:
+        None. Writes nodes and relationships to separate YAML files in the specified directory.
+        
+    Note:
+        This function relies on `field_names` and `multi_part_fields` to be defined in its environment.
+    """
     with open(csv_file, 'r', newline='', encoding='utf-8-sig') as file:
         reader = csv.DictReader(file)
         nodes = []
@@ -107,6 +121,8 @@ def process_csv_file(csv_file, output_directory):
             save_node_yaml(node, output_directory)
 
         save_relationships_yaml(relationships, output_directory)
+
+
 
 def save_relationships_yaml(relationships, output_directory):
     """
