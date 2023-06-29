@@ -1,0 +1,61 @@
+---
+nodes:
+- name: cla_visits
+  fields:
+  - name: cla_visit_id
+    type: VARCHAR()
+    description: Visit ID
+    field_ref: CLV001A
+    categories:
+    - looked_after
+    - visit
+    cms_fields:
+    - liquid_logic:cla_visit_id
+    - mosaic:cla_visit_id
+  - name: cla_episode_id
+    type: VARCHAR()
+    description: Episode ID
+    field_ref: CLV002A
+    foreign_key: cla_episodes.cla_episode_id
+    categories:
+    - looked_after
+    - visit
+    cms_fields:
+    - liquid_logic:cla_episode_id
+    - mosaic:cla_episode_id
+  - name: cla_visit_date
+    type: DATE
+    description: Date of Visit
+    field_ref: CLV003A
+    categories:
+    - looked_after
+    - visit
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cla_visit_date
+    - mosaic:cla_visit_date
+  - name: cla_visit_seen
+    type: BOOLEAN
+    description: Child Seen
+    field_ref: CLV004A
+    categories:
+    - looked_after
+    - visit
+    returns:
+    - Local
+    cms_fields:
+    - liquid_logic:cla_visit_seen
+    - mosaic:cla_visit_seen
+  - name: cla_visit_seen_alone
+    type: BOOLEAN
+    description: Child Seen Alone
+    field_ref: CLV005A
+    categories:
+    - looked_after
+    - visit
+    returns:
+    - Local
+    cms_fields:
+    - liquid_logic:cla_visit_seen_alone
+    - mosaic:cla_visit_seen_alone

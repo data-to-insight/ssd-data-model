@@ -1,0 +1,33 @@
+---
+nodes:
+- name: care_plan
+  fields:
+  - name: review_id
+    type: VARCHAR()
+    description: Review ID
+    field_ref: CAP001A
+    primary_key: true
+    foreign_key: cla_reviews.review_id
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - looked_after
+    - review
+    cms_fields:
+    - liquid_logic:review_id
+    - mosaic:review_id
+  - name: permanence_plan
+    type: null
+    description: What is the permanence plan for this child young person?
+    field_ref: CAP002A
+    categories:
+    - looked_after
+    - review
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:permanence_plan
+    - mosaic:permanence_plan

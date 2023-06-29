@@ -1,0 +1,68 @@
+---
+nodes:
+- name: ehcp_requests
+  fields:
+  - name: ehcp_request_id
+    type: VARCHAR()
+    description: Request ID
+    field_ref: ERQ001A
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - send
+    - ehcp_request
+    cms_fields:
+    - liquid_logic:ehcp_request_id
+    - mosaic:ehcp_request_id
+  - name: send_table_id
+    type: null
+    description: send_table_id
+    field_ref: ERQ002A
+    foreign_key: send.send_table_id
+    categories:
+    - identity
+    - send
+    - ehcp_request
+    cms_fields:
+    - liquid_logic:send_table_id
+    - mosaic:send_table_id
+  - name: ehcp_req_date
+    type: DATE
+    description: Received Date
+    field_ref: ERQ003A
+    categories:
+    - send
+    - ehcp_request
+    returns:
+    - SEN2
+    cms_fields:
+    - liquid_logic:ehcp_req_date
+    - mosaic:ehcp_req_date
+  - name: ehcp_req_outcome_date
+    type: DATE
+    description: Request Outcome Date
+    field_ref: ERQ004A
+    categories:
+    - send
+    - ehcp_request
+    returns:
+    - SEN2
+    cms_fields:
+    - liquid_logic:ehcp_req_outcome_date
+    - mosaic:ehcp_req_outcome_date
+  - name: ehcp_req_outcome
+    type: null
+    description: Request Outcome
+    field_ref: ERQ005A
+    categories:
+    - send
+    - ehcp_request
+    returns:
+    - SEN2
+    cms_fields:
+    - liquid_logic:ehcp_req_outcome
+    - mosaic:ehcp_req_outcome

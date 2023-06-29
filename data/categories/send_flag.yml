@@ -1,0 +1,5 @@
+# item ref: ssd008
+- value: 0
+  description: 'Has EHC Plan'
+- value: 1
+  description: 'Does not have an EHC Plan'

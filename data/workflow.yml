@@ -1,0 +1,30 @@
+- name: Child Workflow
+  color: '#b3e2cd'
+  steps:
+    - name: Personal Details Logged
+    - name: Local Authority Assignment
+    - name: Adoption Placement
+      records:
+        - id: adoption_placement
+
+- name: Referral Workflow
+  color: '#cbd5e8'
+  steps:
+    - name: Referral Entry
+      records:
+        - id: referral
+
+- name: Local Authority Workflow
+  color: '#f4cae4'
+  steps:
+    - name: Local Authority Assignment
+    - name: Adoption Placement Change
+      records:
+        - id: adoption_placement
+
+- name: SEND Workflow
+  color: '#e6f5c9'
+  steps:
+    - name: SEND Entry
+      records:
+        - id: send

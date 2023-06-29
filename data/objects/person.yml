@@ -1,0 +1,148 @@
+---
+nodes:
+- name: person
+  fields:
+  - name: la_person_id
+    type: VARCHAR(10)
+    description: Person Unique ID
+    field_ref: PER001A
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
+  - name: person_sex
+    type: null
+    description: Sex
+    field_ref: PER002A
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    cms_fields:
+    - liquid_logic:person_sex
+    - mosaic:person_sex
+  - name: person_gender
+    type: null
+    description: Gender
+    field_ref: PER003A
+    categories:
+    - identity
+    returns:
+    - CINcensus
+    cms_fields:
+    - liquid_logic:person_gender
+    - mosaic:person_gender
+  - name: person_ethnicity
+    type: VARCHAR(4)
+    description: Ethnicity
+    field_ref: PER004A
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    - CINcensus
+    cms_fields:
+    - liquid_logic:person_ethnicity
+    - mosaic:person_ethnicity
+  - name: person_dob
+    type: DATE
+    description: Date of Birth
+    field_ref: PER005A
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    - CINcensus
+    cms_fields:
+    - liquid_logic:person_dob
+    - mosaic:person_dob
+  - name: person_upn
+    type: CHAR(13)
+    description: UPN
+    field_ref: PER006A
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    cms_fields:
+    - liquid_logic:person_upn
+    - mosaic:person_upn
+  - name: person_upn_unknown
+    type: CHAR(3)
+    description: UPN Unknown
+    field_ref: PER007A
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    cms_fields:
+    - liquid_logic:person_upn_unknown
+    - mosaic:person_upn_unknown
+  - name: person_send
+    type: BOOLEAN
+    description: SEND Flag
+    field_ref: PER008A
+    categories:
+    - identity
+    returns:
+    - NEETandparticipation
+    cms_fields:
+    - liquid_logic:person_send
+    - mosaic:person_send
+  - name: person_expected_dob
+    type: DATE
+    description: Expected Birth Date
+    field_ref: PER009A
+    categories:
+    - identity
+    returns:
+    - CINcensus
+    cms_fields:
+    - liquid_logic:person_expected_dob
+    - mosaic:person_expected_dob
+  - name: person_death_date
+    type: DATE
+    description: Date of Death
+    field_ref: PER010A
+    categories:
+    - identity
+    returns:
+    - CINcensus
+    cms_fields:
+    - liquid_logic:person_death_date
+    - mosaic:person_death_date
+  - name: person_is_mother
+    type: BOOLEAN
+    description: Mother
+    field_ref: PER011A
+    categories:
+    - identity
+    returns:
+    - SSDA903
+    cms_fields:
+    - liquid_logic:person_is_mother
+    - mosaic:person_is_mother
+  - name: person_nationality
+    type: null
+    description: Country of Origin (UASC)
+    field_ref: PER012A
+    categories:
+    - identity
+    returns:
+    - ADCS_SP
+    cms_fields:
+    - liquid_logic:person_nationality
+    - mosaic:person_nationality

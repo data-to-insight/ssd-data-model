@@ -1,0 +1,85 @@
+---
+nodes:
+- name: cp_visits
+  fields:
+  - name: cp_plan_id
+    type: VARCHAR()
+    description: CP Plan ID
+    field_ref: CPV001A
+    primary_key: true
+    foreign_key: cp_plans.cp_plan_id
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    cms_fields:
+    - liquid_logic:cp_plan_id
+    - mosaic:cp_plan_id
+  - name: cp_visit_id
+    type: VARCHAR()
+    description: CP Visit ID
+    field_ref: CPV002A
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    cms_fields:
+    - liquid_logic:cp_visit_id
+    - mosaic:cp_visit_id
+  - name: cp_visit_date
+    type: DATE
+    description: Date of Visit
+    field_ref: CPV003A
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cp_visit_date
+    - mosaic:cp_visit_date
+  - name: cp_visit_seen
+    type: BOOLEAN
+    description: Child Seen
+    field_ref: CPV004A
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - Local
+    cms_fields:
+    - liquid_logic:cp_visit_seen
+    - mosaic:cp_visit_seen
+  - name: cp_visit_seen_alone
+    type: BOOLEAN
+    description: Child Seen Alone
+    field_ref: CPV005A
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cp_visit_seen_alone
+    - mosaic:cp_visit_seen_alone
+  - name: cp_visit_bedroom
+    type: BOOLEAN
+    description: Child Bedroom Seen
+    field_ref: CPV006A
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - Local
+    cms_fields:
+    - liquid_logic:cp_visit_bedroom
+    - mosaic:cp_visit_bedroom

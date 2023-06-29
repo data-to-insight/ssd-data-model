@@ -1,0 +1,33 @@
+---
+nodes:
+- name: assessment_factors
+  fields:
+  - name: asmt_id
+    type: VARCHAR()
+    description: Assessment ID
+    field_ref: ASF001A
+    primary_key: true
+    foreign_key: assessments.assessment_id
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - child_in_need
+    - assessment
+    cms_fields:
+    - liquid_logic:asmt_id
+    - mosaic:asmt_id
+  - name: asmt_factors
+    type: null
+    description: Assessment Factors
+    field_ref: ASF002A
+    categories:
+    - child_in_need
+    - assessment
+    returns:
+    - CINcensus
+    cms_fields:
+    - liquid_logic:asmt_factors
+    - mosaic:asmt_factors

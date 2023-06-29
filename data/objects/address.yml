@@ -1,0 +1,75 @@
+---
+nodes:
+- name: address
+  fields:
+  - name: address
+    type: null
+    description: Address
+    field_ref: ADD001A
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms_fields:
+    - liquid_logic:address
+    - mosaic:address
+  - name: la_person_id
+    type: VARCHAR(10)
+    description: Person Unique ID
+    field_ref: ADD002A
+    foreign_key: person.la_person_id
+    categories:
+    - identity
+    - address
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
+  - name: address_type
+    type: null
+    description: Address Type
+    field_ref: ADD003A
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms_fields:
+    - liquid_logic:address_type
+    - mosaic:address_type
+  - name: address_start
+    type: DATE
+    description: Address Start Date From
+    field_ref: ADD004A
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms_fields:
+    - liquid_logic:address_start
+    - mosaic:address_start
+  - name: address_end
+    type: DATE
+    description: Address End Date To
+    field_ref: ADD005A
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms_fields:
+    - liquid_logic:address_end
+    - mosaic:address_end

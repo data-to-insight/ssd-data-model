@@ -1,0 +1,24 @@
+string:
+  description: "A string of Unicode characters."
+
+integer:
+  description: "An integer."
+
+date:
+  description: "Represents a single date in dd/mm/yy format."
+  format: "dd/mm/yy"
+
+year:
+  extends: integer
+  description: "Represents a single (Gregorian) year as an integer."
+
+monthyear:
+  extends: string
+  description: "Represents a Gregorian month in dd/mm/yy format."
+
+categorical:
+  extends: string
+  description: "Restricted to a set of fixed values. Represented as a string with a set of allowed values defined by a dimension validator."
+
+list:
+  description: "Represents a list of values."

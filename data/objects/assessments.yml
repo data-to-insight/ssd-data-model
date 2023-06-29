@@ -1,0 +1,112 @@
+---
+nodes:
+- name: assessments
+  fields:
+  - name: assessment_id
+    type: VARCHAR()
+    description: Assessment ID
+    field_ref: ASM001A
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - child_in_need
+    - assessment
+    cms_fields:
+    - liquid_logic:assessment_id
+    - mosaic:assessment_id
+  - name: la_person_id
+    type: VARCHAR(10)
+    description: Person Unique ID
+    field_ref: ASM002A
+    foreign_key: person.la_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - child_in_need
+    - assessment
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
+  - name: asmt_start_date
+    type: DATE
+    description: Assessment Start Date
+    field_ref: ASM003A
+    categories:
+    - child_in_need
+    - assessment
+    returns:
+    - CINcensus
+    cms_fields:
+    - liquid_logic:asmt_start_date
+    - mosaic:asmt_start_date
+  - name: asmt_child_seen
+    type: BOOLEAN
+    description: Child Seen During Assessment
+    field_ref: ASM004A
+    categories:
+    - child_in_need
+    - assessment
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:asmt_child_seen
+    - mosaic:asmt_child_seen
+  - name: asmt_auth_date
+    type: DATE
+    description: Assessment Authorised Date
+    field_ref: ASM005A
+    categories:
+    - child_in_need
+    - assessment
+    returns:
+    - CINcensus
+    cms_fields:
+    - liquid_logic:asmt_auth_date
+    - mosaic:asmt_auth_date
+  - name: asmt_outcome
+    type: null
+    description: Assessment Outcome
+    field_ref: ASM006A
+    categories:
+    - child_in_need
+    - assessment
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:asmt_outcome
+    - mosaic:asmt_outcome
+  - name: asmt_team
+    type: null
+    description: Assessment Completed by Team
+    field_ref: ASM007A
+    categories:
+    - child_in_need
+    - assessment
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:asmt_team
+    - mosaic:asmt_team
+  - name: asmt_worker
+    type: null
+    description: Assessment Completed by Worker
+    field_ref: ASM008A
+    categories:
+    - child_in_need
+    - assessment
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:asmt_worker
+    - mosaic:asmt_worker

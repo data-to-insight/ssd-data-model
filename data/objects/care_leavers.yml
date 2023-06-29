@@ -1,0 +1,148 @@
+---
+nodes:
+- name: care_leavers
+  fields:
+  - name: care_leaver_id
+    type: VARCHAR()
+    description: Care Leaver Table ID
+    field_ref: CLE001A
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - care_leavers
+    cms_fields:
+    - liquid_logic:care_leaver_id
+    - mosaic:care_leaver_id
+  - name: la_person_id
+    type: VARCHAR(10)
+    description: Person Unique ID
+    field_ref: CLE002A
+    foreign_key: person.la_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - care_leavers
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
+  - name: cl_eligibility
+    type: null
+    description: Eligibility Status Category
+    field_ref: CLE003A
+    categories:
+    - care_leavers
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cl_eligibility
+    - mosaic:cl_eligibility
+  - name: cl_in_touch
+    type: null
+    description: In Touch Category
+    field_ref: CLE004A
+    categories:
+    - care_leavers
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cl_in_touch
+    - mosaic:cl_in_touch
+  - name: cl_latest_contact
+    type: DATE
+    description: Latest Date of Contact
+    field_ref: CLE005A
+    categories:
+    - care_leavers
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cl_latest_contact
+    - mosaic:cl_latest_contact
+  - name: cl_accommodation
+    type: null
+    description: Accommodation
+    field_ref: CLE006A
+    categories:
+    - care_leavers
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cl_accommodation
+    - mosaic:cl_accommodation
+  - name: cl_accom_suitable
+    type: null
+    description: Suitability of Accommodation
+    field_ref: CLE007A
+    categories:
+    - care_leavers
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cl_accom_suitable
+    - mosaic:cl_accom_suitable
+  - name: cl_activity
+    type: null
+    description: Activity Status
+    field_ref: CLE008A
+    categories:
+    - care_leavers
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cl_activity
+    - mosaic:cl_activity
+  - name: cl_pathway_plan_rev_date
+    type: null
+    description: Latest Pathway Plan Review Date
+    field_ref: CLE009A
+    categories:
+    - care_leavers
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cl_pathway_plan_rev_date
+    - mosaic:cl_pathway_plan_rev_date
+  - name: cl_personal_advisor
+    type: null
+    description: Allocated Personal Advisor
+    field_ref: CLE010A
+    categories:
+    - care_leavers
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cl_personal_advisor
+    - mosaic:cl_personal_advisor
+  - name: cl_team
+    type: null
+    description: Allocated Team
+    field_ref: CLE011A
+    categories:
+    - care_leavers
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cl_team
+    - mosaic:cl_team
+  - name: cl_worker
+    type: null
+    description: Allocated Worker
+    field_ref: CLE012A
+    categories:
+    - care_leavers
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:cl_worker
+    - mosaic:cl_worker

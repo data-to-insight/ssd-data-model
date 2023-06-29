@@ -1,0 +1,45 @@
+---
+nodes:
+- name: disability
+  fields:
+  - name: la_person_id
+    type: VARCHAR(10)
+    description: Person Unique ID
+    field_ref: DIS001A
+    primary_key: true
+    foreign_key: person.la_person_id
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - disability
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
+  - name: person_disability
+    type: null
+    description: Disability Code
+    field_ref: DIS002A
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - disability
+    returns:
+    - CINcensus
+    cms_fields:
+    - liquid_logic:person_disability
+    - mosaic:person_disability

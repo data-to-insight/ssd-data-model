@@ -1,0 +1,113 @@
+---
+nodes:
+- name: worker
+  fields:
+  - name: sw_reg_number
+    type: VARCHAR()
+    description: Social Work England (SWE) registration number
+    field_ref: WRK001A
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - social_worker
+    cms_fields:
+    - liquid_logic:sw_reg_number
+    - mosaic:sw_reg_number
+  - name: sw_id
+    type: VARCHAR()
+    description: Social worker ID
+    field_ref: WRK002A
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - social_worker
+    returns:
+    - SSDA903
+    cms_fields:
+    - liquid_logic:sw_id
+    - mosaic:sw_id
+  - name: sw_epi_start_date
+    type: DATE
+    description: Social worker episode start date
+    field_ref: WRK003A
+    categories:
+    - social_worker
+    returns:
+    - SSDA903
+    cms_fields:
+    - liquid_logic:sw_epi_start_date
+    - mosaic:sw_epi_start_date
+  - name: sw_epi_end_date
+    type: DATE
+    description: Social worker episode end date
+    field_ref: WRK004A
+    categories:
+    - social_worker
+    returns:
+    - SSDA903
+    cms_fields:
+    - liquid_logic:sw_epi_end_date
+    - mosaic:sw_epi_end_date
+  - name: sw_change_reason
+    type: VARCHAR()
+    description: Reason for social worker change
+    field_ref: WRK005A
+    categories:
+    - social_worker
+    returns:
+    - SSDA903
+    cms_fields:
+    - liquid_logic:sw_change_reason
+    - mosaic:sw_change_reason
+  - name: sw_agency
+    type: BOOLEAN
+    description: Agency worker
+    field_ref: WRK006A
+    categories:
+    - social_worker
+    returns:
+    - CSCWF
+    cms_fields:
+    - liquid_logic:sw_agency
+    - mosaic:sw_agency
+  - name: sw_role
+    type: VARCHAR()
+    description: Role within the organisation
+    field_ref: WRK007A
+    categories:
+    - social_worker
+    returns:
+    - CSCWF
+    cms_fields:
+    - liquid_logic:sw_role
+    - mosaic:sw_role
+  - name: sw_caseload
+    type: TINYINT()
+    description: Number of cases held
+    field_ref: WRK008A
+    categories:
+    - social_worker
+    returns:
+    - CSCWF
+    cms_fields:
+    - liquid_logic:sw_caseload
+    - mosaic:sw_caseload
+  - name: sw_qualification
+    type: VARCHAR()
+    description: Qualification level
+    field_ref: WRK009A
+    categories:
+    - social_worker
+    returns:
+    - CSCWF
+    cms_fields:
+    - liquid_logic:sw_qualification
+    - mosaic:sw_qualification

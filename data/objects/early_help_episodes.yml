@@ -1,0 +1,104 @@
+---
+nodes:
+- name: early_help_episodes
+  fields:
+  - name: eh_episode_id
+    type: VARCHAR()
+    description: EH Episode ID
+    field_ref: EAR001A
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - early_help
+    cms_fields:
+    - liquid_logic:eh_episode_id
+    - mosaic:eh_episode_id
+  - name: la_person_id
+    type: VARCHAR(10)
+    description: Person Unique ID
+    field_ref: EAR002A
+    foreign_key: person.la_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - early_help
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
+  - name: eh_epi_start_date
+    type: DATE
+    description: EH Episode Start Date
+    field_ref: EAR003A
+    categories:
+    - early_help
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:eh_epi_start_date
+    - mosaic:eh_epi_start_date
+  - name: eh_epi_end_date
+    type: DATE
+    description: EH Episode End Date
+    field_ref: EAR004A
+    categories:
+    - early_help
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:eh_epi_end_date
+    - mosaic:eh_epi_end_date
+  - name: eh_epi_reason
+    type: null
+    description: EH Episode Reason for Involvement
+    field_ref: EAR005A
+    categories:
+    - early_help
+    returns:
+    - ADCS_SP
+    cms_fields:
+    - liquid_logic:eh_epi_reason
+    - mosaic:eh_epi_reason
+  - name: eh_epi_end_reason
+    type: null
+    description: EH Episode End Reason
+    field_ref: EAR006A
+    categories:
+    - early_help
+    returns:
+    - ADCS_SP
+    cms_fields:
+    - liquid_logic:eh_epi_end_reason
+    - mosaic:eh_epi_end_reason
+  - name: eh_epi_org
+    type: null
+    description: EH Episode Allocated Organisation
+    field_ref: EAR007A
+    categories:
+    - early_help
+    returns:
+    - AnnexA
+    cms_fields:
+    - liquid_logic:eh_epi_org
+    - mosaic:eh_epi_org
+  - name: eh_epi_worker
+    type: null
+    description: EH Episode Allocated Worker
+    field_ref: EAR008A
+    categories:
+    - early_help
+    returns:
+    - Local
+    cms_fields:
+    - liquid_logic:eh_epi_worker
+    - mosaic:eh_epi_worker
