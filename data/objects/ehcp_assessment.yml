@@ -5,7 +5,7 @@ nodes:
   - name: ehcp_asmt_id
     type: VARCHAR()
     description: Assessment ID
-    field_ref: SSD210
+    field_ref: EAM001A
     primary_key: true
     validators:
     - required:
@@ -16,44 +16,44 @@ nodes:
     - send
     - ehcp_request
     - ehcp_assessment
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:ehcp_asmt_id
+    - mosaic:ehcp_asmt_id
   - name: ehcp_request_id
     type: VARCHAR()
     description: Request ID
-    field_ref: SSD211
+    field_ref: EAM002A
     foreign_key: ehcp_requests.ehcp_request_id
     categories:
     - send
     - ehcp_request
     - ehcp_assessment
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:ehcp_request_id
+    - mosaic:ehcp_request_id
   - name: ehcp_asmt_outcome_date
     type: DATE
     description: Assessment Outcome Date
-    field_ref: SSD212
+    field_ref: EAM003A
     categories:
     - send
     - ehcp_request
     - ehcp_assessment
     returns:
     - SEN2
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:ehcp_asmt_outcome_date
+    - mosaic:ehcp_asmt_outcome_date
   - name: ehcp_asmt_outcome
     type: null
     description: Assessment Outcome
-    field_ref: SSD213
+    field_ref: EAM004A
     categories:
     - send
     - ehcp_request
     - ehcp_assessment
     returns:
     - SEN2
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:ehcp_asmt_outcome
+    - mosaic:ehcp_asmt_outcome

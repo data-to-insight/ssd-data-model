@@ -5,7 +5,7 @@ nodes:
   - name: placement_id
     type: VARCHAR()
     description: Placement ID
-    field_ref: SSD122
+    field_ref: PLA001A
     primary_key: true
     validators:
     - required:
@@ -15,24 +15,24 @@ nodes:
     categories:
     - looked_after
     - placement
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:placement_id
+    - mosaic:placement_id
   - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
-    field_ref: SSD123
+    field_ref: PLA002A
     foreign_key: cla_episodes.cla_episode_id
     categories:
     - looked_after
     - placement
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cla_episode_id
+    - mosaic:cla_episode_id
   - name: place_start
     type: DATE
     description: Placement Start Date
-    field_ref: SSD124
+    field_ref: PLA003A
     categories:
     - looked_after
     - placement
@@ -40,92 +40,96 @@ nodes:
     - SSDA903
     - AnnexA
     cms:
-    - liquid_logic
-    - mosaic
+    - Local
+    cms_fields:
+    - liquid_logic:place_start
+    - mosaic:place_start
   - name: place_type
     type: null
     description: Placement Type
-    field_ref: SSD125
+    field_ref: PLA004A
     categories:
     - looked_after
     - placement
     returns:
     - SSDA903
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:place_type
+    - mosaic:place_type
   - name: place_urn
     type: VARCHAR(8)
     description: URN of Placement
-    field_ref: SSD126
+    field_ref: PLA005A
     categories:
     - looked_after
     - placement
     returns:
     - SSDA903
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:place_urn
+    - mosaic:place_urn
   - name: place_la
     type: null
     description: LA of Placement
-    field_ref: SSD127
+    field_ref: PLA006A
     categories:
     - looked_after
     - placement
     returns:
     - SSDA903
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:place_la
+    - mosaic:place_la
   - name: place_provider
     type: null
     description: Placement Provider
-    field_ref: SSD128
+    field_ref: PLA007A
     categories:
     - looked_after
     - placement
     returns:
     - SSDA903
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:place_provider
+    - mosaic:place_provider
   - name: place_postcode
     type: null
     description: Placement Postcode
-    field_ref: SSD129
+    field_ref: PLA008A
     categories:
     - looked_after
     - placement
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:place_postcode
+    - mosaic:place_postcode
   - name: place_end
     type: DATE
     description: Placement End Date
-    field_ref: SSD130
+    field_ref: PLA009A
     categories:
     - looked_after
     - placement
     returns:
     - SSDA903
     cms:
-    - liquid_logic
-    - mosaic
+    - Local
+    cms_fields:
+    - liquid_logic:place_end
+    - mosaic:place_end
   - name: place_change_reason
     type: null
     description: Reason for Placement Change
-    field_ref: SSD131
+    field_ref: PLA010A
     categories:
     - looked_after
     - placement
     returns:
     - SSDA903
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:place_change_reason
+    - mosaic:place_change_reason

@@ -5,7 +5,7 @@ nodes:
   - name: named_plan_id
     type: VARCHAR()
     description: Named Plan ID
-    field_ref: SSD214
+    field_ref: ENP001A
     primary_key: true
     validators:
     - required:
@@ -16,57 +16,57 @@ nodes:
     - send
     - ehcp_request
     - ehcp_assessment
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:named_plan_id
+    - mosaic:named_plan_id
   - name: ehcp_asmt_id
     type: VARCHAR()
     description: Assessment ID
-    field_ref: SSD215
+    field_ref: ENP002A
     foreign_key: ehcp_assessment.ehcp_asmt_id
     categories:
     - send
     - ehcp_request
     - ehcp_assessment
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:ehcp_asmt_id
+    - mosaic:ehcp_asmt_id
   - name: named_plan_start_date
     type: DATE
     description: Start Date
-    field_ref: SSD216
+    field_ref: ENP003A
     categories:
     - send
     - ehcp_request
     - ehcp_assessment
     returns:
     - SEN2
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:named_plan_start_date
+    - mosaic:named_plan_start_date
   - name: named_plan_cease_date
     type: DATE
     description: Cease Date
-    field_ref: SSD217
+    field_ref: ENP004A
     categories:
     - send
     - ehcp_request
     - ehcp_assessment
     returns:
     - SEN2
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:named_plan_cease_date
+    - mosaic:named_plan_cease_date
   - name: named_plan_cease_reason
     type: null
     description: Cease Reason
-    field_ref: SSD218
+    field_ref: ENP005A
     categories:
     - send
     - ehcp_request
     - ehcp_assessment
     returns:
     - SEN2
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:named_plan_cease_reason
+    - mosaic:named_plan_cease_reason

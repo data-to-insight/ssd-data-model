@@ -5,7 +5,7 @@ nodes:
   - name: permanence_id
     type: VARCHAR(10)
     description: permanence_table_id
-    field_ref: SSD184A
+    field_ref: PRM001A
     primary_key: true
     validators:
     - required:
@@ -17,10 +17,13 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:permanence_id
+    - mosaic:permanence_id
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD184
+    description: Person Unique ID
+    field_ref: PRM002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -35,10 +38,13 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
   - name: adm_decision_date
     type: DATE
     description: 'Date of ADM Decision '
-    field_ref: SSD185
+    field_ref: PRM003A
     categories:
     - looked_after
     - permanence
@@ -47,26 +53,26 @@ nodes:
     - SSDA903
     - AnnexA
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:adm_decision_date
+    - mosaic:adm_decision_date
   - name: ffa_cp_decision_date
     type: DATE
     description: Date of FFA CP Decision
-    field_ref: SSD186
+    field_ref: PRM004A
     categories:
     - looked_after
     - permanence
     - adoption
     returns:
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:ffa_cp_decision_date
+    - mosaic:ffa_cp_decision_date
   - name: entered_care_date
     type: DATE
     description: Date the entered Care
-    field_ref: SSD187
+    field_ref: PRM005A
     categories:
     - looked_after
     - permanence
@@ -75,13 +81,13 @@ nodes:
     - SSDA903
     - AnnexA
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:entered_care_date
+    - mosaic:entered_care_date
   - name: placement_order_date
     type: DATE
     description: Date of Placement Freeing Order
-    field_ref: SSD188
+    field_ref: PRM006A
     categories:
     - looked_after
     - permanence
@@ -90,13 +96,13 @@ nodes:
     - SSDA903
     - AnnexA
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:placement_order_date
+    - mosaic:placement_order_date
   - name: placed_for_adoption_date
     type: DATE
     description: Date Placed for Adoption
-    field_ref: SSD189
+    field_ref: PRM007A
     categories:
     - looked_after
     - permanence
@@ -105,13 +111,13 @@ nodes:
     - SSDA903
     - AnnexA
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:placed_for_adoption_date
+    - mosaic:placed_for_adoption_date
   - name: matched_date
     type: DATE
     description: Date Matched to Prospective Adopters
-    field_ref: SSD190
+    field_ref: PRM008A
     categories:
     - looked_after
     - permanence
@@ -120,13 +126,13 @@ nodes:
     - SSDA903
     - AnnexA
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:matched_date
+    - mosaic:matched_date
   - name: placed_ffa_cp_date
     type: DATE
     description: "Date Placed in FFA CP Placement\_"
-    field_ref: SSD191
+    field_ref: PRM009A
     categories:
     - looked_after
     - permanence
@@ -135,13 +141,13 @@ nodes:
     - SSDA903
     - AnnexA
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:placed_ffa_cp_date
+    - mosaic:placed_ffa_cp_date
   - name: decision_reversed_date
     type: DATE
     description: Date of Decision that Child Should No Longer be Placed for Adoption
-    field_ref: SSD192
+    field_ref: PRM010A
     categories:
     - looked_after
     - permanence
@@ -149,14 +155,14 @@ nodes:
     returns:
     - AnnexA
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:decision_reversed_date
+    - mosaic:decision_reversed_date
   - name: placed_foster_carer_date
     type: DATE
     description: Date originally placed with foster carer(s) (if adopted by foster
       carers)
-    field_ref: SSD193
+    field_ref: PRM011A
     categories:
     - looked_after
     - permanence
@@ -165,67 +171,67 @@ nodes:
     - SSDA903
     - AnnexA
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:placed_foster_carer_date
+    - mosaic:placed_foster_carer_date
   - name: sibling_group
     type: BOOLEAN
     description: Is the child a part of a sibling group?
-    field_ref: SSD194
+    field_ref: PRM012A
     categories:
     - looked_after
     - permanence
     - adoption
     returns:
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:sibling_group
+    - mosaic:sibling_group
   - name: siblings_placed_together
     type: TINYINT(2)
     description: Number of children placed, or planned to be placed, for adoption
       together as sibling group INCLUDING this child
-    field_ref: SSD195
+    field_ref: PRM013A
     categories:
     - looked_after
     - permanence
     - adoption
     returns:
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:siblings_placed_together
+    - mosaic:siblings_placed_together
   - name: siblings_placed_apart
     type: TINYINT(2)
     description: Number of siblings placed, or planned to be placed, for adoption
       separately from the child
-    field_ref: SSD196
+    field_ref: PRM014A
     categories:
     - looked_after
     - permanence
     - adoption
     returns:
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:siblings_placed_apart
+    - mosaic:siblings_placed_apart
   - name: place_provider_urn
     type: VARCHAR(8)
     description: URN of the placement provider agency
-    field_ref: SSD197
+    field_ref: PRM015A
     categories:
     - looked_after
     - permanence
     - adoption
     returns:
     - SSDA903
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:place_provider_urn
+    - mosaic:place_provider_urn
   - name: decision_reversed_reason
     type: null
     description: Reason No Longer Placed for Adoption
-    field_ref: SSD198
+    field_ref: PRM016A
     categories:
     - looked_after
     - permanence
@@ -234,13 +240,13 @@ nodes:
     - SSDA903
     - AnnexA
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:decision_reversed_reason
+    - mosaic:decision_reversed_reason
   - name: permanence_order_date
     type: DATE
     description: "Date of Order\_"
-    field_ref: SSD199
+    field_ref: PRM017A
     categories:
     - looked_after
     - permanence
@@ -248,45 +254,45 @@ nodes:
     - SSDA903
     - AnnexA
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:permanence_order_date
+    - mosaic:permanence_order_date
   - name: permanence_order_type
     type: null
     description: Type of Order
-    field_ref: SSD200
+    field_ref: PRM018A
     categories:
     - looked_after
     - permanence
     returns:
     - SSDA903
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:permanence_order_type
+    - mosaic:permanence_order_type
   - name: guardian_status
     type: null
     description: Status of Special Guardian
-    field_ref: SSD201
+    field_ref: PRM019A
     categories:
     - looked_after
     - permanence
     - SGO
     returns:
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:guardian_status
+    - mosaic:guardian_status
   - name: guardian_age
     type: TINYINT(2)
     description: Age of Special Guardian
-    field_ref: SSD202
+    field_ref: PRM020A
     categories:
     - looked_after
     - permanence
     - SGO
     returns:
     - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:guardian_age
+    - mosaic:guardian_age

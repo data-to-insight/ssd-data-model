@@ -5,7 +5,7 @@ nodes:
   - name: legal_status_id
     type: null
     description: Legal Status ID
-    field_ref: SSD029
+    field_ref: LEG001A
     primary_key: true
     validators:
     - required:
@@ -16,13 +16,13 @@ nodes:
     - identity
     - looked_after
     - permanence
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:legal_status_id
+    - mosaic:legal_status_id
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD030
+    description: Person Unique ID
+    field_ref: LEG002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -37,10 +37,13 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
   - name: legal_status
     type: null
     description: Legal Status
-    field_ref: SSD031
+    field_ref: LEG003A
     categories:
     - identity
     - looked_after
@@ -48,32 +51,32 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:legal_status
+    - mosaic:legal_status
   - name: legal_status_start
     type: DATE
     description: Legal Status Start Date
-    field_ref: SSD032
+    field_ref: LEG004A
     categories:
     - identity
     - looked_after
     - permanence
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:legal_status_start
+    - mosaic:legal_status_start
   - name: legal_status_end
     type: DATE
     description: Legal Status End Date
-    field_ref: SSD033
+    field_ref: LEG005A
     categories:
     - identity
     - looked_after
     - permanence
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:legal_status_end
+    - mosaic:legal_status_end

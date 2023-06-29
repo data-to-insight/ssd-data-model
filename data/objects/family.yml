@@ -5,7 +5,7 @@ nodes:
   - name: family_id
     type: null
     description: Family identifier
-    field_ref: SSD013
+    field_ref: FAM001A
     primary_key: true
     validators:
     - required:
@@ -18,13 +18,13 @@ nodes:
     returns:
     - ASGLB
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:family_id
+    - mosaic:family_id
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD014
+    description: Person Unique ID
+    field_ref: FAM002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -38,3 +38,6 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id

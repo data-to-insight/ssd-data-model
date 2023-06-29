@@ -5,7 +5,7 @@ nodes:
   - name: cin_referral_id
     type: VARCHAR()
     description: CIN Referral ID
-    field_ref: SSD047
+    field_ref: CIN001A
     primary_key: true
     validators:
     - required:
@@ -15,13 +15,13 @@ nodes:
     categories:
     - child_in_need
     - referral
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_referral_id
+    - mosaic:cin_referral_id
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD048
+    description: Person Unique ID
+    field_ref: CIN002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -34,88 +34,91 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
   - name: cin_ref_date
     type: DATE
     description: CIN Referral Date
-    field_ref: SSD049
+    field_ref: CIN003A
     categories:
     - child_in_need
     - referral
     returns:
     - CINcensus
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_ref_date
+    - mosaic:cin_ref_date
   - name: cin_ref_source
     type: null
     description: CIN Referral Source
-    field_ref: SSD050
+    field_ref: CIN004A
     categories:
     - child_in_need
     - referral
     returns:
     - CINcensus
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_ref_source
+    - mosaic:cin_ref_source
   - name: cin_ref_outcome
     type: null
     description: CIN Referral Outcome
-    field_ref: SSD051
+    field_ref: CIN005A
     categories:
     - child_in_need
     - referral
     returns:
     - CINcensus
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_ref_outcome
+    - mosaic:cin_ref_outcome
   - name: cin_close_reason
     type: null
     description: CIN Closure Reason
-    field_ref: SSD052
+    field_ref: CIN006A
     categories:
     - child_in_need
     returns:
     - CINcensus
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_close_reason
+    - mosaic:cin_close_reason
   - name: cin_close_date
     type: DATE
     description: CIN Closure Date
-    field_ref: SSD053
+    field_ref: CIN007A
     categories:
     - child_in_need
     returns:
     - CINcensus
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_close_date
+    - mosaic:cin_close_date
   - name: cin_ref_team
     type: null
     description: CIN Referral Completed by Team
-    field_ref: SSD054
+    field_ref: CIN008A
     categories:
     - child_in_need
     - referral
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_ref_team
+    - mosaic:cin_ref_team
   - name: cin_ref_worker
     type: null
     description: CIN Referral Completed by Worker
-    field_ref: SSD055
+    field_ref: CIN009A
     categories:
     - child_in_need
     - referral
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_ref_worker
+    - mosaic:cin_ref_worker

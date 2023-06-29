@@ -5,7 +5,7 @@ nodes:
   - name: cpp_category_id
     type: VARCHAR()
     description: Category of Abuse id
-    field_ref: SSD095A
+    field_ref: CAT001A
     primary_key: true
     validators:
     - required:
@@ -15,13 +15,13 @@ nodes:
     categories:
     - child_protection
     - cp_plan
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cpp_category_id
+    - mosaic:cpp_category_id
   - name: cp_plan_id
     type: VARCHAR()
     description: CP Plan ID
-    field_ref: SSD094
+    field_ref: CAT002A
     foreign_key: cp_plans.cp_plan_id
     validators:
     - required:
@@ -31,30 +31,30 @@ nodes:
     categories:
     - child_protection
     - cp_plan
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_plan_id
+    - mosaic:cp_plan_id
   - name: cpp_category
     type: null
     description: Category of Abuse
-    field_ref: SSD095
+    field_ref: CAT003A
     categories:
     - child_protection
     - cp_plan
     returns:
     - CINcensus
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cpp_category
+    - mosaic:cpp_category
   - name: cpp_category_start
     type: null
     description: Category of Abuse Start Date
-    field_ref: SSD096
+    field_ref: CAT004A
     categories:
     - child_protection
     - cp_plan
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cpp_category_start
+    - mosaic:cpp_category_start

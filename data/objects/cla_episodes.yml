@@ -5,7 +5,7 @@ nodes:
   - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
-    field_ref: SSD114
+    field_ref: CLA001A
     primary_key: true
     validators:
     - required:
@@ -14,13 +14,13 @@ nodes:
         enabled: true
     categories:
     - looked_after
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cla_episode_id
+    - mosaic:cla_episode_id
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD115
+    description: Person Unique ID
+    field_ref: CLA002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -33,71 +33,74 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
   - name: cla_epi_start
     type: DATE
     description: Date Episode Commenced
-    field_ref: SSD116
+    field_ref: CLA003A
     categories:
     - looked_after
     returns:
     - SSDA903
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cla_epi_start
+    - mosaic:cla_epi_start
   - name: cla_epi_start_reason
     type: null
     description: Reason for New CLA Episode
-    field_ref: SSD117
+    field_ref: CLA004A
     categories:
     - looked_after
     returns:
     - SSDA903
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cla_epi_start_reason
+    - mosaic:cla_epi_start_reason
   - name: cla_epi_ceased
     type: DATE
     description: Date Episode Ceased
-    field_ref: SSD118
+    field_ref: CLA005A
     categories:
     - looked_after
     returns:
     - SSDA903
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cla_epi_ceased
+    - mosaic:cla_epi_ceased
   - name: cla_epi_cease_reason
     type: null
     description: Reason Episode Ceased
-    field_ref: SSD119
+    field_ref: CLA006A
     categories:
     - looked_after
     returns:
     - SSDA903
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cla_epi_cease_reason
+    - mosaic:cla_epi_cease_reason
   - name: cla_team
     type: null
     description: Allocated Team
-    field_ref: SSD120
+    field_ref: CLA007A
     categories:
     - looked_after
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cla_team
+    - mosaic:cla_team
   - name: cla_worker
     type: null
     description: Allocated Worker
-    field_ref: SSD121
+    field_ref: CLA008A
     categories:
     - looked_after
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cla_worker
+    - mosaic:cla_worker

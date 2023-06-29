@@ -5,7 +5,7 @@ nodes:
   - name: cin_visit_id
     type: VARCHAR()
     description: CIN Visit ID
-    field_ref: SSD072
+    field_ref: CNV001A
     primary_key: true
     validators:
     - required:
@@ -16,69 +16,70 @@ nodes:
     - child_in_need
     - cin_plan
     - visit
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_visit_id
+    - mosaic:cin_visit_id
   - name: cin_plan_id
     type: VARCHAR()
     description: CIN Plan ID
-    field_ref: SSD073
+    field_ref: CNV002A
+    foreign_key: cin_plans.cin_plan_id
     categories:
     - child_in_need
     - cin_plan
     - visit
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_plan_id
+    - mosaic:cin_plan_id
   - name: cin_visit_date
     type: DATE
     description: CIN Visit Date
-    field_ref: SSD074
+    field_ref: CNV003A
     categories:
     - child_in_need
     - cin_plan
     - visit
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_visit_date
+    - mosaic:cin_visit_date
   - name: cin_visit_seen
     type: BOOLEAN
     description: Child Seen
-    field_ref: SSD075
+    field_ref: CNV004A
     categories:
     - child_in_need
     - cin_plan
     - visit
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_visit_seen
+    - mosaic:cin_visit_seen
   - name: cin_visit_seen_alone
     type: BOOLEAN
     description: Child Seen Alone
-    field_ref: SSD076
+    field_ref: CNV005A
     categories:
     - child_in_need
     - cin_plan
     - visit
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_visit_seen_alone
+    - mosaic:cin_visit_seen_alone
   - name: cin_visit_bedroom
     type: BOOLEAN
     description: Child Bedroom Seen
-    field_ref: SSD077
+    field_ref: CNV006A
     categories:
     - child_in_need
     - cin_plan
     - visit
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cin_visit_bedroom
+    - mosaic:cin_visit_bedroom

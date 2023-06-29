@@ -86,9 +86,29 @@ relationships:
   child_key: la_person_id
   relation: 1:M
 - parent_object: person
+  parent_key: person_upn
+  child_object: send
+  child_key: send_upn
+  relation: 1:M
+- parent_object: person
   parent_key: la_person_id
   child_object: send
   child_key: la_person_id
+  relation: 1:M
+- parent_object: person
+  parent_key: la_person_id
+  child_object: plo_bronze
+  child_key: la_person_id
+  relation: 1:M
+- parent_object: assessments
+  parent_key: assessment_id
+  child_object: assessment_factors
+  child_key: asmt_id
+  relation: 1:M
+- parent_object: cin_plans
+  parent_key: cin_plan_id
+  child_object: cin_visits
+  child_key: cin_plan_id
   relation: 1:M
 - parent_object: cp_plans
   parent_key: cp_plan_id
@@ -130,6 +150,16 @@ relationships:
   child_object: missing
   child_key: cla_episode_id
   relation: 1:M
+- parent_object: cla_reviews
+  parent_key: review_id
+  child_object: care_plan
+  child_key: review_id
+  relation: 1:M
+- parent_object: send
+  parent_key: send_table_id
+  child_object: ehcp_requests
+  child_key: send_table_id
+  relation: 1:M
 - parent_object: ehcp_requests
   parent_key: ehcp_request_id
   child_object: ehcp_assessment
@@ -144,4 +174,9 @@ relationships:
   parent_key: ehcp_asmt_id
   child_object: ehcp_named_plan
   child_key: ehcp_asmt_id
+  relation: 1:M
+- parent_object: ehcp_active_plans
+  parent_key: active_ehcp_id
+  child_object: sen_need
+  child_key: active_ehcp_id
   relation: 1:M

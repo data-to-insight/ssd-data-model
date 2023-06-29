@@ -4,8 +4,8 @@ nodes:
   fields:
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD022
+    description: Person Unique ID
+    field_ref: IMM001A
     primary_key: true
     foreign_key: person.la_person_id
     validators:
@@ -21,42 +21,45 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
   - name: immigration_status
     type: null
     description: Immigration Status
-    field_ref: SSD023
+    field_ref: IMM002A
     categories:
     - identity
     - immigration
     - uasc
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:immigration_status
+    - mosaic:immigration_status
   - name: immigration_status_start
     type: DATE
     description: Immigration Status Start
-    field_ref: SSD024
+    field_ref: IMM003A
     categories:
     - identity
     - immigration
     - uasc
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:immigration_status_start
+    - mosaic:immigration_status_start
   - name: immigration_status_end
     type: DATE
     description: Immigration Status End
-    field_ref: SSD025
+    field_ref: IMM004A
     categories:
     - identity
     - immigration
     - uasc
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:immigration_status_end
+    - mosaic:immigration_status_end

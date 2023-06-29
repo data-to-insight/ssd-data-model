@@ -5,8 +5,9 @@ nodes:
   - name: review_id
     type: VARCHAR()
     description: Review ID
-    field_ref: SSD153
+    field_ref: CAP001A
     primary_key: true
+    foreign_key: cla_reviews.review_id
     validators:
     - required:
         enabled: true
@@ -15,18 +16,18 @@ nodes:
     categories:
     - looked_after
     - review
-    cms:
-    - liquid_logic
-    - mosaic
-  - name: chosen_plan
+    cms_fields:
+    - liquid_logic:review_id
+    - mosaic:review_id
+  - name: permanence_plan
     type: null
-    description: What is the chosen plan for this childyoung person?
-    field_ref: SSD154
+    description: What is the permanence plan for this child young person?
+    field_ref: CAP002A
     categories:
     - looked_after
     - review
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:permanence_plan
+    - mosaic:permanence_plan

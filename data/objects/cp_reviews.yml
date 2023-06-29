@@ -5,7 +5,7 @@ nodes:
   - name: cp_review_id
     type: VARCHAR()
     description: Review ID
-    field_ref: SSD103
+    field_ref: CPR001A
     primary_key: true
     validators:
     - required:
@@ -16,38 +16,38 @@ nodes:
     - child_protection
     - cp_plan
     - review
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_review_id
+    - mosaic:cp_review_id
   - name: cp_plan_id
     type: VARCHAR()
     description: CP Plan ID
-    field_ref: SSD104
+    field_ref: CPR002A
     foreign_key: cp_plans.cp_plan_id
     categories:
     - child_protection
     - cp_plan
     - review
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_plan_id
+    - mosaic:cp_plan_id
   - name: cp_rev_due
     type: DATE
     description: Review Due Date
-    field_ref: SSD105
+    field_ref: CPR003A
     categories:
     - child_protection
     - cp_plan
     - review
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_rev_due
+    - mosaic:cp_rev_due
   - name: cp_rev_date
     type: DATE
     description: Date of Review
-    field_ref: SSD106
+    field_ref: CPR004A
     categories:
     - child_protection
     - cp_plan
@@ -55,52 +55,52 @@ nodes:
     returns:
     - CINcensus
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_rev_date
+    - mosaic:cp_rev_date
   - name: cp_rev_outcome
     type: BOOLEAN
     description: CP Plan to Continue?
-    field_ref: SSD107
+    field_ref: CPR005A
     categories:
     - child_protection
     - cp_plan
     - review
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_rev_outcome
+    - mosaic:cp_rev_outcome
   - name: cp_rev_quorate
     type: BOOLEAN
     description: Quorate?
-    field_ref: SSD108
+    field_ref: CPR006A
     categories:
     - child_protection
     - cp_plan
     - review
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_rev_quorate
+    - mosaic:cp_rev_quorate
   - name: cp_rev_participation
     type: null
-    description: Childs Participation
-    field_ref: SSD109
+    description: Child Participation at Review
+    field_ref: CPR007A
     categories:
     - child_protection
     - cp_plan
     - review
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_rev_participation
+    - mosaic:cp_rev_participation
   - name: cp_rev_cyp_views_quality
     type: null
     description: Quality of representation of CYP views experience
-    field_ref: SSD110
+    field_ref: CPR008A
     categories:
     - child_protection
     - cp_plan
@@ -108,14 +108,14 @@ nodes:
     returns:
     - 1a
     - draft
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_rev_cyp_views_quality
+    - mosaic:cp_rev_cyp_views_quality
   - name: cp_rev_sufficient_prog
     type: null
     description: 'Sufficient progress made against the CP Plan to improve outcomes
       for the child? '
-    field_ref: SSD111
+    field_ref: CPR009A
     categories:
     - child_protection
     - cp_plan
@@ -123,6 +123,6 @@ nodes:
     returns:
     - 1a
     - draft
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_rev_sufficient_prog
+    - mosaic:cp_rev_sufficient_prog

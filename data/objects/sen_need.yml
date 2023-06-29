@@ -5,7 +5,7 @@ nodes:
   - name: sen_need_table_id
     type: VARCHAR()
     description: SEN Need Table ID
-    field_ref: SSD222
+    field_ref: SND001A
     primary_key: true
     validators:
     - required:
@@ -17,25 +17,26 @@ nodes:
     - ehcp_request
     - ehcp
     - need
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:sen_need_table_id
+    - mosaic:sen_need_table_id
   - name: active_ehcp_id
     type: VARCHAR()
     description: Plan ID
-    field_ref: SSD223
+    field_ref: SND002A
+    foreign_key: ehcp_active_plans.active_ehcp_id
     categories:
     - send
     - ehcp_request
     - ehcp
     - need
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:active_ehcp_id
+    - mosaic:active_ehcp_id
   - name: active_ehcp_need
     type: null
     description: SEN Type
-    field_ref: SSD224
+    field_ref: SND003A
     categories:
     - send
     - ehcp_request
@@ -43,13 +44,13 @@ nodes:
     - need
     returns:
     - SEN2
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:active_ehcp_need
+    - mosaic:active_ehcp_need
   - name: active_ehcp_need_rank
     type: null
     description: SEN Type Rank
-    field_ref: SSD225
+    field_ref: SND004A
     categories:
     - send
     - ehcp_request
@@ -57,6 +58,6 @@ nodes:
     - need
     returns:
     - SEN2
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:active_ehcp_need_rank
+    - mosaic:active_ehcp_need_rank

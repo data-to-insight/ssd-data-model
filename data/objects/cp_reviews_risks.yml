@@ -5,7 +5,7 @@ nodes:
   - name: cp_review_id
     type: VARCHAR()
     description: Review ID
-    field_ref: SSD112
+    field_ref: CPK010A
     primary_key: true
     foreign_key: cp_reviews.cp_review_id
     validators:
@@ -17,13 +17,13 @@ nodes:
     - child_protection
     - cp_plan
     - review
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_review_id
+    - mosaic:cp_review_id
   - name: cp_review_risks
     type: null
     description: Risks to child at this conference
-    field_ref: SSD113
+    field_ref: CPK011A
     categories:
     - child_protection
     - cp_plan
@@ -31,6 +31,6 @@ nodes:
     returns:
     - 1a
     - draft
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_review_risks
+    - mosaic:cp_review_risks

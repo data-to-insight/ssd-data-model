@@ -4,8 +4,8 @@ nodes:
   fields:
   - name: person_child_id
     type: VARCHAR(10)
-    description: Mothers Child Unique ID
-    field_ref: SSD026
+    description: Mothers Person Unique ID
+    field_ref: MOT001A
     primary_key: true
     validators:
     - required:
@@ -18,13 +18,13 @@ nodes:
     - mother
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:person_child_id
+    - mosaic:person_child_id
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID (Mother)
-    field_ref: SSD027
+    description: Person Unique ID (Mother)
+    field_ref: MOT002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -39,16 +39,19 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
   - name: person_child_dob
     type: DATE
     description: Date of birth of mothers child
-    field_ref: SSD028
+    field_ref: MOT003A
     categories:
     - identity
     - looked_after
     - mother
     returns:
     - SSDA903
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:person_child_dob
+    - mosaic:person_child_dob

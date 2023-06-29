@@ -5,7 +5,7 @@ nodes:
   - name: s47_enquiry_id
     type: VARCHAR()
     description: S47 Enquiry ID
-    field_ref: SSD078
+    field_ref: S47001A
     primary_key: true
     validators:
     - required:
@@ -15,13 +15,13 @@ nodes:
     categories:
     - s47_enquiry
     - child_protection
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:s47_enquiry_id
+    - mosaic:s47_enquiry_id
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD079
+    description: Person Unique ID
+    field_ref: S47002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -35,97 +35,100 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
   - name: strat_initiating_s47_date
     type: DATE
     description: Strategy Discussion initiating S47 Enquiry Start Date
-    field_ref: SSD080
+    field_ref: S47003A
     categories:
     - s47_enquiry
     - child_protection
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:strat_initiating_s47_date
+    - mosaic:strat_initiating_s47_date
   - name: s47_start_date
     type: DATE
     description: S47 Start Date
-    field_ref: SSD081
+    field_ref: S47004A
     categories:
     - s47_enquiry
     - child_protection
     returns:
     - CINcensus
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:s47_start_date
+    - mosaic:s47_start_date
   - name: s47_completed_date
     type: DATE
     description: S47 Completed Date
-    field_ref: SSD082
+    field_ref: S47005A
     categories:
     - s47_enquiry
     - child_protection
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:s47_completed_date
+    - mosaic:s47_completed_date
   - name: s47outcome
     type: null
     description: S47 Outcome
-    field_ref: SSD083
+    field_ref: S47006A
     categories:
     - s47_enquiry
     - child_protection
     returns:
     - CINcensus
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:s47outcome
+    - mosaic:s47outcome
   - name: icpc_date
     type: DATE
     description: Date of Initial CP Conference
-    field_ref: SSD084
+    field_ref: S47007A
     categories:
     - initial_cp_conference
     - child_protection
     returns:
     - CINcensus
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:icpc_date
+    - mosaic:icpc_date
   - name: icpc_outcome
     type: null
     description: Outcome of Initial CP Conference
-    field_ref: SSD085
+    field_ref: S47008A
     categories:
     - initial_cp_conference
     - child_protection
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:icpc_outcome
+    - mosaic:icpc_outcome
   - name: icpc_team
     type: null
     description: S47 ICPC Allocated Team
-    field_ref: SSD086
+    field_ref: S47009A
     categories:
     - initial_cp_conference
     - child_protection
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:icpc_team
+    - mosaic:icpc_team
   - name: icpc_worker
     type: null
     description: S47 ICPC Allocated Worker
-    field_ref: SSD087
+    field_ref: S47010A
     categories:
     - initial_cp_conference
     - child_protection
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:icpc_worker
+    - mosaic:icpc_worker

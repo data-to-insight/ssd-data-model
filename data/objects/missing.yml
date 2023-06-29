@@ -5,7 +5,7 @@ nodes:
   - name: missing_episode_id
     type: VARCHAR()
     description: Missing Episode ID
-    field_ref: SSD165
+    field_ref: MIS001A
     primary_key: true
     validators:
     - required:
@@ -15,80 +15,80 @@ nodes:
     categories:
     - looked_after
     - missing
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:missing_episode_id
+    - mosaic:missing_episode_id
   - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
-    field_ref: SSD166
+    field_ref: MIS002A
     foreign_key: cla_episodes.cla_episode_id
     categories:
     - looked_after
     - missing
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cla_episode_id
+    - mosaic:cla_episode_id
   - name: mis_epi_start
     type: DATE
     description: Missing Episode Start
-    field_ref: SSD167
+    field_ref: MIS003A
     categories:
     - looked_after
     - missing
     returns:
     - SSDA903
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:mis_epi_start
+    - mosaic:mis_epi_start
   - name: mis_epi_type
     type: null
     description: Episode Type (Missing Absent)
-    field_ref: SSD168
+    field_ref: MIS004A
     categories:
     - looked_after
     - missing
     returns:
     - SSDA903
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:mis_epi_type
+    - mosaic:mis_epi_type
   - name: mis_epi_end
     type: DATE
     description: Missing Episode End
-    field_ref: SSD169
+    field_ref: MIS005A
     categories:
     - looked_after
     - missing
     returns:
     - SSDA903
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:mis_epi_end
+    - mosaic:mis_epi_end
   - name: mis_epi_rhi_offered
     type: BOOLEAN
     description: RHI Offered
-    field_ref: SSD170
+    field_ref: MIS006A
     categories:
     - looked_after
     - missing
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:mis_epi_rhi_offered
+    - mosaic:mis_epi_rhi_offered
   - name: mis_epi_rhi_accepted
     type: BOOLEAN
     description: RHI Accepted
-    field_ref: SSD171
+    field_ref: MIS007A
     categories:
     - looked_after
     - missing
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:mis_epi_rhi_accepted
+    - mosaic:mis_epi_rhi_accepted

@@ -5,7 +5,7 @@ nodes:
   - name: contact_id
     type: VARCHAR()
     description: Contact ID
-    field_ref: SSD034
+    field_ref: CON001A
     primary_key: true
     validators:
     - required:
@@ -14,13 +14,13 @@ nodes:
         enabled: true
     categories:
     - contact
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:contact_id
+    - mosaic:contact_id
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD035
+    description: Person Unique ID
+    field_ref: CON002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -33,36 +33,39 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
   - name: contact_date
     type: DATE
     description: Date of Contact
-    field_ref: SSD036
+    field_ref: CON003A
     categories:
     - contact
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:contact_date
+    - mosaic:contact_date
   - name: contact_source
     type: null
     description: Contact Source
-    field_ref: SSD037
+    field_ref: CON004A
     categories:
     - contact
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:contact_source
+    - mosaic:contact_source
   - name: contact_outcome
     type: null
     description: 'Contact Outcome '
-    field_ref: SSD038
+    field_ref: CON005A
     categories:
     - contact
     returns:
     - ADCS_SP
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:contact_outcome
+    - mosaic:contact_outcome

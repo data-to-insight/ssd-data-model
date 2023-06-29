@@ -5,7 +5,7 @@ nodes:
   - name: send_table_id
     type: null
     description: send_table_id
-    field_ref: SSD203A
+    field_ref: SEN001A
     primary_key: true
     validators:
     - required:
@@ -15,13 +15,14 @@ nodes:
     categories:
     - identity
     - send
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:send_table_id
+    - mosaic:send_table_id
   - name: send_upn
-    type: null
+    type: CHAR(13)
     description: UPN
-    field_ref: SSD203
+    field_ref: SEN002A
+    foreign_key: person.person_upn
     validators:
     - required:
         enabled: true
@@ -30,13 +31,33 @@ nodes:
     categories:
     - identity
     - send
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:send_upn
+    - mosaic:send_upn
+  - name: send_uln
+    type: null
+    description: ULN
+    field_ref: SEN003A
+    categories:
+    - identity
+    - send
+    cms_fields:
+    - liquid_logic:send_uln
+    - mosaic:send_uln
+  - name: upn_unknown
+    type: CHAR(3)
+    description: UPN and ULN unknown
+    field_ref: SEN004A
+    categories:
+    - identity
+    - send
+    cms_fields:
+    - liquid_logic:upn_unknown
+    - mosaic:upn_unknown
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD204
+    description: Person Unique ID
+    field_ref: SEN005A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -50,3 +71,6 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id

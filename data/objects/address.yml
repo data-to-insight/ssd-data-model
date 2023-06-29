@@ -5,7 +5,7 @@ nodes:
   - name: address
     type: null
     description: Address
-    field_ref: SSD015
+    field_ref: ADD001A
     primary_key: true
     validators:
     - required:
@@ -17,13 +17,13 @@ nodes:
     - address
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:address
+    - mosaic:address
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD016
+    description: Person Unique ID
+    field_ref: ADD002A
     foreign_key: person.la_person_id
     categories:
     - identity
@@ -34,39 +34,42 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
   - name: address_type
     type: null
     description: Address Type
-    field_ref: SSD017
+    field_ref: ADD003A
     categories:
     - identity
     - address
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:address_type
+    - mosaic:address_type
   - name: address_start
     type: DATE
     description: Address Start Date From
-    field_ref: SSD018
+    field_ref: ADD004A
     categories:
     - identity
     - address
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:address_start
+    - mosaic:address_start
   - name: address_end
     type: DATE
     description: Address End Date To
-    field_ref: SSD019
+    field_ref: ADD005A
     categories:
     - identity
     - address
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:address_end
+    - mosaic:address_end

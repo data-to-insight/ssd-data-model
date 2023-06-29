@@ -5,7 +5,7 @@ nodes:
   - name: active_ehcp_id
     type: VARCHAR()
     description: Plan ID
-    field_ref: SSD219
+    field_ref: EAP001A
     primary_key: true
     validators:
     - required:
@@ -16,31 +16,31 @@ nodes:
     - send
     - ehcp_request
     - ehcp
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:active_ehcp_id
+    - mosaic:active_ehcp_id
   - name: ehcp_request_id
     type: VARCHAR()
     description: Request ID
-    field_ref: SSD220
+    field_ref: EAP002A
     foreign_key: ehcp_requests.ehcp_request_id
     categories:
     - send
     - ehcp_request
     - ehcp
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:ehcp_request_id
+    - mosaic:ehcp_request_id
   - name: active_ehcp_last_review
     type: DATE
     description: Last Review
-    field_ref: SSD221
+    field_ref: EAP003A
     categories:
     - send
     - ehcp_request
     - ehcp
     returns:
     - SEN2
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:active_ehcp_last_review
+    - mosaic:active_ehcp_last_review

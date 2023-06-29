@@ -5,7 +5,7 @@ nodes:
   - name: sdq_id
     type: VARCHAR()
     description: SDQ ID
-    field_ref: SSD160
+    field_ref: SDQ001A
     primary_key: true
     validators:
     - required:
@@ -15,13 +15,13 @@ nodes:
     categories:
     - looked_after
     - sdq
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:sdq_id
+    - mosaic:sdq_id
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD161
+    description: Person Unique ID
+    field_ref: SDQ002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -35,39 +35,42 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
   - name: sdq_completed_date
     type: DATE
     description: SDQ Completed Date
-    field_ref: SSD162
+    field_ref: SDQ003A
     categories:
     - looked_after
     - sdq
     returns:
     - Local
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:sdq_completed_date
+    - mosaic:sdq_completed_date
   - name: sdq_reason
     type: null
     description: SDQ Reason
-    field_ref: SSD163
+    field_ref: SDQ004A
     categories:
     - looked_after
     - sdq
     returns:
     - SSDA903
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:sdq_reason
+    - mosaic:sdq_reason
   - name: sdq_score
     type: null
     description: SDQ Score
-    field_ref: SSD164
+    field_ref: SDQ005A
     categories:
     - looked_after
     - sdq
     returns:
     - SSDA903
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:sdq_score
+    - mosaic:sdq_score

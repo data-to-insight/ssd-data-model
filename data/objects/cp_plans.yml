@@ -5,7 +5,7 @@ nodes:
   - name: cp_plan_id
     type: VARCHAR()
     description: CP Plan ID
-    field_ref: SSD088
+    field_ref: CPP001A
     primary_key: true
     validators:
     - required:
@@ -15,13 +15,13 @@ nodes:
     categories:
     - child_protection
     - cp_plan
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cp_plan_id
+    - mosaic:cp_plan_id
   - name: la_person_id
     type: VARCHAR(10)
-    description: Child Unique ID
-    field_ref: SSD089
+    description: Person Unique ID
+    field_ref: CPP002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -35,53 +35,56 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_fields:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
   - name: cpp_start_date
     type: DATE
     description: CP Plan Start Date
-    field_ref: SSD090
+    field_ref: CPP003A
     categories:
     - child_protection
     - cp_plan
     returns:
     - CINcensus
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cpp_start_date
+    - mosaic:cpp_start_date
   - name: cpp_end_date
     type: DATE
     description: CP Plan End Date
-    field_ref: SSD091
+    field_ref: CPP004A
     categories:
     - child_protection
     - cp_plan
     returns:
     - CINcensus
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cpp_end_date
+    - mosaic:cpp_end_date
   - name: cpp_team
     type: null
     description: CP Plan Allocated Team
-    field_ref: SSD092
+    field_ref: CPP005A
     categories:
     - child_protection
     - cp_plan
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cpp_team
+    - mosaic:cpp_team
   - name: cpp_worker
     type: null
     description: CP Plan Allocated Worker
-    field_ref: SSD093
+    field_ref: CPP006A
     categories:
     - child_protection
     - cp_plan
     returns:
     - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
+    cms_fields:
+    - liquid_logic:cpp_worker
+    - mosaic:cpp_worker
