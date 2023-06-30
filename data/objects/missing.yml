@@ -5,7 +5,7 @@ nodes:
   - name: missing_episode_id
     type: VARCHAR()
     description: Missing Episode ID
-    field_ref: MIS001A
+    item_ref: MIS001A
     primary_key: true
     validators:
     - required:
@@ -27,7 +27,7 @@ nodes:
   - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
-    field_ref: MIS002A
+    item_ref: MIS002A
     foreign_key: cla_episodes.cla_episode_id
     categories:
     - looked_after
@@ -44,7 +44,7 @@ nodes:
   - name: mis_epi_start
     type: DATE
     description: Missing Episode Start
-    field_ref: MIS003A
+    item_ref: MIS003A
     categories:
     - looked_after
     - missing
@@ -63,7 +63,7 @@ nodes:
   - name: mis_epi_type
     type: null
     description: Episode Type (Missing Absent)
-    field_ref: MIS004A
+    item_ref: MIS004A
     categories:
     - looked_after
     - missing
@@ -82,7 +82,7 @@ nodes:
   - name: mis_epi_end
     type: DATE
     description: Missing Episode End
-    field_ref: MIS005A
+    item_ref: MIS005A
     categories:
     - looked_after
     - missing
@@ -101,7 +101,7 @@ nodes:
   - name: mis_epi_rhi_offered
     type: BOOLEAN
     description: RHI Offered
-    field_ref: MIS006A
+    item_ref: MIS006A
     categories:
     - looked_after
     - missing
@@ -119,7 +119,7 @@ nodes:
   - name: mis_epi_rhi_accepted
     type: BOOLEAN
     description: RHI Accepted
-    field_ref: MIS007A
+    item_ref: MIS007A
     categories:
     - looked_after
     - missing

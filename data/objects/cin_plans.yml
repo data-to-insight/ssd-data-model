@@ -5,7 +5,7 @@ nodes:
   - name: cin_plan_id
     type: VARCHAR()
     description: CIN Plan ID
-    field_ref: CNP001A
+    item_ref: CNP001A
     primary_key: true
     validators:
     - required:
@@ -27,7 +27,7 @@ nodes:
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
-    field_ref: CNP002A
+    item_ref: CNP002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -50,7 +50,7 @@ nodes:
   - name: cin_plan_start
     type: DATE
     description: CIN Plan Start Date
-    field_ref: CNP003A
+    item_ref: CNP003A
     categories:
     - child_in_need
     - cin_plan
@@ -68,7 +68,7 @@ nodes:
   - name: cin_plan_end
     type: DATE
     description: CIN Plan End Date
-    field_ref: CNP004A
+    item_ref: CNP004A
     categories:
     - child_in_need
     - cin_plan
@@ -86,7 +86,7 @@ nodes:
   - name: cin_team
     type: null
     description: CIN Allocated Team
-    field_ref: CNP005A
+    item_ref: CNP005A
     categories:
     - child_in_need
     - cin_plan
@@ -104,7 +104,7 @@ nodes:
   - name: cin_worker
     type: null
     description: CIN Allocated Worker
-    field_ref: CNP006A
+    item_ref: CNP006A
     categories:
     - child_in_need
     - cin_plan

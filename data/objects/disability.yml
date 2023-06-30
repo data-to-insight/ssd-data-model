@@ -5,7 +5,7 @@ nodes:
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
-    field_ref: DIS001A
+    item_ref: DIS001A
     primary_key: true
     foreign_key: person.la_person_id
     validators:
@@ -31,7 +31,7 @@ nodes:
   - name: person_disability
     type: null
     description: Disability Code
-    field_ref: DIS002A
+    item_ref: DIS002A
     primary_key: true
     validators:
     - required:

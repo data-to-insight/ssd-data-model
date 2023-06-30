@@ -18,7 +18,7 @@ import re
 
 # Full list of field names
 # If there are non-required fields in the spec csv, just dont include them here
-field_names = ['field_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 'cms', 'cms_field','cms_table','required_enabled','unique_enabled','primary_key','foreign_key']
+field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 'cms', 'cms_field','cms_table','required_enabled','unique_enabled','primary_key','foreign_key']
 
 # Those that are multi-part/list fields
 multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_field', 'cms_table']
@@ -182,7 +182,7 @@ def save_node_yaml(node, output_directory):
                 'name': field['name'],
                 'type': None if field['type'] == 'null' else field['type'],
                 'description': field['description'],
-                'field_ref': field['field_ref'],
+                'item_ref': field['item_ref'],
             }
 
 

@@ -5,7 +5,7 @@ nodes:
   - name: sdq_id
     type: VARCHAR()
     description: SDQ ID
-    field_ref: SDQ001A
+    item_ref: SDQ001A
     primary_key: true
     validators:
     - required:
@@ -27,7 +27,7 @@ nodes:
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
-    field_ref: SDQ002A
+    item_ref: SDQ002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -50,7 +50,7 @@ nodes:
   - name: sdq_completed_date
     type: DATE
     description: SDQ Completed Date
-    field_ref: SDQ003A
+    item_ref: SDQ003A
     categories:
     - looked_after
     - sdq
@@ -68,7 +68,7 @@ nodes:
   - name: sdq_reason
     type: null
     description: SDQ Reason
-    field_ref: SDQ004A
+    item_ref: SDQ004A
     categories:
     - looked_after
     - sdq
@@ -86,7 +86,7 @@ nodes:
   - name: sdq_score
     type: null
     description: SDQ Score
-    field_ref: SDQ005A
+    item_ref: SDQ005A
     categories:
     - looked_after
     - sdq

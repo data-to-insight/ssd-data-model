@@ -5,7 +5,7 @@ nodes:
   - name: care_leaver_id
     type: VARCHAR()
     description: Care Leaver Table ID
-    field_ref: CLE001A
+    item_ref: CLE001A
     primary_key: true
     validators:
     - required:
@@ -26,7 +26,7 @@ nodes:
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
-    field_ref: CLE002A
+    item_ref: CLE002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -48,7 +48,7 @@ nodes:
   - name: cl_eligibility
     type: null
     description: Eligibility Status Category
-    field_ref: CLE003A
+    item_ref: CLE003A
     categories:
     - care_leavers
     returns:
@@ -65,7 +65,7 @@ nodes:
   - name: cl_in_touch
     type: null
     description: In Touch Category
-    field_ref: CLE004A
+    item_ref: CLE004A
     categories:
     - care_leavers
     returns:
@@ -82,7 +82,7 @@ nodes:
   - name: cl_latest_contact
     type: DATE
     description: Latest Date of Contact
-    field_ref: CLE005A
+    item_ref: CLE005A
     categories:
     - care_leavers
     returns:
@@ -99,7 +99,7 @@ nodes:
   - name: cl_accommodation
     type: null
     description: Accommodation
-    field_ref: CLE006A
+    item_ref: CLE006A
     categories:
     - care_leavers
     returns:
@@ -116,7 +116,7 @@ nodes:
   - name: cl_accom_suitable
     type: null
     description: Suitability of Accommodation
-    field_ref: CLE007A
+    item_ref: CLE007A
     categories:
     - care_leavers
     returns:
@@ -133,7 +133,7 @@ nodes:
   - name: cl_activity
     type: null
     description: Activity Status
-    field_ref: CLE008A
+    item_ref: CLE008A
     categories:
     - care_leavers
     returns:
@@ -150,7 +150,7 @@ nodes:
   - name: cl_pathway_plan_rev_date
     type: null
     description: Latest Pathway Plan Review Date
-    field_ref: CLE009A
+    item_ref: CLE009A
     categories:
     - care_leavers
     returns:
@@ -167,7 +167,7 @@ nodes:
   - name: cl_personal_advisor
     type: null
     description: Allocated Personal Advisor
-    field_ref: CLE010A
+    item_ref: CLE010A
     categories:
     - care_leavers
     returns:
@@ -184,7 +184,7 @@ nodes:
   - name: cl_team
     type: null
     description: Allocated Team
-    field_ref: CLE011A
+    item_ref: CLE011A
     categories:
     - care_leavers
     returns:
@@ -201,7 +201,7 @@ nodes:
   - name: cl_worker
     type: null
     description: Allocated Worker
-    field_ref: CLE012A
+    item_ref: CLE012A
     categories:
     - care_leavers
     returns:

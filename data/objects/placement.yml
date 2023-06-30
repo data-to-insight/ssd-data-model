@@ -5,7 +5,7 @@ nodes:
   - name: placement_id
     type: VARCHAR()
     description: Placement ID
-    field_ref: PLA001A
+    item_ref: PLA001A
     primary_key: true
     validators:
     - required:
@@ -27,7 +27,7 @@ nodes:
   - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
-    field_ref: PLA002A
+    item_ref: PLA002A
     foreign_key: cla_episodes.cla_episode_id
     categories:
     - looked_after
@@ -44,7 +44,7 @@ nodes:
   - name: place_start
     type: DATE
     description: Placement Start Date
-    field_ref: PLA003A
+    item_ref: PLA003A
     categories:
     - looked_after
     - placement
@@ -63,7 +63,7 @@ nodes:
   - name: place_type
     type: null
     description: Placement Type
-    field_ref: PLA004A
+    item_ref: PLA004A
     categories:
     - looked_after
     - placement
@@ -82,7 +82,7 @@ nodes:
   - name: place_urn
     type: VARCHAR(8)
     description: URN of Placement
-    field_ref: PLA005A
+    item_ref: PLA005A
     categories:
     - looked_after
     - placement
@@ -101,7 +101,7 @@ nodes:
   - name: place_la
     type: null
     description: LA of Placement
-    field_ref: PLA006A
+    item_ref: PLA006A
     categories:
     - looked_after
     - placement
@@ -120,7 +120,7 @@ nodes:
   - name: place_provider
     type: null
     description: Placement Provider
-    field_ref: PLA007A
+    item_ref: PLA007A
     categories:
     - looked_after
     - placement
@@ -138,7 +138,7 @@ nodes:
   - name: place_postcode
     type: null
     description: Placement Postcode
-    field_ref: PLA008A
+    item_ref: PLA008A
     categories:
     - looked_after
     - placement
@@ -156,7 +156,7 @@ nodes:
   - name: place_end
     type: DATE
     description: Placement End Date
-    field_ref: PLA009A
+    item_ref: PLA009A
     categories:
     - looked_after
     - placement
@@ -174,7 +174,7 @@ nodes:
   - name: place_change_reason
     type: null
     description: Reason for Placement Change
-    field_ref: PLA010A
+    item_ref: PLA010A
     categories:
     - looked_after
     - placement
