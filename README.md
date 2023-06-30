@@ -86,7 +86,7 @@ definitions, will be used for generating transfer format schemas, such as [JSON 
 
 - tbc - This workflow around this file is still in development.
 
-## Output Formats
+### Output Formats
 
 Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, we provide a set of [tools][ssd-tools] to perform the needed processing tasks, incl. extract the required data items from current/known CMS systems, create ERD diagrams of the current structure, convert the YAML into more conventional formats.
 
@@ -94,38 +94,37 @@ The website and associated documentation is generated using the [tools][ssd-tool
 
 Further/additional documentation relating to this specification: -tbc- 
 
-## Continuous Deployment
+### Continuous Deployment
 
 -tbc-
 
-## Running notes:
+### Running notes
 
 Use the following command in a Git Codespace to set up the working environment:
 ```bash
-    ./setup.sh
+./setup.sh
 ```
 
   For ref: The above bash script contains and runs <all> the following required commands: 
 ```python
-  [$] pip install -r requirements.txt
-  [$] sudo apt-get update
-  [$] sudo apt-get install graphviz libgraphviz-dev pkg-config
-  [$] pip install pygraphviz
+[$] pip install -r requirements.txt
+[$] sudo apt-get update
+[$] sudo apt-get install graphviz libgraphviz-dev pkg-config
+[$] pip install pygraphviz
 
-  [$] pip install poetry
+[$] pip install poetry
 ```
 
-## Relevant Links
+This is the raw code copy/pasted:
 
-[ssd-spec]: https://github.com/data-to-insight/ssd-data-model
+### Relevant Links
 
-[yaml]: https://yaml.org/
+[yaml] : https://yaml.org/
 [vcs]: https://en.wikipedia.org/wiki/Version_control
 [git]: https://git-scm.com/
 [jsc]: https://json-schema.org/
 [csc]: https://digital-preservation.github.io/csv-schema/
 [ghp]: https://pages.github.com/
-
-
+[ssd-spec]: https://github.com/data-to-insight/ssd-data-model/
 
 
