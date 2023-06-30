@@ -16,9 +16,15 @@ nodes:
     - send
     - ehcp_request
     - ehcp_assessment
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:ehcp_asmt_id
     - mosaic:ehcp_asmt_id
+    cms_table:
+    - liquid_logic:ehcp_assessment
+    - mosaic:ehcp_assessment
   - name: ehcp_request_id
     type: VARCHAR()
     description: Request ID
@@ -28,9 +34,15 @@ nodes:
     - send
     - ehcp_request
     - ehcp_assessment
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:ehcp_request_id
     - mosaic:ehcp_request_id
+    cms_table:
+    - liquid_logic:ehcp_assessment
+    - mosaic:ehcp_assessment
   - name: ehcp_asmt_outcome_date
     type: DATE
     description: Assessment Outcome Date
@@ -41,9 +53,15 @@ nodes:
     - ehcp_assessment
     returns:
     - SEN2
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:ehcp_asmt_outcome_date
     - mosaic:ehcp_asmt_outcome_date
+    cms_table:
+    - liquid_logic:ehcp_assessment
+    - mosaic:ehcp_assessment
   - name: ehcp_asmt_outcome
     type: null
     description: Assessment Outcome
@@ -54,6 +72,12 @@ nodes:
     - ehcp_assessment
     returns:
     - SEN2
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:ehcp_asmt_outcome
     - mosaic:ehcp_asmt_outcome
+    cms_table:
+    - liquid_logic:ehcp_assessment
+    - mosaic:ehcp_assessment

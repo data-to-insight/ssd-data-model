@@ -17,9 +17,15 @@ nodes:
     - child_protection
     - cp_plan
     - visit
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_plan_id
     - mosaic:cp_plan_id
+    cms_table:
+    - liquid_logic:cp_visits
+    - mosaic:cp_visits
   - name: cp_visit_id
     type: VARCHAR()
     description: CP Visit ID
@@ -28,9 +34,15 @@ nodes:
     - child_protection
     - cp_plan
     - visit
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_visit_id
     - mosaic:cp_visit_id
+    cms_table:
+    - liquid_logic:cp_visits
+    - mosaic:cp_visits
   - name: cp_visit_date
     type: DATE
     description: Date of Visit
@@ -41,9 +53,15 @@ nodes:
     - visit
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_visit_date
     - mosaic:cp_visit_date
+    cms_table:
+    - liquid_logic:cp_visits
+    - mosaic:cp_visits
   - name: cp_visit_seen
     type: BOOLEAN
     description: Child Seen
@@ -54,9 +72,15 @@ nodes:
     - visit
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_visit_seen
     - mosaic:cp_visit_seen
+    cms_table:
+    - liquid_logic:cp_visits
+    - mosaic:cp_visits
   - name: cp_visit_seen_alone
     type: BOOLEAN
     description: Child Seen Alone
@@ -67,9 +91,15 @@ nodes:
     - visit
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_visit_seen_alone
     - mosaic:cp_visit_seen_alone
+    cms_table:
+    - liquid_logic:cp_visits
+    - mosaic:cp_visits
   - name: cp_visit_bedroom
     type: BOOLEAN
     description: Child Bedroom Seen
@@ -80,6 +110,12 @@ nodes:
     - visit
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cp_visit_bedroom
     - mosaic:cp_visit_bedroom
+    cms_table:
+    - liquid_logic:cp_visits
+    - mosaic:cp_visits

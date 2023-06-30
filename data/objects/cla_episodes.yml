@@ -14,9 +14,15 @@ nodes:
         enabled: true
     categories:
     - looked_after
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_episode_id
     - mosaic:cla_episode_id
+    cms_table:
+    - liquid_logic:cla_episodes
+    - mosaic:cla_episodes
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -33,9 +39,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:cla_episodes
+    - mosaic:cla_episodes
   - name: cla_epi_start
     type: DATE
     description: Date Episode Commenced
@@ -44,9 +53,15 @@ nodes:
     - looked_after
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_epi_start
     - mosaic:cla_epi_start
+    cms_table:
+    - liquid_logic:cla_episodes
+    - mosaic:cla_episodes
   - name: cla_epi_start_reason
     type: null
     description: Reason for New CLA Episode
@@ -55,9 +70,15 @@ nodes:
     - looked_after
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_epi_start_reason
     - mosaic:cla_epi_start_reason
+    cms_table:
+    - liquid_logic:cla_episodes
+    - mosaic:cla_episodes
   - name: cla_epi_ceased
     type: DATE
     description: Date Episode Ceased
@@ -67,9 +88,15 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_epi_ceased
     - mosaic:cla_epi_ceased
+    cms_table:
+    - liquid_logic:cla_episodes
+    - mosaic:cla_episodes
   - name: cla_epi_cease_reason
     type: null
     description: Reason Episode Ceased
@@ -79,9 +106,15 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_epi_cease_reason
     - mosaic:cla_epi_cease_reason
+    cms_table:
+    - liquid_logic:cla_episodes
+    - mosaic:cla_episodes
   - name: cla_team
     type: null
     description: Allocated Team
@@ -90,9 +123,15 @@ nodes:
     - looked_after
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_team
     - mosaic:cla_team
+    cms_table:
+    - liquid_logic:cla_episodes
+    - mosaic:cla_episodes
   - name: cla_worker
     type: null
     description: Allocated Worker
@@ -101,6 +140,12 @@ nodes:
     - looked_after
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_worker
     - mosaic:cla_worker
+    cms_table:
+    - liquid_logic:cla_episodes
+    - mosaic:cla_episodes

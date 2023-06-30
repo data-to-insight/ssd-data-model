@@ -14,9 +14,15 @@ nodes:
         enabled: true
     categories:
     - contact
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:contact_id
     - mosaic:contact_id
+    cms_table:
+    - liquid_logic:contacts
+    - mosaic:contacts
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -33,9 +39,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:contacts
+    - mosaic:contacts
   - name: contact_date
     type: DATE
     description: Date of Contact
@@ -44,9 +53,15 @@ nodes:
     - contact
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:contact_date
     - mosaic:contact_date
+    cms_table:
+    - liquid_logic:contacts
+    - mosaic:contacts
   - name: contact_source
     type: null
     description: Contact Source
@@ -55,9 +70,15 @@ nodes:
     - contact
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:contact_source
     - mosaic:contact_source
+    cms_table:
+    - liquid_logic:contacts
+    - mosaic:contacts
   - name: contact_outcome
     type: null
     description: 'Contact Outcome '
@@ -66,6 +87,12 @@ nodes:
     - contact
     returns:
     - ADCS_SP
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:contact_outcome
     - mosaic:contact_outcome
+    cms_table:
+    - liquid_logic:contacts
+    - mosaic:contacts

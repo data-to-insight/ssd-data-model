@@ -17,9 +17,15 @@ nodes:
     - ehcp_request
     - ehcp
     - need
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:sen_need_table_id
     - mosaic:sen_need_table_id
+    cms_table:
+    - liquid_logic:sen_need
+    - mosaic:sen_need
   - name: active_ehcp_id
     type: VARCHAR()
     description: Plan ID
@@ -30,9 +36,15 @@ nodes:
     - ehcp_request
     - ehcp
     - need
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:active_ehcp_id
     - mosaic:active_ehcp_id
+    cms_table:
+    - liquid_logic:sen_need
+    - mosaic:sen_need
   - name: active_ehcp_need
     type: null
     description: SEN Type
@@ -44,9 +56,15 @@ nodes:
     - need
     returns:
     - SEN2
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:active_ehcp_need
     - mosaic:active_ehcp_need
+    cms_table:
+    - liquid_logic:sen_need
+    - mosaic:sen_need
   - name: active_ehcp_need_rank
     type: null
     description: SEN Type Rank
@@ -58,6 +76,12 @@ nodes:
     - need
     returns:
     - SEN2
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:active_ehcp_need_rank
     - mosaic:active_ehcp_need_rank
+    cms_table:
+    - liquid_logic:sen_need
+    - mosaic:sen_need

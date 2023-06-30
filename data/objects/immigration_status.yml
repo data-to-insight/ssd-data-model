@@ -21,9 +21,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:immigration_status
+    - mosaic:immigration_status
   - name: immigration_status
     type: null
     description: Immigration Status
@@ -34,7 +37,13 @@ nodes:
     - uasc
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:immigration_status
+    - mosaic:immigration_status
+    cms_table:
     - liquid_logic:immigration_status
     - mosaic:immigration_status
   - name: immigration_status_start
@@ -47,9 +56,15 @@ nodes:
     - uasc
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:immigration_status_start
     - mosaic:immigration_status_start
+    cms_table:
+    - liquid_logic:immigration_status
+    - mosaic:immigration_status
   - name: immigration_status_end
     type: DATE
     description: Immigration Status End
@@ -60,6 +75,12 @@ nodes:
     - uasc
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:immigration_status_end
     - mosaic:immigration_status_end
+    cms_table:
+    - liquid_logic:immigration_status
+    - mosaic:immigration_status

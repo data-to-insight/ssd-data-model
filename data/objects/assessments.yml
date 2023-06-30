@@ -15,9 +15,15 @@ nodes:
     categories:
     - child_in_need
     - assessment
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:assessment_id
     - mosaic:assessment_id
+    cms_table:
+    - liquid_logic:assessments
+    - mosaic:assessments
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -35,9 +41,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:assessments
+    - mosaic:assessments
   - name: asmt_start_date
     type: DATE
     description: Assessment Start Date
@@ -47,9 +56,15 @@ nodes:
     - assessment
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:asmt_start_date
     - mosaic:asmt_start_date
+    cms_table:
+    - liquid_logic:assessments
+    - mosaic:assessments
   - name: asmt_child_seen
     type: BOOLEAN
     description: Child Seen During Assessment
@@ -59,9 +74,15 @@ nodes:
     - assessment
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:asmt_child_seen
     - mosaic:asmt_child_seen
+    cms_table:
+    - liquid_logic:assessments
+    - mosaic:assessments
   - name: asmt_auth_date
     type: DATE
     description: Assessment Authorised Date
@@ -71,9 +92,15 @@ nodes:
     - assessment
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:asmt_auth_date
     - mosaic:asmt_auth_date
+    cms_table:
+    - liquid_logic:assessments
+    - mosaic:assessments
   - name: asmt_outcome
     type: null
     description: Assessment Outcome
@@ -83,9 +110,15 @@ nodes:
     - assessment
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:asmt_outcome
     - mosaic:asmt_outcome
+    cms_table:
+    - liquid_logic:assessments
+    - mosaic:assessments
   - name: asmt_team
     type: null
     description: Assessment Completed by Team
@@ -95,9 +128,15 @@ nodes:
     - assessment
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:asmt_team
     - mosaic:asmt_team
+    cms_table:
+    - liquid_logic:assessments
+    - mosaic:assessments
   - name: asmt_worker
     type: null
     description: Assessment Completed by Worker
@@ -107,6 +146,12 @@ nodes:
     - assessment
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:asmt_worker
     - mosaic:asmt_worker
+    cms_table:
+    - liquid_logic:assessments
+    - mosaic:assessments

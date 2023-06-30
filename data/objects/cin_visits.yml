@@ -16,9 +16,15 @@ nodes:
     - child_in_need
     - cin_plan
     - visit
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_visit_id
     - mosaic:cin_visit_id
+    cms_table:
+    - liquid_logic:cin_visits
+    - mosaic:cin_visits
   - name: cin_plan_id
     type: VARCHAR()
     description: CIN Plan ID
@@ -28,9 +34,15 @@ nodes:
     - child_in_need
     - cin_plan
     - visit
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_plan_id
     - mosaic:cin_plan_id
+    cms_table:
+    - liquid_logic:cin_visits
+    - mosaic:cin_visits
   - name: cin_visit_date
     type: DATE
     description: CIN Visit Date
@@ -41,9 +53,15 @@ nodes:
     - visit
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_visit_date
     - mosaic:cin_visit_date
+    cms_table:
+    - liquid_logic:cin_visits
+    - mosaic:cin_visits
   - name: cin_visit_seen
     type: BOOLEAN
     description: Child Seen
@@ -54,9 +72,15 @@ nodes:
     - visit
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_visit_seen
     - mosaic:cin_visit_seen
+    cms_table:
+    - liquid_logic:cin_visits
+    - mosaic:cin_visits
   - name: cin_visit_seen_alone
     type: BOOLEAN
     description: Child Seen Alone
@@ -67,9 +91,15 @@ nodes:
     - visit
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_visit_seen_alone
     - mosaic:cin_visit_seen_alone
+    cms_table:
+    - liquid_logic:cin_visits
+    - mosaic:cin_visits
   - name: cin_visit_bedroom
     type: BOOLEAN
     description: Child Bedroom Seen
@@ -80,6 +110,12 @@ nodes:
     - visit
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cin_visit_bedroom
     - mosaic:cin_visit_bedroom
+    cms_table:
+    - liquid_logic:cin_visits
+    - mosaic:cin_visits

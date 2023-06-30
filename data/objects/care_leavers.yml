@@ -14,9 +14,15 @@ nodes:
         enabled: true
     categories:
     - care_leavers
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:care_leaver_id
     - mosaic:care_leaver_id
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -33,9 +39,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers
   - name: cl_eligibility
     type: null
     description: Eligibility Status Category
@@ -44,9 +53,15 @@ nodes:
     - care_leavers
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cl_eligibility
     - mosaic:cl_eligibility
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers
   - name: cl_in_touch
     type: null
     description: In Touch Category
@@ -55,9 +70,15 @@ nodes:
     - care_leavers
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cl_in_touch
     - mosaic:cl_in_touch
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers
   - name: cl_latest_contact
     type: DATE
     description: Latest Date of Contact
@@ -66,9 +87,15 @@ nodes:
     - care_leavers
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cl_latest_contact
     - mosaic:cl_latest_contact
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers
   - name: cl_accommodation
     type: null
     description: Accommodation
@@ -77,9 +104,15 @@ nodes:
     - care_leavers
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cl_accommodation
     - mosaic:cl_accommodation
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers
   - name: cl_accom_suitable
     type: null
     description: Suitability of Accommodation
@@ -88,9 +121,15 @@ nodes:
     - care_leavers
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cl_accom_suitable
     - mosaic:cl_accom_suitable
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers
   - name: cl_activity
     type: null
     description: Activity Status
@@ -99,9 +138,15 @@ nodes:
     - care_leavers
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cl_activity
     - mosaic:cl_activity
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers
   - name: cl_pathway_plan_rev_date
     type: null
     description: Latest Pathway Plan Review Date
@@ -110,9 +155,15 @@ nodes:
     - care_leavers
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cl_pathway_plan_rev_date
     - mosaic:cl_pathway_plan_rev_date
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers
   - name: cl_personal_advisor
     type: null
     description: Allocated Personal Advisor
@@ -121,9 +172,15 @@ nodes:
     - care_leavers
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cl_personal_advisor
     - mosaic:cl_personal_advisor
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers
   - name: cl_team
     type: null
     description: Allocated Team
@@ -132,9 +189,15 @@ nodes:
     - care_leavers
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cl_team
     - mosaic:cl_team
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers
   - name: cl_worker
     type: null
     description: Allocated Worker
@@ -143,6 +206,12 @@ nodes:
     - care_leavers
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cl_worker
     - mosaic:cl_worker
+    cms_table:
+    - liquid_logic:care_leavers
+    - mosaic:care_leavers

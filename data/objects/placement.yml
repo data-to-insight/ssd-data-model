@@ -15,9 +15,15 @@ nodes:
     categories:
     - looked_after
     - placement
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:placement_id
     - mosaic:placement_id
+    cms_table:
+    - liquid_logic:placement
+    - mosaic:placement
   - name: cla_episode_id
     type: VARCHAR()
     description: Episode ID
@@ -26,9 +32,15 @@ nodes:
     categories:
     - looked_after
     - placement
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_episode_id
     - mosaic:cla_episode_id
+    cms_table:
+    - liquid_logic:placement
+    - mosaic:placement
   - name: place_start
     type: DATE
     description: Placement Start Date
@@ -40,10 +52,14 @@ nodes:
     - SSDA903
     - AnnexA
     cms:
-    - Local
-    cms_fields:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:place_start
     - mosaic:place_start
+    cms_table:
+    - liquid_logic:placement
+    - mosaic:placement
   - name: place_type
     type: null
     description: Placement Type
@@ -54,9 +70,15 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:place_type
     - mosaic:place_type
+    cms_table:
+    - liquid_logic:placement
+    - mosaic:placement
   - name: place_urn
     type: VARCHAR(8)
     description: URN of Placement
@@ -67,9 +89,15 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:place_urn
     - mosaic:place_urn
+    cms_table:
+    - liquid_logic:placement
+    - mosaic:placement
   - name: place_la
     type: null
     description: LA of Placement
@@ -80,9 +108,15 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:place_la
     - mosaic:place_la
+    cms_table:
+    - liquid_logic:placement
+    - mosaic:placement
   - name: place_provider
     type: null
     description: Placement Provider
@@ -92,9 +126,15 @@ nodes:
     - placement
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:place_provider
     - mosaic:place_provider
+    cms_table:
+    - liquid_logic:placement
+    - mosaic:placement
   - name: place_postcode
     type: null
     description: Placement Postcode
@@ -104,9 +144,15 @@ nodes:
     - placement
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:place_postcode
     - mosaic:place_postcode
+    cms_table:
+    - liquid_logic:placement
+    - mosaic:placement
   - name: place_end
     type: DATE
     description: Placement End Date
@@ -117,10 +163,14 @@ nodes:
     returns:
     - SSDA903
     cms:
-    - Local
-    cms_fields:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:place_end
     - mosaic:place_end
+    cms_table:
+    - liquid_logic:placement
+    - mosaic:placement
   - name: place_change_reason
     type: null
     description: Reason for Placement Change
@@ -130,6 +180,12 @@ nodes:
     - placement
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:place_change_reason
     - mosaic:place_change_reason
+    cms_table:
+    - liquid_logic:placement
+    - mosaic:placement

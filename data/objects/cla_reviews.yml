@@ -15,9 +15,15 @@ nodes:
     categories:
     - looked_after
     - review
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:review_id
     - mosaic:review_id
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: cla_episode_id
     type: null
     description: Episode ID
@@ -29,9 +35,15 @@ nodes:
     categories:
     - looked_after
     - review
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:cla_episode_id
     - mosaic:cla_episode_id
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: rev_due_date
     type: DATE
     description: CLA Review Due Date
@@ -41,9 +53,15 @@ nodes:
     - review
     returns:
     - Local
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:rev_due_date
     - mosaic:rev_due_date
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: rev_date
     type: DATE
     description: CLA Review Date
@@ -54,9 +72,15 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:rev_date
     - mosaic:rev_date
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: rev_cyp_involved_care_plan
     type: null
     description: Has the childyoung person been involved in formulating this Care
@@ -68,9 +92,15 @@ nodes:
     returns:
     - 1a
     - draft
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:rev_cyp_involved_care_plan
     - mosaic:rev_cyp_involved_care_plan
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: rev_sw_met_child_views
     type: null
     description: 'Has the Social Worker met with the child on their own to undertake
@@ -82,9 +112,15 @@ nodes:
     returns:
     - 1a
     - draft
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:rev_sw_met_child_views
     - mosaic:rev_sw_met_child_views
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: rev_participation
     type: null
     description: Participation code
@@ -94,9 +130,15 @@ nodes:
     - review
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:rev_participation
     - mosaic:rev_participation
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: rev_care_plan_meet_needs
     type: null
     description: Is the Care Plan meeting the childs needs?
@@ -107,9 +149,15 @@ nodes:
     returns:
     - 1a
     - draft
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:rev_care_plan_meet_needs
     - mosaic:rev_care_plan_meet_needs
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: rev_perm_plan
     type: null
     description: Is a Permanence Plan in place?
@@ -119,9 +167,15 @@ nodes:
     - review
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:rev_perm_plan
     - mosaic:rev_perm_plan
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: rev_last_iro_contact
     type: DATE
     description: Date of Last IRO Visit  Contact to the Child
@@ -131,9 +185,15 @@ nodes:
     - review
     returns:
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:rev_last_iro_contact
     - mosaic:rev_last_iro_contact
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: prev_permanence
     type: null
     description: Has the child young person previously been adopted or left care for
@@ -144,9 +204,15 @@ nodes:
     - review
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:prev_permanence
     - mosaic:prev_permanence
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: prev_perm_order_date
     type: DATE
     description: Date of Previous Permanence Order
@@ -157,9 +223,15 @@ nodes:
     - permanence
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:prev_perm_order_date
     - mosaic:prev_perm_order_date
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: prev_perm_option
     type: null
     description: Previous Permanence Option
@@ -170,9 +242,15 @@ nodes:
     - permanence
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:prev_perm_option
     - mosaic:prev_perm_option
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: prev_perm_la
     type: null
     description: Previous Permanence Arranged LA
@@ -183,9 +261,15 @@ nodes:
     - permanence
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:prev_perm_la
     - mosaic:prev_perm_la
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: convicted_in_year
     type: BOOLEAN
     description: Child convicted during the year
@@ -196,9 +280,15 @@ nodes:
     - offending
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:convicted_in_year
     - mosaic:convicted_in_year
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: health_check
     type: BOOLEAN
     description: Health surveillance checks up to date
@@ -209,9 +299,15 @@ nodes:
     - health
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:health_check
     - mosaic:health_check
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: health_asmt_date
     type: DATE
     description: Date of Last Health Assessment
@@ -223,9 +319,15 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:health_asmt_date
     - mosaic:health_asmt_date
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: dental_check_date
     type: DATE
     description: Date of Last Dental Check
@@ -237,9 +339,15 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:dental_check_date
     - mosaic:dental_check_date
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: immunisations
     type: BOOLEAN
     description: Immunisations up to Date
@@ -250,9 +358,15 @@ nodes:
     - health
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:immunisations
     - mosaic:immunisations
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: substance_misuse
     type: BOOLEAN
     description: Identified as having a substance misuse problem
@@ -263,9 +377,15 @@ nodes:
     - health
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:substance_misuse
     - mosaic:substance_misuse
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews
   - name: intervention_received
     type: BOOLEAN
     description: Child received intervention for substance misuse problem
@@ -276,6 +396,12 @@ nodes:
     - health
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:intervention_received
     - mosaic:intervention_received
+    cms_table:
+    - liquid_logic:cla_reviews
+    - mosaic:cla_reviews

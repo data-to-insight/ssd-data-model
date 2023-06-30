@@ -15,9 +15,15 @@ nodes:
     categories:
     - send
     - ehcp_request
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:ehcp_request_id
     - mosaic:ehcp_request_id
+    cms_table:
+    - liquid_logic:ehcp_requests
+    - mosaic:ehcp_requests
   - name: send_table_id
     type: null
     description: send_table_id
@@ -27,9 +33,15 @@ nodes:
     - identity
     - send
     - ehcp_request
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:send_table_id
     - mosaic:send_table_id
+    cms_table:
+    - liquid_logic:ehcp_requests
+    - mosaic:ehcp_requests
   - name: ehcp_req_date
     type: DATE
     description: Received Date
@@ -39,9 +51,15 @@ nodes:
     - ehcp_request
     returns:
     - SEN2
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:ehcp_req_date
     - mosaic:ehcp_req_date
+    cms_table:
+    - liquid_logic:ehcp_requests
+    - mosaic:ehcp_requests
   - name: ehcp_req_outcome_date
     type: DATE
     description: Request Outcome Date
@@ -51,9 +69,15 @@ nodes:
     - ehcp_request
     returns:
     - SEN2
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:ehcp_req_outcome_date
     - mosaic:ehcp_req_outcome_date
+    cms_table:
+    - liquid_logic:ehcp_requests
+    - mosaic:ehcp_requests
   - name: ehcp_req_outcome
     type: null
     description: Request Outcome
@@ -63,6 +87,12 @@ nodes:
     - ehcp_request
     returns:
     - SEN2
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:ehcp_req_outcome
     - mosaic:ehcp_req_outcome
+    cms_table:
+    - liquid_logic:ehcp_requests
+    - mosaic:ehcp_requests

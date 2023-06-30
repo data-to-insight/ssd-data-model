@@ -20,9 +20,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:person
+    - mosaic:person
   - name: person_sex
     type: null
     description: Sex
@@ -31,9 +34,15 @@ nodes:
     - identity
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_sex
     - mosaic:person_sex
+    cms_table:
+    - liquid_logic:person
+    - mosaic:person
   - name: person_gender
     type: null
     description: Gender
@@ -42,9 +51,15 @@ nodes:
     - identity
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_gender
     - mosaic:person_gender
+    cms_table:
+    - liquid_logic:person
+    - mosaic:person
   - name: person_ethnicity
     type: VARCHAR(4)
     description: Ethnicity
@@ -54,9 +69,15 @@ nodes:
     returns:
     - SSDA903
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_ethnicity
     - mosaic:person_ethnicity
+    cms_table:
+    - liquid_logic:person
+    - mosaic:person
   - name: person_dob
     type: DATE
     description: Date of Birth
@@ -66,9 +87,15 @@ nodes:
     returns:
     - SSDA903
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_dob
     - mosaic:person_dob
+    cms_table:
+    - liquid_logic:child
+    - mosaic:child
   - name: person_upn
     type: CHAR(13)
     description: UPN
@@ -77,9 +104,15 @@ nodes:
     - identity
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_upn
     - mosaic:person_upn
+    cms_table:
+    - liquid_logic:child
+    - mosaic:child
   - name: person_upn_unknown
     type: CHAR(3)
     description: UPN Unknown
@@ -88,9 +121,15 @@ nodes:
     - identity
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_upn_unknown
     - mosaic:person_upn_unknown
+    cms_table:
+    - liquid_logic:child
+    - mosaic:child
   - name: person_send
     type: BOOLEAN
     description: SEND Flag
@@ -99,9 +138,15 @@ nodes:
     - identity
     returns:
     - NEETandparticipation
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_send
     - mosaic:person_send
+    cms_table:
+    - liquid_logic:child
+    - mosaic:child
   - name: person_expected_dob
     type: DATE
     description: Expected Birth Date
@@ -110,9 +155,15 @@ nodes:
     - identity
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_expected_dob
     - mosaic:person_expected_dob
+    cms_table:
+    - liquid_logic:child
+    - mosaic:child
   - name: person_death_date
     type: DATE
     description: Date of Death
@@ -121,9 +172,15 @@ nodes:
     - identity
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_death_date
     - mosaic:person_death_date
+    cms_table:
+    - liquid_logic:child
+    - mosaic:child
   - name: person_is_mother
     type: BOOLEAN
     description: Mother
@@ -132,9 +189,15 @@ nodes:
     - identity
     returns:
     - SSDA903
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_is_mother
     - mosaic:person_is_mother
+    cms_table:
+    - liquid_logic:child
+    - mosaic:child
   - name: person_nationality
     type: null
     description: Country of Origin (UASC)
@@ -143,6 +206,12 @@ nodes:
     - identity
     returns:
     - ADCS_SP
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:person_nationality
     - mosaic:person_nationality
+    cms_table:
+    - liquid_logic:child
+    - mosaic:child

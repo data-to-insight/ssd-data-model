@@ -15,9 +15,15 @@ nodes:
     categories:
     - identity
     - send
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:send_table_id
     - mosaic:send_table_id
+    cms_table:
+    - liquid_logic:send
+    - mosaic:send
   - name: send_upn
     type: CHAR(13)
     description: UPN
@@ -31,9 +37,15 @@ nodes:
     categories:
     - identity
     - send
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:send_upn
     - mosaic:send_upn
+    cms_table:
+    - liquid_logic:send
+    - mosaic:send
   - name: send_uln
     type: null
     description: ULN
@@ -41,9 +53,15 @@ nodes:
     categories:
     - identity
     - send
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:send_uln
     - mosaic:send_uln
+    cms_table:
+    - liquid_logic:send
+    - mosaic:send
   - name: upn_unknown
     type: CHAR(3)
     description: UPN and ULN unknown
@@ -51,9 +69,15 @@ nodes:
     categories:
     - identity
     - send
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:upn_unknown
     - mosaic:upn_unknown
+    cms_table:
+    - liquid_logic:send
+    - mosaic:send
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -71,6 +95,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    cms_fields:
+    cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:send
+    - mosaic:send

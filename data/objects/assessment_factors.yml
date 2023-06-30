@@ -16,9 +16,15 @@ nodes:
     categories:
     - child_in_need
     - assessment
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:asmt_id
     - mosaic:asmt_id
+    cms_table:
+    - liquid_logic:assessment_factors
+    - mosaic:assessment_factors
   - name: asmt_factors
     type: null
     description: Assessment Factors
@@ -28,6 +34,12 @@ nodes:
     - assessment
     returns:
     - CINcensus
-    cms_fields:
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
     - liquid_logic:asmt_factors
     - mosaic:asmt_factors
+    cms_table:
+    - liquid_logic:assessment_factors
+    - mosaic:assessment_factors
