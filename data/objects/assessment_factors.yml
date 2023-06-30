@@ -5,7 +5,7 @@ nodes:
   - name: asmt_id
     type: VARCHAR()
     description: Assessment ID
-    field_ref: ASF001A
+    item_ref: ASF001A
     primary_key: true
     foreign_key: assessments.assessment_id
     validators:
@@ -28,7 +28,7 @@ nodes:
   - name: asmt_factors
     type: null
     description: Assessment Factors
-    field_ref: ASF002A
+    item_ref: ASF002A
     categories:
     - child_in_need
     - assessment

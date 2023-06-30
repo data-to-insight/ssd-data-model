@@ -5,7 +5,7 @@ nodes:
   - name: ehcp_asmt_id
     type: VARCHAR()
     description: Assessment ID
-    field_ref: EAM001A
+    item_ref: EAM001A
     primary_key: true
     validators:
     - required:
@@ -28,7 +28,7 @@ nodes:
   - name: ehcp_request_id
     type: VARCHAR()
     description: Request ID
-    field_ref: EAM002A
+    item_ref: EAM002A
     foreign_key: ehcp_requests.ehcp_request_id
     categories:
     - send
@@ -46,7 +46,7 @@ nodes:
   - name: ehcp_asmt_outcome_date
     type: DATE
     description: Assessment Outcome Date
-    field_ref: EAM003A
+    item_ref: EAM003A
     categories:
     - send
     - ehcp_request
@@ -65,7 +65,7 @@ nodes:
   - name: ehcp_asmt_outcome
     type: null
     description: Assessment Outcome
-    field_ref: EAM004A
+    item_ref: EAM004A
     categories:
     - send
     - ehcp_request

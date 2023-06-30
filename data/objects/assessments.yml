@@ -5,7 +5,7 @@ nodes:
   - name: assessment_id
     type: VARCHAR()
     description: Assessment ID
-    field_ref: ASM001A
+    item_ref: ASM001A
     primary_key: true
     validators:
     - required:
@@ -27,7 +27,7 @@ nodes:
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
-    field_ref: ASM002A
+    item_ref: ASM002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -50,7 +50,7 @@ nodes:
   - name: asmt_start_date
     type: DATE
     description: Assessment Start Date
-    field_ref: ASM003A
+    item_ref: ASM003A
     categories:
     - child_in_need
     - assessment
@@ -68,7 +68,7 @@ nodes:
   - name: asmt_child_seen
     type: BOOLEAN
     description: Child Seen During Assessment
-    field_ref: ASM004A
+    item_ref: ASM004A
     categories:
     - child_in_need
     - assessment
@@ -86,7 +86,7 @@ nodes:
   - name: asmt_auth_date
     type: DATE
     description: Assessment Authorised Date
-    field_ref: ASM005A
+    item_ref: ASM005A
     categories:
     - child_in_need
     - assessment
@@ -104,7 +104,7 @@ nodes:
   - name: asmt_outcome
     type: null
     description: Assessment Outcome
-    field_ref: ASM006A
+    item_ref: ASM006A
     categories:
     - child_in_need
     - assessment
@@ -122,7 +122,7 @@ nodes:
   - name: asmt_team
     type: null
     description: Assessment Completed by Team
-    field_ref: ASM007A
+    item_ref: ASM007A
     categories:
     - child_in_need
     - assessment
@@ -140,7 +140,7 @@ nodes:
   - name: asmt_worker
     type: null
     description: Assessment Completed by Worker
-    field_ref: ASM008A
+    item_ref: ASM008A
     categories:
     - child_in_need
     - assessment

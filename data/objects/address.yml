@@ -5,7 +5,7 @@ nodes:
   - name: address
     type: null
     description: Address
-    field_ref: ADD001A
+    item_ref: ADD001A
     primary_key: true
     validators:
     - required:
@@ -29,7 +29,7 @@ nodes:
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
-    field_ref: ADD002A
+    item_ref: ADD002A
     foreign_key: person.la_person_id
     categories:
     - identity
@@ -49,7 +49,7 @@ nodes:
   - name: address_type
     type: null
     description: Address Type
-    field_ref: ADD003A
+    item_ref: ADD003A
     categories:
     - identity
     - address
@@ -67,7 +67,7 @@ nodes:
   - name: address_start
     type: DATE
     description: Address Start Date From
-    field_ref: ADD004A
+    item_ref: ADD004A
     categories:
     - identity
     - address
@@ -85,7 +85,7 @@ nodes:
   - name: address_end
     type: DATE
     description: Address End Date To
-    field_ref: ADD005A
+    item_ref: ADD005A
     categories:
     - identity
     - address

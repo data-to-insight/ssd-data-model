@@ -45,8 +45,8 @@ def generate_individual_images(yml_data_path, output_path, output_filetype):
                         field_name = f"[PK] {field_name}"
                     if field.get('foreign_key'):
                         field_name = f"[FK] {field_name}"
-                    if field.get('field_ref'):
-                        field_name += f" [{field['field_ref']}]"
+                    if field.get('item_ref'):
+                        field_name += f" [{field['item_ref']}]"
                     # Removed to reduce dup data & requ column width on resultant image
                     # if field.get('returns'):
                     #     returns_data = ', '.join(field['returns'])
@@ -107,8 +107,8 @@ def generate_full_erd(yml_data_path, assets_path, erd_publish_path):
                     if field.get('foreign_key'):
                         field_name = f"[FK] {field_name}"
                     # Append field_ref to the field name
-                    if field.get('field_ref'):
-                        field_name += f" [{field['field_ref']}]"
+                    if field.get('item_ref'):
+                        field_name += f" [{field['item_ref']}]"
                     # Append returns data to the field name
                     if field.get('returns'):
                         returns_data = ', '.join(field['returns'])

@@ -5,7 +5,7 @@ nodes:
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
-    field_ref: PER001A
+    item_ref: PER001A
     primary_key: true
     validators:
     - required:
@@ -29,7 +29,7 @@ nodes:
   - name: person_sex
     type: null
     description: Sex
-    field_ref: PER002A
+    item_ref: PER002A
     categories:
     - identity
     returns:
@@ -46,7 +46,7 @@ nodes:
   - name: person_gender
     type: null
     description: Gender
-    field_ref: PER003A
+    item_ref: PER003A
     categories:
     - identity
     returns:
@@ -63,7 +63,7 @@ nodes:
   - name: person_ethnicity
     type: VARCHAR(4)
     description: Ethnicity
-    field_ref: PER004A
+    item_ref: PER004A
     categories:
     - identity
     returns:
@@ -81,7 +81,7 @@ nodes:
   - name: person_dob
     type: DATE
     description: Date of Birth
-    field_ref: PER005A
+    item_ref: PER005A
     categories:
     - identity
     returns:
@@ -99,7 +99,7 @@ nodes:
   - name: person_upn
     type: CHAR(13)
     description: UPN
-    field_ref: PER006A
+    item_ref: PER006A
     categories:
     - identity
     returns:
@@ -116,7 +116,7 @@ nodes:
   - name: person_upn_unknown
     type: CHAR(3)
     description: UPN Unknown
-    field_ref: PER007A
+    item_ref: PER007A
     categories:
     - identity
     returns:
@@ -133,7 +133,7 @@ nodes:
   - name: person_send
     type: BOOLEAN
     description: SEND Flag
-    field_ref: PER008A
+    item_ref: PER008A
     categories:
     - identity
     returns:
@@ -150,7 +150,7 @@ nodes:
   - name: person_expected_dob
     type: DATE
     description: Expected Birth Date
-    field_ref: PER009A
+    item_ref: PER009A
     categories:
     - identity
     returns:
@@ -167,7 +167,7 @@ nodes:
   - name: person_death_date
     type: DATE
     description: Date of Death
-    field_ref: PER010A
+    item_ref: PER010A
     categories:
     - identity
     returns:
@@ -184,7 +184,7 @@ nodes:
   - name: person_is_mother
     type: BOOLEAN
     description: Mother
-    field_ref: PER011A
+    item_ref: PER011A
     categories:
     - identity
     returns:
@@ -201,7 +201,7 @@ nodes:
   - name: person_nationality
     type: null
     description: Country of Origin (UASC)
-    field_ref: PER012A
+    item_ref: PER012A
     categories:
     - identity
     returns:

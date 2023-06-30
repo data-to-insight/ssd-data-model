@@ -5,7 +5,7 @@ nodes:
   - name: permanence_id
     type: VARCHAR(10)
     description: permanence_table_id
-    field_ref: PRM001A
+    item_ref: PRM001A
     primary_key: true
     validators:
     - required:
@@ -26,7 +26,7 @@ nodes:
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
-    field_ref: PRM002A
+    item_ref: PRM002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -50,7 +50,7 @@ nodes:
   - name: adm_decision_date
     type: DATE
     description: 'Date of ADM Decision '
-    field_ref: PRM003A
+    item_ref: PRM003A
     categories:
     - looked_after
     - permanence
@@ -71,7 +71,7 @@ nodes:
   - name: ffa_cp_decision_date
     type: DATE
     description: Date of FFA CP Decision
-    field_ref: PRM004A
+    item_ref: PRM004A
     categories:
     - looked_after
     - permanence
@@ -90,7 +90,7 @@ nodes:
   - name: entered_care_date
     type: DATE
     description: Date the entered Care
-    field_ref: PRM005A
+    item_ref: PRM005A
     categories:
     - looked_after
     - permanence
@@ -111,7 +111,7 @@ nodes:
   - name: placement_order_date
     type: DATE
     description: Date of Placement Freeing Order
-    field_ref: PRM006A
+    item_ref: PRM006A
     categories:
     - looked_after
     - permanence
@@ -132,7 +132,7 @@ nodes:
   - name: placed_for_adoption_date
     type: DATE
     description: Date Placed for Adoption
-    field_ref: PRM007A
+    item_ref: PRM007A
     categories:
     - looked_after
     - permanence
@@ -153,7 +153,7 @@ nodes:
   - name: matched_date
     type: DATE
     description: Date Matched to Prospective Adopters
-    field_ref: PRM008A
+    item_ref: PRM008A
     categories:
     - looked_after
     - permanence
@@ -174,7 +174,7 @@ nodes:
   - name: placed_ffa_cp_date
     type: DATE
     description: "Date Placed in FFA CP Placement\_"
-    field_ref: PRM009A
+    item_ref: PRM009A
     categories:
     - looked_after
     - permanence
@@ -195,7 +195,7 @@ nodes:
   - name: decision_reversed_date
     type: DATE
     description: Date of Decision that Child Should No Longer be Placed for Adoption
-    field_ref: PRM010A
+    item_ref: PRM010A
     categories:
     - looked_after
     - permanence
@@ -216,7 +216,7 @@ nodes:
     type: DATE
     description: Date originally placed with foster carer(s) (if adopted by foster
       carers)
-    field_ref: PRM011A
+    item_ref: PRM011A
     categories:
     - looked_after
     - permanence
@@ -237,7 +237,7 @@ nodes:
   - name: sibling_group
     type: BOOLEAN
     description: Is the child a part of a sibling group?
-    field_ref: PRM012A
+    item_ref: PRM012A
     categories:
     - looked_after
     - permanence
@@ -257,7 +257,7 @@ nodes:
     type: TINYINT(2)
     description: Number of children placed, or planned to be placed, for adoption
       together as sibling group INCLUDING this child
-    field_ref: PRM013A
+    item_ref: PRM013A
     categories:
     - looked_after
     - permanence
@@ -277,7 +277,7 @@ nodes:
     type: TINYINT(2)
     description: Number of siblings placed, or planned to be placed, for adoption
       separately from the child
-    field_ref: PRM014A
+    item_ref: PRM014A
     categories:
     - looked_after
     - permanence
@@ -296,7 +296,7 @@ nodes:
   - name: place_provider_urn
     type: VARCHAR(8)
     description: URN of the placement provider agency
-    field_ref: PRM015A
+    item_ref: PRM015A
     categories:
     - looked_after
     - permanence
@@ -315,7 +315,7 @@ nodes:
   - name: decision_reversed_reason
     type: null
     description: Reason No Longer Placed for Adoption
-    field_ref: PRM016A
+    item_ref: PRM016A
     categories:
     - looked_after
     - permanence
@@ -336,7 +336,7 @@ nodes:
   - name: permanence_order_date
     type: DATE
     description: "Date of Order\_"
-    field_ref: PRM017A
+    item_ref: PRM017A
     categories:
     - looked_after
     - permanence
@@ -356,7 +356,7 @@ nodes:
   - name: permanence_order_type
     type: null
     description: Type of Order
-    field_ref: PRM018A
+    item_ref: PRM018A
     categories:
     - looked_after
     - permanence
@@ -375,7 +375,7 @@ nodes:
   - name: guardian_status
     type: null
     description: Status of Special Guardian
-    field_ref: PRM019A
+    item_ref: PRM019A
     categories:
     - looked_after
     - permanence
@@ -394,7 +394,7 @@ nodes:
   - name: guardian_age
     type: TINYINT(2)
     description: Age of Special Guardian
-    field_ref: PRM020A
+    item_ref: PRM020A
     categories:
     - looked_after
     - permanence

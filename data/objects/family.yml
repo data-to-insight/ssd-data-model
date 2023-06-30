@@ -5,7 +5,7 @@ nodes:
   - name: family_id
     type: null
     description: Family identifier
-    field_ref: FAM001A
+    item_ref: FAM001A
     primary_key: true
     validators:
     - required:
@@ -30,7 +30,7 @@ nodes:
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
-    field_ref: FAM002A
+    item_ref: FAM002A
     foreign_key: person.la_person_id
     validators:
     - required:

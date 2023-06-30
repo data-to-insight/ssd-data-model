@@ -89,9 +89,9 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
             html_content += "<col style='width: 15%;'/>"  # Set width for categories-column
             html_content += "<col style='width: 15%;'/>"  # Set width for returns-column
             html_content += "</colgroup>"
-            html_content += "<tr><th class='field-ref-column'>Field Ref</th><th class='data-item-column'>Data Item Name / Field</th><th class='field-column'>Field</th><th class='cms-column'>Exists in CMS</th><th class='categories-column'>Data Category Group(s)</th><th class='returns-column'>Returns</th></tr>"
+            html_content += "<tr><th class='item-ref-column'>Item Ref</th><th class='data-item-column'>Data Item Name</th><th class='field-column'>Field</th><th class='cms-column'>Exists in CMS</th><th class='categories-column'>Data Category Group(s)</th><th class='returns-column'>Returns</th></tr>"
             for field in nodes[0]['fields']:
-                field_ref = field.get('field_ref', '')
+                field_ref = field.get('item_ref', '')
                 field_name = field['name']
                 cms_data = ', '.join(field.get('cms', []))
                 categories_data = ', '.join(field.get('categories', []))
