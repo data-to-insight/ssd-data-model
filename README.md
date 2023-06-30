@@ -111,12 +111,9 @@ Use the following command in a Git Codespace to set up the working environment:
   [$] sudo apt-get update
   [$] sudo apt-get install graphviz libgraphviz-dev pkg-config
   [$] pip install pygraphviz
-```
 
-Incase the preferred working option involves Poetry, the bash setup also installs this. (Note: .toml and .lock files are already configured)
-```python
   [$] pip install poetry
- ```
+```
 
 ## Relevant Links
 
