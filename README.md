@@ -107,13 +107,15 @@ Use the following command in a Git Codespace to set up the working environment:
 
   For ref: The above bash script contains and runs <all> the following required commands: 
 ```python
-    [$] pip install -r requirements.txt
-    [$] sudo apt-get update
-    [$] sudo apt-get install graphviz libgraphviz-dev pkg-config
-    [$] pip install pygraphviz
+  [$] pip install -r requirements.txt
+  [$] sudo apt-get update
+  [$] sudo apt-get install graphviz libgraphviz-dev pkg-config
+  [$] pip install pygraphviz
+```
 
-And incase the preferred working option, it also adds (.toml and .lock files already set)
-    [$] pip install poetry
+Incase the preferred working option involves Poetry, the bash setup also installs this. (Note: .toml and .lock files are already configured)
+```python
+  [$] pip install poetry
  ```
 
 ## Relevant Links
