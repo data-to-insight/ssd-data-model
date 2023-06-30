@@ -21,11 +21,11 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:ll_address
-    - mosaic:mosaic_address
+    - liquid_logic:address
+    - mosaic:address
     cms_table:
-    - liquid_logic:ll_address_tbl
-    - mosaic:mosaic_address_tbl
+    - liquid_logic:address
+    - mosaic:address
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
@@ -42,10 +42,10 @@ nodes:
     - mosaic
     cms_field:
     - liquid_logic:la_person_id
-    - mosaic:la_child_id
+    - mosaic:la_person_id
     cms_table:
-    - liquid_logic:ll_address_tbl
-    - mosaic:mosaic_address_tbl
+    - liquid_logic:address
+    - mosaic:address
   - name: address_type
     type: null
     description: Address Type
@@ -59,11 +59,11 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:ll_address_type
-    - mosaic:mosaic_address_type
+    - liquid_logic:address_type
+    - mosaic:address_type
     cms_table:
-    - liquid_logic:ll_address_tbl
-    - mosaic:mosaic_address_tbl
+    - liquid_logic:address
+    - mosaic:address
   - name: address_start
     type: DATE
     description: Address Start Date From
@@ -77,11 +77,11 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:ll_address_start
-    - mosaic:mosaic_address_start
+    - liquid_logic:address_start
+    - mosaic:address_start
     cms_table:
-    - liquid_logic:ll_address_tbl
-    - mosaic:mosaic_address_tbl
+    - liquid_logic:address
+    - mosaic:address
   - name: address_end
     type: DATE
     description: Address End Date To
@@ -93,8 +93,10 @@ nodes:
     - Local
     cms:
     - liquid_logic
-
+    - mosaic
     cms_field:
-    - liquid_logic:ll_address_end
+    - liquid_logic:address_end
+    - mosaic:address_end
     cms_table:
-    - liquid_logic:ll_address_tbl
+    - liquid_logic:address
+    - mosaic:address
