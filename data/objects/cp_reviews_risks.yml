@@ -5,7 +5,7 @@ nodes:
   - name: cp_review_id
     type: VARCHAR()
     description: Review ID
-    field_ref: CPK010A
+    item_ref: CPK010A
     primary_key: true
     foreign_key: cp_reviews.cp_review_id
     validators:
@@ -29,7 +29,7 @@ nodes:
   - name: cp_review_risks
     type: null
     description: Risks to child at this conference
-    field_ref: CPK011A
+    item_ref: CPK011A
     categories:
     - child_protection
     - cp_plan

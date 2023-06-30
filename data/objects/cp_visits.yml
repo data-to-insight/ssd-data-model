@@ -5,7 +5,7 @@ nodes:
   - name: cp_plan_id
     type: VARCHAR()
     description: CP Plan ID
-    field_ref: CPV001A
+    item_ref: CPV001A
     primary_key: true
     foreign_key: cp_plans.cp_plan_id
     validators:
@@ -29,7 +29,7 @@ nodes:
   - name: cp_visit_id
     type: VARCHAR()
     description: CP Visit ID
-    field_ref: CPV002A
+    item_ref: CPV002A
     categories:
     - child_protection
     - cp_plan
@@ -46,7 +46,7 @@ nodes:
   - name: cp_visit_date
     type: DATE
     description: Date of Visit
-    field_ref: CPV003A
+    item_ref: CPV003A
     categories:
     - child_protection
     - cp_plan
@@ -65,7 +65,7 @@ nodes:
   - name: cp_visit_seen
     type: BOOLEAN
     description: Child Seen
-    field_ref: CPV004A
+    item_ref: CPV004A
     categories:
     - child_protection
     - cp_plan
@@ -84,7 +84,7 @@ nodes:
   - name: cp_visit_seen_alone
     type: BOOLEAN
     description: Child Seen Alone
-    field_ref: CPV005A
+    item_ref: CPV005A
     categories:
     - child_protection
     - cp_plan
@@ -103,7 +103,7 @@ nodes:
   - name: cp_visit_bedroom
     type: BOOLEAN
     description: Child Bedroom Seen
-    field_ref: CPV006A
+    item_ref: CPV006A
     categories:
     - child_protection
     - cp_plan

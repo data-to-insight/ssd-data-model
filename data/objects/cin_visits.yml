@@ -5,7 +5,7 @@ nodes:
   - name: cin_visit_id
     type: VARCHAR()
     description: CIN Visit ID
-    field_ref: CNV001A
+    item_ref: CNV001A
     primary_key: true
     validators:
     - required:
@@ -28,7 +28,7 @@ nodes:
   - name: cin_plan_id
     type: VARCHAR()
     description: CIN Plan ID
-    field_ref: CNV002A
+    item_ref: CNV002A
     foreign_key: cin_plans.cin_plan_id
     categories:
     - child_in_need
@@ -46,7 +46,7 @@ nodes:
   - name: cin_visit_date
     type: DATE
     description: CIN Visit Date
-    field_ref: CNV003A
+    item_ref: CNV003A
     categories:
     - child_in_need
     - cin_plan
@@ -65,7 +65,7 @@ nodes:
   - name: cin_visit_seen
     type: BOOLEAN
     description: Child Seen
-    field_ref: CNV004A
+    item_ref: CNV004A
     categories:
     - child_in_need
     - cin_plan
@@ -84,7 +84,7 @@ nodes:
   - name: cin_visit_seen_alone
     type: BOOLEAN
     description: Child Seen Alone
-    field_ref: CNV005A
+    item_ref: CNV005A
     categories:
     - child_in_need
     - cin_plan
@@ -103,7 +103,7 @@ nodes:
   - name: cin_visit_bedroom
     type: BOOLEAN
     description: Child Bedroom Seen
-    field_ref: CNV006A
+    item_ref: CNV006A
     categories:
     - child_in_need
     - cin_plan

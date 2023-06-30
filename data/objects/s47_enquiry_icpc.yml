@@ -5,7 +5,7 @@ nodes:
   - name: s47_enquiry_id
     type: VARCHAR()
     description: S47 Enquiry ID
-    field_ref: S47001A
+    item_ref: S47001A
     primary_key: true
     validators:
     - required:
@@ -27,7 +27,7 @@ nodes:
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
-    field_ref: S47002A
+    item_ref: S47002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -50,7 +50,7 @@ nodes:
   - name: strat_initiating_s47_date
     type: DATE
     description: Strategy Discussion initiating S47 Enquiry Start Date
-    field_ref: S47003A
+    item_ref: S47003A
     categories:
     - s47_enquiry
     - child_protection
@@ -68,7 +68,7 @@ nodes:
   - name: s47_start_date
     type: DATE
     description: S47 Start Date
-    field_ref: S47004A
+    item_ref: S47004A
     categories:
     - s47_enquiry
     - child_protection
@@ -86,7 +86,7 @@ nodes:
   - name: s47_completed_date
     type: DATE
     description: S47 Completed Date
-    field_ref: S47005A
+    item_ref: S47005A
     categories:
     - s47_enquiry
     - child_protection
@@ -102,7 +102,7 @@ nodes:
   - name: s47outcome
     type: null
     description: S47 Outcome
-    field_ref: S47006A
+    item_ref: S47006A
     categories:
     - s47_enquiry
     - child_protection
@@ -120,7 +120,7 @@ nodes:
   - name: icpc_date
     type: DATE
     description: Date of Initial CP Conference
-    field_ref: S47007A
+    item_ref: S47007A
     categories:
     - initial_cp_conference
     - child_protection
@@ -138,7 +138,7 @@ nodes:
   - name: icpc_outcome
     type: null
     description: Outcome of Initial CP Conference
-    field_ref: S47008A
+    item_ref: S47008A
     categories:
     - initial_cp_conference
     - child_protection
@@ -156,7 +156,7 @@ nodes:
   - name: icpc_team
     type: null
     description: S47 ICPC Allocated Team
-    field_ref: S47009A
+    item_ref: S47009A
     categories:
     - initial_cp_conference
     - child_protection
@@ -174,7 +174,7 @@ nodes:
   - name: icpc_worker
     type: null
     description: S47 ICPC Allocated Worker
-    field_ref: S47010A
+    item_ref: S47010A
     categories:
     - initial_cp_conference
     - child_protection

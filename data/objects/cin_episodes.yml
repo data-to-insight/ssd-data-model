@@ -5,7 +5,7 @@ nodes:
   - name: cin_referral_id
     type: VARCHAR()
     description: CIN Referral ID
-    field_ref: CIN001A
+    item_ref: CIN001A
     primary_key: true
     validators:
     - required:
@@ -27,7 +27,7 @@ nodes:
   - name: la_person_id
     type: VARCHAR(10)
     description: Person Unique ID
-    field_ref: CIN002A
+    item_ref: CIN002A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -49,7 +49,7 @@ nodes:
   - name: cin_ref_date
     type: DATE
     description: CIN Referral Date
-    field_ref: CIN003A
+    item_ref: CIN003A
     categories:
     - child_in_need
     - referral
@@ -68,7 +68,7 @@ nodes:
   - name: cin_ref_source
     type: null
     description: CIN Referral Source
-    field_ref: CIN004A
+    item_ref: CIN004A
     categories:
     - child_in_need
     - referral
@@ -87,7 +87,7 @@ nodes:
   - name: cin_ref_outcome
     type: null
     description: CIN Referral Outcome
-    field_ref: CIN005A
+    item_ref: CIN005A
     categories:
     - child_in_need
     - referral
@@ -106,7 +106,7 @@ nodes:
   - name: cin_close_reason
     type: null
     description: CIN Closure Reason
-    field_ref: CIN006A
+    item_ref: CIN006A
     categories:
     - child_in_need
     returns:
@@ -123,7 +123,7 @@ nodes:
   - name: cin_close_date
     type: DATE
     description: CIN Closure Date
-    field_ref: CIN007A
+    item_ref: CIN007A
     categories:
     - child_in_need
     returns:
@@ -140,7 +140,7 @@ nodes:
   - name: cin_ref_team
     type: null
     description: CIN Referral Completed by Team
-    field_ref: CIN008A
+    item_ref: CIN008A
     categories:
     - child_in_need
     - referral
@@ -158,7 +158,7 @@ nodes:
   - name: cin_ref_worker
     type: null
     description: CIN Referral Completed by Worker
-    field_ref: CIN009A
+    item_ref: CIN009A
     categories:
     - child_in_need
     - referral

@@ -5,7 +5,7 @@ nodes:
   - name: ehcp_request_id
     type: VARCHAR()
     description: Request ID
-    field_ref: ERQ001A
+    item_ref: ERQ001A
     primary_key: true
     validators:
     - required:
@@ -27,7 +27,7 @@ nodes:
   - name: send_table_id
     type: null
     description: send_table_id
-    field_ref: ERQ002A
+    item_ref: ERQ002A
     foreign_key: send.send_table_id
     categories:
     - identity
@@ -45,7 +45,7 @@ nodes:
   - name: ehcp_req_date
     type: DATE
     description: Received Date
-    field_ref: ERQ003A
+    item_ref: ERQ003A
     categories:
     - send
     - ehcp_request
@@ -63,7 +63,7 @@ nodes:
   - name: ehcp_req_outcome_date
     type: DATE
     description: Request Outcome Date
-    field_ref: ERQ004A
+    item_ref: ERQ004A
     categories:
     - send
     - ehcp_request
@@ -81,7 +81,7 @@ nodes:
   - name: ehcp_req_outcome
     type: null
     description: Request Outcome
-    field_ref: ERQ005A
+    item_ref: ERQ005A
     categories:
     - send
     - ehcp_request

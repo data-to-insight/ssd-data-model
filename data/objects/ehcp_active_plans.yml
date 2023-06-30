@@ -5,7 +5,7 @@ nodes:
   - name: active_ehcp_id
     type: VARCHAR()
     description: Plan ID
-    field_ref: EAP001A
+    item_ref: EAP001A
     primary_key: true
     validators:
     - required:
@@ -28,7 +28,7 @@ nodes:
   - name: ehcp_request_id
     type: VARCHAR()
     description: Request ID
-    field_ref: EAP002A
+    item_ref: EAP002A
     foreign_key: ehcp_requests.ehcp_request_id
     categories:
     - send
@@ -46,7 +46,7 @@ nodes:
   - name: active_ehcp_last_review
     type: DATE
     description: Last Review
-    field_ref: EAP003A
+    item_ref: EAP003A
     categories:
     - send
     - ehcp_request
