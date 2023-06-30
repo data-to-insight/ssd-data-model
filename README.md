@@ -1,8 +1,9 @@
-# Standard Safeguarding Dataset
+# Standard Safeguarding Dataset (SSD)
 
-This is the source repository for the SSD data model and includes tools for both creating a standardised data set and providing a set of tools for manipulating and generating different outputs from the core specification. 
+This is the source repository for the SSD data model and tools for creating a standardised data set. It also includes a set of tools for manipulating and generating different outputs from the core specification. 
 
 ## Data Item and Entity Definitions
+
 Towards the overall data model, published for iterative review  [current data object/entity model](./docs/index.html).
 
 
@@ -11,9 +12,8 @@ Towards the overall data model, published for iterative review  [current data ob
 The data model defines a set of Objects capturing LA Childrens Services data during the different stages of an individual's progress
 through the system(s). The data model also includes a number of Categories (dimensions) that are referenced from the Fields within a Record.
 
-We define a number of validators that will be used to check data quality. These may be structural validators, such as a field is required or has to be in a defined set (dimension), or relational validators, such as a date should be after another date as events should happen sequentially.
-
 The datamodel is described using [YAML][yaml], which, despite the website, is designed to be a "human friendly" data format. YAML has been used, as text-based format it offers a more human readable structure than such as XML/JSON, a reduced storage/processing footprint and tt provides also offers a proper audit trail of changes that can be tracked in a [Version Control System][vcs] (VCS).
+
 
 The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
 
@@ -22,7 +22,7 @@ The project will use [GIT][git] to track and approve proposed changes to the saf
 The standard itself can be found in the [data](./data) subfolder. The specification aims to capture details of both conceptual
 and logical data models, as well as data interchange formats.
 
-#### Records
+#### Data Objects
 
 The [objects](./data/objects) folder contains definition for all the specification entity/objects as well as details
 of synthetic data parameters and validation rules that apply to each field within the object.
@@ -32,24 +32,25 @@ type, description, which cms systems the data item/field is available on and any
 
 ```yaml
 
-description: The description explains what this record captures
-
-fields:
-
-  field_name:
-    name: <Formal Name>
+- name: <data object name>
+  fields:
+  - name: <field Name>
     type: <string|int|Categorical|List>
-    description: <Explanation of how to use the record>
-    comments: <Development comments - such as issues raised>
-    primary_key: <boolean>
-    foreign_keys:
-    - record: <record id>
-      field:  <field id>>
-    validation:
-      <validator>: <args>
-
-  [...]
-
+    description: 
+    item_ref: <data item ref code>
+    primary_key: <true>
+    validators:
+      <validator>: <args> 
+    categories:
+    returns:
+    cms:
+    cms_field:
+    - liquid_logic:<ll_field_name>
+    - mosaic: <mosaic_field_name>
+    cms_table:
+    - liquid_logic:<ll_tbl_name>
+    - mosaic: <mosaic_tbl_name>
+    [...]
 ```
 
 #### Categories
@@ -74,9 +75,8 @@ or a list of objects:
 ```
 
 #### Workflow
-- tbc - 
 
-The format of this file is still in development.
+- tbc - This file/concept is still in development.
 
 #### Validators
 
@@ -84,43 +84,49 @@ Similarly to the workflow file, the [validators file](./data/validators.yml) is 
 rules that are applied to fields when the data is received. It is also intended that this file, combined with the other
 definitions, will be used for generating transfer format schemas, such as [JSON Schema][jsc] or [CSV Schema][csc].
 
-The format of this file is still in development.
+- tbc - This workflow around this file is still in development.
 
 ## Output Formats
 
 Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, we provide a set of [tools][ssd-tools] to perform the needed processing tasks, incl. extract the required data items from current/known CMS systems, create ERD diagrams of the current structure, convert the YAML into more conventional formats.
 
-The main place to find documentation relating to this specification is
--tbc- The website and associated documentation is generated using the [tools][ssd-tools] mentioned above.
+The website and associated documentation is generated using the [tools][ssd-tools] mentioned above.
+
+Further/additional documentation relating to this specification: -tbc- 
 
 ## Continuous Deployment
 
 -tbc-
 
+## Running notes:
+
+Use the following command in a Git Codespace to set up the working environment:
+```bash
+./setup.sh
+```
+
+  For ref: The above bash script contains and runs <all> the following required commands: 
+```python
+  [$] pip install -r requirements.txt
+  [$] sudo apt-get update
+  [$] sudo apt-get install graphviz libgraphviz-dev pkg-config
+  [$] pip install pygraphviz
+
+And incase the preferred working option, it also adds (.toml and .lock files already set)
+  [$] pip install poetry
+ ```
+
 ## Relevant Links
+
 [ssd-spec]: https://github.com/data-to-insight/ssd-data-model
-[ssd-tools]: https://github.com/data-to-insight/ssd-data-model-tools
 
 [yaml]: https://yaml.org/
 [vcs]: https://en.wikipedia.org/wiki/Version_control
 [git]: https://git-scm.com/
 [jsc]: https://json-schema.org/
 [csc]: https://digital-preservation.github.io/csv-schema/
-[ssot]: https://en.wikipedia.org/wiki/Single_source_of_truth
 [ghp]: https://pages.github.com/
 
 
-
-## [Temp] Running notes:
-./setup.sh
-  Within Git Codespace will set up the needed environment incl. needed extensions, e.g
-  [$] pip install -r requirements.txt
-  [$] sudo apt-get update
-  [$] sudo apt-get install graphviz libgraphviz-dev pkg-config
-  [$] pip install pygraphviz
-
-And incase the preferred working option, it also adds
-  [$] pip install poetry
- 
 
 
