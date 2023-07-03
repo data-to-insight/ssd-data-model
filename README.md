@@ -106,27 +106,21 @@ Currently the yml data objects, associated diagrams, documentation and website c
 ### [Current Phase](#current-phase)
 The project is with Steering Group support, following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](#feedback-anchor) is welcomed at any phase. 
 
-- **User Research**
-: Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities.
-- **Prototype**
-: Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.
-- **Deploy (pilot)**
-: Deploy with support to pilot councils by developing reproducible implementations.
-- **Feedback**
-: Product delivered to the DfE and offer supported adoption for LA's.
-- **Continuous Deployment**
-: Maintenance roadmap agreement and iterative improvement driven iterative approach.
+|   | Description                                                        |
+|---|--------------------------------------------------------------------|
+| **User Research**          | Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities. |
+| **Prototype**              | Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.  |
+| **Deploy (pilot)**         | Deploy with support to pilot councils by developing reproducible implementations. |
+| **Feedback**               | Product delivered to the DfE and offer supported adoption for LA's. |
+| **Continuous Deployment**  | Maintenance roadmap agreement and iterative improvement-driven iterative approach. |
 
 
-
-
-### <a id="feedback"></a> Feedback
-
+### <a id="feedback"></a> Feedback (Prototype | Continous Deployment)
 If you have any questions about this repo, code or the structure definition, contact the project leads via the ([D2I the web site](https://www.datatoinsight.org/collaboration))
 
 
 
-### Running notes
+## Running notes
 The Python based toolset will run within a [Git Codespace](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=645832800). Use this link, then run the setup file, by typing the below command on the command-line.   
 Set up the working environment (will prompt Y/N part-way through, type 'y'to continue):
 ```bash
