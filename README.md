@@ -38,8 +38,7 @@ The project will use [GIT][git] to track and approve proposed changes to the saf
 
 ### Specification Components
 
-The standard itself can be found in the [data](./data) subfolder. The specification aims to capture details of both conceptual
-and logical data models.
+The standard itself can be found in the [data](./data) subfolder. 
 
 #### Data Objects
 
@@ -93,21 +92,17 @@ or a list of objects:
   description: A description of value 2
 ```
 
-#### Workflow
-
-- tbc - This file/concept is still in development.
-
 
 ### Output
 
-Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, we working towards providing a set of [tools][ssd-tools] to perform the needed processing tasks, incl. extract the required data items from current/known CMS systems, provide methods to allow updating the Yaml Object definitions and ERD diagram(s) with current structure revisions.
+Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, the project is working towards providing a set of [tools][ssd-tools] to perform the needed processing, incl. extract the required data items from current/known CMS systems and provide methods to allow the Yaml Object definitions to be easily updated from specification improvement updates or required revisions.
 
-The website and associated documentation is generated using the [tools][ssd-tools] mentioned above.
+Currently the yml data objects, associated diagrams, documentation and website can be (re-)generated using the [tools][ssd-tools]. 
 
-Further/additional documentation relating to this specification: -tbc- 
 
 ### Current Phase
-The project is following a transparent and interative development cycle within the following anticipated deployment process. Stakeholder [feedback](feedback) is welcomed at any point. 
+
+The project is with Steering Group support, following a transparent and interative development cycle, within the following deployment process. Further stakeholder [feedback](feedback) is welcomed at any phase. 
 
 #### <a id="user-research"></a> User Research
 Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities
