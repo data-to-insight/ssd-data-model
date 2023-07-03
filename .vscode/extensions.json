@@ -1,5 +1,6 @@
 {
     "recommendations": [
-        "socialfinance.sf-stlite"
+        "socialfinance.sf-stlite",
+        "ms-python.python"
     ]
 }
