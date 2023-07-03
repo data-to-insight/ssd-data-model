@@ -106,19 +106,19 @@ Currently the yml data objects, associated diagrams, documentation and website c
 ### [Current Phase](#current-phase)
 The project is with Steering Group support, following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](#feedback-anchor) is welcomed at any phase. 
 
-**User Research**
+- **User Research**
 Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities.
 
-**Prototype**
+- **Prototype**
 Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.
 
-**Deploy (pilot)**
+- **Deploy (pilot)**
 Deploy with support to pilot councils by developing reproducible implementations.
 
-**Feedback**
+- **Feedback**
 Product delivered to the DfE and offer supported adoption for LA's.
 
-**Continuous Deployment**
+- **Continuous Deployment**
 Maintenance roadmap agreement and iterative improvement driven iterative approach.
 
 
