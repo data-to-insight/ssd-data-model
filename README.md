@@ -109,7 +109,7 @@ The project is with Steering Group support, following a transparent and iterativ
 
 - **User Research**
   : Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities.
-- **Prototype** [Current Phase]:
+- **Prototype** [Current Phase]
   : Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.
 - **Deploy (pilot)**
   : Deploy with support to pilot councils by developing reproducible implementations.
