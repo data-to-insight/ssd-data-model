@@ -2,15 +2,20 @@
 
 This is the source repository for the SSD dataset and tools for creating the required data based on a core specification (currently in initial prototype/review stage).
 
-The initial core of the SSD has been based around current datasets
+The initial core of the SSD has been based around current statutory returns
 - SSDA903
 - Annex A
 - CIN Census
 
 and iteratively considering
-- Kinship Care (Coram)
-- Pre-Proceedings (Warrington)
-- Section 251 Finance (Barnet)
+- SEN2
+- ADCS Safeguarding
+- RIIA
+- School Census
+- EH Benchmarking
+- Kinship Care
+- Pre-Proceedings
+- Section 251 Finance
 - Voice of Child & Family
 
 
@@ -46,13 +51,13 @@ type, description, which cms systems the data item/field is available on and any
 
 - name: <data object name>
   fields:
-  - name: <field Name>
+  - name: <item Name>
     type: <string|int|Categorical|List>
     description: 
     item_ref: <data item ref code>
     primary_key: <true>
     validators:
-      <validator>: <args> 
+      <validator>:  
     categories:
     returns:
     cms:
