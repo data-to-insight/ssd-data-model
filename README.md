@@ -1,7 +1,7 @@
 # Children's Services Standard Safeguarding Dataset (SSD)
 
 
-This is the source repository for Project 1a the Standard CSC dataset for LAs (SSD) and associated toolset. The repository contains definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns _(Ref: Stage 1)_ and a suite of methods/tools that all local authorities can adopt at zero(or near) running cost to independently produce the dataset _(Ref: Stage 2)_. A six-year historical data scope is suggested across the range of safeguarding activities performed by councils; and the project is developed in allignment with the Care Review and current social work practice.  Current phase : [prototype](#prototype).
+This is the source repository for Project 1a the Standard CSC dataset for LAs (SSD) and associated toolset. The repository contains definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns _(Ref: Stage 1)_ and a suite of methods/tools that all local authorities can adopt at zero(or near) running cost to independently produce the dataset _(Ref: Stage 2)_. A six-year historical data scope is suggested across the range of safeguarding activities performed by councils; and the project is developed in allignment with the Care Review and current social work practice.  Current phase : [prototype](#current-phase).
 
 ## The initial core of the SSD is based on
 ### Current statutory returns
@@ -103,20 +103,25 @@ Currently the yml data objects, associated diagrams, documentation and website c
 
 
 
-### Current Phase
+### [Current Phase](#current-phase)
+The project is with Steering Group support, following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](#feedback-anchor) is welcomed at any phase. 
 
-The project is with Steering Group support, following a transparent and interative development cycle, within the following deployment process. Further stakeholder [feedback](feedback) is welcomed at any phase. 
+**User Research**
+Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities.
 
-#### <a id="user-research"></a> User Research
-Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities
-#### <a id="prototype"></a> Prototype
-Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utising peer feedback
-#### <a id="deploy"></a> Deploy(pilot)
-Deploy with support to pilot councils by developing reporducable implementations
-#### <a id="feedback"></a> Feedback
-Product delivered to the DfE and offer supported adoption for LA's
-#### <a id="continuous-deployment"></a> Continuous Deployment
-Maintenance roadmap agreement and iterative improvement driven iterative approach
+**Prototype**
+Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.
+
+**Deploy (pilot)**
+Deploy with support to pilot councils by developing reproducible implementations.
+
+**Feedback**
+Product delivered to the DfE and offer supported adoption for LA's.
+
+**Continuous Deployment**
+Maintenance roadmap agreement and iterative improvement driven iterative approach.
+
+
 
 
 ### <a id="feedback"></a> Feedback
