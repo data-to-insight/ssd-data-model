@@ -141,11 +141,11 @@ Use the following command in a Git Codespace to set up the working environment:
 ```
 
 
-### Relevant Links
+### Other Relevant Links
 
 [yaml] : https://yaml.org/
 [git]: https://git-scm.com/
-[sql] : https://en.wikipedia.org/wiki/SQL
+[sql] : https://en.wikipedia.org/wiki/SQL/
 [jsc]: https://json-schema.org/
 [csc]: https://digital-preservation.github.io/csv-schema/
 [ghp]: https://pages.github.com/
