@@ -1,13 +1,14 @@
-# Childrens Services Standard Safeguarding Dataset (SSD)
+# Children's Services Standard Safeguarding Dataset (SSD)
 
-This is the source repository for the SSD dataset and tools for creating the required data based on a core specification (currently in initial prototype/review stage).
+This is the source repository for the SSD dataset and tools for creating the required data. The repository(currently in progress/review) contains the definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns dataset(s) (stage 1) and a set of solutions/tools that local authorities can adopt at low/zero cost to enable and produce the dataset.
 
 The initial core of the SSD has been based around current statutory returns
 - SSDA903
 - Annex A
 - CIN Census
 
-and iteratively considering
+and alongside LA user research iteratively considering
+- Linking data items to strategic goals
 - SEN2
 - ADCS Safeguarding
 - RIIA
