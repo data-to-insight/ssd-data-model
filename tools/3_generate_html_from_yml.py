@@ -1,3 +1,9 @@
+
+# here is the python code complete
+
+
+
+
 import glob
 import yaml
 import base64
@@ -5,6 +11,7 @@ import subprocess
 import datetime
 from PIL import Image
 import os
+import json
 
 from admin.admin_tools import get_paths  # get project defined file paths
 from admin.admin_tools import resize_images
@@ -15,6 +22,23 @@ erd_overview_path = paths['wsite_main_images']
 yml_import_path = paths['yml_data']
 
 overview_erd_filename = "ssd_erd_sfdp.png"
+
+# Color dictionary
+color_dict = {
+    "categories": {
+        "Local": "#C5E625",             # New data items but existing
+        "1a": "#1CFCF2",                # Suggested 
+        "1bDraft" : "#F57C1D",           # ??
+        "1bSpecified": "#FFC91E"         # ?? 
+    }
+}
+
+
+# Initialize html_content as an empty string
+html_content = ""
+# Embed color_dict as a JSON object for JavaScript to use
+html_content += f"<script>\nvar color_dict = {json.dumps(color_dict)};\n</script>"
+
 
 # Calculate main image width
 main_image_width = "85%"  # Adjust the padding as needed
@@ -46,6 +70,7 @@ html_content += ".last-updated-container { display: flex; align-items: center; }
 html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
 html_content += ".repo-link { text-decoration: none; }"
 html_content += "</style></head><body>"
+html_content += f"<script>\nvar color_dict = {color_dict};\n</script>"
 html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
 html_content += "<div style='padding: 2px;'>"
@@ -90,29 +115,60 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
             html_content += "<col style='width: 15%;'/>"  # Set width for returns-column
             html_content += "</colgroup>"
             html_content += "<tr><th class='item-ref-column'>Item Ref</th><th class='data-item-column'>Data Item Name</th><th class='field-column'>Field</th><th class='cms-column'>Exists in CMS</th><th class='categories-column'>Data Category Group(s)</th><th class='returns-column'>Returns</th></tr>"
+
+            # For each row in the table:
             for field in nodes[0]['fields']:
                 field_ref = field.get('item_ref', '')
                 field_name = field['name']
                 cms_data = ', '.join(field.get('cms', []))
                 categories_data = ', '.join(field.get('categories', []))
                 returns_data = ', '.join(field.get('returns', []))
-                html_content += f"<tr><td>{field_ref}</td><td>{field_name}</td><td>{field_name}</td><td>{cms_data}</td><td>{categories_data}</td><td>{returns_data}</td></tr>"
+
+                # Add a class to each row, using a unique identifier (like the field reference)
+                html_content += f'<tr class="row-{field_ref}">'
+                html_content += f"<td>{field_ref}</td><td>{field_name}</td><td>{field_name}</td><td>{cms_data}</td><td>{categories_data}</td><td>{returns_data}</td></tr>"
+
             html_content += "</table>"
             html_content += "</div>"
             html_content += "</div>"
             html_content += "</div>"
             html_content += "<hr style='border: none; border-top: 1px solid #ddd; margin-bottom: 20px;'>"
 
-# Close HTML tags
-html_content += "</body></html>"
+html_content += """
+<script>
+window.addEventListener('load', function() {
+  // Function to check if a row matches a category and color it
+  function colorRow(row, returns) {
+    // Check if any of the return elements matches a category
+    for (var i = 0; i < returns.length; i++) {
+      if (color_dict["categories"][returns[i].trim()]) { // .trim() is used to remove potential leading/trailing whitespaces
+        // If it matches, color the row and stop checking
+        row.style.backgroundColor = color_dict["categories"][returns[i].trim()];
+        return;
+      }
+    }
+  }
 
-html_content += "<script>"
-html_content += "window.addEventListener('load', function() {"
-html_content += "  var tableContainer = document.getElementById('table-container');"
-html_content += "  var mainImage = document.getElementById('main-image');"
-html_content += "  mainImage.style.maxWidth = tableContainer.offsetWidth + 'px';"
-html_content += "});"
-html_content += "</script>"
+  // Go through all rows
+  var rows = document.getElementsByTagName("tr");
+
+  for (var i = 0; i < rows.length; i++) {
+    // Get the returns column and split it by ", "
+    var returns = rows[i].children[5].innerText.split(", ").map(item => item.trim());
+
+    console.log("Returns:", returns);  // to check actual content in returns
+    console.log("Color dict categories:", color_dict["categories"]);  // to check your color dict
+
+    // Apply the colorRow function
+    colorRow(rows[i], returns);
+  }
+});
+</script>
+"""
+
+
+html_content += "</body></html>"  # Move this to the end of your Python script
+
 
 with open(paths['wsite_root'] + 'index.html', 'w') as f:
     f.write(html_content)

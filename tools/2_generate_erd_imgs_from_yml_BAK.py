@@ -13,7 +13,6 @@ erd_overview_fname = 'ssd_erd_sfdp'
 
 
 
-
 def generate_individual_images(yml_data_path, output_path, output_filetype):
     """
     Generate individual images for each yml file.
