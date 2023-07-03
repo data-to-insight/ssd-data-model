@@ -1,8 +1,29 @@
-# Standard Safeguarding Dataset (SSD)
+# Children's Services Standard Safeguarding Dataset (SSD)
 
-This is the source repository for the SSD data model and tools for creating a standardised data set. It also includes a set of tools for manipulating and generating different outputs from the core specification. 
+This is the source repository for the SSD dataset and tools for creating the required data. The repository(currently in progress/review) contains the definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns dataset(s) (stage 1) and a set of solutions/tools that local authorities can adopt at low/zero cost to enable and produce the dataset.
 
-## Data Item and Entity Definitions
+The initial core of the SSD has been based around current statutory returns
+- SSDA903
+- Annex A
+- CIN Census
+
+and alongside LA user research iteratively considering
+- Linking data items to strategic goals
+- SEN2
+- ADCS Safeguarding
+- RIIA
+- School Census
+- EH Benchmarking
+- Kinship Care
+- Pre-Proceedings
+- Section 251 Finance
+- Voice of Child & Family
+- CSC National Framework
+- EET Activity
+
+
+
+## Data Object and Item Definitions
 
 Towards the overall data model, published for iterative review  [current data object/entity model](./docs/index.html).
 
@@ -12,8 +33,7 @@ Towards the overall data model, published for iterative review  [current data ob
 The data model defines a set of Objects capturing LA Childrens Services data during the different stages of an individual's progress
 through the system(s). The data model also includes a number of Categories (dimensions) that are referenced from the Fields within a Record.
 
-The datamodel is described using [YAML][yaml], which, despite the website, is designed to be a "human friendly" data format. YAML has been used, as text-based format it offers a more human readable structure than such as XML/JSON, a reduced storage/processing footprint and tt provides also offers a proper audit trail of changes that can be tracked in a [Version Control System][vcs] (VCS).
-
+The datamodel is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.
 
 The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
 
@@ -34,13 +54,13 @@ type, description, which cms systems the data item/field is available on and any
 
 - name: <data object name>
   fields:
-  - name: <field Name>
+  - name: <item Name>
     type: <string|int|Categorical|List>
     description: 
     item_ref: <data item ref code>
     primary_key: <true>
     validators:
-      <validator>: <args> 
+      <validator>:  
     categories:
     returns:
     cms:
@@ -78,13 +98,7 @@ or a list of objects:
 
 - tbc - This file/concept is still in development.
 
-#### Validators
 
-Similarly to the workflow file, the [validators file](./data/validators.yml) is a single file defining the validation
-rules that are applied to fields when the data is received. It is also intended that this file, combined with the other
-definitions, will be used for generating transfer format schemas, such as [JSON Schema][jsc] or [CSV Schema][csc].
-
-- tbc - This workflow around this file is still in development.
 
 ### Output Formats
 
@@ -115,12 +129,14 @@ Use the following command in a Git Codespace to set up the working environment:
 [$] pip install poetry
 ```
 
-This is the raw code copy/pasted:
+### Get in touch
+
+If you have any questions about this repo, code or the structure definition, contact the project leads via the ([D2I the web site](https://www.datatoinsight.org/collaboration))
+
 
 ### Relevant Links
 
 [yaml] : https://yaml.org/
-[vcs]: https://en.wikipedia.org/wiki/Version_control
 [git]: https://git-scm.com/
 [jsc]: https://json-schema.org/
 [csc]: https://digital-preservation.github.io/csv-schema/
