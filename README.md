@@ -1,7 +1,7 @@
 # Children's Services Standard Safeguarding Dataset (SSD)
 
 
-This is the source repository for Project 1a the Standard CSC dataset for LAs (SSD) and associated toolset. The repository contains definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns _(Ref: Stage 1)_ and a suite of methods/tools that all local authorities can adopt at zero(or near) running cost to independently produce the dataset _(Ref: Stage 2)_. A six-year historical data scope is suggested across the range of safeguarding activities performed by councils; and the project is developed in allignment with the Care Review and current social work practice.  Current phase : [prototype](#prototype).
+This is the source repository for Project 1a the Standard CSC dataset for LAs (SSD) and associated toolset. The repository contains definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns _(Ref: Stage 1)_ and a suite of methods/tools that all local authorities can adopt at zero(or near) running cost to independently produce the dataset _(Ref: Stage 2)_. A six-year historical data scope is suggested across the range of safeguarding activities performed by councils; and the project is developed in allignment with the Care Review and current social work practice.  Current phase : [prototype](#current-phase).
 
 ## The initial core of the SSD is based on
 ### Current statutory returns
@@ -27,7 +27,7 @@ This is the source repository for Project 1a the Standard CSC dataset for LAs (S
 
 ## Data Object and Item Definitions
 
-Towards the overall data model, published for iterative review  [current data object/entity model](./docs/index.html).
+Towards the overall data model, published for iterative review  [current data object/entity model](https://data-to-insight.github.io/ssd-data-model/).
 
 ## Data Model
 
@@ -40,7 +40,7 @@ The project will use [GIT][git] to track and approve proposed changes to the saf
 
 ### Specification Components
 
-The standard itself can be found in the [data](./data) subfolder. 
+The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide more 'human readable' reporting methods beyond the aforementioned [data object model](https://data-to-insight.github.io/ssd-data-model/). 
 
 #### Data Objects
 
@@ -103,20 +103,21 @@ Currently the yml data objects, associated diagrams, documentation and website c
 
 
 
-### Current Phase
+### [Current Phase](#current-phase)
+The project is with Steering Group support, following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](#feedback-anchor) is welcomed at any phase. 
 
-The project is with Steering Group support, following a transparent and interative development cycle, within the following deployment process. Further stakeholder [feedback](feedback) is welcomed at any phase. 
+- **User Research**
+: Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities.
+- **Prototype**
+: Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.
+- **Deploy (pilot)**
+: Deploy with support to pilot councils by developing reproducible implementations.
+- **Feedback**
+: Product delivered to the DfE and offer supported adoption for LA's.
+- **Continuous Deployment**
+: Maintenance roadmap agreement and iterative improvement driven iterative approach.
 
-#### <a id="user-research"></a> User Research
-Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities
-#### <a id="prototype"></a> Prototype
-Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utising peer feedback
-#### <a id="deploy"></a> Deploy(pilot)
-Deploy with support to pilot councils by developing reporducable implementations
-#### <a id="feedback"></a> Feedback
-Product delivered to the DfE and offer supported adoption for LA's
-#### <a id="continuous-deployment"></a> Continuous Deployment
-Maintenance roadmap agreement and iterative improvement driven iterative approach
+
 
 
 ### <a id="feedback"></a> Feedback
@@ -126,13 +127,13 @@ If you have any questions about this repo, code or the structure definition, con
 
 
 ### Running notes
-
-Use the following command in a Git Codespace to set up the working environment:
+The Python based toolset will run within a [Git Codespace](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=645832800). Use this link, then run the setup file, by typing the below command on the command-line.   
+Set up the working environment (will prompt Y/N part-way through, type 'y'to continue):
 ```bash
 ./setup.sh
 ```
 
-  For ref: The above bash script contains and runs <all> the following required commands: 
+  For ref: The above bash script contains and runs <all> the following required commands so there is no further setup required.: 
 ```python
 [$] pip install -r requirements.txt
 [$] sudo apt-get update
@@ -141,6 +142,8 @@ Use the following command in a Git Codespace to set up the working environment:
 
 [$] pip install poetry
 ```
+
+The python tools(.py files) are in [tools][ssd-tools] folder. To run them, the easiest way is to right click on the file and select 'run in terminal'. This will only work if the setup.sh file has been already run to installed the needed dependencies. 
 
 
 ### Other Relevant Links
