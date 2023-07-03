@@ -120,8 +120,7 @@ The project is with Steering Group support, following a transparent and iterativ
 
 
 ### Contributors
-- **East Sussex CC** : Project hosts
-- **Hertfordshire CC** : Project
+**Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Project hosts | 
 
 
 ## Running notes
