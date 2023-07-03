@@ -1,13 +1,14 @@
 # Children's Services Standard Safeguarding Dataset (SSD)
 
-This is the source repository for the SSD dataset and tools for creating the required data. The repository(currently in progress/review) contains the definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns dataset(s) (stage 1) and a set of solutions/tools that local authorities can adopt at low/zero cost to enable and produce the dataset.
 
-The initial core of the SSD has been based around current statutory returns
+This is the source repository for the SSD dataset and tools for creating the required data. The repository contains the definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns dataset(s) (stage 1) and a set of solutions/tools that local authorities can adopt at low/zero cost to enable and produce the dataset. A six-year historical data scope is suggested.  Current phase : [prototype](#prototype).
+
+The core of the SSD has been based around current statutory returns
 - SSDA903
 - Annex A
 - CIN Census
 
-and alongside LA user research iteratively considering
+and alongside [user research](#user-research) iteratively considering
 - Linking data items to strategic goals
 - SEN2
 - ADCS Safeguarding
@@ -22,16 +23,14 @@ and alongside LA user research iteratively considering
 - EET Activity
 
 
-
 ## Data Object and Item Definitions
 
 Towards the overall data model, published for iterative review  [current data object/entity model](./docs/index.html).
 
-
 ## Data Model
 
 The data model defines a set of Objects capturing LA Childrens Services data during the different stages of an individual's progress
-through the system(s). The data model also includes a number of Categories (dimensions) that are referenced from the Fields within a Record.
+through the CSC system(s). The data model also includes a number of Categories (dimensions) that are referenced from the Fields within a Data Item.
 
 The datamodel is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.
 
@@ -39,8 +38,7 @@ The project will use [GIT][git] to track and approve proposed changes to the saf
 
 ### Specification Components
 
-The standard itself can be found in the [data](./data) subfolder. The specification aims to capture details of both conceptual
-and logical data models, as well as data interchange formats.
+The standard itself can be found in the [data](./data) subfolder. 
 
 #### Data Objects
 
@@ -94,23 +92,35 @@ or a list of objects:
   description: A description of value 2
 ```
 
-#### Workflow
 
-- tbc - This file/concept is still in development.
+### Output
+
+Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, the project is working towards providing a set of [tools][ssd-tools] to perform the needed processing, incl. extract the required data items from current/known CMS systems and provide methods to allow the Yaml Object definitions to be easily updated from specification improvement updates or required revisions.
+
+Currently the yml data objects, associated diagrams, documentation and website can be (re-)generated using the [tools][ssd-tools]. 
 
 
+### Current Phase
 
-### Output Formats
+The project is with Steering Group support, following a transparent and interative development cycle, within the following deployment process. Further stakeholder [feedback](feedback) is welcomed at any phase. 
 
-Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, we provide a set of [tools][ssd-tools] to perform the needed processing tasks, incl. extract the required data items from current/known CMS systems, create ERD diagrams of the current structure, convert the YAML into more conventional formats.
+#### <a id="user-research"></a> User Research
+Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities
+#### <a id="prototype"></a> Prototype
+Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utising peer feedback
+#### <a id="deploy"></a> Deploy(pilot)
+Deploy with support to pilot councils by developing reporducable implementations
+#### <a id="feedback"></a> Feedback
+Product delivered to the DfE and offer supported adoption for LA's
+#### <a id="continuous-deployment"></a> Continuous Deployment
+Maintenance roadmap agreement and iterative improvement driven iterative approach
 
-The website and associated documentation is generated using the [tools][ssd-tools] mentioned above.
 
-Further/additional documentation relating to this specification: -tbc- 
+### <a id="feedback"></a> Feedback
 
-### Continuous Deployment
+If you have any questions about this repo, code or the structure definition, contact the project leads via the ([D2I the web site](https://www.datatoinsight.org/collaboration))
 
--tbc-
+
 
 ### Running notes
 
@@ -128,10 +138,6 @@ Use the following command in a Git Codespace to set up the working environment:
 
 [$] pip install poetry
 ```
-
-### Get in touch
-
-If you have any questions about this repo, code or the structure definition, contact the project leads via the ([D2I the web site](https://www.datatoinsight.org/collaboration))
 
 
 ### Relevant Links
