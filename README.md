@@ -110,11 +110,11 @@ The website and associated documentation is generated using the [tools][ssd-tool
 Further/additional documentation relating to this specification: -tbc- 
 
 ### Current Phase and Continuous Deployment
-#### User Research
+#### user research
 #### prototype
-#### Deploy
-#### Feedback
-#### Continuous Deployment
+#### deploy
+#### feedback
+#### continuous deployment
 
 
 ### Get in touch
