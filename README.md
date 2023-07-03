@@ -1,27 +1,28 @@
 # Children's Services Standard Safeguarding Dataset (SSD)
 
 
-This is the source repository for the SSD dataset and tools for creating the required data. The repository contains the definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns dataset(s) (stage 1) and a set of solutions/tools that local authorities can adopt at low/zero cost to enable and produce the dataset. A six-year historical data scope is suggested.  Current phase : [prototype](#prototype).
+This is the source repository for Project 1a the Standard CSC dataset for LAs (SSD) and associated toolset. The repository contains definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns _(Ref: Stage 1)_ and a suite of methods/tools that all local authorities can adopt at zero(or near) running cost to independently produce the dataset _(Ref: Stage 2)_. A six-year historical data scope is suggested across the range of safeguarding activities performed by councils; and the project is developed in allignment with the Care Review and current social work practice.  Current phase : [prototype](#prototype).
 
-The core of the SSD has been based around current statutory returns
+## The initial core of the SSD is based on
+### Current statutory returns
 - SSDA903
 - Annex A
 - CIN Census
+- Regional Improvement and Innovation Alliance (RIIA)
 
-and alongside [user research](#user-research) iteratively considering
+### Iterative updates in other (project)areas
 - Linking data items to strategic goals
 - SEN2
 - ADCS Safeguarding
-- RIIA
 - School Census
 - EH Benchmarking
-- Kinship Care
-- Pre-Proceedings
-- Section 251 Finance
-- Voice of Child & Family
+- Kinship Care (1b(i))
+- Pre-Proceedings (1b(ii))
+- Section 251 Finance (1b(iii))
+- Voice of Child & Family (1b(iv))
 - CSC National Framework
 - EET Activity
-
+- and additional ongoing [user research](#user-research) input
 
 ## Data Object and Item Definitions
 
