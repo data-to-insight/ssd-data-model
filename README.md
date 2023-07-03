@@ -127,8 +127,8 @@ If you have any questions about this repo, code or the structure definition, con
 
 
 ### Running notes
-The Python based toolset will run within a new [Git Codespace](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=645832800). Use the link, and on the command line run the following. 
-Set up the working environment (will prompt Y/N part-way through, type 'y'):
+The Python based toolset will run within a [Git Codespace](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=645832800). Use this link, then run the setup file, by typing the below command on the command-line.   
+Set up the working environment (will prompt Y/N part-way through, type 'y'to continue):
 ```bash
 ./setup.sh
 ```
