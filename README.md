@@ -106,13 +106,14 @@ The website and associated documentation is generated using the [tools][ssd-tool
 
 Further/additional documentation relating to this specification: -tbc- 
 
-### Current Phase and Continuous Deployment
+### Current Phase
+
 #### <a id="user-research"></a> User Research
-- Approach outline and research with LA's
+- Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities
 #### <a id="prototype"></a> Prototype
-- Develop the prototype specification abased on peer feedback and testing
-#### <a id="deploy"></a> Deploy(pilot group)
-- Deploy to pilot councils by developing reporducable implementations.
+- Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utising peer feedback
+#### <a id="deploy"></a> Deploy(pilot)
+- Deploy to pilot councils by developing reporducable implementations
 #### <a id="feedback"></a> Feedback
 - Product delivered to the DfE and support for adoption by LA's
 #### <a id="continuous-deployment"></a> Continuous Deployment
