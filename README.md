@@ -110,15 +110,15 @@ Further/additional documentation relating to this specification: -tbc-
 The project is following a transparent and interative development cycle within the following anticipated deployment process. Stakeholder [feedback](feedback) is welcomed at any point. 
 
 #### <a id="user-research"></a> User Research
-- Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities
+Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities
 #### <a id="prototype"></a> Prototype
-- Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utising peer feedback
+Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utising peer feedback
 #### <a id="deploy"></a> Deploy(pilot)
-- Deploy with support to pilot councils by developing reporducable implementations
+Deploy with support to pilot councils by developing reporducable implementations
 #### <a id="feedback"></a> Feedback
-- Product delivered to the DfE and offer supported adoption for LA's
+Product delivered to the DfE and offer supported adoption for LA's
 #### <a id="continuous-deployment"></a> Continuous Deployment
-- Maintenance roadmap agreement and iterative improvement driven iterative approach
+Maintenance roadmap agreement and iterative improvement driven iterative approach
 
 
 ### <a id="feedback"></a> Feedback
