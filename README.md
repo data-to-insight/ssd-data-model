@@ -104,19 +104,15 @@ Currently the yml data objects, associated diagrams, documentation and website c
 
 
 ### [Current Phase](#current-phase)
-The project is with Steering Group support, following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](#feedback-anchor) is welcomed at any phase. 
+The project is with Steering Group support, following a transparent and iterative development cycle, within the following deployment process. Further stakeholder is welcomed at any phase, and should be directed to the project leads on the ([D2I the web site](https://www.datatoinsight.org/collaboration))
 
 |   | Description                                                        |
 |---|--------------------------------------------------------------------|
 | **User Research**          | Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities. |
-| **Prototype**              | Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.  |
+| **\*\*Prototype\*\***      | Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.  |
 | **Deploy (pilot)**         | Deploy with support to pilot councils by developing reproducible implementations. |
 | **Feedback**               | Product delivered to the DfE and offer supported adoption for LA's. |
 | **Continuous Deployment**  | Maintenance roadmap agreement and iterative improvement-driven iterative approach. |
-
-
-### <a id="feedback"></a> Feedback (Prototype | Continous Deployment)
-If you have any questions about this repo, code or the structure definition, contact the project leads via the ([D2I the web site](https://www.datatoinsight.org/collaboration))
 
 
 
