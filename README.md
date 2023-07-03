@@ -104,31 +104,19 @@ Currently the yml data objects, associated diagrams, documentation and website c
 
 
 ### [Current Phase](#current-phase)
-The project is with Steering Group support, following a transparent and iterative development cycle, within the following deployment process. Further stakeholder is welcomed at any phase, and should be directed to the project leads on the ([D2I the web site](https://www.datatoinsight.org/collaboration))
-<table>
-  <tbody>
-    <tr>
-      <td><strong>User Research</strong></td>
-      <td>Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities.</td>
-    </tr>
-    <tr style="background-color: #FFFFCC;">
-      <td><strong>Prototype</strong></td>
-      <td>Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.</td>
-    </tr>
-    <tr>
-      <td><strong>Deploy (pilot)</strong></td>
-      <td>Deploy with support to pilot councils by developing reproducible implementations.</td>
-    </tr>
-    <tr>
-      <td><strong>Feedback</strong></td>
-      <td>Product delivered to the DfE and offer supported adoption for LA's.</td>
-    </tr>
-    <tr>
-      <td><strong>Continuous Deployment</strong></td>
-      <td>Maintenance roadmap agreement and iterative improvement-driven iterative approach.</td>
-    </tr>
-  </tbody>
-</table>
+The project is with Steering Group support, following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](#feedback-anchor) is welcomed at any phase.
+
+- **User Research**
+  : Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities.
+- **Prototype**
+  : Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.
+- **Deploy (pilot)**
+  : Deploy with support to pilot councils by developing reproducible implementations.
+- **Feedback**
+  : Product delivered to the DfE and offer supported adoption for LA's.
+- **Continuous Deployment**
+  : Maintenance roadmap agreement and iterative improvement-driven iterative approach.
+
 
 
 
