@@ -109,9 +109,15 @@ The website and associated documentation is generated using the [tools][ssd-tool
 
 Further/additional documentation relating to this specification: -tbc- 
 
-### Continuous Deployment
+### Current Phase and Continuous Deployment
 
--tbc-
+[current phase]
+
+### Get in touch
+
+If you have any questions about this repo, code or the structure definition, contact the project leads via the ([D2I the web site](https://www.datatoinsight.org/collaboration))
+
+
 
 ### Running notes
 
@@ -129,10 +135,6 @@ Use the following command in a Git Codespace to set up the working environment:
 
 [$] pip install poetry
 ```
-
-### Get in touch
-
-If you have any questions about this repo, code or the structure definition, contact the project leads via the ([D2I the web site](https://www.datatoinsight.org/collaboration))
 
 
 ### Relevant Links
