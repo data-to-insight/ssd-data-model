@@ -97,7 +97,8 @@ or a list of objects:
 
 Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, the project is working towards providing a set of [tools][ssd-tools] to perform the needed processing, incl. extract the required data items from current/known CMS systems and provide methods to allow the Yaml Object definitions to be easily updated from specification improvement updates or required revisions.
 
-Currently the yml data objects, associated diagrams, documentation and website can be (re-)generated using the [tools][ssd-tools]. 
+Currently the yml data objects, associated diagrams, documentation and website can be (re-)generated using the [tools][ssd-tools]. The SQL tools to extract the relevant data directly from different CMS systems, are flexible; enabling the inclusion of new data objects, and items in existing objects. SQL for each CMS can be generated using the provided tools, and the resultant SQL scripts are output in the [SQL](./sql/) folder. 
+
 
 
 ### Current Phase
@@ -144,6 +145,7 @@ Use the following command in a Git Codespace to set up the working environment:
 
 [yaml] : https://yaml.org/
 [git]: https://git-scm.com/
+[sql] : https://en.wikipedia.org/wiki/SQL
 [jsc]: https://json-schema.org/
 [csc]: https://digital-preservation.github.io/csv-schema/
 [ghp]: https://pages.github.com/
