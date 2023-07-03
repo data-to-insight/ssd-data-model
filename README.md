@@ -1,7 +1,7 @@
 # Children's Services Standard Safeguarding Dataset (SSD)
 
 
-This is the source repository for Project 1a the Standard CSC dataset for LAs (SSD) and associated toolset. The repository contains definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns _(Ref: Stage 1)_ and a suite of methods/tools that all local authorities can adopt at zero(or near) running cost to independently produce the dataset _(Ref: Stage 2)_. A six-year historical data scope is suggested across the range of safeguarding activities performed by councils; and the project is developed in allignment with the Care Review and current social work practice.  Current phase : [prototype](#current-phase).
+This is the source repository for the Standard CSC dataset for LAs and associated toolset (Project 1a SSD). The dataset is a broader dataset for Children's Social Care (CSC) in safeguarding authorities, expanding beyond the existing returns _(Ref: Stage 1)_ with a suite of methods/tools that all local authorities can adopt at zero running cost to independently produce the dataset _(Ref: Stage 2)_. The dataset aims to flatten existing local variation in collected data, thus enabling a significantly expanded set of data items and providing a national level consistency and improved independent LA benchmarking. A six-year historical data scope is suggested across the range of safeguarding activities performed by councils. The project is developed in allignment with the Care Review and current social work practice.  Current phase : [prototype](#current-phase). 
 
 ## The initial core of the SSD is based on
 ### Current statutory returns
@@ -10,7 +10,7 @@ This is the source repository for Project 1a the Standard CSC dataset for LAs (S
 - CIN Census
 - Regional Improvement and Innovation Alliance (RIIA)
 
-### Iterative updates in other (project)areas
+### Iterative revisions based on developments in other (project)areas
 - Linking data items to strategic goals
 - SEN2
 - ADCS Safeguarding
@@ -20,6 +20,7 @@ This is the source repository for Project 1a the Standard CSC dataset for LAs (S
 - Pre-Proceedings (1b(ii))
 - Section 251 Finance (1b(iii))
 - Voice of Child & Family (1b(iv))
+- Social worker CMS input data (2a)
 - CSC National Framework
 - EET Activity
 - and additional ongoing [user research](#user-research) input
@@ -115,10 +116,12 @@ The project is with Steering Group support, following a transparent and iterativ
 - **Feedback**
   : Product delivered to the DfE and offer supported adoption for LA's.
 - **Continuous Deployment**
-  : Maintenance roadmap agreement and iterative improvement-driven iterative approach.
+  : Maintenance roadmap and framework agreement towards iterative improvement-driven approach.
 
 
-
+### Contributors
+- **East Sussex CC** : Project hosts
+- **Hertfordshire CC** : Project
 
 
 ## Running notes
@@ -139,6 +142,7 @@ Set up the working environment (will prompt Y/N part-way through, type 'y'to con
 ```
 
 The python tools(.py files) are in [tools][ssd-tools] folder. To run them, the easiest way is to right click on the file and select 'run in terminal'. This will only work if the setup.sh file has been already run to installed the needed dependencies. 
+
 
 
 ### Other Relevant Links
