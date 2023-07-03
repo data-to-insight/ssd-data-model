@@ -27,7 +27,7 @@ This is the source repository for Project 1a the Standard CSC dataset for LAs (S
 
 ## Data Object and Item Definitions
 
-Towards the overall data model, published for iterative review  [current data object/entity model](./docs/index.html).
+Towards the overall data model, published for iterative review  [current data object/entity model](https://data-to-insight.github.io/ssd-data-model/).
 
 ## Data Model
 
@@ -40,7 +40,7 @@ The project will use [GIT][git] to track and approve proposed changes to the saf
 
 ### Specification Components
 
-The standard itself can be found in the [data](./data) subfolder. 
+The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide more 'human readable' reporting methods beyond the aforementioned [data object model](https://data-to-insight.github.io/ssd-data-model/). 
 
 #### Data Objects
 
@@ -107,19 +107,15 @@ Currently the yml data objects, associated diagrams, documentation and website c
 The project is with Steering Group support, following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](#feedback-anchor) is welcomed at any phase. 
 
 - **User Research**
-Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities.
-
+: Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges and opportunities.
 - **Prototype**
-Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.
-
+: Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.
 - **Deploy (pilot)**
-Deploy with support to pilot councils by developing reproducible implementations.
-
+: Deploy with support to pilot councils by developing reproducible implementations.
 - **Feedback**
-Product delivered to the DfE and offer supported adoption for LA's.
-
+: Product delivered to the DfE and offer supported adoption for LA's.
 - **Continuous Deployment**
-Maintenance roadmap agreement and iterative improvement driven iterative approach.
+: Maintenance roadmap agreement and iterative improvement driven iterative approach.
 
 
 
@@ -131,13 +127,13 @@ If you have any questions about this repo, code or the structure definition, con
 
 
 ### Running notes
-
-Use the following command in a Git Codespace to set up the working environment:
+The Python based toolset will run within a new [Git Codespace](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=645832800). Use the link, and on the command line run the following. 
+Set up the working environment (will prompt Y/N part-way through, type 'y'):
 ```bash
 ./setup.sh
 ```
 
-  For ref: The above bash script contains and runs <all> the following required commands: 
+  For ref: The above bash script contains and runs <all> the following required commands so there is no further setup required.: 
 ```python
 [$] pip install -r requirements.txt
 [$] sudo apt-get update
@@ -146,6 +142,8 @@ Use the following command in a Git Codespace to set up the working environment:
 
 [$] pip install poetry
 ```
+
+The python tools(.py files) are in [tools][ssd-tools] folder. To run them, the easiest way is to right click on the file and select 'run in terminal'. This will only work if the setup.sh file has been already run to installed the needed dependencies. 
 
 
 ### Other Relevant Links
