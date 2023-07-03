@@ -1,5 +1,5 @@
 # Children's Services Standard Safeguarding Dataset (SSD)
-[Current-phase] : prototype/review
+Current-phase : [prototype]
 
 This is the source repository for the SSD dataset and tools for creating the required data. The repository contains the definitions for a broader standard dataset for Children's Social Care (CSC) in safeguarding authorities beyond the existing returns dataset(s) (stage 1) and a set of solutions/tools that local authorities can adopt at low/zero cost to enable and produce the dataset.
 
@@ -111,7 +111,7 @@ Further/additional documentation relating to this specification: -tbc-
 
 ### Current Phase and Continuous Deployment
 #### User Research
-#### prototype/review
+#### prototype
 #### Deploy
 #### Feedback
 #### Continuous Deployment
