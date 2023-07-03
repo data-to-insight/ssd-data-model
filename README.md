@@ -11,7 +11,6 @@ This is the source repository for the Standard CSC dataset for LAs and associate
 - Regional Improvement and Innovation Alliance (RIIA)
 
 ### Iterative revisions based on developments in other (project)areas
-- Linking data items to strategic goals
 - SEN2
 - ADCS Safeguarding
 - School Census
@@ -23,7 +22,8 @@ This is the source repository for the Standard CSC dataset for LAs and associate
 - Social worker CMS input data (2a)
 - CSC National Framework
 - EET Activity
-- and additional ongoing [user research](#user-research) input
+- Linking data items to strategic goals
+- Additional ongoing [user research](#user-research) input
 
 
 ## Data Object and Item Definitions
