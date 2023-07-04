@@ -18,16 +18,26 @@ erd_overview_path = paths['wsite_main_images']
 yml_import_path = paths['yml_data']
 
 
-# Colour bandings to highlight data item categories for easier ref on visual outputs
-colour_dict = {                        # Note: colour names are taken from the X11 colour scheme and SVG colour scheme
+graph_legend_data = {                        
     "categories": {
-        "Local": "#C5E625",            # Recorded locally but not currently included in any data collections
-        "1aDraft": "#1CFCF2",          # Suggested new item for SSD
-        "1bDraft" : "#F57C1D",         # Suggested new item for one of the 1b projects
-        "1bSpecified": "#FFC91E"       # Final specified item for one of the 1b projects
+        "Local": {
+            "colour": "#C5E625",            
+            "description": "Recorded locally but not currently included in any data collections",
+        },
+        "1aDraft": {
+            "colour": "#1CFCF2",
+            "description": "Suggested new item for SSD",
+        },
+        "1bDraft" : {
+            "colour": "#F57C1D",
+            "description": "Suggested new item for one of the 1b projects",
+        },
+        "1bSpecified": {
+            "colour": "#FFC91E",
+            "description": "Final specified item for one of the 1b projects",
+        },
     }
 }
-
 
 # Initialize html_content as an empty string
 html_content = ""
@@ -46,9 +56,15 @@ image_width = "300px" # Sub-Image width (adjust as needed)
 page_title_str = "SSD Data Model Documentation"
 page_intro_str = "Project 1a. Standard Safeguarding Dataset. Data objects/item definitions published towards iterative review."
 
-notes_str = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item/field reference numbers [AAA000A] enable specific referencing."
+notes_str = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item id numbers [AAA000A] enable specific item/field referencing."
 repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
+
+# Add a legend
+html_content += "<ul id='legend' style='position: fixed; top: 200px; left: 20px; background: rgba(255, 255, 255, 0.7); padding: 10px; border-radius: 5px; list-style: none; z-index: 1000;'>"
+for category, attr in graph_legend_data["categories"].items():
+    html_content += f"<li style='margin-bottom: 5px;'><div style='display: inline-block; width: 20px; height: 20px; margin-right: 5px; background: {attr['colour']};'></div>{category} - {attr['description']}</li>"
+html_content += "</ul>"
 
 html_content = "<html><head><style>"
 html_content += "body { margin: 20px; }"
@@ -66,7 +82,9 @@ html_content += ".last-updated-container { display: flex; align-items: center; }
 html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
 html_content += ".repo-link { text-decoration: none; }"
 html_content += "</style></head><body>"
-html_content += f"<script>\nvar colour_dict = {colour_dict};\n</script>"
+# html_content += f"<script>\nvar colour_dict = {colour_dict};\n</script>"
+html_content += f"<script>\nvar graph_legend_data = {json.dumps(graph_legend_data)};\n</script>"
+
 html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
 html_content += "<div style='padding: 2px;'>"
@@ -82,7 +100,19 @@ html_content += "</div>"
 html_content += "<h1>Objects Overview:</h1>"
 html_content += f"<p>{notes_str}</p>"
 html_content += "<div id='table-container'>"  # Add id attribute to the table container
+
+# Add a legend
+html_content += "<div id='legend-container' style='position: relative; display: inline-block;'>"
+html_content += "<ul id='legend' style='position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.7); padding: 10px; border-radius: 5px; list-style: none;'>"
+for category, details in graph_legend_data["categories"].items():
+    html_content += f"<li style='margin-bottom: 5px;'><div style='display: inline-block; width: 20px; height: 20px; margin-right: 5px; background: {details['colour']};'></div>{category} - {details['description']}</li>"
+html_content += "</ul>"
+
+
+# Add in main overview image
 html_content += f'<img id="main-image" src="{erd_overview_path}{overview_erd_filename}" alt="Data Objects Overview" style="max-width: 100%; margin-bottom: 20px;">'  # Set max-width to 100% and remove margin-right
+
+html_content += "</div>"  # Close the legend-container div
 html_content += "</div>"
 html_content += "</div>"
 
@@ -146,9 +176,9 @@ window.addEventListener('load', function() {
   function colourRow(row, returns) {
     // Check if any of the return elements matches a category
     for (var i = 0; i < returns.length; i++) {
-      if (colour_dict["categories"][returns[i].trim()]) { // .trim() is used to remove potential leading/trailing whitespaces
+      if (graph_legend_data["categories"][returns[i].trim()]) { // .trim() is used to remove potential leading/trailing whitespaces
         // If it matches, colour the row and stop checking
-        row.style.backgroundColor = colour_dict["categories"][returns[i].trim()];
+        row.style.backgroundColor = graph_legend_data["categories"][returns[i].trim()]["colour"];
         return;
       }
     }
@@ -162,7 +192,7 @@ window.addEventListener('load', function() {
     var returns = rows[i].children[5].innerText.split(", ").map(item => item.trim());
 
     console.log("Returns:", returns);  // to check actual content in returns
-    console.log("Colour dict categories:", colour_dict["categories"]);  // to check your colour dict
+    console.log("Graph Legend Data Categories:", graph_legend_data["categories"]);  // to check your graph_legend_data
 
     // Apply the colourRow function
     colourRow(rows[i], returns);
@@ -170,6 +200,7 @@ window.addEventListener('load', function() {
 });
 </script>
 """
+
 
 
 html_content += "</body></html>"  # HTML end
