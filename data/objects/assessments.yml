@@ -141,7 +141,7 @@ nodes:
     type: null
     description: Assessment Completed by Worker ID
     item_ref: ASM008A
-    foreign_key: social_worker.worker_id
+    foreign_key: social_worker.sw_id
     categories:
     - child_in_need
     - assessment

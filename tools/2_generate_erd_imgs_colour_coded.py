@@ -109,10 +109,25 @@ def generate_full_erd(yml_data_path, assets_path, erd_publish_path):
                 field_labels = []
                 node_colour = 'lightgrey'  # default colour
                 for field in node['fields']:  # For each field in the node
-                    field_name = field['name']
-                    # Process and add field attributes for group, primary_key, foreign_key, item_ref, and returns
-                    # Change node_colour based on return values
-                    # Add formatted field_name to field_labels
+                    field_name = field['name'] if field['name'] is not None else ""
+                    if 'group' in field:
+                        group_labels = ', '.join(field['group'])  # joining all group labels with comma
+                        field_name = f"{field_name} [{group_labels}]"  # adding group labels to the field name
+                    if field.get('primary_key'):
+                        field_name = f"[PK] {field_name}"  # indicating if the field is a primary key
+                    if field.get('foreign_key'):
+                        field_name = f"[FK] {field_name}"  # indicating if the field is a foreign key
+                    if field.get('item_ref'):
+                        field_name += f" [{field['item_ref']}]"  # adding item reference to the field name if it exists
+
+                    if field.get('returns'):  # is there any returns data?
+                        returns_data = field['returns']  
+                        for item in returns_data:  
+                            if item in colour_dict:  # If the item is present in the colour_dict
+                                node_colour = colour_dict[item]  # Set node_colour to the corresponding colour in the colour_dict
+
+                    field_labels.append(field_name)
+
 
                 label = '{' + node['name'] + '|' + '|'.join(field_labels) + '}'
                 G.add_node(node['name'], shape='record', label=f"<{label}>", fillcolor=node_colour, style='filled')  # Add node to the graph

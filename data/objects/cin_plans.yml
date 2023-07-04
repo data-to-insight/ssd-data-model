@@ -105,7 +105,7 @@ nodes:
     type: null
     description: CIN Allocated Worker ID
     item_ref: CNP006A
-    foreign_key: social_worker.worker_id
+    foreign_key: social_worker.sw_id
     categories:
     - child_in_need
     - cin_plan

@@ -134,7 +134,7 @@ nodes:
     type: null
     description: EH Episode Allocated Worker ID
     item_ref: EAR008A
-    foreign_key: social_worker.worker_id
+    foreign_key: social_worker.sw_id
     categories:
     - early_help
     returns:

@@ -175,7 +175,7 @@ nodes:
     type: null
     description: S47 ICPC Allocated Worker ID
     item_ref: S47010A
-    foreign_key: social_worker.worker_id
+    foreign_key: social_worker.sw_id
     categories:
     - initial_cp_conference
     - child_protection

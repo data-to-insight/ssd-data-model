@@ -101,42 +101,42 @@ relationships:
   child_key: la_person_id
   relation: 1:M
 - parent_object: social_worker
-  parent_key: worker_id
+  parent_key: sw_id
   child_object: early_help_episodes
   child_key: eh_epi_worker_id
   relation: 1:M
 - parent_object: social_worker
-  parent_key: worker_id
+  parent_key: sw_id
   child_object: cin_episodes
   child_key: cin_ref_worker_id
   relation: 1:M
 - parent_object: social_worker
-  parent_key: worker_id
+  parent_key: sw_id
   child_object: assessments
   child_key: asmt_worker_id
   relation: 1:M
 - parent_object: social_worker
-  parent_key: worker_id
+  parent_key: sw_id
   child_object: cin_plans
   child_key: cin_worker_id
   relation: 1:M
 - parent_object: social_worker
-  parent_key: worker_id
+  parent_key: sw_id
   child_object: s47_enquiry_icpc
   child_key: icpc_worker_id
   relation: 1:M
 - parent_object: social_worker
-  parent_key: worker_id
+  parent_key: sw_id
   child_object: cp_plans
   child_key: cpp_worker_id
   relation: 1:M
 - parent_object: social_worker
-  parent_key: worker_id
+  parent_key: sw_id
   child_object: cla_episodes
   child_key: cla_worker_id
   relation: 1:M
 - parent_object: social_worker
-  parent_key: worker_id
+  parent_key: sw_id
   child_object: care_leavers
   child_key: cl_worker_id
   relation: 1:M

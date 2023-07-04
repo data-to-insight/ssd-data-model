@@ -10,8 +10,7 @@ nodes:
     categories:
     - voice_of_child
     returns:
-    - 1b
-    - draft
+    - 1bDraft
     cms_field:
     - liquid_logic:voc_explained_worries
     - mosaic:voc_explained_worries
@@ -26,8 +25,7 @@ nodes:
     categories:
     - voice_of_child
     returns:
-    - 1b
-    - draft
+    - 1bDraft
     cms_field:
     - liquid_logic:voc_story_help_understand
     - mosaic:voc_story_help_understand
@@ -42,8 +40,7 @@ nodes:
     categories:
     - voice_of_child
     returns:
-    - 1b
-    - draft
+    - 1bDraft
     cms_field:
     - liquid_logic:voc_agree_worker
     - mosaic:voc_agree_worker
@@ -58,8 +55,7 @@ nodes:
     categories:
     - voice_of_child
     returns:
-    - 1b
-    - draft
+    - 1bDraft
     cms_field:
     - liquid_logic:voc_plan_safe
     - mosaic:voc_plan_safe
@@ -74,8 +70,7 @@ nodes:
     categories:
     - voice_of_child
     returns:
-    - 1b
-    - draft
+    - 1bDraft
     cms_field:
     - liquid_logic:voc_tablet_help_explain
     - mosaic:voc_tablet_help_explain

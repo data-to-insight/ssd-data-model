@@ -107,7 +107,7 @@ nodes:
     type: null
     description: CP Plan Allocated Worker ID
     item_ref: CPP006A
-    foreign_key: social_worker.worker_id
+    foreign_key: social_worker.sw_id
     categories:
     - child_protection
     - cp_plan
