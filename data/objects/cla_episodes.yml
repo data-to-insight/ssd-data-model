@@ -132,10 +132,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_episodes
     - mosaic:cla_episodes
-  - name: cla_worker
+  - name: cla_worker_id
     type: null
-    description: Allocated Worker
+    description: Allocated Worker ID
     item_ref: CLA008A
+    foreign_key: social_worker.worker_id
     categories:
     - looked_after
     returns:
@@ -144,8 +145,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cla_worker
-    - mosaic:cla_worker
+    - liquid_logic:cla_worker_id
+    - mosaic:cla_worker_id
     cms_table:
     - liquid_logic:cla_episodes
     - mosaic:cla_episodes

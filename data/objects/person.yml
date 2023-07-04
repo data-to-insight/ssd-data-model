@@ -94,8 +94,8 @@ nodes:
     - liquid_logic:person_dob
     - mosaic:person_dob
     cms_table:
-    - liquid_logic:child
-    - mosaic:child
+    - liquid_logic:person
+    - mosaic:person
   - name: person_upn
     type: CHAR(13)
     description: UPN
@@ -111,8 +111,8 @@ nodes:
     - liquid_logic:person_upn
     - mosaic:person_upn
     cms_table:
-    - liquid_logic:child
-    - mosaic:child
+    - liquid_logic:person
+    - mosaic:person
   - name: person_upn_unknown
     type: CHAR(3)
     description: UPN Unknown
@@ -128,8 +128,8 @@ nodes:
     - liquid_logic:person_upn_unknown
     - mosaic:person_upn_unknown
     cms_table:
-    - liquid_logic:child
-    - mosaic:child
+    - liquid_logic:person
+    - mosaic:person
   - name: person_send
     type: BOOLEAN
     description: SEND Flag
@@ -145,8 +145,8 @@ nodes:
     - liquid_logic:person_send
     - mosaic:person_send
     cms_table:
-    - liquid_logic:child
-    - mosaic:child
+    - liquid_logic:person
+    - mosaic:person
   - name: person_expected_dob
     type: DATE
     description: Expected Birth Date
@@ -162,8 +162,8 @@ nodes:
     - liquid_logic:person_expected_dob
     - mosaic:person_expected_dob
     cms_table:
-    - liquid_logic:child
-    - mosaic:child
+    - liquid_logic:person
+    - mosaic:person
   - name: person_death_date
     type: DATE
     description: Date of Death
@@ -179,8 +179,8 @@ nodes:
     - liquid_logic:person_death_date
     - mosaic:person_death_date
     cms_table:
-    - liquid_logic:child
-    - mosaic:child
+    - liquid_logic:person
+    - mosaic:person
   - name: person_is_mother
     type: BOOLEAN
     description: Mother
@@ -196,8 +196,8 @@ nodes:
     - liquid_logic:person_is_mother
     - mosaic:person_is_mother
     cms_table:
-    - liquid_logic:child
-    - mosaic:child
+    - liquid_logic:person
+    - mosaic:person
   - name: person_nationality
     type: null
     description: Country of Origin (UASC)
@@ -213,5 +213,5 @@ nodes:
     - liquid_logic:person_nationality
     - mosaic:person_nationality
     cms_table:
-    - liquid_logic:child
-    - mosaic:child
+    - liquid_logic:person
+    - mosaic:person

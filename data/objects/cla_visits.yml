@@ -42,8 +42,6 @@ nodes:
     categories:
     - looked_after
     - visit
-    returns:
-    - AnnexA
     cms:
     - liquid_logic
     - mosaic

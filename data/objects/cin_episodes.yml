@@ -155,10 +155,11 @@ nodes:
     cms_table:
     - liquid_logic:cin_episodes
     - mosaic:cin_episodes
-  - name: cin_ref_worker
+  - name: cin_ref_worker_id
     type: null
-    description: CIN Referral Completed by Worker
+    description: CIN Referral Completed by Worker ID
     item_ref: CIN009A
+    foreign_key: social_worker.worker_id
     categories:
     - child_in_need
     - referral
@@ -168,8 +169,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cin_ref_worker
-    - mosaic:cin_ref_worker
+    - liquid_logic:cin_ref_worker_id
+    - mosaic:cin_ref_worker_id
     cms_table:
     - liquid_logic:cin_episodes
     - mosaic:cin_episodes

@@ -52,8 +52,7 @@ nodes:
     - SSDA903
     - AnnexA
     cms:
-    - liquid_logic
-    - mosaic
+    - Local
     cms_field:
     - liquid_logic:place_start
     - mosaic:place_start
@@ -163,8 +162,7 @@ nodes:
     returns:
     - SSDA903
     cms:
-    - liquid_logic
-    - mosaic
+    - Local
     cms_field:
     - liquid_logic:place_end
     - mosaic:place_end
