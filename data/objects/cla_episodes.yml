@@ -136,7 +136,7 @@ nodes:
     type: null
     description: Allocated Worker ID
     item_ref: CLA008A
-    foreign_key: social_worker.worker_id
+    foreign_key: social_worker.sw_id
     categories:
     - looked_after
     returns:

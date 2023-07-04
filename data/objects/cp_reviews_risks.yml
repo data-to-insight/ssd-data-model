@@ -35,8 +35,7 @@ nodes:
     - cp_plan
     - review
     returns:
-    - 1a
-    - draft
+    - 1aDraft
     cms:
     - liquid_logic
     - mosaic
