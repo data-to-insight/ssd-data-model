@@ -101,10 +101,11 @@ nodes:
     cms_table:
     - liquid_logic:cin_plans
     - mosaic:cin_plans
-  - name: cin_worker
+  - name: cin_worker_id
     type: null
-    description: CIN Allocated Worker
+    description: CIN Allocated Worker ID
     item_ref: CNP006A
+    foreign_key: social_worker.worker_id
     categories:
     - child_in_need
     - cin_plan
@@ -114,8 +115,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cin_worker
-    - mosaic:cin_worker
+    - liquid_logic:cin_worker_id
+    - mosaic:cin_worker_id
     cms_table:
     - liquid_logic:cin_plans
     - mosaic:cin_plans

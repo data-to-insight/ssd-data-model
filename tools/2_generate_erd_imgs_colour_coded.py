@@ -11,12 +11,12 @@ from admin.admin_tools import get_paths # get project defined file paths
 output_filetype = 'png'
 erd_overview_fname = 'ssd_erd_sfdp'
 
-# color names are taken from the X11 color scheme and SVG color scheme
-color_dict = {
-    "Local": "#C5E625",             # New data items but existing
-    "1a": "#1CFCF2",                # Suggested 
-    "1bDraft" : "#F57C1D",           # ??
-    "1bSpecified": "#FFC91E"         # ?? 
+# Colour bandings to highlight data item categories for easier ref on visual outputs
+colour_dict = {                     # Note: colour names are taken from the X11 colour scheme and SVG colour scheme
+    "Local": "#C5E625",            # Recorded locally but not currently included in any data collections
+    "1aDraft": "#1CFCF2",          # Suggested new item for SSD
+    "1bDraft" : "#F57C1D",         # Suggested new item for one of the 1b projects
+    "1bSpecified": "#FFC91E"       # Final specified item for one of the 1b projects
 
 }
 
@@ -42,6 +42,7 @@ def generate_individual_images(yml_data_path, output_path, output_filetype):
             data = yaml.safe_load(f)  # load the content of yaml file into a python dictionary
             nodes = data.get('nodes', [])
             for node in nodes:
+                node_colour = 'lightgrey'  # default colour
                 field_labels = []
                 for field in node['fields']:
                     field_name = field['name'] if field['name'] is not None else ""
@@ -61,6 +62,13 @@ def generate_individual_images(yml_data_path, output_path, output_filetype):
                     #     returns_data = ', '.join(field['returns'])
                     #     field_name += f" [{returns_data}]"
 
+                    if field.get('returns'):  # is there any returns data?
+                        returns_data = field['returns']  
+                        for item in returns_data:  
+                            if item in colour_dict:  # If the item is present in the colour_dict
+                                node_colour = colour_dict[item]  # Set node_colour to the corresponding colour in the colour_dict
+
+
                     field_labels.append(field_name)
                     
                     if 'foreign_key' in field:
@@ -69,7 +77,8 @@ def generate_individual_images(yml_data_path, output_path, output_filetype):
 
                 label = '{' + node['name'] + '|' + '|'.join(field_labels) + '}' 
 
-                G.add_node(node['name'], shape='record', label=label)
+                # G.add_node(node['name'], shape='record', label=label) # creates the node with NO colour applied to output
+                G.add_node(node['name'], shape='record', label=label, fillcolor=node_colour, style='filled') # applies colour banding to output node
 
         file_name = os.path.splitext(os.path.basename(file_path))[0]
         image_path = os.path.join(output_path, f"{file_name}.{output_filetype}")
@@ -98,15 +107,15 @@ def generate_full_erd(yml_data_path, assets_path, erd_publish_path):
             nodes = data.get('nodes', [])
             for node in nodes:  # For each node in the yaml file
                 field_labels = []
-                node_color = 'lightgrey'  # default colour
+                node_colour = 'lightgrey'  # default colour
                 for field in node['fields']:  # For each field in the node
                     field_name = field['name']
                     # Process and add field attributes for group, primary_key, foreign_key, item_ref, and returns
-                    # Change node_color based on return values
+                    # Change node_colour based on return values
                     # Add formatted field_name to field_labels
 
                 label = '{' + node['name'] + '|' + '|'.join(field_labels) + '}'
-                G.add_node(node['name'], shape='record', label=f"<{label}>", fillcolor=node_color, style='filled')  # Add node to the graph
+                G.add_node(node['name'], shape='record', label=f"<{label}>", fillcolor=node_colour, style='filled')  # Add node to the graph
 
             relationships_file = yml_data_path + 'relationships.yml'
             with open(relationships_file) as rf:  # Loading the relationships yaml file

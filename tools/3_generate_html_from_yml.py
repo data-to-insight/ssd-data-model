@@ -1,8 +1,4 @@
 
-# here is the python code complete
-
-
-
 
 import glob
 import yaml
@@ -21,30 +17,30 @@ erd_objects_path = paths['wsite_sub_images']
 erd_overview_path = paths['wsite_main_images']
 yml_import_path = paths['yml_data']
 
-overview_erd_filename = "ssd_erd_sfdp.png"
 
-# Color dictionary
-color_dict = {
+# Colour bandings to highlight data item categories for easier ref on visual outputs
+colour_dict = {                        # Note: colour names are taken from the X11 colour scheme and SVG colour scheme
     "categories": {
-        "Local": "#C5E625",             # New data items but existing
-        "1a": "#1CFCF2",                # Suggested 
-        "1bDraft" : "#F57C1D",           # ??
-        "1bSpecified": "#FFC91E"         # ?? 
+        "Local": "#C5E625",            # Recorded locally but not currently included in any data collections
+        "1aDraft": "#1CFCF2",          # Suggested new item for SSD
+        "1bDraft" : "#F57C1D",         # Suggested new item for one of the 1b projects
+        "1bSpecified": "#FFC91E"       # Final specified item for one of the 1b projects
     }
 }
 
 
 # Initialize html_content as an empty string
 html_content = ""
-# Embed color_dict as a JSON object for JavaScript to use
-html_content += f"<script>\nvar color_dict = {json.dumps(color_dict)};\n</script>"
+# Embed colour_dict as a JSON object for JavaScript to use
+# html_content += f"<script>\nvar colour_dict = {json.dumps(colour_dict)};\n</script>"
 
+# main overview image settings
+# 
+#  output name
+overview_erd_filename = "ssd_erd_sfdp.png"
+main_image_width = "85%"  # Calculate main image width # Adjust the padding as needed
+image_width = "300px" # Sub-Image width (adjust as needed)
 
-# Calculate main image width
-main_image_width = "85%"  # Adjust the padding as needed
-
-# Sub-Image width (adjust as needed)
-image_width = "300px"
 
 # Define page title and intro text
 page_title_str = "SSD Data Model Documentation"
@@ -70,7 +66,7 @@ html_content += ".last-updated-container { display: flex; align-items: center; }
 html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
 html_content += ".repo-link { text-decoration: none; }"
 html_content += "</style></head><body>"
-html_content += f"<script>\nvar color_dict = {color_dict};\n</script>"
+html_content += f"<script>\nvar colour_dict = {colour_dict};\n</script>"
 html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
 html_content += "<div style='padding: 2px;'>"
@@ -82,7 +78,7 @@ html_content += f"<span class='last-updated-date'>{datetime.datetime.now().strft
 html_content += f"<a href='{repo_link_back_str}' class='repo-link'> | SSD Github</a>"
 html_content += "</div>"
 
-# Object Overview section
+# Object *Overview* section / main image
 html_content += "<h1>Objects Overview:</h1>"
 html_content += f"<p>{notes_str}</p>"
 html_content += "<div id='table-container'>"  # Add id attribute to the table container
@@ -90,10 +86,10 @@ html_content += f'<img id="main-image" src="{erd_overview_path}{overview_erd_fil
 html_content += "</div>"
 html_content += "</div>"
 
-# Object Data Points Overview section
+# Object *Data Points* section
 html_content += "<h1>Object Data Points Overview:</h1>"
 
-# Read the YAML files
+# Read the YAML files to get the object data
 for file_path in glob.glob(f'{yml_import_path}*.yml'):
     with open(file_path) as f:
         data = yaml.safe_load(f)
@@ -134,16 +130,25 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
             html_content += "</div>"
             html_content += "<hr style='border: none; border-top: 1px solid #ddd; margin-bottom: 20px;'>"
 
+
+
+"""
+JS is added to the HTML content. Colours rows in output table based on the contents of the 'returns' column.
+- 'colourRow' func: checks if any element in the 'returns' list of a row matches a category in 'colour_dict'. 
+- If it finds a match, it colours the row with the corresponding colour and stops the check.
+- Main script: goes through all rows in the table. For each row, extracts the 'returns' column content, splits it into a list, and applies the 'colourRow' func
+- triggered on the 'load' event of the window, ensuring it runs after the HTML content is fully loaded.
+"""
 html_content += """
 <script>
 window.addEventListener('load', function() {
-  // Function to check if a row matches a category and color it
-  function colorRow(row, returns) {
+  // Function to check if a row matches a category and colour it
+  function colourRow(row, returns) {
     // Check if any of the return elements matches a category
     for (var i = 0; i < returns.length; i++) {
-      if (color_dict["categories"][returns[i].trim()]) { // .trim() is used to remove potential leading/trailing whitespaces
-        // If it matches, color the row and stop checking
-        row.style.backgroundColor = color_dict["categories"][returns[i].trim()];
+      if (colour_dict["categories"][returns[i].trim()]) { // .trim() is used to remove potential leading/trailing whitespaces
+        // If it matches, colour the row and stop checking
+        row.style.backgroundColor = colour_dict["categories"][returns[i].trim()];
         return;
       }
     }
@@ -157,25 +162,27 @@ window.addEventListener('load', function() {
     var returns = rows[i].children[5].innerText.split(", ").map(item => item.trim());
 
     console.log("Returns:", returns);  // to check actual content in returns
-    console.log("Color dict categories:", color_dict["categories"]);  // to check your color dict
+    console.log("Colour dict categories:", colour_dict["categories"]);  // to check your colour dict
 
-    // Apply the colorRow function
-    colorRow(rows[i], returns);
+    // Apply the colourRow function
+    colourRow(rows[i], returns);
   }
 });
 </script>
 """
 
 
-html_content += "</body></html>"  # Move this to the end of your Python script
+html_content += "</body></html>"  # HTML end
 
 
 with open(paths['wsite_root'] + 'index.html', 'w') as f:
     f.write(html_content)
 
+
 # 
 # # Run script to re-create the individual object diagram images
 # subprocess.run(['python3', paths['tools'] + 'create_erd_imgs.py'])
+
 
 
 # Resize & optimise image files for web publishing.

@@ -198,10 +198,11 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
-  - name: cl_worker
+  - name: cl_worker_id
     type: null
-    description: Allocated Worker
+    description: Allocated Worker ID
     item_ref: CLE012A
+    foreign_key: social_worker.worker_id
     categories:
     - care_leavers
     returns:
@@ -210,8 +211,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cl_worker
-    - mosaic:cl_worker
+    - liquid_logic:cl_worker_id
+    - mosaic:cl_worker_id
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers

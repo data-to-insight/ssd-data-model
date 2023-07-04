@@ -137,10 +137,11 @@ nodes:
     cms_table:
     - liquid_logic:assessments
     - mosaic:assessments
-  - name: asmt_worker
+  - name: asmt_worker_id
     type: null
-    description: Assessment Completed by Worker
+    description: Assessment Completed by Worker ID
     item_ref: ASM008A
+    foreign_key: social_worker.worker_id
     categories:
     - child_in_need
     - assessment
@@ -150,8 +151,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:asmt_worker
-    - mosaic:asmt_worker
+    - liquid_logic:asmt_worker_id
+    - mosaic:asmt_worker_id
     cms_table:
     - liquid_logic:assessments
     - mosaic:assessments

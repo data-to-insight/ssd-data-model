@@ -130,10 +130,11 @@ nodes:
     cms_table:
     - liquid_logic:early_help_episodes
     - mosaic:early_help_episodes
-  - name: eh_epi_worker
+  - name: eh_epi_worker_id
     type: null
-    description: EH Episode Allocated Worker
+    description: EH Episode Allocated Worker ID
     item_ref: EAR008A
+    foreign_key: social_worker.worker_id
     categories:
     - early_help
     returns:
@@ -142,8 +143,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:eh_epi_worker
-    - mosaic:eh_epi_worker
+    - liquid_logic:eh_epi_worker_id
+    - mosaic:eh_epi_worker_id
     cms_table:
     - liquid_logic:early_help_episodes
     - mosaic:early_help_episodes

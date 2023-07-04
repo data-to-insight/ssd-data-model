@@ -103,10 +103,11 @@ nodes:
     cms_table:
     - liquid_logic:cp_plans
     - mosaic:cp_plans
-  - name: cpp_worker
+  - name: cpp_worker_id
     type: null
-    description: CP Plan Allocated Worker
+    description: CP Plan Allocated Worker ID
     item_ref: CPP006A
+    foreign_key: social_worker.worker_id
     categories:
     - child_protection
     - cp_plan
@@ -116,8 +117,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cpp_worker
-    - mosaic:cpp_worker
+    - liquid_logic:cpp_worker_id
+    - mosaic:cpp_worker_id
     cms_table:
     - liquid_logic:cp_plans
     - mosaic:cp_plans
