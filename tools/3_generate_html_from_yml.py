@@ -18,26 +18,29 @@ erd_overview_path = paths['wsite_main_images']
 yml_import_path = paths['yml_data']
 
 
-graph_legend_data = {                        
-    "categories": {
-        "Local": {
-            "colour": "#C5E625",            
-            "description": "Recorded locally but not currently included in any data collections",
-        },
-        "1aDraft": {
-            "colour": "#1CFCF2",
-            "description": "Suggested new item for SSD",
-        },
-        "1bDraft" : {
-            "colour": "#F57C1D",
-            "description": "Suggested new item for one of the 1b projects",
-        },
-        "1bSpecified": {
-            "colour": "#FFC91E",
-            "description": "Final specified item for one of the 1b projects",
-        },
-    }
+returns_categories = {
+    "Existing": {
+        "colour": "#CCCCCC",
+        "description": "Current returned data",
+    },
+    "Local": {
+        "colour": "#C5E625",
+        "description": "Recorded locally but not currently included in any data collections",
+    },
+    "1aDraft": {
+        "colour": "#1CFCF2",
+        "description": "Suggested new item for SSD",
+    },
+    "1bDraft": {
+        "colour": "#F57C1D",
+        "description": "Suggested new item for one of the 1b projects",
+    },
+    "1bSpecified": {
+        "colour": "#FFC91E",
+        "description": "Final specified item for one of the 1b projects",
+    },
 }
+
 
 # Initialize html_content as an empty string
 html_content = ""
@@ -47,24 +50,19 @@ html_content = ""
 # main overview image settings
 # 
 #  output name
-overview_erd_filename = "ssd_erd_sfdp.png"
+overview_erd_filename = "ssd_conceptual_diagram.png"
 main_image_width = "85%"  # Calculate main image width # Adjust the padding as needed
 image_width = "300px" # Sub-Image width (adjust as needed)
 
 
 # Define page title and intro text
 page_title_str = "SSD Data Model Documentation"
-page_intro_str = "Project 1a. Standard Safeguarding Dataset. Data objects/item definitions published towards iterative review."
+page_intro_str = "Project 1a. Standard Safeguarding Dataset."
 
-notes_str = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item id numbers [AAA000A] enable specific item/field referencing."
+notes_str1 = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item id numbers [AAA000A] enable specific item/field referencing."
+notes_str2 = "Data objects/item definitions published towards iterative review. Diagrams consisdered as conceptual interpretations, not a true relational/representational model"
 repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
-
-# Add a legend
-html_content += "<ul id='legend' style='position: fixed; top: 200px; left: 20px; background: rgba(255, 255, 255, 0.7); padding: 10px; border-radius: 5px; list-style: none; z-index: 1000;'>"
-for category, attr in graph_legend_data["categories"].items():
-    html_content += f"<li style='margin-bottom: 5px;'><div style='display: inline-block; width: 20px; height: 20px; margin-right: 5px; background: {attr['colour']};'></div>{category} - {attr['description']}</li>"
-html_content += "</ul>"
 
 html_content = "<html><head><style>"
 html_content += "body { margin: 20px; }"
@@ -82,8 +80,9 @@ html_content += ".last-updated-container { display: flex; align-items: center; }
 html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
 html_content += ".repo-link { text-decoration: none; }"
 html_content += "</style></head><body>"
-# html_content += f"<script>\nvar colour_dict = {colour_dict};\n</script>"
-html_content += f"<script>\nvar graph_legend_data = {json.dumps(graph_legend_data)};\n</script>"
+
+# Embed returns_categories as a JSON object for JavaScript to use
+html_content += f"<script>\nvar returns_categories = {json.dumps(returns_categories)};\n</script>"
 
 html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
@@ -93,26 +92,33 @@ html_content += "<div style='padding: 2px;'>"
 html_content += "<div class='last-updated-container'>"
 html_content += f"<span class='last-updated-text'>Last updated:</span>"
 html_content += f"<span class='last-updated-date'>{datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}</span>"
-html_content += f"<a href='{repo_link_back_str}' class='repo-link'> | SSD Github</a>"
+html_content += f"<a href='{repo_link_back_str}' class='repo-link'> &nbsp;|&nbsp; SSD Github</a>"
 html_content += "</div>"
 
 # Object *Overview* section / main image
 html_content += "<h1>Objects Overview:</h1>"
-html_content += f"<p>{notes_str}</p>"
+html_content += f"<p>{notes_str1}</p>"
+html_content += f"<p>{notes_str2}</p>"
 html_content += "<div id='table-container'>"  # Add id attribute to the table container
 
-# Add a legend
-html_content += "<div id='legend-container' style='position: relative; display: inline-block;'>"
-html_content += "<ul id='legend' style='position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.7); padding: 10px; border-radius: 5px; list-style: none;'>"
-for category, details in graph_legend_data["categories"].items():
-    html_content += f"<li style='margin-bottom: 5px;'><div style='display: inline-block; width: 20px; height: 20px; margin-right: 5px; background: {details['colour']};'></div>{category} - {details['description']}</li>"
-html_content += "</ul>"
 
 
 # Add in main overview image
 html_content += f'<img id="main-image" src="{erd_overview_path}{overview_erd_filename}" alt="Data Objects Overview" style="max-width: 100%; margin-bottom: 20px;">'  # Set max-width to 100% and remove margin-right
 
-html_content += "</div>"  # Close the legend-container div
+# Add a legend
+html_content += "<div id='legend-container' style='margin-top: 20px;'>"
+
+html_content += "<h3>Object/Data item key:</h3>"  # Legend heading
+html_content += "<ul id='legend' style='background: rgba(255, 255, 255, 0.7); padding: 10px; border-radius: 5px; list-style: none; margin-top: 2px;'>"
+for category, details in returns_categories.items():
+    html_content += f"<li style='margin-bottom: 5px; font-size: 12px;'><div style='display: inline-block; width: 20px; height: 20px; margin-right: 5px; background: {details['colour']};'></div>{category} - {details['description']}</li>"
+html_content += "</ul>"
+html_content += "<p>Note: Colour identifiers on Overview image indicate presence of <i>at least</i> one known change. See below tables for the item level changes/additions with granular colour-coding.</p>"
+
+html_content += "</div>"
+
+
 html_content += "</div>"
 html_content += "</div>"
 
@@ -169,6 +175,7 @@ JS is added to the HTML content. Colours rows in output table based on the conte
 - Main script: goes through all rows in the table. For each row, extracts the 'returns' column content, splits it into a list, and applies the 'colourRow' func
 - triggered on the 'load' event of the window, ensuring it runs after the HTML content is fully loaded.
 """
+
 html_content += """
 <script>
 window.addEventListener('load', function() {
@@ -176,9 +183,9 @@ window.addEventListener('load', function() {
   function colourRow(row, returns) {
     // Check if any of the return elements matches a category
     for (var i = 0; i < returns.length; i++) {
-      if (graph_legend_data["categories"][returns[i].trim()]) { // .trim() is used to remove potential leading/trailing whitespaces
+      if (returns_categories[returns[i].trim()]) { // .trim() is used to remove potential leading/trailing whitespaces
         // If it matches, colour the row and stop checking
-        row.style.backgroundColor = graph_legend_data["categories"][returns[i].trim()]["colour"];
+        row.style.backgroundColor = returns_categories[returns[i].trim()]["colour"];
         return;
       }
     }
@@ -192,7 +199,7 @@ window.addEventListener('load', function() {
     var returns = rows[i].children[5].innerText.split(", ").map(item => item.trim());
 
     console.log("Returns:", returns);  // to check actual content in returns
-    console.log("Graph Legend Data Categories:", graph_legend_data["categories"]);  // to check your graph_legend_data
+    console.log("Returns Categories:", returns_categories);  // to check your returns_categories
 
     // Apply the colourRow function
     colourRow(rows[i], returns);
@@ -200,6 +207,7 @@ window.addEventListener('load', function() {
 });
 </script>
 """
+
 
 
 
