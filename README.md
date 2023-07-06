@@ -105,7 +105,7 @@ Currently the yml data objects, associated diagrams, documentation and website c
 
 
 ### [Current Phase](#current-phase)
-The project is with Steering Group support, following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](#feedback-anchor) is welcomed at any phase.
+The project with Steering Group support, is following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](#feedback-anchor) and involvement is welcomed at any phase.
 
 - **User Research**
   : Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities.
@@ -119,8 +119,9 @@ The project is with Steering Group support, following a transparent and iterativ
   : Maintenance roadmap and framework agreement towards iterative improvement-driven approach.
 
 
-### Contributors
-**Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Project hosts | 
+### Local Authorities Guiding Development
+**Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC**
+You can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/) and our [blog https://www.datatoinsight.org/blog](https://www.datatoinsight.org/blog) 
 
 
 ## Running notes
