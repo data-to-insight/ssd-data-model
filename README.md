@@ -118,6 +118,7 @@ The project with Steering Group support, is following a transparent and iterativ
 
 ### Local Authorities Guiding Development
 **Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC**
+
 You can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/) and our [blog https://www.datatoinsight.org/blog](https://www.datatoinsight.org/blog) 
 
 
