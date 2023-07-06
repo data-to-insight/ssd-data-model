@@ -114,8 +114,8 @@ The project with Steering Group support, is following a transparent and iterativ
 | --- | --- | --- |
 | 1 | User research | Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities. |
 | 1 | **Prototype [Current Phase]** | Detailed survey of current data item usage, link data items to strategic goals, prototype specification(peer feedback), initial workflow toolset |
-| 2 | Deploy (pilot)** | Deploy with support to pilot councils by developing reproducible implementations. |
-| 2 | Feedback** | Product delivered to the DfE and offer supported adoption for LA's. |
+| 2 | Deploy (pilot) | Deploy with support to pilot councils by developing reproducible implementations. |
+| 2 | Feedback | Product delivered to the DfE and offer supported adoption for LA's and iterative further development. |
 | 2 | Continuous Deployment | Maintenance roadmap and framework agreement towards iterative improvement-driven approach. |
 
 ### Local Authorities guiding development
