@@ -1,10 +1,11 @@
 # Children's Services Standard Safeguarding Dataset (SSD)
 
 This is the (in progress)source repository for the Standard CSC Dataset for LAs and associated toolset (Project 1a SSDF). A broader, more granular, standardised dataset for Children's Social Care (CSC) in safeguarding authorities. Enabling increased scope for bespoke local analysis, using sector-driven national level data, that extends the existing DfE returns _(Ref: Project Stage 1)_ combined with a suite of methods/tools that all local authorities can adopt at near-zero running cost to independently produce the standardised dataset _(Ref: Project Stage 2)_. Current variation in local data caputure and storage limits data collaboration between LAs to standard ‘core’ datasets – most notably the Children in Need (CIN) Census and SSDA903, for children in need and looked after children respectively – and Ofsted’s “Annex A” specification of child-level data. These datasets often lack the depth and granularity that some individual LAs incorporate in bespoke local analysis, including to understand quality of practice and improved outcomes for vunerable children. 
+Current phase : [prototype](#current-phase). 
 
 ## The initial core of the SSD
 
-The dataset aims to 'flatten' existing local variation in collected data, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journies. A six-year historical data scope is being suggested across the range of safeguarding activities performed by councils. The project is being developed in allignment with volunteer local authories, the Care Review, current social work practice, ongoing DfE data projects and associated DfE Forum updates.  Current phase : [prototype](#current-phase). 
+The dataset aims to 'flatten' existing local variation in collected data, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journies. A six-year historical data scope is being suggested across the range of safeguarding activities performed by councils. The project is being developed in allignment with a Pilot Group of volunteer local authorities but also considering the Care Review, current social work practice, ongoing DfE data projects and associated DfE Forum Group updates. Project oversight and governance is via Steering Group.  
 
 ### Current statutory returns
 - SSDA903
@@ -36,14 +37,14 @@ The project will use [GIT][git] to track and approve proposed changes to the saf
 
 ### Specification Components
 
-The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide more 'human readable' reporting methods beyond the aforementioned [data object model](https://data-to-insight.github.io/ssd-data-model/). 
+The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide further 'human readable' reporting methods beyond the aforementioned [data object conceptual model](https://data-to-insight.github.io/ssd-data-model/). We are aiming to publish our full data-landscape overview that resulted in the specification(Once method for making availaible is agreed). 
 
 #### Data Objects
 
 The datamodel is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.
 
-The [objects](./data/objects) folder contains definition for all the specification entity/objects as well as details
-of synthetic data parameters and validation rules that apply to each field within the object.
+The [objects](./data/objects) folder contains definition for the specification, data objects as well as details
+of synthetic data parameters and validation rules that apply to each field within the object. At the moment, the validation definitions do not reference back to the stat-returns validation process. 
 
 An example data object contains a description and a set of fields for that record. The fields have an ID (the key), a name,
 type, description, which cms systems the data item/field is available on and any comments,
@@ -77,7 +78,7 @@ The [categories](./data/categories) folder holds the dimensions as referenced by
 A Dimension object has a value and description, where the value is what would normally be expected to be transferred
 in an interchange format. The description is optional, and is not provided where the value is descriptive enough.
 
-The yaml files can either hold a list of string values, e.g.
+The YAML files can either hold a list of string values, e.g.
 
 ```yaml
 - Value 1
@@ -95,9 +96,9 @@ or a list of objects:
 
 ### Output
 
-Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, the project is working towards providing a set of [tools][ssd-tools] to perform the needed processing, incl. extract the required data items from current/known CMS systems and provide methods to allow the Yaml Object definitions to be easily updated from specification improvement updates or required revisions.
+Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, the project is working towards providing on open source set of [tools(./tools/) to perform the needed processing, incl. extract the required data items from current/known CMS systems and provide methods to allow the Yaml object definitions to be easily updated from specification improvement updates or required revisions. Stakeholders and others are invited to fork the repository and/or suggest changes. 
 
-Currently the yml data objects, associated diagrams, documentation and website can be (re-)generated using the [tools][ssd-tools]. The SQL[sql] tools to extract the relevant data directly from different CMS systems, are flexible; enabling the inclusion of both new data objects, new items in existing objects and revisions to both. SQL for each CMS type can be generated using the provided tools(Pilot includes only Liquid Logic and MOSAIC compatibility), and the resultant SQL scripts are output in the [SQL](./sql/) folder. 
+Currently the YAML data objects, associated diagrams, documentation and website can be (re-)generated using the [tools(./tools/). The SQL[sql] tools to extract the relevant data directly from different CMS systems, are flexible; enabling the inclusion of both new data objects, new items in existing objects and revisions to both. SQL for each CMS type can be generated using the provided tools(Pilot includes only Liquid Logic and MOSAIC compatibility), and the resultant SQL scripts are output in the [SQL](./sql/) folder. 
 
 
 
