@@ -110,13 +110,13 @@ Currently the YAML data objects, associated diagrams, documentation and website 
 ### [Current phase](#current-phase)
 The project with Steering Group support, is following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset) and involvement is welcomed at any phase. 
 
-- **User research - Stage 1**
+- **Stage 1 - User research**
   : Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities.
-- **Prototype - Stage 1** [Current Phase]
+- **Stage 1 - Prototype** [Current Phase]
   : Detailed survey of current data item usage, link data items to strategic goals, prototype specification(peer feedback), initial workflow toolset
-- **Deploy (pilot) - Stage 2**
+- **Stage 2 - Deploy (pilot)**
   : Deploy with support to pilot councils by developing reproducible implementations.
-- **Feedback - Stage 2**
+- **Stage 2 - Feedback**
   : Product delivered to the DfE and offer supported adoption for LA's.
 - **Continuous Deployment**
   : Maintenance roadmap and framework agreement towards iterative improvement-driven approach.
