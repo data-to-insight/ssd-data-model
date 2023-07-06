@@ -119,13 +119,20 @@ The project with Steering Group support, is following a transparent and iterativ
 | 2 | Feedback | Product delivered to the DfE and offer supported adoption for LA's and iterative further development. |
 | 2 | Continuous Deployment | Maintenance roadmap and framework agreement towards iterative improvement-driven approach. |
 
+
 ### Local Authorities guiding development
+
 **Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority
 
 You can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/)
 
 
-## Running notes
+## Repo workflow
+
+In brief, folders [data](./data/), [docs](./docs/) & [sql](./sql/) are output folders. Python scripts within the tools folder generate those files with the exception of [docs/admin](./docs/admin) which contains the import csv definitions of all data objects & relationships. [tools/*.py](./tools/) are numbered to dictate their required run order when updating the specification. This workflow enables the entire project and all outputs to be instantly updated enabling full development transparency and ease of later updates both minor modifications and new modules/objects. It is anticipated that most LA's will only need to access the generated extract [SQL files](./sql/) for their particular CMS. 
+
+
+### Repo running notes
 
 The Python based toolset will run within a [Git Codespace](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=645832800). Use this link, then run the setup file, by typing the below command on the command-line.   
 Set up the working environment (will prompt Y/N part-way through, type 'y'to continue):
@@ -147,7 +154,7 @@ The python tools(.py) are in [tools(./tools/) folder. To run them, right click o
 
 
 
-### Other relevant links
+## Other relevant links
 
 [yaml] : https://yaml.org/
 [git]: https://git-scm.com/
