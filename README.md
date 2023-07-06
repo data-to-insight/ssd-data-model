@@ -108,6 +108,7 @@ Currently the YAML data objects, associated diagrams, documentation and website 
 
 
 ### [Current phase](#current-phase)
+
 The project with Steering Group support, is following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset) and involvement is welcomed at any phase.
 
 | Stage | Phase | Description |
@@ -125,6 +126,7 @@ You can find more information about Data2Insight on our website [https://www.dat
 
 
 ## Running notes
+
 The Python based toolset will run within a [Git Codespace](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=645832800). Use this link, then run the setup file, by typing the below command on the command-line.   
 Set up the working environment (will prompt Y/N part-way through, type 'y'to continue):
 ```bash
@@ -141,7 +143,7 @@ Set up the working environment (will prompt Y/N part-way through, type 'y'to con
 [$] pip install poetry
 ```
 
-The python tools(.py files) are in [tools][ssd-tools] folder. To run them, the easiest way is to right click on the file and select 'run in terminal'. This will only work if the setup.sh file has been already run to installed the needed dependencies. 
+The python tools(.py) are in [tools(./tools/) folder. To run them, right click on the file and select 'run in terminal' or type filename on the commandline. This will only work if the setup.sh file has been already run to installed the needed dependencies. 
 
 
 
