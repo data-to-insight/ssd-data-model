@@ -3,19 +3,19 @@
 This is the (in progress)source repository for the Standard CSC Dataset for LAs and associated toolset (Project 1a SSDF). A broader, more granular, standardised dataset for Children's Social Care (CSC) in safeguarding authorities. Enabling increased scope for bespoke local analysis, using sector-driven national level data, that extends the existing DfE returns _(Ref: Project Stage 1)_ combined with a suite of methods/tools that all local authorities can adopt at near-zero running cost to independently produce the standardised dataset _(Ref: Project Stage 2)_. Current variation in local data caputure and storage limits data collaboration between LAs to standard ‘core’ datasets – most notably the Children in Need (CIN) Census and SSDA903, for children in need and looked after children respectively – and Ofsted’s “Annex A” specification of child-level data. These datasets often lack the depth and granularity that some individual LAs incorporate in bespoke local analysis, including to understand quality of practice and improved outcomes for vunerable children. 
 Current phase : [prototype](#current-phase). 
 
-## The initial core of the SSD
+## Initial core of the SSD
 
 The dataset aims to 'flatten' existing local variation in collected data, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journies. A six-year historical data scope is being suggested across the range of safeguarding activities performed by councils. Project oversight and governance is via a Steering Group, DfE and volunteer LA's as part of a pilot group. 
 
 [Subscribe or volunteer for pilot involvement](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset-Subscribe)
 
-### Current statutory returns
+#### Current statutory returns
 - SSDA903
 - Annex A
 - CIN Census
 - Regional Improvement and Innovation Alliance (RIIA)
 
-### Iterative revisions based on developments in other (project)areas
+#### Iterative revisions based on developments in other (project)areas
 - SEN2
 - ADCS Safeguarding
 - School Census
@@ -31,17 +31,20 @@ The dataset aims to 'flatten' existing local variation in collected data, thus e
 - Additional ongoing user research input
 
 
-## Data Objects Conceptual Model
+## Specification components
+
+### Data objects Conceptual Model
 
 Defining a set of objects/data points capturing LA Childrens Services data during the different stages of an individual's progress through the CSC system(s); published for iterative review  [current data object/conceptual model](https://data-to-insight.github.io/ssd-data-model/). 
 
 The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
 
-### Specification Components
+
+### Specification
 
 The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide further 'human readable' reporting methods beyond the aforementioned [data object conceptual model](https://data-to-insight.github.io/ssd-data-model/). We are aiming to publish our full data-landscape overview that resulted in the specification(Once method for making availaible is agreed). 
 
-#### Data Objects
+### Data objects
 
 The datamodel is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.
 
@@ -74,7 +77,7 @@ type, description, which cms systems the data item/field is available on and any
     [...]
 ```
 
-#### Categories
+### Categories
 
 The [categories](./data/categories) folder holds the dimensions as referenced by `Categorical` and `List` datatypes.
 A Dimension object has a value and description, where the value is what would normally be expected to be transferred
@@ -104,10 +107,10 @@ Currently the YAML data objects, associated diagrams, documentation and website 
 
 
 
-### [Current Phase](#current-phase)
+### [Current phase](#current-phase)
 The project with Steering Group support, is following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset) and involvement is welcomed at any phase. 
 
-- **User Research**
+- **User research**
   : Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities.
 - **Prototype** [Current Phase]
   : Detailed survey of current data item usage, link data items to strategic goals, develop the prototype specification utilizing peer feedback.
@@ -119,7 +122,7 @@ The project with Steering Group support, is following a transparent and iterativ
   : Maintenance roadmap and framework agreement towards iterative improvement-driven approach.
 
 
-### Local Authorities Guiding Development
+### Local Authorities guiding development
 **Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority
 
 You can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/) and our [blog https://www.datatoinsight.org/blog](https://www.datatoinsight.org/blog) 
@@ -146,7 +149,7 @@ The python tools(.py files) are in [tools][ssd-tools] folder. To run them, the e
 
 
 
-### Other Relevant Links
+### Other relevant links
 
 [yaml] : https://yaml.org/
 [git]: https://git-scm.com/
