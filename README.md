@@ -1,9 +1,11 @@
 # Children's Services Standard Safeguarding Dataset (SSD)
 
+This is the (in progress)source repository for the Standard CSC Dataset for LAs and associated toolset (Project 1a SSDF). A broader, more granular, standardised dataset for Children's Social Care (CSC) in safeguarding authorities. Enabling increased scope for bespoke local analysis, using sector-driven national level data, that extends the existing DfE returns _(Ref: Project Stage 1)_ combined with a suite of methods/tools that all local authorities can adopt at near-zero running cost to independently produce the standardised dataset _(Ref: Project Stage 2)_. Current variation in local data caputure and storage limits data collaboration between LAs to standard ‘core’ datasets – most notably the Children in Need (CIN) Census and SSDA903, for children in need and looked after children respectively – and Ofsted’s “Annex A” specification of child-level data. These datasets often lack the depth and granularity that some individual LAs incorporate in bespoke local analysis, including to understand quality of practice and improved outcomes for vunerable children. 
 
-This is the source repository for the Standard CSC dataset for LAs and associated toolset (Project 1a SSD). The dataset is a broader dataset for Children's Social Care (CSC) in safeguarding authorities, expanding beyond the existing returns _(Ref: Stage 1)_ with a suite of methods/tools that all local authorities can adopt at zero running cost to independently produce the dataset _(Ref: Stage 2)_. The dataset aims to flatten existing local variation in collected data, thus enabling a significantly expanded set of data items and providing a national level consistency and improved independent LA benchmarking. A six-year historical data scope is suggested across the range of safeguarding activities performed by councils. The project is developed in allignment with the Care Review and current social work practice.  Current phase : [prototype](#current-phase). 
+## The initial core of the SSD
 
-## The initial core of the SSD is based on
+The dataset aims to 'flatten' existing local variation in collected data, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, and improved independent LA benchmarking and potential for identifying best practice outcomes journies. A six-year historical data scope is being suggested across the range of safeguarding activities performed by councils. The project is being developed in allignment with volunteer local authories, the Care Review, current social work practice, ongoing DfE data projects and associated DfE Forum updates.  Current phase : [prototype](#current-phase). 
+
 ### Current statutory returns
 - SSDA903
 - Annex A
@@ -26,16 +28,9 @@ This is the source repository for the Standard CSC dataset for LAs and associate
 - Additional ongoing [user research](#user-research) input
 
 
-## Data Object and Item Definitions
+## Data Objects Conceptual Model
 
-Towards the overall data model, published for iterative review  [current data object/entity model](https://data-to-insight.github.io/ssd-data-model/).
-
-## Data Model
-
-The data model defines a set of Objects capturing LA Childrens Services data during the different stages of an individual's progress
-through the CSC system(s). The data model also includes a number of Categories (dimensions) that are referenced from the Fields within a Data Item.
-
-The datamodel is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.
+Towards the overall data modelling, published for iterative review  [current data object/conceptual model](https://data-to-insight.github.io/ssd-data-model/). Defining a set of Objects capturing LA Childrens Services data during the different stages of an individual's progress through the CSC system(s). 
 
 The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
 
@@ -44,6 +39,8 @@ The project will use [GIT][git] to track and approve proposed changes to the saf
 The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide more 'human readable' reporting methods beyond the aforementioned [data object model](https://data-to-insight.github.io/ssd-data-model/). 
 
 #### Data Objects
+
+The datamodel is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.
 
 The [objects](./data/objects) folder contains definition for all the specification entity/objects as well as details
 of synthetic data parameters and validation rules that apply to each field within the object.
