@@ -108,19 +108,15 @@ Currently the YAML data objects, associated diagrams, documentation and website 
 
 
 ### [Current phase](#current-phase)
-The project with Steering Group support, is following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset) and involvement is welcomed at any phase. 
+The project with Steering Group support, is following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset) and involvement is welcomed at any phase.
 
-- **Stage 1 - User research**
-  : Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities.
-- **Stage 1 - Prototype** [Current Phase]
-  : Detailed survey of current data item usage, link data items to strategic goals, prototype specification(peer feedback), initial workflow toolset
-- **Stage 2 - Deploy (pilot)**
-  : Deploy with support to pilot councils by developing reproducible implementations.
-- **Stage 2 - Feedback**
-  : Product delivered to the DfE and offer supported adoption for LA's.
-- **Continuous Deployment**
-  : Maintenance roadmap and framework agreement towards iterative improvement-driven approach.
-
+| Stage | Description |
+| --- | --- |
+| **Stage 1 - User research** | Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities. |
+| **Stage 1 - Prototype** [Current Phase] | Detailed survey of current data item usage, link data items to strategic goals, prototype specification(peer feedback), initial workflow toolset |
+| **Stage 2 - Deploy (pilot)** | Deploy with support to pilot councils by developing reproducible implementations. |
+| **Stage 2 - Feedback** | Product delivered to the DfE and offer supported adoption for LA's. |
+| **Continuous Deployment** | Maintenance roadmap and framework agreement towards iterative improvement-driven approach. |
 
 ### Local Authorities guiding development
 **Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority
