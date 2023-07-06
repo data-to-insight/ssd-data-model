@@ -6,6 +6,7 @@ Current phase : [prototype](#current-phase).
 ## The initial core of the SSD
 
 The dataset aims to 'flatten' existing local variation in collected data, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journies. A six-year historical data scope is being suggested across the range of safeguarding activities performed by councils. Project oversight and governance is via a Steering Group, DfE and volunteer LA's as part of a pilot group. 
+
 [Subscribe or volunteer for pilot involvement](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset-Subscribe)
 
 ### Current statutory returns
