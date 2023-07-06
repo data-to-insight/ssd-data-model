@@ -4,7 +4,7 @@ This is the (in progress)source repository for the Standard CSC Dataset for LAs 
 
 ## The initial core of the SSD
 
-The dataset aims to 'flatten' existing local variation in collected data, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, and improved independent LA benchmarking and potential for identifying best practice outcomes journies. A six-year historical data scope is being suggested across the range of safeguarding activities performed by councils. The project is being developed in allignment with volunteer local authories, the Care Review, current social work practice, ongoing DfE data projects and associated DfE Forum updates.  Current phase : [prototype](#current-phase). 
+The dataset aims to 'flatten' existing local variation in collected data, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journies. A six-year historical data scope is being suggested across the range of safeguarding activities performed by councils. The project is being developed in allignment with volunteer local authories, the Care Review, current social work practice, ongoing DfE data projects and associated DfE Forum updates.  Current phase : [prototype](#current-phase). 
 
 ### Current statutory returns
 - SSDA903
