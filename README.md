@@ -109,7 +109,7 @@ Currently the YAML data objects, associated diagrams, documentation and website 
 
 ### [Current phase](#current-phase)
 
-The project with Steering Group support, is following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset) and involvement is welcomed at any phase.
+The project is following a transparent and iterative development cycle, within the following deployment stages. Further stakeholder [feedback](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset) and involvement is welcomed at any phase. LA's that wish to take part in the pilot deployment are invited to get in touch. 
 
 | Stage | Phase | Description |
 | --- | --- | --- |
