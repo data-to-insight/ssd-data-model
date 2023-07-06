@@ -5,7 +5,7 @@ Current phase : [prototype](#current-phase).
 
 ## The initial core of the SSD
 
-The dataset aims to 'flatten' existing local variation in collected data, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journies. A six-year historical data scope is being suggested across the range of safeguarding activities performed by councils. The project is being developed in allignment with a Pilot Group of volunteer local authorities but also considering the Care Review, current social work practice, ongoing DfE data projects and associated DfE Forum Group updates. Project oversight and governance is via Steering Group.  
+The dataset aims to 'flatten' existing local variation in collected data, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journies. A six-year historical data scope is being suggested across the range of safeguarding activities performed by councils. The project is being developed in allignment with a Pilot Group of volunteer local authorities but also considering such as the Care Review, current social work practice, ongoing DfE data projects and associated DfE Forum Group updates. Project oversight and governance is via Steering Group.  
 
 ### Current statutory returns
 - SSDA903
@@ -26,7 +26,7 @@ The dataset aims to 'flatten' existing local variation in collected data, thus e
 - CSC National Framework
 - EET Activity
 - Linking data items to strategic goals
-- Additional ongoing [user research](#user-research) input
+- Additional ongoing user research input
 
 
 ## Data Objects Conceptual Model
@@ -103,7 +103,7 @@ Currently the YAML data objects, associated diagrams, documentation and website 
 
 
 ### [Current Phase](#current-phase)
-The project with Steering Group support, is following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](#feedback-anchor) and involvement is welcomed at any phase.
+The project with Steering Group support, is following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](datatoinsight.enquiries@gmail.com) and involvement is welcomed at any phase. 
 
 - **User Research**
   : Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities.
