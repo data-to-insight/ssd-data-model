@@ -103,7 +103,7 @@ Currently the YAML data objects, associated diagrams, documentation and website 
 
 
 ### [Current Phase](#current-phase)
-The project with Steering Group support, is following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](mailto:datatoinsight.enquiries@gmail.com?subject=Standard SAfeguarding Dataset) and involvement is welcomed at any phase. 
+The project with Steering Group support, is following a transparent and iterative development cycle, within the following deployment process. Further stakeholder [feedback](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset) and involvement is welcomed at any phase. 
 
 - **User Research**
   : Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities.
