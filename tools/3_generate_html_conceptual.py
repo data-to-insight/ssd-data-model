@@ -74,7 +74,7 @@ html_content += f"<span class='last-updated-text'>Last updated:</span>"
 html_content += f"<span class='last-updated-date'>{datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}</span>"
 html_content += f"<a href='{repo_link_back_str}' class='repo-link'> &nbsp;|&nbsp; SSD Github</a>"
 html_content += f"<a href='{index_link_back_str}' class='repo-link'> &nbsp;|&nbsp; Index</a>"
-html_content += f"<a href='{guidance_link_back_str_link_back_str}' class='repo-link'> &nbsp;|&nbsp; Data Item Guidance</a>"
+html_content += f"<a href='{guidance_link_back_str}' class='repo-link'> &nbsp;|&nbsp; Data Item Guidance</a>"
 html_content += f"<a href='{returns_maps_link_back_str }' class='repo-link'> &nbsp;|&nbsp; Existing returns maps</a>"
 html_content += "</div>"
 
