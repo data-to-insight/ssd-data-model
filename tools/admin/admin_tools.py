@@ -42,7 +42,7 @@ def get_paths():
         'wsite_root':'docs/',
         'wsite_main_images': 'imgs/',
         'wsite_sub_images': 'imgs/erd_data_objects/',
-        'wsite_returns_maps': 'imgs/returns_maps/',
+        'wsite_returns_maps': 'docs/imgs/returns_maps/',
         'data_specification': 'docs/admin/data_objects_specification.csv'  
     }
     return paths
