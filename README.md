@@ -124,7 +124,7 @@ The project is following a transparent and iterative development cycle, within t
 
 **Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority | Essex CC : Project Management | **ADCS North West** (hosted by **Stockport Council**)
 
-You can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/)
+Repo forks, and direct involvement with the project are welcomed and you can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/)
 
 
 ## Repo workflow
