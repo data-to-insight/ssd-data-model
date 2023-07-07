@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: Contact ID
     item_ref: CON001A
+    guidance: Contact Record unique ID from system or auto-generated as part of export.
     primary_key: true
     validators:
     - required:
@@ -27,6 +28,7 @@ nodes:
     type: VARCHAR(10)
     description: Person Unique ID
     item_ref: CON002A
+    guidance: See PER001A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -49,6 +51,7 @@ nodes:
     type: DATE
     description: Date of Contact
     item_ref: CON003A
+    guidance: Date Contact received into LA
     categories:
     - contact
     returns:
@@ -66,6 +69,11 @@ nodes:
     type: null
     description: Contact Source
     item_ref: CON004A
+    guidance: 'For each new contact, record the source of contact from the list.
+
+      Where there is more than one contact for the same child on the same day, the
+      first contact should be recorded and it is this contact source that should be
+      recorded here.'
     categories:
     - contact
     returns:
@@ -81,8 +89,9 @@ nodes:
     - mosaic:contacts
   - name: contact_outcome
     type: null
-    description: 'Contact Outcome '
+    description: Contact Outcome
     item_ref: CON005A
+    guidance: EH Referral/ CIN Referral
     categories:
     - contact
     returns:

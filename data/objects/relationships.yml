@@ -86,11 +86,6 @@ relationships:
   child_key: la_person_id
   relation: 1:M
 - parent_object: person
-  parent_key: person_upn
-  child_object: send
-  child_key: send_upn
-  relation: 1:M
-- parent_object: person
   parent_key: la_person_id
   child_object: send
   child_key: la_person_id
@@ -98,6 +93,11 @@ relationships:
 - parent_object: person
   parent_key: la_person_id
   child_object: pre_proceedings
+  child_key: la_person_id
+  relation: 1:M
+- parent_object: person
+  parent_key: la_person_id
+  child_object: voice_of_child
   child_key: la_person_id
   relation: 1:M
 - parent_object: social_worker

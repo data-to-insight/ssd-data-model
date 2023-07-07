@@ -6,6 +6,7 @@ nodes:
     type: null
     description: Review ID
     item_ref: CLR001A
+    guidance: null
     primary_key: true
     validators:
     - required:
@@ -28,6 +29,7 @@ nodes:
     type: null
     description: Episode ID
     item_ref: CLR002A
+    guidance: null
     foreign_key: cla_episodes.cla_episode_id
     validators:
     - required:
@@ -48,6 +50,7 @@ nodes:
     type: DATE
     description: CLA Review Due Date
     item_ref: CLR003A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -66,6 +69,7 @@ nodes:
     type: DATE
     description: CLA Review Date
     item_ref: CLR004A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -83,9 +87,10 @@ nodes:
     - mosaic:cla_reviews
   - name: rev_cyp_involved_care_plan
     type: null
-    description: Has the childyoung person been involved in formulating this Care
+    description: Has the child/young person been involved in formulating this Care
       Plan?
     item_ref: CLR005A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -102,9 +107,10 @@ nodes:
     - mosaic:cla_reviews
   - name: rev_sw_met_child_views
     type: null
-    description: 'Has the Social Worker met with the child on their own to undertake
-      direct work to establish their wishes and views '
+    description: Has the Social Worker met with the child on their own to undertake
+      direct work to establish their wishes and views
     item_ref: CLR006A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -123,6 +129,7 @@ nodes:
     type: null
     description: Participation code
     item_ref: CLR007A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -141,6 +148,7 @@ nodes:
     type: null
     description: Is the Care Plan meeting the childs needs?
     item_ref: CLR008A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -159,6 +167,7 @@ nodes:
     type: null
     description: Is a Permanence Plan in place?
     item_ref: CLR009A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -175,8 +184,9 @@ nodes:
     - mosaic:cla_reviews
   - name: rev_last_iro_contact
     type: DATE
-    description: Date of Last IRO Visit  Contact to the Child
+    description: Date of Last IRO Visit / Contact to the Child
     item_ref: CLR010A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -193,9 +203,10 @@ nodes:
     - mosaic:cla_reviews
   - name: prev_permanence
     type: null
-    description: Has the child young person previously been adopted or left care for
-      special guardianship or residence order?
+    description: Has the child/ young person previously been adopted or left care
+      for special guardianship or residence order?
     item_ref: CLR011A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -214,6 +225,7 @@ nodes:
     type: DATE
     description: Date of Previous Permanence Order
     item_ref: CLR012A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -233,6 +245,7 @@ nodes:
     type: null
     description: Previous Permanence Option
     item_ref: CLR013A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -252,6 +265,7 @@ nodes:
     type: null
     description: Previous Permanence Arranged LA
     item_ref: CLR014A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -271,6 +285,7 @@ nodes:
     type: BOOLEAN
     description: Child convicted during the year
     item_ref: CLR015A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -290,6 +305,7 @@ nodes:
     type: BOOLEAN
     description: Health surveillance checks up to date
     item_ref: CLR016A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -309,6 +325,7 @@ nodes:
     type: DATE
     description: Date of Last Health Assessment
     item_ref: CLR017A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -329,6 +346,7 @@ nodes:
     type: DATE
     description: Date of Last Dental Check
     item_ref: CLR018A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -349,6 +367,7 @@ nodes:
     type: BOOLEAN
     description: Immunisations up to Date
     item_ref: CLR019A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -368,6 +387,7 @@ nodes:
     type: BOOLEAN
     description: Identified as having a substance misuse problem
     item_ref: CLR020A
+    guidance: null
     categories:
     - looked_after
     - review
@@ -387,6 +407,7 @@ nodes:
     type: BOOLEAN
     description: Child received intervention for substance misuse problem
     item_ref: CLR021A
+    guidance: null
     categories:
     - looked_after
     - review

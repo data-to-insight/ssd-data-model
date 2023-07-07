@@ -11,36 +11,12 @@ import json
 
 from admin.admin_tools import get_paths  # get project defined file paths
 from admin.admin_tools import resize_images
+from admin.admin_tools import returns_categories
 
 paths = get_paths()
 erd_objects_path = paths['wsite_sub_images']
 erd_overview_path = paths['wsite_main_images']
 yml_import_path = paths['yml_data']
-
-
-returns_categories = {
-    "Existing": {
-        "colour": "#CCCCCC",
-        "description": "Current returned data",
-    },
-    "Local": {
-        "colour": "#C5E625",
-        "description": "Recorded locally but not currently included in any data collections",
-    },
-    "1aDraft": {
-        "colour": "#1CFCF2",
-        "description": "Suggested new item for SSD",
-    },
-    "1bDraft": {
-        "colour": "#F57C1D",
-        "description": "Suggested new item for one of the 1b projects",
-    },
-    "1bSpecified": {
-        "colour": "#FFC91E",
-        "description": "Final specified item for one of the 1b projects",
-    },
-}
-
 
 # Initialize html_content as an empty string
 html_content = ""
@@ -56,8 +32,8 @@ image_width = "300px" # Sub-Image width (adjust as needed)
 
 
 # Define page title and intro text
-page_title_str = "SSD Data Model Documentation"
-page_intro_str = "Project 1a. Standard Safeguarding Dataset."
+page_title_str = "Project 1a"
+page_intro_str = "Standard Safeguarding Dataset"
 
 notes_str1 = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item id numbers [AAA000A] enable specific item/field referencing."
 notes_str2 = "Data objects/item definitions published towards iterative review. Diagrams consisdered as conceptual interpretations, not a true relational/representational model"
@@ -139,8 +115,8 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
             html_content += "<div style='padding-bottom: 50px;'>"
             html_content += "<table style='border-collapse: collapse; border: none;'>"
             html_content += "<colgroup>"
-            html_content += "<col style='width: 10%;'/>"  # Set width for field-ref-column
-            html_content += "<col style='width: 30%;'/>"  # Set width for data-item-column
+            html_content += "<col style='width: 12%;'/>"  # Set width for field-ref-column
+            html_content += "<col style='width: 28%;'/>"  # Set width for data-item-column
             html_content += "<col style='width: 20%;'/>"  # Set width for field-column
             html_content += "<col style='width: 10%;'/>"  # Set width for cms-column
             html_content += "<col style='width: 15%;'/>"  # Set width for categories-column
@@ -198,8 +174,6 @@ window.addEventListener('load', function() {
     // Get the returns column and split it by ", "
     var returns = rows[i].children[5].innerText.split(", ").map(item => item.trim());
 
-    console.log("Returns:", returns);  // to check actual content in returns
-    console.log("Returns Categories:", returns_categories);  // to check your returns_categories
 
     // Apply the colourRow function
     colourRow(rows[i], returns);

@@ -1,4 +1,5 @@
 from admin.admin_tools import get_paths # get project defined file paths
+from admin.admin_tools import clean_fieldname_data # get project defined file paths
 
 
 # File handling input/output
@@ -18,7 +19,7 @@ import re
 
 # Full list of field names
 # If there are non-required fields in the spec csv, just dont include them here
-field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 'cms', 'cms_field','cms_table','required_enabled','unique_enabled','primary_key','foreign_key']
+field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 'cms', 'cms_field','cms_table','required_enabled','unique_enabled','primary_key','foreign_key', 'guidance']
 
 # Those that are multi-part/list fields
 multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_field', 'cms_table']
@@ -26,44 +27,6 @@ multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_field',
 
 # Creating a new dictionary to store relationships
 relationships = {}
-
-
-def clean_fieldname_data(value, is_name=False):
-    """
-    Cleans the given value.
-    Processes include removing special characters ('/ \'), replacing spaces with underscores.
-
-    Args:
-        value (str): Input string to be cleaned.
-        is_name (bool): Whether the input value is a name. If True, additional processing is done.
-
-    Returns:
-        str: The cleaned string.
-    """
-    # Replace tab characters with spaces
-    value = value.replace('\t', ' ')
-
-    # Remove special characters
-    value = re.sub(r'[\\/]', '', value)
-
-    
-    # (towards avoiding '' values in output yml)
-    if not value.strip():  # Check if the value is an empty string or consists only of whitespace
-        return None  # Return None if the value is empty 
-
-    if not value:  # Check if the value is an empty string
-        return None  # Return None if the value is empty 
-
-    if value.lower() == 'null':
-        value = None  # Return None if the value is empty 
-
-
-    if is_name:
-        value = value.lower()  # Force name element to lowercase
-        value = value.replace(' ', '_')  # Replace spaces with underscores
-
-    return value
-
 
 
 
@@ -183,6 +146,7 @@ def save_node_yaml(node, output_directory):
                 'type': None if field['type'] == 'null' else field['type'],
                 'description': field['description'],
                 'item_ref': field['item_ref'],
+                'guidance': field['guidance'],
             }
 
 

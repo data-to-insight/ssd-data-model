@@ -4,8 +4,9 @@ nodes:
   fields:
   - name: person_child_id
     type: VARCHAR(10)
-    description: Mothers Person Unique ID
+    description: Mother's Child's Unique ID
     item_ref: MOT001A
+    guidance: The unique identifier of the mother's child
     primary_key: true
     validators:
     - required:
@@ -31,6 +32,7 @@ nodes:
     type: VARCHAR(10)
     description: Person Unique ID (Mother)
     item_ref: MOT002A
+    guidance: See PER001A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -55,6 +57,7 @@ nodes:
     type: DATE
     description: Date of birth of mothers child
     item_ref: MOT003A
+    guidance: Currently collected for CLA only, only first child dob collected
     categories:
     - identity
     - looked_after

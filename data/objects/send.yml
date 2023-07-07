@@ -6,6 +6,7 @@ nodes:
     type: null
     description: send_table_id
     item_ref: SEN001A
+    guidance: '#N/A'
     primary_key: true
     validators:
     - required:
@@ -28,7 +29,7 @@ nodes:
     type: CHAR(13)
     description: UPN
     item_ref: SEN002A
-    foreign_key: person.person_upn
+    guidance: '#N/A'
     validators:
     - required:
         enabled: true
@@ -50,6 +51,7 @@ nodes:
     type: null
     description: ULN
     item_ref: SEN003A
+    guidance: '#N/A'
     categories:
     - identity
     - send
@@ -66,6 +68,7 @@ nodes:
     type: CHAR(3)
     description: UPN and ULN unknown
     item_ref: SEN004A
+    guidance: '#N/A'
     categories:
     - identity
     - send
@@ -82,6 +85,7 @@ nodes:
     type: VARCHAR(10)
     description: Person Unique ID
     item_ref: SEN005A
+    guidance: '#N/A'
     foreign_key: person.la_person_id
     validators:
     - required:

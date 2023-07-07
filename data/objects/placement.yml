@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: Placement ID
     item_ref: PLA001A
+    guidance: null
     primary_key: true
     validators:
     - required:
@@ -28,6 +29,7 @@ nodes:
     type: VARCHAR()
     description: Episode ID
     item_ref: PLA002A
+    guidance: null
     foreign_key: cla_episodes.cla_episode_id
     categories:
     - looked_after
@@ -45,14 +47,13 @@ nodes:
     type: DATE
     description: Placement Start Date
     item_ref: PLA003A
+    guidance: null
     categories:
     - looked_after
     - placement
     returns:
     - SSDA903
     - AnnexA
-    cms:
-    - Local
     cms_field:
     - liquid_logic:place_start
     - mosaic:place_start
@@ -63,6 +64,7 @@ nodes:
     type: null
     description: Placement Type
     item_ref: PLA004A
+    guidance: null
     categories:
     - looked_after
     - placement
@@ -82,6 +84,7 @@ nodes:
     type: VARCHAR(8)
     description: URN of Placement
     item_ref: PLA005A
+    guidance: null
     categories:
     - looked_after
     - placement
@@ -101,6 +104,7 @@ nodes:
     type: null
     description: LA of Placement
     item_ref: PLA006A
+    guidance: null
     categories:
     - looked_after
     - placement
@@ -120,6 +124,7 @@ nodes:
     type: null
     description: Placement Provider
     item_ref: PLA007A
+    guidance: null
     categories:
     - looked_after
     - placement
@@ -138,6 +143,7 @@ nodes:
     type: null
     description: Placement Postcode
     item_ref: PLA008A
+    guidance: null
     categories:
     - looked_after
     - placement
@@ -156,13 +162,12 @@ nodes:
     type: DATE
     description: Placement End Date
     item_ref: PLA009A
+    guidance: null
     categories:
     - looked_after
     - placement
     returns:
     - SSDA903
-    cms:
-    - Local
     cms_field:
     - liquid_logic:place_end
     - mosaic:place_end
@@ -173,6 +178,7 @@ nodes:
     type: null
     description: Reason for Placement Change
     item_ref: PLA010A
+    guidance: null
     categories:
     - looked_after
     - placement

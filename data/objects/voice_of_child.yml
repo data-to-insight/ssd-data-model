@@ -2,11 +2,35 @@
 nodes:
 - name: voice_of_child
   fields:
+  - name: la_person_id
+    type: VARCHAR(10)
+    description: Person Unique ID
+    item_ref: VOC001A
+    guidance: null
+    foreign_key: person.la_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - voice_of_child
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:voice_of_child
+    - mosaic:voice_of_child
   - name: voc_explained_worries
     type: null
     description: Has someone explained to you why people are worried for your family
       in a way that you can understand?
-    item_ref: VOC001A
+    item_ref: VOC002A
+    guidance: null
     categories:
     - voice_of_child
     returns:
@@ -21,7 +45,8 @@ nodes:
     type: null
     description: Does your story with words and pictures help you to understand what
       has happened in your family?
-    item_ref: VOC002A
+    item_ref: VOC003A
+    guidance: null
     categories:
     - voice_of_child
     returns:
@@ -36,7 +61,8 @@ nodes:
     type: null
     description: Do you agree with what your worker says needs to happen to keep you
       safe?
-    item_ref: VOC003A
+    item_ref: VOC004A
+    guidance: null
     categories:
     - voice_of_child
     returns:
@@ -51,7 +77,8 @@ nodes:
     type: null
     description: Do you think the plan tells everyone what they need to do to keep
       you safe?
-    item_ref: VOC004A
+    item_ref: VOC005A
+    guidance: null
     categories:
     - voice_of_child
     returns:
@@ -64,9 +91,10 @@ nodes:
     - mosaic:voice_of_child
   - name: voc_tablet_help_explain
     type: null
-    description: Did writing drawing on the tablet help you to explain what you were
+    description: Did writing/ drawing on the tablet help you to explain what you were
       thinking and what you wanted to happen?
-    item_ref: VOC005A
+    item_ref: VOC006A
+    guidance: '#N/A'
     categories:
     - voice_of_child
     returns:

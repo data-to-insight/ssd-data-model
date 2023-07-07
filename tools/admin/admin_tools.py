@@ -1,6 +1,32 @@
 import glob
 from PIL import Image
 import os
+import re
+
+returns_categories = {
+    "Existing": {
+        "colour": "#CCCCCC",
+        "description": "Current returned data",
+    },
+    "Local": {
+        "colour": "#C5E625",
+        "description": "Recorded locally but not currently included in any data collections",
+    },
+    "1aDraft": {
+        "colour": "#1CFCF2",
+        "description": "Suggested new item for SSD",
+    },
+    "1bDraft": {
+        "colour": "#F57C1D",
+        "description": "Suggested new item for one of the 1b projects",
+    },
+    "1bSpecified": {
+        "colour": "#FFC91E",
+        "description": "Final specified item for one of the 1b projects",
+    },
+}
+
+
 
 def get_paths():
     """
@@ -28,4 +54,37 @@ def resize_images(folder_path, target_width, quality=90):
         target_height = int((current_height / current_width) * target_width)
         resized_img = img.resize((target_width, target_height), resample=Image.LANCZOS)
         resized_img.save(file_path, format='PNG', optimize=True, quality=quality)
+
+
+
+def clean_fieldname_data(value, is_name=False):
+    """
+    Cleans the given value.
+    Processes include removing special characters ('/ \'), replacing spaces with underscores.
+
+    Args:
+        value (str): Input string to be cleaned.
+        is_name (bool): Whether the input value is a name. If True, additional processing is done.
+
+    Returns:
+        str: The cleaned string.
+    """
+
+    # Replace double spaces with single spaces
+    value = re.sub(r'\s{2,}', ' ', value)
+
+    # Remove leading and trailing spaces
+    value = value.strip()
+
+    # # Replace many middle spaces with underscore
+    # value = re.sub(r'\s+', '_', value)
+
+    # Check for values '0', 'null', None, and empty strings
+    if value in ['0', 'null', None, '', 0]:
+        return None
+    
+    if is_name:
+        value = value.lower()  # Force name element to lowercase
+
+    return value
 

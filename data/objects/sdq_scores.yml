@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: SDQ ID
     item_ref: SDQ001A
+    guidance: null
     primary_key: true
     validators:
     - required:
@@ -28,6 +29,7 @@ nodes:
     type: VARCHAR(10)
     description: Person Unique ID
     item_ref: SDQ002A
+    guidance: See PER001A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -51,6 +53,7 @@ nodes:
     type: DATE
     description: SDQ Completed Date
     item_ref: SDQ003A
+    guidance: null
     categories:
     - looked_after
     - sdq
@@ -69,6 +72,7 @@ nodes:
     type: null
     description: SDQ Reason
     item_ref: SDQ004A
+    guidance: null
     categories:
     - looked_after
     - sdq
@@ -87,6 +91,7 @@ nodes:
     type: null
     description: SDQ Score
     item_ref: SDQ005A
+    guidance: null
     categories:
     - looked_after
     - sdq

@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: CIN Referral ID
     item_ref: CIN001A
+    guidance: Referral Record unique ID from system or auto-generated as part of export.
     primary_key: true
     validators:
     - required:
@@ -28,6 +29,7 @@ nodes:
     type: VARCHAR(10)
     description: Person Unique ID
     item_ref: CIN002A
+    guidance: See PER001A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -50,6 +52,7 @@ nodes:
     type: DATE
     description: CIN Referral Date
     item_ref: CIN003A
+    guidance: Date of Referral
     categories:
     - child_in_need
     - referral
@@ -69,6 +72,12 @@ nodes:
     type: null
     description: CIN Referral Source
     item_ref: CIN004A
+    guidance: 'For each new referral, record the source of referral from the list.
+
+      Where there is more than one referral for the same child on the same day, the
+      first referral should be recorded and it is this referral source that should
+      be recorded here. The data should be returned for each year the episode remains
+      open.'
     categories:
     - child_in_need
     - referral
@@ -88,6 +97,7 @@ nodes:
     type: null
     description: CIN Referral Outcome
     item_ref: CIN005A
+    guidance: NFA/ Assessment/ Step-down
     categories:
     - child_in_need
     - referral
@@ -107,6 +117,39 @@ nodes:
     type: null
     description: CIN Closure Reason
     item_ref: CIN006A
+    guidance: "This is the reason the local authority stops providing services to\
+      \ the child.\nEnter the reason that the case was closed from the code list.\n\
+      - RC1 Adopted.\n- RC2 Died.\n- RC3 Child arrangements order.\n- RC4 Special\
+      \ guardianship order.\n- RC5 Transferred to services of another local authority.\n\
+      - RC6 Transferred to adult social care services.\n- RC7 Services ceased for\
+      \ any other reason, including child no longer in need.\n- RC8 Case closed after\
+      \ assessment, no further action.\n- RC9 Case closed after assessment, referred\
+      \ to early help.\nIf the case is still open then leave this item blank.\n- \u2018\
+      RC8 - case closed after assessment, no further action\u2019 and \u2018RC9 -\
+      \ case closed after assessment, referred to early help\u2019.\nThe reason for\
+      \ closure code RC8 should be used by local authorities to categorise a case\
+      \ for a child who they assess following a referral, but for whom they do not\
+      \ provide services and whose case is subsequently closed. It should not be used\
+      \ for any other reason.\nThe reason for closure code RC9 should be used by local\
+      \ authorities to categorise a case for a child who they assess following a referral,\
+      \ but is subsequently referred to early help and whose case is then closed.\n\
+      These are different from cases that were closed prior to assessment, at the\
+      \ referral stage; the referral no further action flag should be used in these\
+      \ cases (see section 4.3). The reason for closure codes RC8 and RC9 should not\
+      \ be used for cases that were closed prior to assessment, or for cases where\
+      \ services were provided following assessment.\nIn cases where the child has\
+      \ been assessed not to be in need after an assessment, the reason for closure\
+      \ code RC8 should be used. Where the child has been assessed not to be in need\
+      \ after an assessment and then referred to early help, the reason for closure\
+      \ code RC9 should be used. If a primary need code is retained on your system\
+      \ for these children, then this can be returned using the full code set listed\
+      \ in section 4.5. However, if you do not retain a primary need code for some\
+      \ or all of these children use code \u2018N0\u2019 for this field. This allows\
+      \ for children whose reference data is not completely entered on the system\
+      \ and whose need code is yet to be determined, or where the case is a referral\
+      \ that has been closed following assessment.\nWhen the reason for closure code\
+      \ RC8 or RC9 is used the case should be closed on the same date as the assessment\
+      \ ends or, if this is not practical, as soon as possible afterwards."
     categories:
     - child_in_need
     returns:
@@ -124,6 +167,34 @@ nodes:
     type: DATE
     description: CIN Closure Date
     item_ref: CIN007A
+    guidance: "A case is closed if the local authority has no intention of taking\
+      \ any initiative with respect to the child or family concerned, unless the local\
+      \ authority receives new information that requires it to take some sort of action.\n\
+      Enter the date that the case was closed, according to the formatting covered\
+      \ in the general notes. If the case is still open then leave this item blank.\
+      \ A children in need closure date can be the same as the referral date but,\
+      \ in practice, this should only very rarely occur. Closure date is not required\
+      \ for a referral that leads to no further action.\n- Children in need closure\
+      \ in the case of adoption\nWhen a child\u2019s case is closed because of adoption\
+      \ (reason for closure code \u2018RC1\u2019), the children in need closure date\
+      \ will normally be the day when the court granted the adoption order.\nIt is\
+      \ recognised that an adoption case may sometimes remain open to allow all procedures\
+      \ to be completed. In this situation the census will allow for the case to extend\
+      \ up to one month after the date of the adoption order without having to open\
+      \ a new record. The need code would stay the same in these cases. Anything above\
+      \ one month will require a new record to be created. If a child remains in need\
+      \ after being adopted from care, then the new post-adoption child record should\
+      \ be opened with a children in need referral date that is the date of the court\u2019\
+      s adoption order. If the child is receiving post-adoption support, it should\
+      \ be recorded in this new record.\n- Children in need closure in the case of\
+      \ death\nWhen a child is no longer in need because the child dies or an unborn\
+      \ child is stillborn (reason for closure code \u2018RC2\u2019), the closure\
+      \ date and the date of death recorded on the death certificate no longer need\
+      \ to match. It is recognised that the case may remain open for investigation\
+      \ and review procedures after the child dies; the date of death field allows\
+      \ local authorities to separately record the date of death and final case closure\
+      \ date in the census. This will allow local authorities to record the services\
+      \ they provide between the death and the case closure."
     categories:
     - child_in_need
     returns:
@@ -141,6 +212,7 @@ nodes:
     type: null
     description: CIN Referral Completed by Team
     item_ref: CIN008A
+    guidance: Allocated Team responsible for completing Referral
     categories:
     - child_in_need
     - referral
@@ -159,6 +231,7 @@ nodes:
     type: null
     description: CIN Referral Completed by Worker ID
     item_ref: CIN009A
+    guidance: Allocated worker responsible for completing Referral
     foreign_key: social_worker.sw_id
     categories:
     - child_in_need

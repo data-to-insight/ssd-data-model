@@ -6,6 +6,7 @@ nodes:
     type: null
     description: Address
     item_ref: ADD001A
+    guidance: Address detail
     primary_key: true
     validators:
     - required:
@@ -30,6 +31,7 @@ nodes:
     type: VARCHAR(10)
     description: Person Unique ID
     item_ref: ADD002A
+    guidance: See PER001A
     foreign_key: person.la_person_id
     categories:
     - identity
@@ -50,6 +52,7 @@ nodes:
     type: null
     description: Address Type
     item_ref: ADD003A
+    guidance: Home/ Placement/ Primary/ Secondary
     categories:
     - identity
     - address
@@ -66,8 +69,9 @@ nodes:
     - mosaic:address
   - name: address_start
     type: DATE
-    description: Address Start Date From
+    description: Address Start Date/ From
     item_ref: ADD004A
+    guidance: Date person started living at the address
     categories:
     - identity
     - address
@@ -84,8 +88,9 @@ nodes:
     - mosaic:address
   - name: address_end
     type: DATE
-    description: Address End Date To
+    description: Address End Date/ To
     item_ref: ADD005A
+    guidance: Date person left the address
     categories:
     - identity
     - address
@@ -97,6 +102,27 @@ nodes:
     cms_field:
     - liquid_logic:address_end
     - mosaic:address_end
+    cms_table:
+    - liquid_logic:address
+    - mosaic:address
+  - name: address_postcode
+    type: null
+    description: Address Postcode
+    item_ref: ADD006A
+    guidance: You should provide a current post code for most persons and every effort
+      should be made to obtain valid details. If it is not possible to get the post
+      code, you should leave this field blank and provide an explanatory note.
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:address_postcode
+    - mosaic:address_postcode
     cms_table:
     - liquid_logic:address
     - mosaic:address
