@@ -64,6 +64,7 @@ html_content += ".last-updated-container { display: flex; align-items: center; }
 html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
 html_content += ".repo-link { text-decoration: none; }"
 html_content += ".link-section a { margin-left: 10px; margin-right: 10px; }"
+html_content += ".guidance-notes { color: orange; font-size: 14px; }"  # Modify the font size and color of guidance notes
 
 html_content += "</style></head><body>"
 
@@ -87,7 +88,9 @@ html_content += "</div>"
 html_content += "</div>"
 
 # Object *Overview* section / main image
-html_content += "<h1>Objects Overview <span style='color: orange;'>(Incl. Guidance Notes)</span>:</h1>"
+html_content += f"<h1>Objects Overview <span class='guidance-notes'>(Incl. Guidance Notes)</span>:</h1>"
+
+
 html_content += f"<p>{notes_str1}</p>"
 html_content += f"<p>{notes_str2}</p>"
 html_content += "<div id='table-container'>"  # Add id attribute to the table container
@@ -113,7 +116,7 @@ html_content += "</div>"
 html_content += "</div>"
 
 # Object *Data Points* section
-html_content += "<h1>Object Data Points Overview<span style='color: orange;'>(Incl. Guidance Notes)</span>:</h1>"
+html_content += f"<h1>Object Data Points Overview<span class='guidance-notes'>(Incl. Guidance Notes)</span>:</h1>"
 
 # Read the YAML files to get the object data
 for file_path in glob.glob(f'{yml_import_path}*.yml'):
