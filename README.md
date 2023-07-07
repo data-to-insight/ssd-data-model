@@ -122,7 +122,7 @@ The project is following a transparent and iterative development cycle, within t
 
 ### Local Authorities guiding development
 
-**Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority
+**Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority | Essex CC : Project Management | **ADCS North West** (hosted by **Stockport Council**)
 
 You can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/)
 
