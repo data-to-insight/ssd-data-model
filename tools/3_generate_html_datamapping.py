@@ -35,6 +35,9 @@ html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
 html_content += ".repo-link { text-decoration: none; }"
 html_content += ".link-section a { margin-left: 10px; margin-right: 10px; }"
 html_content += ".image-container { display: block; }"
+# html_content += ".image-container img { width: 100%; }"  # Stretch images to have the same width
+# Alternatively, use the following CSS style to fill the container:
+html_content += ".image-container img { width: 100%; height: 100%; object-fit: cover; }"
 html_content += "</style></head><body>"
 
 html_content += f"<h1>{page_title_str}</h1>"
