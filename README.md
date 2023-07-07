@@ -41,7 +41,6 @@ Defining a set of objects/data points capturing LA Childrens Services data durin
 - [data object/item-guidance model](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/guidance.html)
 - [existing data returns map](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/existingreturnsmap.html)
 
-
 The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
 
 
@@ -51,7 +50,7 @@ The object specification input file[csv] can be found in the [admin](./docs/admi
 
 ### Data objects
 
-The datamodel is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.
+The data model is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.
 
 The [objects](./data/objects) folder contains definition for the specification, data objects as well as details
 of synthetic data parameters and validation rules that apply to each field within the object. At the moment, the validation definitions do not reference back to the stat-returns validation process. 
@@ -127,9 +126,9 @@ The project is following a transparent and iterative development cycle, within t
 
 ### Local Authorities guiding development
 
-**Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority
+**Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority | Essex CC : Project Management | **ADCS North West** (hosted by **Stockport Council**)
 
-You can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/)
+Repo forks, and direct involvement with the project are welcomed and you can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/)
 
 
 ## Repo workflow
@@ -155,7 +154,7 @@ Set up the working environment (will prompt Y/N part-way through, type 'y'to con
 [$] pip install poetry
 ```
 
-The python tools(.py) are in [tools(./tools/) folder. To run them, right click on the file and select 'run in terminal' or type filename on the commandline. This will only work if the setup.sh file has been already run to installed the needed dependencies. 
+The python tools(.py) are in [tools](./tools/) folder. To run them, right click on the file and select 'run in terminal' or type filename on the commandline. This will only work if the setup.sh file has been already run to installed the needed dependencies. 
 
 
 
