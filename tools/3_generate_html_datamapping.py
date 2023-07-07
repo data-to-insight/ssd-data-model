@@ -4,10 +4,8 @@ import datetime
 from admin.admin_tools import get_paths  # get project defined file paths
 
 
-paths = get_paths()
 
-# Define the path to the images folder
-images_folder = "assets/ReturnsMapping/"
+paths = get_paths()
 
 # Initialize html_content as an empty string
 html_content = ""
@@ -18,12 +16,18 @@ main_image_width = "85%"
 image_width = "300px"
 
 # Define page title and intro text
-page_title_str = "Project 1a"
-page_intro_str = "Standard Safeguarding Dataset"
+page_title_str = "Project 1a - Standard Safeguarding Dataset"
+page_intro_str = ""
+
 
 
 notes_str1 = "Right click and open image(s) in a new browser tab to zoom/magnify/scroll."
 repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
+
+# Other sub-links
+index_link_back_str = "https://data-to-insight.github.io/ssd-data-model/index.html"
+guidance_link_back_str = "https://data-to-insight.github.io/ssd-data-model/guidance.html"
+returns_maps_link_back_str = "https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html"
 
 
 # Initialize html_content as an empty string
@@ -52,10 +56,14 @@ html_content += f"<h1>{page_title_str}</h1>"
 html_content += f"<p>{page_intro_str}</p>"
 html_content += "<div style='padding: 2px;'>"
 
+# Last updated and link section
 html_content += "<div class='last-updated-container'>"
 html_content += f"<span class='last-updated-text'>Last updated:</span>"
 html_content += f"<span class='last-updated-date'>{datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}</span>"
 html_content += f"<a href='{repo_link_back_str}' class='repo-link'> &nbsp;|&nbsp; SSD Github</a>"
+html_content += f"<a href='{index_link_back_str}' class='repo-link'> &nbsp;|&nbsp; Index</a>"
+html_content += f"<a href='{guidance_link_back_str}' class='repo-link'> &nbsp;|&nbsp; Data Item Guidance</a>"
+html_content += f"<a href='{returns_maps_link_back_str }' class='repo-link'> &nbsp;|&nbsp; Existing returns maps</a>"
 html_content += "</div>"
 
 html_content += "<h1>DfE Data Returns Map:</h1>"
@@ -66,7 +74,7 @@ html_content += "</div>"
 
 
 # Get the list of image files in the folder
-image_files = glob.glob(images_folder + "*.jpg")
+image_files = glob.glob(paths['wsite_returns_maps']  + "*.jpg")
 
 # Loop over the image files and add them to the HTML content
 for image_file in image_files:
