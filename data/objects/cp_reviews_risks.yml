@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: Review ID
     item_ref: CPK010A
+    guidance: null
     primary_key: true
     foreign_key: cp_reviews.cp_review_id
     validators:
@@ -30,6 +31,7 @@ nodes:
     type: null
     description: Risks to child at this conference
     item_ref: CPK011A
+    guidance: null
     categories:
     - child_protection
     - cp_plan

@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: CP Plan ID
     item_ref: CPP001A
+    guidance: CP Plan unique ID from system or auto-generated as part of export.
     primary_key: true
     validators:
     - required:
@@ -28,6 +29,7 @@ nodes:
     type: VARCHAR(10)
     description: Person Unique ID
     item_ref: CPP002A
+    guidance: See PER001A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -51,6 +53,7 @@ nodes:
     type: DATE
     description: CP Plan Start Date
     item_ref: CPP003A
+    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -70,6 +73,7 @@ nodes:
     type: DATE
     description: CP Plan End Date
     item_ref: CPP004A
+    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -89,6 +93,7 @@ nodes:
     type: null
     description: CP Plan Allocated Team
     item_ref: CPP005A
+    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -107,6 +112,7 @@ nodes:
     type: null
     description: CP Plan Allocated Worker ID
     item_ref: CPP006A
+    guidance: null
     foreign_key: social_worker.sw_id
     categories:
     - child_protection

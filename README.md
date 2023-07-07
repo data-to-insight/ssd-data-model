@@ -35,7 +35,10 @@ The dataset aims to 'flatten' existing local variation in collected data, thus e
 
 ### Data objects Conceptual Model
 
-Defining a set of objects/data points capturing LA Childrens Services data during the different stages of an individual's progress through the CSC system(s); published for iterative review  [current data object/conceptual model](https://data-to-insight.github.io/ssd-data-model/). 
+Defining a set of objects/data points capturing LA Childrens Services data during the different stages of an individual's progress through the CSC system(s); published for iterative review
+
+[data object/conceptual model](https://data-to-insight.github.io/ssd-data-model/)
+[data object/item-guidance model](https://data-to-insight.github.io/ssd-data-model/). 
 
 The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
 

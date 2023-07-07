@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: Visit ID
     item_ref: CLV001A
+    guidance: null
     categories:
     - looked_after
     - visit
@@ -22,6 +23,7 @@ nodes:
     type: VARCHAR()
     description: Episode ID
     item_ref: CLV002A
+    guidance: null
     foreign_key: cla_episodes.cla_episode_id
     categories:
     - looked_after
@@ -39,9 +41,12 @@ nodes:
     type: DATE
     description: Date of Visit
     item_ref: CLV003A
+    guidance: null
     categories:
     - looked_after
     - visit
+    returns:
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -55,6 +60,7 @@ nodes:
     type: BOOLEAN
     description: Child Seen
     item_ref: CLV004A
+    guidance: null
     categories:
     - looked_after
     - visit
@@ -73,6 +79,7 @@ nodes:
     type: BOOLEAN
     description: Child Seen Alone
     item_ref: CLV005A
+    guidance: null
     categories:
     - looked_after
     - visit

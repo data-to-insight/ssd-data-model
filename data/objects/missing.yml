@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: Missing Episode ID
     item_ref: MIS001A
+    guidance: null
     primary_key: true
     validators:
     - required:
@@ -28,6 +29,7 @@ nodes:
     type: VARCHAR()
     description: Episode ID
     item_ref: MIS002A
+    guidance: null
     foreign_key: cla_episodes.cla_episode_id
     categories:
     - looked_after
@@ -45,6 +47,7 @@ nodes:
     type: DATE
     description: Missing Episode Start
     item_ref: MIS003A
+    guidance: null
     categories:
     - looked_after
     - missing
@@ -62,8 +65,9 @@ nodes:
     - mosaic:missing
   - name: mis_epi_type
     type: null
-    description: Episode Type (Missing Absent)
+    description: Episode Type (Missing/ Absent)
     item_ref: MIS004A
+    guidance: null
     categories:
     - looked_after
     - missing
@@ -83,6 +87,7 @@ nodes:
     type: DATE
     description: Missing Episode End
     item_ref: MIS005A
+    guidance: null
     categories:
     - looked_after
     - missing
@@ -102,6 +107,7 @@ nodes:
     type: BOOLEAN
     description: RHI Offered
     item_ref: MIS006A
+    guidance: null
     categories:
     - looked_after
     - missing
@@ -120,6 +126,7 @@ nodes:
     type: BOOLEAN
     description: RHI Accepted
     item_ref: MIS007A
+    guidance: null
     categories:
     - looked_after
     - missing

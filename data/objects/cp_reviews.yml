@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: Review ID
     item_ref: CPR001A
+    guidance: null
     primary_key: true
     validators:
     - required:
@@ -29,6 +30,7 @@ nodes:
     type: VARCHAR()
     description: CP Plan ID
     item_ref: CPR002A
+    guidance: null
     foreign_key: cp_plans.cp_plan_id
     categories:
     - child_protection
@@ -47,6 +49,7 @@ nodes:
     type: DATE
     description: Review Due Date
     item_ref: CPR003A
+    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -66,6 +69,7 @@ nodes:
     type: DATE
     description: Date of Review
     item_ref: CPR004A
+    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -86,6 +90,7 @@ nodes:
     type: BOOLEAN
     description: CP Plan to Continue?
     item_ref: CPR005A
+    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -105,6 +110,7 @@ nodes:
     type: BOOLEAN
     description: Quorate?
     item_ref: CPR006A
+    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -124,6 +130,7 @@ nodes:
     type: null
     description: Child Participation at Review
     item_ref: CPR007A
+    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -141,8 +148,9 @@ nodes:
     - mosaic:cp_reviews
   - name: cp_rev_cyp_views_quality
     type: null
-    description: Quality of representation of CYP views experience
+    description: Quality of representation of CYP views/ experience
     item_ref: CPR008A
+    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -160,9 +168,10 @@ nodes:
     - mosaic:cp_reviews
   - name: cp_rev_sufficient_prog
     type: null
-    description: 'Sufficient progress made against the CP Plan to improve outcomes
-      for the child? '
+    description: Sufficient progress made against the CP Plan to improve outcomes
+      for the child?
     item_ref: CPR009A
+    guidance: null
     categories:
     - child_protection
     - cp_plan

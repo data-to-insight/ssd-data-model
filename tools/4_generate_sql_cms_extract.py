@@ -1,13 +1,26 @@
-import glob
-import yaml
+#
+# User defined settings
 
 # Generate SQL for which CMS?
-cms_type = 'mosaic'  # Specify the CMS type for SQL generation
+cms_type = input("Enter a CMS type (mosaic|liquid logic): ") # Specify the CMS type for generating SQL
 
 db_name = 'PLACEHOLDER_DB_NAME'  # Replace this with your database name
 
+
+
+
+#
+# No changes required past this point
+
+import glob
+import yaml
+
 # Read the YAML schema files
 schema_files = glob.glob('data/objects/*.yml')
+
+# clean up potentially dirty user input 
+cms_type = cms_type.strip().lower().replace("  ", " ").replace(" ", "_")
+
 
 # Start generating the SQL script
 sql_script = f"USE {db_name};\n"

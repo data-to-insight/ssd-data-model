@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: Named Plan ID
     item_ref: ENP001A
+    guidance: '#N/A'
     primary_key: true
     validators:
     - required:
@@ -29,6 +30,7 @@ nodes:
     type: VARCHAR()
     description: Assessment ID
     item_ref: ENP002A
+    guidance: '#N/A'
     foreign_key: ehcp_assessment.ehcp_asmt_id
     categories:
     - send
@@ -47,6 +49,7 @@ nodes:
     type: DATE
     description: Start Date
     item_ref: ENP003A
+    guidance: '#N/A'
     categories:
     - send
     - ehcp_request
@@ -66,6 +69,7 @@ nodes:
     type: DATE
     description: Cease Date
     item_ref: ENP004A
+    guidance: '#N/A'
     categories:
     - send
     - ehcp_request
@@ -85,6 +89,7 @@ nodes:
     type: null
     description: Cease Reason
     item_ref: ENP005A
+    guidance: '#N/A'
     categories:
     - send
     - ehcp_request

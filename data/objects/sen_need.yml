@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: SEN Need Table ID
     item_ref: SND001A
+    guidance: '#N/A'
     primary_key: true
     validators:
     - required:
@@ -30,6 +31,7 @@ nodes:
     type: VARCHAR()
     description: Plan ID
     item_ref: SND002A
+    guidance: '#N/A'
     foreign_key: ehcp_active_plans.active_ehcp_id
     categories:
     - send
@@ -49,6 +51,7 @@ nodes:
     type: null
     description: SEN Type
     item_ref: SND003A
+    guidance: '#N/A'
     categories:
     - send
     - ehcp_request
@@ -69,6 +72,7 @@ nodes:
     type: null
     description: SEN Type Rank
     item_ref: SND004A
+    guidance: '#N/A'
     categories:
     - send
     - ehcp_request

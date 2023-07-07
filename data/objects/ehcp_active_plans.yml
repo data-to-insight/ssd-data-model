@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: Plan ID
     item_ref: EAP001A
+    guidance: '#N/A'
     primary_key: true
     validators:
     - required:
@@ -29,6 +30,7 @@ nodes:
     type: VARCHAR()
     description: Request ID
     item_ref: EAP002A
+    guidance: '#N/A'
     foreign_key: ehcp_requests.ehcp_request_id
     categories:
     - send
@@ -47,6 +49,7 @@ nodes:
     type: DATE
     description: Last Review
     item_ref: EAP003A
+    guidance: '#N/A'
     categories:
     - send
     - ehcp_request

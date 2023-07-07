@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: Care Leaver Table ID
     item_ref: CLE001A
+    guidance: null
     primary_key: true
     validators:
     - required:
@@ -27,6 +28,7 @@ nodes:
     type: VARCHAR(10)
     description: Person Unique ID
     item_ref: CLE002A
+    guidance: See PER001A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -47,8 +49,9 @@ nodes:
     - mosaic:care_leavers
   - name: cl_eligibility
     type: null
-    description: Eligibility Status Category
+    description: Eligibility Status/ Category
     item_ref: CLE003A
+    guidance: null
     categories:
     - care_leavers
     returns:
@@ -66,6 +69,7 @@ nodes:
     type: null
     description: In Touch Category
     item_ref: CLE004A
+    guidance: null
     categories:
     - care_leavers
     returns:
@@ -83,6 +87,7 @@ nodes:
     type: DATE
     description: Latest Date of Contact
     item_ref: CLE005A
+    guidance: null
     categories:
     - care_leavers
     returns:
@@ -100,6 +105,7 @@ nodes:
     type: null
     description: Accommodation
     item_ref: CLE006A
+    guidance: null
     categories:
     - care_leavers
     returns:
@@ -117,6 +123,7 @@ nodes:
     type: null
     description: Suitability of Accommodation
     item_ref: CLE007A
+    guidance: null
     categories:
     - care_leavers
     returns:
@@ -134,6 +141,7 @@ nodes:
     type: null
     description: Activity Status
     item_ref: CLE008A
+    guidance: null
     categories:
     - care_leavers
     returns:
@@ -151,6 +159,7 @@ nodes:
     type: null
     description: Latest Pathway Plan Review Date
     item_ref: CLE009A
+    guidance: null
     categories:
     - care_leavers
     returns:
@@ -168,6 +177,7 @@ nodes:
     type: null
     description: Allocated Personal Advisor
     item_ref: CLE010A
+    guidance: null
     categories:
     - care_leavers
     returns:
@@ -185,6 +195,7 @@ nodes:
     type: null
     description: Allocated Team
     item_ref: CLE011A
+    guidance: null
     categories:
     - care_leavers
     returns:
@@ -202,6 +213,7 @@ nodes:
     type: null
     description: Allocated Worker ID
     item_ref: CLE012A
+    guidance: null
     foreign_key: social_worker.sw_id
     categories:
     - care_leavers

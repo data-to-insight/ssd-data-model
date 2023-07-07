@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: Category of Abuse id
     item_ref: CAT001A
+    guidance: null
     primary_key: true
     validators:
     - required:
@@ -28,6 +29,7 @@ nodes:
     type: VARCHAR()
     description: CP Plan ID
     item_ref: CAT002A
+    guidance: See CPP001A
     foreign_key: cp_plans.cp_plan_id
     validators:
     - required:
@@ -50,6 +52,7 @@ nodes:
     type: null
     description: Category of Abuse
     item_ref: CAT003A
+    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -68,6 +71,7 @@ nodes:
     type: null
     description: Category of Abuse Start Date
     item_ref: CAT004A
+    guidance: null
     categories:
     - child_protection
     - cp_plan

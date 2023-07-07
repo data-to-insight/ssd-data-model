@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR(10)
     description: Person Unique ID
     item_ref: IMM001A
+    guidance: See PER001A
     primary_key: true
     foreign_key: person.la_person_id
     validators:
@@ -31,6 +32,7 @@ nodes:
     type: null
     description: Immigration Status
     item_ref: IMM002A
+    guidance: Immigration Status e.g. Unaccompanied Asylum Seeking Child
     categories:
     - identity
     - immigration
@@ -50,6 +52,7 @@ nodes:
     type: DATE
     description: Immigration Status Start
     item_ref: IMM003A
+    guidance: Start Date of Immigration Status
     categories:
     - identity
     - immigration
@@ -69,6 +72,7 @@ nodes:
     type: DATE
     description: Immigration Status End
     item_ref: IMM004A
+    guidance: End Date of Immigration Status
     categories:
     - identity
     - immigration

@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: CIN Visit ID
     item_ref: CNV001A
+    guidance: CIN Visit unique ID from system or auto-generated as part of export.
     primary_key: true
     validators:
     - required:
@@ -29,6 +30,7 @@ nodes:
     type: VARCHAR()
     description: CIN Plan ID
     item_ref: CNV002A
+    guidance: See CNP001A
     foreign_key: cin_plans.cin_plan_id
     categories:
     - child_in_need
@@ -47,6 +49,7 @@ nodes:
     type: DATE
     description: CIN Visit Date
     item_ref: CNV003A
+    guidance: Date of Visit
     categories:
     - child_in_need
     - cin_plan
@@ -66,6 +69,7 @@ nodes:
     type: BOOLEAN
     description: Child Seen
     item_ref: CNV004A
+    guidance: Was the child seen during this visit?
     categories:
     - child_in_need
     - cin_plan
@@ -85,6 +89,7 @@ nodes:
     type: BOOLEAN
     description: Child Seen Alone
     item_ref: CNV005A
+    guidance: Was the child seen alone during this visit?
     categories:
     - child_in_need
     - cin_plan
@@ -104,6 +109,7 @@ nodes:
     type: BOOLEAN
     description: Child Bedroom Seen
     item_ref: CNV006A
+    guidance: Was the child's bedroom seen during this visit?
     categories:
     - child_in_need
     - cin_plan

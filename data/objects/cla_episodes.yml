@@ -6,6 +6,7 @@ nodes:
     type: VARCHAR()
     description: Episode ID
     item_ref: CLA001A
+    guidance: null
     primary_key: true
     validators:
     - required:
@@ -27,6 +28,7 @@ nodes:
     type: VARCHAR(10)
     description: Person Unique ID
     item_ref: CLA002A
+    guidance: See PER001A
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -49,6 +51,34 @@ nodes:
     type: DATE
     description: Date Episode Commenced
     item_ref: CLA003A
+    guidance: "This item records the date that each episode began. For the first episode\
+      \ in the year, this date can be in the current data year, or an earlier data\
+      \ year. When loading data using CSV or XML, dates must be recorded in a DD/MM/YYYY\
+      \ format. Example: 4 November 2023 should be entered as 04/11/2023.\nExceptionally,\
+      \ once loaded, the dates in the episode fields will appear as DD/MM/YY (year\
+      \ as a 2-digit number). Manual amendments to episode dates may be made using\
+      \ either format DD/MM/YY or DD/MM/YYYY, though the latter will appear as DD/MM/YY\
+      \ when saved). This is intended to make the episodes easier to read and manually\
+      \ amend, particularly when a record contains several episodes.\nWhere episodes\
+      \ are consecutive, the new episode must start on the same day that the previous\
+      \ episode finished.\nWhen recording an agreement to provide a series of short-term\
+      \ placements (legal status V3/V4), enter in this field the date the first placement\
+      \ under the agreement began. For further information about children being looked-after\
+      \ under a series of short-term placements see Section 1.10.\nWhere an episode\
+      \ began in a previous statistical year, but is still open on 31 March, do not\
+      \ complete \u2018Reason Episode Ceased\u2019 or \u2018Date Episode Ceased\u2019\
+      . The following year\u2019s record must then start with the same episode details\
+      \ showing the actual date the episode commenced if the episode subsequently\
+      \ closes, both the \u2018Reason Episode Ceased\u2019 and the \u2018Date Episode\
+      \ Ceased\u2019 should be recorded).\nEpisodes cannot start and end on the same\
+      \ day. If a child has two changes of legal status in one day only the second\
+      \ legal status is recorded. Similarly, in the unlikely event of two placements\
+      \ starting on the same day, only the status at the end of the day should be\
+      \ recorded. In such cases we no longer regard the first move of the day as being\
+      \ a placement. It follows from this that an essential component of a placement\
+      \ for SSDA903 purposes is that a placement must involve an overnight stay. A\
+      \ \u2018placement\u2019 that does not include an overnight stay should be regarded\
+      \ as a \u2018visit\u2019 and not shown on the SSDA903."
     categories:
     - looked_after
     returns:
@@ -66,6 +96,39 @@ nodes:
     type: null
     description: Reason for New CLA Episode
     item_ref: CLA004A
+    guidance: "Use Code S where a child is starting to be looked-after for the first\
+      \ time, or had previously ceased to be looked-after, and is now starting to\
+      \ be looked-after again. Also use code S when recording agreements to provide\
+      \ short-term placements (legal status V4), and for individual breaks under such\
+      \ an agreement, if these are being recorded separately (legal status V3).\n\
+      Use Code L where there is a change of legal status, but the placement does not\
+      \ change. By \u2018legal status\u2019 we mean the legal status underlying the\
+      \ fact that the child is looked-after.\nUse Code P where there is a change of\
+      \ placement and carer, but the legal status does not change. This would include\
+      \ the following scenarios:\n\u2022 Move from one foster carer to another foster\
+      \ carer (for example, U3 to another U3 placement type code).\n\u2022 Move from\
+      \ a foster carer to a children\u2019s home (for example, U3 to K2 placement\
+      \ types).\nIn both scenarios there has been a change of carer. When a child\
+      \ is living independently, a new episode should be created each time they move,\
+      \ and code P should be used.\nUse Code T where there is a change of placement,\
+      \ but the child remains with the same carer and the legal status does not change.\
+      \ This would include the following scenarios:\n\u2022 Child moves to a new house\
+      \ with current foster carer (either inside or outside of local authority boundary).\n\
+      \u2022 Child remains with same carer or within same setting but either the URN\
+      \ of the setting changes or the provider type changes (for example, a foster\
+      \ carer moves from an IFA to the local authority provider, or a placement for\
+      \ adoption transferring to a regional adoption agency, or an unregulated independent\
+      \ or semi independent setting registering with Ofsted).\nIn both scenarios,\
+      \ the child has remained with the same carer, but for some other reason, a new\
+      \ placement is required on the SSDA903.\nUse Code B where both legal status\
+      \ and placement change, with a change of carer, on the same day. The two changes\
+      \ do not need to be simultaneous or consequent one upon the other. The code\
+      \ simply reflects that there was a change in carer and a change in legal status,\
+      \ for whatever reason, on the same day.\nUse Code U where both legal status\
+      \ and placement change on the same day, but the child remains with the same\
+      \ carer. The two changes do not need to be simultaneous or consequent one upon\
+      \ the other. The code simply reflects that there was a change in placement and\
+      \ a change in legal status, for whatever reason, on the same day."
     categories:
     - looked_after
     returns:
@@ -83,6 +146,7 @@ nodes:
     type: DATE
     description: Date Episode Ceased
     item_ref: CLA005A
+    guidance: null
     categories:
     - looked_after
     returns:
@@ -101,6 +165,7 @@ nodes:
     type: null
     description: Reason Episode Ceased
     item_ref: CLA006A
+    guidance: null
     categories:
     - looked_after
     returns:
@@ -119,6 +184,7 @@ nodes:
     type: null
     description: Allocated Team
     item_ref: CLA007A
+    guidance: null
     categories:
     - looked_after
     returns:
@@ -136,6 +202,7 @@ nodes:
     type: null
     description: Allocated Worker ID
     item_ref: CLA008A
+    guidance: null
     foreign_key: social_worker.sw_id
     categories:
     - looked_after
