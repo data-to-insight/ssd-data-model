@@ -59,6 +59,8 @@ html_content += "th.returns-column { width: 20%; }"
 html_content += ".last-updated-container { display: flex; align-items: center; }"
 html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
 html_content += ".repo-link { text-decoration: none; }"
+html_content += ".link-section a { margin-left: 10px; margin-right: 10px; }"
+
 html_content += "</style></head><body>"
 
 # Embed returns_categories as a JSON object for JavaScript to use
