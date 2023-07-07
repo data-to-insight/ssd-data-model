@@ -8,9 +8,6 @@ paths = get_paths()
 # Initialize html_content as an empty string
 html_content = ""
 
-# main overview image settings
-main_image_width = "85%"
-
 # Define page title and intro text
 page_title_str = "Project 1a - Standard Safeguarding Dataset"
 page_intro_str = ""
@@ -34,10 +31,8 @@ html_content += ".last-updated-container { display: flex; align-items: center; }
 html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
 html_content += ".repo-link { text-decoration: none; }"
 html_content += ".link-section a { margin-left: 10px; margin-right: 10px; }"
-html_content += ".image-container { display: block; }"
-# html_content += ".image-container img { width: 100%; }"  # Stretch images to have the same width
-# Alternatively, use the following CSS style to fill the container:
-html_content += ".image-container img { width: 100%; height: 100%; object-fit: cover; }"
+html_content += ".image-container { display: block; width: 85%; margin: 0 auto; }"  # Set the container width to 85% of the page width
+html_content += ".image-container img { width: 100%; }"  # Stretch the images to fill the container width
 html_content += "</style></head><body>"
 
 html_content += f"<h1>{page_title_str}</h1>"
