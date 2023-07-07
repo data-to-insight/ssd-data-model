@@ -35,7 +35,7 @@ The dataset aims to 'flatten' existing local variation in collected data, thus e
 
 ### Data objects Conceptual Model
 
-Defining a set of objects/data points capturing LA Childrens Services data during the different stages of an individual's progress through the CSC system(s); published for iterative review  [current data object/conceptual model](https://data-to-insight.github.io/ssd-data-model/). 
+Defining a set of objects/data points capturing LA Children's Services data during the different stages of an individual's progress through the CSC system(s); published for iterative review  [current data object/conceptual model](https://data-to-insight.github.io/ssd-data-model/). 
 
 The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
 
@@ -46,7 +46,7 @@ The object specification input file[csv] can be found in the [admin](./docs/admi
 
 ### Data objects
 
-The datamodel is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.
+The data model is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.
 
 The [objects](./data/objects) folder contains definition for the specification, data objects as well as details
 of synthetic data parameters and validation rules that apply to each field within the object. At the moment, the validation definitions do not reference back to the stat-returns validation process. 
