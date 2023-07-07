@@ -33,6 +33,8 @@ html_content += "body { margin: 20px; }"
 html_content += ".last-updated-container { display: flex; align-items: center; }"
 html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
 html_content += ".repo-link { text-decoration: none; }"
+html_content += ".link-section a { margin-left: 10px; margin-right: 10px; }"
+html_content += ".image-container { display: block; }"
 html_content += "</style></head><body>"
 
 html_content += f"<h1>{page_title_str}</h1>"
@@ -43,31 +45,34 @@ html_content += "<div style='padding: 2px;'>"
 html_content += "<div class='last-updated-container'>"
 html_content += f"<span class='last-updated-text'>Last updated:</span>"
 html_content += f"<span class='last-updated-date'>{datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}</span>"
-html_content += f"<a href='{repo_link_back_str}' class='repo-link'> &nbsp;|&nbsp; SSD Github</a>"
-html_content += f"<a href='{index_link_back_str}' class='repo-link'> &nbsp;|&nbsp; Object Concept Model</a>"
-html_content += f"<a href='{guidance_link_back_str}' class='repo-link'> &nbsp;|&nbsp; Data Item Guidance</a>"
-html_content += f"<a href='{returns_maps_link_back_str}' class='repo-link'> &nbsp;|&nbsp; Existing returns maps</a>"
+html_content += "<div class='link-section'>"
+html_content += f"<a href='{repo_link_back_str}' class='repo-link'> | SSD Github</a>"
+html_content += f"<a href='{index_link_back_str}' class='repo-link'> | Object Concept Model</a>"
+html_content += f"<a href='{guidance_link_back_str}' class='repo-link'> | Data Item Guidance</a>"
+html_content += f"<a href='{returns_maps_link_back_str}' class='repo-link'> | Existing returns maps</a>"
+html_content += "</div>"
 html_content += "</div>"
 
 html_content += "<h1>DfE Data Returns:</h1>"
 html_content += f"<p>{notes_str1}</p>"
 
 # Get the list of image files in the folder
-image_files = glob.glob(paths['returns_maps'] + "*.jpg") # location of source files
-
+image_files = glob.glob(paths['returns_maps'] + "*.jpg")  # location of source files
 
 # Check if any image files are found
 if len(image_files) > 0:
     # Loop over the image files and add them to the HTML content
     for image_file in image_files:
-  
         # Extract the image filename
         image_filename = os.path.basename(image_file)
 
-        web_img_path = paths['wsite_returns_maps'] + image_filename # relative img path to generated html page
+        web_img_path = paths['wsite_returns_maps'] + image_filename  # relative img path to generated HTML page
 
+        image_filename = os.path.splitext(image_filename)[0]  # Remove '.jpg' extension
+
+        html_content += f"<h2>{image_filename}</h2>"
         # Add the image to the HTML content
-        html_content += f'<img src="{web_img_path}" alt="{image_filename}" style="max-width: 100%; margin-bottom: 20px;">'
+        html_content += f'<div class="image-container"><img src="{web_img_path}" alt="{image_filename}" style="max-width: 100%; margin-bottom: 20px;"></div>'
 else:
     # No image files found
     print(f"In location {paths['returns_maps']}, No images found...")
