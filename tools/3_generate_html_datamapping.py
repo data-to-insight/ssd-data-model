@@ -53,21 +53,24 @@ html_content += "<h1>DfE Data Returns:</h1>"
 html_content += f"<p>{notes_str1}</p>"
 
 # Get the list of image files in the folder
-image_files = glob.glob(paths['wsite_returns_maps'] + "*.jpg")
+image_files = glob.glob(paths['returns_maps'] + "*.jpg") # location of source files
 
 
 # Check if any image files are found
 if len(image_files) > 0:
     # Loop over the image files and add them to the HTML content
     for image_file in image_files:
+  
         # Extract the image filename
         image_filename = os.path.basename(image_file)
 
+        web_img_path = paths['wsite_returns_maps'] + image_filename # relative img path to generated html page
+
         # Add the image to the HTML content
-        html_content += f'<img src="{image_file}" alt="{image_filename}" style="max-width: 100%; margin-bottom: 20px;">'
+        html_content += f'<img src="{web_img_path}" alt="{image_filename}" style="max-width: 100%; margin-bottom: 20px;">'
 else:
     # No image files found
-    print(f"In location {paths['wsite_returns_maps']}, No images found...")
+    print(f"In location {paths['returns_maps']}, No images found...")
     html_content += "<p>No images found.</p>"
 
 
