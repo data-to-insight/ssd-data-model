@@ -41,7 +41,6 @@ Defining a set of objects/data points capturing LA Childrens Services data durin
 - [data object/item-guidance model](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/guidance.html)
 - [existing data returns map](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/existingreturnsmap.html)
 
-new guidance and returns mapping imgs and
 
 The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
 
