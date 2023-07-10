@@ -3,10 +3,8 @@ import os
 import datetime
 from admin.admin_tools import get_paths  # get project defined file paths
 
-paths = get_paths()
 
-# Initialize html_content as an empty string
-html_content = ""
+
 
 # Define page title and intro text
 page_title_str = "Project 1a - Standard Safeguarding Dataset"
@@ -20,6 +18,14 @@ index_link_str = "https://data-to-insight.github.io/ssd-data-model/index.html"
 guidance_link_str = "https://data-to-insight.github.io/ssd-data-model/guidance.html"
 returns_maps_link_str = "https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html"
 change_request_link_str = "https://forms.office.com/e/UysrcGApJ1"
+
+
+#### end of settings
+
+
+
+
+paths = get_paths()
 
 # Initialize html_content as an empty string
 html_content = ""
