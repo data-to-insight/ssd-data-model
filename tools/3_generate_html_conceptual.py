@@ -32,11 +32,11 @@ image_width = "300px" # Sub-Image width (adjust as needed)
 
 
 # Define page title and intro text
-page_title_str = "Project 1a - Standard Safeguarding Dataset"
+page_title_str = "Standard Safeguarding Dataset: Object Concept Model"
 page_intro_str = ""
 
-notes_str1 = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item id numbers [AAA000A] enable specific item/field referencing."
-notes_str2 = "Data objects/item definitions published towards iterative review. Diagrams consisdered as conceptual interpretations, not a true relational/representational model"
+notes_str1 = "This page shows how the Standard Safeguarding Dataset's tables relate, and details the structure of each table. Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item id numbers [AAA000A] enable specific item/field referencing."
+notes_str2 = "This is work in progress subject to frequent change; Data objects and item definitions are published here to support iterative development. Diagrams consisdered as conceptual interpretations, not a true relational/representational model"
 repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 # Other sub-links
