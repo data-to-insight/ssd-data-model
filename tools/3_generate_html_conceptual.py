@@ -37,12 +37,13 @@ page_intro_str = ""
 
 notes_str1 = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item id numbers [AAA000A] enable specific item/field referencing."
 notes_str2 = "Data objects/item definitions published towards iterative review. Diagrams consisdered as conceptual interpretations, not a true relational/representational model"
-repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
+repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 # Other sub-links
-index_link_back_str = "https://data-to-insight.github.io/ssd-data-model/index.html"
-guidance_link_back_str = "https://data-to-insight.github.io/ssd-data-model/guidance.html"
-returns_maps_link_back_str = "https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html"
+index_link_str = "https://data-to-insight.github.io/ssd-data-model/index.html"
+guidance_link_str = "https://data-to-insight.github.io/ssd-data-model/guidance.html"
+returns_maps_link_str = "https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html"
+change_request_link_str = "https://forms.office.com/e/UysrcGApJ1"
 
 html_content = "<html><head><style>"
 html_content += "body { margin: 20px; }"
@@ -59,9 +60,11 @@ html_content += "th.returns-column { width: 20%; }"
 html_content += ".last-updated-container { display: flex; align-items: center; }"
 html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
 html_content += ".repo-link { text-decoration: none; }"
+# html_content += ".link-section a { margin-left: 10px; margin-right: 10px; }"
 html_content += ".link-section a { margin-left: 10px; margin-right: 10px; }"
 
 html_content += "</style></head><body>"
+
 
 # Embed returns_categories as a JSON object for JavaScript to use
 html_content += f"<script>\nvar returns_categories = {json.dumps(returns_categories)};\n</script>"
@@ -74,13 +77,18 @@ html_content += "<div style='padding: 2px;'>"
 html_content += "<div class='last-updated-container'>"
 html_content += f"<span class='last-updated-text'>Last updated:</span>"
 html_content += f"<span class='last-updated-date'>{datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}</span>"
+
 html_content += "<div class='link-section'>"
-html_content += f"<a href='{repo_link_back_str}' class='repo-link'> | SSD Github</a>"
-html_content += f"<a href='{index_link_back_str}' class='repo-link'> | Object Concept Model</a>"
-html_content += f"<a href='{guidance_link_back_str}' class='repo-link'> | Data Item Guidance</a>"
-html_content += f"<a href='{returns_maps_link_back_str}' class='repo-link'> | Existing returns maps</a>"
+html_content += f"<a href='{repo_link_str}' class='repo-link'> | SSD Github</a>"
+html_content += f"<a href='{index_link_str}' class='repo-link'> | Object Concept Model</a>"
+html_content += f"<a href='{guidance_link_str}' class='repo-link'> | Data Item Guidance</a>"
+html_content += f"<a href='{returns_maps_link_str}' class='repo-link'> | Existing returns maps</a>"
+html_content += f"<a href='{change_request_link_str}' class='repo-link'> | Submit Change Request</a>"
 html_content += "</div>"
+
 html_content += "</div>"
+
+
 
 # Object *Overview* section / main image
 html_content += "<h1>Objects Overview:</h1>"
