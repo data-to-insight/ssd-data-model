@@ -13,22 +13,6 @@ from admin.admin_tools import get_paths  # get project defined file paths
 from admin.admin_tools import resize_images
 from admin.admin_tools import returns_categories
 
-paths = get_paths()
-erd_objects_path = paths['wsite_sub_images']
-erd_overview_path = paths['wsite_main_images']
-yml_import_path = paths['yml_data']
-
-# Initialize html_content as an empty string
-html_content = ""
-# Embed colour_dict as a JSON object for JavaScript to use
-# html_content += f"<script>\nvar colour_dict = {json.dumps(colour_dict)};\n</script>"
-
-# main overview image settings
-# 
-#  output name
-overview_erd_filename = "ssd_conceptual_diagram.png"
-main_image_width = "85%"  # Calculate main image width # Adjust the padding as needed
-image_width = "300px" # Sub-Image width (adjust as needed)
 
 
 # Define page title and intro text
@@ -44,6 +28,27 @@ index_link_str = "https://data-to-insight.github.io/ssd-data-model/index.html"
 guidance_link_str = "https://data-to-insight.github.io/ssd-data-model/guidance.html"
 returns_maps_link_str = "https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html"
 change_request_link_str = "https://forms.office.com/e/UysrcGApJ1"
+
+
+#### end of settings
+
+
+paths = get_paths()
+erd_objects_path = paths['wsite_sub_images']
+erd_overview_path = paths['wsite_main_images']
+yml_import_path = paths['yml_data']
+
+# Initialize html_content as an empty string
+html_content = ""
+
+
+# main overview/display image settings
+# 
+overview_erd_filename = "ssd_conceptual_diagram.png"
+main_image_width = "85%"  # Calculate main image width # Adjust the padding as needed
+image_width = "300px" # Sub-Image width (adjust as needed)
+
+
 
 html_content = "<html><head><style>"
 html_content += "body { margin: 20px; }"
