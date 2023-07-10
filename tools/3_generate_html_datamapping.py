@@ -8,11 +8,11 @@ from admin.admin_tools import get_paths  # get project defined file paths
 
 # Define page title and intro text
 page_title_str = "Standard Safeguarding Dataset: Existing Returns Map"
-page_intro_str = ""
+page_intro_str = "This page shows the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. "
 
 
-notes_str1 = "This page shows the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. Right click and open image(s) in a new browser tab to zoom/magnify/scroll."
-repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
+notes_str1 = "Right click and open image(s) in a new browser tab to zoom/magnify/scroll."
+repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 
 # Other sub-links

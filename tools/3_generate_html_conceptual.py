@@ -2,11 +2,7 @@
 
 import glob
 import yaml
-import base64
-import subprocess
 import datetime
-from PIL import Image
-import os
 import json
 
 from admin.admin_tools import get_paths  # get project defined file paths
@@ -17,9 +13,9 @@ from admin.admin_tools import returns_categories
 
 # Define page title and intro text
 page_title_str = "Standard Safeguarding Dataset: Object Concept Model"
-page_intro_str = ""
+page_intro_str = "This page shows how the Standard Safeguarding Dataset's tables relate, and details the structure of each table. "
 
-notes_str1 = "This page shows how the Standard Safeguarding Dataset's tables relate, and details the structure of each table. Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item id numbers [AAA000A] enable specific item/field referencing."
+notes_str1 = "Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item id numbers [AAA000A] enable specific item/field referencing."
 notes_str2 = "This is work in progress subject to frequent change; Data objects and item definitions are published here to support iterative development. Diagrams consisdered as conceptual interpretations, not a true relational/representational model"
 repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
