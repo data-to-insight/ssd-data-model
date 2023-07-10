@@ -3,22 +3,31 @@ import os
 import datetime
 from admin.admin_tools import get_paths  # get project defined file paths
 
-paths = get_paths()
 
-# Initialize html_content as an empty string
-html_content = ""
+
 
 # Define page title and intro text
 page_title_str = "Standard Safeguarding Dataset: Existing Returns Map"
 page_intro_str = ""
 
+
 notes_str1 = "This page shows the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. Right click and open image(s) in a new browser tab to zoom/magnify/scroll."
 repo_link_back_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
+
 # Other sub-links
-index_link_back_str = "https://data-to-insight.github.io/ssd-data-model/index.html"
-guidance_link_back_str = "https://data-to-insight.github.io/ssd-data-model/guidance.html"
-returns_maps_link_back_str = "https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html"
+index_link_str = "https://data-to-insight.github.io/ssd-data-model/index.html"
+guidance_link_str = "https://data-to-insight.github.io/ssd-data-model/guidance.html"
+returns_maps_link_str = "https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html"
+change_request_link_str = "https://forms.office.com/e/UysrcGApJ1"
+
+
+#### end of settings
+
+
+
+
+paths = get_paths()
 
 # Initialize html_content as an empty string
 html_content = ""
@@ -44,11 +53,13 @@ html_content += "<div class='last-updated-container'>"
 html_content += f"<span class='last-updated-text'>Last updated:</span>"
 html_content += f"<span class='last-updated-date'>{datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}</span>"
 html_content += "<div class='link-section'>"
-html_content += f"<a href='{repo_link_back_str}' class='repo-link'> | SSD Github</a>"
-html_content += f"<a href='{index_link_back_str}' class='repo-link'> | Object Concept Model</a>"
-html_content += f"<a href='{guidance_link_back_str}' class='repo-link'> | Data Item Guidance</a>"
-html_content += f"<a href='{returns_maps_link_back_str}' class='repo-link'> | Existing returns maps</a>"
+html_content += f"<a href='{repo_link_str}' class='repo-link'> | SSD Github</a>"
+html_content += f"<a href='{index_link_str}' class='repo-link'> | Object Concept Model</a>"
+html_content += f"<a href='{guidance_link_str}' class='repo-link'> | Data Item Guidance</a>"
+html_content += f"<a href='{returns_maps_link_str}' class='repo-link'> | Existing returns maps</a>"
+html_content += f"<a href='{change_request_link_str}' class='repo-link'> | Submit Change Request</a>"
 html_content += "</div>"
+
 html_content += "</div>"
 
 html_content += "<h1>DfE Data Returns:</h1>"
