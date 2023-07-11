@@ -40,8 +40,9 @@ nodes:
       \ \u2013 one for pre-adoption and one for post-adoption \u2013 with two different\
       \ child identifiers."
     metadata:
-      change_datetime: '2023-07-10'
+      change_datetime: 10/07/2023 09:00
       change_ref_id: SSD0002
+      item_changes_count: '2.0'
       reason_text: extended number of chars allowed
       data_quality_notes: null
   - name: person_sex

@@ -48,8 +48,9 @@ nodes:
     - mosaic:address
     guidance: See PER001A
     metadata:
-      change_datetime: '2023-07-10'
+      change_datetime: 10/07/2023 05:00
       change_ref_id: SSD0103
+      item_changes_count: '2.0'
       reason_text: cms field name change
       data_quality_notes: null
   - name: address_type
@@ -71,8 +72,9 @@ nodes:
     - mosaic:address
     guidance: Home/ Placement/ Primary/ Secondary
     metadata:
-      change_datetime: '2023-07-11'
+      change_datetime: 11/07/2023 00:00
       change_ref_id: SSD0004
+      item_changes_count: '1.0'
       reason_text: from string to integer
       data_quality_notes: null
   - name: address_start

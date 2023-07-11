@@ -1,6 +1,5 @@
 
 
-
 import csv
 import os
 import yaml
@@ -29,7 +28,7 @@ field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'n
                'cms', 'cms_field','cms_table',
                'required_enabled','unique_enabled','primary_key','foreign_key', 
                'guidance', 
-               'item_ref', 'change_datetime', 'change_ref_id', 'reason_text', 'data_quality_notes'] # meta data field
+               'item_ref', 'change_datetime', 'change_ref_id', 'item_changes_count', 'reason_text', 'data_quality_notes'] # meta data field
 
 # Those that are multi-part/list fields
 multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_field', 'cms_table']
@@ -88,18 +87,19 @@ def process_csv_file(csv_file, change_log_file, output_directory):
         None. Writes nodes and relationships to separate YAML files in the specified directory.
     """
 
-   
-    # Load main data CSV into pandas DataFrame
-    data_df = pd.read_csv(csv_file, quotechar='"')
+    # Load csv data 
+    data_df = pd.read_csv(csv_file, quotechar='"')          # Load main data 
+    change_df = pd.read_csv(change_log_file, quotechar='"') # Load change log 
 
-    # Load change log CSV into pandas DataFrame
-    change_df = pd.read_csv(change_log_file, quotechar='"')
 
-    # Convert 'change_datetime' to datetime type, sort by 'item_ref' and 'change_datetime'
+    # Convert to datetime, sort by 'item_ref' and 'change_datetime'
     change_df['change_datetime'] = pd.to_datetime(change_df['change_datetime'], format='%d/%m/%Y %H:%M')
-
     change_df = change_df.sort_values(['item_ref', 'change_datetime'], ascending=[True, False])
+    
+    # Get an int count of how many historic changes occured
+    change_df ['item_changes_count'] = change_df .groupby('item_ref')['item_ref'].transform('count').astype(int)
 
+ 
     # Keep only the most recent change log entry per 'item_ref'
     change_df = change_df.drop_duplicates(subset='item_ref', keep='first')
 
@@ -231,16 +231,19 @@ def save_node_yaml(node, output_directory):
                     field_data[name] = field[name]
 
 
-            # Add guidance field last
+            # Add guidance field last due to data length
             field_data['guidance'] = field['guidance']
 
 
+            #
+            # Add metadata Incl item-level change tracking
             if 'change_datetime' in field and pd.notnull(field['change_datetime']):
                 if isinstance(field['change_datetime'], str):
                     field['change_datetime'] = pd.to_datetime(field['change_datetime'])
                 field_data['metadata'] = {
-                    'change_datetime': field['change_datetime'].strftime('%Y-%m-%d'),
+                    'change_datetime': field['change_datetime'].strftime('%d/%m/%Y %H:%M'),
                     'change_ref_id': field['change_ref_id'],
+                    'item_changes_count': field['item_changes_count'],
                     'reason_text': field['reason_text'],
                     'data_quality_notes': field['data_quality_notes']
                 }
