@@ -3,10 +3,9 @@ nodes:
 - name: contacts
   fields:
   - name: contact_id
-    type: VARCHAR()
     description: Contact ID
     item_ref: CON001A
-    guidance: Contact Record unique ID from system or auto-generated as part of export.
+    type: string
     primary_key: true
     validators:
     - required:
@@ -24,11 +23,11 @@ nodes:
     cms_table:
     - liquid_logic:contacts
     - mosaic:contacts
+    guidance: Contact Record unique ID from system or auto-generated as part of export.
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: CON002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -47,11 +46,11 @@ nodes:
     cms_table:
     - liquid_logic:contacts
     - mosaic:contacts
+    guidance: See PER001A
   - name: contact_date
-    type: DATE
     description: Date of Contact
     item_ref: CON003A
-    guidance: Date Contact received into LA
+    type: date
     categories:
     - contact
     returns:
@@ -65,15 +64,10 @@ nodes:
     cms_table:
     - liquid_logic:contacts
     - mosaic:contacts
+    guidance: Date Contact received into LA
   - name: contact_source
-    type: null
     description: Contact Source
     item_ref: CON004A
-    guidance: 'For each new contact, record the source of contact from the list.
-
-      Where there is more than one contact for the same child on the same day, the
-      first contact should be recorded and it is this contact source that should be
-      recorded here.'
     categories:
     - contact
     returns:
@@ -87,11 +81,14 @@ nodes:
     cms_table:
     - liquid_logic:contacts
     - mosaic:contacts
+    guidance: 'For each new contact, record the source of contact from the list.
+
+      Where there is more than one contact for the same child on the same day, the
+      first contact should be recorded and it is this contact source that should be
+      recorded here.'
   - name: contact_outcome
-    type: null
     description: Contact Outcome
     item_ref: CON005A
-    guidance: EH Referral/ CIN Referral
     categories:
     - contact
     returns:
@@ -105,3 +102,4 @@ nodes:
     cms_table:
     - liquid_logic:contacts
     - mosaic:contacts
+    guidance: EH Referral/ CIN Referral

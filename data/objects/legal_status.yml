@@ -3,11 +3,8 @@ nodes:
 - name: legal_status
   fields:
   - name: legal_status_id
-    type: null
     description: Legal Status ID
     item_ref: LEG001A
-    guidance: Legal Status Record unique ID from system or auto-generated as part
-      of export.
     primary_key: true
     validators:
     - required:
@@ -27,11 +24,12 @@ nodes:
     cms_table:
     - liquid_logic:legal_status
     - mosaic:legal_status
+    guidance: Legal Status Record unique ID from system or auto-generated as part
+      of export.
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: LEG002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -52,10 +50,26 @@ nodes:
     cms_table:
     - liquid_logic:legal_status
     - mosaic:legal_status
+    guidance: See PER001A
   - name: legal_status
-    type: null
     description: Legal Status
     item_ref: LEG003A
+    categories:
+    - identity
+    - looked_after
+    - permanence
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:legal_status
+    - mosaic:legal_status
+    cms_table:
+    - liquid_logic:legal_status
+    - mosaic:legal_status
     guidance: "The legal status code on the SSDA903 records the legal status underlying\
       \ being \u2018looked-after\u2019. If a child is looked-after because it is accommodated,\
       \ the legal status goes some way to describe (in legal terms at least) why the\
@@ -99,27 +113,10 @@ nodes:
       \ rare, it was felt that the use of a separate code could not be warranted.\
       \ If such a case should arise, it should be coded C2, as the practical effects\
       \ are the same."
-    categories:
-    - identity
-    - looked_after
-    - permanence
-    returns:
-    - SSDA903
-    - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:legal_status
-    - mosaic:legal_status
-    cms_table:
-    - liquid_logic:legal_status
-    - mosaic:legal_status
   - name: legal_status_start
-    type: DATE
     description: Legal Status Start Date
     item_ref: LEG004A
-    guidance: Start Date of Legal Status
+    type: date
     categories:
     - identity
     - looked_after
@@ -135,11 +132,11 @@ nodes:
     cms_table:
     - liquid_logic:legal_status
     - mosaic:legal_status
+    guidance: Start Date of Legal Status
   - name: legal_status_end
-    type: DATE
     description: Legal Status End Date
     item_ref: LEG005A
-    guidance: End Date of Legal Status
+    type: date
     categories:
     - identity
     - looked_after
@@ -155,3 +152,4 @@ nodes:
     cms_table:
     - liquid_logic:legal_status
     - mosaic:legal_status
+    guidance: End Date of Legal Status

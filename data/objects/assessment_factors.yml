@@ -3,10 +3,9 @@ nodes:
 - name: assessment_factors
   fields:
   - name: asmt_id
-    type: VARCHAR()
     description: Assessment ID
     item_ref: ASF001A
-    guidance: See ASM001A
+    type: string
     primary_key: true
     foreign_key: assessments.assessment_id
     validators:
@@ -26,10 +25,24 @@ nodes:
     cms_table:
     - liquid_logic:assessment_factors
     - mosaic:assessment_factors
+    guidance: See ASM001A
   - name: asmt_factors
-    type: null
     description: Assessment Factors
     item_ref: ASF002A
+    categories:
+    - child_in_need
+    - assessment
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:asmt_factors
+    - mosaic:asmt_factors
+    cms_table:
+    - liquid_logic:assessment_factors
+    - mosaic:assessment_factors
     guidance: "Record the factors as understood at the end of the assessment relevant\
       \ to:\n\u2022 the impairment of the child\u2019s health and development (\u2018\
       Child\u2019);\n\u2022 the parent(s)/carer(s) capacity to respond to the child\u2019\
@@ -67,17 +80,3 @@ nodes:
       \ in the \u2018Additional guide on the factors identified at the end of assessment\u2019\
       \ for more information. The additional guide is available as part of the Children\
       \ in need census: guide to submitting data."
-    categories:
-    - child_in_need
-    - assessment
-    returns:
-    - CINcensus
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:asmt_factors
-    - mosaic:asmt_factors
-    cms_table:
-    - liquid_logic:assessment_factors
-    - mosaic:assessment_factors

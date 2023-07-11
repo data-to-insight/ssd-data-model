@@ -3,10 +3,9 @@ nodes:
 - name: cp_reviews
   fields:
   - name: cp_review_id
-    type: VARCHAR()
     description: Review ID
     item_ref: CPR001A
-    guidance: null
+    type: string
     primary_key: true
     validators:
     - required:
@@ -26,11 +25,11 @@ nodes:
     cms_table:
     - liquid_logic:cp_reviews
     - mosaic:cp_reviews
+    guidance: CP Plan Review unique ID from system or auto-generated as part of export.
   - name: cp_plan_id
-    type: VARCHAR()
     description: CP Plan ID
     item_ref: CPR002A
-    guidance: null
+    type: string
     foreign_key: cp_plans.cp_plan_id
     categories:
     - child_protection
@@ -45,11 +44,11 @@ nodes:
     cms_table:
     - liquid_logic:cp_reviews
     - mosaic:cp_reviews
+    guidance: See CPP001A
   - name: cp_rev_due
-    type: DATE
     description: Review Due Date
     item_ref: CPR003A
-    guidance: null
+    type: date
     categories:
     - child_protection
     - cp_plan
@@ -65,11 +64,11 @@ nodes:
     cms_table:
     - liquid_logic:cp_reviews
     - mosaic:cp_reviews
+    guidance: The due date of the review conference.
   - name: cp_rev_date
-    type: DATE
     description: Date of Review
     item_ref: CPR004A
-    guidance: null
+    type: date
     categories:
     - child_protection
     - cp_plan
@@ -86,11 +85,11 @@ nodes:
     cms_table:
     - liquid_logic:cp_reviews
     - mosaic:cp_reviews
+    guidance: The actual date on which the Review Conference was held
   - name: cp_rev_outcome
-    type: BOOLEAN
     description: CP Plan to Continue?
     item_ref: CPR005A
-    guidance: null
+    type: boolean
     categories:
     - child_protection
     - cp_plan
@@ -106,11 +105,11 @@ nodes:
     cms_table:
     - liquid_logic:cp_reviews
     - mosaic:cp_reviews
+    guidance: Was the outcome of the conference to continue the CP Plan? (Yes/ No)
   - name: cp_rev_quorate
-    type: BOOLEAN
     description: Quorate?
     item_ref: CPR006A
-    guidance: null
+    type: boolean
     categories:
     - child_protection
     - cp_plan
@@ -126,11 +125,16 @@ nodes:
     cms_table:
     - liquid_logic:cp_reviews
     - mosaic:cp_reviews
+    guidance: Was the conference quorate? The primary principle for determining quoracy
+      is that there should be sufficient agencies or key disciplines present to enable
+      safe decisions to be made in the individual circumstances. Minimum representation
+      is Children's Social Care and at least two other agencies or key disciplines
+      that have had direct contact with the child and family. In a case relating to
+      fabricated or induced illness, it is important to ensure the paediatrician is
+      able to attend.
   - name: cp_rev_participation
-    type: null
     description: Child Participation at Review
     item_ref: CPR007A
-    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -146,11 +150,33 @@ nodes:
     cms_table:
     - liquid_logic:cp_reviews
     - mosaic:cp_reviews
+    guidance: 'Record the method of participation in each review using the codes below:
+      -PN0 Child aged under 4 at the time of the review
+
+      -PN1 Child physically attends and speaks for him or herself (Attendance).
+
+      -PN2 Child physically attends and an advocate speaks on his or her behalf. (Attendance
+      views represented by advocate or Child Protection Adisor (CPA))
+
+      -PN3 Child attends and conveys his or her view symbolically (non-verbally) (Attendance
+      symbols)
+
+      -PN4 Child physically attends but does not speak for him or herself, does not
+      convey his or her view symbolically (non-verbally) and does not ask an advocate
+      to speak for him or her (Attendance without contribution)
+
+      -PN5 Child does not attend physically but briefs an advocate to speak for him
+      or her (Views represented by advocate or independent reviewing officer (IRO)
+      through texting, written format, phone, audio/video, viewpoint)
+
+      -PN6 Child does not attend but conveys his or her feelings to the review by
+      a facilitative medium (Texting the chair, written format, phone, audio/video,
+      viewpoint)
+
+      -PN7 Child does not attend nor are his or her views conveyed to the review'
   - name: cp_rev_cyp_views_quality
-    type: null
     description: Quality of representation of CYP views/ experience
     item_ref: CPR008A
-    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -166,12 +192,12 @@ nodes:
     cms_table:
     - liquid_logic:cp_reviews
     - mosaic:cp_reviews
+    guidance: CPA judgement of the quality of representation of child/ young person's
+      views/ experience. This indicator will require further discussion/ development.
   - name: cp_rev_sufficient_prog
-    type: null
     description: Sufficient progress made against the CP Plan to improve outcomes
       for the child?
     item_ref: CPR009A
-    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -187,3 +213,6 @@ nodes:
     cms_table:
     - liquid_logic:cp_reviews
     - mosaic:cp_reviews
+    guidance: CPA judgement of whether sufficient progress has been made against the
+      CP Plan to improve outcomes fort he child/ young person. Needs further discussion.
+      This indicator will require further discussion/ development.

@@ -3,10 +3,8 @@ nodes:
 - name: cla_reviews
   fields:
   - name: review_id
-    type: null
     description: Review ID
     item_ref: CLR001A
-    guidance: null
     primary_key: true
     validators:
     - required:
@@ -25,11 +23,10 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: CLA Review unique ID from system or auto-generated as part of export.
   - name: cla_episode_id
-    type: null
     description: Episode ID
     item_ref: CLR002A
-    guidance: null
     foreign_key: cla_episodes.cla_episode_id
     validators:
     - required:
@@ -46,11 +43,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: See CLA001A
   - name: rev_due_date
-    type: DATE
     description: CLA Review Due Date
     item_ref: CLR003A
-    guidance: null
+    type: date
     categories:
     - looked_after
     - review
@@ -65,11 +62,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: Date the CLA review was due
   - name: rev_date
-    type: DATE
     description: CLA Review Date
     item_ref: CLR004A
-    guidance: null
+    type: date
     categories:
     - looked_after
     - review
@@ -85,12 +82,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: Actual date of Review conference
   - name: rev_cyp_involved_care_plan
-    type: null
     description: Has the child/young person been involved in formulating this Care
       Plan?
     item_ref: CLR005A
-    guidance: null
     categories:
     - looked_after
     - review
@@ -105,12 +101,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: From IRO outcomes form, will need further discussion/ development.
   - name: rev_sw_met_child_views
-    type: null
     description: Has the Social Worker met with the child on their own to undertake
       direct work to establish their wishes and views
     item_ref: CLR006A
-    guidance: null
     categories:
     - looked_after
     - review
@@ -125,11 +120,10 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: From IRO outcomes form, will need further discussion/ development.
   - name: rev_participation
-    type: null
     description: Participation code
     item_ref: CLR007A
-    guidance: null
     categories:
     - looked_after
     - review
@@ -144,11 +138,33 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: 'Record the method of participation in each review using the codes below:
+      -PN0 Child aged under 4 at the time of the review
+
+      -PN1 Child physically attends and speaks for him or herself (Attendance).
+
+      -PN2 Child physically attends and an advocate speaks on his or her behalf. (Attendance
+      views represented by advocate or Independent Reviewing Officer (IRO))
+
+      -PN3 Child attends and conveys his or her view symbolically (non-verbally) (Attendance
+      symbols)
+
+      -PN4 Child physically attends but does not speak for him or herself, does not
+      convey his or her view symbolically (non-verbally) and does not ask an advocate
+      to speak for him or her (Attendance without contribution)
+
+      -PN5 Child does not attend physically but briefs an advocate to speak for him
+      or her (Views represented by advocate or independent reviewing officer (IRO)
+      through texting, written format, phone, audio/video, viewpoint)
+
+      -PN6 Child does not attend but conveys his or her feelings to the review by
+      a facilitative medium (Texting the chair, written format, phone, audio/video,
+      viewpoint)
+
+      -PN7 Child does not attend nor are his or her views conveyed to the review'
   - name: rev_care_plan_meet_needs
-    type: null
     description: Is the Care Plan meeting the childs needs?
     item_ref: CLR008A
-    guidance: null
     categories:
     - looked_after
     - review
@@ -163,11 +179,10 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: rev_perm_plan
-    type: null
     description: Is a Permanence Plan in place?
     item_ref: CLR009A
-    guidance: null
     categories:
     - looked_after
     - review
@@ -182,11 +197,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: rev_last_iro_contact
-    type: DATE
     description: Date of Last IRO Visit / Contact to the Child
     item_ref: CLR010A
-    guidance: null
+    type: date
     categories:
     - looked_after
     - review
@@ -201,12 +216,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: prev_permanence
-    type: null
     description: Has the child/ young person previously been adopted or left care
       for special guardianship or residence order?
     item_ref: CLR011A
-    guidance: null
     categories:
     - looked_after
     - review
@@ -221,11 +235,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: prev_perm_order_date
-    type: DATE
     description: Date of Previous Permanence Order
     item_ref: CLR012A
-    guidance: null
+    type: date
     categories:
     - looked_after
     - review
@@ -241,11 +255,10 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: prev_perm_option
-    type: null
     description: Previous Permanence Option
     item_ref: CLR013A
-    guidance: null
     categories:
     - looked_after
     - review
@@ -261,11 +274,10 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: prev_perm_la
-    type: null
     description: Previous Permanence Arranged LA
     item_ref: CLR014A
-    guidance: null
     categories:
     - looked_after
     - review
@@ -281,11 +293,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: convicted_in_year
-    type: BOOLEAN
     description: Child convicted during the year
     item_ref: CLR015A
-    guidance: null
+    type: boolean
     categories:
     - looked_after
     - review
@@ -301,11 +313,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: health_check
-    type: BOOLEAN
     description: Health surveillance checks up to date
     item_ref: CLR016A
-    guidance: null
+    type: boolean
     categories:
     - looked_after
     - review
@@ -321,11 +333,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: health_asmt_date
-    type: DATE
     description: Date of Last Health Assessment
     item_ref: CLR017A
-    guidance: null
+    type: date
     categories:
     - looked_after
     - review
@@ -342,11 +354,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: dental_check_date
-    type: DATE
     description: Date of Last Dental Check
     item_ref: CLR018A
-    guidance: null
+    type: date
     categories:
     - looked_after
     - review
@@ -363,11 +375,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: immunisations
-    type: BOOLEAN
     description: Immunisations up to Date
     item_ref: CLR019A
-    guidance: null
+    type: boolean
     categories:
     - looked_after
     - review
@@ -383,11 +395,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: substance_misuse
-    type: BOOLEAN
     description: Identified as having a substance misuse problem
     item_ref: CLR020A
-    guidance: null
+    type: boolean
     categories:
     - looked_after
     - review
@@ -403,11 +415,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null
   - name: intervention_received
-    type: BOOLEAN
     description: Child received intervention for substance misuse problem
     item_ref: CLR021A
-    guidance: null
+    type: boolean
     categories:
     - looked_after
     - review
@@ -423,3 +435,4 @@ nodes:
     cms_table:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
+    guidance: null

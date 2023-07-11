@@ -1,3 +1,12 @@
+
+
+
+import csv
+import os
+import yaml
+import re
+import pandas as pd
+
 from admin.admin_tools import get_paths # get project defined file paths
 from admin.admin_tools import clean_fieldname_data # get project defined file paths
 
@@ -8,18 +17,19 @@ paths = get_paths()
 
 # Data Structure spec
 data_spec_csv = paths['data_specification']
+change_log_file = paths['change_log']
 output_directory = paths['yml_data']
 
 
 
-import csv
-import os
-import yaml
-import re
 
 # Full list of field names
 # If there are non-required fields in the spec csv, just dont include them here
-field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 'cms', 'cms_field','cms_table','required_enabled','unique_enabled','primary_key','foreign_key', 'guidance']
+field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 
+               'cms', 'cms_field','cms_table',
+               'required_enabled','unique_enabled','primary_key','foreign_key', 
+               'guidance', 
+               'item_ref', 'change_datetime', 'change_ref_id', 'reason_text', 'data_quality_notes'] # meta data field
 
 # Those that are multi-part/list fields
 multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_field', 'cms_table']
@@ -28,62 +38,6 @@ multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_field',
 # Creating a new dictionary to store relationships
 relationships = {}
 
-
-
-def process_csv_file(csv_file, output_directory):
-    """
-    Processes a CSV file, extracting and storing data nodes and their relationships in YAML format.
-    
-    Args:
-        csv_file (str): Path to the input CSV file.
-        output_directory (str): Path to the output directory to store the YAML files.
-    
-    Returns:
-        None. Writes nodes and relationships to separate YAML files in the specified directory.
-        
-    Note:
-        This function relies on `field_names` and `multi_part_fields` to be defined in its environment.
-    """
-    with open(csv_file, 'r', newline='', encoding='utf-8-sig') as file:
-        reader = csv.DictReader(file)
-        nodes = []
-
-        for row in reader:
-            object_name = row['object_name']
-            field = {}
-
-            for name in field_names:
-                value = row[name].strip('"')
-                value = clean_fieldname_data(value, is_name=(name == 'name'))
-                field[name] = value
-
-            for name in multi_part_fields:
-                value = field[name]
-                field[name] = [v.strip().replace(' ', '') for v in value.split('|')] if value else []
-
-            node_index = next((i for i, node in enumerate(nodes) if node['name'] == object_name), None)
-
-            if node_index is None:
-                nodes.append({'name': object_name, 'fields': [field]})
-            else:
-                nodes[node_index]['fields'].append(field)
-
-            # Parse the foreign_key relationship and add to the dictionary
-            if field['foreign_key']:
-                # Split the relationship string into parent object and key
-                parent_object, parent_key = field['foreign_key'].split('.')
-                if parent_object not in relationships:
-                    relationships[parent_object] = []
-                relationships[parent_object].append({
-                    'child_object': object_name,
-                    'parent_key': parent_key,
-                    'child_key': field['name']
-                })
-
-        for node in nodes:
-            save_node_yaml(node, output_directory)
-
-        save_relationships_yaml(relationships, output_directory)
 
 
 
@@ -121,6 +75,99 @@ def save_relationships_yaml(relationships, output_directory):
 
 
 
+def process_csv_file(csv_file, change_log_file, output_directory):
+    """
+    Processes a CSV file, extracting and storing data nodes and their relationships in YAML format.
+    
+    Args:
+        csv_file (str): Path to the input CSV file.
+        change_log_file (str): Path to the input change log CSV file.
+        output_directory (str): Path to the output directory to store the YAML files.
+    
+    Returns:
+        None. Writes nodes and relationships to separate YAML files in the specified directory.
+    """
+
+   
+    # Load main data CSV into pandas DataFrame
+    data_df = pd.read_csv(csv_file, quotechar='"')
+
+    # Load change log CSV into pandas DataFrame
+    change_df = pd.read_csv(change_log_file, quotechar='"')
+
+    # Convert 'change_datetime' to datetime type, sort by 'item_ref' and 'change_datetime'
+    change_df['change_datetime'] = pd.to_datetime(change_df['change_datetime'], format='%d/%m/%Y %H:%M')
+
+    change_df = change_df.sort_values(['item_ref', 'change_datetime'], ascending=[True, False])
+
+    # Keep only the most recent change log entry per 'item_ref'
+    change_df = change_df.drop_duplicates(subset='item_ref', keep='first')
+
+    # Merge the change log data into main data based on 'item_ref'
+    data_df = pd.merge(data_df, change_df, on='item_ref', how='left')
+
+    data_df = data_df.fillna('') # nan's cause str processing issues down the line
+
+    # Convert the merged DataFrame back to list of dictionaries for processing
+    data = data_df.to_dict('records')
+
+    nodes = []  # Initialize nodes here
+
+    for row in data:
+        object_name = row['object_name']
+        field = {}
+
+        for name in field_names:
+            try:
+                value = row[name].strip('"') if isinstance(row[name], str) else row[name]
+                field[name] = value
+            except KeyError:
+                print(f"KeyError for key '{name}' in row: {row}")
+                raise  # re-raise the exception to see the traceback and stop execution
+            
+        for name in field_names:
+            value = row[name].strip('"') if isinstance(row[name], str) else row[name]
+            if value is not None and pd.notnull(value):
+                value = clean_fieldname_data(str(value), is_name=(name == 'name'))
+            field[name] = value
+
+        for name in multi_part_fields:
+            value = field[name]
+            # field[name] = [v.strip().replace(' ', '') for v in value.split('|')] if value else []
+            if isinstance(value, str):
+                field[name] = [v.strip().replace(' ', '') for v in value.split('|')] if value else []
+            else:
+                field[name] = []  # or handle this case appropriately
+
+        node_index = next((i for i, node in enumerate(nodes) if node['name'] == object_name), None)
+
+        if node_index is None:
+            nodes.append({'name': object_name, 'fields': [field]})
+        else:
+            nodes[node_index]['fields'].append(field)
+
+        # Parse the foreign_key relationship and add to the dictionary
+        
+        if pd.notna(field['foreign_key']): 
+            # Split the relationship string into parent object and key
+            field['foreign_key'] = str(field['foreign_key'])
+            parent_object, parent_key = field['foreign_key'].split('.')
+            if parent_object not in relationships:
+                relationships[parent_object] = []
+            relationships[parent_object].append({
+                'child_object': object_name,
+                'parent_key': parent_key,
+                'child_key': field['name']
+            })
+
+    for node in nodes:
+        save_node_yaml(node, output_directory)
+
+    save_relationships_yaml(relationships, output_directory)
+
+
+
+
 def save_node_yaml(node, output_directory):
     """
     Saves a YAML file for a specific node with its associated fields.
@@ -132,6 +179,7 @@ def save_node_yaml(node, output_directory):
 
     yaml_file = os.path.join(output_directory, f"{node['name']}.yml")
 
+
     with open(yaml_file, 'w') as file:
         data = {
             'nodes': [{
@@ -140,16 +188,16 @@ def save_node_yaml(node, output_directory):
             }]
         }
 
+
         for field in node['fields']:
             field_data = {
                 'name': field['name'],
-                'type': None if field['type'] == 'null' else field['type'],
                 'description': field['description'],
-                'item_ref': field['item_ref'],
-                'guidance': field['guidance'],
+                'item_ref': field['item_ref']
             }
 
-
+            # Can be integrated into the above structure once all definitions in the spec are set
+            # WE only requ the null checks due to in progress developement 
             if field.get('type') and field['type'].lower() != 'null':
                 field_data['type'] = field['type']
 
@@ -177,15 +225,26 @@ def save_node_yaml(node, output_directory):
                         }
                     })
 
-            # Remove the 'type' key if the value is None
-            if field['type'] is not None:
-                field_data['type'] = field['type']
-
 
             for name in multi_part_fields:
                 if field.get(name):
                     field_data[name] = field[name]
 
+
+            # Add guidance field last
+            field_data['guidance'] = field['guidance']
+
+
+            if 'change_datetime' in field and pd.notnull(field['change_datetime']):
+                if isinstance(field['change_datetime'], str):
+                    field['change_datetime'] = pd.to_datetime(field['change_datetime'])
+                field_data['metadata'] = {
+                    'change_datetime': field['change_datetime'].strftime('%Y-%m-%d'),
+                    'change_ref_id': field['change_ref_id'],
+                    'reason_text': field['reason_text'],
+                    'data_quality_notes': field['data_quality_notes']
+                }
+                
             # Include the field data only if it has any non-empty value
             if any(field_data.values()):
                 data['nodes'][0]['fields'].append(field_data)
@@ -194,7 +253,7 @@ def save_node_yaml(node, output_directory):
 
 
 
-process_csv_file(data_spec_csv, output_directory)
+process_csv_file(data_spec_csv, change_log_file, output_directory)
 
 
 

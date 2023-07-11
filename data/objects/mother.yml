@@ -3,10 +3,9 @@ nodes:
 - name: mother
   fields:
   - name: person_child_id
-    type: VARCHAR(10)
     description: Mother's Child's Unique ID
     item_ref: MOT001A
-    guidance: The unique identifier of the mother's child
+    type: string
     primary_key: true
     validators:
     - required:
@@ -28,11 +27,11 @@ nodes:
     cms_table:
     - liquid_logic:mother
     - mosaic:mother
+    guidance: The unique identifier of the mother's child
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID (Mother)
     item_ref: MOT002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -53,11 +52,11 @@ nodes:
     cms_table:
     - liquid_logic:mother
     - mosaic:mother
+    guidance: See PER001A
   - name: person_child_dob
-    type: DATE
     description: Date of birth of mothers child
     item_ref: MOT003A
-    guidance: Currently collected for CLA only, only first child dob collected
+    type: date
     categories:
     - identity
     - looked_after
@@ -73,3 +72,4 @@ nodes:
     cms_table:
     - liquid_logic:mother
     - mosaic:mother
+    guidance: Currently collected for CLA only, only first child dob collected

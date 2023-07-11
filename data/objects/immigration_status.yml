@@ -3,10 +3,9 @@ nodes:
 - name: immigration_status
   fields:
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: IMM001A
-    guidance: See PER001A
+    type: string
     primary_key: true
     foreign_key: person.la_person_id
     validators:
@@ -28,11 +27,15 @@ nodes:
     cms_table:
     - liquid_logic:immigration_status
     - mosaic:immigration_status
+    guidance: See PER001A
+    metadata:
+      change_datetime: '2023-07-14'
+      change_ref_id: SSD0007
+      reason_text: validator changed
+      data_quality_notes: null
   - name: immigration_status
-    type: null
     description: Immigration Status
     item_ref: IMM002A
-    guidance: Immigration Status e.g. Unaccompanied Asylum Seeking Child
     categories:
     - identity
     - immigration
@@ -48,11 +51,11 @@ nodes:
     cms_table:
     - liquid_logic:immigration_status
     - mosaic:immigration_status
+    guidance: Immigration Status e.g. Unaccompanied Asylum Seeking Child
   - name: immigration_status_start
-    type: DATE
     description: Immigration Status Start
     item_ref: IMM003A
-    guidance: Start Date of Immigration Status
+    type: date
     categories:
     - identity
     - immigration
@@ -68,11 +71,11 @@ nodes:
     cms_table:
     - liquid_logic:immigration_status
     - mosaic:immigration_status
+    guidance: Start Date of Immigration Status
   - name: immigration_status_end
-    type: DATE
     description: Immigration Status End
     item_ref: IMM004A
-    guidance: End Date of Immigration Status
+    type: date
     categories:
     - identity
     - immigration
@@ -88,3 +91,4 @@ nodes:
     cms_table:
     - liquid_logic:immigration_status
     - mosaic:immigration_status
+    guidance: End Date of Immigration Status

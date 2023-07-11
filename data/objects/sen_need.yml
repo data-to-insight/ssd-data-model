@@ -3,10 +3,9 @@ nodes:
 - name: sen_need
   fields:
   - name: sen_need_table_id
-    type: VARCHAR()
     description: SEN Need Table ID
     item_ref: SND001A
-    guidance: '#N/A'
+    type: string
     primary_key: true
     validators:
     - required:
@@ -27,11 +26,11 @@ nodes:
     cms_table:
     - liquid_logic:sen_need
     - mosaic:sen_need
+    guidance: null
   - name: active_ehcp_id
-    type: VARCHAR()
     description: Plan ID
     item_ref: SND002A
-    guidance: '#N/A'
+    type: string
     foreign_key: ehcp_active_plans.active_ehcp_id
     categories:
     - send
@@ -47,11 +46,11 @@ nodes:
     cms_table:
     - liquid_logic:sen_need
     - mosaic:sen_need
+    guidance: See EAP001A
   - name: active_ehcp_need
-    type: null
     description: SEN Type
     item_ref: SND003A
-    guidance: '#N/A'
+    type: string
     categories:
     - send
     - ehcp_request
@@ -68,11 +67,11 @@ nodes:
     cms_table:
     - liquid_logic:sen_need
     - mosaic:sen_need
+    guidance: null
   - name: active_ehcp_need_rank
-    type: null
     description: SEN Type Rank
     item_ref: SND004A
-    guidance: '#N/A'
+    type: string
     categories:
     - send
     - ehcp_request
@@ -89,3 +88,4 @@ nodes:
     cms_table:
     - liquid_logic:sen_need
     - mosaic:sen_need
+    guidance: null

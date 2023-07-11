@@ -3,11 +3,9 @@ nodes:
 - name: s47_enquiry_icpc
   fields:
   - name: s47_enquiry_id
-    type: VARCHAR()
     description: S47 Enquiry ID
     item_ref: S47001A
-    guidance: Section 57 Enquiry unique ID from system or auto-generated as part of
-      export.
+    type: string
     primary_key: true
     validators:
     - required:
@@ -26,11 +24,12 @@ nodes:
     cms_table:
     - liquid_logic:s47_enquiry_icpc
     - mosaic:s47_enquiry_icpc
+    guidance: Section 57 Enquiry unique ID from system or auto-generated as part of
+      export.
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: S47002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -50,21 +49,11 @@ nodes:
     cms_table:
     - liquid_logic:s47_enquiry_icpc
     - mosaic:s47_enquiry_icpc
+    guidance: See PER001A
   - name: s47_start_date
-    type: DATE
     description: S47 Start Date
     item_ref: S47004A
-    guidance: 'This item refers to enquiries conducted under the provisions of section
-      47 of the Children Act 1989. The objective of such enquiries is to determine
-      whether action is needed to promote and safeguard the welfare of the child or
-      children who are the subject of the enquiries. An assessment should also be
-      recorded on each occasion a child is subject to a section 47 enquiry.
-
-      We are aware that in some local authorities a section 47 enquiry is automatically
-      triggered alongside the assessment. In these cases, where both resulted in no
-      further action, a section 47 should not be recorded. Enter the date of the strategy
-      discussion at which the section 47 enquiries were initiated, using the formatting
-      covered in the general notes. This can be a non-working day.'
+    type: date
     categories:
     - s47_enquiry
     - child_protection
@@ -79,11 +68,21 @@ nodes:
     cms_table:
     - liquid_logic:s47_enquiry_icpc
     - mosaic:s47_enquiry_icpc
+    guidance: 'This item refers to enquiries conducted under the provisions of section
+      47 of the Children Act 1989. The objective of such enquiries is to determine
+      whether action is needed to promote and safeguard the welfare of the child or
+      children who are the subject of the enquiries. An assessment should also be
+      recorded on each occasion a child is subject to a section 47 enquiry.
+
+      We are aware that in some local authorities a section 47 enquiry is automatically
+      triggered alongside the assessment. In these cases, where both resulted in no
+      further action, a section 47 should not be recorded. Enter the date of the strategy
+      discussion at which the section 47 enquiries were initiated, using the formatting
+      covered in the general notes. This can be a non-working day.'
   - name: s47_authorised_date
-    type: DATE
     description: S47 Authorised Date
     item_ref: S47005A
-    guidance: Enter the actual date on which the S47 Enquiry is completed and authorised.
+    type: date
     categories:
     - s47_enquiry
     - child_protection
@@ -98,10 +97,24 @@ nodes:
     cms_table:
     - liquid_logic:s47_enquiry_icpc
     - mosaic:s47_enquiry_icpc
+    guidance: Enter the actual date on which the S47 Enquiry is completed and authorised.
   - name: s47outcome
-    type: null
     description: S47 Outcome
     item_ref: S47006A
+    categories:
+    - s47_enquiry
+    - child_protection
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:s47outcome
+    - mosaic:s47outcome
+    cms_table:
+    - liquid_logic:s47_enquiry_icpc
+    - mosaic:s47_enquiry_icpc
     guidance: 'Enter the outcome of the Section 47 Enquiry:
 
       - Initial CP Conference
@@ -119,27 +132,33 @@ nodes:
       - No Further Action
 
       - Other Outcome'
+  - name: icpc_transfer_in
+    description: Is this a transferred in ICPC?
+    item_ref: S47011A
+    type: boolean
     categories:
     - s47_enquiry
     - child_protection
     returns:
-    - CINcensus
+    - Local
     cms:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:s47outcome
-    - mosaic:s47outcome
+    - liquid_logic:icpc_transfer_in
+    - mosaic:icpc_transfer_in
     cms_table:
     - liquid_logic:s47_enquiry_icpc
     - mosaic:s47_enquiry_icpc
+    guidance: 'In this is a transfer in ICPC:
+
+      1 - Yes
+
+      0 - No'
   - name: icpc_date
-    type: DATE
     description: Date of Initial CP Conference
     item_ref: S47007A
-    guidance: Enter the date on which the initial child protection conference takes
-      place, using the formatting covered in the general notes. If the initial child
-      protection conference has not yet taken place, please leave blank.
+    type: date
     categories:
     - initial_cp_conference
     - child_protection
@@ -154,15 +173,12 @@ nodes:
     cms_table:
     - liquid_logic:s47_enquiry_icpc
     - mosaic:s47_enquiry_icpc
+    guidance: Enter the date on which the initial child protection conference takes
+      place, using the formatting covered in the general notes. If the initial child
+      protection conference has not yet taken place, please leave blank.
   - name: icpc_outcome
-    type: null
     description: Outcome of Initial CP Conference
     item_ref: S47008A
-    guidance: 'Enter the outcome of the Initial CP Conference:
-
-      - Child/ young person to be subject of a Child Protection Plan
-
-      - Do not start Child Protection Plan'
     categories:
     - initial_cp_conference
     - child_protection
@@ -177,11 +193,14 @@ nodes:
     cms_table:
     - liquid_logic:s47_enquiry_icpc
     - mosaic:s47_enquiry_icpc
+    guidance: 'Enter the outcome of the Initial CP Conference:
+
+      - Child/ young person to be subject of a Child Protection Plan
+
+      - Do not start Child Protection Plan'
   - name: icpc_team
-    type: null
     description: S47/ ICPC Allocated Team
     item_ref: S47009A
-    guidance: Allocated Team responsible for S47 Enquiry/ ICPC
     categories:
     - initial_cp_conference
     - child_protection
@@ -196,11 +215,10 @@ nodes:
     cms_table:
     - liquid_logic:s47_enquiry_icpc
     - mosaic:s47_enquiry_icpc
+    guidance: Allocated Team responsible for S47 Enquiry/ ICPC
   - name: icpc_worker_id
-    type: null
     description: S47/ ICPC Allocated Worker ID
     item_ref: S47010A
-    guidance: Allocated worker responsible for S47 Enquiry/ ICPC
     foreign_key: social_worker.sw_id
     categories:
     - initial_cp_conference
@@ -216,3 +234,4 @@ nodes:
     cms_table:
     - liquid_logic:s47_enquiry_icpc
     - mosaic:s47_enquiry_icpc
+    guidance: Allocated worker responsible for S47 Enquiry/ ICPC

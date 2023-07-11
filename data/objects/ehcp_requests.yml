@@ -3,10 +3,9 @@ nodes:
 - name: ehcp_requests
   fields:
   - name: ehcp_request_id
-    type: VARCHAR()
     description: Request ID
     item_ref: ERQ001A
-    guidance: '#N/A'
+    type: string
     primary_key: true
     validators:
     - required:
@@ -25,11 +24,10 @@ nodes:
     cms_table:
     - liquid_logic:ehcp_requests
     - mosaic:ehcp_requests
+    guidance: null
   - name: send_table_id
-    type: null
     description: send_table_id
     item_ref: ERQ002A
-    guidance: '#N/A'
     foreign_key: send.send_table_id
     categories:
     - identity
@@ -44,11 +42,11 @@ nodes:
     cms_table:
     - liquid_logic:ehcp_requests
     - mosaic:ehcp_requests
+    guidance: See SEN001A
   - name: ehcp_req_date
-    type: DATE
     description: Received Date
     item_ref: ERQ003A
-    guidance: '#N/A'
+    type: date
     categories:
     - send
     - ehcp_request
@@ -63,11 +61,11 @@ nodes:
     cms_table:
     - liquid_logic:ehcp_requests
     - mosaic:ehcp_requests
+    guidance: null
   - name: ehcp_req_outcome_date
-    type: DATE
     description: Request Outcome Date
     item_ref: ERQ004A
-    guidance: '#N/A'
+    type: date
     categories:
     - send
     - ehcp_request
@@ -82,11 +80,11 @@ nodes:
     cms_table:
     - liquid_logic:ehcp_requests
     - mosaic:ehcp_requests
+    guidance: null
   - name: ehcp_req_outcome
-    type: null
     description: Request Outcome
     item_ref: ERQ005A
-    guidance: '#N/A'
+    type: string
     categories:
     - send
     - ehcp_request
@@ -101,3 +99,4 @@ nodes:
     cms_table:
     - liquid_logic:ehcp_requests
     - mosaic:ehcp_requests
+    guidance: null

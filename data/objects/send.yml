@@ -3,10 +3,9 @@ nodes:
 - name: send
   fields:
   - name: send_table_id
-    type: null
     description: send_table_id
     item_ref: SEN001A
-    guidance: '#N/A'
+    type: integer
     primary_key: true
     validators:
     - required:
@@ -25,11 +24,12 @@ nodes:
     cms_table:
     - liquid_logic:send
     - mosaic:send
+    guidance: Permanence table record unique ID from system or auto-generated as part
+      of export.
   - name: send_upn
-    type: CHAR(13)
     description: UPN
     item_ref: SEN002A
-    guidance: '#N/A'
+    type: string
     validators:
     - required:
         enabled: true
@@ -47,11 +47,11 @@ nodes:
     cms_table:
     - liquid_logic:send
     - mosaic:send
+    guidance: See PER006A
   - name: send_uln
-    type: null
     description: ULN
     item_ref: SEN003A
-    guidance: '#N/A'
+    type: string
     categories:
     - identity
     - send
@@ -64,11 +64,11 @@ nodes:
     cms_table:
     - liquid_logic:send
     - mosaic:send
+    guidance: null
   - name: upn_unknown
-    type: CHAR(3)
     description: UPN and ULN unknown
     item_ref: SEN004A
-    guidance: '#N/A'
+    type: string
     categories:
     - identity
     - send
@@ -81,11 +81,11 @@ nodes:
     cms_table:
     - liquid_logic:send
     - mosaic:send
+    guidance: null
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: SEN005A
-    guidance: '#N/A'
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -105,3 +105,4 @@ nodes:
     cms_table:
     - liquid_logic:send
     - mosaic:send
+    guidance: See PER001A

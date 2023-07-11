@@ -76,14 +76,14 @@ key_items = [
     {"color": "#F2C4DA", "text": "S47 and IPCP"},
     {"color": "#6CD9FA", "text": "Contact"},
     {"color": "#93D375", "text": "Early Help"},
-    {"color": "#D6F693", "text": "Early Help (Plot)"},
+    {"color": "#D6F693", "text": "Early Help (Pilot)"},
     {"color": "#F5D027", "text": "Social Care Referral"},
     {"color": "#FF9D48", "text": "Child in Need"},
     {"color": "#EA94BB", "text": "CP Plan"},
     {"color": "#C6A2D2", "text": "Looked After & Leavers"},
     {"color": "#FFF9B1", "text": "Permanence"},
     {"color": "#ACB5FF", "text": "Education"},
-    {"color": "#F2A1AA", "text": "Workforce|Other"}
+    {"color": "#F2A1AA", "text": "Workforce | Other"}
 ]
 
 # Loop over key items and add color cells/borderless boxes

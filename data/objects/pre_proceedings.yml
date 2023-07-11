@@ -3,10 +3,9 @@ nodes:
 - name: pre_proceedings
   fields:
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: PLB001A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -27,13 +26,11 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: See PER001A
   - name: plo_family_id
-    type: null
     description: PLO Family ID
     item_ref: PLB002A
-    guidance: Unique Identifier number for each family group - a family group is described
-      as a group of children linked by parents all starting and ceasing pre or care
-      proceedings at the same time
+    type: string
     primary_key: true
     validators:
     - required:
@@ -53,13 +50,13 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: Unique Identifier number for each family group - a family group is described
+      as a group of children linked by parents all starting and ceasing pre or care
+      proceedings at the same time
   - name: pre_pro_decision_date
-    type: DATE
     description: Date decision made to enter Pre Proceedings
     item_ref: PLB011A
-    guidance: This is the date of legal meeting / panel that agreed to commence pre-proceedings.
-      The date should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a
-      four digit number.
+    type: date
     categories:
     - pre_proceedings
     returns:
@@ -73,13 +70,13 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: This is the date of legal meeting / panel that agreed to commence pre-proceedings.
+      The date should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a
+      four digit number.
   - name: initial_pre_pro_meeting
-    type: DATE
     description: Date of Initial Pre Proceedings Meeting
     item_ref: PLB012A
-    guidance: This is the first pre-proceedings meeting following the legal meeting
-      / panel that agreed to commence pre-proceedings. The date should be recorded
-      in a DD/MM/YYYY format, i.e. day/month/year as a four digit number.
+    type: date
     categories:
     - pre_proceedings
     returns:
@@ -93,17 +90,13 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: This is the first pre-proceedings meeting following the legal meeting
+      / panel that agreed to commence pre-proceedings. The date should be recorded
+      in a DD/MM/YYYY format, i.e. day/month/year as a four digit number.
   - name: pre_pro_outcome
-    type: null
     description: What is the Outcome of Pre-Proceedings
     item_ref: PLB013A
-    guidance: 'Please select:
-
-      Decision to Issue Care Proceedings /
-
-      Decision to step down
-
-      If still in pre-proceedings, please leave blank.'
+    type: string
     categories:
     - pre_proceedings
     returns:
@@ -117,13 +110,17 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: 'Please select:
+
+      Decision to Issue Care Proceedings /
+
+      Decision to step down
+
+      If still in pre-proceedings, please leave blank.'
   - name: date_agree_stepdown_issue
-    type: DATE
     description: Date Agreed to Step down/issue
     item_ref: PLB014A
-    guidance: This is the date of legal meeting / panel that agreed to end pre-proceedings
-      to either step down or issue care proceedings. The date should be recorded in
-      a DD/MM/YYYY format, i.e. day/month/year as a four digit number.
+    type: date
     categories:
     - pre_proceedings
     returns:
@@ -137,14 +134,14 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: This is the date of legal meeting / panel that agreed to end pre-proceedings
+      to either step down or issue care proceedings. The date should be recorded in
+      a DD/MM/YYYY format, i.e. day/month/year as a four digit number.
   - name: cp_plans_referral_period
-    type: null
     description: How many times has the child been subject to a Child Protection Plan
       during this referral period?
     item_ref: PLS001A
-    guidance: Please provide a numeric value for the number of the times the child
-      has been the subject of a Child Protection Plan during this referral period.
-      If none, please put 0.
+    type: integer
     categories:
     - pre_proceedings
     returns:
@@ -158,13 +155,13 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: Please provide a numeric value for the number of the times the child
+      has been the subject of a Child Protection Plan during this referral period.
+      If none, please put 0.
   - name: legal_gateway_outcome
-    type: null
     description: What was the outcome of legal gateway / panel / meeting after panel?
     item_ref: PLS002A
-    guidance: "Please select one of these options:\nA \u2013 Continue with current\
-      \ plan\nB \u2013 Start pre-proceedings\nC \u2013 Issue care proceedings\nD \u2013\
-      \ Unknown"
+    type: string
     categories:
     - pre_proceedings
     returns:
@@ -178,13 +175,13 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: "Please select one of these options:\nA \u2013 Continue with current\
+      \ plan\nB \u2013 Start pre-proceedings\nC \u2013 Issue care proceedings\nD \u2013\
+      \ Unknown"
   - name: prev_pre_proc_child
-    type: null
     description: "How many previous periods of pre-proceedings have there been in\
       \ the child\u2019s lifetime?"
     item_ref: PLS003A
-    guidance: Please provide a numeric value. If there have not been any previous
-      periods, please put 0.
     categories:
     - pre_proceedings
     returns:
@@ -198,13 +195,12 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: Please provide a numeric value. If there have not been any previous
+      periods, please put 0.
   - name: prev_care_proc_child
-    type: null
     description: "How many previous periods of care proceedings have there been in\
       \ the child\u2019s lifetime?"
     item_ref: PLS004A
-    guidance: Please provide a numeric value. If there have not been any previous
-      periods, please put 0.
     categories:
     - pre_proceedings
     returns:
@@ -218,16 +214,13 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: Please provide a numeric value. If there have not been any previous
+      periods, please put 0.
   - name: pre_pro_letter_date
-    type: DATE
     description: What is the date that the pre-proceedings letter and plan was sent
       to parents?
     item_ref: PLS005A
-    guidance: 'If the case has not been in pre-proceedings, please
-
-      leave blank.
-
-      Please use the UK date format: DD/MM/YYYY'
+    type: date
     categories:
     - pre_proceedings
     returns:
@@ -241,16 +234,16 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: 'If the case has not been in pre-proceedings, please
+
+      leave blank.
+
+      Please use the UK date format: DD/MM/YYYY'
   - name: care_pro_letter_date
-    type: DATE
     description: What is the date that the letter to issue care proceedings was sent
       to parents?
     item_ref: PLS006A
-    guidance: 'If care proceedings have not been issued, please leave
-
-      blank.
-
-      Please use the UK date format DD/MM/YYYY'
+    type: date
     categories:
     - pre_proceedings
     returns:
@@ -264,13 +257,15 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: 'If care proceedings have not been issued, please leave
+
+      blank.
+
+      Please use the UK date format DD/MM/YYYY'
   - name: pre_pro_meetings_num
-    type: null
     description: How many review pre-proceeding meetings have been held with parents
       following the initial meeting?
     item_ref: PLS007A
-    guidance: Please give a numeric value for the number of meetings that took place
-      with parents, excluding the initial meeting.
     categories:
     - pre_proceedings
     returns:
@@ -284,11 +279,11 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: Please give a numeric value for the number of meetings that took place
+      with parents, excluding the initial meeting.
   - name: pre_pro_parents_legal_rep
-    type: null
     description: Did parents have legal representation during pre-proceedings?
     item_ref: PLS008A
-    guidance: Please select Yes / No / Unknown
     categories:
     - pre_proceedings
     returns:
@@ -302,11 +297,10 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: Please select Yes / No / Unknown
   - name: parents_legal_rep_point_of_issue
-    type: null
     description: Did parents have legal representation at the point of issue?
     item_ref: PLS009A
-    guidance: Please select Yes / No / Unknown / Not in care proceedings
     categories:
     - pre_proceedings
     returns:
@@ -320,13 +314,10 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: Please select Yes / No / Unknown / Not in care proceedings
   - name: court_reference
-    type: null
     description: If in Care Proceedings, what is the Court reference number?
     item_ref: PLS010A
-    guidance: This is the Court number which is given to a family group when care
-      proceedings are issued. This may be stored on the case management system or
-      held in legal files. If the case is not in care proceedings, please leave blank.
     categories:
     - pre_proceedings
     returns:
@@ -340,12 +331,12 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: This is the Court number which is given to a family group when care
+      proceedings are issued. This may be stored on the case management system or
+      held in legal files. If the case is not in care proceedings, please leave blank.
   - name: care_proc_court_hearings
-    type: null
     description: How many Court hearings have taken place whilst in care proceedings?
     item_ref: PLS011A
-    guidance: This includes the initial IRH and final hearing. Please give a numeric
-      value. If case is not in care proceedings, please leave blank.
     categories:
     - pre_proceedings
     returns:
@@ -359,13 +350,11 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: This includes the initial IRH and final hearing. Please give a numeric
+      value. If case is not in care proceedings, please leave blank.
   - name: care_proc_short_notice
-    type: null
     description: Were Care Proceedings issued on a short notice application?
     item_ref: PLS012A
-    guidance: "Please select Yes / No / Unknown / Not in care proceedings. A short\
-      \ notice application is an urgent application for the court to hear the case\
-      \ within the next 2 \u2013 5 days."
     categories:
     - pre_proceedings
     returns:
@@ -379,18 +368,12 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
-  - name: care_proc_short_notice_reason
-    type: null
-    description: What was the reason for any short notice applications?
-    item_ref: PLS013A
-    guidance: "Please choose the main reason from this list:\n(A)\nApplications under\
-      \ the Children Act 1989 where without such an order a child\u2019s immediate\
-      \ safety would be compromised, including where there is an immediate threat\
-      \ of child abduction.\n(B)\nApplications for Emergency Protection Orders where\
-      \ the criteria for such or order is met. (c) Other If a short notice application\
-      \ has not taken place, please select 'No short notice applications'. A short\
+    guidance: "Please select Yes / No / Unknown / Not in care proceedings. A short\
       \ notice application is an urgent application for the court to hear the case\
       \ within the next 2 \u2013 5 days."
+  - name: care_proc_short_notice_reason
+    description: What was the reason for any short notice applications?
+    item_ref: PLS013A
     categories:
     - pre_proceedings
     returns:
@@ -404,11 +387,17 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: "Please choose the main reason from this list:\n(A)\nApplications under\
+      \ the Children Act 1989 where without such an order a child\u2019s immediate\
+      \ safety would be compromised, including where there is an immediate threat\
+      \ of child abduction.\n(B)\nApplications for Emergency Protection Orders where\
+      \ the criteria for such or order is met. (c) Other If a short notice application\
+      \ has not taken place, please select 'No short notice applications'. A short\
+      \ notice application is an urgent application for the court to hear the case\
+      \ within the next 2 \u2013 5 days."
   - name: la_inital _plan_approved
-    type: null
     description: "Was the LA\u2019s initial plan approved at the initial hearing?"
     item_ref: PLS014A
-    guidance: Please select Yes / No / Unknown
     categories:
     - pre_proceedings
     returns:
@@ -422,19 +411,11 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: Please select Yes / No / Unknown
   - name: la_initial_care_plan
-    type: null
     description: "What was the LA\u2019s initial care plan for the child at the initial\
       \ hearing?"
     item_ref: PLS015A
-    guidance: "Please choose one option from this list: A \u2013 Interim / Care Order\n\
-      B \u2013 Interim / Care Order \u2013 Placement with parents\nC \u2013 Adoption\n\
-      D \u2013 Interim / Supervision Order\nE \u2013 Special Guardianship Order\n\
-      F \u2013 Private Law Order\nG \u2013 Other If case is not in care proceedings,\
-      \ please select 'Not in care proceedings' Please note \u2018Care order \u2013\
-      \ placement with parents\u2019 means that the public care order was granted\
-      \ but that the child remained in their parent\u2019s care, rather than in another\
-      \ placement."
     categories:
     - pre_proceedings
     returns:
@@ -448,11 +429,17 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: "Please choose one option from this list: A \u2013 Interim / Care Order\n\
+      B \u2013 Interim / Care Order \u2013 Placement with parents\nC \u2013 Adoption\n\
+      D \u2013 Interim / Supervision Order\nE \u2013 Special Guardianship Order\n\
+      F \u2013 Private Law Order\nG \u2013 Other If case is not in care proceedings,\
+      \ please select 'Not in care proceedings' Please note \u2018Care order \u2013\
+      \ placement with parents\u2019 means that the public care order was granted\
+      \ but that the child remained in their parent\u2019s care, rather than in another\
+      \ placement."
   - name: la_final_plan_approved
-    type: null
     description: "Was the LA\u2019s final plan approved at the final hearing?"
     item_ref: PLS016A
-    guidance: Please select Yes / No / Unknown
     categories:
     - pre_proceedings
     returns:
@@ -466,18 +453,11 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: Please select Yes / No / Unknown
   - name: la_final_care_plan
-    type: null
     description: "What was the LA\u2019s final care plan for the child at the final\
       \ hearing?"
     item_ref: PLS017A
-    guidance: "Please choose one option from this list: A \u2013 Care Order\nB \u2013\
-      \ Care Order \u2013 Placement with parents\nC \u2013 Adoption\nD \u2013 Supervision\
-      \ Order\nE \u2013 Special Guardianship Order\nF \u2013 Private Law Order\nG\
-      \ \u2013 Other\nH \u2013 Not yet at final hearing - still in care proceedings\
-      \ If not yet at the final hearing, please select \"Not yet at final hearing\
-      \ - still in care proceedings'. This will indicate that the case is still active\
-      \ in care proceedings."
     categories:
     - pre_proceedings
     returns:
@@ -491,3 +471,10 @@ nodes:
     cms_table:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
+    guidance: "Please choose one option from this list: A \u2013 Care Order\nB \u2013\
+      \ Care Order \u2013 Placement with parents\nC \u2013 Adoption\nD \u2013 Supervision\
+      \ Order\nE \u2013 Special Guardianship Order\nF \u2013 Private Law Order\nG\
+      \ \u2013 Other\nH \u2013 Not yet at final hearing - still in care proceedings\
+      \ If not yet at the final hearing, please select \"Not yet at final hearing\
+      \ - still in care proceedings'. This will indicate that the case is still active\
+      \ in care proceedings."

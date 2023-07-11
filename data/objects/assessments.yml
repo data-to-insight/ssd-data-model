@@ -3,9 +3,27 @@ nodes:
 - name: assessments
   fields:
   - name: assessment_id
-    type: VARCHAR()
     description: Assessment ID
     item_ref: ASM001A
+    type: string
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - child_in_need
+    - assessment
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:assessment_id
+    - mosaic:assessment_id
+    cms_table:
+    - liquid_logic:assessments
+    - mosaic:assessments
     guidance: 'Assessment unique ID from system or auto-generated as part of export.
       Under the Children Act 1989, local authorities are required to provide services
       for children in need for the purposes of safeguarding and promoting their welfare.
@@ -42,29 +60,10 @@ nodes:
       There must always be an assessment actual start date, but if the assessment
       authorisation date falls after the end of the census year, it should be left
       blank. The assessment internal review point date is optional.'
-    primary_key: true
-    validators:
-    - required:
-        enabled: true
-    - unique:
-        enabled: true
-    categories:
-    - child_in_need
-    - assessment
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:assessment_id
-    - mosaic:assessment_id
-    cms_table:
-    - liquid_logic:assessments
-    - mosaic:assessments
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: ASM002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -84,12 +83,11 @@ nodes:
     cms_table:
     - liquid_logic:assessments
     - mosaic:assessments
+    guidance: See PER001A
   - name: asmt_start_date
-    type: DATE
     description: Assessment Start Date
     item_ref: ASM003A
-    guidance: Enter the date the assessment actually started. This is the actual start
-      date of the continuous assessment.
+    type: date
     categories:
     - child_in_need
     - assessment
@@ -104,11 +102,12 @@ nodes:
     cms_table:
     - liquid_logic:assessments
     - mosaic:assessments
+    guidance: Enter the date the assessment actually started. This is the actual start
+      date of the continuous assessment.
   - name: asmt_child_seen
-    type: BOOLEAN
     description: Child Seen During Assessment
     item_ref: ASM004A
-    guidance: Was the child seen during the Assessment process?
+    type: boolean
     categories:
     - child_in_need
     - assessment
@@ -123,18 +122,11 @@ nodes:
     cms_table:
     - liquid_logic:assessments
     - mosaic:assessments
+    guidance: Was the child seen during the Assessment process?
   - name: asmt_auth_date
-    type: DATE
     description: Assessment Authorised Date
     item_ref: ASM005A
-    guidance: "Enter the actual date on which an assessment is completed and authorised,\
-      \ according to the formatting covered in the general notes. This is the date\
-      \ the assessment is completed and authorised.\nAn assessment is deemed to be\
-      \ completed once the social worker has informed, in writing, all the relevant\
-      \ agencies and the family of their decisions and if the child is a child in\
-      \ need, of the plan for providing support/ or once the assessment has been discussed\
-      \ with the child\u2019s family (or carers) and the team manager has viewed and\
-      \ authorised the assessment."
+    type: date
     categories:
     - child_in_need
     - assessment
@@ -149,24 +141,17 @@ nodes:
     cms_table:
     - liquid_logic:assessments
     - mosaic:assessments
+    guidance: "Enter the actual date on which an assessment is completed and authorised,\
+      \ according to the formatting covered in the general notes. This is the date\
+      \ the assessment is completed and authorised.\nAn assessment is deemed to be\
+      \ completed once the social worker has informed, in writing, all the relevant\
+      \ agencies and the family of their decisions and if the child is a child in\
+      \ need, of the plan for providing support/ or once the assessment has been discussed\
+      \ with the child\u2019s family (or carers) and the team manager has viewed and\
+      \ authorised the assessment."
   - name: asmt_outcome
-    type: null
     description: Assessment Outcome
     item_ref: ASM006A
-    guidance: 'The outcomes may be as follows: - No further action;
-
-      - Additional support which can be provided through universal services and single
-      service provision or the Early Help assessment process;
-
-      - The development of a multi-agency Child in Need plan for the provision of
-      child in need services to promote the child''s health and development;
-
-      - Specialist assessment for a more in-depth understanding of the child''s needs
-      and circumstances;
-
-      - Undertaking a Strategy Discussion/Meeting, a Section 47 child protection enquiry;
-
-      - Emergency action to protect a child'
     categories:
     - child_in_need
     - assessment
@@ -181,11 +166,23 @@ nodes:
     cms_table:
     - liquid_logic:assessments
     - mosaic:assessments
+    guidance: 'The outcomes may be as follows: - No further action;
+
+      - Additional support which can be provided through universal services and single
+      service provision or the Early Help assessment process;
+
+      - The development of a multi-agency Child in Need plan for the provision of
+      child in need services to promote the child''s health and development;
+
+      - Specialist assessment for a more in-depth understanding of the child''s needs
+      and circumstances;
+
+      - Undertaking a Strategy Discussion/Meeting, a Section 47 child protection enquiry;
+
+      - Emergency action to protect a child'
   - name: asmt_team
-    type: null
     description: Assessment Completed by Team
     item_ref: ASM007A
-    guidance: Allocated Team responsible for completing Assessment
     categories:
     - child_in_need
     - assessment
@@ -200,11 +197,10 @@ nodes:
     cms_table:
     - liquid_logic:assessments
     - mosaic:assessments
+    guidance: Allocated Team responsible for completing Assessment
   - name: asmt_worker_id
-    type: null
     description: Assessment Completed by Worker ID
     item_ref: ASM008A
-    guidance: Allocated worker responsible for completing Assessment
     foreign_key: social_worker.sw_id
     categories:
     - child_in_need
@@ -220,3 +216,4 @@ nodes:
     cms_table:
     - liquid_logic:assessments
     - mosaic:assessments
+    guidance: Allocated worker responsible for completing Assessment
