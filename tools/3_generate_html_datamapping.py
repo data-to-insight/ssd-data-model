@@ -31,8 +31,6 @@ paths = get_paths()
 
 # Initialize html_content as an empty string
 html_content = ""
-# Embed colour_dict as a JSON object for JavaScript to use
-# html_content += f"<script>\nvar colour_dict = {json.dumps(colour_dict)};\n</script>"
 
 html_content = "<html><head><style>"
 html_content += "body { margin: 20px; }"
@@ -42,6 +40,9 @@ html_content += ".repo-link { text-decoration: none; }"
 html_content += ".link-section a { margin-left: 10px; margin-right: 10px; }"
 html_content += ".image-container { display: block; width: 85%; margin: 0 auto; }"  # Set the container width to 85% of the page width
 html_content += ".image-container img { width: 100%; }"  # Stretch the images to fill the container width
+html_content += ".key-container { display: flex; }"
+html_content += ".key-item { flex-grow: 1; text-align: center; padding: 10px; border: none; }"
+
 html_content += "</style></head><body>"
 
 html_content += f"<h1>{page_title_str}</h1>"
@@ -64,6 +65,35 @@ html_content += "</div>"
 
 html_content += "<h1>DfE Data Returns:</h1>"
 html_content += f"<p>{notes_str1}</p>"
+
+# Add key/legend
+html_content += "<h2>Key/Legend:</h2>"
+html_content += "<div class='key-container'>"
+
+# Define color and text for each key item
+key_items = [
+    {"color": "#F5F6F8", "text": "Identity"},
+    {"color": "#F2C4DA", "text": "S47 and IPCP"},
+    {"color": "#6CD9FA", "text": "Contact"},
+    {"color": "#93D375", "text": "Early Help"},
+    {"color": "#D6F693", "text": "Early Help (Plot)"},
+    {"color": "#F5D027", "text": "Social Care Referral"},
+    {"color": "#FF9D48", "text": "Child in Need"},
+    {"color": "#EA94BB", "text": "CP Plan"},
+    {"color": "#C6A2D2", "text": "Looked After & Leavers"},
+    {"color": "#FFF9B1", "text": "Permanence"},
+    {"color": "#ACB5FF", "text": "Education"},
+    {"color": "#F2A1AA", "text": "Workforce|Other"}
+]
+
+# Loop over key items and add color cells/borderless boxes
+for item in key_items:
+    color = item["color"]
+    text = item["text"]
+    html_content += f"<div class='key-item' style='background-color: {color};'>{text}</div>"
+
+html_content += "</div>" # key end
+
 
 # Get the list of image files in the folder
 image_files = glob.glob(paths['returns_maps'] + "*.jpg")  # location of source files
