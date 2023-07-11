@@ -11,7 +11,7 @@ page_title_str = "Standard Safeguarding Dataset: Existing Returns Map"
 page_intro_str = ""
 
 
-notes_str1 = "This page shows the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. Right click and open image(s) in a new browser tab to zoom/magnify/scroll."
+notes_str1 = "This page shows the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. Please note that image quality will vary due to limitations on source files and page generator workflow."
 repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 
