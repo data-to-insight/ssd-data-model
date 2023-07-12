@@ -29,11 +29,11 @@ nodes:
     - mosaic:immigration_status
     guidance: See PER001A
     metadata:
-      release_datetime: 14/07/2023 00:00
+      release: 14/07/2023 00:00
       change_id: SSD-007
-      change_versions_count: '1.0'
-      change_impact_title: validator changed
-      change_type: Change
+      versions_count: '1.0'
+      impact_title: validator changed
+      type: Change
   - name: immigration_status
     description: Immigration Status
     item_ref: IMM002A

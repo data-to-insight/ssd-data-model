@@ -240,11 +240,11 @@ def save_node_yaml(node, output_directory):
                 if isinstance(field['release_datetime'], str):
                     field['release_datetime'] = pd.to_datetime(field['release_datetime'])
                 field_data['metadata'] = {
-                    'release_datetime': field['release_datetime'].strftime('%d/%m/%Y %H:%M'),
+                    'release': field['release_datetime'].strftime('%d/%m/%Y %H:%M'),
                     'change_id': field['change_id'],
-                    'change_versions_count': field['change_versions_count'],
-                    'change_impact_title': field['change_impact_title'],
-                    'change_type': field['change_type']
+                    'versions_count': field['change_versions_count'],
+                    'impact_title': field['change_impact_title'],
+                    'type': field['change_type']
                 }
                 
             # Include the field data only if it has any non-empty value

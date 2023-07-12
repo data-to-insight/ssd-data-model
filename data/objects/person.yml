@@ -40,11 +40,11 @@ nodes:
       \ \u2013 one for pre-adoption and one for post-adoption \u2013 with two different\
       \ child identifiers."
     metadata:
-      release_datetime: 08/07/2023 10:00
+      release: 08/07/2023 10:00
       change_id: SSD-014
-      change_versions_count: '2.0'
-      change_impact_title: reduced number of chars allowed
-      change_type: Initiative
+      versions_count: '2.0'
+      impact_title: reduced number of chars allowed
+      type: Initiative
   - name: person_sex
     description: Sex
     item_ref: PER002A
