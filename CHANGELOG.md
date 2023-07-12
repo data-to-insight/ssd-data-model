@@ -1,6 +1,6 @@
 # Change log
 SSD Data Item Changes:
-The complete change history for SSD data items in reverse chronological order, with pending|expected changes showing first.Last updated: 12/07/2023 19:48
+The complete change history for SSD data items in reverse chronological order, with pending|expected changes showing first.Last updated: 12/07/2023 19:50
 
 | item_ref   | release_datetime    | change_id   | change_impact_title              | change_status   | change_type     | change_impact_notes   |
 |:-----------|:--------------------|:------------|:---------------------------------|:----------------|:----------------|:----------------------|
