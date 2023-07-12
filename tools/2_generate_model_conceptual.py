@@ -4,33 +4,11 @@ import os
 from graphviz import Digraph
 from admin.admin_tools import get_paths
 
+from admin.admin_tools import returns_categories # Colour bandings to highlight data item categories for easier ref on visual outputs
+
 # output filenames (non-dynamic)
 output_filetype = 'png'
 erd_overview_fname = 'ssd_conceptual_diagram'
-
-# Colour bandings to highlight data item categories for easier ref on visual outputs
-returns_categories = {
-    "Existing": {
-        "colour": "#CCCCCC",
-        "description": "Current returned data",
-    },
-    "Local": {
-        "colour": "#C5E625",
-        "description": "Recorded locally but not currently included in any data collections",
-    },
-    "1aDraft": {
-        "colour": "#1CFCF2",
-        "description": "Suggested new item for SSD",
-    },
-    "1bDraft": {
-        "colour": "#F57C1D",
-        "description": "Suggested new item for one of the 1b projects",
-    },
-    "1bSpecified": {
-        "colour": "#FFC91E",
-        "description": "Final specified item for one of the 1b projects",
-    },
-}
 
 
 def generate_full_erd(yml_data_path, assets_path, erd_publish_path, legend_data):

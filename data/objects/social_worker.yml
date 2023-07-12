@@ -3,10 +3,9 @@ nodes:
 - name: social_worker
   fields:
   - name: sw_reg_number
-    type: VARCHAR()
     description: Social Work England (SWE) registration number
     item_ref: WRK001A
-    guidance: null
+    type: string
     primary_key: true
     validators:
     - required:
@@ -24,11 +23,11 @@ nodes:
     cms_table:
     - liquid_logic:social_worker
     - mosaic:social_worker
+    guidance: null
   - name: sw_id
-    type: VARCHAR()
     description: Social worker ID
     item_ref: WRK002A
-    guidance: null
+    type: string
     primary_key: true
     validators:
     - required:
@@ -48,11 +47,11 @@ nodes:
     cms_table:
     - liquid_logic:social_worker
     - mosaic:social_worker
+    guidance: null
   - name: sw_epi_start_date
-    type: DATE
     description: Social worker episode start date
     item_ref: WRK003A
-    guidance: null
+    type: date
     categories:
     - social_worker
     returns:
@@ -66,11 +65,11 @@ nodes:
     cms_table:
     - liquid_logic:social_worker
     - mosaic:social_worker
+    guidance: null
   - name: sw_epi_end_date
-    type: DATE
     description: Social worker episode end date
     item_ref: WRK004A
-    guidance: null
+    type: date
     categories:
     - social_worker
     returns:
@@ -84,11 +83,11 @@ nodes:
     cms_table:
     - liquid_logic:social_worker
     - mosaic:social_worker
+    guidance: null
   - name: sw_change_reason
-    type: VARCHAR()
     description: Reason for social worker change
     item_ref: WRK005A
-    guidance: null
+    type: string
     categories:
     - social_worker
     returns:
@@ -102,11 +101,11 @@ nodes:
     cms_table:
     - liquid_logic:social_worker
     - mosaic:social_worker
+    guidance: null
   - name: sw_agency
-    type: BOOLEAN
     description: Agency worker
     item_ref: WRK006A
-    guidance: null
+    type: boolean
     categories:
     - social_worker
     returns:
@@ -120,11 +119,11 @@ nodes:
     cms_table:
     - liquid_logic:social_worker
     - mosaic:social_worker
+    guidance: null
   - name: sw_role
-    type: VARCHAR()
     description: Role within the organisation
     item_ref: WRK007A
-    guidance: null
+    type: string
     categories:
     - social_worker
     returns:
@@ -138,11 +137,11 @@ nodes:
     cms_table:
     - liquid_logic:social_worker
     - mosaic:social_worker
+    guidance: null
   - name: sw_caseload
-    type: TINYINT()
     description: Number of cases held
     item_ref: WRK008A
-    guidance: null
+    type: integer
     categories:
     - social_worker
     returns:
@@ -156,11 +155,11 @@ nodes:
     cms_table:
     - liquid_logic:social_worker
     - mosaic:social_worker
+    guidance: null
   - name: sw_qualification
-    type: VARCHAR()
     description: Qualification level
     item_ref: WRK009A
-    guidance: null
+    type: string
     categories:
     - social_worker
     returns:
@@ -174,3 +173,4 @@ nodes:
     cms_table:
     - liquid_logic:social_worker
     - mosaic:social_worker
+    guidance: null

@@ -3,10 +3,9 @@ nodes:
 - name: care_leavers
   fields:
   - name: care_leaver_id
-    type: VARCHAR()
     description: Care Leaver Table ID
     item_ref: CLE001A
-    guidance: null
+    type: string
     primary_key: true
     validators:
     - required:
@@ -24,11 +23,12 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: Care Leaver record unique ID from system or auto-generated as part of
+      export.
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: CLE002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -47,11 +47,10 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: See PER001A
   - name: cl_eligibility
-    type: null
     description: Eligibility Status/ Category
     item_ref: CLE003A
-    guidance: null
     categories:
     - care_leavers
     returns:
@@ -65,11 +64,10 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: null
   - name: cl_in_touch
-    type: null
     description: In Touch Category
     item_ref: CLE004A
-    guidance: null
     categories:
     - care_leavers
     returns:
@@ -83,11 +81,11 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: null
   - name: cl_latest_contact
-    type: DATE
     description: Latest Date of Contact
     item_ref: CLE005A
-    guidance: null
+    type: date
     categories:
     - care_leavers
     returns:
@@ -101,11 +99,10 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: null
   - name: cl_accommodation
-    type: null
     description: Accommodation
     item_ref: CLE006A
-    guidance: null
     categories:
     - care_leavers
     returns:
@@ -119,11 +116,10 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: null
   - name: cl_accom_suitable
-    type: null
     description: Suitability of Accommodation
     item_ref: CLE007A
-    guidance: null
     categories:
     - care_leavers
     returns:
@@ -137,11 +133,10 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: null
   - name: cl_activity
-    type: null
     description: Activity Status
     item_ref: CLE008A
-    guidance: null
     categories:
     - care_leavers
     returns:
@@ -155,11 +150,10 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: null
   - name: cl_pathway_plan_rev_date
-    type: null
     description: Latest Pathway Plan Review Date
     item_ref: CLE009A
-    guidance: null
     categories:
     - care_leavers
     returns:
@@ -173,11 +167,10 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: null
   - name: cl_personal_advisor
-    type: null
     description: Allocated Personal Advisor
     item_ref: CLE010A
-    guidance: null
     categories:
     - care_leavers
     returns:
@@ -191,11 +184,10 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: null
   - name: cl_team
-    type: null
     description: Allocated Team
     item_ref: CLE011A
-    guidance: null
     categories:
     - care_leavers
     returns:
@@ -209,11 +201,10 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: null
   - name: cl_worker_id
-    type: null
     description: Allocated Worker ID
     item_ref: CLE012A
-    guidance: null
     foreign_key: social_worker.sw_id
     categories:
     - care_leavers
@@ -228,3 +219,4 @@ nodes:
     cms_table:
     - liquid_logic:care_leavers
     - mosaic:care_leavers
+    guidance: null

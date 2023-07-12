@@ -3,10 +3,9 @@ nodes:
 - name: cin_episodes
   fields:
   - name: cin_referral_id
-    type: VARCHAR()
     description: CIN Referral ID
     item_ref: CIN001A
-    guidance: Referral Record unique ID from system or auto-generated as part of export.
+    type: string
     primary_key: true
     validators:
     - required:
@@ -25,11 +24,23 @@ nodes:
     cms_table:
     - liquid_logic:cin_episodes
     - mosaic:cin_episodes
+    guidance: "Referral Record unique ID from system or auto-generated as part of\
+      \ export. Information required for transfer in cases\nIf a child who was the\
+      \ subject of a child protection plan in their previous local authority moves\
+      \ to your local authority, then all data modules need to be completed, however\
+      \ the children in need details module should include:\n\u2022 a referral date\
+      \ (which should be the date your local authority received formal notification\
+      \ that the child had permanently moved to your local authority);\n\u2022 a source\
+      \ of referral;\n\u2022 a primary need code;\n\u2022 the referral no further\
+      \ action flag should equal 0 or false;\n\u2022 the date of initial child protection\
+      \ conference should be provided, but within the children in need details group,\
+      \ not as part of the section 47 enquiries sub group.\nThe section 47 enquiries\
+      \ group should not be returned for these children unless a subsequent section\
+      \ 47 enquiry is carried out at your local authority."
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: CIN002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -48,11 +59,11 @@ nodes:
     cms_table:
     - liquid_logic:cin_episodes
     - mosaic:cin_episodes
+    guidance: See PER001A
   - name: cin_ref_date
-    type: DATE
     description: CIN Referral Date
     item_ref: CIN003A
-    guidance: Date of Referral
+    type: date
     categories:
     - child_in_need
     - referral
@@ -68,16 +79,49 @@ nodes:
     cms_table:
     - liquid_logic:cin_episodes
     - mosaic:cin_episodes
+    guidance: Date of Referral
+  - name: cin_primary_need
+    description: CIN Primary Need Code
+    item_ref: CIN010A
+    categories:
+    - child_in_need
+    - referral
+    returns:
+    - 1aRemove
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cin_primary_need
+    - mosaic:cin_primary_need
+    cms_table:
+    - liquid_logic:cin_episodes
+    - mosaic:cin_episodes
+    guidance: "This code indicates the main reason why a child started to receive\
+      \ services. It should not be left blank. Only one reason can be recorded.\n\
+      If a child is also looked after, the primary need code for children in need\
+      \ might not necessarily be the same as that recorded in the children looked\
+      \ after data collection. For example, this may occur if a child became looked\
+      \ after at a later date than when they became a child in need.\nThe categories\
+      \ are designed only to identify what kind of pressures are placed on social\
+      \ services. They have no diagnostic value with regard to the children themselves\
+      \ and must not be used to determine what type of service the child should receive.\n\
+      If there is difficulty choosing between two or more categories of need, choose\
+      \ the category that comes highest up in the table, for example, if trying to\
+      \ decide between family in acute stress and family dysfunction, choose family\
+      \ in acute stress.\nThe order of the categories relates to the specificity of\
+      \ the description and not necessarily importance. However, the order is fixed\
+      \ so that there is consistency.\nFurther information on choosing a primary need\
+      \ category is in appendix A.\nThe children in need census for 2005 and earlier\
+      \ tried to account for all money spent in a census week. To allow for this,\
+      \ \u2018N9\u2019 was created, but as this census is specifically child based,\
+      \ the definition of \u2018N9\u2019 from 2005 is not applicable. As in previous\
+      \ years, \u2018N9\u2019 can be used if a child is no longer in need and the\
+      \ only service they are receiving is adoption support (on an open case) immediately\
+      \ after they have been in need."
   - name: cin_ref_source
-    type: null
     description: CIN Referral Source
     item_ref: CIN004A
-    guidance: 'For each new referral, record the source of referral from the list.
-
-      Where there is more than one referral for the same child on the same day, the
-      first referral should be recorded and it is this referral source that should
-      be recorded here. The data should be returned for each year the episode remains
-      open.'
     categories:
     - child_in_need
     - referral
@@ -93,11 +137,15 @@ nodes:
     cms_table:
     - liquid_logic:cin_episodes
     - mosaic:cin_episodes
+    guidance: 'For each new referral, record the source of referral from the list.
+
+      Where there is more than one referral for the same child on the same day, the
+      first referral should be recorded and it is this referral source that should
+      be recorded here. The data should be returned for each year the episode remains
+      open.'
   - name: cin_ref_outcome
-    type: null
     description: CIN Referral Outcome
     item_ref: CIN005A
-    guidance: NFA/ Assessment/ Step-down
     categories:
     - child_in_need
     - referral
@@ -113,10 +161,35 @@ nodes:
     cms_table:
     - liquid_logic:cin_episodes
     - mosaic:cin_episodes
+    guidance: 'Outcome of the Referral:
+
+      -No Further Action
+
+      -Advice and Information or signpost to other services
+
+      -Step-down to Early Help
+
+      -Assessment required
+
+      -Strategy discussion and/or Section 47 enquiry
+
+      -Other'
   - name: cin_close_reason
-    type: null
     description: CIN Closure Reason
     item_ref: CIN006A
+    categories:
+    - child_in_need
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cin_close_reason
+    - mosaic:cin_close_reason
+    cms_table:
+    - liquid_logic:cin_episodes
+    - mosaic:cin_episodes
     guidance: "This is the reason the local authority stops providing services to\
       \ the child.\nEnter the reason that the case was closed from the code list.\n\
       - RC1 Adopted.\n- RC2 Died.\n- RC3 Child arrangements order.\n- RC4 Special\
@@ -150,6 +223,10 @@ nodes:
       \ that has been closed following assessment.\nWhen the reason for closure code\
       \ RC8 or RC9 is used the case should be closed on the same date as the assessment\
       \ ends or, if this is not practical, as soon as possible afterwards."
+  - name: cin_close_date
+    description: CIN Closure Date
+    item_ref: CIN007A
+    type: date
     categories:
     - child_in_need
     returns:
@@ -158,15 +235,11 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cin_close_reason
-    - mosaic:cin_close_reason
+    - liquid_logic:cin_close_date
+    - mosaic:cin_close_date
     cms_table:
     - liquid_logic:cin_episodes
     - mosaic:cin_episodes
-  - name: cin_close_date
-    type: DATE
-    description: CIN Closure Date
-    item_ref: CIN007A
     guidance: "A case is closed if the local authority has no intention of taking\
       \ any initiative with respect to the child or family concerned, unless the local\
       \ authority receives new information that requires it to take some sort of action.\n\
@@ -195,24 +268,9 @@ nodes:
       \ local authorities to separately record the date of death and final case closure\
       \ date in the census. This will allow local authorities to record the services\
       \ they provide between the death and the case closure."
-    categories:
-    - child_in_need
-    returns:
-    - CINcensus
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:cin_close_date
-    - mosaic:cin_close_date
-    cms_table:
-    - liquid_logic:cin_episodes
-    - mosaic:cin_episodes
   - name: cin_ref_team
-    type: null
     description: CIN Referral Completed by Team
     item_ref: CIN008A
-    guidance: Allocated Team responsible for completing Referral
     categories:
     - child_in_need
     - referral
@@ -227,11 +285,10 @@ nodes:
     cms_table:
     - liquid_logic:cin_episodes
     - mosaic:cin_episodes
+    guidance: Allocated Team responsible for completing Referral
   - name: cin_ref_worker_id
-    type: null
     description: CIN Referral Completed by Worker ID
     item_ref: CIN009A
-    guidance: Allocated worker responsible for completing Referral
     foreign_key: social_worker.sw_id
     categories:
     - child_in_need
@@ -247,3 +304,4 @@ nodes:
     cms_table:
     - liquid_logic:cin_episodes
     - mosaic:cin_episodes
+    guidance: Allocated worker responsible for completing Referral

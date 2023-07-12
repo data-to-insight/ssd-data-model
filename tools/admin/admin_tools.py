@@ -24,6 +24,10 @@ returns_categories = {
         "colour": "#FFC91E",
         "description": "Final specified item for one of the 1b projects",
     },
+    "1aRemove": {
+        "colour": "##FF2114",
+        "description": "Specified item rejected from final spec.",
+    },
 }
 
 
@@ -44,7 +48,8 @@ def get_paths():
         'wsite_sub_images': 'imgs/erd_data_objects/',
         'returns_maps': 'docs/imgs/returns_maps/',
         'wsite_returns_maps': 'imgs/returns_maps/',
-        'data_specification': 'docs/admin/data_objects_specification.csv'  
+        'data_specification': 'docs/admin/data_objects_specification.csv',
+        'change_log': 'docs/admin/ssd_change_log.csv'  
     }
     return paths
 

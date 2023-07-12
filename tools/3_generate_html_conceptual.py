@@ -49,17 +49,20 @@ html_content += "body { margin: 20px; }"
 html_content += "table { border-collapse: collapse; width: 100%; margin: auto; table-layout: fixed; }"  # Set width to 100% and table-layout to fixed
 html_content += "th, td { text-align: left; padding: 8px; word-wrap: break-word; border: 1px solid #ddd; }"
 html_content += "th { background-color: #f2f2f2; }"
+
+# Per Object table/container settings
 html_content += "th.image-column { width: " + str(image_width) + "; }"
 html_content += "th.field-ref-column { width: 100px; }"
 html_content += "th.data-item-column { width: 30%; }"
-html_content += "th.field-column { width: 20%; }"
 html_content += "th.cms-column { width: 15%; }"
 html_content += "th.categories-column { width: 15%; }"
 html_content += "th.returns-column { width: 20%; }"
+html_content += "th.changelog-column { width: 20%; }"
+
+
 html_content += ".last-updated-container { display: flex; align-items: center; }"
 html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
 html_content += ".repo-link { text-decoration: none; }"
-# html_content += ".link-section a { margin-left: 10px; margin-right: 10px; }"
 html_content += ".link-section a { margin-left: 10px; margin-right: 10px; }"
 
 html_content += "</style></head><body>"
@@ -131,16 +134,18 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
             html_content += "<div style='display: flex; align-items: flex-start;'>"
             html_content += f'<img src="{erd_objects_path}{entity_name}.png" alt="{entity_name}" style="width: {image_width}; margin-right: 20px;">'
             html_content += "<div style='padding-bottom: 50px;'>"
+            
+            # Per Object table/container settings
             html_content += "<table style='border-collapse: collapse; border: none;'>"
             html_content += "<colgroup>"
             html_content += "<col style='width: 12%;'/>"  # Set width for field-ref-column
             html_content += "<col style='width: 28%;'/>"  # Set width for data-item-column
-            html_content += "<col style='width: 20%;'/>"  # Set width for field-column
             html_content += "<col style='width: 10%;'/>"  # Set width for cms-column
             html_content += "<col style='width: 15%;'/>"  # Set width for categories-column
             html_content += "<col style='width: 15%;'/>"  # Set width for returns-column
+            html_content += "<col style='width: 20%;'/>"  # Set width for change_log-column
             html_content += "</colgroup>"
-            html_content += "<tr><th class='item-ref-column'>Item Ref</th><th class='data-item-column'>Data Item Name</th><th class='field-column'>Field</th><th class='cms-column'>Exists in CMS</th><th class='categories-column'>Data Category Group(s)</th><th class='returns-column'>Returns</th></tr>"
+            html_content += "<tr><th class='item-ref-column'>Item Ref</th><th class='data-item-column'>Data Item Name</th><th class='cms-column'>Exists in CMS</th><th class='categories-column'>Data Category Group(s)</th><th class='returns-column'>Returns</th><th class='changelog-column'>Change Log</th></tr>"
 
             # For each row in the table:
             for field in nodes[0]['fields']:
@@ -150,9 +155,13 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
                 categories_data = ', '.join(field.get('categories', []))
                 returns_data = ', '.join(field.get('returns', []))
 
+                metadata = field.get('metadata', {}) # check if there is a key/val dict
+                # meta_data = ', '.join(f"{k}: {v}" for k, v in metadata.items()) # re-form into key/val list(comma split list that wraps)
+                meta_data = '<br>'.join(f"{k}: {v}" for k, v in metadata.items()) # re-form into key/val list(Incl. html line breaks)
+
                 # Add a class to each row, using a unique identifier (like the field reference)
                 html_content += f'<tr class="row-{field_ref}">'
-                html_content += f"<td>{field_ref}</td><td>{field_name}</td><td>{field_name}</td><td>{cms_data}</td><td>{categories_data}</td><td>{returns_data}</td></tr>"
+                html_content += f"<td>{field_ref}</td><td>{field_name}</td><td>{cms_data}</td><td>{categories_data}</td><td>{returns_data}</td><td>{meta_data}</td></tr>"
 
             html_content += "</table>"
             html_content += "</div>"

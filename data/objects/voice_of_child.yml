@@ -3,10 +3,9 @@ nodes:
 - name: voice_of_child
   fields:
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: VOC001A
-    guidance: null
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -25,12 +24,11 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
+    guidance: null
   - name: voc_explained_worries
-    type: null
     description: Has someone explained to you why people are worried for your family
       in a way that you can understand?
     item_ref: VOC002A
-    guidance: null
     categories:
     - voice_of_child
     returns:
@@ -41,12 +39,11 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
+    guidance: null
   - name: voc_story_help_understand
-    type: null
     description: Does your story with words and pictures help you to understand what
       has happened in your family?
     item_ref: VOC003A
-    guidance: null
     categories:
     - voice_of_child
     returns:
@@ -57,12 +54,11 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
+    guidance: null
   - name: voc_agree_worker
-    type: null
     description: Do you agree with what your worker says needs to happen to keep you
       safe?
     item_ref: VOC004A
-    guidance: null
     categories:
     - voice_of_child
     returns:
@@ -73,12 +69,11 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
+    guidance: null
   - name: voc_plan_safe
-    type: null
     description: Do you think the plan tells everyone what they need to do to keep
       you safe?
     item_ref: VOC005A
-    guidance: null
     categories:
     - voice_of_child
     returns:
@@ -89,12 +84,11 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
+    guidance: null
   - name: voc_tablet_help_explain
-    type: null
     description: Did writing/ drawing on the tablet help you to explain what you were
       thinking and what you wanted to happen?
     item_ref: VOC006A
-    guidance: '#N/A'
     categories:
     - voice_of_child
     returns:
@@ -105,3 +99,4 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
+    guidance: null

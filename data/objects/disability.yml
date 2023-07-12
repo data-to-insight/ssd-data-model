@@ -3,10 +3,9 @@ nodes:
 - name: disability
   fields:
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: DIS001A
-    guidance: See PER001A
+    type: string
     primary_key: true
     foreign_key: person.la_person_id
     validators:
@@ -29,10 +28,36 @@ nodes:
     cms_table:
     - liquid_logic:disability
     - mosaic:disability
+    guidance: See PER001A
+    metadata:
+      release_datetime: 12/07/2023 00:00
+      change_id: SSD-005
+      item_changes_count: '1.0'
+      change_reason: guidance change
+      change_type: Change
   - name: person_disability
-    type: null
     description: Disability Code
     item_ref: DIS002A
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - disability
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:person_disability
+    - mosaic:person_disability
+    cms_table:
+    - liquid_logic:disability
+    - mosaic:disability
     guidance: "The Disability Discrimination Act 2005 (DDA) defines a disabled person\
       \ as a person with a physical or mental impairment which has a substantial and\
       \ long-term adverse effect on his/her ability to carry out normal day-to-day\
@@ -59,23 +84,9 @@ nodes:
       \ appropriately.\nIf a child has no disability, do not leave this item blank;\
       \ use the code \u2018NONE\u2019. However, if a child is unborn then the disability\
       \ item should be left blank."
-    primary_key: true
-    validators:
-    - required:
-        enabled: true
-    - unique:
-        enabled: true
-    categories:
-    - identity
-    - disability
-    returns:
-    - CINcensus
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:person_disability
-    - mosaic:person_disability
-    cms_table:
-    - liquid_logic:disability
-    - mosaic:disability
+    metadata:
+      release_datetime: 13/07/2023 00:00
+      change_id: SSD-006
+      item_changes_count: '1.0'
+      change_reason: new item
+      change_type: New Feature

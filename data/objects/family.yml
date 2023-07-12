@@ -3,11 +3,8 @@ nodes:
 - name: family
   fields:
   - name: family_id
-    type: null
     description: Family identifier
     item_ref: FAM001A
-    guidance: For linking to adoptive family or Family-level interventions e.g. Early
-      Help
     primary_key: true
     validators:
     - required:
@@ -29,11 +26,12 @@ nodes:
     cms_table:
     - liquid_logic:family
     - mosaic:family
+    guidance: For linking to adoptive family or Family-level interventions e.g. Early
+      Help
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: FAM002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -53,3 +51,4 @@ nodes:
     cms_table:
     - liquid_logic:family
     - mosaic:family
+    guidance: See PER001A

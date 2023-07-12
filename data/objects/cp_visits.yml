@@ -3,10 +3,9 @@ nodes:
 - name: cp_visits
   fields:
   - name: cp_plan_id
-    type: VARCHAR()
     description: CP Plan ID
     item_ref: CPV001A
-    guidance: null
+    type: string
     primary_key: true
     foreign_key: cp_plans.cp_plan_id
     validators:
@@ -27,11 +26,11 @@ nodes:
     cms_table:
     - liquid_logic:cp_visits
     - mosaic:cp_visits
+    guidance: See CPP001A
   - name: cp_visit_id
-    type: VARCHAR()
     description: CP Visit ID
     item_ref: CPV002A
-    guidance: null
+    type: string
     categories:
     - child_protection
     - cp_plan
@@ -45,11 +44,12 @@ nodes:
     cms_table:
     - liquid_logic:cp_visits
     - mosaic:cp_visits
+    guidance: CIN Visit record unique ID from system or auto-generated as part of
+      export.
   - name: cp_visit_date
-    type: DATE
     description: Date of Visit
     item_ref: CPV003A
-    guidance: null
+    type: date
     categories:
     - child_protection
     - cp_plan
@@ -65,11 +65,11 @@ nodes:
     cms_table:
     - liquid_logic:cp_visits
     - mosaic:cp_visits
+    guidance: Actual date of Visit
   - name: cp_visit_seen
-    type: BOOLEAN
     description: Child Seen
     item_ref: CPV004A
-    guidance: null
+    type: boolean
     categories:
     - child_protection
     - cp_plan
@@ -85,11 +85,11 @@ nodes:
     cms_table:
     - liquid_logic:cp_visits
     - mosaic:cp_visits
+    guidance: Was the child seen during this visit? Yes/ No
   - name: cp_visit_seen_alone
-    type: BOOLEAN
     description: Child Seen Alone
     item_ref: CPV005A
-    guidance: null
+    type: boolean
     categories:
     - child_protection
     - cp_plan
@@ -105,11 +105,11 @@ nodes:
     cms_table:
     - liquid_logic:cp_visits
     - mosaic:cp_visits
+    guidance: Was the child seen alone during this visit? Yes/ No
   - name: cp_visit_bedroom
-    type: BOOLEAN
     description: Child Bedroom Seen
     item_ref: CPV006A
-    guidance: null
+    type: boolean
     categories:
     - child_protection
     - cp_plan
@@ -125,3 +125,4 @@ nodes:
     cms_table:
     - liquid_logic:cp_visits
     - mosaic:cp_visits
+    guidance: Was the child's bedroom seen during this visit? Yes/ No

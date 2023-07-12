@@ -3,11 +3,9 @@ nodes:
 - name: early_help_episodes
   fields:
   - name: eh_episode_id
-    type: VARCHAR()
     description: EH Episode ID
     item_ref: EAR001A
-    guidance: Early Help Episode unique ID from system or auto-generated as part of
-      export.
+    type: string
     primary_key: true
     validators:
     - required:
@@ -25,11 +23,12 @@ nodes:
     cms_table:
     - liquid_logic:early_help_episodes
     - mosaic:early_help_episodes
+    guidance: Early Help Episode unique ID from system or auto-generated as part of
+      export.
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: EAR002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -48,11 +47,11 @@ nodes:
     cms_table:
     - liquid_logic:early_help_episodes
     - mosaic:early_help_episodes
+    guidance: See PER001A
   - name: eh_epi_start_date
-    type: DATE
     description: EH Episode Start Date
     item_ref: EAR003A
-    guidance: Date Early Help Episode Started
+    type: date
     categories:
     - early_help
     returns:
@@ -66,11 +65,11 @@ nodes:
     cms_table:
     - liquid_logic:early_help_episodes
     - mosaic:early_help_episodes
+    guidance: Date Early Help Episode Started
   - name: eh_epi_end_date
-    type: DATE
     description: EH Episode End Date
     item_ref: EAR004A
-    guidance: Date Early Help Episode Ended
+    type: date
     categories:
     - early_help
     returns:
@@ -84,11 +83,10 @@ nodes:
     cms_table:
     - liquid_logic:early_help_episodes
     - mosaic:early_help_episodes
+    guidance: Date Early Help Episode Ended
   - name: eh_epi_reason
-    type: null
     description: EH Episode Reason for Involvement
     item_ref: EAR005A
-    guidance: null
     categories:
     - early_help
     returns:
@@ -102,11 +100,33 @@ nodes:
     cms_table:
     - liquid_logic:early_help_episodes
     - mosaic:early_help_episodes
+    guidance: 'Broad categorisation of Reason for Involvement. Potential categories
+      could be:
+
+      -Alcohol/ Substance Misuse (Parent or Child)
+
+      -Mental Health (Parent or Child)
+
+      -Parenting and Family Dynamics
+
+      -Physical and Learning Disabilities/Illness (Parent or Child)
+
+      -Domestic Violence/ Abuse
+
+      -Child Abuse/ Neglect
+
+      -Special Circumstances/ Vulnerabilities
+
+      -Socio-economic Challenges
+
+      -Child Well-being and Development
+
+      -Information and Support Service
+
+      -Other'
   - name: eh_epi_end_reason
-    type: null
     description: EH Episode End Reason
     item_ref: EAR006A
-    guidance: Outcomes met/ Step-up/ NFA
     categories:
     - early_help
     returns:
@@ -120,11 +140,10 @@ nodes:
     cms_table:
     - liquid_logic:early_help_episodes
     - mosaic:early_help_episodes
+    guidance: Outcomes met/ Step-up/ NFA
   - name: eh_epi_org
-    type: null
     description: EH Episode Allocated Organisation
     item_ref: EAR007A
-    guidance: Organisation responsible for Early Help provision
     categories:
     - early_help
     returns:
@@ -138,11 +157,10 @@ nodes:
     cms_table:
     - liquid_logic:early_help_episodes
     - mosaic:early_help_episodes
+    guidance: Organisation responsible for Early Help provision
   - name: eh_epi_worker_id
-    type: null
     description: EH Episode Allocated Worker ID
     item_ref: EAR008A
-    guidance: Allocated worker responsible for Early Help provision
     foreign_key: social_worker.sw_id
     categories:
     - early_help
@@ -157,3 +175,4 @@ nodes:
     cms_table:
     - liquid_logic:early_help_episodes
     - mosaic:early_help_episodes
+    guidance: Allocated worker responsible for Early Help provision

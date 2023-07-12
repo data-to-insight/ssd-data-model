@@ -3,10 +3,9 @@ nodes:
 - name: cla_episodes
   fields:
   - name: cla_episode_id
-    type: VARCHAR()
     description: Episode ID
     item_ref: CLA001A
-    guidance: null
+    type: string
     primary_key: true
     validators:
     - required:
@@ -24,11 +23,11 @@ nodes:
     cms_table:
     - liquid_logic:cla_episodes
     - mosaic:cla_episodes
+    guidance: CLA Episode unique ID from system or auto-generated as part of export.
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: CLA002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -47,10 +46,24 @@ nodes:
     cms_table:
     - liquid_logic:cla_episodes
     - mosaic:cla_episodes
+    guidance: See PER001A
   - name: cla_epi_start
-    type: DATE
     description: Date Episode Commenced
     item_ref: CLA003A
+    type: date
+    categories:
+    - looked_after
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cla_epi_start
+    - mosaic:cla_epi_start
+    cms_table:
+    - liquid_logic:cla_episodes
+    - mosaic:cla_episodes
     guidance: "This item records the date that each episode began. For the first episode\
       \ in the year, this date can be in the current data year, or an earlier data\
       \ year. When loading data using CSV or XML, dates must be recorded in a DD/MM/YYYY\
@@ -79,6 +92,9 @@ nodes:
       \ for SSDA903 purposes is that a placement must involve an overnight stay. A\
       \ \u2018placement\u2019 that does not include an overnight stay should be regarded\
       \ as a \u2018visit\u2019 and not shown on the SSDA903."
+  - name: cla_epi_start_reason
+    description: Reason for New CLA Episode
+    item_ref: CLA004A
     categories:
     - looked_after
     returns:
@@ -87,15 +103,11 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cla_epi_start
-    - mosaic:cla_epi_start
+    - liquid_logic:cla_epi_start_reason
+    - mosaic:cla_epi_start_reason
     cms_table:
     - liquid_logic:cla_episodes
     - mosaic:cla_episodes
-  - name: cla_epi_start_reason
-    type: null
-    description: Reason for New CLA Episode
-    item_ref: CLA004A
     guidance: "Use Code S where a child is starting to be looked-after for the first\
       \ time, or had previously ceased to be looked-after, and is now starting to\
       \ be looked-after again. Also use code S when recording agreements to provide\
@@ -129,24 +141,27 @@ nodes:
       \ carer. The two changes do not need to be simultaneous or consequent one upon\
       \ the other. The code simply reflects that there was a change in placement and\
       \ a change in legal status, for whatever reason, on the same day."
+  - name: cla_primary_need
+    description: CIN Primary Need Code
+    item_ref: CLA009A
     categories:
     - looked_after
     returns:
-    - SSDA903
+    - 1aRemove
     cms:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cla_epi_start_reason
-    - mosaic:cla_epi_start_reason
+    - liquid_logic:cla_primary_need
+    - mosaic:cla_primary_need
     cms_table:
     - liquid_logic:cla_episodes
     - mosaic:cla_episodes
+    guidance: null
   - name: cla_epi_ceased
-    type: DATE
     description: Date Episode Ceased
     item_ref: CLA005A
-    guidance: null
+    type: date
     categories:
     - looked_after
     returns:
@@ -161,11 +176,29 @@ nodes:
     cms_table:
     - liquid_logic:cla_episodes
     - mosaic:cla_episodes
+    guidance: "This item records the date that each episode ended. Code day and month\
+      \ as two-digit numbers and year as a four-digit number. Example: 4 November\
+      \ 2022 should be entered as 04/11/2022.\nAn episode cannot start and end on\
+      \ the same day. Where a child has not left care, a new episode must start on\
+      \ the same day as the previous episode finished.\nWhen a child ceases to be\
+      \ looked-after because of adoption (reason episode ceased codes of E11 or E12),\
+      \ the date episode ceased is the date the court makes the adoption order.\n\
+      When a child ceases to be looked-after because he/she dies whilst being looked-after\
+      \ (reason episode ceased code E2), the date episode ceased must be the same\
+      \ as the date of death as recorded on the death certificate.\nPeriods of care\
+      \ in local authority accommodation of less than 24 hours must not be recorded\
+      \ on the SSDA903. The only exceptions to this rule are:\n\u2022 Children who\
+      \ are being regularly accommodated under an agreed series of short-term placements\
+      \ (legal status codes V3 and V4). Overnight stays of less than 24 hours may\
+      \ be treated as 24 hours for statistical purposes\n\u2022 UASC. They should\
+      \ be recorded as a children looked after as soon as they come to the attention\
+      \ of local authorities, rather than only when they have been accommodated for\
+      \ 24 hours. Unlike other children, all UASC who come to the attention of local\
+      \ authorities will become looked-after so the 24-hour rule should not apply\
+      \ for this group of children."
   - name: cla_epi_cease_reason
-    type: null
     description: Reason Episode Ceased
     item_ref: CLA006A
-    guidance: null
     categories:
     - looked_after
     returns:
@@ -180,11 +213,47 @@ nodes:
     cms_table:
     - liquid_logic:cla_episodes
     - mosaic:cla_episodes
+    guidance: "When an episode has ended and a further episode, in the same period\
+      \ of care, has started, use the code, X1. All other \u2018reason episode ceased\u2019\
+      \ codes record the circumstances when a child ceases to be looked-after.\nIf\
+      \ a child ceases to be looked-after because he/she has turned 18, this can already\
+      \ be deduced from his/her date of birth. Therefore, the appropriate code below\
+      \ should be used to capture the destination of the young person.\n-X1 Episode\
+      \ ceases, and new episode begins on same day, for any reason\n-E11 Adopted -\
+      \ application for an adoption order unopposed\nE12 Adopted \u2013 consent dispensed\
+      \ with by the court\nE2 Died\nE3 Care taken over by another local authority\
+      \ in the UK\nE4A Returned home to live with parent(s), relative(s), or other\
+      \ person(s) with parental responsibility as part of the care planning process\
+      \ (not under a special guardianship order or residence order/ child arrangement\
+      \ order).\nE4B Returned home to live with parent(s), relative(s), or other person(s)\
+      \ with parental responsibility which was not part of the current care planning\
+      \ process (not under a special guardianship order or residence order or (from\
+      \ 22 April 2014) a child arrangement order).\nE13 Left care to live with parent(s),\
+      \ relative(s), or other person(s) with no parental responsibility.\nE41 Residence\
+      \ order/ child arrangement order which sets out with whom the child is to live)\
+      \ granted\nE45 Special guardianship order made to former foster carer(s), who\
+      \ was/are a relative(s) or friend(s)\nE46 Special guardianship order made to\
+      \ former foster carer(s), other than relative(s) or friend(s)\nE47 Special guardianship\
+      \ order made to carer(s), other than former foster carer(s), who was/are a relative(s)\
+      \ or friend(s)\nE48 Special guardianship order made to carer(s), other than\
+      \ former foster carer(s), other than relative(s) or friend(s)\nE5 Moved into\
+      \ independent living arrangement and no longer looked-after: supportive accommodation\
+      \ providing formalised advice/support arrangements (such as most hostels, young\
+      \ men\u2019s Christian association, foyers, staying close and care leavers projects).\
+      \ Includes both children leaving care before and at age 18\nE6 Moved into independent\
+      \ living arrangement and no longer looked-after: accommodation providing no\
+      \ formalised advice/support arrangements (such as bedsit, own flat, living with\
+      \ friend(s)). Includes both children leaving care before and at age 18\nE7 Transferred\
+      \ to residential care funded by adult social care services\nE9 Sentenced to\
+      \ custody\nE14 Accommodation on remand ended\nE15 Age assessment determined\
+      \ child is aged 18 or over and E5, E6 and E7 do not apply, such as an unaccompanied\
+      \ asylum-seeking child (UASC) whose age has been disputed\nE16 Child moved abroad\n\
+      E17 Aged 18 (or over) and remained with current carers (inc under staying put\
+      \ arrangements)\nE8 Period of being looked-after ceased for any other reason\
+      \ (where none of the other reasons apply)"
   - name: cla_team
-    type: null
     description: Allocated Team
     item_ref: CLA007A
-    guidance: null
     categories:
     - looked_after
     returns:
@@ -198,11 +267,10 @@ nodes:
     cms_table:
     - liquid_logic:cla_episodes
     - mosaic:cla_episodes
+    guidance: Allocated Team responsible for Looked After Child
   - name: cla_worker_id
-    type: null
     description: Allocated Worker ID
     item_ref: CLA008A
-    guidance: null
     foreign_key: social_worker.sw_id
     categories:
     - looked_after
@@ -217,3 +285,4 @@ nodes:
     cms_table:
     - liquid_logic:cla_episodes
     - mosaic:cla_episodes
+    guidance: Allocated worker responsible for Looked After Child

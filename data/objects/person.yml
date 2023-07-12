@@ -3,22 +3,9 @@ nodes:
 - name: person
   fields:
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: PER001A
-    guidance: "This must be a unique ID for each child (no longer than 10 characters)\
-      \ and should be retained from year to year. A child ID should not be reused\
-      \ after a period of time, it should be unique to a single child in your local\
-      \ authority. It can include alphabetic and numeric characters. Do not use non-numeric\
-      \ or non-alphabetic characters. This item is the sole means of DfE computer\
-      \ identification of each child record. The system is currently set to strip\
-      \ out any leading zeros in child identifiers. We would therefore ask local authorities\
-      \ not to use leading zeros in child identifiers.\nIf you are planning to change\
-      \ child identifiers, for example as part of a new computer scheme, DfE must\
-      \ be advised at an early stage.\nIf a looked-after child is adopted, and subsequently\
-      \ becomes looked-after again later, they should have two separate unlinked records\
-      \ \u2013 one for pre-adoption and one for post-adoption \u2013 with two different\
-      \ child identifiers."
+    type: string
     primary_key: true
     validators:
     - required:
@@ -39,11 +26,28 @@ nodes:
     cms_table:
     - liquid_logic:person
     - mosaic:person
+    guidance: "This must be a unique ID for each child (no longer than 10 characters)\
+      \ and should be retained from year to year. A child ID should not be reused\
+      \ after a period of time, it should be unique to a single child in your local\
+      \ authority. It can include alphabetic and numeric characters. Do not use non-numeric\
+      \ or non-alphabetic characters. This item is the sole means of DfE computer\
+      \ identification of each child record. The system is currently set to strip\
+      \ out any leading zeros in child identifiers. We would therefore ask local authorities\
+      \ not to use leading zeros in child identifiers.\nIf you are planning to change\
+      \ child identifiers, for example as part of a new computer scheme, DfE must\
+      \ be advised at an early stage.\nIf a looked-after child is adopted, and subsequently\
+      \ becomes looked-after again later, they should have two separate unlinked records\
+      \ \u2013 one for pre-adoption and one for post-adoption \u2013 with two different\
+      \ child identifiers."
+    metadata:
+      release_datetime: 10/07/2023 09:00
+      change_id: SSD-002
+      item_changes_count: '2.0'
+      change_reason: extended number of chars allowed
+      change_type: Initiative
   - name: person_sex
-    type: null
     description: Sex
     item_ref: PER002A
-    guidance: Sex, as recorded on a birth certificate or in a gender recognition certificate.
     categories:
     - identity
     returns:
@@ -57,10 +61,28 @@ nodes:
     cms_table:
     - liquid_logic:person
     - mosaic:person
+    guidance: 'Sex, as recorded on a birth certificate or in a gender recognition
+      certificate. F - Female
+
+      M - Male
+
+      U - Unknown'
   - name: person_gender
-    type: null
     description: Gender
     item_ref: PER003A
+    categories:
+    - identity
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:person_gender
+    - mosaic:person_gender
+    cms_table:
+    - liquid_logic:person
+    - mosaic:person
     guidance: "The DfE do not plan to collect \u2018gender identity\u2019, however\
       \ we understand you may wish to collect this on your own system. Definition\n\
       A person\u2019s inner concept of self as male, female, neither or a blend of\
@@ -75,32 +97,10 @@ nodes:
       \ has been chosen. While there are no plans to transfer this data it is envisaged\
       \ that, if transfer of codes were to be implemented, only code \u20189\u2019\
       \ would be transferred rather than codes \u201811\u2019, \u201812\u2019 etc."
-    categories:
-    - identity
-    returns:
-    - CINcensus
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:person_gender
-    - mosaic:person_gender
-    cms_table:
-    - liquid_logic:person
-    - mosaic:person
   - name: person_ethnicity
-    type: VARCHAR(4)
     description: Ethnicity
     item_ref: PER004A
-    guidance: "We require data on ethnicity for all children. The local authority\
-      \ must not ascribe any ethnicity to the pupil. This information must come from\
-      \ the child, or the parent, guardian or carer.\nWhere the ethnicity has not\
-      \ yet been collected, this is recorded as \u2018NOBT\u2019 (information not\
-      \ yet obtained). Where a child, parent, guardian or carer declines to provide\
-      \ ethnicity data, code \u2018REFU\u2019 (refused) is recorded and returned.\n\
-      Ethnicity should be recorded using one of the DfE main categories shown on the\
-      \ 'Lists' tab, which replicates those used in the school census and the children\
-      \ in need (CIN) return."
+    type: string
     categories:
     - identity
     returns:
@@ -115,20 +115,19 @@ nodes:
     cms_table:
     - liquid_logic:person
     - mosaic:person
+    guidance: "We require data on ethnicity for all children. The local authority\
+      \ must not ascribe any ethnicity to the pupil. This information must come from\
+      \ the child, or the parent, guardian or carer.\nWhere the ethnicity has not\
+      \ yet been collected, this is recorded as \u2018NOBT\u2019 (information not\
+      \ yet obtained). Where a child, parent, guardian or carer declines to provide\
+      \ ethnicity data, code \u2018REFU\u2019 (refused) is recorded and returned.\n\
+      Ethnicity should be recorded using one of the DfE main categories shown on the\
+      \ 'Lists' tab, which replicates those used in the school census and the children\
+      \ in need (CIN) return."
   - name: person_dob
-    type: DATE
     description: Date of Birth
     item_ref: PER005A
-    guidance: "The date of birth should be recorded in a DD/MM/YYYY format.\nIf the\
-      \ exact day of birth is not known:\nUnknown dates can be a problem for unaccompanied\
-      \ asylum-seeking children, If the day of birth is not known then assume that\
-      \ it was the 15th of the month. Do not use first day of the month as a dummy\
-      \ date of birth.\nIf the date of birth of an unaccompanied asylum-seeking child\
-      \ is reassessed, and:\n\u2022 if the age of the child is assessed to be over\
-      \ 18 years, then please report the original date of birth recorded on entry\
-      \ into care rather than amend it to the reassessed date of birth.\n\u2022 if\
-      \ the age of the child is assessed to be under 18 years, then please report\
-      \ the reassessed date of birth."
+    type: date
     categories:
     - identity
     returns:
@@ -143,17 +142,20 @@ nodes:
     cms_table:
     - liquid_logic:person
     - mosaic:person
+    guidance: "The date of birth should be recorded in a DD/MM/YYYY format.\nIf the\
+      \ exact day of birth is not known:\nUnknown dates can be a problem for unaccompanied\
+      \ asylum-seeking children, If the day of birth is not known then assume that\
+      \ it was the 15th of the month. Do not use first day of the month as a dummy\
+      \ date of birth.\nIf the date of birth of an unaccompanied asylum-seeking child\
+      \ is reassessed, and:\n\u2022 if the age of the child is assessed to be over\
+      \ 18 years, then please report the original date of birth recorded on entry\
+      \ into care rather than amend it to the reassessed date of birth.\n\u2022 if\
+      \ the age of the child is assessed to be under 18 years, then please report\
+      \ the reassessed date of birth."
   - name: person_upn
-    type: CHAR(13)
     description: UPN
     item_ref: PER006A
-    guidance: "The UPN must be 13 characters long. The first character is a letter\
-      \ (but cannot be I, O or S). The remaining characters are numeric. For example,\
-      \ H801200001001. If the UPN is temporary, then the last character must be a\
-      \ letter. The UPN field cannot be left blank unless the child is looked-after\
-      \ under an agreed series of short-term placements. For children looked after\
-      \ that have been adopted and subsequently return to being looked-after, the\
-      \ UPN on the child\u2019s pre- and post- adoption records should be different."
+    type: string
     categories:
     - identity
     returns:
@@ -167,17 +169,17 @@ nodes:
     cms_table:
     - liquid_logic:person
     - mosaic:person
+    guidance: "The UPN must be 13 characters long. The first character is a letter\
+      \ (but cannot be I, O or S). The remaining characters are numeric. For example,\
+      \ H801200001001. If the UPN is temporary, then the last character must be a\
+      \ letter. The UPN field cannot be left blank unless the child is looked-after\
+      \ under an agreed series of short-term placements. For children looked after\
+      \ that have been adopted and subsequently return to being looked-after, the\
+      \ UPN on the child\u2019s pre- and post- adoption records should be different."
   - name: person_upn_unknown
-    type: CHAR(3)
     description: UPN Unknown
     item_ref: PER007A
-    guidance: If the UPN is unknown, then one of the codes below should be used. These
-      codes are to be used within the UPN field where it is not possible to provide
-      a UPN. They are not entered into a separate field as they are in the CIN Census.If
-      a child is educated outside England, please use UPN unknown code UN3, unless
-      the child has a UPN from previously attending a school in England. If the child
-      is home educated and has previously attended a mainstream school, please provide
-      the UPN allocated earlier.
+    type: string
     categories:
     - identity
     returns:
@@ -191,12 +193,17 @@ nodes:
     cms_table:
     - liquid_logic:person
     - mosaic:person
+    guidance: If the UPN is unknown, then one of the codes below should be used. These
+      codes are to be used within the UPN field where it is not possible to provide
+      a UPN. They are not entered into a separate field as they are in the CIN Census.If
+      a child is educated outside England, please use UPN unknown code UN3, unless
+      the child has a UPN from previously attending a school in England. If the child
+      is home educated and has previously attended a mainstream school, please provide
+      the UPN allocated earlier.
   - name: person_send
-    type: BOOLEAN
     description: SEND Flag
     item_ref: PER008A
-    guidance: Young people who have an EHC plan or had an EHC plan or statement of
-      SEN at the time of completing compulsory education
+    type: boolean
     categories:
     - identity
     returns:
@@ -210,10 +217,25 @@ nodes:
     cms_table:
     - liquid_logic:person
     - mosaic:person
+    guidance: Young people who have an EHC plan or had an EHC plan or statement of
+      SEN at the time of completing compulsory education
   - name: person_expected_dob
-    type: DATE
     description: Expected Birth Date
     item_ref: PER009A
+    type: date
+    categories:
+    - identity
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:person_expected_dob
+    - mosaic:person_expected_dob
+    cms_table:
+    - liquid_logic:person
+    - mosaic:person
     guidance: "Record the expected date of birth (due date) for a child who is unborn\
       \ at the time of referral and who remains unborn at 31 March or when the case\
       \ is closed. If the child is born before 31 March 2023 or before the case is\
@@ -230,6 +252,10 @@ nodes:
       \ does not need to match the date on the death certificate. The date of death\
       \ and the final closure date can both be recorded. The reason for closure should\
       \ be recorded as \u2018RC2 died\u2019."
+  - name: person_death_date
+    description: Date of Death
+    item_ref: PER010A
+    type: date
     categories:
     - identity
     returns:
@@ -238,15 +264,11 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_expected_dob
-    - mosaic:person_expected_dob
+    - liquid_logic:person_death_date
+    - mosaic:person_death_date
     cms_table:
     - liquid_logic:person
     - mosaic:person
-  - name: person_death_date
-    type: DATE
-    description: Date of Death
-    item_ref: PER010A
     guidance: "The collection of date of death information reflects the legislation\
       \ introduced on 1 April 2008, which made reviews into child deaths a statutory\
       \ requirement. This is required as it shows more clearly where services continue\
@@ -262,23 +284,23 @@ nodes:
       \ the pregnancy before referral to children\u2019s social care services, they\
       \ should not be included in the children in need census; whether or not services\
       \ were provided after the death."
+  - name: person_is_mother
+    description: Mother
+    item_ref: PER011A
+    type: boolean
     categories:
     - identity
     returns:
-    - CINcensus
+    - SSDA903
     cms:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_death_date
-    - mosaic:person_death_date
+    - liquid_logic:person_is_mother
+    - mosaic:person_is_mother
     cms_table:
     - liquid_logic:person
     - mosaic:person
-  - name: person_is_mother
-    type: BOOLEAN
-    description: Mother
-    item_ref: PER011A
     guidance: 'Currently collected for CLA only. Local authorities are asked to indicate
       whether each looked-after girl is, on 31 March, a mother.
 
@@ -306,24 +328,9 @@ nodes:
 
       classified as a mother even if they do not care for the child themselves (for
       example, if consent was given for the child to be adopted).'
-    categories:
-    - identity
-    returns:
-    - SSDA903
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:person_is_mother
-    - mosaic:person_is_mother
-    cms_table:
-    - liquid_logic:person
-    - mosaic:person
   - name: person_nationality
-    type: null
     description: Country of Origin (UASC)
     item_ref: PER012A
-    guidance: Required for UASC
     categories:
     - identity
     returns:
@@ -337,3 +344,4 @@ nodes:
     cms_table:
     - liquid_logic:person
     - mosaic:person
+    guidance: Required for UASC

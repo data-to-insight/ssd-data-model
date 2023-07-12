@@ -3,10 +3,9 @@ nodes:
 - name: cin_visits
   fields:
   - name: cin_visit_id
-    type: VARCHAR()
     description: CIN Visit ID
     item_ref: CNV001A
-    guidance: CIN Visit unique ID from system or auto-generated as part of export.
+    type: string
     primary_key: true
     validators:
     - required:
@@ -26,11 +25,11 @@ nodes:
     cms_table:
     - liquid_logic:cin_visits
     - mosaic:cin_visits
+    guidance: CIN Visit unique ID from system or auto-generated as part of export.
   - name: cin_plan_id
-    type: VARCHAR()
     description: CIN Plan ID
     item_ref: CNV002A
-    guidance: See CNP001A
+    type: string
     foreign_key: cin_plans.cin_plan_id
     categories:
     - child_in_need
@@ -45,11 +44,11 @@ nodes:
     cms_table:
     - liquid_logic:cin_visits
     - mosaic:cin_visits
+    guidance: See CNP001A
   - name: cin_visit_date
-    type: DATE
     description: CIN Visit Date
     item_ref: CNV003A
-    guidance: Date of Visit
+    type: date
     categories:
     - child_in_need
     - cin_plan
@@ -65,11 +64,11 @@ nodes:
     cms_table:
     - liquid_logic:cin_visits
     - mosaic:cin_visits
+    guidance: Date of Visit
   - name: cin_visit_seen
-    type: BOOLEAN
     description: Child Seen
     item_ref: CNV004A
-    guidance: Was the child seen during this visit?
+    type: boolean
     categories:
     - child_in_need
     - cin_plan
@@ -85,11 +84,11 @@ nodes:
     cms_table:
     - liquid_logic:cin_visits
     - mosaic:cin_visits
+    guidance: Was the child seen during this visit? Yes/ No
   - name: cin_visit_seen_alone
-    type: BOOLEAN
     description: Child Seen Alone
     item_ref: CNV005A
-    guidance: Was the child seen alone during this visit?
+    type: boolean
     categories:
     - child_in_need
     - cin_plan
@@ -105,11 +104,11 @@ nodes:
     cms_table:
     - liquid_logic:cin_visits
     - mosaic:cin_visits
+    guidance: Was the child seen alone during this visit? Yes/ No
   - name: cin_visit_bedroom
-    type: BOOLEAN
     description: Child Bedroom Seen
     item_ref: CNV006A
-    guidance: Was the child's bedroom seen during this visit?
+    type: boolean
     categories:
     - child_in_need
     - cin_plan
@@ -125,3 +124,4 @@ nodes:
     cms_table:
     - liquid_logic:cin_visits
     - mosaic:cin_visits
+    guidance: Was the child's bedroom seen during this visit? Yes/ No

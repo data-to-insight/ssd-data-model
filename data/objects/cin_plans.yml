@@ -3,10 +3,9 @@ nodes:
 - name: cin_plans
   fields:
   - name: cin_plan_id
-    type: VARCHAR()
     description: CIN Plan ID
     item_ref: CNP001A
-    guidance: CIN Plan unique ID from system or auto-generated as part of export.
+    type: string
     primary_key: true
     validators:
     - required:
@@ -25,11 +24,11 @@ nodes:
     cms_table:
     - liquid_logic:cin_plans
     - mosaic:cin_plans
+    guidance: CIN Plan unique ID from system or auto-generated as part of export.
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: CNP002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     validators:
     - required:
@@ -49,22 +48,11 @@ nodes:
     cms_table:
     - liquid_logic:cin_plans
     - mosaic:cin_plans
+    guidance: See PER001A
   - name: cin_plan_start
-    type: DATE
     description: CIN Plan Start Date
     item_ref: CNP003A
-    guidance: "Start Date of CIN Plan The CIN plan start date and CIN plan end date\
-      \ should be recorded.\nA CIN plan should be developed where the outcome of an\
-      \ assessment is that a local authority children\u2019s social care should provide\
-      \ services. The CIN plan sets out which organisations and agencies will provide\
-      \ which services to the child and family. The plan should also set clear measurable\
-      \ outcomes for the child and expectations for the parent(s) or carer(s). More\
-      \ information on CIN plans is provided in \u2018Working together to safeguard\
-      \ children\u2019.\nA child can have one, more than one or no CIN plan(s) \u2013\
-      \ but can only have one at a time.\nCIN plans do not include other plans such\
-      \ as leaving care support or adoption support.\nWe are aware there will be some\
-      \ variation in how local authorities record this data and part of the reason\
-      \ for collecting the data item is to help the department understand these differences."
+    type: date
     categories:
     - child_in_need
     - cin_plan
@@ -79,10 +67,36 @@ nodes:
     cms_table:
     - liquid_logic:cin_plans
     - mosaic:cin_plans
+    guidance: "Start Date of CIN Plan The CIN plan start date and CIN plan end date\
+      \ should be recorded.\nA CIN plan should be developed where the outcome of an\
+      \ assessment is that a local authority children\u2019s social care should provide\
+      \ services. The CIN plan sets out which organisations and agencies will provide\
+      \ which services to the child and family. The plan should also set clear measurable\
+      \ outcomes for the child and expectations for the parent(s) or carer(s). More\
+      \ information on CIN plans is provided in \u2018Working together to safeguard\
+      \ children\u2019.\nA child can have one, more than one or no CIN plan(s) \u2013\
+      \ but can only have one at a time.\nCIN plans do not include other plans such\
+      \ as leaving care support or adoption support.\nWe are aware there will be some\
+      \ variation in how local authorities record this data and part of the reason\
+      \ for collecting the data item is to help the department understand these differences."
   - name: cin_plan_end
-    type: DATE
     description: CIN Plan End Date
     item_ref: CNP004A
+    type: date
+    categories:
+    - child_in_need
+    - cin_plan
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cin_plan_end
+    - mosaic:cin_plan_end
+    cms_table:
+    - liquid_logic:cin_plans
+    - mosaic:cin_plans
     guidance: "End Date of CIN Plan The CIN plan start date and CIN plan end date\
       \ should be recorded.\nA CIN plan should be developed where the outcome of an\
       \ assessment is that a local authority children\u2019s social care should provide\
@@ -100,25 +114,9 @@ nodes:
       \ or adoption support.\nWe are aware there will be some variation in how local\
       \ authorities record this data and part of the reason for collecting the data\
       \ item is to help the department understand these differences."
-    categories:
-    - child_in_need
-    - cin_plan
-    returns:
-    - CINcensus
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:cin_plan_end
-    - mosaic:cin_plan_end
-    cms_table:
-    - liquid_logic:cin_plans
-    - mosaic:cin_plans
   - name: cin_team
-    type: null
     description: CIN Allocated Team
     item_ref: CNP005A
-    guidance: Allocated Team responsible for CIN Plan
     categories:
     - child_in_need
     - cin_plan
@@ -133,11 +131,10 @@ nodes:
     cms_table:
     - liquid_logic:cin_plans
     - mosaic:cin_plans
+    guidance: Allocated Team responsible for CIN Plan
   - name: cin_worker_id
-    type: null
     description: CIN Allocated Worker ID
     item_ref: CNP006A
-    guidance: Allocated worker responsible for CIN Plan
     foreign_key: social_worker.sw_id
     categories:
     - child_in_need
@@ -153,3 +150,4 @@ nodes:
     cms_table:
     - liquid_logic:cin_plans
     - mosaic:cin_plans
+    guidance: Allocated worker responsible for CIN Plan

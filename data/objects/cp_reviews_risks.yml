@@ -3,10 +3,9 @@ nodes:
 - name: cp_reviews_risks
   fields:
   - name: cp_review_id
-    type: VARCHAR()
     description: Review ID
     item_ref: CPK010A
-    guidance: null
+    type: string
     primary_key: true
     foreign_key: cp_reviews.cp_review_id
     validators:
@@ -27,11 +26,10 @@ nodes:
     cms_table:
     - liquid_logic:cp_reviews_risks
     - mosaic:cp_reviews_risks
+    guidance: See CPR001A
   - name: cp_review_risks
-    type: null
     description: Risks to child at this conference
     item_ref: CPK011A
-    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -47,3 +45,26 @@ nodes:
     cms_table:
     - liquid_logic:cp_reviews_risks
     - mosaic:cp_reviews_risks
+    guidance: 'List the current risk factors for the child at this conference. This
+      indicator will require further discussion/ development. Possible categories:
+      -Adults who pose a risk of physical harm
+
+      -Adults who pose a risk of sexual harm
+
+      -Alcohol abuse
+
+      -Child Sexual Exploitation
+
+      -Domestic violence
+
+      -Fabricated Illness
+
+      -Learning Disability
+
+      -Mental Health
+
+      -Neglectful Parenting
+
+      -Substance misuse
+
+      -Other'

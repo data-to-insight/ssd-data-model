@@ -1,0 +1,35 @@
+name: Update CHANGELOG
+
+on:
+  push:
+    branches:
+      - mmain
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas tabulate
+
+    - name: Update CHANGELOG
+      run: python path_to_your_script/script.py
+
+    - name: Commit and push if it changed
+      run: | 
+        git diff
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git commit -m "Update CHANGELOG.md" -a || echo "No changes to commit"
+        git push

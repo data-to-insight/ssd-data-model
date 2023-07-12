@@ -3,10 +3,8 @@ nodes:
 - name: address
   fields:
   - name: address
-    type: null
     description: Address
     item_ref: ADD001A
-    guidance: Address detail
     primary_key: true
     validators:
     - required:
@@ -27,11 +25,11 @@ nodes:
     cms_table:
     - liquid_logic:address
     - mosaic:address
+    guidance: Address detail
   - name: la_person_id
-    type: VARCHAR(10)
     description: Person Unique ID
     item_ref: ADD002A
-    guidance: See PER001A
+    type: string
     foreign_key: person.la_person_id
     categories:
     - identity
@@ -48,11 +46,16 @@ nodes:
     cms_table:
     - liquid_logic:address
     - mosaic:address
+    guidance: See PER001A
+    metadata:
+      release_datetime: 10/07/2023 05:00
+      change_id: SSD-103
+      item_changes_count: '2.0'
+      change_reason: cms field name change
+      change_type: Service Request
   - name: address_type
-    type: null
     description: Address Type
     item_ref: ADD003A
-    guidance: Home/ Placement/ Primary/ Secondary
     categories:
     - identity
     - address
@@ -67,11 +70,17 @@ nodes:
     cms_table:
     - liquid_logic:address
     - mosaic:address
+    guidance: Home/ Placement/ Primary/ Secondary
+    metadata:
+      release_datetime: 11/07/2023 00:00
+      change_id: SSD-004
+      item_changes_count: '1.0'
+      change_reason: from string to integer
+      change_type: bug
   - name: address_start
-    type: DATE
     description: Address Start Date/ From
     item_ref: ADD004A
-    guidance: Date person started living at the address
+    type: date
     categories:
     - identity
     - address
@@ -86,11 +95,11 @@ nodes:
     cms_table:
     - liquid_logic:address
     - mosaic:address
+    guidance: Date person started living at the address
   - name: address_end
-    type: DATE
     description: Address End Date/ To
     item_ref: ADD005A
-    guidance: Date person left the address
+    type: date
     categories:
     - identity
     - address
@@ -105,13 +114,10 @@ nodes:
     cms_table:
     - liquid_logic:address
     - mosaic:address
+    guidance: Date person left the address
   - name: address_postcode
-    type: null
     description: Address Postcode
     item_ref: ADD006A
-    guidance: You should provide a current post code for most persons and every effort
-      should be made to obtain valid details. If it is not possible to get the post
-      code, you should leave this field blank and provide an explanatory note.
     categories:
     - identity
     - address
@@ -126,3 +132,6 @@ nodes:
     cms_table:
     - liquid_logic:address
     - mosaic:address
+    guidance: You should provide a current post code for most persons and every effort
+      should be made to obtain valid details. If it is not possible to get the post
+      code, you should leave this field blank and provide an explanatory note.

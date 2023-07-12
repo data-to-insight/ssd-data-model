@@ -3,10 +3,9 @@ nodes:
 - name: category_of_abuse
   fields:
   - name: cpp_category_id
-    type: VARCHAR()
     description: Category of Abuse id
     item_ref: CAT001A
-    guidance: null
+    type: string
     primary_key: true
     validators:
     - required:
@@ -25,11 +24,12 @@ nodes:
     cms_table:
     - liquid_logic:category_of_abuse
     - mosaic:category_of_abuse
+    guidance: Category of Abuse record unique ID from system or auto-generated as
+      part of export.
   - name: cp_plan_id
-    type: VARCHAR()
     description: CP Plan ID
     item_ref: CAT002A
-    guidance: See CPP001A
+    type: string
     foreign_key: cp_plans.cp_plan_id
     validators:
     - required:
@@ -48,11 +48,10 @@ nodes:
     cms_table:
     - liquid_logic:category_of_abuse
     - mosaic:category_of_abuse
+    guidance: See CPP001A
   - name: cpp_category
-    type: null
     description: Category of Abuse
     item_ref: CAT003A
-    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -67,11 +66,35 @@ nodes:
     cms_table:
     - liquid_logic:category_of_abuse
     - mosaic:category_of_abuse
+    guidance: "Using the code set in the table below record the category of abuse\
+      \ as assessed when the child protection plan commenced and any subsequent category\
+      \ of abuse assigned to the child protection plan. The latest category of abuse\
+      \ may be the same as the initial category of abuse. -NEG Neglect\n-PHY Physical\
+      \ abuse\n-SAB Sexual abuse\n-EMO Emotional abuse\n-MUL Multiple/not recommended\
+      \ The multiple category is for when more than one category of abuse is relevant\
+      \ to the child\u2019s current protection plan. It is not intended to record\
+      \ information for children who have been the subject of more than one child\
+      \ protection plan during the year.\nThe category of abuse under which a child\
+      \ is made the subject of a child protection plan will have been decided upon\
+      \ at the child protection conference. However, if the category of abuse applicable\
+      \ to the current child protection plan has changed as a result of subsequent\
+      \ child protection conferences, then enter the latest category of abuse. Overall,\
+      \ the initial category of abuse is that decided upon at the conference; any\
+      \ amended category is to be recorded as the latest category of abuse. The categories\
+      \ are defined for the purpose of this collection as follows:\n-Neglect\nNeglect\
+      \ is the persistent failure to meet a child\u2019s basic physical and/or psychological\
+      \ needs, which is likely to result in the serious impairment of the child\u2019\
+      s health or development. For instance, a parent or carer may fail to:\n\u2022\
+      \ provide adequate food, shelter, or clothing (including exclusion from home\
+      \ or abandonment);\n\u2022 protect a child from physical harm, emotional harm,\
+      \ or danger;\n\u2022 ensure adequate supervision (including the use of inadequate\
+      \ care-givers);\n\u2022 ensure access to appropriate medical care or treatment.\n\
+      It may also include neglect of, or unresponsiveness to, a child\u2019s basic\
+      \ emotional needs.\nMore information on childhood neglect including training\
+      \ and resource materials can be found in Safeguarding children."
   - name: cpp_category_start
-    type: null
     description: Category of Abuse Start Date
     item_ref: CAT004A
-    guidance: null
     categories:
     - child_protection
     - cp_plan
@@ -86,3 +109,5 @@ nodes:
     cms_table:
     - liquid_logic:category_of_abuse
     - mosaic:category_of_abuse
+    guidance: The Start Date of the Category of Abuse/ the date at which the Category
+      of Abuse was changed.

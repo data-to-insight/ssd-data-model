@@ -11,7 +11,7 @@ page_title_str = "Standard Safeguarding Dataset: Existing Returns Map"
 page_intro_str = ""
 
 
-notes_str1 = "This page shows the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. Right click and open image(s) in a new browser tab to zoom/magnify/scroll."
+notes_str1 = "This page shows the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. Please note that image quality will vary due to limitations on source files and page generator workflow."
 repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 
@@ -76,14 +76,14 @@ key_items = [
     {"color": "#F2C4DA", "text": "S47 and IPCP"},
     {"color": "#6CD9FA", "text": "Contact"},
     {"color": "#93D375", "text": "Early Help"},
-    {"color": "#D6F693", "text": "Early Help (Plot)"},
+    {"color": "#D6F693", "text": "Early Help (Pilot)"},
     {"color": "#F5D027", "text": "Social Care Referral"},
     {"color": "#FF9D48", "text": "Child in Need"},
     {"color": "#EA94BB", "text": "CP Plan"},
     {"color": "#C6A2D2", "text": "Looked After & Leavers"},
     {"color": "#FFF9B1", "text": "Permanence"},
     {"color": "#ACB5FF", "text": "Education"},
-    {"color": "#F2A1AA", "text": "Workforce|Other"}
+    {"color": "#F2A1AA", "text": "Workforce | Other"}
 ]
 
 # Loop over key items and add color cells/borderless boxes

@@ -3,10 +3,9 @@ nodes:
 - name: missing
   fields:
   - name: missing_episode_id
-    type: VARCHAR()
     description: Missing Episode ID
     item_ref: MIS001A
-    guidance: null
+    type: string
     primary_key: true
     validators:
     - required:
@@ -25,11 +24,36 @@ nodes:
     cms_table:
     - liquid_logic:missing
     - mosaic:missing
+    guidance: "Missing Episode record unique ID from system or auto-generated as part\
+      \ of export. This module collects data on children who are missing from care\
+      \ or away from their placement without authorisation. All such episodes should\
+      \ be recorded, regardless of duration, along with the start/end date of the\
+      \ incident. Additional Notes\nIf a missing from care or away from placement\
+      \ without authorisation episode starts and ends within the same day, then the\
+      \ same date should be returned for the start and end dates. Similarly, if more\
+      \ than one missing episode occurs within the same day, separate episodes should\
+      \ be recorded but these should have the same start/end dates.\nIf a child is\
+      \ away from placement without authorisation, but they subsequently become missing\
+      \ (meaning their whereabouts become unknown), this should be recorded as two\
+      \ separate episodes, but the end date of the away from placement without authorisation\
+      \ episode should be the same as the start date of the missing episode. This\
+      \ should be the point at which the child\u2019s whereabouts became unknown.\
+      \ Equally, there may be some circumstances where the whereabouts of a missing\
+      \ child become known such that he/she is no longer considered to be missing,\
+      \ but the child is still not where they are supposed to be. A new \u2018away\
+      \ from placement without authorisation\u2019 episode should be recorded, and\
+      \ this would have a start date consistent with the date of the end of the missing\
+      \ episode. This should be the date the child\u2019s whereabouts became known.\n\
+      For children who start to be looked-after when missing, record the placement\
+      \ arranged for the child had the child not been missing, then add details of\
+      \ the missing child to the missing module.\nIf a child ceases to be looked-after\
+      \ whilst still missing (for example they turn 18) then please enter an end date\
+      \ for the missing/away from placement without authorisation which is equal to\
+      \ the date the child ceased to be looked-after."
   - name: cla_episode_id
-    type: VARCHAR()
     description: Episode ID
     item_ref: MIS002A
-    guidance: null
+    type: string
     foreign_key: cla_episodes.cla_episode_id
     categories:
     - looked_after
@@ -43,11 +67,11 @@ nodes:
     cms_table:
     - liquid_logic:missing
     - mosaic:missing
+    guidance: See CLA001A
   - name: mis_epi_start
-    type: DATE
     description: Missing Episode Start
     item_ref: MIS003A
-    guidance: null
+    type: date
     categories:
     - looked_after
     - missing
@@ -63,11 +87,26 @@ nodes:
     cms_table:
     - liquid_logic:missing
     - mosaic:missing
+    guidance: "The missing episode start date should be completed for both missing\
+      \ episodes and episodes where the child was away from placement without authorisation.\
+      \ It should be the date the child left his or her normal placement or the date\
+      \ the child was last seen by a responsible adult (whichever was the latest).\
+      \ For this purpose, a responsible adult is either the child\u2019s carer, or\
+      \ a professional directly associated with the child\u2019s welfare or education\
+      \ (like a doctor, school-teacher or social worker).\nAny UASC that go missing\
+      \ before being accommodated for 24 hours for data collection purposes should\
+      \ still be recorded as missing with a start date as the date in which they left\
+      \ his or her normal placement or the date the child was last seen by a responsible\
+      \ adult (whichever was the latest). For this purpose, a responsible adult is\
+      \ either the child\u2019s carer, or a professional directly associated with\
+      \ the child\u2019s welfare or education (like a doctor, school-teacher, home\
+      \ office official or social worker).\nUnresolved cases should remain open and\
+      \ until the child\u2019s 18th birthday, at which point the case should be closed\
+      \ using the appropriate reason code. Records must not be closed before this\
+      \ point."
   - name: mis_epi_type
-    type: null
     description: Episode Type (Missing/ Absent)
     item_ref: MIS004A
-    guidance: null
     categories:
     - looked_after
     - missing
@@ -83,11 +122,21 @@ nodes:
     cms_table:
     - liquid_logic:missing
     - mosaic:missing
+    guidance: "Record each episode where a child was \u2018missing\u2019 or \u2018\
+      away from placement without authorisation\u2019 according to the following definitions:\n\
+      \u2022 M - Missing from care: a looked-after child who is not at their placement\
+      \ or the place they are expected to be (for example school) and their whereabouts\
+      \ is not known\n\u2022 A - Away from placement without authorisation: a looked-after\
+      \ child whose whereabouts is known but who is not at their placement or place\
+      \ they are expected to be and the carer has concerns or the incident has been\
+      \ notified to the local authority or the police.\nAny children missing from\
+      \ care or away from placement without authorisation for any length of time between\
+      \ should be recorded. This includes children who were still missing/ away from\
+      \ placement without authorisation at the report date."
   - name: mis_epi_end
-    type: DATE
     description: Missing Episode End
     item_ref: MIS005A
-    guidance: null
+    type: date
     categories:
     - looked_after
     - missing
@@ -103,11 +152,16 @@ nodes:
     cms_table:
     - liquid_logic:missing
     - mosaic:missing
+    guidance: The missing episode end date should be completed for both missing episodes
+      and episodes where the child was away from placement without authorisation.
+      It should be the date that the child was found (where whereabouts are unknown)
+      or the date that the child returned to his/her normal placement (where whereabouts
+      known). If the child was still missing or away from placement without authorisation
+      at reporting date, then this field should be blank.
   - name: mis_epi_rhi_offered
-    type: BOOLEAN
     description: RHI Offered
     item_ref: MIS006A
-    guidance: null
+    type: boolean
     categories:
     - looked_after
     - missing
@@ -122,11 +176,11 @@ nodes:
     cms_table:
     - liquid_logic:missing
     - mosaic:missing
+    guidance: null
   - name: mis_epi_rhi_accepted
-    type: BOOLEAN
     description: RHI Accepted
     item_ref: MIS007A
-    guidance: null
+    type: boolean
     categories:
     - looked_after
     - missing
@@ -141,3 +195,4 @@ nodes:
     cms_table:
     - liquid_logic:missing
     - mosaic:missing
+    guidance: null
