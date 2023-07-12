@@ -25,7 +25,7 @@ returns_categories = {
         "description": "Final specified item for one of the 1b projects",
     },
     "1aRemove": {
-        "colour": "##FF2114",
+        "colour": "#FF2114",
         "description": "Specified item rejected from final spec.",
     },
 }
