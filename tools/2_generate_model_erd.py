@@ -146,7 +146,7 @@ def generate_full_erd(yml_data_path, assets_path, erd_publish_path, returns_cate
 
 
     # Render the main graph to a file
-    G.draw(assets_path + erd_overview_fname + "." + output_filetype, prog='dot', format=output_filetype)
+    ##G.draw(assets_path + erd_overview_fname + "." + output_filetype, prog='dot', format=output_filetype)
         
     # 1
     # Render copy of the main graph to be web published

@@ -29,7 +29,7 @@ nodes:
     description: Person Unique ID
     item_ref: PRM002A
     type: string
-    foreign_key: person.la_person_id
+    foreign_key: cla_episodes.la_person_id
     validators:
     - required:
         enabled: true
@@ -71,27 +71,12 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
-  - name: ffa_cp_decision_date
-    description: Date of FFA/ CP Decision
-    item_ref: PRM004A
-    type: date
-    categories:
-    - looked_after
-    - permanence
-    - adoption
-    returns:
-    - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:ffa_cp_decision_date
-    - mosaic:ffa_cp_decision_date
-    cms_table:
-    - liquid_logic:permanence
-    - mosaic:permanence
-    guidance: null
+    guidance: 'Record the date of the decision that the child should be placed for
+      adoption using the following format: DD/MM/YYYY
+
+      This is the date on which the local authority formally decides that a child
+      should be placed for adoption, i.e. the date the agency decision maker takes
+      the decision to endorse the proposed adoption plan for the child.'
   - name: entered_care_date
     description: Date the entered Care
     item_ref: PRM005A
@@ -113,7 +98,29 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: 'Record the date the child entered the current period of continuous
+      care using the following format: DD/MM/YYYY'
+  - name: ffa_cp_decision_date
+    description: Date of FFA/ CP Decision
+    item_ref: PRM004A
+    type: date
+    categories:
+    - looked_after
+    - permanence
+    - adoption
+    returns:
+    - ASGLB
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:ffa_cp_decision_date
+    - mosaic:ffa_cp_decision_date
+    cms_table:
+    - liquid_logic:permanence
+    - mosaic:permanence
+    guidance: Date of the decision that the child should be placed in a FFA or CP
+      placement with a selected family
   - name: placement_order_date
     description: Date of Placement/ Freeing Order
     item_ref: PRM006A
@@ -135,7 +142,11 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: 'Record the date a Placement order or Freeing order was granted using
+      the following format: DD/MM/YYYY
+
+      This can be ascertained from the date when a child''s legal status has changed
+      to E1 (Placement order granted) or D1 (Freeing order granted).'
   - name: placed_for_adoption_date
     description: Date Placed for Adoption
     item_ref: PRM007A
@@ -157,7 +168,13 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: 'Record the date the child is placed for adoption with particular prospective
+      adopters using the following format: DD/MM/YYYY. Or, if the child was placed
+      with their foster carers or were in a FFA/concurrent planning placement, record
+      the date this placement changed from a foster placement to an adoption placement.
+
+      This is the date that child goes to live with the prospective adopters who will
+      adopt them. It does not mean that the child has been adopted.'
   - name: matched_date
     description: Date Matched to Prospective Adopters
     item_ref: PRM008A
@@ -179,7 +196,17 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: "Record the date the child was matched to particular prospective adopters\
+      \ or with dually approved foster carers/adopters for FFA using the following\
+      \ format: DD/MM/YYYY\nThis is the date on which the local authority formally\
+      \ decides that the child should be placed for adoption with the particular prospective\
+      \ adopters. If the child is adopted by the foster carer or relatives with whom\
+      \ he/she is already placed, the date of decision (B2b) should be entered for\
+      \ this data item.\nPreviously: \u201CThis is the date on which the local authority\
+      \ formally decides that the child should be placed for adoption with the particular\
+      \ prospective adopter(s). This decision will be made after the adoption panel\
+      \ has made its recommendation on this matter (regulation 33(1) of the Adoption\
+      \ Agencies Regulations 2005).\u201D"
   - name: placed_ffa_cp_date
     description: Date Placed in FFA/ CP Placement
     item_ref: PRM009A
@@ -201,7 +228,7 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: Date the child was placed in a FFA or CP placement.
   - name: decision_reversed_date
     description: Date of Decision that Child Should No Longer be Placed for Adoption
     item_ref: PRM010A
@@ -222,7 +249,8 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: 'Record the date that the local authority formally decides that a child
+      should no longer be placed for adoption using the following format: DD/MM/YYYY'
   - name: placed_foster_carer_date
     description: Date originally placed with foster carer(s) (if adopted by foster
       carer/s)
@@ -245,7 +273,8 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: Date the child was originally placed with their foster carer(s) (only
+      if the child was adopted by their foster carer(s))
   - name: sibling_group
     description: Is the child a part of a sibling group?
     item_ref: PRM012A
@@ -265,7 +294,7 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: Is the child a part of a sibling group (0=No, 1=Yes)?
   - name: siblings_placed_together
     description: Number of children placed, or planned to be placed, for adoption
       together as sibling group INCLUDING this child
@@ -286,7 +315,8 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: Number of children placed, or planned to be placed, for adoption together
+      as sibling group INCLUDING this child
   - name: siblings_placed_apart
     description: Number of siblings placed, or planned to be placed, for adoption
       separately from the child
@@ -307,7 +337,8 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: Number of siblings placed, or planned to be placed, for adoption separately
+      from the child
   - name: place_provider_urn
     description: URN of the placement provider agency
     item_ref: PRM015A
@@ -327,11 +358,10 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: URN of the placement provider agency
   - name: decision_reversed_reason
     description: Reason No Longer Placed for Adoption
     item_ref: PRM016A
-    type: string
     categories:
     - looked_after
     - permanence
@@ -349,7 +379,10 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: "Record the reason why the child is no longer considered for adoption.\
+      \ Please use codes;\nRD1 - The child\u2019s needs changed subsequent to the\
+      \ decision\nRD2 - The Court did not make a placement order\nRD3 - Prospective\
+      \ adopters could not be found\nRD4 - Any other reason"
   - name: permanence_order_date
     description: Date of Order
     item_ref: PRM017A
@@ -370,11 +403,10 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: Date permanence order granted
   - name: permanence_order_type
     description: Type of Order
     item_ref: PRM018A
-    type: string
     categories:
     - looked_after
     - permanence
@@ -390,11 +422,10 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: Type of Permanence order granted (Adoption/ SGO/ CAO)
   - name: guardian_status
     description: Status of Special Guardian
     item_ref: PRM019A
-    type: string
     categories:
     - looked_after
     - permanence
@@ -410,7 +441,18 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: 'If child has been granted a Special Guardianship Order, enter the relationship
+      of the Special Guardian:
+
+      -Grandparent
+
+      -Other family relative
+
+      -Friend or other existing relationship
+
+      -Former foster carer
+
+      -Other carer'
   - name: guardian_age
     description: Age of Special Guardian
     item_ref: PRM020A
@@ -430,4 +472,19 @@ nodes:
     cms_table:
     - liquid_logic:permanence
     - mosaic:permanence
-    guidance: null
+    guidance: 'If child has been granted a Special Guardianship Order, enter the relationship
+      of the Special Guardian:
+
+      -18 to 19
+
+      -20 to 29
+
+      -30 to 39
+
+      -40 to 49
+
+      -50 to 59
+
+      -60 and over
+
+      -Unknown'

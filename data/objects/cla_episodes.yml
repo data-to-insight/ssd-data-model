@@ -157,7 +157,56 @@ nodes:
     cms_table:
     - liquid_logic:cla_episodes
     - mosaic:cla_episodes
-    guidance: null
+    guidance: "This code indicates the main reason why a child started to receive\
+      \ services. It should not be left blank. Only one reason can be recorded.\n\
+      If a child is also looked after, the primary need code for children in need\
+      \ might not necessarily be the same as that recorded in the children looked\
+      \ after data collection. For example, this may occur if a child became looked\
+      \ after at a later date than when they became a child in need.\nThe categories\
+      \ are designed only to identify what kind of pressures are placed on social\
+      \ services. They have no diagnostic value with regard to the children themselves\
+      \ and must not be used to determine what type of service the child should receive.\n\
+      If there is difficulty choosing between two or more categories of need, choose\
+      \ the category that comes highest up in the table, for example, if trying to\
+      \ decide between family in acute stress and family dysfunction, choose family\
+      \ in acute stress.\nThe order of the categories relates to the specificity of\
+      \ the description and not necessarily importance. However, the order is fixed\
+      \ so that there is consistency.\nFurther information on choosing a primary need\
+      \ category is in appendix A.\nThe children in need census for 2005 and earlier\
+      \ tried to account for all money spent in a census week. To allow for this,\
+      \ \u2018N9\u2019 was created, but as this census is specifically child based,\
+      \ the definition of \u2018N9\u2019 from 2005 is not applicable. As in previous\
+      \ years, \u2018N9\u2019 can be used if a child is no longer in need and the\
+      \ only service they are receiving is adoption support (on an open case) immediately\
+      \ after they have been in need. Enter the primary need code, selecting from\
+      \ the table below:\n-N1 Abuse or neglect\nChildren in need as a result of, or\
+      \ at risk of, abuse or neglect; also includes children at risk because of domestic\
+      \ violence.\n-N2 Child\u2019s disability\nChildren and families whose main need\
+      \ for services arises because of their child\u2019s disability, illness or intrinsic\
+      \ condition.\n-N3 Parental disability or illness\nChildren whose main need for\
+      \ services arises because the capacity of their parent(s) (or carer(s)) to care\
+      \ for them is impaired by the parent(s) (or carer(s)) disability, physical or\
+      \ mental illness, or addictions.\n-N4 Family in acute stress\nChildren whose\
+      \ needs arise from living in a family that is going through a temporary crisis\
+      \ that diminishes the parental capacity to adequately meet some of the children\u2019\
+      s needs.\n-N5 Family dysfunction\nChildren whose needs primarily arise from\
+      \ living in a family where the parenting capacity is chronically inadequate.\n\
+      -N6 Socially unacceptable behaviour\nChildren and families whose need for services\
+      \ primarily arise out of the child\u2019s behaviour impacting detrimentally\
+      \ on the community.\n-N7 Low income\nChildren, living in families or independently,\
+      \ whose needs primarily arise from being dependent on an income below the standard\
+      \ state entitlements.\n-N8 Absent parenting\nChildren whose needs for services\
+      \ arise mainly from having no parents available to provide for them.\n-N9 Cases\
+      \ other than children in need\nChildren who have been adopted and, although\
+      \ they are no longer a child in need, receive adoption support from children\u2019\
+      s social services immediately after adoption. This should not be used where\
+      \ a child receives an adoption payment only as these children should not be\
+      \ included in the census.\nThe previous definition of \u2018N9\u2019 from 2005\
+      \ was casework which is required for a legal and administrative reason only\
+      \ and there is no child in the case who is in need.\n-N0 Not stated\nChildren\
+      \ whose reference data is not completely entered on the system and whose need\
+      \ code is yet to be determined, or the case is a referral that has been closed\
+      \ following assessment."
   - name: cla_epi_ceased
     description: Date Episode Ceased
     item_ref: CLA005A
@@ -250,7 +299,46 @@ nodes:
       \ asylum-seeking child (UASC) whose age has been disputed\nE16 Child moved abroad\n\
       E17 Aged 18 (or over) and remained with current carers (inc under staying put\
       \ arrangements)\nE8 Period of being looked-after ceased for any other reason\
-      \ (where none of the other reasons apply)"
+      \ (where none of the other reasons apply) Further detail on when some of the\
+      \ codes should be used is provided below:\nE4A - Relates to a planned move where\
+      \ the child returns home as part of their agreed care plan. This return home\
+      \ has been discussed as part of the care planning process and happens within\
+      \ a planned timeframe.\nE4B - Relates to an unplanned move - includes instances\
+      \ where the child\u2019s return home is immediate (for example, within 24 hours)\
+      \ and has not been discussed as part of the care planning process or does not\
+      \ occur within the planned timeframe. This would include instances where a child\
+      \ under a voluntary arrangement is removed from care by their parents and this\
+      \ was not agreed as part of the care planning process.\nE13 - Left care to live\
+      \ with parents, relatives, or other person with no parental responsibility \u2013\
+      \ this code should be used if the child left care to live with parents, relatives\
+      \ or another person, but this person did not have parental responsibility.\n\
+      E14 - Accommodation on remand ended \u2013 this code should be used if a child\
+      \ was remanded to youth detention accommodation and has stopped their episode\
+      \ of care because they are no longer remanded.\nE15 - Age assessment determined\
+      \ child is aged 18 or over and E5, E6 and E7 do not apply, for example, an unaccompanied\
+      \ asylum seeking child whose age has been disputed \u2013 this code should be\
+      \ used if the episode of care ended because the age was disputed, an assessment\
+      \ revealed the child was 18 or over and the young person was not transferred\
+      \ to residential care and did not move into independent living arrangements.\
+      \ E16 - Moved abroad \u2013 use this code if the child left care because they\
+      \ moved to another country, including when a child is deported.\nE17 - Aged\
+      \ 18 (or over) and remained with current carers (inc under staying put arrangements)\
+      \ \u2013 use this code whenever the young person has ceased care and remains\
+      \ with their former carers, irrespective of placement type. Young people in\
+      \ foster care who are \u2018staying put\u2019 are only a subset of this group.\n\
+      E8 - Period of being looked-after ceased for any other reason \u2013 this code\
+      \ should never be used purely because a child has reached the age of 18 as this\
+      \ can already be deduced from his/her date of birth. It should only be used\
+      \ when none of the alternative destinations listed are appropriate. E8 should\
+      \ also be used when a child turns 18 and continues to be missing.\nIf a looked-after\
+      \ child is sentenced to custody and placed in a secure children\u2019s home,\
+      \ secure training centre or young offenders\u2019 institution, their status\
+      \ in that setting depends on the legislative framework under which the custodial\
+      \ sentence is applied. If the child is subject to a Care Order (Section 31 Children\
+      \ Act 1989) then they remain looked-after regardless of being sentenced to custody.\
+      \ If the child is accommodated in care by a voluntary agreement under Section\
+      \ 20 of the Children Act 1989, then they cease to be looked-after when they\
+      \ are admitted to custody."
   - name: cla_team
     description: Allocated Team
     item_ref: CLA007A

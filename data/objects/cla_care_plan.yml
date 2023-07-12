@@ -1,0 +1,40 @@
+---
+nodes:
+- name: cla_care_plan
+  fields:
+  - name: cla_care_plan
+    description: What is the chosen/ permanence plan for this child/ young person?
+    item_ref: CAP003A
+    type: string
+    categories:
+    - looked_after
+    - care_plan
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cla_care_plan
+    - mosaic:cla_care_plan
+    cms_table:
+    - liquid_logic:cla_care_plan
+    - mosaic:cla_care_plan
+    guidance: 'Please indicate what the current primary permanence plan is for the
+      child. Please use codes;
+
+      a) Return to family
+
+      b) Adoption
+
+      c) SGO/CAO
+
+      d) Supported living in the community
+
+      e) Long-term residential placement
+
+      f) Long-term fostering
+
+      g) other Where the child does not have a permanence plan agreed (such as recently
+      entered care) please leave blank.More than one box might be ticked if parallel
+      planning is being pursued'

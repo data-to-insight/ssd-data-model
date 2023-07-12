@@ -1,0 +1,68 @@
+---
+nodes:
+- name: cla_immunisations
+  fields:
+  - name: immunisations_id
+    description: Immunisations ID
+    item_ref: CLM001
+    type: string
+    categories:
+    - looked_after
+    - health
+    - immunisations
+    guidance: Immunisations record unique ID from system or auto-generated as part
+      of export.
+  - name: la_person_id
+    description: Person Unique ID
+    item_ref: CLM002
+    type: string
+    foreign_key: cla_episodes.la_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - looked_after
+    - health
+    - immunisations
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:cla_immunisations
+    - mosaic:cla_immunisations
+    guidance: See PER001A
+  - name: immunisations_status_date
+    description: Date marked up to date
+    item_ref: CLM003
+    type: date
+    categories:
+    - looked_after
+    - health
+    - immunisations
+    guidance: Date immunisations were marked up to date
+  - name: immunisations_status
+    description: Immunisations up to Date
+    item_ref: CLM004
+    type: string
+    categories:
+    - looked_after
+    - health
+    - immunisations
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:immunisations_status
+    - mosaic:immunisations_status
+    cms_table:
+    - liquid_logic:cla_immunisations
+    - mosaic:cla_immunisations
+    guidance: Immunisations up to date?

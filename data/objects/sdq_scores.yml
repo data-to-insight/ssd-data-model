@@ -29,7 +29,7 @@ nodes:
     description: Person Unique ID
     item_ref: SDQ002A
     type: string
-    foreign_key: person.la_person_id
+    foreign_key: cla_episodes.la_person_id
     validators:
     - required:
         enabled: true

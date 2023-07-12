@@ -151,7 +151,8 @@ nodes:
       \ 18 years, then please report the original date of birth recorded on entry\
       \ into care rather than amend it to the reassessed date of birth.\n\u2022 if\
       \ the age of the child is assessed to be under 18 years, then please report\
-      \ the reassessed date of birth."
+      \ the reassessed date of birth. Should complete either Date of Birth or Expected\
+      \ Date of Birth but not both."
   - name: person_upn
     description: UPN
     item_ref: PER006A
@@ -251,7 +252,9 @@ nodes:
       \ of birth and leave the date of birth blank. The children in need closure date\
       \ does not need to match the date on the death certificate. The date of death\
       \ and the final closure date can both be recorded. The reason for closure should\
-      \ be recorded as \u2018RC2 died\u2019."
+      \ be recorded as \u2018RC2 died\u2019. Should complete either Date of Birth\
+      \ or Expected Date of Birth but not both. Should complete either Date of Birth\
+      \ or Expected Date of Birth but not both."
   - name: person_death_date
     description: Date of Death
     item_ref: PER010A

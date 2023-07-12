@@ -24,7 +24,7 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
-    guidance: null
+    guidance: See PER001A
   - name: voc_explained_worries
     description: Has someone explained to you why people are worried for your family
       in a way that you can understand?
@@ -39,7 +39,7 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
-    guidance: null
+    guidance: Child answer from questionnaire.
   - name: voc_story_help_understand
     description: Does your story with words and pictures help you to understand what
       has happened in your family?
@@ -54,7 +54,7 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
-    guidance: null
+    guidance: Child answer from questionnaire.
   - name: voc_agree_worker
     description: Do you agree with what your worker says needs to happen to keep you
       safe?
@@ -69,7 +69,7 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
-    guidance: null
+    guidance: Child answer from questionnaire.
   - name: voc_plan_safe
     description: Do you think the plan tells everyone what they need to do to keep
       you safe?
@@ -84,7 +84,7 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
-    guidance: null
+    guidance: Child answer from questionnaire.
   - name: voc_tablet_help_explain
     description: Did writing/ drawing on the tablet help you to explain what you were
       thinking and what you wanted to happen?
@@ -99,4 +99,4 @@ nodes:
     cms_table:
     - liquid_logic:voice_of_child
     - mosaic:voice_of_child
-    guidance: null
+    guidance: Child answer from questionnaire.

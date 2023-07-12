@@ -30,7 +30,6 @@ nodes:
   - name: plo_family_id
     description: PLO Family ID
     item_ref: PLB002A
-    type: string
     primary_key: true
     validators:
     - required:
@@ -96,7 +95,6 @@ nodes:
   - name: pre_pro_outcome
     description: What is the Outcome of Pre-Proceedings
     item_ref: PLB013A
-    type: string
     categories:
     - pre_proceedings
     returns:
@@ -141,7 +139,6 @@ nodes:
     description: How many times has the child been subject to a Child Protection Plan
       during this referral period?
     item_ref: PLS001A
-    type: integer
     categories:
     - pre_proceedings
     returns:
@@ -161,7 +158,6 @@ nodes:
   - name: legal_gateway_outcome
     description: What was the outcome of legal gateway / panel / meeting after panel?
     item_ref: PLS002A
-    type: string
     categories:
     - pre_proceedings
     returns:

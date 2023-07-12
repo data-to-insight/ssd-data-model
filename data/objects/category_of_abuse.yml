@@ -91,7 +91,41 @@ nodes:
       \ care-givers);\n\u2022 ensure access to appropriate medical care or treatment.\n\
       It may also include neglect of, or unresponsiveness to, a child\u2019s basic\
       \ emotional needs.\nMore information on childhood neglect including training\
-      \ and resource materials can be found in Safeguarding children."
+      \ and resource materials can be found in Safeguarding children. -Physical abuse\n\
+      Physical abuse may involve hitting, shaking, throwing, poisoning, burning or\
+      \ scalding, drowning, suffocating, or otherwise causing physical harm to a child.\
+      \ Physical harm may also be caused when a parent or carer deliberately fabricates\
+      \ symptoms or induces illness in a child. The fabrication and deliberate inducement\
+      \ or symptoms relate to conditions such as Munchausen syndrome by proxy.\n-Sexual\
+      \ abuse\nSexual abuse involves forcing or enticing a child to take part in sexual\
+      \ activities, including prostitution, regardless of whether or not the child\
+      \ is aware of what is happening. Such activities may involve physical contact,\
+      \ including non-penetrative and penetrative acts (for example rape, buggery,\
+      \ or oral sex) or non-penetrative acts such as masturbation, kissing, rubbing\
+      \ and touching outside of clothing. They may also include non-contact activities,\
+      \ such as involving children in looking at, or in the production of, sexual\
+      \ images, watching sexual activities, encouraging children to behave in sexually\
+      \ inappropriate ways, or grooming a child in preparation for abuse (including\
+      \ via the internet). Sexual abuse is not solely perpetrated by adult males.\
+      \ Women can also commit acts of sexual abuse, as can other children.\n-Emotional\
+      \ abuse\nEmotional abuse is the persistent ill-treatment of a child that causes\
+      \ severe and continual adverse effects on the child\u2019s emotional development.\
+      \ It may involve conveying to the child that they are inadequate, worthless\
+      \ or unloved, or valued only as far as they meet the needs of another person.\
+      \ It may include not giving the child opportunities to express their views,\
+      \ deliberately silencing them or making fun of what they say or how they communicate.\
+      \ It may feature the imposing of age or developmentally inappropriate expectations\
+      \ on the child. Such expectations may include interactions that are beyond the\
+      \ child\u2019s developmental capability. It includes overprotection and limitation\
+      \ of exploration and learning, or preventing the child from participating in\
+      \ normal social interactions. It may involve the child seeing or hearing the\
+      \ ill-treatment of another. It may also involve serious bullying (including\
+      \ cyber bullying), causing children frequently to feel frightened or in danger,\
+      \ or the exploitation or corruption of children. Some level of emotional abuse\
+      \ is implied in all types of ill-treatment of a child, although it may occur\
+      \ on its own. Use this category when it is the main or sole form of abuse.\n\
+      -Multiple/not recommended\nThis category is used to record multiple categories\
+      \ or where no category is recommended."
   - name: cpp_category_start
     description: Category of Abuse Start Date
     item_ref: CAT004A

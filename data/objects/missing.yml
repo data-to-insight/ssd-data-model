@@ -176,7 +176,9 @@ nodes:
     cms_table:
     - liquid_logic:missing
     - mosaic:missing
-    guidance: null
+    guidance: Please respond 'Yes' if the child was offered a Return Interview after
+      their last missing episode. Respond 'No' if the child was not offered a Return
+      Interview.
   - name: mis_epi_rhi_accepted
     description: RHI Accepted
     item_ref: MIS007A
@@ -195,4 +197,7 @@ nodes:
     cms_table:
     - liquid_logic:missing
     - mosaic:missing
-    guidance: null
+    guidance: Please respond 'Yes' if the child accepted a Return Interview offered
+      after their last missing episode. Respond 'No' if the child did not accept a
+      Return Interview. If an interview was not offered or the child has not been
+      missing, leave blank.

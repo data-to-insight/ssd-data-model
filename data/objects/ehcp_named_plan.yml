@@ -25,7 +25,15 @@ nodes:
     cms_table:
     - liquid_logic:ehcp_named_plan
     - mosaic:ehcp_named_plan
-    guidance: null
+    guidance: 'EHCP named plan unique ID from system or auto-generated as part of
+      export. This module collects information on the content of the EHC plan, i.e.
+      what is in Section I. It should be completed for all existing active EHC plans.
+
+      It is possible that multiple plans may be recorded for a single person. For
+      example, if an EHC plan has previously ceased and a further plan has later been
+      issued following a new needs assessment. Changes may occur to this section from
+      one year to the next for the same person, for example where an establishment
+      named on the EHC plan is changed.'
   - name: ehcp_asmt_id
     description: Assessment ID
     item_ref: ENP002A
@@ -64,7 +72,7 @@ nodes:
     cms_table:
     - liquid_logic:ehcp_named_plan
     - mosaic:ehcp_named_plan
-    guidance: null
+    guidance: Date of current EHC plan.
   - name: named_plan_cease_date
     description: Cease Date
     item_ref: ENP004A
@@ -84,11 +92,14 @@ nodes:
     cms_table:
     - liquid_logic:ehcp_named_plan
     - mosaic:ehcp_named_plan
-    guidance: null
+    guidance: Please provide the date the EHC plan ended or the date the EHC plan
+      was transferred to another local authority. Do not record the date of the decision
+      to cease. Local authorities must continue to maintain the EHC plan until the
+      time has passed for bringing an appeal or, when an appeal has been registered,
+      until it has been concluded.
   - name: named_plan_cease_reason
     description: Cease Reason
     item_ref: ENP005A
-    type: string
     categories:
     - send
     - ehcp_request
@@ -104,4 +115,11 @@ nodes:
     cms_table:
     - liquid_logic:ehcp_named_plan
     - mosaic:ehcp_named_plan
-    guidance: null
+    guidance: "Please provide the reason the EHC plan ended from the list below\n\
+      1 \u2013 Reached maximum age (this is the end of the academic year during which\
+      \ the young person turned 25)\n2 \u2013 Ongoing educational or training needs\
+      \ being met without an EHC plan\n3 \u2013 Moved on to higher education\n4 \u2013\
+      \ Moved on to paid employment, excluding apprenticeships\n5 \u2013 Transferred\
+      \ to another LA\n6 \u2013 Young person no longer wishes to engage in education\
+      \ or training\n7 \u2013 Child or young person has moved outside England\n8 \u2013\
+      \ Child or young person deceased\n9 \u2013 Other"

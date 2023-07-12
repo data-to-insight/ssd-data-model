@@ -72,17 +72,7 @@ relationships:
   relation: 1:M
 - parent_object: person
   parent_key: la_person_id
-  child_object: sdq_scores
-  child_key: la_person_id
-  relation: 1:M
-- parent_object: person
-  parent_key: la_person_id
   child_object: care_leavers
-  child_key: la_person_id
-  relation: 1:M
-- parent_object: person
-  parent_key: la_person_id
-  child_object: permanence
   child_key: la_person_id
   relation: 1:M
 - parent_object: person
@@ -171,6 +161,26 @@ relationships:
   child_key: cp_review_id
   relation: 1:M
 - parent_object: cla_episodes
+  parent_key: la_person_id
+  child_object: cla_convictions
+  child_key: la_person_id
+  relation: 1:M
+- parent_object: cla_episodes
+  parent_key: la_person_id
+  child_object: cla_health
+  child_key: la_person_id
+  relation: 1:M
+- parent_object: cla_episodes
+  parent_key: la_person_id
+  child_object: cla_immunisations
+  child_key: la_person_id
+  relation: 1:M
+- parent_object: cla_episodes
+  parent_key: la_person_id
+  child_object: cla_substance_misuse
+  child_key: la_person_id
+  relation: 1:M
+- parent_object: cla_episodes
   parent_key: cla_episode_id
   child_object: placement
   child_key: cla_episode_id
@@ -181,19 +191,34 @@ relationships:
   child_key: cla_episode_id
   relation: 1:M
 - parent_object: cla_episodes
+  parent_key: la_person_id
+  child_object: cla_previous_permanence
+  child_key: la_person_id
+  relation: 1:M
+- parent_object: cla_episodes
+  parent_key: la_person_id
+  child_object: cla_episode_id
+  child_key: cla_episode_id
+  relation: 1:M
+- parent_object: cla_episodes
   parent_key: cla_episode_id
   child_object: cla_visits
   child_key: cla_episode_id
+  relation: 1:M
+- parent_object: cla_episodes
+  parent_key: la_person_id
+  child_object: sdq_scores
+  child_key: la_person_id
   relation: 1:M
 - parent_object: cla_episodes
   parent_key: cla_episode_id
   child_object: missing
   child_key: cla_episode_id
   relation: 1:M
-- parent_object: cla_reviews
-  parent_key: review_id
-  child_object: care_plan
-  child_key: review_id
+- parent_object: cla_episodes
+  parent_key: la_person_id
+  child_object: permanence
+  child_key: la_person_id
   relation: 1:M
 - parent_object: send
   parent_key: send_table_id
