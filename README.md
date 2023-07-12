@@ -48,6 +48,24 @@ The project will use [GIT][git] to track and approve proposed changes to the saf
 
 The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide further 'human readable' reporting methods beyond the aforementioned [data object conceptual model](https://data-to-insight.github.io/ssd-data-model/). We are aiming to publish our full data-landscape overview that resulted in the specification. 
 
+### Change log
+
+Agreed data item-level changes are assigned an identifier, and will be traceable within the [changelog.md](./CHANGELOG.md). A sub-set of the change details for the most recent change (if any) appear within the metadata block with the object YAML file(s).
+```yaml
+
+- name: <data object name>
+  fields:
+  - [...]
+    metadata:
+      release_datetime: 
+      change_id: 
+      item_changes_count: 
+      change_reason: 
+      change_type: <bug|new feature|change|...tbc>
+    
+```
+
+
 ### Data objects
 
 The data model is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.
@@ -58,12 +76,12 @@ of synthetic data parameters and validation rules that apply to each field withi
 An example data object contains a description and a set of fields for that record. The fields have an ID (the key), a name,
 type, description, which cms systems the data item/field is available on and any comments,
 
-```yaml
+```yaml/workspaces/ssd-data-model/data/objects
 
 - name: <data object name>
   fields:
   - name: <item Name>
-    type: <string|int|Categorical|List>
+    type: <string|int|categorical|list>
     description: 
     item_ref: <data item ref code>
     primary_key: <true>
@@ -78,6 +96,13 @@ type, description, which cms systems the data item/field is available on and any
     cms_table:
     - liquid_logic:<ll_tbl_name>
     - mosaic: <mosaic_tbl_name>
+    guidance: <DfE of similar guidance txt>
+    metadata:
+      release_datetime: 
+      change_id: 
+      item_changes_count: 
+      change_reason: 
+      change_type: <bug|new feature|change|...tbc>
     [...]
 ```
 
