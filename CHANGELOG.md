@@ -1,5 +1,7 @@
 # Changelog
 SSD Data Item Change History:
+Last updated: 12/07/2023 14:40
+
 | item_ref   | release_datetime   | change_id   | change_impact_title              | change_status   | change_type     |   change_impact_notes |
 |:-----------|:-------------------|:------------|:---------------------------------|:----------------|:----------------|----------------------:|
 | PER001A    | nan                | SSD-002     | extended number of chars allowed | pending         | Initiative      |                   nan |

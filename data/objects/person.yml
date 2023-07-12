@@ -42,7 +42,7 @@ nodes:
     metadata:
       release: 08/07/2023 10:00
       change_id: SSD-014
-      versions_count: '2.0'
+      versions_count: 2
       impact_title: reduced number of chars allowed
       type: Initiative
   - name: person_sex

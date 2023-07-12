@@ -92,13 +92,12 @@ def process_csv_file(csv_file, change_log_file, output_directory):
 
 
     # Convert to datetime, sort by 'item_ref' and 'release_datetime'
-    change_df['release_datetime'] = pd.to_datetime(change_df['release_datetime'], format='%d/%m/%Y %H:%M')
+    change_df['release_datetime'] = pd.to_datetime(change_df['release_datetime'], format='%d/%m/%Y %H:%M', errors='coerce') # unreleased blanks become NaT
     change_df = change_df.sort_values(['item_ref', 'release_datetime'], ascending=[True, False]) # Use , na_position='first') if wanting NaT/unreleased changes
     
     # Get an int count of how many historic changes occured
     change_df ['change_versions_count'] = change_df .groupby('item_ref')['item_ref'].transform('count').astype(int)
 
- 
     # Keep only the most recent change log entry per 'item_ref'
     change_df = change_df.drop_duplicates(subset='item_ref', keep='first')
 
@@ -242,7 +241,7 @@ def save_node_yaml(node, output_directory):
                 field_data['metadata'] = {
                     'release': field['release_datetime'].strftime('%d/%m/%Y %H:%M'),
                     'change_id': field['change_id'],
-                    'versions_count': field['change_versions_count'],
+                    'versions_count': int(float(field['change_versions_count'])),
                     'impact_title': field['change_impact_title'],
                     'type': field['change_type']
                 }
