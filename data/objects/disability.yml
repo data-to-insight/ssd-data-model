@@ -30,11 +30,11 @@ nodes:
     - mosaic:disability
     guidance: See PER001A
     metadata:
-      change_datetime: 12/07/2023 00:00
-      change_ref_id: SSD0005
+      release_datetime: 12/07/2023 00:00
+      change_id: SSD-005
       item_changes_count: '1.0'
-      reason_text: guidance change
-      data_quality_notes: null
+      change_reason: guidance change
+      change_type: Change
   - name: person_disability
     description: Disability Code
     item_ref: DIS002A
@@ -85,8 +85,8 @@ nodes:
       \ use the code \u2018NONE\u2019. However, if a child is unborn then the disability\
       \ item should be left blank."
     metadata:
-      change_datetime: 13/07/2023 00:00
-      change_ref_id: SSD0006
+      release_datetime: 13/07/2023 00:00
+      change_id: SSD-006
       item_changes_count: '1.0'
-      reason_text: new item
-      data_quality_notes: null
+      change_reason: new item
+      change_type: New Feature

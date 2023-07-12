@@ -21,14 +21,13 @@ output_directory = paths['yml_data']
 
 
 
-
 # Full list of field names
 # If there are non-required fields in the spec csv, just dont include them here
 field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 
                'cms', 'cms_field','cms_table',
                'required_enabled','unique_enabled','primary_key','foreign_key', 
                'guidance', 
-               'item_ref', 'change_datetime', 'change_ref_id', 'item_changes_count', 'reason_text', 'data_quality_notes'] # meta data field
+               'item_ref', 'release_datetime', 'change_id', 'item_changes_count', 'change_reason', 'change_type', 'data_quality_notes'] # meta data fields
 
 # Those that are multi-part/list fields
 multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_field', 'cms_table']
@@ -92,9 +91,9 @@ def process_csv_file(csv_file, change_log_file, output_directory):
     change_df = pd.read_csv(change_log_file, quotechar='"') # Load change log 
 
 
-    # Convert to datetime, sort by 'item_ref' and 'change_datetime'
-    change_df['change_datetime'] = pd.to_datetime(change_df['change_datetime'], format='%d/%m/%Y %H:%M')
-    change_df = change_df.sort_values(['item_ref', 'change_datetime'], ascending=[True, False])
+    # Convert to datetime, sort by 'item_ref' and 'release_datetime'
+    change_df['release_datetime'] = pd.to_datetime(change_df['release_datetime'], format='%d/%m/%Y %H:%M')
+    change_df = change_df.sort_values(['item_ref', 'release_datetime'], ascending=[True, False])
     
     # Get an int count of how many historic changes occured
     change_df ['item_changes_count'] = change_df .groupby('item_ref')['item_ref'].transform('count').astype(int)
@@ -237,15 +236,15 @@ def save_node_yaml(node, output_directory):
 
             #
             # Add metadata Incl item-level change tracking
-            if 'change_datetime' in field and pd.notnull(field['change_datetime']):
-                if isinstance(field['change_datetime'], str):
-                    field['change_datetime'] = pd.to_datetime(field['change_datetime'])
+            if 'release_datetime' in field and pd.notnull(field['release_datetime']):
+                if isinstance(field['release_datetime'], str):
+                    field['release_datetime'] = pd.to_datetime(field['release_datetime'])
                 field_data['metadata'] = {
-                    'change_datetime': field['change_datetime'].strftime('%d/%m/%Y %H:%M'),
-                    'change_ref_id': field['change_ref_id'],
+                    'release_datetime': field['release_datetime'].strftime('%d/%m/%Y %H:%M'),
+                    'change_id': field['change_id'],
                     'item_changes_count': field['item_changes_count'],
-                    'reason_text': field['reason_text'],
-                    'data_quality_notes': field['data_quality_notes']
+                    'change_reason': field['change_reason'],
+                    'change_type': field['change_type']
                 }
                 
             # Include the field data only if it has any non-empty value

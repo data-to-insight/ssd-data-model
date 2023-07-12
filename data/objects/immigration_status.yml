@@ -29,11 +29,11 @@ nodes:
     - mosaic:immigration_status
     guidance: See PER001A
     metadata:
-      change_datetime: 14/07/2023 00:00
-      change_ref_id: SSD0007
+      release_datetime: 14/07/2023 00:00
+      change_id: SSD-007
       item_changes_count: '1.0'
-      reason_text: validator changed
-      data_quality_notes: null
+      change_reason: validator changed
+      change_type: Change
   - name: immigration_status
     description: Immigration Status
     item_ref: IMM002A
