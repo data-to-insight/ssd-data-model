@@ -27,7 +27,7 @@ field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'n
                'cms', 'cms_field','cms_table',
                'required_enabled','unique_enabled','primary_key','foreign_key', 
                'guidance', 
-               'item_ref', 'release_datetime', 'change_id', 'item_changes_count', 'change_reason', 'change_type', 'data_quality_notes'] # meta data fields
+               'item_ref', 'release_datetime', 'change_id', 'change_impact_title', 'change_status', 'change_type', 'change_impact_notes', 'change_versions_count'] # meta data fields
 
 # Those that are multi-part/list fields
 multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_field', 'cms_table']
@@ -93,10 +93,10 @@ def process_csv_file(csv_file, change_log_file, output_directory):
 
     # Convert to datetime, sort by 'item_ref' and 'release_datetime'
     change_df['release_datetime'] = pd.to_datetime(change_df['release_datetime'], format='%d/%m/%Y %H:%M')
-    change_df = change_df.sort_values(['item_ref', 'release_datetime'], ascending=[True, False])
+    change_df = change_df.sort_values(['item_ref', 'release_datetime'], ascending=[True, False]) # Use , na_position='first') if wanting NaT/unreleased changes
     
     # Get an int count of how many historic changes occured
-    change_df ['item_changes_count'] = change_df .groupby('item_ref')['item_ref'].transform('count').astype(int)
+    change_df ['change_versions_count'] = change_df .groupby('item_ref')['item_ref'].transform('count').astype(int)
 
  
     # Keep only the most recent change log entry per 'item_ref'
@@ -242,8 +242,8 @@ def save_node_yaml(node, output_directory):
                 field_data['metadata'] = {
                     'release_datetime': field['release_datetime'].strftime('%d/%m/%Y %H:%M'),
                     'change_id': field['change_id'],
-                    'item_changes_count': field['item_changes_count'],
-                    'change_reason': field['change_reason'],
+                    'change_versions_count': field['change_versions_count'],
+                    'change_impact_title': field['change_impact_title'],
                     'change_type': field['change_type']
                 }
                 

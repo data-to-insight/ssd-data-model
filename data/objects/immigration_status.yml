@@ -31,8 +31,8 @@ nodes:
     metadata:
       release_datetime: 14/07/2023 00:00
       change_id: SSD-007
-      item_changes_count: '1.0'
-      change_reason: validator changed
+      change_versions_count: '1.0'
+      change_impact_title: validator changed
       change_type: Change
   - name: immigration_status
     description: Immigration Status
