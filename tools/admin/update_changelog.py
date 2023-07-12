@@ -2,8 +2,6 @@ import pandas as pd
 from tabulate import tabulate
 from datetime import datetime
 
-print("TEST: Script located...")
-
 # Read the CSV data file
 df = pd.read_csv('docs/admin/ssd_change_log.csv')
 
