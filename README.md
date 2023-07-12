@@ -43,7 +43,6 @@ Defining a set of objects/data points capturing LA Childrens Services data durin
 
 The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
 
-
 ### Specification
 
 The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide further 'human readable' reporting methods beyond the aforementioned [data object conceptual model](https://data-to-insight.github.io/ssd-data-model/). We are aiming to publish our full data-landscape overview that resulted in the specification. 
