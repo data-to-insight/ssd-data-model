@@ -125,12 +125,11 @@ or a list of objects:
   description: A description of value 2
 ```
 
-
 ### Output
 
-Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, the project is working towards providing on open source set of [tools(./tools/) to perform the needed processing, incl. extract the required data items from current/known CMS systems and provide methods to allow the Yaml object definitions to be easily updated from specification improvement updates or required revisions. Stakeholders and others are invited to fork the repository and/or suggest changes. 
+Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, the project is working towards providing an open source set of [tools](./tools/) to perform the needed processing, incl. extract the required data items from current/known CMS systems and provide methods to allow the YAML object definitions to be easily updated from specification improvement updates or required revisions. Stakeholders and others are also invited to fork the repository and/or suggest changes to all elements of the project including definitions structure and code-base. 
 
-Currently the YAML data objects, associated diagrams, documentation and website can be (re-)generated using the [tools(./tools/). The SQL[sql] tools to extract the relevant data directly from different CMS systems, are flexible; enabling the inclusion of both new data objects, new items in existing objects and revisions to both. SQL for each CMS type can be generated using the provided tools(Pilot includes only Liquid Logic and MOSAIC compatibility), and the resultant SQL scripts are output in the [SQL](./sql/) folder. 
+Currently the YAML data objects, associated diagrams, documentation and website can be (re-)generated using the [tools](./tools/). The SQL[sql] tools are in development at the moment, but are aimed towards extracting the relevant data directly from different CMS systems in a CMS-agnostic approach; enabling the inclusion of both new data objects, new items in existing objects and revisions to both. SQL for each CMS type can be generated using the provided tools(Pilot includes only Liquid Logic and MOSAIC compatibility), and the resultant SQL scripts are output in the [SQL](./sql/) folder. 
 
 
 
