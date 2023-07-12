@@ -48,11 +48,11 @@ nodes:
     - mosaic:address
     guidance: See PER001A
     metadata:
-      release_datetime: 10/07/2023 05:00
+      release: 10/07/2023 05:00
       change_id: SSD-103
-      change_versions_count: '2.0'
-      change_impact_title: cms field name change
-      change_type: Service Request
+      versions_count: '2.0'
+      impact_title: cms field name change
+      type: Service Request
   - name: address_type
     description: Address Type
     item_ref: ADD003A
@@ -72,11 +72,11 @@ nodes:
     - mosaic:address
     guidance: Home/ Placement/ Primary/ Secondary
     metadata:
-      release_datetime: 11/07/2023 00:00
+      release: 11/07/2023 00:00
       change_id: SSD-004
-      change_versions_count: '1.0'
-      change_impact_title: from string to integer
-      change_type: bug
+      versions_count: '1.0'
+      impact_title: from string to integer
+      type: bug
   - name: address_start
     description: Address Start Date/ From
     item_ref: ADD004A

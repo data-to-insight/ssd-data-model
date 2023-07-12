@@ -30,11 +30,11 @@ nodes:
     - mosaic:disability
     guidance: See PER001A
     metadata:
-      release_datetime: 12/07/2023 00:00
+      release: 12/07/2023 00:00
       change_id: SSD-005
-      change_versions_count: '1.0'
-      change_impact_title: guidance change
-      change_type: Change
+      versions_count: '1.0'
+      impact_title: guidance change
+      type: Change
   - name: person_disability
     description: Disability Code
     item_ref: DIS002A

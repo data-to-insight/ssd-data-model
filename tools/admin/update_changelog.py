@@ -2,7 +2,7 @@ import pandas as pd
 from tabulate import tabulate
 
 # Read the CSV data file
-df = pd.read_csv('/workspaces/ssd-data-model/docs/admin/ssd_change_log.csv')
+df = pd.read_csv('docs/admin/ssd_change_log.csv')
 
 # Convert the DataFrame to Markdown Table and add it to CHANGELOG
 with open('CHANGELOG.md', 'w') as f:
