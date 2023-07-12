@@ -50,7 +50,7 @@ nodes:
     metadata:
       release: 10/07/2023 05:00
       change_id: SSD-103
-      versions_count: '2.0'
+      versions_count: 2
       impact_title: cms field name change
       type: Service Request
   - name: address_type
@@ -74,7 +74,7 @@ nodes:
     metadata:
       release: 11/07/2023 00:00
       change_id: SSD-004
-      versions_count: '1.0'
+      versions_count: 1
       impact_title: from string to integer
       type: bug
   - name: address_start
