@@ -50,9 +50,9 @@ The object specification input file[csv] can be found in the [admin](./docs/admi
 
 ### Change log
 
-Agreed data item-level changes are assigned an identifier, and will be traceable within the [changelog.md](./CHANGELOG.md). A sub-set of the change details for the most recent change (if any) appear within the metadata block with the object YAML file(s).
-```yaml
+Agreed data item-level changes are assigned an identifier, and will be traceable within the [changelog.md](./CHANGELOG.md). A sub-set of the change details for the most recent change (if any) appear within the metadata block with the object YAML file(s). The current change log contains sample data until we deploy the first pilot release. 
 
+```yaml
 - name: <data object name>
   fields:
   - [...]
@@ -62,7 +62,6 @@ Agreed data item-level changes are assigned an identifier, and will be traceable
       item_changes_count: 
       change_reason: 
       change_type: <bug|new feature|change|...tbc>
-    
 ```
 
 
@@ -76,7 +75,7 @@ of synthetic data parameters and validation rules that apply to each field withi
 An example data object contains a description and a set of fields for that record. The fields have an ID (the key), a name,
 type, description, which cms systems the data item/field is available on and any comments,
 
-```yaml/workspaces/ssd-data-model/data/objects
+```yaml
 
 - name: <data object name>
   fields:
@@ -112,7 +111,7 @@ The [categories](./data/categories) folder holds the dimensions as referenced by
 A Dimension object has a value and description, where the value is what would normally be expected to be transferred
 in an interchange format. The description is optional, and is not provided where the value is descriptive enough.
 
-The YAML files can either hold a list of string values, e.g.
+The YAML category files can either hold a list of string values, e.g.
 
 ```yaml
 - Value 1
