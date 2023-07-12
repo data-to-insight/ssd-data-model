@@ -176,7 +176,7 @@ Set up the working environment (will prompt Y/N part-way through, type 'y'to con
 [$] pip install poetry
 ```
 
-The python tools(.py) are in [tools](./tools/) folder. To run them, right click on the file and select 'run in terminal' or type filename on the commandline. This will only work if the setup.sh file has been already run to installed the needed dependencies. 
+The python tools(.py) are in [tools](./tools/) folder. To run them, right click on the file and select 'run in terminal' or type filename on the commandline. This will only work if the setup.sh file has been already run to install the needed dependencies. 
 
 
 
