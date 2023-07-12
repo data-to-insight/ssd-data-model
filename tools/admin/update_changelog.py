@@ -23,8 +23,9 @@ date_time_str = now.strftime("%d/%m/%Y %H:%M")
 
 # Convert the DataFrame to Markdown Table and add it to CHANGELOG
 with open('CHANGELOG.md', 'w') as f:
-    f.write("# Changelog\n")
-    f.write("SSD Data Item Change History:\n")
+    f.write("# Change log\n")
+    f.write("SSD Data Item Changes:\n")
+    f.write("The complete change history for SSD data items in reverse chronological order, with pending|expected changes showing first.")
     f.write("Last updated: " + date_time_str + "\n\n")
     f.write(tabulate(df, headers='keys', tablefmt='pipe', showindex=False))
 
