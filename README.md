@@ -35,7 +35,7 @@ The dataset aims to 'flatten' existing local variation in collected data, thus e
 
 ### Data objects Conceptual Model
 
-Defining a set of objects/data points capturing LA Childrens Services data during the different stages of an individual's progress through the CSC system(s); published for iterative review
+Defining the scope of objects/data points capturing LA Childrens Services data during the different stages of an individual's progress through the CSC system(s). Published for iterative review.
 
 - [data object/conceptual model](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/index.html)
 - [data object/item-guidance model](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/guidance.html)
@@ -45,11 +45,11 @@ The project will use [GIT][git] to track and approve proposed changes to the saf
 
 ### Specification
 
-The raw object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide further 'human readable' reporting methods beyond the aforementioned [data object conceptual model](https://data-to-insight.github.io/ssd-data-model/).
+The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide further 'human readable' reporting methods beyond the aforementioned [data object conceptual model](https://data-to-insight.github.io/ssd-data-model/). We are aiming to publish our full data-landscape overview that resulted in the specification. 
 
 ### Change log
 
-Agreed data item-level changes are assigned an identifier, and will be traceable within the [changelog.md](./CHANGELOG.md). A sub-set of the change details for the most recent change (if any) appear within the metadata block with the object YAML file(s). The current change log contains sample data until we deploy the first pilot release. 
+Agreed data item-level changes are assigned an identifier, and will be traceable within the [changelog.md](./CHANGELOG.md). A sub-set of the change details for the most recent change (if any) also appear within each objects metadata block within the YAML file(s). The current change log contains sample data until we deploy the first pilot release. Note: Object-level change tracking is not yet available/in progress; feedback/suggestions welcomed. 
 
 ```yaml
 - name: <data object name>
