@@ -1,6 +1,6 @@
 # Change log
 SSD Data Item Changes:
-The complete change history for SSD data items in reverse chronological order, with pending|expected changes showing first.Last updated: 13/07/2023 09:49
+The complete change history for SSD data items in reverse chronological order, with pending|expected changes showing first.Last updated: 13/07/2023 14:23
 
 | item_ref   | release_datetime    | change_id   | change_impact_title              | change_status   | change_type   | change_impact_notes   |
 |:-----------|:--------------------|:------------|:---------------------------------|:----------------|:--------------|:----------------------|
@@ -9,6 +9,7 @@ The complete change history for SSD data items in reverse chronological order, w
 | DIS002A    | NaT                 | SSD-006     | new item                         | pending         | New Feature   |                       |
 | S47003A    | NaT                 | SSD-221     | Remove strat_initiating_s47_date | pending         | Depreciated   |                       |
 | CLR009A    | NaT                 | SSD-222     | Remove rev_perm_plan             | pending         | Depreciated   |                       |
+| CIN010A    | NaT                 | SSD-223     | Remove cin_primary_need          | pending         | Depreciated   |                       |
 | IMM001A    | 2023-07-14 00:00:00 | SSD-007     | validator changed                | released        | Change        |                       |
 | IMM001A    | 2023-07-14 00:00:00 | SSD-007     | validator changed                | released        | Change        |                       |
 | DIS001A    | 2023-07-12 00:00:00 | SSD-005     | guidance change                  | released        | Change        |                       |
