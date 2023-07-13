@@ -651,9 +651,9 @@ Code set for local authority of previous permanence:
 -999  Information not available
 If local authority boundaries have changed since this option was arranged, please use the code at the time of the adoption/SGO/RO/CAO.
 If a child was adopted by an adopter found through a voluntary adoption agency (VAA) record the local authority which was previously looking after the child. Similarly, if a child was adopted by a foster carer who applied directly to the court to adopt the child, then record the local authority which was previously looking after the child. "
-child.cla_episodes.care_plan,CAP001A,,cla_care_plan,looked_after|care_plan,,string,cla_plan_id,,Care Plan Table ID,,liquid_logic|mosaic,liquid_logic : cla_plan_id|mosaic : cla_plan_id,liquid_logic : cla_care_plan|mosaic : cla_care_plan,,,,,,,,,Care Plan record unique ID 
-child.cla_episodes.care_plan,CAP002A,,cla_care_plan,looked_after|care_plan,,string,cla_episode_id,,CLA Episode ID,,liquid_logic|mosaic,liquid_logic : cla_episode_id|mosaic : cla_episode_id,liquid_logic : cla_care_plan|mosaic : cla_care_plan,,,,,Yes,,,cla_episodes.la_person_id,See CLA001A 
-child.cla_episodes.care_plan,CAP003A,SSD154,cla_care_plan,looked_after|care_plan,,string,cla_care_plan,,What is the chosen/ permanence plan for this child/ young person?,AnnexA,liquid_logic|mosaic,liquid_logic : cla_care_plan|mosaic : cla_care_plan,liquid_logic : cla_care_plan|mosaic : cla_care_plan,,,,,,,,,"Please indicate what the current primary permanence plan is for the child.
+child.cla_episodes.cla_care_plan,CAP001A,,cla_care_plan,looked_after|care_plan,,string,cla_plan_id,,Care Plan Table ID,,liquid_logic|mosaic,liquid_logic : cla_plan_id|mosaic : cla_plan_id,liquid_logic : cla_care_plan|mosaic : cla_care_plan,,,,,,,,,Care Plan record unique ID 
+child.cla_episodes.cla_care_plan,CAP002A,,cla_care_plan,looked_after|care_plan,,string,la_person_id,,CLA Episode ID,,liquid_logic|mosaic,liquid_logic : la_person_id|mosaic : la_person_id,liquid_logic : cla_care_plan|mosaic : cla_care_plan,,,,,Yes,,,cla_episodes.la_person_id,See CLA001A 
+child.cla_episodes.cla_care_plan,CAP003A,SSD154,cla_care_plan,looked_after|care_plan,,string,cla_plan,,What is the chosen/ permanence plan for this child/ young person?,AnnexA,liquid_logic|mosaic,liquid_logic : cla_plan|mosaic : cla_plan,liquid_logic : cla_care_plan|mosaic : cla_care_plan,,,,,,,,,"Please indicate what the current primary permanence plan is for the child.
 
 Please use codes;
 a) Return to family

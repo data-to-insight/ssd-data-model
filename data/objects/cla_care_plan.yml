@@ -19,7 +19,7 @@ nodes:
     - liquid_logic:cla_care_plan
     - mosaic:cla_care_plan
     guidance: Care Plan record unique ID
-  - name: cla_episode_id
+  - name: la_person_id
     description: CLA Episode ID
     item_ref: CAP002A
     type: string
@@ -34,13 +34,13 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cla_episode_id
-    - mosaic:cla_episode_id
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
     cms_table:
     - liquid_logic:cla_care_plan
     - mosaic:cla_care_plan
     guidance: See CLA001A
-  - name: cla_care_plan
+  - name: cla_plan
     description: What is the chosen/ permanence plan for this child/ young person?
     item_ref: CAP003A
     type: string
@@ -53,8 +53,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cla_care_plan
-    - mosaic:cla_care_plan
+    - liquid_logic:cla_plan
+    - mosaic:cla_plan
     cms_table:
     - liquid_logic:cla_care_plan
     - mosaic:cla_care_plan
