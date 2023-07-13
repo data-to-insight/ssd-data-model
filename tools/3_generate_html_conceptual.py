@@ -182,12 +182,12 @@ JS is added to the HTML content. Colours rows in output table based on the conte
 html_content += """
 <script>
 window.addEventListener('load', function() {
-  // Function to check if a row matches a category and colour it
+  // Function to check if a row matches a category and color it
   function colourRow(row, returns) {
     // Check if any of the return elements matches a category
     for (var i = 0; i < returns.length; i++) {
-      if (returns_categories[returns[i].trim()]) { // .trim() is used to remove potential leading/trailing whitespaces
-        // If it matches, colour the row and stop checking
+      if (returns_categories[returns[i].trim()]) {
+        // If it matches, color the row and stop checking
         row.style.backgroundColor = returns_categories[returns[i].trim()]["colour"];
         return;
       }
@@ -201,12 +201,12 @@ window.addEventListener('load', function() {
     // Get the returns column and split it by ", "
     var returns = rows[i].children[4].innerText.split(", ").map(item => item.trim());
 
-
     // Apply the colourRow function
     colourRow(rows[i], returns);
   }
 });
 </script>
+
 """
 
 
