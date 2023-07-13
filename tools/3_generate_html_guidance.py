@@ -136,10 +136,10 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
             html_content += "<table style='border-collapse: collapse; border: none;'>"
             html_content += "<colgroup>"
             html_content += "<col style='width: 12%;'/>"  # Set width for field/item-ref-column
-            html_content += "<col style='width: 28%;'/>"  # Set width for data-item-column
-            html_content += "<col style='width: 25%;'/>"  # Set width for guidance-column
+            html_content += "<col style='width: 20%;'/>"  # Set width for data-item-column
+            html_content += "<col style='width: 38%;'/>"  # Set width for guidance-column
             html_content += "<col style='width: 15%;'/>"  # Set width for returns-column
-            html_content += "<col style='width: 20%;'/>"  # Set width for change_log-column
+            html_content += "<col style='width: 15%;'/>"  # Set width for change_log-column
             html_content += "</colgroup>"
             html_content += "<tr><th class='item-ref-column'>Item Ref</th><th class='data-item-column'>Data Item Name</th><th class='guidance-column'>Guidance</th><th class='returns-column'>Returns</th><th class='changelog-column'>Change Log</th></tr>"
 
