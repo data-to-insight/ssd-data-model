@@ -197,7 +197,7 @@ relationships:
   relation: 1:M
 - parent_object: cla_episodes
   parent_key: la_person_id
-  child_object: cla_episode_id
+  child_object: cla_care_plan
   child_key: cla_episode_id
   relation: 1:M
 - parent_object: cla_episodes
