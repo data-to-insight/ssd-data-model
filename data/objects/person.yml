@@ -44,7 +44,7 @@ nodes:
       change_id: SSD-014
       versions_count: 2
       impact_title: reduced number of chars allowed
-      type: Initiative
+      type: Change
   - name: person_sex
     description: Sex
     item_ref: PER002A

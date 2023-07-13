@@ -8,8 +8,10 @@ pip install -r requirements.txt
 sudo apt-get update                                         # requ' to run the below
 sudo apt-get install graphviz libgraphviz-dev pkg-config    # creating ERD/graphviz diagrams/images
 pip install pygraphviz                                      # creating ERD/graphviz diagrams/images
+pip install graphviz
 pip install openpyxl                                        # create repo tree reference file in xls
 pip install tabulate                                        # create change log table formatting
+
 
 # Install or update Poetry
 if ! command -v poetry &>/dev/null; then
@@ -20,4 +22,4 @@ fi
 
 
 # Install the Python extension for Visual Studio Code
-code --install-extension ms-python.python
+code --install-extension ms-python.python --force

@@ -7,7 +7,7 @@ paths = get_paths()
 # creating base objects and essentials
 
 # Run script to refresh changelog in case workflow action run not recent
-subprocess.run(['python3', paths['tools'] + 'update_changelog.py'])
+subprocess.run(['python3', paths['tools'] + 'admin/update_changelog.py'])
 
 # Run script to re-create the individual object diagram images
 subprocess.run(['python3', paths['tools'] + '1_generate_yaml_objects.py'])
