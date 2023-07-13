@@ -199,7 +199,7 @@ window.addEventListener('load', function() {
 
   for (var i = 0; i < rows.length; i++) {
     // Get the returns column and split it by ", "
-    var returns = rows[i].children[5].innerText.split(", ").map(item => item.trim());
+    var returns = rows[i].children[4].innerText.split(", ").map(item => item.trim());
 
 
     // Apply the colourRow function
