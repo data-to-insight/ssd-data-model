@@ -159,6 +159,7 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
                 # meta_data = ', '.join(f"{k}: {v}" for k, v in metadata.items()) # re-form into key/val list(comma split list that wraps)
                 meta_data = '<br>'.join(f"{k}: {v}" for k, v in metadata.items()) # re-form into key/val list(Incl. html line breaks)
 
+                
                 # Add a class to each row, using a unique identifier (like the field reference)
                 html_content += f'<tr class="row-{field_ref}">'
                 html_content += f"<td>{field_ref}</td><td>{field_name}</td><td>{cms_data}</td><td>{categories_data}</td><td>{returns_data}</td><td>{meta_data}</td></tr>"

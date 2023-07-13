@@ -10,3 +10,4 @@ IMM001A,14/07/2023 00:00,SSD-007,validator changed,released,Change,
 IMM001A,14/07/2023 00:00,SSD-007,validator changed,released,Change,
 S47003A,,SSD-221,Remove strat_initiating_s47_date,pending,Depreciated,
 CLR009A,,SSD-222,Remove rev_perm_plan,pending,Depreciated,
+CIN010A,,SSD-223,Remove cin_primary_need, pending, Depreciated

@@ -1,3 +1,5 @@
+
+
 import glob
 import yaml
 import datetime
@@ -58,6 +60,13 @@ html_content += "th { background-color: #f2f2f2; }"
 
 # Per Object table/container settings
 html_content += "th.image-column { width: " + str(image_width) + "; }"
+
+# Common column classes and widths
+html_content += ".item-ref-column { width: 12%; }"
+html_content += ".data-item-column { width: 25%; }"
+html_content += ".guidance-column { width: 33%; }"
+html_content += ".returns-column { width: 15%; }"
+html_content += ".changelog-column { width: 15%; }"
 
 html_content += ".last-updated-container { display: flex; align-items: center; }"
 html_content += ".last-updated-text { font-weight: bold; margin-right: 5px; }"
