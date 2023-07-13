@@ -2,6 +2,7 @@
 SSD Data Item Changes:
 The complete change history for SSD data items in reverse chronological order, with pending|expected changes showing first.Last updated: 13/07/2023 09:21
 
+
 | item_ref   | release_datetime    | change_id   | change_impact_title              | change_status   | change_type   | change_impact_notes   |
 |:-----------|:--------------------|:------------|:---------------------------------|:----------------|:--------------|:----------------------|
 | PER001A    | NaT                 | SSD-002     | extended number of chars allowed | pending         | Change        |                       |
