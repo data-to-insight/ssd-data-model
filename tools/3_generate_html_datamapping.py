@@ -7,11 +7,11 @@ from admin.admin_tools import get_paths  # get project defined file paths
 
 
 # Define page title and intro text
-page_title_str = "Standard Safeguarding Dataset: Existing DfE Returns Map & (Subset)Abstractions"
+page_title_str = "Standard Safeguarding Dataset: Existing DfE Returns Map"
 page_intro_str = ""
 
 
-notes_str1 = "This page shows how abtractions of the SSD data map could meet the requirements of the core DfE returns and below this the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. Please note that image quality will vary due to limitations on source files and page generator workflow."
+notes_str1 = "This page shows subset views of the SSD data map towards core DfE returns, and below this the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. Please note that image quality will vary due to limitations on source files and page generator workflow."
 repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 # Used with the seperator between diagrams/planning images
@@ -68,36 +68,8 @@ html_content += "</div>"
 
 html_content += "</div>"
 
-html_content += "<h1>SSD (Subset)Abtractions:</h1>"
+html_content += "<h1>SSD data map subsets:</h1>"
 html_content += f"<p>{notes_str1}</p>"
-
-# Add key/legend
-html_content += "<h2>Key/Legend:</h2>"
-html_content += "<div class='key-container'>"
-
-# Define color and text for each key item
-key_items = [
-    {"color": "#F5F6F8", "text": "Identity"},
-    {"color": "#F2C4DA", "text": "S47 and IPCP"},
-    {"color": "#6CD9FA", "text": "Contact"},
-    {"color": "#93D375", "text": "Early Help"},
-    {"color": "#D6F693", "text": "Early Help (Pilot)"},
-    {"color": "#F5D027", "text": "Social Care Referral"},
-    {"color": "#FF9D48", "text": "Child in Need"},
-    {"color": "#EA94BB", "text": "CP Plan"},
-    {"color": "#C6A2D2", "text": "Looked After & Leavers"},
-    {"color": "#FFF9B1", "text": "Permanence"},
-    {"color": "#ACB5FF", "text": "Education"},
-    {"color": "#F2A1AA", "text": "Workforce | Other"}
-]
-
-# Loop over key items and add color cells/borderless boxes
-for item in key_items:
-    color = item["color"]
-    text = item["text"]
-    html_content += f"<div class='key-item' style='background-color: {color};'>{text}</div>"
-
-html_content += "</div>" # key end
 
 
 # Get the list of image files in the folder
@@ -120,6 +92,11 @@ if len(image_files) > 0:
 
         image_filename = os.path.splitext(image_filename)[0]  # Remove '.jpg' extension
 
+        
+        image_filename = image_filename.replace("ssd_", "") # Remove 'ssd_' from the filename 
+        parts = image_filename.split("_")                   # Split the filename by underscore
+        image_filename = parts[0].upper()                   # Capitalise the first part
+
         html_content += f"<h2>{image_filename}</h2>"
         # Add the image to the HTML content
         html_content += f'<div class="image-container"><img src="{web_img_path}" alt="{image_filename}" style="max-width: 100%; margin-bottom: 20px;"></div>'
@@ -127,6 +104,38 @@ if len(image_files) > 0:
     # Add a visual separator
     html_content += "</Br></Br><h1>Current DfE Data Returns Map:</h1>"
     html_content += f"<p>{sub_notes_str1}</p></Br>"
+
+
+
+    # Add key/legend
+    html_content += "<h2>Key/Legend:</h2>"
+    html_content += "<div class='key-container'>"
+
+    # Define color and text for each key item
+    key_items = [
+        {"color": "#F5F6F8", "text": "Identity"},
+        {"color": "#F2C4DA", "text": "S47 and IPCP"},
+        {"color": "#6CD9FA", "text": "Contact"},
+        {"color": "#93D375", "text": "Early Help"},
+        {"color": "#D6F693", "text": "Early Help (Pilot)"},
+        {"color": "#F5D027", "text": "Social Care Referral"},
+        {"color": "#FF9D48", "text": "Child in Need"},
+        {"color": "#EA94BB", "text": "CP Plan"},
+        {"color": "#C6A2D2", "text": "Looked After & Leavers"},
+        {"color": "#FFF9B1", "text": "Permanence"},
+        {"color": "#ACB5FF", "text": "Education"},
+        {"color": "#F2A1AA", "text": "Workforce | Other"}
+    ]
+
+    # Loop over key items and add color cells/borderless boxes
+    for item in key_items:
+        color = item["color"]
+        text = item["text"]
+        html_content += f"<div class='key-item' style='background-color: {color};'>{text}</div>"
+    html_content += "</div>" # key end
+
+
+
 
     # Loop over the non-diagram files and add them to the HTML content
     for image_file in non_diagram_files:
@@ -153,5 +162,6 @@ html_content += "</div>"
 html_content += "</div>"
 html_content += "</body></html>"
 
+# push out the compiled html content/formating to file
 with open(paths['wsite_root'] + 'existingreturnsmap.html', 'w') as f:
     f.write(html_content)
