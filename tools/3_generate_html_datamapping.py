@@ -11,11 +11,11 @@ page_title_str = "Standard Safeguarding Dataset: Existing DfE Returns Map"
 page_intro_str = ""
 
 
-notes_str1 = "This page shows subset views of the SSD data map towards core DfE returns, and below this the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. Please note that image quality will vary due to limitations on source files and page generator workflow."
+notes_str1 = "This page shows subset views of the SSD data map towards core DfE returns, and below this the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape."
 repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
 # Used with the seperator between diagrams/planning images
-sub_notes_str1 = "Initial data mapping undertaken by the Standard Safeguarding Dataset. Please note that image quality will vary due to limitations on source files and page generator workflow."
+sub_notes_str1 = "Initial data mapping undertaken by the Standard Safeguarding Dataset. </Br>Please note that image quality will vary due to limitations on source files and page generator workflow."
 
 # Other sub-links
 index_link_str = "https://data-to-insight.github.io/ssd-data-model/index.html"
@@ -45,6 +45,7 @@ html_content += ".image-container { display: block; width: 85%; margin: 0 auto; 
 html_content += ".image-container img { width: 100%; }"  # Stretch the images to fill the container width
 html_content += ".key-container { display: flex; }"
 html_content += ".key-item { flex-grow: 1; text-align: center; padding: 10px; border: none; }"
+html_content += "h1, h2 { border-bottom: none; }"
 
 html_content += "</style></head><body>"
 
@@ -90,15 +91,14 @@ if len(image_files) > 0:
 
         web_img_path = paths['wsite_returns_maps'] + image_filename  # relative img path to generated HTML page
 
-        image_filename = os.path.splitext(image_filename)[0]  # Remove '.jpg' extension
-
-        
-        image_filename = image_filename.replace("ssd_", "") # Remove 'ssd_' from the filename 
-        parts = image_filename.split("_")                   # Split the filename by underscore
-        image_filename = parts[0].upper()                   # Capitalise the first part
-
+        # Format the diagram sub-headers
+        image_filename = os.path.splitext(image_filename)[0]    # Remove '.jpg' extension
+        image_filename = image_filename.replace("ssd_", "")     # Remove 'ssd_' from the filename 
+        parts = image_filename.split("_")                       # Split the filename by underscore
+        image_filename = parts[0].upper()                       # Capitalise the first part
         html_content += f"<h2>{image_filename}</h2>"
-        # Add the image to the HTML content
+
+        # Add the image/diagram to the HTML content
         html_content += f'<div class="image-container"><img src="{web_img_path}" alt="{image_filename}" style="max-width: 100%; margin-bottom: 20px;"></div>'
 
     # Add a visual separator
