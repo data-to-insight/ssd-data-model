@@ -41,6 +41,7 @@ def get_paths():
         'docs': 'docs/',
         'tools': 'tools/',
         'erd_publish': 'docs/imgs/',
+        'erd_returns_publish': 'doc/img/erd_returns_maps',
         'erd_objects_publish': 'docs/imgs/erd_data_objects/',
         'yml_data': 'data/objects/',  # yml imports
         'wsite_root':'docs/',

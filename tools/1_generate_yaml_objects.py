@@ -1,13 +1,13 @@
 
 
-import csv
 import os
 import yaml
-import re
 import pandas as pd
+import glob
+
 
 from admin.admin_tools import get_paths # get project defined file paths
-from admin.admin_tools import clean_fieldname_data # get project defined file paths
+from admin.admin_tools import clean_fieldname_data # get field cleaner func
 
 
 # File handling input/output
@@ -254,7 +254,27 @@ def save_node_yaml(node, output_directory):
 
 
 
-process_csv_file(data_spec_csv, change_log_file, output_directory)
+def delete_yml_objects(output_directory):
+    """
+    Delete all *.yml files from a directory.
+
+    :param output_directory: str, path to the directory to clean
+    """
+
+    # Get list of all .yml files in the directory
+    files = glob.glob(os.path.join(output_directory, "*.yml"))
+
+    # Iterate over the list of filepaths & remove each file.
+    for file in files:
+        try:
+            os.remove(file)
+        except OSError as e:
+            print("Error: %s : %s" % (file, e.strerror))
+            
+
+
+delete_yml_objects(output_directory) # remove existing to prevent obsolete being left
+process_csv_file(data_spec_csv, change_log_file, output_directory) # create all new yml objects
 
 
 

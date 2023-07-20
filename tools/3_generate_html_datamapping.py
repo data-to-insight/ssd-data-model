@@ -7,19 +7,22 @@ from admin.admin_tools import get_paths  # get project defined file paths
 
 
 # Define page title and intro text
-page_title_str = "Standard Safeguarding Dataset: Existing Returns Map"
+page_title_str = "Standard Safeguarding Dataset: Existing DfE Returns Map & (Subset)Abstractions"
 page_intro_str = ""
 
 
-notes_str1 = "This page shows the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. Please note that image quality will vary due to limitations on source files and page generator workflow."
+notes_str1 = "This page shows how abtractions of the SSD data map could meet the requirements of the core DfE returns and below this the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape. Please note that image quality will vary due to limitations on source files and page generator workflow."
 repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
 
+# Used with the seperator between diagrams/planning images
+sub_notes_str1 = "Initial data mapping undertaken by the Standard Safeguarding Dataset. Please note that image quality will vary due to limitations on source files and page generator workflow."
 
 # Other sub-links
 index_link_str = "https://data-to-insight.github.io/ssd-data-model/index.html"
 guidance_link_str = "https://data-to-insight.github.io/ssd-data-model/guidance.html"
 returns_maps_link_str = "https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html"
 change_request_link_str = "https://forms.office.com/e/UysrcGApJ1"
+object_specification_link_str = "https://data-to-insight.github.io/ssd-data-model/object_definitions.pdf"
 
 
 #### end of settings
@@ -59,11 +62,13 @@ html_content += f"<a href='{index_link_str}' class='repo-link'> | Object Concept
 html_content += f"<a href='{guidance_link_str}' class='repo-link'> | Data Item Guidance</a>"
 html_content += f"<a href='{returns_maps_link_str}' class='repo-link'> | Existing returns maps</a>"
 html_content += f"<a href='{change_request_link_str}' class='repo-link'> | Submit Change Request</a>"
-html_content += "</div>"
+html_content += f"<a href='{object_specification_link_str}' class='repo-link'> | Object Spec download(PDF)</a>"
 
 html_content += "</div>"
 
-html_content += "<h1>DfE Data Returns:</h1>"
+html_content += "</div>"
+
+html_content += "<h1>SSD (Subset)Abtractions:</h1>"
 html_content += f"<p>{notes_str1}</p>"
 
 # Add key/legend
@@ -101,7 +106,13 @@ image_files = glob.glob(paths['returns_maps'] + "*.jpg")  # location of source f
 # Check if any image files are found
 if len(image_files) > 0:
     # Loop over the image files and add them to the HTML content
-    for image_file in image_files:
+
+    diagram_files = [file for file in image_files if 'diagram' in os.path.basename(file).lower()]
+    non_diagram_files = [file for file in image_files if file not in diagram_files]
+
+    # Loop over the diagram files and add them to the HTML content
+    for image_file in diagram_files:
+
         # Extract the image filename
         image_filename = os.path.basename(image_file)
 
@@ -112,6 +123,26 @@ if len(image_files) > 0:
         html_content += f"<h2>{image_filename}</h2>"
         # Add the image to the HTML content
         html_content += f'<div class="image-container"><img src="{web_img_path}" alt="{image_filename}" style="max-width: 100%; margin-bottom: 20px;"></div>'
+
+    # Add a visual separator
+    html_content += "</Br></Br><h1>Current DfE Data Returns Map:</h1>"
+    html_content += f"<p>{sub_notes_str1}</p></Br>"
+
+    # Loop over the non-diagram files and add them to the HTML content
+    for image_file in non_diagram_files:
+
+         # Extract the image filename
+        image_filename = os.path.basename(image_file)
+
+        web_img_path = paths['wsite_returns_maps'] + image_filename  # relative img path to generated HTML page
+
+        image_filename = os.path.splitext(image_filename)[0]  # Remove '.jpg' extension
+
+        html_content += f"<h2>{image_filename}</h2>"
+        # Add the image to the HTML content
+        html_content += f'<div class="image-container"><img src="{web_img_path}" alt="{image_filename}" style="max-width: 100%; margin-bottom: 20px;"></div>'
+       
+
 else:
     # No image files found
     print(f"In location {paths['returns_maps']}, No images found...")

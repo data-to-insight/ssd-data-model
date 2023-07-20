@@ -24,8 +24,7 @@ index_link_str = "https://data-to-insight.github.io/ssd-data-model/index.html"
 guidance_link_str = "https://data-to-insight.github.io/ssd-data-model/guidance.html"
 returns_maps_link_str = "https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html"
 change_request_link_str = "https://forms.office.com/e/UysrcGApJ1"
-
-
+object_specification_link_str = "https://data-to-insight.github.io/ssd-data-model/object_definitions.pdf"
 #### end of settings
 
 
@@ -84,11 +83,13 @@ html_content += "<div class='link-section'>"
 html_content += f"<a href='{repo_link_str}' class='repo-link'> | SSD Github</a>"
 html_content += f"<a href='{index_link_str}' class='repo-link'> | Object Concept Model</a>"
 html_content += f"<a href='{guidance_link_str}' class='repo-link'> | Data Item Guidance</a>"
-html_content += f"<a href='{returns_maps_link_str}' class='repo-link'> | Existing returns maps</a>"
+html_content += f"<a href='{returns_maps_link_str}' class='repo-link'> | Existing Returns Maps</a>"
 html_content += f"<a href='{change_request_link_str}' class='repo-link'> | Submit Change Request</a>"
+html_content += f"<a href='{object_specification_link_str}' class='repo-link'> | Object Spec download(PDF)</a>"
 html_content += "</div>"
 
 html_content += "</div>"
+
 
 
 

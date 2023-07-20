@@ -84,15 +84,18 @@ def generate_individual_images(yml_data_path, output_path, output_filetype, retu
         G.draw(image_path, prog='dot', format=output_filetype)
 
 
-def generate_full_erd(yml_data_path, assets_path, erd_publish_path, returns_categories):
+def generate_full_erd(yml_data_path, erd_publish_path, returns_categories, filename, output_filetype='png', node_list=None):
     """
     Generate an entity relationship diagram (ERD) from a collection of yml files.
     Each yml file represents an entity or an object in the ERD.
     The ERD gives an overview of how different entities relate to each other in the system.
 
     :param yml_data_path: str, path to the directory containing yml files.
-    :param assets_path: str, path to the assets directory where ERD will be saved.
     :param erd_publish_path: str, path to the directory where ERD will be published for web access.
+    :param returns_categories: dict, information about return categories.
+    :param filename: str, name of the output file.
+    :param output_filetype: str, file type of the output file. Default is 'png'.
+    :param node_list: list, list of nodes to be included in the diagram. If None or empty, all nodes will be included.
     """
 
     G = pgv.AGraph(directed=True)  # Initialise the graph
@@ -100,8 +103,11 @@ def generate_full_erd(yml_data_path, assets_path, erd_publish_path, returns_cate
     G.graph_attr['rankdir'] = 'TB'
     G.edge_attr['splines'] = 'ortho'
 
-        
     for file_path in glob.glob(yml_data_path + '*.yml'):  # Iterating through each yaml file in directory
+        node_name = os.path.basename(file_path).replace(".yml", "")
+        if node_list and node_name not in node_list:  # Only skip if the list is non-empty and the node is not in it
+            continue
+
         with open(file_path) as f:
             data = yaml.safe_load(f)  # Loading the yaml data into a python dict
             nodes = data.get('nodes', [])
@@ -121,7 +127,7 @@ def generate_full_erd(yml_data_path, assets_path, erd_publish_path, returns_cate
                         field_name += f" [{field['item_ref']}]"  # adding item reference to the field name if it exists
 
                     if field.get('returns'):  # is there any returns data?
-                        returns_data = field['returns']  
+                        returns_data = field.get('returns')  
                         for item in returns_data:  
                             if item in returns_categories:
                                 node_colour = returns_categories[item]['colour']  
@@ -129,6 +135,7 @@ def generate_full_erd(yml_data_path, assets_path, erd_publish_path, returns_cate
                             else:
                                 node_colour = returns_categories['Existing']['colour']  
        
+
                     field_labels.append(field_name)
 
 
@@ -141,33 +148,46 @@ def generate_full_erd(yml_data_path, assets_path, erd_publish_path, returns_cate
             for relation in relationships_data['relationships']:  # For each relationship in the yaml file
                 from_node = relation['parent_object']
                 to_node = relation['child_object']
+                if node_list and (from_node not in node_list or to_node not in node_list):
+                    continue
                 relation_type = relation['relation']
                 G.add_edge(from_node, to_node, label=relation_type)  # Add edge to the graph to represent the relationship
 
 
-    # Render the main graph to a file
-    ##G.draw(assets_path + erd_overview_fname + "." + output_filetype, prog='dot', format=output_filetype)
-        
+    # Render the graph to a file
     # 1
-    # Render copy of the main graph to be web published
+    # Render main graph to be web published
     G.layout(prog='sfdp', args='-Goverlap=false -Gsplines=line') 
-    G.draw(erd_publish_path + erd_overview_fname + "." + output_filetype, format=output_filetype)
-
-    # 2
-    # Render an additional copy(alternative layout) of the main graph as local web published copy
-    G.draw(erd_publish_path + erd_overview_fname + "_dot" + "." + output_filetype, prog='dot', format=output_filetype)
-
-
-    # Alternative render options for ref
-    # 
-    # G.graph_attr['overlap'] = 'scale'  # Adjust overlap attribute (options: 'scale', 'compress', 'vpsc', or 'ortho')
-    # G.graph_attr['scale'] = 0.1  # Adjust scale attribute 
-    # G.draw('docs/ssd_erd_twopi.png', prog='twopi', format='png')
+    G.draw(erd_publish_path + filename + "." + output_filetype, format=output_filetype)
 
 
 
 paths = get_paths()
     
-generate_full_erd(paths['yml_data'], paths['assets'], paths['erd_publish'], returns_categories)
+generate_full_erd(paths['yml_data'], paths['erd_publish'], returns_categories, 'ssd_full_diagram', node_list=[])
+
+
+# ERD Returns maps
+# imgs/erd_returns_maps
+RIIA = ['person', 'legal_status', 'immigration_status', 'social_worker', 'contacts', 'early_help_episodes', 'cin_episodes', 'cin_plans', 'assessments', 's47_enquiry_icpc', 'cp_plans', 'cla_episodes', 'care_leavers', 'send', 'ehcp_requests', 'ehcp_assessment']
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_riia_diagram', output_filetype='jpg', node_list=RIIA)
+
+CLA = ['person', 'legal_status', 'immigration_status', 'disability','mother', 'social_worker', 'cla_episodes','placement', 'cla_immunisations','missing','cla_health', 'cla_substance_misuse','cla_care_plan','cla_visits','cla_convictions']
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_cla_diagram', output_filetype='jpg', node_list=CLA)
+
+ANNEXA = ['person', 'legal_status', 'immigration_status', 'disability',
+          'contacts', 'early_help_episodes', 'cin_episodes', 'cin_plans', 'cin_visits',
+          'assessments', 's47_enquiry_icpc', 
+          'cp_plans', 'cp_reviews', 'category_of_abuse', 'cp_visits',
+          'cla_episodes', 'cla_visits', 'cla_reviews', 'missing', 'permanence', 'care_leavers', 'social_worker']
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_annexa_diagram', output_filetype='jpg', node_list=ANNEXA)
+
+
+
+
 generate_individual_images(paths['yml_data'], paths['erd_objects_publish'], output_filetype, returns_categories)
+
+
+
+
 

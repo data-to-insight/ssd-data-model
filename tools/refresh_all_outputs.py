@@ -34,3 +34,9 @@ subprocess.run(['python3', paths['tools'] + '3_generate_html_guidance.py'])
 # Run script to re-create the individual object diagram images
 subprocess.run(['python3', paths['tools'] + '3_generate_html_datamapping.py'])
 
+
+# Downloadable item generation
+
+# Run script to re-create the individual object diagram images
+subprocess.run(['python3', paths['tools'] + '4_generate_dataset_pdf_report.py'])
+
