@@ -84,7 +84,7 @@ def generate_individual_images(yml_data_path, output_path, output_filetype, retu
         G.draw(image_path, prog='dot', format=output_filetype)
 
 
-def generate_full_erd(yml_data_path, erd_publish_path, returns_categories, filename, node_list=None):
+def generate_full_erd(yml_data_path, erd_publish_path, returns_categories, filename, output_filetype='png', node_list=None):
     """
     Generate an entity relationship diagram (ERD) from a collection of yml files.
     Each yml file represents an entity or an object in the ERD.
@@ -93,7 +93,9 @@ def generate_full_erd(yml_data_path, erd_publish_path, returns_categories, filen
     :param yml_data_path: str, path to the directory containing yml files.
     :param erd_publish_path: str, path to the directory where ERD will be published for web access.
     :param returns_categories: dict, information about return categories.
-    :param node_list: list, list of nodes to be included in the diagram. If None, all nodes will be included.
+    :param filename: str, name of the output file.
+    :param output_filetype: str, file type of the output file. Default is 'png'.
+    :param node_list: list, list of nodes to be included in the diagram. If None or empty, all nodes will be included.
     """
 
     G = pgv.AGraph(directed=True)  # Initialise the graph
@@ -164,18 +166,21 @@ paths = get_paths()
     
 generate_full_erd(paths['yml_data'], paths['erd_publish'], returns_categories, 'ssd_full_diagram', node_list=[])
 
+
+# ERD Returns maps
+# imgs/erd_returns_maps
 RIIA = ['person', 'legal_status', 'immigration_status', 'social_worker', 'contacts', 'early_help_episodes', 'cin_episodes', 'cin_plans', 'assessments', 's47_enquiry_icpc', 'cp_plans', 'cla_episodes', 'care_leavers', 'send', 'ehcp_requests', 'ehcp_assessment']
-generate_full_erd(paths['yml_data'], paths['erd_publish'], returns_categories, 'ssd_riia_diagram', node_list=RIIA)
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_riia_diagram', output_filetype='jpg', node_list=RIIA)
 
 CLA = ['person', 'legal_status', 'immigration_status', 'disability','mother', 'social_worker', 'cla_episodes','placement', 'cla_immunisations','missing','cla_health', 'cla_substance_misuse','cla_care_plan','cla_visits','cla_convictions']
-generate_full_erd(paths['yml_data'], paths['erd_publish'], returns_categories, 'ssd_cla_diagram', node_list=CLA)
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_cla_diagram', output_filetype='jpg', node_list=CLA)
 
 ANNEXA = ['person', 'legal_status', 'immigration_status', 'disability',
           'contacts', 'early_help_episodes', 'cin_episodes', 'cin_plans', 'cin_visits',
           'assessments', 's47_enquiry_icpc', 
           'cp_plans', 'cp_reviews', 'category_of_abuse', 'cp_visits',
           'cla_episodes', 'cla_visits', 'cla_reviews', 'missing', 'permanence', 'care_leavers', 'social_worker']
-generate_full_erd(paths['yml_data'], paths['erd_publish'], returns_categories, 'ssd_annexa_diagram', node_list=ANNEXA)
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_annexa_diagram', output_filetype='jpg', node_list=ANNEXA)
 
 
 
@@ -186,7 +191,3 @@ generate_individual_images(paths['yml_data'], paths['erd_objects_publish'], outp
 
 
 
-# FULL
-# RIIA = [person, legal_status, immigration_status, social_worker, contacts, early_help_episodes, cin_episodes, cin_plans, assessments, s47_enquiry_icpc, cp_plans, cla_episodes, care_leavers, send, ehcp_requests, ehcp_assessment]
-# ANNEXA
-# CLA'

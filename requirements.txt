@@ -164,3 +164,4 @@ webcolors==1.13
 webencodings==0.5.1
 websocket-client==1.5.3
 zipp==3.16.0
+reportlab
