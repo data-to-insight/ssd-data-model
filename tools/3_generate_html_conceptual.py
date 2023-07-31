@@ -156,6 +156,7 @@ for file_path in glob.glob(f'{yml_import_path}*.yml'):
                 categories_data = ', '.join(field.get('categories', []))
                 returns_data = ', '.join(field.get('returns', []))
 
+                # metadata includes change log data #changelog (being added to changelog-column)
                 metadata = field.get('metadata', {}) # check if there is a key/val dict
                 # meta_data = ', '.join(f"{k}: {v}" for k, v in metadata.items()) # re-form into key/val list(comma split list that wraps)
                 meta_data = '<br>'.join(f"{k}: {v}" for k, v in metadata.items()) # re-form into key/val list(Incl. html line breaks)
