@@ -5,10 +5,10 @@ from reportlab.lib.pagesizes import A4
 
 from reportlab.lib.styles import getSampleStyleSheet
 
-directory = 'data/objects/'
+yml_data_obj_dir = 'data/objects/'  # where the data obj definitions are
 
-if not os.path.exists('docs'):
-    os.makedirs('docs')
+if not os.path.exists('docs'): # pdf report output location
+    os.makedirs('docs') # create it if doesnt exist. 
 
 
 def create_pdf_from_yaml(directory):
@@ -68,5 +68,5 @@ def create_pdf_from_yaml(directory):
     # Build the pdf
     doc.build(story)
 
-# Call the function
-create_pdf_from_yaml(directory)
+
+create_pdf_from_yaml(yml_data_obj_dir)
