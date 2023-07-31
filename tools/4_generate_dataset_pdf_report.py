@@ -21,9 +21,16 @@ def create_pdf_from_yaml(directory):
     story = [Spacer(1, 2 * 72)]
     styles = getSampleStyleSheet()
 
+    # Define a custom style for center-aligned text
+    centre_style = ParagraphStyle('Center', parent=styles['Normal'])
+    centre_style.alignment = 1  # 0=left, 1=centre, 2=right
+    
     # Title Page
     title = "<br/><br/><br/><br/><br/><br/><br/><br/><h1>Standard Safeguarding Dataset</h1><br/><h2>YAML Object Specification</h2>"
+    last_updated_date = datetime.datetime.now().strftime('%d-%m-%Y %H:%M')
+
     story.append(Paragraph(title, styles['Title']))
+    story.append(Paragraph(last_updated_date, centre_style))  # Use the custom 'Centre' style here
     story.append(PageBreak())
 
     # Create a list to hold table of contents entries
