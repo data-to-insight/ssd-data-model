@@ -31,7 +31,7 @@ nodes:
     metadata:
       release: 14/07/2023 00:00
       change_id: SSD-007
-      source: D2I
+      change_source: D2I
       versions_count: 2
       impact_title: validator changed
       type: Change

@@ -32,7 +32,7 @@ nodes:
     metadata:
       release: 12/07/2023 00:00
       change_id: SSD-005
-      source: DfE
+      change_source: DfE
       versions_count: 1
       impact_title: guidance change
       type: Change
