@@ -27,7 +27,7 @@ field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'n
                'cms', 'cms_field','cms_table',
                'required_enabled','unique_enabled','primary_key','foreign_key', 
                'guidance', 
-               'item_ref', 'release_datetime', 'change_id', 'change_impact_title', 'change_status', 'change_type', 'change_impact_notes', 'change_versions_count'] # meta data fields
+               'item_ref', 'release_datetime', 'change_id', 'change_impact_title', 'change_status', 'change_type', 'change_source','change_impact_notes', 'change_versions_count'] # meta data fields
 
 # Those that are multi-part/list fields
 multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_field', 'cms_table']
@@ -240,10 +240,11 @@ def save_node_yaml(node, output_directory):
                     field['release_datetime'] = pd.to_datetime(field['release_datetime'])
                 field_data['metadata'] = {
                     'release': field['release_datetime'].strftime('%d/%m/%Y %H:%M'),
-                    'change_id': field['change_id'],
-                    'versions_count': int(float(field['change_versions_count'])),
-                    'impact_title': field['change_impact_title'],
-                    'type': field['change_type']
+                    'change_id': field['change_id'],                                    # unique change identifier
+                    'change_source': field['change_source'],                                   # source/origin of change request
+                    'versions_count': int(float(field['change_versions_count'])),       # calculated count, num of changes
+                    'impact_title': field['change_impact_title'],                       # short change description
+                    'type': field['change_type']                                        # what type of change [bug|new|...]
                 }
                 
             # Include the field data only if it has any non-empty value

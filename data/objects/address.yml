@@ -50,6 +50,7 @@ nodes:
     metadata:
       release: 10/07/2023 05:00
       change_id: SSD-103
+      source: Local Authority
       versions_count: 2
       impact_title: cms field name change
       type: Change
@@ -74,6 +75,7 @@ nodes:
     metadata:
       release: 11/07/2023 00:00
       change_id: SSD-004
+      source: DfE
       versions_count: 1
       impact_title: from string to integer
       type: Bug Fix
