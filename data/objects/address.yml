@@ -47,13 +47,6 @@ nodes:
     - liquid_logic:address
     - mosaic:address
     guidance: See PER001A
-    metadata:
-      release: 10/07/2023 05:00
-      change_id: SSD-103
-      change_source: Local Authority
-      versions_count: 2
-      impact_title: cms field name change
-      type: Change
   - name: address_type
     description: Address Type
     item_ref: ADD003A
@@ -72,13 +65,6 @@ nodes:
     - liquid_logic:address
     - mosaic:address
     guidance: Home/ Placement/ Primary/ Secondary
-    metadata:
-      release: 11/07/2023 00:00
-      change_id: SSD-004
-      change_source: DfE
-      versions_count: 1
-      impact_title: from string to integer
-      type: Bug Fix
   - name: address_start
     description: Address Start Date/ From
     item_ref: ADD004A

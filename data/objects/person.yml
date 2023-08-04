@@ -39,13 +39,6 @@ nodes:
       \ becomes looked-after again later, they should have two separate unlinked records\
       \ \u2013 one for pre-adoption and one for post-adoption \u2013 with two different\
       \ child identifiers."
-    metadata:
-      release: 08/07/2023 10:00
-      change_id: SSD-014
-      change_source: Steering Group
-      versions_count: 2
-      impact_title: reduced number of chars allowed
-      type: Change
   - name: person_sex
     description: Sex
     item_ref: PER002A

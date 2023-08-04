@@ -52,6 +52,13 @@ nodes:
     guidance: Unique Identifier number for each family group - a family group is described
       as a group of children linked by parents all starting and ceasing pre or care
       proceedings at the same time
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-508
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: pre_pro_decision_date
     description: Date decision made to enter Pre Proceedings
     item_ref: PLB011A
@@ -72,6 +79,13 @@ nodes:
     guidance: This is the date of legal meeting / panel that agreed to commence pre-proceedings.
       The date should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a
       four digit number.
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-509
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: initial_pre_pro_meeting
     description: Date of Initial Pre Proceedings Meeting
     item_ref: PLB012A
@@ -92,6 +106,13 @@ nodes:
     guidance: This is the first pre-proceedings meeting following the legal meeting
       / panel that agreed to commence pre-proceedings. The date should be recorded
       in a DD/MM/YYYY format, i.e. day/month/year as a four digit number.
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-510
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: pre_pro_outcome
     description: What is the Outcome of Pre-Proceedings
     item_ref: PLB013A
@@ -115,6 +136,13 @@ nodes:
       Decision to step down
 
       If still in pre-proceedings, please leave blank.'
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-511
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: date_agree_stepdown_issue
     description: Date Agreed to Step down/issue
     item_ref: PLB014A
@@ -135,6 +163,13 @@ nodes:
     guidance: This is the date of legal meeting / panel that agreed to end pre-proceedings
       to either step down or issue care proceedings. The date should be recorded in
       a DD/MM/YYYY format, i.e. day/month/year as a four digit number.
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-512
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: cp_plans_referral_period
     description: How many times has the child been subject to a Child Protection Plan
       during this referral period?
@@ -155,6 +190,13 @@ nodes:
     guidance: Please provide a numeric value for the number of the times the child
       has been the subject of a Child Protection Plan during this referral period.
       If none, please put 0.
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-513
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: legal_gateway_outcome
     description: What was the outcome of legal gateway / panel / meeting after panel?
     item_ref: PLS002A
@@ -174,6 +216,13 @@ nodes:
     guidance: "Please select one of these options:\nA \u2013 Continue with current\
       \ plan\nB \u2013 Start pre-proceedings\nC \u2013 Issue care proceedings\nD \u2013\
       \ Unknown"
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-514
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: prev_pre_proc_child
     description: "How many previous periods of pre-proceedings have there been in\
       \ the child\u2019s lifetime?"
@@ -193,6 +242,13 @@ nodes:
     - mosaic:pre_proceedings
     guidance: Please provide a numeric value. If there have not been any previous
       periods, please put 0.
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-515
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: prev_care_proc_child
     description: "How many previous periods of care proceedings have there been in\
       \ the child\u2019s lifetime?"
@@ -212,6 +268,13 @@ nodes:
     - mosaic:pre_proceedings
     guidance: Please provide a numeric value. If there have not been any previous
       periods, please put 0.
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-516
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: pre_pro_letter_date
     description: What is the date that the pre-proceedings letter and plan was sent
       to parents?
@@ -235,6 +298,13 @@ nodes:
       leave blank.
 
       Please use the UK date format: DD/MM/YYYY'
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-517
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: care_pro_letter_date
     description: What is the date that the letter to issue care proceedings was sent
       to parents?
@@ -258,6 +328,13 @@ nodes:
       blank.
 
       Please use the UK date format DD/MM/YYYY'
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-518
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: pre_pro_meetings_num
     description: How many review pre-proceeding meetings have been held with parents
       following the initial meeting?
@@ -277,6 +354,13 @@ nodes:
     - mosaic:pre_proceedings
     guidance: Please give a numeric value for the number of meetings that took place
       with parents, excluding the initial meeting.
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-519
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: pre_pro_parents_legal_rep
     description: Did parents have legal representation during pre-proceedings?
     item_ref: PLS008A
@@ -294,6 +378,13 @@ nodes:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
     guidance: Please select Yes / No / Unknown
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-520
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: parents_legal_rep_point_of_issue
     description: Did parents have legal representation at the point of issue?
     item_ref: PLS009A
@@ -311,6 +402,13 @@ nodes:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
     guidance: Please select Yes / No / Unknown / Not in care proceedings
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-521
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: court_reference
     description: If in Care Proceedings, what is the Court reference number?
     item_ref: PLS010A
@@ -330,6 +428,13 @@ nodes:
     guidance: This is the Court number which is given to a family group when care
       proceedings are issued. This may be stored on the case management system or
       held in legal files. If the case is not in care proceedings, please leave blank.
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-522
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: care_proc_court_hearings
     description: How many Court hearings have taken place whilst in care proceedings?
     item_ref: PLS011A
@@ -348,6 +453,13 @@ nodes:
     - mosaic:pre_proceedings
     guidance: This includes the initial IRH and final hearing. Please give a numeric
       value. If case is not in care proceedings, please leave blank.
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-523
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: care_proc_short_notice
     description: Were Care Proceedings issued on a short notice application?
     item_ref: PLS012A
@@ -367,6 +479,13 @@ nodes:
     guidance: "Please select Yes / No / Unknown / Not in care proceedings. A short\
       \ notice application is an urgent application for the court to hear the case\
       \ within the next 2 \u2013 5 days."
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-524
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: care_proc_short_notice_reason
     description: What was the reason for any short notice applications?
     item_ref: PLS013A
@@ -391,6 +510,13 @@ nodes:
       \ has not taken place, please select 'No short notice applications'. A short\
       \ notice application is an urgent application for the court to hear the case\
       \ within the next 2 \u2013 5 days."
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-525
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: la_inital _plan_approved
     description: "Was the LA\u2019s initial plan approved at the initial hearing?"
     item_ref: PLS014A
@@ -408,6 +534,13 @@ nodes:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
     guidance: Please select Yes / No / Unknown
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-526
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: la_initial_care_plan
     description: "What was the LA\u2019s initial care plan for the child at the initial\
       \ hearing?"
@@ -433,6 +566,13 @@ nodes:
       \ placement with parents\u2019 means that the public care order was granted\
       \ but that the child remained in their parent\u2019s care, rather than in another\
       \ placement."
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-527
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: la_final_plan_approved
     description: "Was the LA\u2019s final plan approved at the final hearing?"
     item_ref: PLS016A
@@ -450,6 +590,13 @@ nodes:
     - liquid_logic:pre_proceedings
     - mosaic:pre_proceedings
     guidance: Please select Yes / No / Unknown
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-528
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: la_final_care_plan
     description: "What was the LA\u2019s final care plan for the child at the final\
       \ hearing?"
@@ -474,3 +621,10 @@ nodes:
       \ If not yet at the final hearing, please select \"Not yet at final hearing\
       \ - still in care proceedings'. This will indicate that the case is still active\
       \ in care proceedings."
+    metadata:
+      release: 04/08/2023 10:00
+      change_id: SSD-529
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
