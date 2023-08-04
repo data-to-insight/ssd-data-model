@@ -1,3 +1,4 @@
+
 import pandas as pd
 from tabulate import tabulate
 from datetime import datetime
@@ -19,7 +20,6 @@ now = datetime.now()
 # Format datetime string
 date_time_str = now.strftime("%d/%m/%Y %H:%M")
 
-# Convert the DataFrame to Markdown Table and add it to CHANGELOG
 with open('CHANGELOG.md', 'w') as f:
     f.write("# Change log\n")
     f.write("SSD Data Item Changes:\n")
