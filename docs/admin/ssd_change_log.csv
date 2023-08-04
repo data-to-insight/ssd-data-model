@@ -1,4 +1,4 @@
-﻿item_ref,release_datetime,change_id,change_object,change_impact_title,change_status,change_type,change_source,change_impact_notes
+item_ref,release_datetime,change_id,change_object,change_impact_title,change_status,change_type,change_source,change_impact_notes
 CIN010A,,SSD-500,cin_episodes,,pending,Depreciated,D2I,1aRemove
 CPR008A,,SSD-501,cp_reviews,,pending,New Feature,D2I,1aDraft
 CPR009A,,SSD-502,cp_reviews,,pending,New Feature,D2I,1aDraft
