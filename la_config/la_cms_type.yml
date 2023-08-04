@@ -1,0 +1,767 @@
+301:
+  la_name: Barking and Dagenham
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+302:
+  la_name: Barnet
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+370:
+  la_name: Barnsley
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+800:
+  la_name: Bath and North East Somerset
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+822:
+  la_name: Bedford Borough
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+303:
+  la_name: Bexley
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+330:
+  la_name: Birmingham
+  cms: OLM Systems
+  cms_db: ""
+  db_vers: ""
+889:
+  la_name: Blackburn with Darwen
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+890:
+  la_name: Blackpool
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+350:
+  la_name: Bolton
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+839:
+  la_name: "Bournemouth, Christchurch and Poole"
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+867:
+  la_name: Bracknell Forest
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+380:
+  la_name: Bradford
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+304:
+  la_name: Brent
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+846:
+  la_name: Brighton and Hove
+  cms: Eclipse
+  cms_db: ""
+  db_vers: ""
+801:
+  la_name: Bristol
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+305:
+  la_name: Bromley
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+825:
+  la_name: Buckinghamshire
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+351:
+  la_name: Bury
+  cms: Liquid Logic 
+  cms_db: ""
+  db_vers: ""
+381:
+  la_name: Calderdale
+  cms: BespokeInHouse
+  cms_db: ""
+  db_vers: ""
+873:
+  la_name: Cambridgeshire
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+202:
+  la_name: Camden
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+823:
+  la_name: Central Bedfordshire
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+895:
+  la_name: Cheshire East
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+896:
+  la_name: Cheshire West and Chester
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+201:
+  la_name: City of London
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+908:
+  la_name: Cornwall Council
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+331:
+  la_name: Coventry
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+306:
+  la_name: Croydon
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+942:
+  la_name: Cumberland
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+841:
+  la_name: Darlington
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+831:
+  la_name: Derby
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+830:
+  la_name: Derbyshire
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+878:
+  la_name: Devon
+  cms: Eclipse
+  cms_db: ""
+  db_vers: ""
+371:
+  la_name: Doncaster
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+838:
+  la_name: Dorset
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+332:
+  la_name: Dudley
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+840:
+  la_name: Durham
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+307:
+  la_name: Ealing
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+811:
+  la_name: East Riding of Yorkshire
+  cms: Azeus
+  cms_db: ""
+  db_vers: ""
+845:
+  la_name: East Sussex
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+308:
+  la_name: Enfield
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+881:
+  la_name: Essex
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+390:
+  la_name: Gateshead
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+916:
+  la_name: Gloucestershire
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+203:
+  la_name: Greenwich
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+204:
+  la_name: Hackney
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+876:
+  la_name: Halton
+  cms: Eclipse
+  cms_db: ""
+  db_vers: ""
+205:
+  la_name: Hammersmith and Fulham
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+850:
+  la_name: Hampshire
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+309:
+  la_name: Haringey
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+310:
+  la_name: Harrow
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+805:
+  la_name: Hartlepool
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+311:
+  la_name: Havering
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+884:
+  la_name: Herefordshire
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+919:
+  la_name: Hertfordshire
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+312:
+  la_name: Hillingdon
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+313:
+  la_name: Hounslow
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+921:
+  la_name: Isle of Wight
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+420:
+  la_name: Isles of Scilly
+  cms: Azeus
+  cms_db: ""
+  db_vers: ""
+206:
+  la_name: Islington
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+207:
+  la_name: Kensington and Chelsea
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+886:
+  la_name: Kent
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+810:
+  la_name: Kingston upon Hull
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+314:
+  la_name: Kingston upon Thames
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+382:
+  la_name: Kirklees
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+340:
+  la_name: Knowsley
+  cms: Liquid Logic
+  cms_db: SQL Server
+  db_vers: 2014
+208:
+  la_name: Lambeth
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+888:
+  la_name: Lancashire
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+383:
+  la_name: Leeds
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+856:
+  la_name: Leicester
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+855:
+  la_name: Leicestershire
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+209:
+  la_name: Lewisham
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+925:
+  la_name: Lincolnshire
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+341:
+  la_name: Liverpool
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+821:
+  la_name: Luton
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+352:
+  la_name: Manchester
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+887:
+  la_name: Medway
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+315:
+  la_name: Merton
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+806:
+  la_name: Middlesbrough
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+826:
+  la_name: Milton Keynes
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+391:
+  la_name: Newcastle upon Tyne
+  cms: Eclipse
+  cms_db: ""
+  db_vers: ""
+316:
+  la_name: Newham
+  cms: Azeus
+  cms_db: ""
+  db_vers: ""
+926:
+  la_name: Norfolk
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+812:
+  la_name: North East Lincolnshire
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+813:
+  la_name: North Lincolnshire
+  cms: Care First
+  cms_db: ""
+  db_vers: ""
+940:
+  la_name: North Northamptonshire
+  cms: Care First
+  cms_db: ""
+  db_vers: ""
+802:
+  la_name: North Somerset
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+392:
+  la_name: North Tyneside
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+815:
+  la_name: North Yorkshire
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+929:
+  la_name: Northumberland
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+892:
+  la_name: Nottingham
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+891:
+  la_name: Nottinghamshire
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+353:
+  la_name: Oldham
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+931:
+  la_name: Oxfordshire
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+874:
+  la_name: Peterborough
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+879:
+  la_name: Plymouth
+  cms: Eclipse
+  cms_db: ""
+  db_vers: ""
+851:
+  la_name: Portsmouth
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+870:
+  la_name: Reading
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+317:
+  la_name: Redbridge
+  cms: Redbridge
+  cms_db: ""
+  db_vers: ""
+807:
+  la_name: Redcar and Cleveland
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+318:
+  la_name: Richmond upon Thames
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+354:
+  la_name: Rochdale
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+372:
+  la_name: Rotherham
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+857:
+  la_name: Rutland
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+355:
+  la_name: Salford
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+333:
+  la_name: Sandwell
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+343:
+  la_name: Sefton
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+373:
+  la_name: Sheffield
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+893:
+  la_name: Shropshire
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+871:
+  la_name: Slough
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+334:
+  la_name: Solihull
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+933:
+  la_name: Somerset
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+803:
+  la_name: South Gloucestershire 
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+393:
+  la_name: South Tyneside
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+852:
+  la_name: Southampton
+  cms: Care Director
+  cms_db: ""
+  db_vers: ""
+882:
+  la_name: Southend-on-Sea
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+210:
+  la_name: Southwark
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+342:
+  la_name: St Helens
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+860:
+  la_name: Staffordshire
+  cms: Care Director
+  cms_db: ""
+  db_vers: ""
+356:
+  la_name: Stockport
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+808:
+  la_name: Stockton-on-Tees
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+861:
+  la_name: Stoke-on-Trent
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+935:
+  la_name: Suffolk
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+394:
+  la_name: Sunderland
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+936:
+  la_name: Surrey
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+319:
+  la_name: Sutton
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+866:
+  la_name: Swindon
+  cms: Care Director
+  cms_db: ""
+  db_vers: ""
+357:
+  la_name: Tameside
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+894:
+  la_name: Telford and Wrekin
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+883:
+  la_name: Thurrock
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+880:
+  la_name: Torbay
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+211:
+  la_name: Tower Hamlets
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+358:
+  la_name: Trafford
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+384:
+  la_name: Wakefield
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+335:
+  la_name: Walsall
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+320:
+  la_name: Waltham Forest
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+212:
+  la_name: Wandsworth
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+877:
+  la_name: Warrington
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+937:
+  la_name: Warwickshire
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+869:
+  la_name: West Berkshire
+  cms: Care Director
+  cms_db: ""
+  db_vers: ""
+941:
+  la_name: West Northamptonshire
+  cms: Care First
+  cms_db: ""
+  db_vers: ""
+938:
+  la_name: West Sussex
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+213:
+  la_name: Westminster
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+943:
+  la_name: Westmorland and Furness
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+359:
+  la_name: Wigan
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+865:
+  la_name: Wiltshire
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+868:
+  la_name: Windsor and Maidenhead
+  cms: PARIS
+  cms_db: ""
+  db_vers: ""
+344:
+  la_name: Wirral
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+872:
+  la_name: Wokingham
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+336:
+  la_name: Wolverhampton
+  cms: Eclipse
+  cms_db: ""
+  db_vers: ""
+885:
+  la_name: Worcestershire
+  cms: Liquid Logic
+  cms_db: ""
+  db_vers: ""
+816:
+  la_name: York
+  cms: MOSAIC
+  cms_db: ""
+  db_vers: ""
+
+
