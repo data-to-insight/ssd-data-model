@@ -3,6 +3,8 @@ from PIL import Image
 import os
 import re
 
+# Dictionary to store returns cats, and associated colour spec so that they
+# can be accssed for such as the diagram keys on the web front-end
 returns_categories = {
     "Existing": {
         "colour": "#CCCCCC",
@@ -29,6 +31,34 @@ returns_categories = {
         "description": "Specified item rejected from final spec.",
     },
 }
+
+
+# Dictionary to store the unique SQL variation(s) statement for each database
+# used within the SQL generation process
+#  date_filter for each database is a function that takes date_field and date_threshold as arguments and returns the appropriate SQL
+db_variants = {
+    "mysql": {
+        "date_filter": lambda date_field, date_threshold: f" WHERE {date_field} >= CURDATE() - INTERVAL {date_threshold} YEAR",
+        "use_db": True
+    },
+    "oracle": {
+        "date_filter": lambda date_field, date_threshold: f" WHERE {date_field} >= ADD_MONTHS(SYSDATE, -{date_threshold}*12)",
+        "use_db": False
+    },
+    "sqlserver": {
+        "date_filter": lambda date_field, date_threshold: f" WHERE {date_field} >= DATEADD(YEAR, -{date_threshold}, GETDATE())",
+        "use_db": True
+    },
+    "postgresql": {
+        "date_filter": lambda date_field, date_threshold: f" WHERE {date_field} >= CURRENT_DATE - INTERVAL '{date_threshold} years'",
+        "use_db": False
+    },
+    "sqlite": {
+        "date_filter": lambda date_field, date_threshold: f" WHERE {date_field} >= date('now', '-{date_threshold} years')",
+        "use_db": False
+    }
+}
+
 
 
 
