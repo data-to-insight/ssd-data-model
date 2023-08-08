@@ -1,5 +1,9 @@
 import yaml
 
+#
+# USed only to re-jig/struc the LA config YML file into new revised structure with la codes as distinct keys.
+# not for public access/need. 
+
 def transform_yaml():
     # Load the YAML file
     with open('la_config/la_cms_config_v1.yml', 'r') as file:

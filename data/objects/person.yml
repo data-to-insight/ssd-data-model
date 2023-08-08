@@ -24,7 +24,7 @@ nodes:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: "This must be a unique ID for each child (no longer than 10 characters)\
       \ and should be retained from year to year. A child ID should not be reused\
@@ -47,13 +47,13 @@ nodes:
     returns:
     - SSDA903
     cms:
-    - liquid_logic
+    # - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_sex
+    # - liquid_logic:person_details_sex
     - mosaic:person_sex
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: 'Sex, as recorded on a birth certificate or in a gender recognition
       certificate. F - Female
@@ -69,13 +69,13 @@ nodes:
     returns:
     - CINcensus
     cms:
-    - liquid_logic
+    # - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_gender
+    # - liquid_logic:person_details_gender
     - mosaic:person_gender
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: "The DfE do not plan to collect \u2018gender identity\u2019, however\
       \ we understand you may wish to collect this on your own system. Definition\n\
@@ -104,10 +104,10 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_ethnicity
+    - liquid_logic:person_details_ethnicity
     - mosaic:person_ethnicity
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: "We require data on ethnicity for all children. The local authority\
       \ must not ascribe any ethnicity to the pupil. This information must come from\
@@ -128,13 +128,13 @@ nodes:
     - SSDA903
     - CINcensus
     cms:
-    - liquid_logic
+    # - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_dob
+    # - liquid_logic:person_details_dob
     - mosaic:person_dob
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: "The date of birth should be recorded in a DD/MM/YYYY format.\nIf the\
       \ exact day of birth is not known:\nUnknown dates can be a problem for unaccompanied\
@@ -159,10 +159,10 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_upn
+    - liquid_logic:person_details_upn
     - mosaic:person_upn
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: "The UPN must be 13 characters long. The first character is a letter\
       \ (but cannot be I, O or S). The remaining characters are numeric. For example,\
@@ -183,10 +183,10 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_upn_unknown
+    - liquid_logic:person_details_upn_unknown
     - mosaic:person_upn_unknown
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: If the UPN is unknown, then one of the codes below should be used. These
       codes are to be used within the UPN field where it is not possible to provide
@@ -207,10 +207,10 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_send
+    - liquid_logic:person_details_send
     - mosaic:person_send
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: Young people who have an EHC plan or had an EHC plan or statement of
       SEN at the time of completing compulsory education
@@ -226,10 +226,10 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_expected_dob
+    - liquid_logic:person_details_expected_dob
     - mosaic:person_expected_dob
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: "Record the expected date of birth (due date) for a child who is unborn\
       \ at the time of referral and who remains unborn at 31 March or when the case\
@@ -261,10 +261,10 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_death_date
+    - liquid_logic:person_details_death_date
     - mosaic:person_death_date
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: "The collection of date of death information reflects the legislation\
       \ introduced on 1 April 2008, which made reviews into child deaths a statutory\
@@ -293,10 +293,10 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_is_mother
+    - liquid_logic:person_details_is_mother
     - mosaic:person_is_mother
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: 'Currently collected for CLA only. Local authorities are asked to indicate
       whether each looked-after girl is, on 31 March, a mother.
@@ -336,9 +336,9 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:person_nationality
+    - liquid_logic:person_details_nationality
     - mosaic:person_nationality
     cms_table:
-    - liquid_logic:person
+    - liquid_logic:person_details
     - mosaic:person
     guidance: Required for UASC
