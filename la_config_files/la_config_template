@@ -1,0 +1,21 @@
+000: # re-use la code here
+  metadata:
+    last_updated: 2023-08-08
+    version: 1.0
+  la_code: 000
+  la_name: Sample LA name
+  cms: Liquid_Logic | Mosaic
+  cms_db: ''
+  db_vers: ''
+  db_schema:
+    tables:
+      expected_table_1:
+        name: replacement_table_1
+        fields:
+          expected_field_1A: replacement_field_1A
+          expected_field_1B: replacement_field_1B
+      expected_table_2:
+        name: replacement_table_2
+        fields:
+          expected_field_2A: replacement_field_2A
+          expected_field_2B: replacement_field_2B

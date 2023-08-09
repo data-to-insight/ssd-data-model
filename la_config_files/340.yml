@@ -1,0 +1,26 @@
+340:
+  metadata:
+    last_updated: 2023-08-08
+    version: 1.0
+    updated_by: ANother
+    change_description: Updated CMS details and corrected table names.
+    approved_by: 
+    documentation_link: http://example.com/doc
+    
+  la_code: 340
+  la_name: Knowsley
+  cms: Liquid_Logic
+  cms_db: 'SQL Server'
+  db_vers: '2014'
+  db_schema:
+    tables:
+      person: # name of the known/expected data object
+        name: person_knowsley # replacement table name/actual db table on this la system
+        fields:
+          person_sex: person_sex_knowsley # swap out fieldname:  for :fieldname
+          person_gender: person_gender_knowsley
+      address:
+        name: address_knowsley
+        fields:
+          address_type: address_type_knowsley
+          address_postcode: address_postcode_knowsley
