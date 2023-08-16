@@ -1,18 +1,22 @@
 import yaml
 import os
+import sqlparse # help with sql output readability
+
 from admin.admin_tools import db_variants           # i.e. ,/admin/admin_tools.py - this picks up known localised LA config settings
 
-# print(os.getcwd())
-# print(os.listdir('la_config_files/'))
+
 
 # Get the LA configuration before calling generate_sql
-la_number = 340 # 208 - Lambeth(mosaic) # 340 - Knowsley(LL)
+la_number = 208 # 208 - Lambeth(mosaic) # 340 - Knowsley(LL) # 845 - EastSussex(LL)
 db_name = "PLACEHOLDER_DB_NAME"                     # Used only on some db specific processing (could also be moved into db_variants config)
 
 primary_table_name = "person"                       # main/base table
 join_tables = ["family", "address", "disability"]   # list of requ join tables
-date_field = "entry_date"                           # which field is the date, need as db specific processing required(this date on base table?)
+date_field = "entry_date"                           # which field/col used to restrict data to date threshold period
 date_threshold = 6  # years                         # historic data threshold
+
+
+
 
 
 
@@ -73,8 +77,7 @@ def generate_sql(cms_db, db_name, table_name, field_names, date_field, date_thre
     return sql_query
 
 
-import os
-import yaml
+
 
 def get_la_config(la_code):
     """
@@ -133,6 +136,9 @@ def write_sql_to_file(la_config, sql_query):
 
     No explicit returns. Raises IOError if the file cannot be written.
     """
+    # Format the SQL query for better readability
+    formatted_sql = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
+
     # Create the directory if it does not exist
     os.makedirs('sql', exist_ok=True)
 
@@ -144,11 +150,12 @@ def write_sql_to_file(la_config, sql_query):
     # Create the filename
     filename = f"sql/{la_config['la_code']}_{safe_la_name}_{safe_cms}_{safe_cms_db}.sql"
 
-    # Write the SQL query to the file
+    # Write the formatted SQL query to the file
     with open(filename, 'w') as f:
-        f.write(sql_query)
+        f.write(formatted_sql)
 
     print(f"SQL query written to file: {filename}")
+
 
 
 
@@ -272,12 +279,6 @@ table_field_dict = get_field_names_for_tables(tables_list, cms_type, exception_f
 # Adjust table:fields to conform with LA bespoke fit/LA config
 #
 la_table_field_dict = adjust_bespoke_la_config(la_config, table_field_dict)
-
-
-## TEMP TESTING
-# 
-print(f"\nTESTING\nTable+fields spec(compare differences if any)\nPRE-bespoke-la changes:\n - {table_field_dict} \nPOST-bespoke-la changes:\n - {la_table_field_dict}")
-## END
 
 #
 # Create SQL notation on fields

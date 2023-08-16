@@ -61,7 +61,6 @@ db_variants = {
 
 
 
-
 def get_paths():
     """
     Return a dictionary of paths used in the application.
@@ -86,6 +85,19 @@ def get_paths():
 
 
 def resize_images(folder_path, target_width, quality=90):
+    """
+    Resizes/optimises imgs in given dir. Function added to better enable web publishing of 
+    erd imgs and ensure front-end reporting performs better. In/out file type is embedded as .png
+
+    Args:
+        folder_path (str): Path to images to be optimised
+        target_width (int): Aimed for width size of resultant images post-processing. 
+        quality (int): Value 1-100 as % of quality to maintain. 
+
+    Returns:
+        N/a, images are saved in place.
+
+    """
     for file_path in glob.glob(os.path.join(folder_path, '*.png')):
         img = Image.open(file_path)
         current_width, current_height = img.size

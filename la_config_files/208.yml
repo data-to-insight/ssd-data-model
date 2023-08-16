@@ -10,8 +10,15 @@
   la_code: 208
   la_name: Lambeth
   cms: Mosaic
-  cms_db: 'Oracle'
-  db_vers: '2020'
+
+  cms_db: 'Oracle' # 2020
+
+  db_vers: '' 
+  ics_universe_vers: ''
+
+  data_warehouse_vers: ''
+  front_end_vers: ''
+
   db_schema:
     tables:
       person: # name of the known/expected data object

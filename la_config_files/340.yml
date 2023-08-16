@@ -10,8 +10,15 @@
   la_code: 340
   la_name: Knowsley
   cms: Liquid_Logic
-  cms_db: 'SQL Server'
-  db_vers: '2014'
+
+  cms_db: 'SQL Server' # 2014
+
+  db_vers: '11.0.0' 
+  ics_universe_vers: '11.0.0'
+
+  data_warehouse_vers: '15.3'
+  front_end_vers: '16.0.11.2'
+
   db_schema:
     tables:
       person: # name of the known/expected data object
