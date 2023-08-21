@@ -21,7 +21,7 @@ SELECT person_Lambeth.la_person_id,
        disability.la_person_id,
        disability.person_disability
 FROM person
-INNER JOIN family ON person.la_person_id = family.la_person_id
+LEFT JOIN family ON person.la_person_id = family.la_person_id
 INNER JOIN address ON person.la_person_id = address.la_person_id
 INNER JOIN disability ON person.la_person_id = disability.la_person_id
 WHERE entry_date >= ADD_MONTHS(SYSDATE, -6*12);

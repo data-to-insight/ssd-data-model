@@ -144,8 +144,8 @@ def process_csv_file(csv_file, change_log_file, output_directory):
         else:
             nodes[node_index]['fields'].append(field)
 
+
         # Parse the foreign_key relationship and add to the dictionary
-        
         if pd.notna(field['foreign_key']): 
             # Split the relationship string into parent object and key
             field['foreign_key'] = str(field['foreign_key'])

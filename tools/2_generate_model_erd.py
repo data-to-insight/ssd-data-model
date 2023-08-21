@@ -163,28 +163,66 @@ def generate_full_erd(yml_data_path, erd_publish_path, returns_categories, filen
 
 
 paths = get_paths()
-    
+
+#
+# # Generate main/complete/overview diagram img    
 generate_full_erd(paths['yml_data'], paths['erd_publish'], returns_categories, 'ssd_full_diagram', node_list=[])
 
 
-# ERD Returns maps
-# imgs/erd_returns_maps
+
+
+# # Genrate subset/Reductive/returns map diagram imgs
+# 
+
+# RIIA
+#
 RIIA = ['person', 'legal_status', 'immigration_status', 'social_worker', 'contacts', 'early_help_episodes', 'cin_episodes', 'cin_plans', 'assessments', 's47_enquiry_icpc', 'cp_plans', 'cla_episodes', 'care_leavers', 'send', 'ehcp_requests', 'ehcp_assessment']
-generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_riia_diagram', output_filetype='jpg', node_list=RIIA)
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_riia_last_quarter_diagram', output_filetype='jpg', node_list=RIIA)
 
+# CURRENT CLA
+#
 CLA = ['person', 'legal_status', 'immigration_status', 'disability','mother', 'social_worker', 'cla_episodes','placement', 'cla_immunisations','missing','cla_health', 'cla_substance_misuse','cla_care_plan','cla_visits','cla_convictions']
-generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_cla_diagram', output_filetype='jpg', node_list=CLA)
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_current_cla_cohort_diagram', output_filetype='jpg', node_list=CLA)
 
+# ANNEXA
+#
 ANNEXA = ['person', 'legal_status', 'immigration_status', 'disability',
           'contacts', 'early_help_episodes', 'cin_episodes', 'cin_plans', 'cin_visits',
           'assessments', 's47_enquiry_icpc', 
           'cp_plans', 'cp_reviews', 'category_of_abuse', 'cp_visits',
           'cla_episodes', 'cla_visits', 'cla_reviews', 'missing', 'permanence', 'care_leavers', 'social_worker']
-generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_annexa_diagram', output_filetype='jpg', node_list=ANNEXA)
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_annexa_plus_diagram', output_filetype='jpg', node_list=ANNEXA)
+
+# CURRENT CP
+#
+CURRENTCP = ['person, address', 'disability', 'cp_plans', 'category_of_abuse', 'cp_visits', 'cp_reviews', 'cp_reviews_risks']
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_current_cp_cohort_diagram', output_filetype='jpg', node_list=CURRENTCP)
+
+# CIN
+#
+CIN = ['person', 'disability', 'cin_episodes', 'assessments', 'assessment_factors', 's47_enquiry_icpc', 'cp_plans', 'category_of_abuse', 'cp_reviews']
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_cin_census_diagram', output_filetype='jpg', node_list=CIN)
+
+# SSDA903
+#
+SSDA903 = ['person', 'address', 'immigration_status', 'mother', 'legal_status', 'cla_episodes', 'cla_convictions', 'cla_health', 'cla_immunisations', 'cla_substance_misuse', 'placement', 'cla_reviews', 'cla_previous_permanence', 'sdq_scores', 'missing', 'care_leavers', 'permanence']
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_ssda903_diagram', output_filetype='jpg', node_list=SSDA903)
+
+# DfE CSC Dashboard
+#
+CSCDASH = ['person', 'address', 'legal_status', 'cin_episodes', 'assessments', 's47_enquiry_icpc', 'cp_plans', 'cla_episodes', 'placement', 'sdq_scores', 'care_leavers']
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_dfe_csc_dashboard_diagram', output_filetype='jpg', node_list=CSCDASH)
+
+# Child Journey
+#
+CHILDJOURNEY = ['person', 'family', 'address', 'disability', 'immigration_status', 'legal_status', 'contacts', 'early_help_episodes', 'cin_episodes', 'assessments', 'cin_plans', 's47_enquiry_icpc', 'cp_plans', 'cla_episodes', 'care_leavers', 'permanence']
+generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_child_journey_diagram', output_filetype='jpg', node_list=CHILDJOURNEY)
 
 
 
 
+# # Genrate individual erd diagram imgs
+# 
 generate_individual_images(paths['yml_data'], paths['erd_objects_publish'], output_filetype, returns_categories)
 
 
