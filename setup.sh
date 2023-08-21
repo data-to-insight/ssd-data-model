@@ -12,6 +12,8 @@ pip install graphviz
 pip install openpyxl                                        # create repo tree reference file in xls
 pip install tabulate                                        # create change log table formatting
 pip install reportlab
+pip install markdown
+pip install sqlparse
 
 # Install or update Poetry
 if ! command -v poetry &>/dev/null; then

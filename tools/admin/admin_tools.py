@@ -3,6 +3,8 @@ from PIL import Image
 import os
 import re
 
+# Dictionary to store returns cats, and associated colour spec so that they
+# can be accssed for such as the diagram keys on the web front-end
 returns_categories = {
     "Existing": {
         "colour": "#CCCCCC",
@@ -31,6 +33,33 @@ returns_categories = {
 }
 
 
+# Dictionary to store the unique SQL variation(s) statement for each database
+# used within the SQL generation process
+#  date_filter for each database is a function that takes date_field and date_threshold as arguments and returns the appropriate SQL
+db_variants = {
+    "mysql": {
+        "date_filter": lambda date_field, date_threshold: f" WHERE {date_field} >= CURDATE() - INTERVAL {date_threshold} YEAR",
+        "use_db": True
+    },
+    "oracle": {
+        "date_filter": lambda date_field, date_threshold: f" WHERE {date_field} >= ADD_MONTHS(SYSDATE, -{date_threshold}*12)",
+        "use_db": False
+    },
+    "sqlserver": {
+        "date_filter": lambda date_field, date_threshold: f" WHERE {date_field} >= DATEADD(YEAR, -{date_threshold}, GETDATE())",
+        "use_db": True
+    },
+    "postgresql": {
+        "date_filter": lambda date_field, date_threshold: f" WHERE {date_field} >= CURRENT_DATE - INTERVAL '{date_threshold} years'",
+        "use_db": False
+    },
+    "sqlite": {
+        "date_filter": lambda date_field, date_threshold: f" WHERE {date_field} >= date('now', '-{date_threshold} years')",
+        "use_db": False
+    }
+}
+
+
 
 def get_paths():
     """
@@ -56,6 +85,19 @@ def get_paths():
 
 
 def resize_images(folder_path, target_width, quality=90):
+    """
+    Resizes/optimises imgs in given dir. Function added to better enable web publishing of 
+    erd imgs and ensure front-end reporting performs better. In/out file type is embedded as .png
+
+    Args:
+        folder_path (str): Path to images to be optimised
+        target_width (int): Aimed for width size of resultant images post-processing. 
+        quality (int): Value 1-100 as % of quality to maintain. 
+
+    Returns:
+        N/a, images are saved in place.
+
+    """
     for file_path in glob.glob(os.path.join(folder_path, '*.png')):
         img = Image.open(file_path)
         current_width, current_height = img.size

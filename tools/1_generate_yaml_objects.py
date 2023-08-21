@@ -144,8 +144,8 @@ def process_csv_file(csv_file, change_log_file, output_directory):
         else:
             nodes[node_index]['fields'].append(field)
 
+
         # Parse the foreign_key relationship and add to the dictionary
-        
         if pd.notna(field['foreign_key']): 
             # Split the relationship string into parent object and key
             field['foreign_key'] = str(field['foreign_key'])
@@ -174,7 +174,10 @@ def save_node_yaml(node, output_directory):
         node (dict): Dictionary representing the node with 'name' and 'fields' keys.
         output_directory (str): Directory to save the generated YAML files.
     """
-
+    if not node.get('fields'):
+        print(f"No fields found for node {node['name']}. Skipping...")
+        return
+    
     yaml_file = os.path.join(output_directory, f"{node['name']}.yml")
 
 
@@ -235,9 +238,11 @@ def save_node_yaml(node, output_directory):
 
             #
             # Add metadata Incl item-level change tracking
+
             if 'release_datetime' in field and pd.notnull(field['release_datetime']):
                 if isinstance(field['release_datetime'], str):
                     field['release_datetime'] = pd.to_datetime(field['release_datetime'])
+
                 field_data['metadata'] = {
                     'release': field['release_datetime'].strftime('%d/%m/%Y %H:%M'),
                     'change_id': field['change_id'],                                    # unique change identifier

@@ -16,7 +16,8 @@ page_intro_str = ""
 
 notes_str1 = "This page shows detailed item-level guidance on data items within the Standard Safeguarding Dataset. Right click and open the image in a new browser tab to zoom/magnify/scroll object level detail. Data item id numbers [AAA000A] enable specific item/field referencing."
 notes_str2 = "This is work in progress subject to frequent change; Data objects and item definitions are published here to support iterative development. Diagrams consisdered as conceptual interpretations, not a true relational/representational model"
-repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
+# repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"   # For when Repo is PUBLIC
+repo_link_str = "https://data-to-insight.github.io/ssd-data-model/README.html"              # For when repo is PRIVATE
 
 # Other sub-links
 index_link_str = "https://data-to-insight.github.io/ssd-data-model/index.html"
