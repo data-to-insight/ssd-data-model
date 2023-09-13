@@ -145,3 +145,10 @@ nodes:
     - mosaic:category_of_abuse
     guidance: The Start Date of the Category of Abuse/ the date at which the Category
       of Abuse was changed.
+    metadata:
+      release: In review|pending
+      change_id: SSD-552
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature

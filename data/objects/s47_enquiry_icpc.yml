@@ -98,6 +98,13 @@ nodes:
     - liquid_logic:s47_enquiry_icpc
     - mosaic:s47_enquiry_icpc
     guidance: Enter the actual date on which the S47 Enquiry is completed and authorised.
+    metadata:
+      release: In review|pending
+      change_id: SSD-550
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: s47outcome
     description: S47 Outcome
     item_ref: S47006A
@@ -155,6 +162,13 @@ nodes:
       1 - Yes
 
       0 - No'
+    metadata:
+      release: In review|pending
+      change_id: SSD-551
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: icpc_date
     description: Date of Initial CP Conference
     item_ref: S47007A

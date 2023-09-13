@@ -68,6 +68,13 @@ nodes:
     - liquid_logic:sdq_scores
     - mosaic:sdq_scores
     guidance: Date of completion of Strength and Difficulties Questionnaire (SDQ)
+    metadata:
+      release: In review|pending
+      change_id: SSD-562
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: sdq_reason
     description: SDQ Reason
     item_ref: SDQ004A

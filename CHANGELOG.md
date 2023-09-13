@@ -1,41 +1,69 @@
 # Change log
 SSD Data Item Changes:
-The complete change history for SSD data items in reverse chronological order, with pending|expected changes showing first.Agreed data item-level changes are assigned an identifier. A sub-set of the change details for the most recent change (if any) also appears within each objects metadata block(YAML).The current change log contains only sample data until we deploy the first pilot release.Note: Object-level change tracking is not yet available/in progress; feedback/suggestions welcomed.Last updated: 13/09/2023 12:36
+The complete change history for SSD data items in reverse chronological order, with pending|expected changes showing first.Agreed data item-level changes are assigned an identifier. A sub-set of the change details for the most recent change (if any) also appears within each objects metadata block(YAML).The current change log contains only sample data until we deploy the first pilot release.Note: Object-level change tracking is not yet available/in progress; feedback/suggestions welcomed.Last updated: 13/09/2023 16:36
 
-| item_ref   | release_datetime   | change_id   | change_object    | change_impact_title   | change_status   | change_type   | change_source   | change_impact_notes           |
-|:-----------|:-------------------|:------------|:-----------------|:----------------------|:----------------|:--------------|:----------------|:------------------------------|
-| CIN010A    | In Review-Pending  | SSD-500     | cin_episodes     |                       | pending         | Depreciated   | D2I             | 1aRemove                      |
-| CPR008A    | In Review-Pending  | SSD-501     | cp_reviews       |                       | pending         | New Feature   | D2I             | 1aDraft                       |
-| CPR009A    | In Review-Pending  | SSD-502     | cp_reviews       |                       | pending         | New Feature   | D2I             | 1aDraft                       |
-| CPK011A    | In Review-Pending  | SSD-503     | cp_reviews_risks |                       | pending         | New Feature   | D2I             | 1aDraft                       |
-| CLA009A    | In Review-Pending  | SSD-504     | cla_episodes     |                       | pending         | Depreciated   | D2I             | 1aRemove                      |
-| CLR005A    | In Review-Pending  | SSD-505     | cla_reviews      |                       | pending         | New Feature   | D2I             | 1aDraft - Suggested new item  |
-| CLR006A    | In Review-Pending  | SSD-506     | cla_reviews      |                       | pending         | New Feature   | D2I             | 1aDraft - Suggested new item  |
-| CLR008A    | In Review-Pending  | SSD-507     | cla_reviews      |                       | pending         | New Feature   | D2I             | 1aDraft - Suggested new item  |
-| VOC002A    | In Review-Pending  | SSD-530     | voice_of_child   |                       | pending         | New Feature   | 1bDraft         | 1bDraft - Suggested new item  |
-| VOC003A    | In Review-Pending  | SSD-531     | voice_of_child   |                       | pending         | New Feature   | 1bDraft         | 1bDraft - Suggested new item  |
-| VOC004A    | In Review-Pending  | SSD-532     | voice_of_child   |                       | pending         | New Feature   | 1bDraft         | 1bDraft - Suggested new item  |
-| VOC005A    | In Review-Pending  | SSD-533     | voice_of_child   |                       | pending         | New Feature   | 1bDraft         | 1bDraft - Suggested new item  |
-| VOC006A    | In Review-Pending  | SSD-534     | voice_of_child   |                       | pending         | New Feature   | 1bDraft         | 1bDraft - Suggested new item  |
-| PLB002A    | 04/08/2023 10:00   | SSD-508     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLB011A    | 04/08/2023 10:00   | SSD-509     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS016A    | 04/08/2023 10:00   | SSD-528     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS015A    | 04/08/2023 10:00   | SSD-527     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS014A    | 04/08/2023 10:00   | SSD-526     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS013A    | 04/08/2023 10:00   | SSD-525     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS012A    | 04/08/2023 10:00   | SSD-524     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS011A    | 04/08/2023 10:00   | SSD-523     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS010A    | 04/08/2023 10:00   | SSD-522     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS009A    | 04/08/2023 10:00   | SSD-521     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS008A    | 04/08/2023 10:00   | SSD-520     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS007A    | 04/08/2023 10:00   | SSD-519     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS006A    | 04/08/2023 10:00   | SSD-518     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS005A    | 04/08/2023 10:00   | SSD-517     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS004A    | 04/08/2023 10:00   | SSD-516     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS003A    | 04/08/2023 10:00   | SSD-515     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS002A    | 04/08/2023 10:00   | SSD-514     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS001A    | 04/08/2023 10:00   | SSD-513     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLB014A    | 04/08/2023 10:00   | SSD-512     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLB013A    | 04/08/2023 10:00   | SSD-511     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLB012A    | 04/08/2023 10:00   | SSD-510     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
-| PLS017A    | 04/08/2023 10:00   | SSD-529     | pre_proceedings  |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
+| item_ref   | release_datetime   | change_id   | change_object       | change_impact_title   | change_status   | change_type   | change_source   | change_impact_notes                                    |
+|:-----------|:-------------------|:------------|:--------------------|:----------------------|:----------------|:--------------|:----------------|:-------------------------------------------------------|
+| CIN010A    | In Review-Pending  | SSD-500     | cin_episodes        |                       | pending         | Depreciated   | D2I             | 1aRemove                                               |
+| CLA009A    | In Review-Pending  | SSD-504     | cla_episodes        |                       | pending         | Depreciated   | D2I             | 1aRemove                                               |
+| CLR005A    | In Review-Pending  | SSD-505     | cla_reviews         |                       | pending         | New Feature   | D2I             | 1aDraft - Suggested new item                           |
+| CLR006A    | In Review-Pending  | SSD-506     | cla_reviews         |                       | pending         | New Feature   | D2I             | 1aDraft - Suggested new item                           |
+| CLR008A    | In Review-Pending  | SSD-507     | cla_reviews         |                       | pending         | New Feature   | D2I             | 1aDraft - Suggested new item                           |
+| CPK011A    | In Review-Pending  | SSD-503     | cp_reviews_risks    |                       | pending         | New Feature   | D2I             | 1aDraft                                                |
+| CPR008A    | In Review-Pending  | SSD-501     | cp_reviews          |                       | pending         | New Feature   | D2I             | 1aDraft                                                |
+| CPR009A    | In Review-Pending  | SSD-502     | cp_reviews          |                       | pending         | New Feature   | D2I             | 1aDraft                                                |
+| VOC002A    | In Review-Pending  | SSD-530     | voice_of_child      |                       | pending         | New Feature   | 1bDraft         | 1bDraft - Suggested new item                           |
+| VOC003A    | In Review-Pending  | SSD-531     | voice_of_child      |                       | pending         | New Feature   | 1bDraft         | 1bDraft - Suggested new item                           |
+| VOC004A    | In Review-Pending  | SSD-532     | voice_of_child      |                       | pending         | New Feature   | 1bDraft         | 1bDraft - Suggested new item                           |
+| VOC005A    | In Review-Pending  | SSD-533     | voice_of_child      |                       | pending         | New Feature   | 1bDraft         | 1bDraft - Suggested new item                           |
+| VOC006A    | In Review-Pending  | SSD-534     | voice_of_child      |                       | pending         | New Feature   | 1bDraft         | 1bDraft - Suggested new item                           |
+| ADD001A    | In Review-Pending  | SSD-535     | address             |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| ADD003A    | In Review-Pending  | SSD-536     | address             |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| ADD004A    | In Review-Pending  | SSD-537     | address             |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| ADD005A    | In Review-Pending  | SSD-538     | address             |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| ADD006A    | In Review-Pending  | SSD-539     | address             |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| IMM002A    | In Review-Pending  | SSD-540     | immigration_status  |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| IMM003A    | In Review-Pending  | SSD-541     | immigration_status  |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| IMM004A    | In Review-Pending  | SSD-542     | immigration_status  |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| MOT001A    | In Review-Pending  | SSD-543     | mother              |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| LEG004A    | In Review-Pending  | SSD-544     | legal_status        |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| LEG005A    | In Review-Pending  | SSD-545     | legal_status        |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| EAR008A    | In Review-Pending  | SSD-546     | early_help_episodes |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CNV003A    | In Review-Pending  | SSD-547     | cin_visits          |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CNV005A    | In Review-Pending  | SSD-548     | cin_visits          |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CNV006A    | In Review-Pending  | SSD-549     | cin_visits          |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| S47005A    | In Review-Pending  | SSD-550     | s47_enquiry_icpc    |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| S47011A    | In Review-Pending  | SSD-551     | s47_enquiry_icpc    |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CAT004A    | In Review-Pending  | SSD-552     | category_of_abuse   |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CPV004A    | In Review-Pending  | SSD-553     | cp_visits           |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CPV006A    | In Review-Pending  | SSD-554     | cp_visits           |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CPR003A    | In Review-Pending  | SSD-555     | cp_reviews          |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CPR005A    | In Review-Pending  | SSD-556     | cp_reviews          |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CPR006A    | In Review-Pending  | SSD-557     | cp_reviews          |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CPR007A    | In Review-Pending  | SSD-558     | cp_reviews          |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CLR003A    | In Review-Pending  | SSD-559     | cla_reviews         |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CLV004A    | In Review-Pending  | SSD-560     | cla_visits          |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| CLV005A    | In Review-Pending  | SSD-561     | cla_visits          |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| SDQ003A    | In Review-Pending  | SSD-562     | sdq_scores          |                       | pending         | New Feature   | Local           | Local - Recorded but not incl. in any data collections |
+| PLB002A    | 04/08/2023 10:00   | SSD-508     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLB011A    | 04/08/2023 10:00   | SSD-509     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS016A    | 04/08/2023 10:00   | SSD-528     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS015A    | 04/08/2023 10:00   | SSD-527     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS014A    | 04/08/2023 10:00   | SSD-526     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS013A    | 04/08/2023 10:00   | SSD-525     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS012A    | 04/08/2023 10:00   | SSD-524     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS011A    | 04/08/2023 10:00   | SSD-523     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS010A    | 04/08/2023 10:00   | SSD-522     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS009A    | 04/08/2023 10:00   | SSD-521     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS008A    | 04/08/2023 10:00   | SSD-520     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS007A    | 04/08/2023 10:00   | SSD-519     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS006A    | 04/08/2023 10:00   | SSD-518     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS005A    | 04/08/2023 10:00   | SSD-517     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS004A    | 04/08/2023 10:00   | SSD-516     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS003A    | 04/08/2023 10:00   | SSD-515     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS002A    | 04/08/2023 10:00   | SSD-514     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS001A    | 04/08/2023 10:00   | SSD-513     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLB014A    | 04/08/2023 10:00   | SSD-512     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLB013A    | 04/08/2023 10:00   | SSD-511     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLB012A    | 04/08/2023 10:00   | SSD-510     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
+| PLS017A    | 04/08/2023 10:00   | SSD-529     | pre_proceedings     |                       | released        | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item                          |
