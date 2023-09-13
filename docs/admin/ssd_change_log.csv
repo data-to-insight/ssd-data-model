@@ -1,12 +1,12 @@
 item_ref,release_datetime,change_id,change_object,change_impact_title,change_status,change_type,change_source,change_impact_notes
-CIN010A,,SSD-500,cin_episodes,,pending,Depreciated,D2I,1aRemove
-CPR008A,,SSD-501,cp_reviews,,pending,New Feature,D2I,1aDraft
-CPR009A,,SSD-502,cp_reviews,,pending,New Feature,D2I,1aDraft
-CPK011A,,SSD-503,cp_reviews_risks,,pending,New Feature,D2I,1aDraft
-CLA009A,,SSD-504,cla_episodes,,pending,Depreciated,D2I,1aRemove
-CLR005A,,SSD-505,cla_reviews,,pending,New Feature,D2I,1aDraft - Suggested new item
-CLR006A,,SSD-506,cla_reviews,,pending,New Feature,D2I,1aDraft - Suggested new item
-CLR008A,,SSD-507,cla_reviews,,pending,New Feature,D2I,1aDraft - Suggested new item
+CIN010A,For review,SSD-500,cin_episodes,,pending,Depreciated,D2I,1aRemove
+CPR008A,For review,SSD-501,cp_reviews,,pending,New Feature,D2I,1aDraft
+CPR009A,For review,SSD-502,cp_reviews,,pending,New Feature,D2I,1aDraft
+CPK011A,For review,SSD-503,cp_reviews_risks,,pending,New Feature,D2I,1aDraft
+CLA009A,For review,SSD-504,cla_episodes,,pending,Depreciated,D2I,1aRemove
+CLR005A,For review,SSD-505,cla_reviews,,pending,New Feature,D2I,1aDraft - Suggested new item
+CLR006A,For review,SSD-506,cla_reviews,,pending,New Feature,D2I,1aDraft - Suggested new item
+CLR008A,For review,SSD-507,cla_reviews,,pending,New Feature,D2I,1aDraft - Suggested new item
 PLB002A,04/08/2023 10:00,SSD-508,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
 PLB011A,04/08/2023 10:00,SSD-509,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
 PLB012A,04/08/2023 10:00,SSD-510,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
@@ -29,8 +29,8 @@ PLS014A,04/08/2023 10:00,SSD-526,pre_proceedings,,released,New Feature,1bSpecifi
 PLS015A,04/08/2023 10:00,SSD-527,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
 PLS016A,04/08/2023 10:00,SSD-528,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
 PLS017A,04/08/2023 10:00,SSD-529,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
-VOC002A,,SSD-530,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
-VOC003A,,SSD-531,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
-VOC004A,,SSD-532,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
-VOC005A,,SSD-533,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
-VOC006A,,SSD-534,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
+VOC002A,For review,SSD-530,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
+VOC003A,For review,SSD-531,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
+VOC004A,For review,SSD-532,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
+VOC005A,For review,SSD-533,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
+VOC006A,For review,SSD-534,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item

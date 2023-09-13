@@ -12,7 +12,7 @@ import re
 
 paths = get_paths()
 
-# creating base objects and essentials
+# creating base objects and essential admin
 
 # Run script to refresh changelog in case workflow action run not recent
 subprocess.run(['python3', paths['tools'] + 'admin/update_changelog.py'])
