@@ -102,6 +102,13 @@ nodes:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
     guidance: From IRO outcomes form, will need further discussion/ development.
+    metadata:
+      release: In review|pending
+      change_id: SSD-505
+      change_source: D2I
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: rev_sw_met_child_views
     description: Has the Social Worker met with the child on their own to undertake
       direct work to establish their wishes and views
@@ -121,6 +128,13 @@ nodes:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
     guidance: From IRO outcomes form, will need further discussion/ development.
+    metadata:
+      release: In review|pending
+      change_id: SSD-506
+      change_source: D2I
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: rev_participation
     description: Participation code
     item_ref: CLR007A
@@ -180,6 +194,13 @@ nodes:
     - liquid_logic:cla_reviews
     - mosaic:cla_reviews
     guidance: From IRO outcomes form, will need further discussion/ development.
+    metadata:
+      release: In review|pending
+      change_id: SSD-507
+      change_source: D2I
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: rev_last_iro_contact
     description: Date of Last IRO Visit / Contact to the Child
     item_ref: CLR010A
