@@ -194,6 +194,13 @@ nodes:
     - mosaic:cp_reviews
     guidance: CPA judgement of the quality of representation of child/ young person's
       views/ experience. This indicator will require further discussion/ development.
+    metadata:
+      release: In review|pending
+      change_id: SSD-501
+      change_source: D2I
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: cp_rev_sufficient_prog
     description: Sufficient progress made against the CP Plan to improve outcomes
       for the child?
@@ -216,3 +223,10 @@ nodes:
     guidance: CPA judgement of whether sufficient progress has been made against the
       CP Plan to improve outcomes fort he child/ young person. Needs further discussion.
       This indicator will require further discussion/ development.
+    metadata:
+      release: In review|pending
+      change_id: SSD-502
+      change_source: D2I
+      versions_count: 1
+      impact_title: null
+      type: New Feature
