@@ -65,6 +65,13 @@ nodes:
     - liquid_logic:cp_reviews
     - mosaic:cp_reviews
     guidance: The due date of the review conference.
+    metadata:
+      release: In review|pending
+      change_id: SSD-555
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: cp_rev_date
     description: Date of Review
     item_ref: CPR004A
@@ -106,6 +113,13 @@ nodes:
     - liquid_logic:cp_reviews
     - mosaic:cp_reviews
     guidance: Was the outcome of the conference to continue the CP Plan? (Yes/ No)
+    metadata:
+      release: In review|pending
+      change_id: SSD-556
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: cp_rev_quorate
     description: Quorate?
     item_ref: CPR006A
@@ -132,6 +146,13 @@ nodes:
       that have had direct contact with the child and family. In a case relating to
       fabricated or induced illness, it is important to ensure the paediatrician is
       able to attend.
+    metadata:
+      release: In review|pending
+      change_id: SSD-557
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: cp_rev_participation
     description: Child Participation at Review
     item_ref: CPR007A
@@ -174,6 +195,13 @@ nodes:
       viewpoint)
 
       -PN7 Child does not attend nor are his or her views conveyed to the review'
+    metadata:
+      release: In review|pending
+      change_id: SSD-558
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: cp_rev_cyp_views_quality
     description: Quality of representation of CYP views/ experience
     item_ref: CPR008A

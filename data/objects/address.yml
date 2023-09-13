@@ -26,6 +26,13 @@ nodes:
     - liquid_logic:address
     - mosaic:address
     guidance: Address detail
+    metadata:
+      release: In review|pending
+      change_id: SSD-535
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: la_person_id
     description: Person Unique ID
     item_ref: ADD002A
@@ -65,6 +72,13 @@ nodes:
     - liquid_logic:address
     - mosaic:address
     guidance: Home/ Placement/ Primary/ Secondary
+    metadata:
+      release: In review|pending
+      change_id: SSD-536
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: address_start
     description: Address Start Date/ From
     item_ref: ADD004A
@@ -84,6 +98,13 @@ nodes:
     - liquid_logic:address
     - mosaic:address
     guidance: Date person started living at the address
+    metadata:
+      release: In review|pending
+      change_id: SSD-537
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: address_end
     description: Address End Date/ To
     item_ref: ADD005A
@@ -103,6 +124,13 @@ nodes:
     - liquid_logic:address
     - mosaic:address
     guidance: Date person left the address
+    metadata:
+      release: In review|pending
+      change_id: SSD-538
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: address_postcode
     description: Address Postcode
     item_ref: ADD006A
@@ -123,3 +151,10 @@ nodes:
     guidance: You should provide a current post code for most persons and every effort
       should be made to obtain valid details. If it is not possible to get the post
       code, you should leave this field blank and provide an explanatory note.
+    metadata:
+      release: In review|pending
+      change_id: SSD-539
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
