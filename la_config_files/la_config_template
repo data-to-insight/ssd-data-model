@@ -1,0 +1,30 @@
+000:                                                    # la code here (not the URN)
+  metadata:
+    last_updated: 2023-08-08                            # Last update to this config file
+    version: 1.0                                        # configu update version number
+  la_code: 000                                          # la code number (again)
+  la_name: Sample LA name                               # la name / title as wider known  
+  cms: Liquid_Logic | Mosaic                            # choose one, which cms la is using
+  cms_db: ''                                            # db type, usually sql server, oracle, mysql
+  db_vers: ''                                           # db version OR install date YEAR
+  
+  # Not currently in use, but potentially required depending on levels of bespoke config required
+
+  ics_universe_vers: '11.0.0'                           # this is usually the same as the db vers if known, these interchangable  
+  data_warehouse_vers: '15.3'                           # DW version
+  front_end_vers: '16.0.11.2'                           # in case the front end has specific nuances
+
+
+# Translation table between SSD spec and LA back-ends
+  db_schema:
+    tables:
+      expected_table_1:                                 # spec/expected table name1
+        name: replacement_table_1                       # actual la table/replacement1 for SQL extract
+        fields:
+          expected_field_1A: replacement_field_1A       # spec/expected table fieldname and :replacement fieldname1
+          expected_field_1B: replacement_field_1B       # spec/expected table fieldname and :replacement fieldname2
+      expected_table_2:
+        name: replacement_table_2
+        fields:
+          expected_field_2A: replacement_field_2A
+          expected_field_2B: replacement_field_2B

@@ -12,7 +12,8 @@ page_intro_str = ""
 
 
 notes_str1 = "This page shows subset views of the SSD data map towards core DfE returns, and below this the initial data mapping undertaken by the Standard Safeguarding Dataset project to understand the existing children's safeguarding data landscape."
-repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"
+# repo_link_str = "https://github.com/data-to-insight/ssd-data-model/blob/main/README.md"   # For when Repo is PUBLIC
+repo_link_str = "https://data-to-insight.github.io/ssd-data-model/README.html"              # For when repo is PRIVATE
 
 # Used with the seperator between diagrams/planning images
 sub_notes_str1 = "Initial data mapping undertaken by the Standard Safeguarding Dataset. </Br>Please note that image quality will vary due to limitations on source files and page generator workflow."

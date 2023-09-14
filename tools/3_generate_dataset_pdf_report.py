@@ -1,14 +1,16 @@
 import os
 import yaml
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+
 from reportlab.lib.pagesizes import A4
+import datetime
 
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
-directory = 'data/objects/'
+yml_data_obj_dir = 'data/objects/'  # where the data obj definitions are
 
-if not os.path.exists('docs'):
-    os.makedirs('docs')
+if not os.path.exists('docs'): # pdf report output location
+    os.makedirs('docs') # create it if doesnt exist. 
 
 
 def create_pdf_from_yaml(directory):
@@ -21,9 +23,17 @@ def create_pdf_from_yaml(directory):
     story = [Spacer(1, 2 * 72)]
     styles = getSampleStyleSheet()
 
+    # Define a custom style for center-aligned text
+    centre_style = ParagraphStyle('Center', parent=styles['Normal'])
+    centre_style.alignment = 1  # 0=left, 1=centre, 2=right
+    
     # Title Page
     title = "<br/><br/><br/><br/><br/><br/><br/><br/><h1>Standard Safeguarding Dataset</h1><br/><h2>YAML Object Specification</h2>"
+    last_updated_date = datetime.datetime.now().strftime('%d-%m-%Y %H:%M')
+    last_updated_text = f"Last updated/Ver: {last_updated_date}"  # Add prefix "Last updated: " to the date
+
     story.append(Paragraph(title, styles['Title']))
+    story.append(Paragraph(last_updated_text, centre_style))  # Use the custom 'Centre' style here
     story.append(PageBreak())
 
     # Create a list to hold table of contents entries
@@ -68,5 +78,5 @@ def create_pdf_from_yaml(directory):
     # Build the pdf
     doc.build(story)
 
-# Call the function
-create_pdf_from_yaml(directory)
+
+create_pdf_from_yaml(yml_data_obj_dir)

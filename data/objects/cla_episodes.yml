@@ -207,6 +207,13 @@ nodes:
       \ whose reference data is not completely entered on the system and whose need\
       \ code is yet to be determined, or the case is a referral that has been closed\
       \ following assessment."
+    metadata:
+      release: In review|pending
+      change_id: SSD-504
+      change_source: D2I
+      versions_count: 1
+      impact_title: null
+      type: Depreciated
   - name: cla_epi_ceased
     description: Date Episode Ceased
     item_ref: CLA005A

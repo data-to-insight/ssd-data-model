@@ -7,7 +7,7 @@ Current phase : [prototype](#current-phase).
 
 The dataset aims to 'flatten' existing local variation in collected data, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journies. A six-year historical data scope is being suggested across the range of safeguarding activities performed by councils. Project oversight and governance is via a Steering Group, DfE and volunteer LA's as part of a pilot group. 
 
-[Subscribe](https://forms.office.com/e/UysrcGApJ1) or [volunteer for pilot involvement](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset-Subscribe)
+[Subscribe](https://forms.office.com/e/UysrcGApJ1) or [volunteer for pilot involvement](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset-Subscribe). - Please be aware that in order to make it available to GitPages/Public, if being viewed outside of the Git Repo, this page has been generated from the repo README.md page and some inconsistent formating might be evident as a result. 
 
 #### Current statutory returns
 - SSDA903
@@ -137,6 +137,7 @@ Currently the YAML data objects, associated diagrams, documentation and website 
 
 The project is following a transparent and iterative development cycle, within the following deployment stages. Further stakeholder [feedback](https://forms.office.com/e/UysrcGApJ1) and involvement is welcomed at any phase. LA's that wish to take part in the pilot deployment are further invited to [get in touch](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset). 
 
+
 | Stage | Phase | Description |
 | --- | --- | --- |
 | 1 | User research | Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities. |
@@ -166,7 +167,8 @@ Set up the working environment (will prompt Y/N part-way through, type 'y'to con
 ./setup.sh
 ```
 
-  For ref: The above bash script contains and runs <all> the following required commands so there is no further setup required.: 
+  For ref: The above bash script contains and runs <all> the following required commands so there is no further setup required. In some rare occasions, where 
+  errors in running anything to do with Pygraphviz subsequently occur, running this setup.sh script twice usually fixes the issue(s): 
 ```python
 [$] pip install -r requirements.txt
 [$] sudo apt-get update

@@ -29,12 +29,6 @@ nodes:
     - liquid_logic:disability
     - mosaic:disability
     guidance: See PER001A
-    metadata:
-      release: 12/07/2023 00:00
-      change_id: SSD-005
-      versions_count: 1
-      impact_title: guidance change
-      type: Change
   - name: person_disability
     description: Disability Code
     item_ref: DIS002A

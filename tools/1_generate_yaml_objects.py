@@ -27,7 +27,7 @@ field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'n
                'cms', 'cms_field','cms_table',
                'required_enabled','unique_enabled','primary_key','foreign_key', 
                'guidance', 
-               'item_ref', 'release_datetime', 'change_id', 'change_impact_title', 'change_status', 'change_type', 'change_impact_notes', 'change_versions_count'] # meta data fields
+               'item_ref', 'release_datetime', 'change_id', 'change_impact_title', 'change_status', 'change_type', 'change_source','change_impact_notes', 'change_versions_count'] # meta data fields
 
 # Those that are multi-part/list fields
 multi_part_fields = ['categories', 'constraints', 'returns', 'cms', 'cms_field', 'cms_table']
@@ -144,8 +144,8 @@ def process_csv_file(csv_file, change_log_file, output_directory):
         else:
             nodes[node_index]['fields'].append(field)
 
+
         # Parse the foreign_key relationship and add to the dictionary
-        
         if pd.notna(field['foreign_key']): 
             # Split the relationship string into parent object and key
             field['foreign_key'] = str(field['foreign_key'])
@@ -174,7 +174,10 @@ def save_node_yaml(node, output_directory):
         node (dict): Dictionary representing the node with 'name' and 'fields' keys.
         output_directory (str): Directory to save the generated YAML files.
     """
-
+    if not node.get('fields'):
+        print(f"No fields found for node {node['name']}. Skipping...")
+        return
+    
     yaml_file = os.path.join(output_directory, f"{node['name']}.yml")
 
 
@@ -235,17 +238,26 @@ def save_node_yaml(node, output_directory):
 
             #
             # Add metadata Incl item-level change tracking
-            if 'release_datetime' in field and pd.notnull(field['release_datetime']):
-                if isinstance(field['release_datetime'], str):
+               
+            if 'change_id' in field and pd.notnull(field['change_id']):
+                # If release_datetime is a non-empty string, try converting it to datetime
+                if isinstance(field['release_datetime'], str) and field['release_datetime'].strip():
                     field['release_datetime'] = pd.to_datetime(field['release_datetime'])
+                else:
+                    field['release_datetime'] = None
+
+                # Format release_datetime if it's valid and not NaT, else set to "N/A"
+                release = field['release_datetime'].strftime('%d/%m/%Y %H:%M') if field['release_datetime'] and not pd.isna(field['release_datetime']) else "In review|pending"
+
                 field_data['metadata'] = {
-                    'release': field['release_datetime'].strftime('%d/%m/%Y %H:%M'),
-                    'change_id': field['change_id'],
-                    'versions_count': int(float(field['change_versions_count'])),
-                    'impact_title': field['change_impact_title'],
-                    'type': field['change_type']
+                    'release': release,
+                    'change_id': field['change_id'],                                 # unique change identifier
+                    'change_source': field['change_source'],                         # source/origin of change request
+                    'versions_count': int(float(field['change_versions_count'])),    # calculated count, num of changes
+                    'impact_title': field['change_impact_title'],                    # short change description
+                    'type': field['change_type']                                     # what type of change [bug|new|...]
                 }
-                
+
             # Include the field data only if it has any non-empty value
             if any(field_data.values()):
                 data['nodes'][0]['fields'].append(field_data)

@@ -28,12 +28,6 @@ nodes:
     - liquid_logic:immigration_status
     - mosaic:immigration_status
     guidance: See PER001A
-    metadata:
-      release: 14/07/2023 00:00
-      change_id: SSD-007
-      versions_count: 2
-      impact_title: validator changed
-      type: Change
   - name: immigration_status
     description: Immigration Status
     item_ref: IMM002A
@@ -53,6 +47,13 @@ nodes:
     - liquid_logic:immigration_status
     - mosaic:immigration_status
     guidance: Immigration Status e.g. Unaccompanied Asylum Seeking Child
+    metadata:
+      release: In review|pending
+      change_id: SSD-540
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: immigration_status_start
     description: Immigration Status Start
     item_ref: IMM003A
@@ -73,6 +74,13 @@ nodes:
     - liquid_logic:immigration_status
     - mosaic:immigration_status
     guidance: Start Date of Immigration Status
+    metadata:
+      release: In review|pending
+      change_id: SSD-541
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: immigration_status_end
     description: Immigration Status End
     item_ref: IMM004A
@@ -93,3 +101,10 @@ nodes:
     - liquid_logic:immigration_status
     - mosaic:immigration_status
     guidance: End Date of Immigration Status
+    metadata:
+      release: In review|pending
+      change_id: SSD-542
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
