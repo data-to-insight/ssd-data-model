@@ -86,6 +86,13 @@ nodes:
     - liquid_logic:cp_visits
     - mosaic:cp_visits
     guidance: Was the child seen during this visit? Yes/ No
+    metadata:
+      release: In review|pending
+      change_id: SSD-553
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
   - name: cp_visit_seen_alone
     description: Child Seen Alone
     item_ref: CPV005A
@@ -126,3 +133,10 @@ nodes:
     - liquid_logic:cp_visits
     - mosaic:cp_visits
     guidance: Was the child's bedroom seen during this visit? Yes/ No
+    metadata:
+      release: In review|pending
+      change_id: SSD-554
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature

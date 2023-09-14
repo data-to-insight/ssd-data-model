@@ -8,10 +8,17 @@ df = pd.read_csv('docs/admin/ssd_change_log.csv')
 
 # Convert 'release_datetime' to datetime, blanks become NaT
 df['release_datetime'] = pd.to_datetime(df['release_datetime'], format='%d/%m/%Y %H:%M', errors='coerce')
+
 # Sort by 'release_datetime', NaT values first as these are unreleased|pending
 df = df.sort_values(by='release_datetime', ascending=False, na_position='first')
 
-# Replace 'nan' with an empty string
+# Replace NaT with 'In Review-Pending' and convert everything to string
+# From this point foreward there's no date related ops performed on the field. 
+df['release_datetime'] = df['release_datetime'].apply(lambda x: 'In Review-Pending' if pd.isna(x) else x.strftime('%d/%m/%Y %H:%M'))
+
+
+# Replace any potential 'nan' with an empty string 
+# (as a catch all for mis-placed data entry on the changelog input sheet)
 df = df.fillna('')
 
 # Get current datetime

@@ -5,13 +5,11 @@ relationships:
   child_object: family
   child_key: la_person_id
   relation: 1:M
-  join_type: LEFT
 - parent_object: person
   parent_key: la_person_id
   child_object: address
   child_key: la_person_id
   relation: 1:M
-  join_type: INNER
 - parent_object: person
   parent_key: la_person_id
   child_object: disability
