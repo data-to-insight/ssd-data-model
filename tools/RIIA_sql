@@ -1,0 +1,73 @@
+-- Define the quarter and date range
+SET @QUARTER = 2;
+
+/* Def/understanding of RIIA quarter boundaries
+Quarter 1 (Q1): January 1 to March 31 (Months 1-3)
+Quarter 2 (Q2): April 1 to June 30 (Months 4-6)
+Quarter 3 (Q3): July 1 to September 30 (Months 7-9)
+Quarter 4 (Q4): October 1 to December 31 (Months 10-12)
+*/
+
+SET @START_DATE = CASE 
+    WHEN @QUARTER = 1 THEN DATE_FORMAT(CURRENT_DATE, '%Y-01-01')
+    WHEN @QUARTER = 2 THEN DATE_FORMAT(CURRENT_DATE, '%Y-04-01')
+    WHEN @QUARTER = 3 THEN DATE_FORMAT(CURRENT_DATE, '%Y-07-01')
+    ELSE DATE_FORMAT(CURRENT_DATE, '%Y-10-01')
+END;
+
+SET @END_DATE = CASE 
+    WHEN @QUARTER = 1 THEN DATE_FORMAT(CURRENT_DATE, '%Y-03-31')
+    WHEN @QUARTER = 2 THEN DATE_FORMAT(CURRENT_DATE, '%Y-06-30')
+    WHEN @QUARTER = 3 THEN DATE_FORMAT(CURRENT_DATE, '%Y-09-30')
+    ELSE DATE_FORMAT(CURRENT_DATE, '%Y-12-31')
+END;
+
+-- Sample join for `immigration_status`:
+SELECT 
+    p.la_person_id,
+    p.person_sex,
+    p.person_gender,
+    p.person_ethnicity,
+    p.person_dob,
+    p.person_upn,
+    p.person_upn_unknown,
+    p.person_send,
+    p.person_is_mother,
+    p.person_nationality,
+    i.immigration_status,
+    i.immigration_status_start,
+    i.immigration_status_end
+FROM 
+    person p
+JOIN 
+    immigration_status i ON p.la_person_id = i.la_person_id
+WHERE
+    (i.immigration_status_start BETWEEN @START_DATE AND @END_DATE)
+    OR (i.immigration_status_end BETWEEN @START_DATE AND @END_DATE)
+;
+
+-- for `contacts`
+SELECT 
+    p.la_person_id,
+    p.person_sex,
+    p.person_gender,
+    p.person_ethnicity,
+    p.person_dob,
+    p.person_upn,
+    p.person_upn_unknown,
+    p.person_send,
+    p.person_is_mother,
+    p.person_nationality,
+    c.contact_id,
+    c.contact_date,
+    c.contact_source,
+    c.contact_outcome
+FROM 
+    person p
+JOIN 
+    contacts c ON p.la_person_id = c.la_person_id
+WHERE
+    (c.contact_date BETWEEN @START_DATE AND @END_DATE)
+;
+
+
