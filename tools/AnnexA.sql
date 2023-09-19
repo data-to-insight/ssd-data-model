@@ -451,11 +451,14 @@ WHERE
     cr.cp_rev_due >= DATE_SUB(CURRENT_DATE, INTERVAL 12 MONTH);
 
 
+--Ofsted List 10 - Adoption 2022
+--AdoptionDecision	PlacementOrder	Matching	PlacedforAdoption	AdoptionOrder	FosteringtoAdopt	FullName	AdoptedByFormerCarer
 
 -- cla_episodes
 SELECT
     /* Common AA fields */ 
     p.la_person_id,
+    f.family_id as familyID, -- is this "local adoptive family identifier for the adoptive family"? 
     p.person_gender,
     p.person_ethnicity,
     p.person_dob,
@@ -466,21 +469,29 @@ SELECT
             ELSE 0 
         END) as CurrentAge, -- Calculated Age (Note on List 1 is 'AGE')
     
+    /* Disability field */
+    d.person_disability,
+
     /* Returns fields */
     ce.cla_episode_id,
-    ce.cla_epi_start,
-    ce.cla_epi_start_reason,
+    ce.cla_epi_start as CLAStart,
+    ce.cla_epi_start_reason as AdoptionDecision,
     ce.cla_primary_need,
-    ce.cla_epi_ceased,
-    ce.cla_epi_cease_reason,
+    ce.cla_epi_ceased as AdoptionEndDecision,
+    ce.cla_epi_cease_reason as AdoptionEndReason,
     ce.cla_team,
     ce.cla_worker_id
 FROM
     cla_episodes ce
 INNER JOIN
     person p ON ce.la_person_id = p.la_person_id
+LEFT JOIN   -- Using LEFT JOIN to ensure we get all records even if there's no matching disability
+    disability d ON p.la_person_id = d.la_person_id
+LEFT JOIN   -- Using LEFT JOIN to get familyID
+    family f ON p.la_person_id = f.la_person_id
 WHERE
     ce.cla_epi_start >= DATE_SUB(CURRENT_DATE, INTERVAL 12 MONTH);
+
 
 
 
@@ -559,6 +570,8 @@ WHERE
     cl.cl_latest_contact >= DATE_SUB(CURRENT_DATE, INTERVAL 12 MONTH);
     
 -- UASC, EndReasonDesc ??
+
+
 
 
 -- permanence
