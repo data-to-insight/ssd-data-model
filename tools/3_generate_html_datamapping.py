@@ -96,6 +96,7 @@ if len(image_files) > 0:
         image_filename = os.path.splitext(image_filename)[0]    # Remove '.jpg' extension
         image_filename = image_filename.replace("ssd_", "")     # Remove 'ssd_' from the filename 
         parts = image_filename.split("_")                       # Split the filename by underscore
+
         image_filename = parts[0].upper()                       # Capitalise the first part
         html_content += f"<h2>{image_filename}</h2>"
 
