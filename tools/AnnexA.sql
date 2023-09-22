@@ -297,11 +297,12 @@ WHERE
 
 
 
-
-
+-- 
+-- ??? - StartDate	NoCPConference	CPDate	CPPlan	CountS47s12m1	CountICPCs12m	EndDate	StepOutcomeDesc	FinalOutcome1
+-- Ofsted List 5 - Section 47 Enquiries and ICPC OC YYYY
 -- s47_enquiry_icpc
 SELECT
-/* Common AA fields */ 
+    /* Common AA fields */ 
     p.la_person_id,
     p.person_gender,
     p.person_ethnicity,
@@ -311,8 +312,9 @@ SELECT
             WHEN MONTH(CURRENT_DATE) < MONTH(p.person_dob) OR 
                 (MONTH(CURRENT_DATE) = MONTH(p.person_dob) AND DAY(CURRENT_DATE) < DAY(p.person_dob)) THEN 1 
             ELSE 0 
-        END) as CurrentAge, -- Calculated Age (Note on List 1 is 'AGE')
-/* Returns fields */
+        END) as CurrentAge,
+    
+    /* Returns fields */
     se.s47_enquiry_id,
     se.s47_start_date,
     se.s47_authorised_date,
@@ -321,13 +323,30 @@ SELECT
     se.icpc_date,
     se.icpc_outcome,
     se.icpc_team,
-    se.icpc_worker_id
+    se.icpc_worker_id,
+
+    /* Aggregate field */
+    agg.CountS47s12m
+
 FROM
     s47_enquiry_icpc se
 INNER JOIN
     person p ON se.la_person_id = p.la_person_id
+LEFT JOIN (
+    SELECT
+        la_person_id,
+        COUNT(s47_enquiry_id) as CountS47s12m
+    FROM
+        s47_enquiry_icpc
+    WHERE
+        s47_start_date >= DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH)
+    GROUP BY
+        la_person_id
+) as agg ON se.la_person_id = agg.la_person_id
+
 WHERE
     se.s47_start_date >= DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH);
+
 
 
 
@@ -451,46 +470,8 @@ WHERE
     cr.cp_rev_due >= DATE_SUB(CURRENT_DATE, INTERVAL 12 MONTH);
 
 
---Ofsted List 10 - Adoption 2022
---AdoptionDecision	PlacementOrder	Matching	PlacedforAdoption	AdoptionOrder	FosteringtoAdopt	FullName	AdoptedByFormerCarer
 
--- cla_episodes
-SELECT
-    /* Common AA fields */ 
-    p.la_person_id,
-    f.family_id as familyID, -- is this "local adoptive family identifier for the adoptive family"? 
-    p.person_gender,
-    p.person_ethnicity,
-    p.person_dob,
-    YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 
-        (CASE 
-            WHEN MONTH(CURRENT_DATE) < MONTH(p.person_dob) OR 
-                (MONTH(CURRENT_DATE) = MONTH(p.person_dob) AND DAY(CURRENT_DATE) < DAY(p.person_dob)) THEN 1 
-            ELSE 0 
-        END) as CurrentAge, -- Calculated Age (Note on List 1 is 'AGE')
-    
-    /* Disability field */
-    d.person_disability,
 
-    /* Returns fields */
-    ce.cla_episode_id,
-    ce.cla_epi_start as CLAStart,
-    ce.cla_epi_start_reason as AdoptionDecision,
-    ce.cla_primary_need,
-    ce.cla_epi_ceased as AdoptionEndDecision,
-    ce.cla_epi_cease_reason as AdoptionEndReason,
-    ce.cla_team,
-    ce.cla_worker_id
-FROM
-    cla_episodes ce
-INNER JOIN
-    person p ON ce.la_person_id = p.la_person_id
-LEFT JOIN   -- Using LEFT JOIN to ensure we get all records even if there's no matching disability
-    disability d ON p.la_person_id = d.la_person_id
-LEFT JOIN   -- Using LEFT JOIN to get familyID
-    family f ON p.la_person_id = f.la_person_id
-WHERE
-    ce.cla_epi_start >= DATE_SUB(CURRENT_DATE, INTERVAL 12 MONTH);
 
 
 
@@ -571,6 +552,58 @@ WHERE
     
 -- UASC, EndReasonDesc ??
 
+
+
+--Ofsted List 10 - Adoption YYYY
+-- cla_episodes
+SELECT
+    /* Common AA fields */ 
+    p.la_person_id,
+    f.family_id as familyID, 
+    p.person_gender,
+    p.person_ethnicity,
+    p.person_dob,
+    YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 
+        (CASE 
+            WHEN MONTH(CURRENT_DATE) < MONTH(p.person_dob) OR 
+                (MONTH(CURRENT_DATE) = MONTH(p.person_dob) AND DAY(CURRENT_DATE) < DAY(p.person_dob)) THEN 1 
+            ELSE 0 
+        END) as CurrentAge,
+    
+    /* Disability field */
+    d.person_disability,
+
+    /* Returns fields */
+    ce.cla_episode_id,
+    ce.cla_epi_start as CLAStart,
+    ce.cla_epi_start_reason as AdoptionDecision,
+    ce.cla_primary_need,
+    ce.cla_epi_ceased as AdoptionEndDecision,
+    ce.cla_epi_cease_reason as AdoptionEndReason,
+    ce.cla_team,
+    ce.cla_worker_id,
+
+    /* Permanence fields */
+    perm.adm_decision_date,
+    perm.placement_order_date,
+    perm.matched_date,
+    perm.placed_for_adoption_date,
+    perm.permanence_order_date,
+    perm.placed_ffa_cp_date
+    perm.placed_foster_carer_date -- is this AdoptedByFormerCarer??
+
+FROM
+    cla_episodes ce
+INNER JOIN
+    person p ON ce.la_person_id = p.la_person_id
+LEFT JOIN   
+    disability d ON p.la_person_id = d.la_person_id
+LEFT JOIN   
+    family f ON p.la_person_id = f.la_person_id
+INNER JOIN
+    permanence perm ON p.la_person_id = perm.la_person_id
+WHERE
+    ce.cla_epi_start >= DATE_SUB(CURRENT_DATE, INTERVAL 12 MONTH);
 
 
 
