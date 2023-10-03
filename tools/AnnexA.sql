@@ -62,35 +62,36 @@ SSD AnnexA Returns Queries
 */
 
 -- Ofsted List 1 - Contacts YYYY
+-- SQL Server version
 -- "List 1: Contacts "All contacts received in the six months before the date of inspection
 -- Where a contact refers to multiple children, include an entry for each child in the contact."
 
 -- CREATE TEMPORARY TABLE `AA_1_contacts` AS 
 SELECT
-    /* Common AA fields */ 
+    /* Common AA fields */
     p.la_person_id,
     p.person_gender,
     p.person_ethnicity,
-    DATE_FORMAT(p.person_dob, '%d/%m/%Y') AS formatted_person_dob,
+    FORMAT(p.person_dob, 'dd/MM/yyyy') AS formatted_person_dob,
     CASE -- provide the child's age in years at their last birthday.
-        WHEN p.person_dob > CURRENT_DATE THEN -1 -- If a child is unborn, enter their age as '-1'
+        WHEN p.person_dob > GETDATE() THEN -1 -- If a child is unborn, enter their age as '-1'
         -- If born on Feb 29 and the current year is not a leap year and the date is before Feb 28, adjust the age
         WHEN MONTH(p.person_dob) = 2 AND DAY(p.person_dob) = 29 AND
-            MONTH(CURRENT_DATE) <= 2 AND DAY(CURRENT_DATE) < 28 AND
-            (YEAR(CURRENT_DATE) % 4 != 0 OR (YEAR(CURRENT_DATE) % 100 = 0 AND YEAR(CURRENT_DATE) % 400 != 0))
-        THEN YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 2
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.person_dob) - 2
         ELSE 
-            YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 
+            YEAR(GETDATE()) - YEAR(p.person_dob) - 
             CASE 
-                WHEN MONTH(CURRENT_DATE) < MONTH(p.person_dob) OR 
-                    (MONTH(CURRENT_DATE) = MONTH(p.person_dob) AND DAY(CURRENT_DATE) < DAY(p.person_dob))
+                WHEN MONTH(GETDATE()) < MONTH(p.person_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.person_dob) AND DAY(GETDATE()) < DAY(p.person_dob))
                 THEN 1 
                 ELSE 0 -- returned if age is < 1yr
             END
-    END as CurrentAge -- Calculated Age (Note on List 1 is 'AGE')    
+    END as CurrentAge, -- Calculated Age (Note on List 1 is 'AGE')
     
     /* Returns fields */
-    DATE_FORMAT(c.contact_date, '%d/%m/%Y') AS formatted_contact_date,
+    FORMAT(c.contact_date, 'dd/MM/yyyy') AS formatted_contact_date,
     c.contact_source
 
 FROM
@@ -98,44 +99,42 @@ FROM
 LEFT JOIN
     person p ON c.la_person_id = p.la_person_id
 WHERE
-    c.contact_date >= DATE_ADD(CURRENT_DATE, INTERVAL -6 MONTH);
-
-
-
+    c.contact_date >= DATEADD(MONTH, -6, GETDATE());
 
 
 
 -- Ofsted List 2 - Early Help Assessments YYYY
+-- SQL Server version
 -- List 2: Early Help	"All early help assessments in the six months before the date of inspection. 
 -- Also, current early help interventions that are being coordinated through the local authority.
 
 -- CREATE TEMPORARY TABLE `AA_2_early_help_assessments` AS 
 SELECT
-    /* Common AA fields */ 
+    /* Common AA fields */
     p.la_person_id,
     p.person_gender,
     p.person_ethnicity,
-    p.person_dob,
+    FORMAT(p.person_dob, 'dd/MM/yyyy') as person_dob,
     CASE -- provide the child's age in years at their last birthday.
-        WHEN p.person_dob > CURRENT_DATE THEN -1 -- If a child is unborn, enter their age as '-1'
+        WHEN p.person_dob > GETDATE() THEN -1 -- If a child is unborn, enter their age as '-1'
         -- If born on Feb 29 and the current year is not a leap year and the date is before Feb 28, adjust the age
         WHEN MONTH(p.person_dob) = 2 AND DAY(p.person_dob) = 29 AND
-            MONTH(CURRENT_DATE) <= 2 AND DAY(CURRENT_DATE) < 28 AND
-            (YEAR(CURRENT_DATE) % 4 != 0 OR (YEAR(CURRENT_DATE) % 100 = 0 AND YEAR(CURRENT_DATE) % 400 != 0))
-        THEN YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 2
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.person_dob) - 2
         ELSE 
-            YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 
+            YEAR(GETDATE()) - YEAR(p.person_dob) - 
             CASE 
-                WHEN MONTH(CURRENT_DATE) < MONTH(p.person_dob) OR 
-                    (MONTH(CURRENT_DATE) = MONTH(p.person_dob) AND DAY(CURRENT_DATE) < DAY(p.person_dob))
+                WHEN MONTH(GETDATE()) < MONTH(p.person_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.person_dob) AND DAY(GETDATE()) < DAY(p.person_dob))
                 THEN 1 
                 ELSE 0 -- returned if age is < 1yr
             END
-    END as CurrentAge -- Calculated Age (Note on List 1 is 'AGE')    
-
+    END as CurrentAge, -- Calculated Age (Note on List 1 is 'AGE')
+    
     /* Returns fields */
-    e.eh_epi_start_date,
-    e.eh_epi_end_date,
+    FORMAT(e.eh_epi_start_date, 'dd/MM/yyyy') as eh_epi_start_date,
+    FORMAT(e.eh_epi_end_date, 'dd/MM/yyyy') as eh_epi_end_date,
     e.eh_epi_org
 FROM
     person p
@@ -145,45 +144,46 @@ WHERE
     (
         /* eh_epi_start_date is within the last 6 months, or eh_epi_end_date is within the last 6 months, 
         or eh_epi_end_date is null, or eh_epi_end_date is an empty string*/
-        e.eh_epi_start_date >= DATE_ADD(CURRENT_DATE, INTERVAL -6 MONTH)
+        e.eh_epi_start_date >= DATEADD(MONTH, -6, GETDATE())
     OR
-        (e.eh_epi_end_date >= DATE_ADD(CURRENT_DATE, INTERVAL -6 MONTH) OR e.eh_epi_end_date IS NULL OR e.eh_epi_end_date = '')
+        (e.eh_epi_end_date >= DATEADD(MONTH, -6, GETDATE()) OR e.eh_epi_end_date IS NULL OR e.eh_epi_end_date = '')
     );
 
 
 
 
 -- Ofsted List 3 - Referrals YYYY
+-- SQL Server version
 -- List 3: Referral	"All referrals received in the six months before the inspection.
 -- Children may appear multiple times on this list if they have received multiple referrals."
 
 -- CREATE TEMPORARY TABLE `AA_3_referrals` AS 
 SELECT
-    /* Common AA fields */ 
+    /* Common AA fields */
     p.la_person_id,
     p.person_gender,
     p.person_ethnicity,
-    p.person_dob,
+    FORMAT(p.person_dob, 'dd/MM/yyyy') as person_dob,
     CASE -- provide the child's age in years at their last birthday.
-        WHEN p.person_dob > CURRENT_DATE THEN -1 -- If a child is unborn, enter their age as '-1'
+        WHEN p.person_dob > GETDATE() THEN -1 -- If a child is unborn, enter their age as '-1'
         -- If born on Feb 29 and the current year is not a leap year and the date is before Feb 28, adjust the age
         WHEN MONTH(p.person_dob) = 2 AND DAY(p.person_dob) = 29 AND
-            MONTH(CURRENT_DATE) <= 2 AND DAY(CURRENT_DATE) < 28 AND
-            (YEAR(CURRENT_DATE) % 4 != 0 OR (YEAR(CURRENT_DATE) % 100 = 0 AND YEAR(CURRENT_DATE) % 400 != 0))
-        THEN YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 2
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.person_dob) - 2
         ELSE 
-            YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 
+            YEAR(GETDATE()) - YEAR(p.person_dob) - 
             CASE 
-                WHEN MONTH(CURRENT_DATE) < MONTH(p.person_dob) OR 
-                    (MONTH(CURRENT_DATE) = MONTH(p.person_dob) AND DAY(CURRENT_DATE) < DAY(p.person_dob))
+                WHEN MONTH(GETDATE()) < MONTH(p.person_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.person_dob) AND DAY(GETDATE()) < DAY(p.person_dob))
                 THEN 1 
                 ELSE 0 -- returned if age is < 1yr
             END
-    END as CurrentAge -- Calculated Age (Note on List 1 is 'AGE')    
+    END as CurrentAge, -- Calculated Age (Note on List 1 is 'AGE')
     
     /* Returns fields */
     ce.cin_referral_id,
-    ce.cin_ref_date,
+    FORMAT(ce.cin_ref_date, 'dd/MM/yyyy') as cin_ref_date,
     ce.cin_primary_need,
     CASE -- indicate if the most recent referral (or individual referral) resulted in 'No Further Action' (NFA)
         WHEN ce.cin_ref_outcomec = 'NFA' THEN 'Yes'
@@ -207,56 +207,54 @@ LEFT JOIN
         FROM 
             cin_episodes
         WHERE
-            cin_ref_date >= DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH)
+            cin_ref_date >= DATEADD(MONTH, -12, GETDATE())
         GROUP BY
             la_person_id
     ) sub ON ce.la_person_id = sub.la_person_id
 WHERE
-    ce.cin_ref_date >= DATE_ADD(CURRENT_DATE, INTERVAL -6 MONTH);
-
+    ce.cin_ref_date >= DATEADD(MONTH, -6, GETDATE());
 
 
 
 
 
 -- Ofsted List 4 - Assessments YYYY
-
+-- SQL Server version
 -- CREATE TEMPORARY TABLE `AA_4_assessments` AS 
 SELECT
     /* Common AA fields */
     p.la_person_id,
     p.person_gender,
     p.person_ethnicity,
-    p.person_dob,
+    FORMAT(p.person_dob, 'dd/MM/yyyy') as person_dob,
     CASE -- provide the child's age in years at their last birthday.
-        WHEN p.person_dob > CURRENT_DATE THEN -1 -- If a child is unborn, enter their age as '-1'
+        WHEN p.person_dob > GETDATE() THEN -1 -- If a child is unborn, enter their age as '-1'
         -- If born on Feb 29 and the current year is not a leap year and the date is before Feb 28, adjust the age
         WHEN MONTH(p.person_dob) = 2 AND DAY(p.person_dob) = 29 AND
-            MONTH(CURRENT_DATE) <= 2 AND DAY(CURRENT_DATE) < 28 AND
-            (YEAR(CURRENT_DATE) % 4 != 0 OR (YEAR(CURRENT_DATE) % 100 = 0 AND YEAR(CURRENT_DATE) % 400 != 0))
-        THEN YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 2
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.person_dob) - 2
         ELSE 
-            YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 
+            YEAR(GETDATE()) - YEAR(p.person_dob) - 
             CASE 
-                WHEN MONTH(CURRENT_DATE) < MONTH(p.person_dob) OR 
-                    (MONTH(CURRENT_DATE) = MONTH(p.person_dob) AND DAY(CURRENT_DATE) < DAY(p.person_dob))
+                WHEN MONTH(GETDATE()) < MONTH(p.person_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.person_dob) AND DAY(GETDATE()) < DAY(p.person_dob))
                 THEN 1 
                 ELSE 0 -- returned if age is < 1yr
             END
-    END as CurrentAge -- Calculated Age (Note on List 1 is 'AGE')    
+    END as CurrentAge, -- Calculated Age (Note on List 1 is 'AGE')
     
     /* Returns fields */    
     a.assessment_id,
-    a.asmt_start_date,
+    FORMAT(a.asmt_start_date, 'dd/MM/yyyy') as asmt_start_date,
     a.asmt_child_seen,
-    a.asmt_auth_date,
-    -- ESCC Have SocialCareSupport? 
+    FORMAT(a.asmt_auth_date, 'dd/MM/yyyy') as asmt_auth_date,
     a.asmt_outcome,
     a.asmt_team,
     a.asmt_worker_id,
 
     /* Disability field */
-    d.person_disability, /* Disability field - Is this returned or generated??  Yes/No/Unknown */
+    d.person_disability -- Disability field - Is this returned or generated??  Yes/No/Unknown 
 
 FROM
     assessments a
@@ -265,51 +263,56 @@ INNER JOIN
 LEFT JOIN   -- ensure we get all records even if there's no matching disability
     disability d ON p.la_person_id = d.la_person_id
 WHERE
-    a.asmt_start_date >= DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH);
+    a.asmt_start_date >= DATEADD(MONTH, -12, GETDATE());
+
 
 
 
 -- 
 -- ??? - StartDate	NoCPConference	CPDate	CPPlan	CountS47s12m1	CountICPCs12m	EndDate	StepOutcomeDesc	FinalOutcome1
 -- Ofsted List 5 - Section 47 Enquiries and ICPC OC YYYY
+-- List 5: Section 47 enquiries and Initial Child Protection Conferences	"All section 47 enquiries in the six months before the inspection.
+-- This includes open S47 enquiries yet to reach a decision where possible.
+-- Where a child has been the subject of multiple section 47 enquiries within the period, please provide one row for each enquiry."
 
 -- CREATE TEMPORARY TABLE `AA_5_s47_enquiries` AS 
 SELECT
-    /* Common AA fields */ 
+    /* Common AA fields */
     p.la_person_id,
     p.person_gender,
     p.person_ethnicity,
-    p.person_dob,
+    FORMAT(p.person_dob, 'dd/MM/yyyy') AS formatted_person_dob, -- Applied date formatting
     CASE -- provide the child's age in years at their last birthday.
-        WHEN p.person_dob > CURRENT_DATE THEN -1 -- If a child is unborn, enter their age as '-1'
+        WHEN p.person_dob > GETDATE() THEN -1 -- If a child is unborn, enter their age as '-1'
         -- If born on Feb 29 and the current year is not a leap year and the date is before Feb 28, adjust the age
         WHEN MONTH(p.person_dob) = 2 AND DAY(p.person_dob) = 29 AND
-            MONTH(CURRENT_DATE) <= 2 AND DAY(CURRENT_DATE) < 28 AND
-            (YEAR(CURRENT_DATE) % 4 != 0 OR (YEAR(CURRENT_DATE) % 100 = 0 AND YEAR(CURRENT_DATE) % 400 != 0))
-        THEN YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 2
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.person_dob) - 2
         ELSE 
-            YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 
+            YEAR(GETDATE()) - YEAR(p.person_dob) - 
             CASE 
-                WHEN MONTH(CURRENT_DATE) < MONTH(p.person_dob) OR 
-                    (MONTH(CURRENT_DATE) = MONTH(p.person_dob) AND DAY(CURRENT_DATE) < DAY(p.person_dob))
+                WHEN MONTH(GETDATE()) < MONTH(p.person_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.person_dob) AND DAY(GETDATE()) < DAY(p.person_dob))
                 THEN 1 
                 ELSE 0 -- returned if age is < 1yr
             END
-    END as CurrentAge -- Calculated Age (Note on List 1 is 'AGE')    
+    END as CurrentAge, -- Calculated Age (Note on List 1 is 'AGE')
     
     /* Returns fields */
     se.s47_enquiry_id,
-    se.s47_start_date,
-    se.s47_authorised_date,
+    FORMAT(se.s47_start_date, 'dd/MM/yyyy') AS formatted_s47_start_date, -- Applied date formatting
+    FORMAT(se.s47_authorised_date, 'dd/MM/yyyy') AS formatted_s47_authorised_date, -- Applied date formatting
     se.s47outcome,
     se.icpc_transfer_in,
-    se.icpc_date,
+    FORMAT(se.icpc_date, 'dd/MM/yyyy') AS formatted_icpc_date, -- Applied date formatting
     se.icpc_outcome,
     se.icpc_team,
     se.icpc_worker_id,
 
-    /* Aggregate field */
-    agg.CountS47s12m
+    /* Aggregate fields */
+    agg.CountS47s12m, -- doesn't include most recent/current
+    agg_icpc.CountICPCs12m -- doesn't include most recent/current
 
 FROM
     s47_enquiry_icpc se
@@ -317,18 +320,38 @@ INNER JOIN
     person p ON se.la_person_id = p.la_person_id
 LEFT JOIN (
     SELECT
+    /* section 47 enquiries the child has been the subject of within 
+    the 12 months PRIOR(hence the -1) to their latest section 47 enquiry*/
         la_person_id,
-        COUNT(s47_enquiry_id) as CountS47s12m
+        COUNT(s47_enquiry_id) - 1 as CountS47s12m
     FROM
         s47_enquiry_icpc
     WHERE
-        s47_start_date >= DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH)
+        s47_start_date >= DATEADD(MONTH, -12, GETDATE())
     GROUP BY
         la_person_id
 ) as agg ON se.la_person_id = agg.la_person_id
 
+LEFT JOIN (
+    SELECT
+    /*initial child protection conferences the child has been the subject of 
+    in the 12 months before their latest Section 47 enquiry.*/
+        la_person_id,
+        COUNT(s47_enquiry_id) as CountICPCs12m
+    FROM
+        s47_enquiry_icpc
+    WHERE
+        s47_start_date >= DATEADD(MONTH, -12, GETDATE())
+        AND (icpc_date IS NOT NULL AND icpc_date <> '')
+    GROUP BY
+        la_person_id
+) as agg_icpc ON se.la_person_id = agg_icpc.la_person_id
+
 WHERE
-    se.s47_start_date >= DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH);
+    se.s47_start_date >= DATEADD(MONTH, -6, GETDATE());
+
+
+
 
 
 
@@ -358,22 +381,23 @@ SELECT
     p.person_gender,
     p.person_ethnicity,
     p.person_dob,
-    CASE -- provide the child's age in years at their last birthday.
-        WHEN p.person_dob > CURRENT_DATE THEN -1 -- If a child is unborn, enter their age as '-1'
+    CASE 
+        -- provide the child's age in years at their last birthday.
+        WHEN p.person_dob > GETDATE() THEN -1 -- If a child is unborn, enter their age as '-1'
         -- If born on Feb 29 and the current year is not a leap year and the date is before Feb 28, adjust the age
         WHEN MONTH(p.person_dob) = 2 AND DAY(p.person_dob) = 29 AND
-            MONTH(CURRENT_DATE) <= 2 AND DAY(CURRENT_DATE) < 28 AND
-            (YEAR(CURRENT_DATE) % 4 != 0 OR (YEAR(CURRENT_DATE) % 100 = 0 AND YEAR(CURRENT_DATE) % 400 != 0))
-        THEN YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 2
+             MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+             (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.person_dob) - 2
         ELSE 
-            YEAR(CURRENT_DATE) - YEAR(p.person_dob) - 
+            YEAR(GETDATE()) - YEAR(p.person_dob) - 
             CASE 
-                WHEN MONTH(CURRENT_DATE) < MONTH(p.person_dob) OR 
-                    (MONTH(CURRENT_DATE) = MONTH(p.person_dob) AND DAY(CURRENT_DATE) < DAY(p.person_dob))
+                WHEN MONTH(GETDATE()) < MONTH(p.person_dob) OR 
+                     (MONTH(GETDATE()) = MONTH(p.person_dob) AND DAY(GETDATE()) < DAY(p.person_dob))
                 THEN 1 
                 ELSE 0 -- returned if age is < 1yr
             END
-    END as CurrentAge -- Calculated Age (Note on List 1 is 'AGE')    
+    END as CurrentAge, -- Calculated Age (Note on List 1 is 'AGE')
 
     d.person_disability, /* Disability field - Is this returned or generated??  Yes/No/Unknown */
 
@@ -384,8 +408,23 @@ SELECT
     cp.cin_team,
     cp.cin_worker_id,
 
-    /* Case status ???? */
-
+    /* case_status */
+    CASE 
+        WHEN ce.cla_epi_start < GETDATE() AND (ce.cla_epi_ceased IS NULL OR ce.cla_epi_ceased = '') 
+        THEN 'Looked after child'
+        WHEN cpp.cpp_start_date < GETDATE() AND cpp.cpp_end_date IS NULL
+        THEN 'Child Protection plan'
+        WHEN cp.cin_plan_Start < GETDATE() AND cp.cin_plan_end IS NULL
+        THEN 'Child in need plan'
+        WHEN asm.asmt_start_date < GETDATE() AND asm.asmt_auth_date IS NULL
+        THEN 'Open Assessment'
+        WHEN ce.cla_epi_ceased > DATEADD(MONTH, -6, GETDATE()) OR
+             cpp.cpp_end_date > DATEADD(MONTH, -6, GETDATE()) OR 
+             cp.cin_plan_end > DATEADD(MONTH, -6, GETDATE()) OR
+             asm.asmt_auth_date > DATEADD(MONTH, -6, GETDATE())
+        THEN 'Closed episode'
+        ELSE NULL 
+    END as case_status
 
 FROM
     cin_plans cp
@@ -393,9 +432,24 @@ INNER JOIN
     person p ON cp.la_person_id = p.la_person_id
 LEFT JOIN   -- with disability
     disability d ON cp.la_person_id = d.la_person_id
+LEFT JOIN   -- cla_episodes to get the most recent cla_epi_start
+    (
+        SELECT la_person_id, MAX(cla_epi_start) as cla_epi_start, cla_epi_ceased
+        FROM cla_episodes
+        GROUP BY la_person_id, cla_epi_ceased
+    ) AS ce ON p.la_person_id = ce.la_person_id
+LEFT JOIN   -- cp_plans to get the cpp_start_date and cpp_end_date
+    (
+        SELECT la_person_id, MAX(cpp_start_date) as cpp_start_date, cpp_end_date
+        FROM cp_plans
+        GROUP BY la_person_id, cpp_end_date
+    ) AS cpp ON p.la_person_id = cpp.la_person_id
+LEFT JOIN   -- joining with assessments to get the asmt_start_date and asmt_auth_date
+    assessments asm ON p.la_person_id = asm.la_person_id
 
 WHERE
-    cp.cin_plan_Start >= DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH);
+    cp.cin_plan_Start >= DATEADD(MONTH, -6, GETDATE());
+
 
 
 
