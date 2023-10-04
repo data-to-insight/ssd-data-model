@@ -147,7 +147,12 @@ BEGIN
     ORDER BY
         pa.[EXTERNAL_ID] ASC;
 
-    -- Add the foreign key constraint
+    -- Set the primary key on address_id
+    ALTER TABLE Child_Social.address
+    ADD CONSTRAINT PK_address_id
+    PRIMARY KEY (address_id);
+
+    -- Add the foreign key constraint for la_person_id
     ALTER TABLE Child_Social.address
     ADD CONSTRAINT FK_address_person
     FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
@@ -163,12 +168,14 @@ BEGIN
     CREATE INDEX IDX_address_end 
     ON Child_Social.address(address_end);
 END
+
 */
 
 /* TEMP TABLE DEF */
 -- Drop the temp table if it exists
 IF OBJECT_ID('tempdb..#address') IS NOT NULL DROP TABLE #address;
 
+-- Create the temp table #address
 -- Create the temp table #address
 SELECT 
     pa.[DIM_PERSON_ADDRESS_ID] as address_id,
@@ -194,6 +201,11 @@ FROM
     Child_Social.DIM_PERSON_ADDRESS AS pa
 ORDER BY
     pa.[EXTERNAL_ID] ASC;
+
+-- Add primary key constraint to address_id
+ALTER TABLE #address
+ADD CONSTRAINT PK_address_id
+PRIMARY KEY (address_id);
 
 -- Create a non-clustered index on la_person_id for quicker lookups and joins
 CREATE INDEX IDX_address_person ON #address(la_person_id);
@@ -236,8 +248,7 @@ BEGIN
     FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
 
     -- Index the foreign key
-    CREATE INDEX IDX_disability_la_person_id 
-    ON Child_Social.disability(la_person_id);
+    CREATE INDEX IDX_disability_la_person_id ON Child_Social.disability(la_person_id);
 END
 */
 
@@ -258,8 +269,19 @@ FROM
 ORDER BY
     fd.[EXTERNAL_ID] ASC;
 
+-- Add primary key constraint to disability_id
+ALTER TABLE #disability
+ADD CONSTRAINT PK_disability_id
+PRIMARY KEY (disability_id);
+
+-- Add foreign key constraint to la_person_id referencing person.la_person_id
+ALTER TABLE #disability
+ADD CONSTRAINT FK_disability_person
+FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+
 -- Create a non-clustered index on la_person_id for quicker lookups and joins
 CREATE INDEX IDX_disability_la_person_id ON #disability(la_person_id);
+
 /* END TMP TABLE */
 
 
@@ -377,6 +399,11 @@ BEGIN
     ORDER BY
         fc.[EXTERNAL_ID] ASC;
 
+    -- Add primary key constraint to contact_id
+    ALTER TABLE Child_Social.contact
+    ADD CONSTRAINT PK_contact_id
+    PRIMARY KEY (contact_id);
+
     -- Add foreign key relationship to person.la_person_id
     ALTER TABLE Child_Social.contact
     ADD CONSTRAINT FK_contact_person
@@ -385,6 +412,7 @@ BEGIN
     -- Create a non-clustered index on la_person_id for quicker lookups and joins
     CREATE INDEX IDX_contact_person ON Child_Social.contact(la_person_id);
 END;
+
 */
 
 /* TEMP TABLE DEF */
@@ -407,6 +435,11 @@ FROM
 ORDER BY
     fc.[EXTERNAL_ID] ASC;
 
+-- Add primary key constraint to contact_id
+ALTER TABLE #contact
+ADD CONSTRAINT PK_contact_id
+PRIMARY KEY (contact_id);
+
 -- Add foreign key relationship to person.la_person_id
 ALTER TABLE #contact
 ADD CONSTRAINT FK_contact_person
@@ -417,4 +450,148 @@ CREATE INDEX IDX_contact_person ON #contact(la_person_id);
 /*END TMP TABLE */
 
 
+
+
+-- s47 table
+/*
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 's47_enquiry_icpc')
+BEGIN
+
+    -- Create the s47_enquiry_icpc table in Child_Social schema
+    SELECT
+        s47.[FACT_S47_ID] as s47_enquiry_id,
+        s47.[EXTERNAL_ID] as la_person_id,
+        s47.[START_DTTM] as s47_start_date,
+        s47.[START_DTTM] as s47_authorised_date,
+        cpc.[YOUR_COLUMN_NAME] as s47_outcome,      -- TO DO 
+        cpc.[TRANSFER_IN_FLAG] as icpc_transfer_in, -- TO CHECK
+        cpc.[MEETING_DTTM] as icpc_date,            -- TO CHECK
+        s47.[OUTCOME_CP_FLAG] as icpc_outcome,      -- TO CHECK
+        s47.[COMPLETED_BY_DEPT_ID] as icpc_team,
+        s47.[COMPLETED_BY_USER_STAFF_ID] as icpc_worker_id
+
+    INTO
+        Child_Social.s47_enquiry_icpc
+
+    FROM 
+        Child_Social.FACT_S47 AS s47
+    JOIN
+        Child_Social.FACT_CP_CONFERENCE as cpc ON s47.[EXTERNAL_ID] = cpc.[EXTERNAL_ID];
+
+    -- Set s47_enquiry_id as the primary key for the table
+    ALTER TABLE Child_Social.s47_enquiry_icpc
+    ADD CONSTRAINT PK_s47_enquiry_id
+    PRIMARY KEY (s47_enquiry_id);
+
+    -- Add a foreign key constraint for la_person_id referencing person.la_person_id
+    ALTER TABLE Child_Social.s47_enquiry_icpc
+    ADD CONSTRAINT FK_s47_person
+    FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+END
+*/
+
+/* TEMP TABLE DEF */
+-- Drop the temporary table if it exists
+IF OBJECT_ID('tempdb..#s47_enquiry_icpc') IS NOT NULL 
+    DROP TABLE #s47_enquiry_icpc;
+
+-- Create the temp table #s47
+SELECT
+    s47.[FACT_S47_ID] as s47_enquiry_id,
+    s47.[EXTERNAL_ID] as la_person_id,
+    s47.[START_DTTM] as s47_start_date,
+    s47.[START_DTTM] as s47_authorised_date,
+    cpc.[YOUR_COLUMN_NAME] as s47_outcome,      -- TO DO 
+    cpc.[TRANSFER_IN_FLAG] as icpc_transfer_in, -- TO CHECK
+    cpc.[MEETING_DTTM] as icpc_date,            -- TO CHECK
+    s47.[OUTCOME_CP_FLAG] as icpc_outcome,      -- TO CHECK
+    s47.[COMPLETED_BY_DEPT_ID] as icpc_team,
+    s47.[COMPLETED_BY_USER_STAFF_ID] as icpc_worker_id
+INTO
+    #s47_enquiry_icpc
+FROM 
+    Child_Social.FACT_S47 AS s47
+JOIN
+    Child_Social.FACT_CP_CONFERENCE as cpc ON s47.[EXTERNAL_ID] = cpc.[EXTERNAL_ID];
+
+-- Set s47_enquiry_id as the primary key for the temp table
+ALTER TABLE #s47_enquiry_icpc
+ADD PRIMARY KEY (s47_enquiry_id);
+
+-- Add a foreign key constraint for la_person_id referencing person.la_person_id
+ALTER TABLE #s47_enquiry_icpc
+ADD FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+/*END TMP TABLE */
+
+
+
+
+
+
+
+/*
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cla_Substance_misuse')
+BEGIN
+    -- Create cla_Substance_misuse table
+    SELECT 
+        fsm.[FACT_SUBSTANCE_MISUSE_ID] as substance_misuse_id,
+        fsm.[EXTERNAL_ID] as la_person_id,
+        fsm.[CREATE_DTTM] as create_date,
+        fsm.[DIM_PERSON_ID] as person_dim_id,
+        fsm.[START_DTTM] as start_date,
+        fsm.[END_DTTM] as end_date,
+        fsm.[DIM_LOOKUP_SUBSTANCE_TYPE_ID] as substance_type_id,
+        fsm.[DIM_LOOKUP_SUBSTANCE_TYPE_CODE] as substance_type_code
+
+    INTO 
+        Child_Social.cla_Substance_misuse
+
+    FROM 
+        Child_Social.FACT_SUBSTANCE_MISUSE AS fsm;
+
+    -- Set the primary key on substance_misuse_id
+    ALTER TABLE Child_Social.cla_Substance_misuse
+    ADD CONSTRAINT PK_substance_misuse_id
+    PRIMARY KEY (substance_misuse_id);
+
+    -- Add the foreign key constraint for la_person_id
+    ALTER TABLE Child_Social.cla_Substance_misuse
+    ADD CONSTRAINT FK_substance_misuse_person
+    FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+END
+*/
+
+/* TEMP TABLE DEF */
+-- Drop the temp table if it exists
+IF OBJECT_ID('tempdb..#cla_Substance_misuse') IS NOT NULL 
+    DROP TABLE #cla_Substance_misuse;
+
+-- Create the temporary table #cla_Substance_misuse
+SELECT 
+    fsm.[FACT_SUBSTANCE_MISUSE_ID] as substance_misuse_id,
+    fsm.[EXTERNAL_ID] as la_person_id,
+    fsm.[CREATE_DTTM] as create_date,
+    fsm.[DIM_PERSON_ID] as person_dim_id,
+    fsm.[START_DTTM] as start_date,
+    fsm.[END_DTTM] as end_date,
+    fsm.[DIM_LOOKUP_SUBSTANCE_TYPE_ID] as substance_type_id,
+    fsm.[DIM_LOOKUP_SUBSTANCE_TYPE_CODE] as substance_type_code
+
+INTO 
+    #cla_Substance_misuse
+
+FROM 
+    Child_Social.FACT_SUBSTANCE_MISUSE AS fsm;
+
+-- Set the primary key on substance_misuse_id
+ALTER TABLE #cla_Substance_misuse
+ADD CONSTRAINT PK_substance_misuse_id_temp
+PRIMARY KEY (substance_misuse_id);
+
+-- Add the foreign key constraint for la_person_id
+-- (You can only add FK constraints in temp tables if you're sure the related table will be available in the same session)
+ALTER TABLE #cla_Substance_misuse
+ADD CONSTRAINT FK_substance_misuse_person_temp
+FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+/*END TMP TABLE */
 
