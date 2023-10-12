@@ -1,24 +1,63 @@
 
+/* Notes:
+Ensure that extracted dates are in dd/MM/YYYY format and created fields are DATE, not DATETIME
+Full review needed of max/exagerated/default new field type sizes e.g. family_id NVARCHAR(255)
+*/
+
 
 /*
--- person table
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND  TABLE_NAME = 'person')
-BEGIN
-    SELECT 
-        p.[EXTERNAL_ID] as la_person_id,
-        p.[DIM_LOOKUP_VARIATION_OF_SEX_CODE] as person_sex,
-        p.[GENDER_MAIN_CODE] as person_gender,
-        p.[ETHNICITY_MAIN_CODE] as person_ethnicity,
-        p.[BIRTH_DTTM] as person_dob,
-        p.[UPN] as person_upn,
-        p.[NO_UPN_CODE] as person_upn_unknown,
-        p.[EHM_SEN_FLAG] as person_send,
-        p.[DOB_ESTIMATED] as person_expected_dob,
-        p.[DEATH_DTTM] as person_death_date,
-        p.[NATNL_CODE] as person_nationality,
-        CASE WHEN fc.[DIM_PERSON_ID] IS NOT NULL THEN 'Y' ELSE 'N' END as person_is_mother
+Start of SSD table creation 
+*/
 
-    INTO Child_Social.person
+
+/* object name: person
+*/
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'person')
+BEGIN
+    -- Create 'person' structure
+    CREATE TABLE Child_Social.person (
+        la_person_id NVARCHAR(MAX) PRIMARY KEY,
+        person_sex NVARCHAR(MAX),
+        person_gender NVARCHAR(MAX),
+        person_ethnicity NVARCHAR(MAX),
+        person_dob DATETIME,
+        person_upn NVARCHAR(MAX),
+        person_upn_unknown NVARCHAR(MAX),
+        person_send NVARCHAR(MAX),
+        person_expected_dob NVARCHAR(MAX),
+        person_death_date DATETIME,
+        person_nationality NVARCHAR(MAX),
+        person_is_mother CHAR(1)
+    );
+    
+    -- Insert data into 'person'
+    INSERT INTO Child_Social.person (
+        la_person_id,
+        person_sex,
+        person_gender,
+        person_ethnicity,
+        person_dob,
+        person_upn,
+        person_upn_unknown,
+        person_send,
+        person_expected_dob,
+        person_death_date,
+        person_nationality,
+        person_is_mother
+    )
+    SELECT 
+        p.[EXTERNAL_ID],
+        p.[DIM_LOOKUP_VARIATION_OF_SEX_CODE],
+        p.[GENDER_MAIN_CODE],
+        p.[ETHNICITY_MAIN_CODE],
+        p.[BIRTH_DTTM],
+        p.[UPN],
+        p.[NO_UPN_CODE],
+        p.[EHM_SEN_FLAG],
+        p.[DOB_ESTIMATED],
+        p.[DEATH_DTTM],
+        p.[NATNL_CODE],
+        CASE WHEN fc.[DIM_PERSON_ID] IS NOT NULL THEN 'Y' ELSE 'N' END -- needs confirming
     FROM 
         Child_Social.DIM_PERSON AS p
     LEFT JOIN
@@ -28,136 +67,72 @@ BEGIN
     ORDER BY
         p.[EXTERNAL_ID] ASC;
 
-    -- Add primary key constraint
-    ALTER TABLE Child_Social.person
-    ADD PRIMARY KEY (la_person_id);
-    
     -- Create a non-clustered index on la_person_id for quicker lookups and joins
     CREATE INDEX IDX_person_la_person_id ON Child_Social.person(la_person_id);
 END;
+
+
+
+
+
+
+/* object name: family
 */
+-- part of early help system(s).
 
-
-/* TEMP TABLE DEF */
--- Drop the temp table if it exists
-IF OBJECT_ID('tempdb..#person') IS NOT NULL DROP TABLE #person;
-
--- Create the temp table #person
-SELECT 
-    p.[EXTERNAL_ID] as la_person_id,
-    p.[DIM_LOOKUP_VARIATION_OF_SEX_CODE] as person_sex,
-    p.[GENDER_MAIN_CODE] as person_gender,
-    p.[ETHNICITY_MAIN_CODE] as person_ethnicity,
-    p.[BIRTH_DTTM] as person_dob,
-    p.[UPN] as person_upn,
-    p.[NO_UPN_CODE] as person_upn_unknown,
-    p.[EHM_SEN_FLAG] as person_send,
-    p.[DOB_ESTIMATED] as person_expected_dob,
-    p.[DEATH_DTTM] as person_death_date,
-    p.[NATNL_CODE] as person_nationality,
-    CASE WHEN fc.[DIM_PERSON_ID] IS NOT NULL THEN 'Y' ELSE 'N' END as person_is_mother
-INTO #person
-FROM 
-    Child_Social.DIM_PERSON AS p
-LEFT JOIN
-    Child_Social.FACT_CPIS_UPLOAD AS fc
-ON 
-    p.[EXTERNAL_ID] = fc.[EXTERNAL_ID]
-ORDER BY
-    p.[EXTERNAL_ID] ASC;
-
--- Add primary key constraint to temp table
-ALTER TABLE #person
-ADD PRIMARY KEY (la_person_id);
-    
--- Create a non-clustered index on la_person_id for quicker lookups and joins
-CREATE INDEX IDX_person_la_person_id ON #person(la_person_id);
-/* END TMP TABLE */
-
-
-
-
-/*
--- family table
--- part of early help system(s). set blank template out
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND  TABLE_NAME = 'family')
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'family')
 BEGIN
-
-    -- Create the 'family' table
+    -- Create 'family'
     CREATE TABLE Child_Social.family (
-        family_id NVARCHAR(MAX) PRIMARY KEY,
-        la_person_id NVARCHAR(MAX),
+        DIM_TF_FAMILY_ID INT PRIMARY KEY, 
+        family_id NVARCHAR(255),
+        la_person_id NVARCHAR(255),
         
-        -- Define the foreign key constraint
+        -- Define foreign key constraint
         FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id)
     );
 
-    -- Create a non-clustered index on the foreign key
+    -- Insert data from Singleview.DIM_TF_FAMILY into newly created table
+    INSERT INTO Child_Social.family (
+        DIM_TF_FAMILY_ID, 
+        family_id, 
+        la_person_id
+        )
+    SELECT 
+        DIM_TF_FAMILY_ID,
+        UNIQUE_FAMILY_NUMBER    as family_id,
+        EXTERNAL_ID             as la_person_id
+    FROM Singleview.DIM_TF_FAMILY;
+
+    -- Create a non-clustered index on foreign key
     CREATE INDEX IDX_family_person ON Child_Social.family(la_person_id);
 END;
+
+
+
+/* object name: address
 */
 
-/* TEMP TABLE DEF */
--- Drop the temp table if it exists
-IF OBJECT_ID('tempdb..#family') IS NOT NULL 
-    DROP TABLE #family;
-
--- Create the temp table #family
-CREATE TABLE #family (
-    family_id NVARCHAR(MAX) PRIMARY KEY,
-    la_person_id NVARCHAR(MAX)
-);
-
--- Create a non-clustered index on la_person_id for quicker lookups and joins
-CREATE INDEX IDX_family_person ON #family(la_person_id);
-/* END TMP TABLE */
-
-
-
-
-/*
--- address table
+-- Check if address exists
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'address')
 BEGIN
-    -- Create the address table if it doesn't exist
-    SELECT 
-        pa.[DIM_PERSON_ADDRESS_ID] as address_id,
-        pa.[EXTERNAL_ID] as la_person_id, -- Assuming EXTERNAL_ID corresponds to la_person_id
-        pa.[ADDSS_TYPE_CODE] as address_type,
-        pa.[START_DTTM] as address_start,
-        pa.[END_DTTM] as address_end,
-        pa.[POSTCODE] as address_postcode,
-        
-        -- Create the concatenated address field
-        CONCAT_WS(',', 
-            NULLIF(pa.[ROOM_NO], ''), 
-            NULLIF(pa.[FLOOR_NO], ''), 
-            NULLIF(pa.[FLAT_NO], ''), 
-            NULLIF(pa.[BUILDING], ''), 
-            NULLIF(pa.[HOUSE_NO], ''), 
-            NULLIF(pa.[STREET], ''), 
-            NULLIF(pa.[TOWN], '')
-        ) as address
+    -- Create address if it doesn't exist
+    CREATE TABLE Child_Social.address (
+        address_id INT PRIMARY KEY,
+        la_person_id NVARCHAR(MAX), -- Assuming EXTERNAL_ID corresponds to la_person_id
+        address_type NVARCHAR(MAX),
+        address_start DATETIME,
+        address_end DATETIME,
+        address_postcode NVARCHAR(MAX),
+        address NVARCHAR(MAX)
+    );
 
-    INTO 
-        Child_Social.address
-
-    FROM 
-        Child_Social.DIM_PERSON_ADDRESS AS pa
-    ORDER BY
-        pa.[EXTERNAL_ID] ASC;
-
-    -- Set the primary key on address_id
-    ALTER TABLE Child_Social.address
-    ADD CONSTRAINT PK_address_id
-    PRIMARY KEY (address_id);
-
-    -- Add the foreign key constraint for la_person_id
+    -- Add foreign key constraint for la_person_id
     ALTER TABLE Child_Social.address
     ADD CONSTRAINT FK_address_person
     FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
 
-    -- Non-clustered index on the foreign key
+    -- Non-clustered index on foreign key
     CREATE INDEX IDX_address_person 
     ON Child_Social.address(la_person_id);
 
@@ -167,431 +142,610 @@ BEGIN
 
     CREATE INDEX IDX_address_end 
     ON Child_Social.address(address_end);
+
+    -- Now, insert data into newly created table
+    INSERT INTO Child_Social.address (
+        address_id, 
+        la_person_id, 
+        address_type, 
+        address_start, 
+        address_end, 
+        address_postcode, 
+        address
+    )
+    SELECT 
+        pa.[DIM_PERSON_ADDRESS_ID],
+        pa.[EXTERNAL_ID], -- Assuming EXTERNAL_ID corresponds to la_person_id
+        pa.[ADDSS_TYPE_CODE],
+        pa.[START_DTTM],
+        pa.[END_DTTM],
+        pa.[POSTCODE],
+        -- Create concatenated address field
+        CONCAT_WS(',', 
+            NULLIF(pa.[ROOM_NO], ''), 
+            NULLIF(pa.[FLOOR_NO], ''), 
+            NULLIF(pa.[FLAT_NO], ''), 
+            NULLIF(pa.[BUILDING], ''), 
+            NULLIF(pa.[HOUSE_NO], ''), 
+            NULLIF(pa.[STREET], ''), 
+            NULLIF(pa.[TOWN], '')
+        )
+    FROM 
+        Child_Social.DIM_PERSON_ADDRESS AS pa
+    ORDER BY
+        pa.[EXTERNAL_ID] ASC;
 END
 
+
+
+/* object name: disability 
 */
-
-/* TEMP TABLE DEF */
--- Drop the temp table if it exists
-IF OBJECT_ID('tempdb..#address') IS NOT NULL DROP TABLE #address;
-
--- Create the temp table #address
--- Create the temp table #address
-SELECT 
-    pa.[DIM_PERSON_ADDRESS_ID] as address_id,
-    pa.[EXTERNAL_ID] as la_person_id, -- Assuming EXTERNAL_ID corresponds to la_person_id
-    pa.[ADDSS_TYPE_CODE] as address_type,
-    pa.[START_DTTM] as address_start,
-    pa.[END_DTTM] as address_end,
-    pa.[POSTCODE] as address_postcode,
-        
-    -- Create the concatenated address field
-    CONCAT_WS(',', 
-        NULLIF(pa.[ROOM_NO], ''), 
-        NULLIF(pa.[FLOOR_NO], ''), 
-        NULLIF(pa.[FLAT_NO], ''), 
-        NULLIF(pa.[BUILDING], ''), 
-        NULLIF(pa.[HOUSE_NO], ''), 
-        NULLIF(pa.[STREET], ''), 
-        NULLIF(pa.[TOWN], '')
-    ) as address
-
-INTO #address
-FROM 
-    Child_Social.DIM_PERSON_ADDRESS AS pa
-ORDER BY
-    pa.[EXTERNAL_ID] ASC;
-
--- Add primary key constraint to address_id
-ALTER TABLE #address
-ADD CONSTRAINT PK_address_id
-PRIMARY KEY (address_id);
-
--- Create a non-clustered index on la_person_id for quicker lookups and joins
-CREATE INDEX IDX_address_person ON #address(la_person_id);
-
--- Non-clustered indexes on address_start and address_end
-CREATE INDEX IDX_address_start ON #address(address_start);
-CREATE INDEX IDX_address_end ON #address(address_end);
-/* END TMP TABLE */
-
-
-
-
-/*
--- disability table 
+-- Check if disability exists
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'disability')
 BEGIN
-    -- Create the disability table if it doesn't exist
-    SELECT 
-        fd.[FACT_DISABILITY_ID] as disability_id,
-        fd.[EXTERNAL_ID] as la_person_id,
-        fd.[DISABILITY_GROUP_CODE] as person_disability
+    -- Create disability if it doesn't exist
+    CREATE TABLE Child_Social.disability (
+        disability_id INT PRIMARY KEY,
+        la_person_id NVARCHAR(MAX),
+        person_disability NVARCHAR(MAX)
+    );
 
-    INTO 
-        Child_Social.disability
-
-    FROM 
-        Child_Social.FACT_DISABILITY AS fd
-
-    ORDER BY
-        fd.[EXTERNAL_ID] ASC;
-
-    -- Set the primary key on disability_id
-    ALTER TABLE Child_Social.disability
-    ADD CONSTRAINT PK_disability_id
-    PRIMARY KEY (disability_id);
-
-    -- Add the foreign key constraint
+    -- Add foreign key constraint for la_person_id
     ALTER TABLE Child_Social.disability
     ADD CONSTRAINT FK_disability_person
     FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
 
-    -- Index the foreign key
-    CREATE INDEX IDX_disability_la_person_id ON Child_Social.disability(la_person_id);
+    -- Non-clustered index on foreign key
+    CREATE INDEX IDX_disability_la_person_id 
+    ON Child_Social.disability(la_person_id);
+
+    -- Now, insert data into newly created table
+    INSERT INTO Child_Social.disability (
+        disability_id, 
+        la_person_id, 
+        person_disability
+    )
+    SELECT 
+        fd.[FACT_DISABILITY_ID],
+        fd.[EXTERNAL_ID],
+        fd.[DISABILITY_GROUP_CODE]
+    FROM 
+        Child_Social.FACT_DISABILITY AS fd
+    ORDER BY
+        fd.[EXTERNAL_ID] ASC;
 END
+
+
+
+
+
+/* object name: immigration_status table
 */
 
-/* TEMP TABLE DEF */
--- Drop the temp table if it exists
-IF OBJECT_ID('tempdb..#disability') IS NOT NULL 
-    DROP TABLE #disability;
-
--- Create the temp table #disability
-SELECT 
-    fd.[FACT_DISABILITY_ID] as disability_id,
-    fd.[EXTERNAL_ID] as la_person_id,
-    fd.[DISABILITY_GROUP_CODE] as person_disability
-
-INTO #disability
-FROM 
-    Child_Social.FACT_DISABILITY AS fd
-ORDER BY
-    fd.[EXTERNAL_ID] ASC;
-
--- Add primary key constraint to disability_id
-ALTER TABLE #disability
-ADD CONSTRAINT PK_disability_id
-PRIMARY KEY (disability_id);
-
--- Add foreign key constraint to la_person_id referencing person.la_person_id
-ALTER TABLE #disability
-ADD CONSTRAINT FK_disability_person
-FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
-
--- Create a non-clustered index on la_person_id for quicker lookups and joins
-CREATE INDEX IDX_disability_la_person_id ON #disability(la_person_id);
-
-/* END TMP TABLE */
-
-
-
-
-/*
--- immigration_status table
+-- Check if immigration_status exists
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'immigration_status')
 BEGIN
-    -- Create the immigration_status table if it doesn't exist
-    SELECT 
-        is.[FACT_IMMIGRATION_STATUS_ID] as immigration_status_id,
-        is.[EXTERNAL_ID] as la_person_id,
-        is.[START_DTTM] as immigration_status_start,
-        is.[END_DTTM] as immigration_status_end,
-        is.[DIM_LOOKUP_IMMGR_STATUS_CODE] as immigration_status
+    -- Create immigration_status if it doesn't exist
+    CREATE TABLE Child_Social.immigration_status (
+        immigration_status_id INT PRIMARY KEY,
+        la_person_id NVARCHAR(MAX),
+        immigration_status_start DATETIME,
+        immigration_status_end DATETIME,
+        immigration_status NVARCHAR(MAX)
+    );
 
-    INTO 
-        Child_Social.immigration_status
-
-    FROM 
-        Child_Social.FACT_IMMIGRATION_STATUS AS is
-
-    ORDER BY
-        is.[EXTERNAL_ID] ASC;
-
-    -- Set the primary key on immigration_status_id
-    ALTER TABLE Child_Social.immigration_status
-    ADD CONSTRAINT PK_immigration_status_id
-    PRIMARY KEY (immigration_status_id);
-
-    -- Add the foreign key constraint
+    -- Add foreign key constraint for la_person_id
     ALTER TABLE Child_Social.immigration_status
     ADD CONSTRAINT FK_immigration_status_person
     FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
 
-    -- Index the foreign key
+    -- Non-clustered index on foreign key
     CREATE INDEX IDX_immigration_status_la_person_id 
     ON Child_Social.immigration_status(la_person_id);
 
-    -- Non-clustered index on immigration_status_start
+    -- Non-clustered indexes on immigration_status_start and immigration_status_end
     CREATE INDEX IDX_immigration_status_start 
     ON Child_Social.immigration_status(immigration_status_start);
 
-    -- Non-clustered index on immigration_status_end
     CREATE INDEX IDX_immigration_status_end 
     ON Child_Social.immigration_status(immigration_status_end);
+
+    -- Now, insert data into newly created table
+    INSERT INTO Child_Social.immigration_status (
+        immigration_status_id, 
+        la_person_id, 
+        immigration_status_start,
+        immigration_status_end,
+        immigration_status
+    )
+    SELECT 
+        is.[FACT_IMMIGRATION_STATUS_ID],
+        is.[EXTERNAL_ID],
+        is.[START_DTTM],
+        is.[END_DTTM],
+        is.[DIM_LOOKUP_IMMGR_STATUS_CODE]
+    FROM 
+        Child_Social.FACT_IMMIGRATION_STATUS AS is
+    ORDER BY
+        is.[EXTERNAL_ID] ASC;
 END
+
+
+/* object name: mother
+*/
+-- Check if mother exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'mother')
+/*
+person_child_id
+la_person_id
+person_child_dob
 */
 
-/* TEMP TABLE DEF */
-IF OBJECT_ID('tempdb..#immigration_status') IS NOT NULL DROP TABLE #immigration_status;
--- Create the immigration_status table if it doesn't exist
-SELECT 
-    is.[FACT_IMMIGRATION_STATUS_ID] as immigration_status_id,
-    is.[EXTERNAL_ID] as la_person_id,
-    is.[START_DTTM] as immigration_status_start,
-    is.[END_DTTM] as immigration_status_end,
-    is.[DIM_LOOKUP_IMMGR_STATUS_CODE] as immigration_status
-
-INTO 
-    #immigration_status
-
-FROM 
-    Child_Social.FACT_IMMIGRATION_STATUS AS is
-
-ORDER BY
-    is.[EXTERNAL_ID] ASC;
-
--- Set the primary key on immigration_status_id
-ALTER TABLE #immigration_status
-ADD CONSTRAINT PK_immigration_status_id
-PRIMARY KEY (immigration_status_id);
-
--- Add the foreign key constraint
-ALTER TABLE #immigration_status
-ADD CONSTRAINT FK_immigration_status_person
-FOREIGN KEY (la_person_id) REFERENCES #person(la_person_id);
-
--- Index the foreign key
-CREATE INDEX IDX_immigration_status_la_person_id 
-ON #immigration_status(la_person_id);
-
--- Non-clustered index on immigration_status_start
-CREATE INDEX IDX_immigration_status_start 
-ON #immigration_status(immigration_status_start);
-
--- Non-clustered index on immigration_status_end
-CREATE INDEX IDX_immigration_status_end 
-ON #immigration_status(immigration_status_end);
-/* END TMP TABLE DEF */
 
 
-
-
-
-/*
--- contact table
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'contact')
+/* object name: legal_status
+*/
+-- Check if legal_status exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'Child_Social' 
+               AND TABLE_NAME = 'legal_status')
 BEGIN
 
-    -- Create the contact table
+    -- Create legal_status structure
+    CREATE TABLE Child_Social.legal_status (
+        legal_status_id INT PRIMARY KEY,
+        la_person_id NVARCHAR(MAX),
+        legal_status_start DATETIME,
+        legal_status_end DATETIME,
+        person_dim_id INT
+    );
+
+    -- Insert data into legal_status table
+    INSERT INTO Child_Social.legal_status (
+        legal_status_id,
+        la_person_id,
+        legal_status_start,
+        legal_status_end,
+        person_dim_id
+    )
     SELECT
-        fc.[FACT_CONTACT_ID] as contact_id,
-        fc.[EXTERNAL_ID] as la_person_id,
-        fc.[START_DTTM] as contact_start,
-        fc.[SOURCE_CONTACT] as contact_source,
-        fc.[CONTACT_OUTCOMES] as contact_outcome
-
-    INTO Child_Social.contact
-
+        fls.[FACT_LEGAL_STATUS_ID],
+        fls.[EXTERNAL_ID],
+        fls.[START_DTTM],
+        fls.[END_DTTM],
+        fls.[DIM_PERSON_ID]
     FROM 
-        Child_Social.FACT_CONTACT AS fc
+        Child_Social.FACT_LEGAL_STATUS AS fls;
 
-    ORDER BY
-        fc.[EXTERNAL_ID] ASC;
+    -- Add foreign key constraint linking la_person_id in legal_status to la_person_id in person
+    ALTER TABLE Child_Social.legal_status
+    ADD CONSTRAINT FK_legal_status_person
+    FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
 
-    -- Add primary key constraint to contact_id
-    ALTER TABLE Child_Social.contact
-    ADD CONSTRAINT PK_contact_id
-    PRIMARY KEY (contact_id);
+END;
 
-    -- Add foreign key relationship to person.la_person_id
+
+
+/* object name: contact
+*/
+-- Check if contact exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'contact')
+BEGIN
+    -- Create contact structure
+    CREATE TABLE Child_Social.contact (
+        contact_id INT PRIMARY KEY,
+        la_person_id NVARCHAR(MAX),
+        contact_start DATETIME,
+        contact_source NVARCHAR(MAX),
+        contact_outcome NVARCHAR(MAX)
+    );
+
+    -- Add foreign key constraint for la_person_id
     ALTER TABLE Child_Social.contact
     ADD CONSTRAINT FK_contact_person
     FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
 
     -- Create a non-clustered index on la_person_id for quicker lookups and joins
     CREATE INDEX IDX_contact_person ON Child_Social.contact(la_person_id);
-END;
+
+    -- Insert data into newly created table
+    INSERT INTO Child_Social.contact (
+        contact_id, 
+        la_person_id, 
+        contact_start,
+        contact_source,
+        contact_outcome
+    )
+    SELECT 
+        fc.[FACT_CONTACT_ID],
+        fc.[EXTERNAL_ID],
+        fc.[START_DTTM],
+        fc.[SOURCE_CONTACT],
+        fc.[CONTACT_OUTCOMES]
+    FROM 
+        Child_Social.FACT_CONTACT AS fc
+    ORDER BY
+        fc.[EXTERNAL_ID] ASC;
+END
+
+
+
+/* object name: early help
+*/
+
+-- Check if early_help exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'early_help')
+
+/*
+eh_episode_id
+la_person_id
+eh_epi_start_date
+eh_epi_end_date
+eh_epi_reason
+eh_epi_end_reason
+eh_epi_org
+eh_epi_worker_id
+*/
+
+
+
+/* object name: cin_episodes
+*/
+-- Check if cin_episodes exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cin_episodes')
+
+/*
+cin_referral_id
+la_person_id
+cin_ref_date
+cin_primary_need
+cin_ref_source
+cin_ref_outcome
+cin_close_reason
+cin_close_date
+cin_ref_team
+cin_ref_worker_id
+*/
+
+
+
+/* object name: assessments
+*/
+-- Check if assessments exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'assessments')
+
+/*
+assessment_id
+la_person_id
+asmt_start_date
+asmt_child_seen
+asmt_auth_date
+asmt_outcome
+asmt_team
+asmt_worker_id
+
+-- ??
+-- Child_Social FACT_CORE_ASSESSMENT	EXTERNAL_ID
+-- Child_Social FACT_INITIAL_ASSESSMENT	EXTERNAL_ID
+-- Child_Social FACT_SINGLE_ASSESSMENT	EXTERNAL_ID
+
+-- dbo	DIM_ASSESSMENT_DETAILS	EXTERNAL_ID
+*/
+
+
+
+/* object name: assessment_factors
+*/
+
+-- Check if assessment_factors exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'assessment_factors')
+
+/*
+asmt_id
+asmt_factors
+*/
+
+
+
+
+/* object name: cin_plans
+*/
+
+-- Check if cin_plans exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cin_plans')
+
+/*
+cin_plan_id
+la_person_id
+cin_plan_Start
+cin_plan_end
+cin_team
+cin_worker_id
+*/
+
+
+/* object name: cin_visits
+*/
+
+-- Check if cin_visits exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cin_visits')
+
+/*
+cin_visit_id
+cin_plan_id
+cin_visit_date
+cin_visit_seen
+cin_visit_seen_alone
+cin_visit_bedroom
 
 */
 
-/* TEMP TABLE DEF */
--- Drop the temp table if it exists
-IF OBJECT_ID('tempdb..#contact') IS NOT NULL DROP TABLE #contact;
 
--- Create the temp table #contact
-SELECT
-	fc.[FACT_CONTACT_ID] as contact_id,
-	fc.[EXTERNAL_ID] as la_person_id,
-    fc.[START_DTTM] as contact_start,
-    fc.[SOURCE_CONTACT] as contact_source,
-	fc.[CONTACT_OUTCOMES] as contact_outcome
-
-INTO #contact
-
-FROM 
-    Child_Social.FACT_CONTACT AS fc
-
-ORDER BY
-    fc.[EXTERNAL_ID] ASC;
-
--- Add primary key constraint to contact_id
-ALTER TABLE #contact
-ADD CONSTRAINT PK_contact_id
-PRIMARY KEY (contact_id);
-
--- Add foreign key relationship to person.la_person_id
-ALTER TABLE #contact
-ADD CONSTRAINT FK_contact_person
-FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
-
--- Create a non-clustered index on la_person_id for quicker lookups and joins
-CREATE INDEX IDX_contact_person ON #contact(la_person_id);
-/*END TMP TABLE */
-
-
-
-
--- s47 table
-/*
+/* object name: s47
+*/
+-- Check if s47_enquiry_icpc exists
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 's47_enquiry_icpc')
 BEGIN
+    -- Create s47_enquiry_icpc structure
+    CREATE TABLE Child_Social.s47_enquiry_icpc (
+        s47_enquiry_id INT PRIMARY KEY,
+        la_person_id NVARCHAR(MAX),
+        s47_start_date DATETIME,
+        s47_authorised_date DATETIME,
+        s47_outcome NVARCHAR(MAX),
+        icpc_transfer_in NVARCHAR(MAX),
+        icpc_date DATETIME,
+        icpc_outcome NVARCHAR(MAX),
+        icpc_team NVARCHAR(MAX),
+        icpc_worker_id NVARCHAR(MAX)
+    );
 
-    -- Create the s47_enquiry_icpc table in Child_Social schema
-    SELECT
-        s47.[FACT_S47_ID] as s47_enquiry_id,
-        s47.[EXTERNAL_ID] as la_person_id,
-        s47.[START_DTTM] as s47_start_date,
-        s47.[START_DTTM] as s47_authorised_date,
-        cpc.[YOUR_COLUMN_NAME] as s47_outcome,      -- TO DO 
-        cpc.[TRANSFER_IN_FLAG] as icpc_transfer_in, -- TO CHECK
-        cpc.[MEETING_DTTM] as icpc_date,            -- TO CHECK
-        s47.[OUTCOME_CP_FLAG] as icpc_outcome,      -- TO CHECK
-        s47.[COMPLETED_BY_DEPT_ID] as icpc_team,
-        s47.[COMPLETED_BY_USER_STAFF_ID] as icpc_worker_id
-
-    INTO
-        Child_Social.s47_enquiry_icpc
-
-    FROM 
-        Child_Social.FACT_S47 AS s47
-    JOIN
-        Child_Social.FACT_CP_CONFERENCE as cpc ON s47.[EXTERNAL_ID] = cpc.[EXTERNAL_ID];
-
-    -- Set s47_enquiry_id as the primary key for the table
-    ALTER TABLE Child_Social.s47_enquiry_icpc
-    ADD CONSTRAINT PK_s47_enquiry_id
-    PRIMARY KEY (s47_enquiry_id);
-
-    -- Add a foreign key constraint for la_person_id referencing person.la_person_id
+    -- Add foreign key constraint for la_person_id
     ALTER TABLE Child_Social.s47_enquiry_icpc
     ADD CONSTRAINT FK_s47_person
     FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+
+    -- Populate s47_enquiry_icpc table with data
+    INSERT INTO Child_Social.s47_enquiry_icpc (
+        s47_enquiry_id,
+        la_person_id,
+        s47_start_date,
+        s47_authorised_date,
+        s47_outcome,
+        icpc_transfer_in,
+        icpc_date,
+        icpc_outcome,
+        icpc_team,
+        icpc_worker_id
+    )
+    SELECT 
+        s47.[FACT_S47_ID],
+        s47.[EXTERNAL_ID],
+        s47.[START_DTTM],
+        s47.[START_DTTM],
+        CASE 
+            WHEN cpc.[FACT_S47_ID] IS NOT NULL THEN 'CP Plan Started'
+            ELSE 'CP Plan not Required'
+        END,
+        cpc.[TRANSFER_IN_FLAG],
+        cpc.[MEETING_DTTM],
+        s47.[OUTCOME_CP_FLAG],
+        s47.[COMPLETED_BY_DEPT_ID],
+        s47.[COMPLETED_BY_USER_STAFF_ID]
+    FROM 
+        Child_Social.FACT_S47 AS s47
+    LEFT JOIN 
+        Child_Social.FACT_CP_CONFERENCE as cpc ON s47.[FACT_S47_ID] = cpc.[FACT_S47_ID];
 END
+
+
+/* object name: cp_plans
 */
 
-/* TEMP TABLE DEF */
--- Drop the temporary table if it exists
-IF OBJECT_ID('tempdb..#s47_enquiry_icpc') IS NOT NULL 
-    DROP TABLE #s47_enquiry_icpc;
 
--- Create the temp table #s47
-SELECT
-    s47.[FACT_S47_ID] as s47_enquiry_id,
-    s47.[EXTERNAL_ID] as la_person_id,
-    s47.[START_DTTM] as s47_start_date,
-    s47.[START_DTTM] as s47_authorised_date,
-    cpc.[YOUR_COLUMN_NAME] as s47_outcome,      -- TO DO 
-    cpc.[TRANSFER_IN_FLAG] as icpc_transfer_in, -- TO CHECK
-    cpc.[MEETING_DTTM] as icpc_date,            -- TO CHECK
-    s47.[OUTCOME_CP_FLAG] as icpc_outcome,      -- TO CHECK
-    s47.[COMPLETED_BY_DEPT_ID] as icpc_team,
-    s47.[COMPLETED_BY_USER_STAFF_ID] as icpc_worker_id
-INTO
-    #s47_enquiry_icpc
-FROM 
-    Child_Social.FACT_S47 AS s47
-JOIN
-    Child_Social.FACT_CP_CONFERENCE as cpc ON s47.[EXTERNAL_ID] = cpc.[EXTERNAL_ID];
+/* object name: category_of_abuse
+*/
 
--- Set s47_enquiry_id as the primary key for the temp table
-ALTER TABLE #s47_enquiry_icpc
-ADD PRIMARY KEY (s47_enquiry_id);
 
--- Add a foreign key constraint for la_person_id referencing person.la_person_id
-ALTER TABLE #s47_enquiry_icpc
-ADD FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
-/*END TMP TABLE */
+/* object name: cp_visits
+*/
+
+
+/* object name: cp_reviews
+*/
+
+
+/* object name: cp_reviews_risks
+*/
+
+
+/* object name: cla_episodes
+*/
 
 
 
+/* object name: cla_convictions
+*/
+
+-- Check if cla_convictions exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cla_convictions')
 
 
 
+/* object name: cla_health
+*/
 
-/*
+
+/* object name: cla_immunisations
+*/
+
+
+/* object name: substance_misuse
+*/
+
+-- Check if substance_misuse exists
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cla_Substance_misuse')
 BEGIN
-    -- Create cla_Substance_misuse table
+    -- Create cla_Substance_misuse structure
+    CREATE TABLE Child_Social.cla_Substance_misuse (
+        substance_misuse_id INT PRIMARY KEY,
+        la_person_id NVARCHAR(MAX),
+        create_date DATETIME,
+        person_dim_id INT,
+        start_date DATETIME,
+        end_date DATETIME,
+        substance_type_id INT,
+        substance_type_code NVARCHAR(MAX)
+    );
+
+    -- Insert data intocla_Substance_misuse table
+    INSERT INTO Child_Social.cla_Substance_misuse (
+        substance_misuse_id,
+        la_person_id,
+        create_date,
+        person_dim_id,
+        start_date,
+        end_date,
+        substance_type_id,
+        substance_type_code
+    )
     SELECT 
         fsm.[FACT_SUBSTANCE_MISUSE_ID] as substance_misuse_id,
         fsm.[EXTERNAL_ID] as la_person_id,
-        fsm.[CREATE_DTTM] as create_date,
-        fsm.[DIM_PERSON_ID] as person_dim_id,
-        fsm.[START_DTTM] as start_date,
-        fsm.[END_DTTM] as end_date,
-        fsm.[DIM_LOOKUP_SUBSTANCE_TYPE_ID] as substance_type_id,
-        fsm.[DIM_LOOKUP_SUBSTANCE_TYPE_CODE] as substance_type_code
-
-    INTO 
-        Child_Social.cla_Substance_misuse
-
+        -- fsm.[DIM_PERSON_ID] as la_person_id, -- which is it
+        FORMAT(fsm.[START_DTTM], 'dd/MM/yyyy') as substance_misuse_date,
+        fsm.[DIM_LOOKUP_SUBSTANCE_TYPE_CODE] as substance_misused,
+        fsm.[ACCEPT_FLAG] as intervention_received -- needs confirming
     FROM 
         Child_Social.FACT_SUBSTANCE_MISUSE AS fsm;
 
-    -- Set the primary key on substance_misuse_id
-    ALTER TABLE Child_Social.cla_Substance_misuse
-    ADD CONSTRAINT PK_substance_misuse_id
-    PRIMARY KEY (substance_misuse_id);
-
-    -- Add the foreign key constraint for la_person_id
-    ALTER TABLE Child_Social.cla_Substance_misuse
+    -- Add foreign key constraint for la_person_id
+    ALTER Child_Social.cla_Substance_misuse
     ADD CONSTRAINT FK_substance_misuse_person
     FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
-END
+END;
+
+
+
+/* object name: placement
 */
 
-/* TEMP TABLE DEF */
--- Drop the temp table if it exists
-IF OBJECT_ID('tempdb..#cla_Substance_misuse') IS NOT NULL 
-    DROP TABLE #cla_Substance_misuse;
+-- Check if placement exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'placement')
 
--- Create the temporary table #cla_Substance_misuse
-SELECT 
-    fsm.[FACT_SUBSTANCE_MISUSE_ID] as substance_misuse_id,
-    fsm.[EXTERNAL_ID] as la_person_id,
-    fsm.[CREATE_DTTM] as create_date,
-    fsm.[DIM_PERSON_ID] as person_dim_id,
-    fsm.[START_DTTM] as start_date,
-    fsm.[END_DTTM] as end_date,
-    fsm.[DIM_LOOKUP_SUBSTANCE_TYPE_ID] as substance_type_id,
-    fsm.[DIM_LOOKUP_SUBSTANCE_TYPE_CODE] as substance_type_code
 
-INTO 
-    #cla_Substance_misuse
 
-FROM 
-    Child_Social.FACT_SUBSTANCE_MISUSE AS fsm;
 
--- Set the primary key on substance_misuse_id
-ALTER TABLE #cla_Substance_misuse
-ADD CONSTRAINT PK_substance_misuse_id_temp
-PRIMARY KEY (substance_misuse_id);
+-- NEEDS FURTHER WORK
+/* object name: cla_reviews
+*/
 
--- Add the foreign key constraint for la_person_id
--- (You can only add FK constraints in temp tables if you're sure the related table will be available in the same session)
-ALTER TABLE #cla_Substance_misuse
-ADD CONSTRAINT FK_substance_misuse_person_temp
-FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
-/*END TMP TABLE */
+-- Check if cla_reviews exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cla_Substance_misuse')
+BEGIN
+    SELECT 
+    FACT_CLA_REVIEW.[FACT_CLA_REVIEW_ID] as cp_review_id
+    --FACT_CLA_REVIEW.[] as cp_plan_id -- FACT_CLA_ID? 
+    FACT_CLA_REVIEW.[DUE_DTTM] as cp_rev_due
+    --FACT_CLA_REVIEW.[START_DTTM] as cp_rev_date
+    --FACT_CLA_REVIEW.[] as cp_rev_outcome
+    --FACT_CLA_REVIEW.[] as cp_rev_quorate
+    --FACT_CLA_REVIEW.[] as cp_rev_participation
+    --FACT_CLA_REVIEW.[] as cp_rev_cyp_views_quality
+    --FACT_CLA_REVIEW.[] as cp_rev_sufficient_prog
+    --FACT_CLA_REVIEW.[] as cp_review_id
+    --FACT_CLA_REVIEW.[] as cp_review_risks
+
+    INTO #cla_reviews
+
+    FROM FACT_CLA_REVIEW
+END
+
+
+
+
+/* object name: cla_previous_permanence
+*/
+
+/* object name: cla_care_plan
+*/
+
+
+/* object name: cla_visits
+*/
+
+/* object name: sdq_scores
+*/
+
+/* object name: missing
+*/
+
+/* object name: care_leavers
+*/
+
+/* object name: permanence
+*/
+
+
+
+/* object name: send
+*/
+-- Check if send exists
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'send')
+BEGIN
+    -- Create send structure
+    CREATE TABLE Child_Social.send (
+        send_table_id INT,
+        la_person_id NVARCHAR(MAX),
+        send_upn INT,
+        upn_unknown NVARCHAR(MAX),
+        send_uln NVARCHAR(MAX)
+    );
+
+    -- Populate send table with data
+    INSERT INTO Child_Social.send (
+        send_table_id,
+        la_person_id, 
+        send_upn,
+        upn_unknown,
+        send_uln
+    )
+    SELECT 
+        f.FACT_903_DATA_ID as send_table_id,
+        f.EXTERNAL_ID as la_person_id, 
+        f.FACT_903_DATA_ID as send_upn,
+        f.NO_UPN_CODE as upn_unknown,
+        p.ULN as send_uln
+    FROM 
+        Child_Social.FACT_903_DATA AS f
+    LEFT JOIN 
+        Education.DIM_PERSON AS p ON f.DIM_PERSON_ID = p.DIM_PERSON_ID;
+END;
+
+/* ?? Should this actually be pulling from Child_Social.FACT_SENRECORD.DIM_PERSON_ID | Child_Social.FACT_SEN.DIM_PERSON_ID
+*/
+
+
+/* object name: ehcp_assessment
+*/
+
+/* object name: ehcp_named_plan
+*/
+
+/* object name: ehcp_active_plans
+*/
+
+/* object name: send_need
+*/
+
+/* object name: social_worker
+*/
+
+/* object name: pre_proceedings
+*/
+
+
+/* object name: voice_of_child
+*/
+
 

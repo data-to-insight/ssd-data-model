@@ -247,9 +247,20 @@ SELECT
     /* Returns fields */    
     a.assessment_id,
     FORMAT(a.asmt_start_date, 'dd/MM/yyyy') as asmt_start_date,
-    a.asmt_child_seen,
+    -- FACT_SINGLE_ASSESSMENT.SEEN_FLAG  a.asmt_child_seen,
     FORMAT(a.asmt_auth_date, 'dd/MM/yyyy') as asmt_auth_date,
-    a.asmt_outcome,
+ 
+ 
+    a.asmt_outcome, -- TO CHECK
+    -- OUTCOME_STRATEGY_DISCUSSION_FLAG
+OUTCOME_CLA_REQUEST_FLAG
+OUTCOME_PRIVATE_FOSTERING_FLAG
+OUTCOME_LEGAL_ACTION_FLAG
+OUTCOME_PROV_OF_SERVICES_FLAG
+OUTCOME_PROV_OF_SB_CARE_FLAG
+OUTCOME_SPECIALIST_ASSESSMENT_FLAG
+
+
     a.asmt_team,
     a.asmt_worker_id,
 
@@ -257,7 +268,7 @@ SELECT
     d.person_disability -- Disability field - Is this returned or generated??  Yes/No/Unknown 
 
 FROM
-    assessments a
+    --- FACT_INITIAL_ASSESSMENT  assessments a
 INNER JOIN
     person p ON a.la_person_id = p.la_person_id
 LEFT JOIN   -- ensure we get all records even if there's no matching disability
@@ -304,9 +315,9 @@ SELECT
     FORMAT(se.s47_start_date, 'dd/MM/yyyy') AS formatted_s47_start_date, -- Applied date formatting
     FORMAT(se.s47_authorised_date, 'dd/MM/yyyy') AS formatted_s47_authorised_date, -- Applied date formatting
     se.s47outcome,
-    se.icpc_transfer_in,
-    FORMAT(se.icpc_date, 'dd/MM/yyyy') AS formatted_icpc_date, -- Applied date formatting
-    se.icpc_outcome,
+    -- CP_CONF se.icpc_transfer_in, -- CP_CONF
+    -- CP_CONF FORMAT(se.icpc_date, 'dd/MM/yyyy') AS formatted_icpc_date, -- Applied date formatting
+    -- CP_CONF se.icpc_outcome,
     se.icpc_team,
     se.icpc_worker_id,
 
