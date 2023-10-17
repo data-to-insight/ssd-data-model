@@ -56,6 +56,7 @@ TO_CHAR(c.contact_date, 'DD/MM/YYYY') AS formatted_contact_date,
 
 
 
+
 **************************
 SSD AnnexA Returns Queries
 **************************
@@ -67,6 +68,7 @@ SSD AnnexA Returns Queries
 -- Where a contact refers to multiple children, include an entry for each child in the contact."
 
 -- CREATE TEMPORARY TABLE `AA_1_contacts` AS 
+CREATE VIEW AA_1_contacts_vw AS
 SELECT
     /* Common AA fields */
     p.la_person_id,
@@ -108,7 +110,7 @@ WHERE
 -- List 2: Early Help	"All early help assessments in the six months before the date of inspection. 
 -- Also, current early help interventions that are being coordinated through the local authority.
 
--- CREATE TEMPORARY TABLE `AA_2_early_help_assessments` AS 
+CREATE VIEW AA_2_early_help_assessments_vw AS
 SELECT
     /* Common AA fields */
     p.la_person_id,
@@ -157,7 +159,7 @@ WHERE
 -- List 3: Referral	"All referrals received in the six months before the inspection.
 -- Children may appear multiple times on this list if they have received multiple referrals."
 
--- CREATE TEMPORARY TABLE `AA_3_referrals` AS 
+CREATE VIEW AA_3_referrals_vw AS
 SELECT
     /* Common AA fields */
     p.la_person_id,
@@ -221,6 +223,7 @@ WHERE
 -- Ofsted List 4 - Assessments YYYY
 -- SQL Server version
 -- CREATE TEMPORARY TABLE `AA_4_assessments` AS 
+CREATE VIEW AA_4_assessments_vw AS
 SELECT
     /* Common AA fields */
     p.la_person_id,
@@ -286,7 +289,8 @@ WHERE
 -- This includes open S47 enquiries yet to reach a decision where possible.
 -- Where a child has been the subject of multiple section 47 enquiries within the period, please provide one row for each enquiry."
 
--- CREATE TEMPORARY TABLE `AA_5_s47_enquiries` AS 
+-- CREATE TEMPORARY TABLE `AA_5_s47_enquiries` AS
+CREATE VIEW AA_5_s47_enquiries_vw AS
 SELECT
     /* Common AA fields */
     p.la_person_id,
@@ -385,7 +389,8 @@ WHERE
 
 -- THEN Case status = ‘Closed episode’
 
--- CREATE TEMPORARY TABLE `AA_6_children_in_need` AS 
+-- CREATE TEMPORARY TABLE `AA_6_children_in_need` AS
+CREATE VIEW AA_6_children_in_need_vw AS
 SELECT
     /* Common AA fields */ 
     p.la_person_id,
@@ -472,7 +477,8 @@ WHERE
     -- cp end date?
     -- Number of Previous Child Protection Plans?
 
--- CREATE TEMPORARY TABLE `AA_7_child_protection` AS 
+-- CREATE TEMPORARY TABLE `AA_7_child_protection` AS
+CREATE VIEW AA_7_child_protection_vw AS
 SELECT
     /* Common AA fields */
     p.la_person_id,
@@ -580,7 +586,8 @@ GROUP BY
 
 -- Ofsted List 8 - Children in Care YYYY
 
--- CREATE TEMPORARY TABLE `AA_8_children_in_care` AS 
+-- CREATE TEMPORARY TABLE `AA_8_children_in_care` AS
+CREATE VIEW AA_8_children_in_care_vw AS
 SELECT
     /* Common AA fields */ 
     p.la_person_id,
@@ -631,7 +638,8 @@ LEFT JOIN   -- immigration_status table (UASC)
 -- Ofsted List 9 - Care Leavers YYYY
 -- UASC, EndReasonDesc ??
 
--- CREATE TEMPORARY TABLE `AA_9_care_leavers` AS 
+-- CREATE TEMPORARY TABLE `AA_9_care_leavers` AS
+CREATE VIEW AA_9_care_leavers_vw AS
 SELECT
     /* Common AA fields */ 
     p.la_person_id,
@@ -689,7 +697,8 @@ WHERE
 
 --Ofsted List 10 - Adoption YYYY
 
--- CREATE TEMPORARY TABLE `AA_10_adoption` AS 
+-- CREATE TEMPORARY TABLE `AA_10_adoption` AS
+CREATE VIEW AA_10_adoption_vw AS
 SELECT
     /* Common AA fields */ 
     p.la_person_id,
@@ -749,8 +758,14 @@ WHERE
 
 
 
+
+
+
+
+
 -- Spec/table references --
 
+/* Below are notes on object sql */
 
 
 -- disability

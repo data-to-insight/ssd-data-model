@@ -351,123 +351,12 @@ CREATE INDEX IDX_contact_person ON #ssd_contact(la_person_id);
 
 
 
-/* object name: early help
-*/
-
--- Check if early_help exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_early_help')
-
-/*
-eh_episode_id
-la_person_id
-eh_epi_start_date
-eh_epi_end_date
-eh_epi_reason
-eh_epi_end_reason
-eh_epi_org
-eh_epi_worker_id
-*/
-
-
-
-/* object name: cin_episodes
-*/
--- Check if cin_episodes exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cin_episodes')
-
-/*
-cin_referral_id
-la_person_id
-cin_ref_date
-cin_primary_need
-cin_ref_source
-cin_ref_outcome
-cin_close_reason
-cin_close_date
-cin_ref_team
-cin_ref_worker_id
-*/
-
-
-
-/* object name: assessments
-*/
--- Check if assessments exists
-IF OBJECT_ID('tempdb..#ssd_assessment') IS NOT NULL DROP TABLE #ssd_assessment;
-
-/*
-assessment_id
-la_person_id
-asmt_start_date
-asmt_child_seen
-asmt_auth_date
-asmt_outcome
-asmt_team
-asmt_worker_id
-
--- ??
--- Child_Social FACT_CORE_ASSESSMENT	EXTERNAL_ID
--- Child_Social FACT_INITIAL_ASSESSMENT	EXTERNAL_ID
--- Child_Social FACT_SINGLE_ASSESSMENT	EXTERNAL_ID
-
--- dbo	DIM_ASSESSMENT_DETAILS	EXTERNAL_ID
-*/
-
-
-
-/* object name: assessment_factors
-*/
-
--- Check if assessment_factors exists
-IF OBJECT_ID('tempdb..#ssd_assessment') IS NOT NULL DROP TABLE #ssd_assessment_factors;
-/*
-asmt_id
-asmt_factors
-*/
-
-
-
-
-/* object name: cin_plans
-*/
-
--- Check if cin_plans exists
-IF OBJECT_ID('tempdb..#ssd_cin_plans') IS NOT NULL DROP TABLE #ssd_cin_plans;
-/*
-cin_plan_id
-la_person_id
-cin_plan_Start
-cin_plan_end
-cin_team
-cin_worker_id
-*/
-
-
-/* object name: cin_visits
-*/
-
--- Check if cin_visits exists
-IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
-
-/*
-cin_visit_id
-cin_plan_id
-cin_visit_date
-cin_visit_seen
-cin_visit_seen_alone
-cin_visit_bedroom
-
-*/
-
-
-
-
-
 /* object name: s47
 */
 
 -- Drop the temporary table if it exists
-IF OBJECT_ID('tempdb..#ssd_s47_enquiry_icpc') IS NOT NULL DROP TABLE #ssd_s47_enquiry_icpc;
+IF OBJECT_ID('tempdb..#ssd_s47_enquiry_icpc') IS NOT NULL 
+    DROP TABLE #ssd_s47_enquiry_icpc;
 
 -- Create the temp table #s47
 SELECT
@@ -503,47 +392,7 @@ ADD FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 
 
 
-/* object name: cp_plans
-*/
-IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
-
-
-/* object name: category_of_abuse
-*/
-
-
-/* object name: cp_visits
-*/
-
-
-/* object name: cp_reviews
-*/
-
-
-/* object name: cp_reviews_risks
-*/
-
-
-/* object name: cla_episodes
-*/
-
-
-
-/* object name: cla_convictions
-*/
-
-
-
-
-/* object name: cla_health
-*/
-
-
-/* object name: cla_immunisations
-*/
-
-
-/* object name: substance_misuse
+/* object name: substance_abuse table
 */
 
 -- Check if exists, & drop it
@@ -579,68 +428,6 @@ ADD CONSTRAINT FK_substance_misuse_person_temp
 FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 /*END TMP TABLE */
 
-
-
-
-
-/* object name: placement
-*/
-
--- Check if placement exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_placement')
-
-
-
-
-
-/* object name: cla_reviews
-*/
-
--- Check if cla_reviews exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cla_Substance_misuse')
-BEGIN
-    SELECT 
-    FACT_CLA_REVIEW.[FACT_CLA_REVIEW_ID] as cp_review_id
-    --FACT_CLA_REVIEW.[] as cp_plan_id -- FACT_CLA_ID? 
-    FACT_CLA_REVIEW.[DUE_DTTM] as cp_rev_due
-    --FACT_CLA_REVIEW.[START_DTTM] as cp_rev_date
-    --FACT_CLA_REVIEW.[] as cp_rev_outcome
-    --FACT_CLA_REVIEW.[] as cp_rev_quorate
-    --FACT_CLA_REVIEW.[] as cp_rev_participation
-    --FACT_CLA_REVIEW.[] as cp_rev_cyp_views_quality
-    --FACT_CLA_REVIEW.[] as cp_rev_sufficient_prog
-    --FACT_CLA_REVIEW.[] as cp_review_id
-    --FACT_CLA_REVIEW.[] as cp_review_risks
-
-    INTO #ssd_cla_reviews
-
-    FROM FACT_CLA_REVIEW
-END
-
-
-
-
-/* object name: cla_previous_permanence
-*/
-
-/* object name: cla_care_plan
-*/
-
-
-/* object name: cla_visits
-*/
-
-/* object name: sdq_scores
-*/
-
-/* object name: missing
-*/
-
-/* object name: care_leavers
-*/
-
-/* object name: permanence
-*/
 
 
 /* object name: send
@@ -684,13 +471,13 @@ LEFT JOIN
 
 /* object name: social_worker
 */
--- FACT_CASEWORKER.FACT_CASEWORKER_ID as sw_id
--- sw_epi_start_date
--- sw_epi_end_date
--- sw_change_reason
--- FACT_CASEWORKER.AGENCY as sw_agency
--- FACT_CASEWORKER.DIM_LOOKUP_PROF_ROLE_ID_CODE as sw_role
--- sw_caseload
+FACT_CASEWORKER.FACT_CASEWORKER_ID as sw_id
+sw_epi_start_date
+sw_epi_end_date
+sw_change_reason
+FACT_CASEWORKER.AGENCY as sw_agency
+FACT_CASEWORKER.DIM_LOOKUP_PROF_ROLE_ID_CODE as sw_role
+sw_caseload
 -- sw_qualification
 
 
@@ -705,3 +492,30 @@ LEFT JOIN
 
 
 
+
+
+
+/* object name: assessment
+*/
+
+-- Drop the temp table if it already exists
+IF OBJECT_ID('tempdb..#ssd_assessment') IS NOT NULL
+   DROP TABLE #ssd_assessment;
+
+-- ??
+-- Child_Social FACT_CORE_ASSESSMENT	EXTERNAL_ID
+-- Child_Social FACT_INITIAL_ASSESSMENT	EXTERNAL_ID
+-- Child_Social FACT_SINGLE_ASSESSMENT	EXTERNAL_ID
+
+-- dbo	DIM_ASSESSMENT_DETAILS	EXTERNAL_ID
+
+
+
+
+-- cin_plans table
+
+-- FACT_REFERRALS	REFRL_START_DTTM
+-- FACT_REFERRALS	DIM_LOOKUP_CATEGORY_OF_NEED_CODE
+
+
+-- FACT_SINGLE_ASSESSMENT	SEEN_FLAG

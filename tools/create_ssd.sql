@@ -5,18 +5,24 @@ Full review needed of max/exagerated/default new field type sizes e.g. family_id
 */
 
 
+
+/* Clean up block */
+-- DROP TABLE Child_Social.ssd_person;
+
+
 /*
 Start of SSD table creation 
 */
 
+USE HDM;
 
 /* object name: person
 */
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'person')
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_person')
 BEGIN
-    -- Create 'person' structure
-    CREATE TABLE Child_Social.person (
-        la_person_id NVARCHAR(MAX) PRIMARY KEY,
+    -- Create 'ssd_person' structure
+    CREATE TABLE #ssd_person (
+        la_person_id NVARCHAR(255) PRIMARY KEY, 
         person_sex NVARCHAR(MAX),
         person_gender NVARCHAR(MAX),
         person_ethnicity NVARCHAR(MAX),
@@ -29,9 +35,9 @@ BEGIN
         person_nationality NVARCHAR(MAX),
         person_is_mother CHAR(1)
     );
-    
-    -- Insert data into 'person'
-    INSERT INTO Child_Social.person (
+
+    -- Insert data into 'ssd_person'
+    INSERT INTO ssd_person (
         la_person_id,
         person_sex,
         person_gender,
@@ -52,23 +58,31 @@ BEGIN
         p.[ETHNICITY_MAIN_CODE],
         p.[BIRTH_DTTM],
         p.[UPN],
-        p.[NO_UPN_CODE],
+
+        (SELECT TOP 1 f.NO_UPN_CODE              -- Subquery to fetch the NO_UPN_CODE.
+        FROM Child_Social.FACT_903_DATA f       
+        WHERE f.EXTERNAL_ID = p.EXTERNAL_ID
+        AND f.NO_UPN_CODE IS NOT NULL
+        ORDER BY f.NO_UPN_CODE DESC),  -- desc order to ensure a non-null value first
+
         p.[EHM_SEN_FLAG],
         p.[DOB_ESTIMATED],
         p.[DEATH_DTTM],
         p.[NATNL_CODE],
-        CASE WHEN fc.[DIM_PERSON_ID] IS NOT NULL THEN 'Y' ELSE 'N' END -- needs confirming
+        CASE WHEN fc.[DIM_PERSON_ID] IS NOT NULL THEN 'Y' ELSE 'N' END 
     FROM 
         Child_Social.DIM_PERSON AS p
     LEFT JOIN
         Child_Social.FACT_CPIS_UPLOAD AS fc
     ON 
         p.[EXTERNAL_ID] = fc.[EXTERNAL_ID]
+    WHERE 
+        p.[EXTERNAL_ID] IS NOT NULL
     ORDER BY
         p.[EXTERNAL_ID] ASC;
 
     -- Create a non-clustered index on la_person_id for quicker lookups and joins
-    CREATE INDEX IDX_person_la_person_id ON Child_Social.person(la_person_id);
+    CREATE INDEX IDX_ssd_person_la_person_id ON ssd_person(la_person_id);
 END;
 
 
@@ -80,11 +94,11 @@ END;
 */
 -- part of early help system(s).
 
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'family')
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_family')
 BEGIN
     -- Create 'family'
-    CREATE TABLE Child_Social.family (
-        DIM_TF_FAMILY_ID INT PRIMARY KEY, 
+    CREATE TABLE Child_Social.ssd_family (
+        DIM_TF_FAMILY_ID NVARCHAR(255) PRIMARY KEY, 
         family_id NVARCHAR(255),
         la_person_id NVARCHAR(255),
         
@@ -93,7 +107,7 @@ BEGIN
     );
 
     -- Insert data from Singleview.DIM_TF_FAMILY into newly created table
-    INSERT INTO Child_Social.family (
+    INSERT INTO Child_Social.ssd_family (
         DIM_TF_FAMILY_ID, 
         family_id, 
         la_person_id
@@ -105,21 +119,21 @@ BEGIN
     FROM Singleview.DIM_TF_FAMILY;
 
     -- Create a non-clustered index on foreign key
-    CREATE INDEX IDX_family_person ON Child_Social.family(la_person_id);
+    CREATE INDEX IDX_family_person ON Child_Social.ssd_family(la_person_id);
 END;
 
 
 
-/* object name: address
+/* object name: ssd_address
 */
 
 -- Check if address exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'address')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_address')
 BEGIN
     -- Create address if it doesn't exist
-    CREATE TABLE Child_Social.address (
-        address_id INT PRIMARY KEY,
-        la_person_id NVARCHAR(MAX), -- Assuming EXTERNAL_ID corresponds to la_person_id
+    CREATE TABLE Child_Social.ssd_address (
+        address_id NVARCHAR(255) PRIMARY KEY,
+        la_person_id NVARCHAR(255), -- Assuming EXTERNAL_ID corresponds to la_person_id
         address_type NVARCHAR(MAX),
         address_start DATETIME,
         address_end DATETIME,
@@ -128,23 +142,20 @@ BEGIN
     );
 
     -- Add foreign key constraint for la_person_id
-    ALTER TABLE Child_Social.address
+    ALTER TABLE Child_Social.ssd_address
     ADD CONSTRAINT FK_address_person
-    FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+    FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 
     -- Non-clustered index on foreign key
-    CREATE INDEX IDX_address_person 
-    ON Child_Social.address(la_person_id);
+    CREATE INDEX IDX_address_person ON Child_Social.ssd_address(la_person_id);
 
     -- Non-clustered indexes on address_start and address_end
-    CREATE INDEX IDX_address_start 
-    ON Child_Social.address(address_start);
+    CREATE INDEX IDX_address_start ON Child_Social.ssd_address(address_start);
 
-    CREATE INDEX IDX_address_end 
-    ON Child_Social.address(address_end);
+    CREATE INDEX IDX_address_end ON Child_Social.ssd_address(address_end);
 
     -- Now, insert data into newly created table
-    INSERT INTO Child_Social.address (
+    INSERT INTO Child_Social.ssd_address (
         address_id, 
         la_person_id, 
         address_type, 
@@ -178,29 +189,30 @@ END
 
 
 
-/* object name: disability 
+
+/* object name: ssd_disability 
 */
 -- Check if disability exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'disability')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_disability')
 BEGIN
     -- Create disability if it doesn't exist
-    CREATE TABLE Child_Social.disability (
-        disability_id INT PRIMARY KEY,
-        la_person_id NVARCHAR(MAX),
+    CREATE TABLE Child_Social.ssd_disability (
+        disability_id NVARCHAR(255) PRIMARY KEY,
+        la_person_id NVARCHAR(255),
         person_disability NVARCHAR(MAX)
     );
 
     -- Add foreign key constraint for la_person_id
-    ALTER TABLE Child_Social.disability
+    ALTER TABLE Child_Social.ssd_disability
     ADD CONSTRAINT FK_disability_person
-    FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+    FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 
     -- Non-clustered index on foreign key
     CREATE INDEX IDX_disability_la_person_id 
-    ON Child_Social.disability(la_person_id);
+    ON Child_Social.ssd_disability(la_person_id);
 
     -- Now, insert data into newly created table
-    INSERT INTO Child_Social.disability (
+    INSERT INTO Child_Social.ssd_disability (
         disability_id, 
         la_person_id, 
         person_disability
@@ -223,35 +235,35 @@ END
 */
 
 -- Check if immigration_status exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'immigration_status')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_immigration_status')
 BEGIN
     -- Create immigration_status if it doesn't exist
-    CREATE TABLE Child_Social.immigration_status (
-        immigration_status_id INT PRIMARY KEY,
-        la_person_id NVARCHAR(MAX),
+    CREATE TABLE Child_Social.ssd_immigration_status (
+        immigration_status_id NVARCHAR(255) PRIMARY KEY,
+        la_person_id NVARCHAR(255),
         immigration_status_start DATETIME,
         immigration_status_end DATETIME,
         immigration_status NVARCHAR(MAX)
     );
 
     -- Add foreign key constraint for la_person_id
-    ALTER TABLE Child_Social.immigration_status
+    ALTER TABLE Child_Social.ssd_immigration_status
     ADD CONSTRAINT FK_immigration_status_person
     FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
 
     -- Non-clustered index on foreign key
     CREATE INDEX IDX_immigration_status_la_person_id 
-    ON Child_Social.immigration_status(la_person_id);
+    ON Child_Social.ssd_immigration_status(la_person_id);
 
     -- Non-clustered indexes on immigration_status_start and immigration_status_end
     CREATE INDEX IDX_immigration_status_start 
-    ON Child_Social.immigration_status(immigration_status_start);
+    ON Child_Social.ssd_immigration_status(immigration_status_start);
 
     CREATE INDEX IDX_immigration_status_end 
-    ON Child_Social.immigration_status(immigration_status_end);
+    ON Child_Social.ssd_immigration_status(immigration_status_end);
 
     -- Now, insert data into newly created table
-    INSERT INTO Child_Social.immigration_status (
+    INSERT INTO Child_Social.ssd_immigration_status (
         immigration_status_id, 
         la_person_id, 
         immigration_status_start,
@@ -274,7 +286,7 @@ END
 /* object name: mother
 */
 -- Check if mother exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'mother')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_mother')
 /*
 person_child_id
 la_person_id
@@ -288,20 +300,20 @@ person_child_dob
 -- Check if legal_status exists
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES 
                WHERE TABLE_SCHEMA = 'Child_Social' 
-               AND TABLE_NAME = 'legal_status')
+               AND TABLE_NAME = 'ssd_legal_status')
 BEGIN
 
-    -- Create legal_status structure
-    CREATE TABLE Child_Social.legal_status (
-        legal_status_id INT PRIMARY KEY,
-        la_person_id NVARCHAR(MAX),
+    -- Create ssd_legal_status structure
+    CREATE TABLE Child_Social.ssd_legal_status (
+        legal_status_id NVARCHAR(255) PRIMARY KEY,
+        la_person_id NVARCHAR(255),
         legal_status_start DATETIME,
         legal_status_end DATETIME,
-        person_dim_id INT
+        person_dim_id NVARCHAR(255)
     );
 
-    -- Insert data into legal_status table
-    INSERT INTO Child_Social.legal_status (
+    -- Insert data into ssd_legal_status table
+    INSERT INTO Child_Social.ssd_legal_status (
         legal_status_id,
         la_person_id,
         legal_status_start,
@@ -318,9 +330,9 @@ BEGIN
         Child_Social.FACT_LEGAL_STATUS AS fls;
 
     -- Add foreign key constraint linking la_person_id in legal_status to la_person_id in person
-    ALTER TABLE Child_Social.legal_status
+    ALTER TABLE Child_Social.ssd_legal_status
     ADD CONSTRAINT FK_legal_status_person
-    FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+    FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 
 END;
 
@@ -329,27 +341,27 @@ END;
 /* object name: contact
 */
 -- Check if contact exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'contact')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_contact')
 BEGIN
     -- Create contact structure
-    CREATE TABLE Child_Social.contact (
-        contact_id INT PRIMARY KEY,
-        la_person_id NVARCHAR(MAX),
+    CREATE TABLE Child_Social.ssd_contact (
+        contact_id NVARCHAR(255) PRIMARY KEY,
+        la_person_id NVARCHAR(255),
         contact_start DATETIME,
         contact_source NVARCHAR(MAX),
         contact_outcome NVARCHAR(MAX)
     );
 
     -- Add foreign key constraint for la_person_id
-    ALTER TABLE Child_Social.contact
+    ALTER TABLE Child_Social.ssd_contact
     ADD CONSTRAINT FK_contact_person
-    FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+    FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 
     -- Create a non-clustered index on la_person_id for quicker lookups and joins
-    CREATE INDEX IDX_contact_person ON Child_Social.contact(la_person_id);
+    CREATE INDEX IDX_contact_person ON Child_Social.ssd_contact(la_person_id);
 
     -- Insert data into newly created table
-    INSERT INTO Child_Social.contact (
+    INSERT INTO Child_Social.ssd_contact (
         contact_id, 
         la_person_id, 
         contact_start,
@@ -374,7 +386,7 @@ END
 */
 
 -- Check if early_help exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'early_help')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_early_help')
 
 /*
 eh_episode_id
@@ -392,7 +404,7 @@ eh_epi_worker_id
 /* object name: cin_episodes
 */
 -- Check if cin_episodes exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cin_episodes')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cin_episodes')
 
 /*
 cin_referral_id
@@ -412,7 +424,7 @@ cin_ref_worker_id
 /* object name: assessments
 */
 -- Check if assessments exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'assessments')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_assessments')
 
 /*
 assessment_id
@@ -438,7 +450,7 @@ asmt_worker_id
 */
 
 -- Check if assessment_factors exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'assessment_factors')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_assessment_factors')
 
 /*
 asmt_id
@@ -452,7 +464,7 @@ asmt_factors
 */
 
 -- Check if cin_plans exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cin_plans')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cin_plans')
 
 /*
 cin_plan_id
@@ -468,7 +480,7 @@ cin_worker_id
 */
 
 -- Check if cin_visits exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cin_visits')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cin_visits')
 
 /*
 cin_visit_id
@@ -484,12 +496,12 @@ cin_visit_bedroom
 /* object name: s47
 */
 -- Check if s47_enquiry_icpc exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 's47_enquiry_icpc')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_s47_enquiry_icpc')
 BEGIN
     -- Create s47_enquiry_icpc structure
-    CREATE TABLE Child_Social.s47_enquiry_icpc (
-        s47_enquiry_id INT PRIMARY KEY,
-        la_person_id NVARCHAR(MAX),
+    CREATE TABLE Child_Social.ssd_s47_enquiry_icpc (
+        s47_enquiry_id NVARCHAR(255) PRIMARY KEY,
+        la_person_id NVARCHAR(255),
         s47_start_date DATETIME,
         s47_authorised_date DATETIME,
         s47_outcome NVARCHAR(MAX),
@@ -501,12 +513,12 @@ BEGIN
     );
 
     -- Add foreign key constraint for la_person_id
-    ALTER TABLE Child_Social.s47_enquiry_icpc
+    ALTER TABLE Child_Social.ssd_s47_enquiry_icpc
     ADD CONSTRAINT FK_s47_person
-    FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+    FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 
     -- Populate s47_enquiry_icpc table with data
-    INSERT INTO Child_Social.s47_enquiry_icpc (
+    INSERT INTO Child_Social.ssd_s47_enquiry_icpc (
         s47_enquiry_id,
         la_person_id,
         s47_start_date,
@@ -568,7 +580,7 @@ END
 */
 
 -- Check if cla_convictions exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cla_convictions')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cla_convictions')
 
 
 
@@ -584,22 +596,22 @@ IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Chi
 */
 
 -- Check if substance_misuse exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cla_Substance_misuse')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cla_Substance_misuse')
 BEGIN
     -- Create cla_Substance_misuse structure
-    CREATE TABLE Child_Social.cla_Substance_misuse (
-        substance_misuse_id INT PRIMARY KEY,
+    CREATE TABLE Child_Social.ssd_cla_Substance_misuse (
+        substance_misuse_id NVARCHAR(255) PRIMARY KEY,
         la_person_id NVARCHAR(MAX),
         create_date DATETIME,
-        person_dim_id INT,
+        person_dim_id NVARCHAR(255),
         start_date DATETIME,
         end_date DATETIME,
-        substance_type_id INT,
+        substance_type_id NVARCHAR(255),
         substance_type_code NVARCHAR(MAX)
     );
 
-    -- Insert data intocla_Substance_misuse table
-    INSERT INTO Child_Social.cla_Substance_misuse (
+    -- Insert data into cla_Substance_misuse table
+    INSERT INTO Child_Social.ssd_cla_Substance_misuse (
         substance_misuse_id,
         la_person_id,
         create_date,
@@ -620,9 +632,9 @@ BEGIN
         Child_Social.FACT_SUBSTANCE_MISUSE AS fsm;
 
     -- Add foreign key constraint for la_person_id
-    ALTER Child_Social.cla_Substance_misuse
+    ALTER Child_Social.ssd_cla_substance_misuse
     ADD CONSTRAINT FK_substance_misuse_person
-    FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id);
+    FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 END;
 
 
@@ -631,17 +643,17 @@ END;
 */
 
 -- Check if placement exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'placement')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_placement')
 
 
 
 
--- NEEDS FURTHER WORK
+
 /* object name: cla_reviews
 */
 
 -- Check if cla_reviews exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'cla_Substance_misuse')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cla_Substance_misuse')
 BEGIN
     SELECT 
     FACT_CLA_REVIEW.[FACT_CLA_REVIEW_ID] as cp_review_id
@@ -656,7 +668,7 @@ BEGIN
     --FACT_CLA_REVIEW.[] as cp_review_id
     --FACT_CLA_REVIEW.[] as cp_review_risks
 
-    INTO #cla_reviews
+    INTO #ssd_cla_reviews
 
     FROM FACT_CLA_REVIEW
 END
@@ -691,19 +703,19 @@ END
 /* object name: send
 */
 -- Check if send exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'send')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_send')
 BEGIN
     -- Create send structure
-    CREATE TABLE Child_Social.send (
-        send_table_id INT,
-        la_person_id NVARCHAR(MAX),
-        send_upn INT,
+    CREATE TABLE Child_Social.ssd_send (
+        send_table_id NVARCHAR(255),
+        la_person_id NVARCHAR(255),
+        send_upn NVARCHAR(255),
         upn_unknown NVARCHAR(MAX),
         send_uln NVARCHAR(MAX)
     );
 
     -- Populate send table with data
-    INSERT INTO Child_Social.send (
+    INSERT INTO Child_Social.ssd_send (
         send_table_id,
         la_person_id, 
         send_upn,
@@ -740,6 +752,15 @@ END;
 
 /* object name: social_worker
 */
+FACT_CASEWORKER.FACT_CASEWORKER_ID as sw_id
+sw_epi_start_date
+sw_epi_end_date
+sw_change_reason
+FACT_CASEWORKER.AGENCY as sw_agency
+FACT_CASEWORKER.DIM_LOOKUP_PROF_ROLE_ID_CODE as sw_role
+sw_caseload
+-- sw_qualification
+
 
 /* object name: pre_proceedings
 */
