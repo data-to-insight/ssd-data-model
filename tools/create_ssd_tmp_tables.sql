@@ -496,9 +496,6 @@ LEFT JOIN Child_Social.FACT_CP_CONFERENCE as cpc ON s47.[FACT_S47_ID] = cpc.[FAC
 ALTER TABLE #ssd_s47_enquiry_icpc
 ADD PRIMARY KEY (s47_enquiry_id);
 
--- Add a foreign key constraint for la_person_id referencing person.la_person_id
-ALTER TABLE #ssd_s47_enquiry_icpc
-ADD FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 
 
 
@@ -597,7 +594,7 @@ IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Chi
 */
 
 -- Check if cla_reviews exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cla_Substance_misuse')
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cla_reviews')
 BEGIN
     SELECT 
     FACT_CLA_REVIEW.[FACT_CLA_REVIEW_ID] as cp_review_id
@@ -652,6 +649,7 @@ IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL
 
 -- Create the temporary table 
 SELECT 
+    -- need id field
     f.EXTERNAL_ID, 
     f.FACT_903_DATA_ID,
     f.DIM_PERSON_ID, 
