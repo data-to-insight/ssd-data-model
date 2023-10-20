@@ -82,12 +82,35 @@ ON
     p.[EXTERNAL_ID] = fc.[EXTERNAL_ID]
 WHERE 
     p.[EXTERNAL_ID] IS NOT NULL
+AND (
+    EXISTS (
+        SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
+        WHERE fr.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
+        AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+    )
+    OR EXISTS (
+        SELECT 1 FROM Child_Social.FACT_CONTACTS fc
+        WHERE fc.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
+        AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+    )
+    OR EXISTS (
+        SELECT 1 FROM Child_Social.FACT_EHCP_EPISODE fe 
+        WHERE fe.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
+        AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+    )
+)
 ORDER BY
     p.[EXTERNAL_ID] ASC;
 
 -- Create a non-clustered index on la_person_id for quicker lookups and joins
 CREATE INDEX IDX_ssd_person_la_person_id ON Child_Social.ssd_person(la_person_id);
 
+-- has open referral - FACT_REFERRALS.REFRL_START_DTTM
+-- contact in last 6yrs - Child_Social.FACT_CONTACTS.CONTACT_DTTM
+-- ehcp request in last 6yrs - Child_Social.FACT_EHCP_EPISODE.REQUEST_DTTM ;
+-- active plan or has been active in 6yrs
+-- eh_referral open in last 6yrs - Child_Social.FACT_REFERRALS.REFRL_START_DTTM
+-- record in send - where from ? Child_Social.FACT_SEN, DIM_LOOKUP_SEN, DIM_LOOKUP_SEN_TYPE
 
 DROP TABLE Child_Social.ssd_person;
 

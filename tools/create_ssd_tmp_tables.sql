@@ -1,106 +1,65 @@
 
 USE HDM;
 
+-- ssd time frame (YRS)
+DECLARE @YearsBack INT = 6;
+
+-- Query run time vars
 DECLARE @StartTime DATETIME, @EndTime DATETIME;
--- Record the start time
-SET @StartTime = GETDATE();
+SET @StartTime = GETDATE(); -- Record the start time
 
 
 
-/* object name: person 
+/* Template
+=============================================================================
+Object Name: 
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
--- -- Check if exists, & drop it
--- IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL 
---     DROP TABLE #ssd_person;
-
--- -- Create '#ssd_person' structure
--- CREATE TABLE #ssd_person (
---     la_person_id NVARCHAR(255) PRIMARY KEY, 
---     person_sex NVARCHAR(MAX),
---     person_gender NVARCHAR(MAX),
---     person_ethnicity NVARCHAR(MAX),
---     person_dob DATETIME,
---     person_upn NVARCHAR(MAX),
---     person_upn_unknown NVARCHAR(MAX),
---     person_send NVARCHAR(MAX),
---     person_expected_dob NVARCHAR(MAX),
---     person_death_date DATETIME,
---     person_nationality NVARCHAR(MAX),
---     person_is_mother CHAR(1)
--- );
-
--- -- Insert data into '#ssd_person'
--- INSERT INTO #ssd_person (
---     la_person_id,
---     person_sex,
---     person_gender,
---     person_ethnicity,
---     person_dob,
---     person_upn,
---     person_upn_unknown,
---     person_send,
---     person_expected_dob,
---     person_death_date,
---     person_nationality,
---     person_is_mother
--- )
--- SELECT TOP 100 
---     p.[EXTERNAL_ID],
---     p.[DIM_LOOKUP_VARIATION_OF_SEX_CODE],
---     p.[GENDER_MAIN_CODE],
---     p.[ETHNICITY_MAIN_CODE],
---     p.[BIRTH_DTTM],
---     p.[UPN],
-
--- 	(SELECT TOP 1 f.NO_UPN_CODE              -- Subquery to fetch the NO_UPN_CODE.
--- 	 FROM Child_Social.FACT_903_DATA f       -- This *unlikely* to be the best source
--- 	 WHERE f.EXTERNAL_ID = p.EXTERNAL_ID
--- 	 AND f.NO_UPN_CODE IS NOT NULL
--- 	 ORDER BY f.NO_UPN_CODE DESC),  -- desc order to ensure a non-null value first
-
---     p.[EHM_SEN_FLAG],
---     p.[DOB_ESTIMATED],
---     p.[DEATH_DTTM],
---     p.[NATNL_CODE],
---     CASE WHEN fc.[DIM_PERSON_ID] IS NOT NULL THEN 'Y' ELSE 'N' END 
--- FROM 
---     Child_Social.DIM_PERSON AS p
--- LEFT JOIN
---     Child_Social.FACT_CPIS_UPLOAD AS fc
--- ON 
---     p.[EXTERNAL_ID] = fc.[EXTERNAL_ID]
--- WHERE 
---     p.[EXTERNAL_ID] IS NOT NULL
--- ORDER BY
---     p.[EXTERNAL_ID] ASC;
-
--- -- Create non-clustered index on la_person_id
--- CREATE INDEX IDX_ssd_person_la_person_id ON #ssd_person(la_person_id);
 
 
-/* object name: person 
+
+/*
+=============================================================================
+Object Name: ssd_person
+Description: person/child details
+Author: D2I
+Last Modified Date: 2023-10-20
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: Need to confirm FACT_903_DATA as source of mother related data
+Dependencies: 
+- DIM_PERSON
+- FACT_REFERRALS
+- FACT_CONTACTS
+- FACT_EHCP_EPISODE
+- FACT_903_DATA
+=============================================================================
 */
 
--- Check if exists, & drop it
-IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL 
-    DROP TABLE #ssd_person;
+/* If the temporary table exists, drop it */
+IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
--- Create and populate '#ssd_person' table using SELECT INTO
-SELECT TOP 100 
+SELECT 
     p.[EXTERNAL_ID] AS la_person_id,
     p.[DIM_LOOKUP_VARIATION_OF_SEX_CODE] AS person_sex,
     p.[GENDER_MAIN_CODE] AS person_gender,
     p.[ETHNICITY_MAIN_CODE] AS person_ethnicity,
     p.[BIRTH_DTTM] AS person_dob,
     p.[UPN] AS person_upn,
-
-	(SELECT TOP 1 f.NO_UPN_CODE              -- Subquery to fetch the NO_UPN_CODE.
-	 FROM Child_Social.FACT_903_DATA f       -- This *unlikely* to be the best source
-	 WHERE f.EXTERNAL_ID = p.EXTERNAL_ID
-	 AND f.NO_UPN_CODE IS NOT NULL
-	 ORDER BY f.NO_UPN_CODE DESC) AS person_upn_unknown,  -- desc order to ensure a non-null value first
-
+    (SELECT TOP 1 f.NO_UPN_CODE
+    FROM Child_Social.FACT_903_DATA f
+    WHERE f.EXTERNAL_ID = p.EXTERNAL_ID
+    AND f.NO_UPN_CODE IS NOT NULL
+    ORDER BY f.NO_UPN_CODE DESC) AS person_upn_unknown,
     p.[EHM_SEN_FLAG] AS person_send,
     p.[DOB_ESTIMATED] AS person_expected_dob,
     p.[DEATH_DTTM] AS person_death_date,
@@ -116,14 +75,44 @@ ON
     p.[EXTERNAL_ID] = fc.[EXTERNAL_ID]
 WHERE 
     p.[EXTERNAL_ID] IS NOT NULL
+AND (
+    EXISTS (
+        SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
+        WHERE fr.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
+        AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+    )
+    OR EXISTS (
+        SELECT 1 FROM Child_Social.FACT_CONTACTS fc
+        WHERE fc.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
+        AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+    )
+    OR EXISTS (
+        SELECT 1 FROM Child_Social.FACT_EHCP_EPISODE fe 
+        WHERE fe.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
+        AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+    )
+)
 ORDER BY
     p.[EXTERNAL_ID] ASC;
 
--- Create non-clustered index on la_person_id
+-- Create a non-clustered index on la_person_id for quicker lookups and joins in the temp table
 CREATE INDEX IDX_ssd_person_la_person_id ON #ssd_person(la_person_id);
 
 
 
+/* 
+=============================================================================
+Object Name: ssd_family
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
 -- Check if exists, & drop it
 IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
@@ -140,10 +129,19 @@ CREATE INDEX IDX_family_person ON #ssd_family(la_person_id);
 
 
 
-
-/* object name: address
+/* 
+=============================================================================
+Object Name: ssd_address
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
 -- Check if exists, & drop it
 IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
@@ -173,7 +171,7 @@ FROM
 ORDER BY
     pa.[EXTERNAL_ID] ASC;
 
--- Add primary key constraint to address_id
+-- Add primary key
 ALTER TABLE #ssd_address ADD CONSTRAINT PK_address_id PRIMARY KEY (address_id);
 
 -- Non-clustered index on la_person_id
@@ -186,8 +184,18 @@ CREATE INDEX IDX_address_end ON #ssd_address(address_end);
 
 
 
-
-/* object name: disability
+/* 
+=============================================================================
+Object Name: ssd_disability
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 -- Check if exists, & drop it
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL 
@@ -232,12 +240,22 @@ IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 
 
 
-
-
--- immigration_status table
-
+/* 
+=============================================================================
+Object Name: ssd_immigration_status
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+-- Check if exists, & drop it
 IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
--- Create the immigration_status table if it doesn't exist
+
 SELECT 
     is.[FACT_IMMIGRATION_STATUS_ID] as immigration_status_id,
     is.[EXTERNAL_ID] as la_person_id,
@@ -254,7 +272,7 @@ FROM
 ORDER BY
     is.[EXTERNAL_ID] ASC;
 
--- Set the primary key on immigration_status_id
+-- Set the primary key
 ALTER TABLE #ssd_immigration_status
 ADD CONSTRAINT PK_immigration_status_id
 PRIMARY KEY (immigration_status_id);
@@ -269,7 +287,19 @@ CREATE INDEX IDX_immigration_status_end
 ON #ssd_immigration_status(immigration_status_end);
 
 
-
+/* 
+=============================================================================
+Object Name: ssd_mother
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
 /* object name: mother
 */
 
@@ -280,49 +310,66 @@ person_child_dob
 */
 
 
-
-/* object name: legal_status
+/* 
+=============================================================================
+Object Name: ssd_legal_status
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
--- Check if legal_status exists
+-- Check if exists, & drop it
+IF OBJECT_ID('tempdb..#ssd_legal_status ') IS NOT NULL DROP TABLE #ssd_legal_status;
 
+CREATE TABLE Child_Social.ssd_legal_status (
+    legal_status_id NVARCHAR(255) PRIMARY KEY,
+    la_person_id NVARCHAR(255),
+    legal_status_start DATETIME,
+    legal_status_end DATETIME,
+    person_dim_id NVARCHAR(255)
+);
 
-    -- Create ssd_legal_status structure
-    CREATE TABLE Child_Social.ssd_legal_status (
-        legal_status_id NVARCHAR(255) PRIMARY KEY,
-        la_person_id NVARCHAR(255),
-        legal_status_start DATETIME,
-        legal_status_end DATETIME,
-        person_dim_id NVARCHAR(255)
-    );
-
-    -- Insert data into ssd_legal_status table
-    INSERT INTO Child_Social.ssd_legal_status (
-        legal_status_id,
-        la_person_id,
-        legal_status_start,
-        legal_status_end,
-        person_dim_id
-    )
-    SELECT
-        fls.[FACT_LEGAL_STATUS_ID],
-        fls.[EXTERNAL_ID],
-        fls.[START_DTTM],
-        fls.[END_DTTM],
-        fls.[DIM_PERSON_ID]
-    FROM 
-        Child_Social.FACT_LEGAL_STATUS AS fls;
-
+-- Insert data 
+INSERT INTO Child_Social.ssd_legal_status (
+    legal_status_id,
+    la_person_id,
+    legal_status_start,
+    legal_status_end,
+    person_dim_id
+)
+SELECT
+    fls.[FACT_LEGAL_STATUS_ID],
+    fls.[EXTERNAL_ID],
+    fls.[START_DTTM],
+    fls.[END_DTTM],
+    fls.[DIM_PERSON_ID]
+FROM 
+    Child_Social.FACT_LEGAL_STATUS AS fls;
 
 
 
 
-/* object name: contact
+/* 
+=============================================================================
+Object Name: ssd_contact
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
 -- Check if exists, & drop it
 IF OBJECT_ID('tempdb..#ssd_contact') IS NOT NULL DROP TABLE #ssd_contact;
 
--- Create the temp table #contact
 SELECT
 	fc.[FACT_CONTACT_ID] as contact_id,
 	fc.[EXTERNAL_ID] as la_person_id,
@@ -338,7 +385,7 @@ FROM
 ORDER BY
     fc.[EXTERNAL_ID] ASC;
 
--- Add primary key constraint to contact_id
+-- Add primary key
 ALTER TABLE #ssd_contact
 ADD CONSTRAINT PK_contact_id
 PRIMARY KEY (contact_id);
@@ -350,13 +397,21 @@ CREATE INDEX IDX_contact_person ON #ssd_contact(la_person_id);
 
 
 
-
-/* object name: early help
+/* 
+=============================================================================
+Object Name: ssd_Early_help
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
--- Check if early_help exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_early_help')
-
+-- Check if exists, & drop it
+IF OBJECT_ID('tempdb..#ssd_early_help') IS NOT NULL DROP TABLE #ssd_early_help;
 /*
 eh_episode_id
 la_person_id
@@ -369,11 +424,21 @@ eh_epi_worker_id
 */
 
 
-
-/* object name: cin_episodes
+/* 
+=============================================================================
+Object Name: ssd_cin_episodes
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
--- Check if cin_episodes exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cin_episodes')
+-- Check if exists, & drop it
+IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
 /*
 cin_referral_id
@@ -389,10 +454,20 @@ cin_ref_worker_id
 */
 
 
-
-/* object name: assessments
+/* 
+=============================================================================
+Object Name: ssd_assessments
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
--- Check if assessments exists
+-- Check if exists, & drop it
 IF OBJECT_ID('tempdb..#ssd_assessment') IS NOT NULL DROP TABLE #ssd_assessment;
 
 /*
@@ -414,11 +489,20 @@ asmt_worker_id
 */
 
 
-
-/* object name: assessment_factors
+/* 
+=============================================================================
+Object Name: ssd_assessment_factors
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
--- Check if assessment_factors exists
+-- Check if exists, & drop it
 IF OBJECT_ID('tempdb..#ssd_assessment') IS NOT NULL DROP TABLE #ssd_assessment_factors;
 /*
 asmt_id
@@ -427,11 +511,20 @@ asmt_factors
 
 
 
-
-/* object name: cin_plans
+/* 
+=============================================================================
+Object Name: ssd_cin_plans
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
--- Check if cin_plans exists
+-- Check if exists, & drop it
 IF OBJECT_ID('tempdb..#ssd_cin_plans') IS NOT NULL DROP TABLE #ssd_cin_plans;
 /*
 cin_plan_id
@@ -442,11 +535,20 @@ cin_team
 cin_worker_id
 */
 
-
-/* object name: cin_visits
+/* 
+=============================================================================
+Object Name: ssd_cin_visits
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
--- Check if cin_visits exists
+-- Check if exists, & drop it
 IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
 
 /*
@@ -462,11 +564,20 @@ cin_visit_bedroom
 
 
 
-
-/* object name: s47
+/* 
+=============================================================================
+Object Name: ssd_s47
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
--- Drop the temporary table if it exists
+-- Check if exists, & drop it
 IF OBJECT_ID('tempdb..#ssd_s47_enquiry_icpc') IS NOT NULL DROP TABLE #ssd_s47_enquiry_icpc;
 
 -- Create the temp table #s47
@@ -499,53 +610,163 @@ ADD PRIMARY KEY (s47_enquiry_id);
 
 
 
-
-/* object name: cp_plans
+/* 
+=============================================================================
+Object Name: ssd_cp_plans
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
+-- Check if exists, & drop it
 IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
 
-
-/* object name: category_of_abuse
-*/
-
-
-/* object name: cp_visits
-*/
-
-
-/* object name: cp_reviews
-*/
-
-
-/* object name: cp_reviews_risks
-*/
-
-
-/* object name: cla_episodes
+/* 
+=============================================================================
+Object Name: ssd_category_of_abuse
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
 
-/* object name: cla_convictions
+/* 
+=============================================================================
+Object Name: ssd_cp_visits
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+/* 
+=============================================================================
+Object Name: ssd_cp_reviews
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+/* 
+=============================================================================
+Object Name: ssd_cp_reviews_risks
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_cla_episodes
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_cla_convictions
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
 
 
-/* object name: cla_health
+/* 
+=============================================================================
+Object Name: ssd_cla_health
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: cla_immunisations
+/* 
+=============================================================================
+Object Name: ssd_cla_immunisations
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: substance_misuse
+/* 
+=============================================================================
+Object Name: ssd_substance_misuse
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
 -- Check if exists, & drop it
-IF OBJECT_ID('tempdb..#ssd_cla_Substance_misuse') IS NOT NULL 
-    DROP TABLE #ssd_cla_Substance_misuse;
+IF OBJECT_ID('tempdb..#ssd_cla_Substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_Substance_misuse;
+
 
 -- Create the temporary table #cla_Substance_misuse
 SELECT 
@@ -579,68 +800,184 @@ FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 
 
 
+/* 
+=============================================================================
+Object Name: ssd_placement
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+-- Check if exists, & drop it
+IF OBJECT_ID('tempdb..#ssd_placement') IS NOT NULL DROP TABLE #ssd_placement;
 
-/* object name: placement
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_cla_reviews
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+-- Check if exists, & drop it
+IF OBJECT_ID('tempdb..#ssd_cla_reviews') IS NOT NULL DROP TABLE #ssd_cla_reviews;
+
+SELECT 
+FACT_CLA_REVIEW.[FACT_CLA_REVIEW_ID] as cp_review_id
+--FACT_CLA_REVIEW.[] as cp_plan_id -- FACT_CLA_ID? 
+FACT_CLA_REVIEW.[DUE_DTTM] as cp_rev_due
+--FACT_CLA_REVIEW.[START_DTTM] as cp_rev_date
+--FACT_CLA_REVIEW.[] as cp_rev_outcome
+--FACT_CLA_REVIEW.[] as cp_rev_quorate
+--FACT_CLA_REVIEW.[] as cp_rev_participation
+--FACT_CLA_REVIEW.[] as cp_rev_cyp_views_quality
+--FACT_CLA_REVIEW.[] as cp_rev_sufficient_prog
+--FACT_CLA_REVIEW.[] as cp_review_id
+--FACT_CLA_REVIEW.[] as cp_review_risks
+
+INTO #ssd_cla_reviews
+
+FROM FACT_CLA_REVIEW
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_cla_previous_permanence
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+-- Check if exists, & drop it
+IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
+
+
+/* 
+=============================================================================
+Object Name: ssd_cla_care_plan
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+-- Check if exists, & drop it
+IF OBJECT_ID('tempdb..#ssd_cla_care_plan') IS NOT NULL DROP TABLE #ssd_cla_care_plan;
+
+
+/* 
+=============================================================================
+Object Name: ssd_cla_visits
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
--- Check if placement exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_placement')
 
 
-
-
-
-/* object name: cla_reviews
-*/
-
--- Check if cla_reviews exists
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cla_reviews')
-BEGIN
-    SELECT 
-    FACT_CLA_REVIEW.[FACT_CLA_REVIEW_ID] as cp_review_id
-    --FACT_CLA_REVIEW.[] as cp_plan_id -- FACT_CLA_ID? 
-    FACT_CLA_REVIEW.[DUE_DTTM] as cp_rev_due
-    --FACT_CLA_REVIEW.[START_DTTM] as cp_rev_date
-    --FACT_CLA_REVIEW.[] as cp_rev_outcome
-    --FACT_CLA_REVIEW.[] as cp_rev_quorate
-    --FACT_CLA_REVIEW.[] as cp_rev_participation
-    --FACT_CLA_REVIEW.[] as cp_rev_cyp_views_quality
-    --FACT_CLA_REVIEW.[] as cp_rev_sufficient_prog
-    --FACT_CLA_REVIEW.[] as cp_review_id
-    --FACT_CLA_REVIEW.[] as cp_review_risks
-
-    INTO #ssd_cla_reviews
-
-    FROM FACT_CLA_REVIEW
-END
-
-
-
-
-/* object name: cla_previous_permanence
-*/
-
-/* object name: cla_care_plan
+/* 
+=============================================================================
+Object Name: ssd_sdq_scores
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: cla_visits
+/* 
+=============================================================================
+Object Name: ssd_missing
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
-/* object name: sdq_scores
+
+
+/* 
+=============================================================================
+Object Name: ssd_care_leavers
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
-/* object name: missing
-*/
-
-/* object name: care_leavers
-*/
-
-/* object name: permanence
-*/
 
 
-/* object name: send
+/* 
+=============================================================================
+Object Name: ssd_permanence
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_send
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 -- Drop the temp table if it already exists
@@ -667,21 +1004,77 @@ LEFT JOIN
 
 
 
-
-/* object name: ehcp_assessment
+/* 
+=============================================================================
+Object Name: ssd_ehcp_assessment
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
-/* object name: ehcp_named_plan
-*/
 
-/* object name: ehcp_active_plans
-*/
 
-/* object name: send_need
-*/
+/* 
+=============================================================================
+Object Name: ssd_ehcp_named_plan
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 
-/* object name: social_worker
-*/
+
+/* 
+=============================================================================
+Object Name: ssd_ehcp_active_plans
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+
+
+/* 
+=============================================================================
+Object Name: ssd_send_need
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_social_worker
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 -- FACT_CASEWORKER.FACT_CASEWORKER_ID as sw_id
 -- sw_epi_start_date
 -- sw_epi_end_date
@@ -692,12 +1085,32 @@ LEFT JOIN
 -- sw_qualification
 
 
-/* object name: pre_proceedings
-*/
+/* 
+=============================================================================
+Object Name: ssd_pre_proceedings
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 
 
-/* object name: voice_of_child
-*/
+/* 
+=============================================================================
+Object Name: ssd_voice_of_child
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 
 
 
