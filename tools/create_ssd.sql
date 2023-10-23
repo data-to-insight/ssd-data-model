@@ -1,59 +1,75 @@
 
-/* Notes:
-Ensure that extracted dates are in dd/MM/YYYY format and created fields are DATE, not DATETIME
-Full review needed of max/exagerated/default new field type sizes e.g. family_id NVARCHAR(255)
+/* DEV Notes:
+- Ensure that extracted dates are in dd/MM/YYYY format and created fields are DATE, not DATETIME
+- Full review needed of max/exagerated/default new field type sizes e.g. family_id NVARCHAR(255)  (keys cannot use MAX)
 */
 
 
+USE HDM;
 
-/* Clean up block */
--- DROP TABLE Child_Social.ssd_person;
+-- ssd time frame (YRS)
+DECLARE @YearsBack INT = 6;
+
+-- Query run time vars
+DECLARE @StartTime DATETIME, @EndTime DATETIME;
+SET @StartTime = GETDATE(); -- Record the start time
 
 
 /*
-Start of SSD table creation 
+=============================================================================
+Object Name: ssd_person
+Description: person/child details
+Author: D2I
+Last Modified Date: 2023-10-20
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: Need to confirm FACT_903_DATA as source of mother related data
+Dependencies: 
+- Child_Social.DIM_PERSON
+- Child_Social.FACT_REFERRALS
+- Child_Social.FACT_CONTACTS
+- Child_Social.FACT_EHCP_EPISODE
+- Child_Social.FACT_903_DATA
+=============================================================================
 */
-
-USE HDM;
-DECLARE @YearsBack INT = 6;
-
-/* object name: person
-*/
+-- check exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_person')
 BEGIN
     DROP TABLE Child_Social.ssd_person;
 END
 
--- Create 'ssd_person' structure
+-- Create structure
 CREATE TABLE ssd_person (
-    la_person_id NVARCHAR(255) PRIMARY KEY, 
-    person_sex NVARCHAR(MAX),
-    person_gender NVARCHAR(MAX),
-    person_ethnicity NVARCHAR(MAX),
-    person_dob DATETIME,
-    person_upn NVARCHAR(MAX),
-    person_upn_unknown NVARCHAR(MAX),
-    person_send NVARCHAR(MAX),
-    person_expected_dob NVARCHAR(MAX),
-    person_death_date DATETIME,
-    person_nationality NVARCHAR(MAX),
-    person_is_mother CHAR(1)
+    la_person_id NVARCHAR(36) PRIMARY KEY, 
+    pers_sex NVARCHAR(48),
+    --pers_gender NVARCHAR(MAX), -- not yet defined
+    pers_ethnicity NVARCHAR(38),
+    pers_dob DATETIME,
+    pers_common_child_id NVARCHAR(10),
+    pers_upn NVARCHAR(20),
+    pers_upn_unknown NVARCHAR(96),
+    pers_send NVARCHAR(1),
+    pers_expected_dob DATETIME,
+    pers_death_date DATETIME,
+    pers_nationality NVARCHAR(48),
+    pers_is_mother CHAR(1)
 );
 
--- Insert data into 'ssd_person'
+-- Insert data 
 INSERT INTO ssd_person (
     la_person_id,
-    person_sex,
-    person_gender,
-    person_ethnicity,
-    person_dob,
-    person_upn,
-    person_upn_unknown,
-    person_send,
-    person_expected_dob,
-    person_death_date,
-    person_nationality,
-    person_is_mother
+    pers_sex,
+    pers_gender,
+    pers_ethnicity,
+    pers_dob,
+    pers_common_child_id,
+    pers_upn,
+    pers_upn_unknown,
+    pers_send,
+    pers_expected_dob,
+    pers_death_date,
+    pers_nationality,
+    pers_is_mother
 )
 SELECT 
     p.[EXTERNAL_ID],
@@ -61,13 +77,14 @@ SELECT
     p.[GENDER_MAIN_CODE],
     p.[ETHNICITY_MAIN_CODE],
     p.[BIRTH_DTTM],
+    NULL AS pers_common_child_id, -- Set to NULL
     p.[UPN],
 
     (SELECT TOP 1 f.NO_UPN_CODE              -- Subquery to fetch ANY/MOST RECENT? NO_UPN_CODE.
     FROM Child_Social.FACT_903_DATA f        -- This *unlikely* to be the best source
     WHERE f.EXTERNAL_ID = p.EXTERNAL_ID
     AND f.NO_UPN_CODE IS NOT NULL
-    ORDER BY f.NO_UPN_CODE DESC) AS person_upn_unknown,  -- desc order to ensure a non-null value first
+    ORDER BY f.NO_UPN_CODE DESC) AS pers_upn_unknown,  -- desc order to ensure a non-null value first
 
     p.[EHM_SEN_FLAG],
     p.[DOB_ESTIMATED],
@@ -84,20 +101,32 @@ WHERE
     p.[EXTERNAL_ID] IS NOT NULL
 AND (
     EXISTS (
+        -- has open referral
         SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
         WHERE fr.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
         AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
     )
     OR EXISTS (
+        -- contact in last x@yrs
         SELECT 1 FROM Child_Social.FACT_CONTACTS fc
         WHERE fc.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
         AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
     )
     OR EXISTS (
+        -- ehcp request in last x@yrs
         SELECT 1 FROM Child_Social.FACT_EHCP_EPISODE fe 
         WHERE fe.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
         AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
     )
+    -- OR EXISTS (
+        -- active plan or has been active in x@yrs
+    --)
+    -- OR EXISTS (
+        -- eh_referral open in last x@yrs
+    --)
+    -- OR EXISTS (
+        -- record in send
+    --)
 )
 ORDER BY
     p.[EXTERNAL_ID] ASC;
@@ -105,28 +134,38 @@ ORDER BY
 -- Create a non-clustered index on la_person_id for quicker lookups and joins
 CREATE INDEX IDX_ssd_person_la_person_id ON Child_Social.ssd_person(la_person_id);
 
--- has open referral - FACT_REFERRALS.REFRL_START_DTTM
--- contact in last 6yrs - Child_Social.FACT_CONTACTS.CONTACT_DTTM
--- ehcp request in last 6yrs - Child_Social.FACT_EHCP_EPISODE.REQUEST_DTTM ;
+-- [done]has open referral - FACT_REFERRALS.REFRL_START_DTTM
+-- [done]contact in last 6yrs - Child_Social.FACT_CONTACTS.CONTACT_DTTM
+-- [done]ehcp request in last 6yrs - Child_Social.FACT_EHCP_EPISODE.REQUEST_DTTM ;
 -- active plan or has been active in 6yrs
 -- eh_referral open in last 6yrs - Child_Social.FACT_REFERRALS.REFRL_START_DTTM
 -- record in send - where from ? Child_Social.FACT_SEN, DIM_LOOKUP_SEN, DIM_LOOKUP_SEN_TYPE
 
-DROP TABLE Child_Social.ssd_person;
 
 
 
 
-/* object name: family
+/* 
+=============================================================================
+Object Name: ssd_family
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
+Dependencies: 
+- Singleview.DIM_TF_FAMILY
+- ssd.ssd_person
+=============================================================================
 */
--- part of early help system(s).
-
+-- check exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_family')
 BEGIN
     DROP TABLE Child_Social.ssd_family;
 END
 
--- Create 'family'
+-- Create structure
 CREATE TABLE Child_Social.ssd_family (
     DIM_TF_FAMILY_ID NVARCHAR(255) PRIMARY KEY, 
     family_id NVARCHAR(255),
@@ -136,7 +175,7 @@ CREATE TABLE Child_Social.ssd_family (
     FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id)
 );
 
--- Insert data from Singleview.DIM_TF_FAMILY into newly created table
+-- Insert data 
 INSERT INTO Child_Social.ssd_family (
     DIM_TF_FAMILY_ID, 
     family_id, 
@@ -146,7 +185,12 @@ SELECT
     DIM_TF_FAMILY_ID,
     UNIQUE_FAMILY_NUMBER    as family_id,
     EXTERNAL_ID             as la_person_id
-FROM Singleview.DIM_TF_FAMILY;
+FROM Singleview.DIM_TF_FAMILY
+WHERE EXISTS ( -- only need address data for matching/relevant records
+    SELECT 1 
+    FROM Child_Social.ssd_person p
+    WHERE p.la_person_id = f.EXTERNAL_ID
+    );
 
 -- Create a non-clustered index on foreign key
 CREATE INDEX IDX_family_person ON Child_Social.ssd_family(la_person_id);
@@ -154,16 +198,26 @@ CREATE INDEX IDX_family_person ON Child_Social.ssd_family(la_person_id);
 
 
 
-/* object name: ssd_address
+/* 
+=============================================================================
+Object Name: ssd_address
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
--- Check if address exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_address')
 BEGIN
     DROP TABLE Child_Social.ssd_address;
 END
 
--- Create address if it doesn't exist
+-- Create structure
 CREATE TABLE Child_Social.ssd_address (
     address_id NVARCHAR(255) PRIMARY KEY,
     la_person_id NVARCHAR(255), -- Assuming EXTERNAL_ID corresponds to la_person_id
@@ -187,7 +241,7 @@ CREATE INDEX IDX_address_start ON Child_Social.ssd_address(address_start);
 
 CREATE INDEX IDX_address_end ON Child_Social.ssd_address(address_end);
 
--- Now, insert data into newly created table
+-- insert data
 INSERT INTO Child_Social.ssd_address (
     address_id, 
     la_person_id, 
@@ -223,7 +277,18 @@ ORDER BY
 
 
 
-/* object name: ssd_disability 
+/* 
+=============================================================================
+Object Name: ssd_disability
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 -- Check if disability exists
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_disability')
@@ -232,7 +297,7 @@ BEGIN
 END
 
 
--- Create disability if it doesn't exist
+-- Create structure
 CREATE TABLE Child_Social.ssd_disability (
     disability_id NVARCHAR(255) PRIMARY KEY,
     la_person_id NVARCHAR(255),
@@ -248,7 +313,7 @@ FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 CREATE INDEX IDX_disability_la_person_id 
 ON Child_Social.ssd_disability(la_person_id);
 
--- Now, insert data into newly created table
+-- insert data
 INSERT INTO Child_Social.ssd_disability (
     disability_id, 
     la_person_id, 
@@ -268,16 +333,26 @@ ORDER BY
 
 
 
-/* object name: immigration_status table
+/* 
+=============================================================================
+Object Name: ssd_immigration_status
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
--- Check if immigration_status exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_immigration_status')
 BEGIN
     DROP TABLE Child_Social.ssd_immigration_status;
 END
 
--- Create immigration_status if it doesn't exist
+-- Create structure
 CREATE TABLE Child_Social.ssd_immigration_status (
     immigration_status_id NVARCHAR(255) PRIMARY KEY,
     la_person_id NVARCHAR(255),
@@ -302,7 +377,7 @@ ON Child_Social.ssd_immigration_status(immigration_status_start);
 CREATE INDEX IDX_immigration_status_end 
 ON Child_Social.ssd_immigration_status(immigration_status_end);
 
--- Now, insert data into newly created table
+-- insert data
 INSERT INTO Child_Social.ssd_immigration_status (
     immigration_status_id, 
     la_person_id, 
@@ -323,9 +398,20 @@ ORDER BY
 
 
 
-/* object name: mother
+/* 
+=============================================================================
+Object Name: ssd_mother
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
--- Check if mother exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_mother')
 BEGIN
     DROP TABLE Child_Social.ssd_mother;
@@ -338,14 +424,25 @@ person_child_dob
 
 
 
-/* object name: legal_status
+/* 
+=============================================================================
+Object Name: ssd_legal_status
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
--- Check if legal_status exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_legal_status')
 BEGIN
     DROP TABLE Child_Social.ssd_legal_status;
 END
--- Create ssd_legal_status structure
+-- Create structure
 CREATE TABLE Child_Social.ssd_legal_status (
     legal_status_id NVARCHAR(255) PRIMARY KEY,
     la_person_id NVARCHAR(255),
@@ -354,7 +451,7 @@ CREATE TABLE Child_Social.ssd_legal_status (
     person_dim_id NVARCHAR(255)
 );
 
--- Insert data into ssd_legal_status table
+-- Insert data 
 INSERT INTO Child_Social.ssd_legal_status (
     legal_status_id,
     la_person_id,
@@ -378,15 +475,26 @@ FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 
 
 
-/* object name: contact
+/* 
+=============================================================================
+Object Name: ssd_contact
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
--- Check if contact exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_contact')
 BEGIN
     DROP TABLE Child_Social.ssd_contact;
 END
 
--- Create contact structure
+-- Create structure
 CREATE TABLE Child_Social.ssd_contact (
     contact_id NVARCHAR(255) PRIMARY KEY,
     la_person_id NVARCHAR(255),
@@ -403,7 +511,7 @@ FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 -- Create a non-clustered index on la_person_id for quicker lookups and joins
 CREATE INDEX IDX_contact_person ON Child_Social.ssd_contact(la_person_id);
 
--- Insert data into newly created table
+-- Insert data
 INSERT INTO Child_Social.ssd_contact (
     contact_id, 
     la_person_id, 
@@ -425,10 +533,20 @@ ORDER BY
 
 
 
-/* object name: early help
+/* 
+=============================================================================
+Object Name: ssd_Early_help
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
--- Check if early_help exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_early_help')
 BEGIN
     DROP TABLE Child_Social.ssd_early_help;
@@ -446,14 +564,26 @@ eh_epi_worker_id
 
 
 
-/* object name: cin_episodes
+/* 
+=============================================================================
+Object Name: ssd_cin_episodes
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
--- Check if cin_episodes exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cin_episodes')
 BEGIN
     DROP TABLE Child_Social.ssd_cin_episodes;
 END
 
+-- create structure
 CREATE TABLE ssd_cin_episodes (
     cin_referral_id NVARCHAR(255) PRIMARY KEY,
     la_person_id NVARCHAR(255),
@@ -500,9 +630,20 @@ ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person FOREIG
 
 
 
-/* object name: assessments
+/* 
+=============================================================================
+Object Name: ssd_assessments
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
--- Check if assessments exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_assessments')
 BEGIN
     DROP TABLE Child_Social.ssd_assessments;
@@ -527,14 +668,26 @@ asmt_worker_id
 
 
 
-/* object name: assessment_factors
+/* 
+=============================================================================
+Object Name: ssd_assessment_factors
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
--- Check if assessment_factors exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_assessment_factors')
 BEGIN
     DROP TABLE Child_Social.ssd_assessment_factors;
 END
+
+
 /*
 asmt_id
 asmt_factors
@@ -543,10 +696,20 @@ asmt_factors
 
 
 
-/* object name: cin_plans
+/* 
+=============================================================================
+Object Name: ssd_cin_plans
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
--- Check if cin_plans exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cin_plans')
 BEGIN
     DROP TABLE Child_Social.ssd_cin_plans;
@@ -561,10 +724,20 @@ cin_worker_id
 */
 
 
-/* object name: cin_visits
+/* 
+=============================================================================
+Object Name: ssd_cin_visits
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
-
--- Check if cin_visits exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cin_visits')
 BEGIN
     DROP TABLE Child_Social.ssd_cin_visits;
@@ -580,15 +753,26 @@ cin_visit_bedroom
 */
 
 
-/* object name: s47
+/* 
+=============================================================================
+Object Name: ssd_s47
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
--- Check if s47_enquiry_icpc exists
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_s47_enquiry_icpc')
 BEGIN
     DROP TABLE Child_Social.ssd_s47_enquiry_icpc;
 END
 
--- Create s47_enquiry_icpc structure
+--Create structure 
 CREATE TABLE Child_Social.ssd_s47_enquiry_icpc (
     s47_enquiry_id NVARCHAR(255) PRIMARY KEY,
     la_person_id NVARCHAR(255),
@@ -607,7 +791,7 @@ ALTER TABLE Child_Social.ssd_s47_enquiry_icpc
 ADD CONSTRAINT FK_s47_person
 FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 
--- Populate s47_enquiry_icpc table with data
+-- insert data
 INSERT INTO Child_Social.ssd_s47_enquiry_icpc (
     s47_enquiry_id,
     la_person_id,
@@ -641,56 +825,166 @@ LEFT JOIN
 
 
 
-/* object name: cp_plans
+/* 
+=============================================================================
+Object Name: ssd_cp_plans
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: category_of_abuse
-*/
-
-
-/* object name: cp_visits
-*/
-
-
-/* object name: cp_reviews
-*/
-
-
-/* object name: cp_reviews_risks
-*/
-
-
-/* object name: cla_episodes
+/* 
+=============================================================================
+Object Name: ssd_category_of_abuse
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
 
-/* object name: cla_convictions
+/* 
+=============================================================================
+Object Name: ssd_cp_visits
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
--- Check if cla_convictions exists
 
-
-
-/* object name: cla_health
+/* 
+=============================================================================
+Object Name: ssd_cp_reviews
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: cla_immunisations
+/* 
+=============================================================================
+Object Name: ssd_cp_reviews_risks
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: substance_misuse
+
+/* 
+=============================================================================
+Object Name: ssd_cla_episodes
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
--- Check if substance_misuse exists
+
+
+/* 
+=============================================================================
+Object Name: ssd_cla_convictions
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_cla_health
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+/* 
+=============================================================================
+Object Name: ssd_cla_immunisations
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+/* 
+=============================================================================
+Object Name: ssd_substance_misuse
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [Development | *Staging* | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+-- Check if exists & drop
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cla_substance_misuse')
 BEGIN
     DROP TABLE Child_Social.ssd_cla_substance_misuse;
 END
 BEGIN
-    -- Create cla_Substance_misuse structure
+    -- Create structure
     CREATE TABLE Child_Social.ssd_cla_Substance_misuse (
         substance_misuse_id NVARCHAR(255) PRIMARY KEY,
         la_person_id NVARCHAR(MAX),
@@ -702,7 +996,7 @@ BEGIN
         substance_type_code NVARCHAR(MAX)
     );
 
-    -- Insert data into cla_Substance_misuse table
+    -- insert data
     INSERT INTO Child_Social.ssd_cla_Substance_misuse (
         substance_misuse_id,
         la_person_id,
@@ -731,21 +1025,44 @@ END;
 
 
 
-/* object name: placement
+/* 
+=============================================================================
+Object Name: ssd_placement
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
--- Check if placement exists
 
 
 
 
-
-/* object name: cla_reviews
+/* 
+=============================================================================
+Object Name: ssd_cla_reviews
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
+-- Check if exists, & drop 
 
--- Check if cla_reviews exists
+-- Create structure 
 
 
+
+-- insert data
 -- SELECT 
 -- FACT_CLA_REVIEW.[FACT_CLA_REVIEW_ID] as cp_review_id
 -- --FACT_CLA_REVIEW.[] as cp_plan_id -- FACT_CLA_ID? 
@@ -759,29 +1076,88 @@ END;
 -- --FACT_CLA_REVIEW.[] as cp_review_id
 -- --FACT_CLA_REVIEW.[] as cp_review_risks
 
--- INTO ssd_cla_reviews
+-- INTO #ssd_cla_reviews
 
 -- FROM FACT_CLA_REVIEW
 
 
 
 
-
-/* object name: cla_previous_permanence
+/* 
+=============================================================================
+Object Name: ssd_cla_previous_permanence
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: cla_care_plan
+/* 
+=============================================================================
+Object Name: ssd_cla_care_plan
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: cla_visits
+/* 
+=============================================================================
+Object Name: ssd_cla_visits
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
-/* object name: sdq_scores
+
+
+/* 
+=============================================================================
+Object Name: ssd_sdq_scores
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
-/* object name: missing
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_missing
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 -- TABLE_SCHEMA	TABLE_NAME	COLUMN_NAME
 -- Child_Social	FACT_CLA	NO_OF_TIMES_MISSING
@@ -820,23 +1196,60 @@ END;
 -- Singleview	FACT_TF_INDIVIDUAL_PROGRESS	MISSING_FROM_EDUCATION_MONTHS
 -- Education	FACT_WEEKLY_ATTENDANCE_SNAPSHOT	TOTAL_MISSING_MARKS
 
-/* object name: care_leavers
+
+
+/* 
+=============================================================================
+Object Name: ssd_care_leavers
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
-/* object name: permanence
+
+
+/* 
+=============================================================================
+Object Name: ssd_permanence
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
 
-/* object name: send
+/* 
+=============================================================================
+Object Name: ssd_send
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
--- Check if send exists
+-- Check if exists, & drop 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_send')
 BEGIN
     DROP TABLE Child_Social.ssd_send;
 END
 
--- Create send structure
+-- Create structure 
 CREATE TABLE Child_Social.ssd_send (
     send_table_id NVARCHAR(255),
     la_person_id NVARCHAR(255),
@@ -845,7 +1258,7 @@ CREATE TABLE Child_Social.ssd_send (
     send_uln NVARCHAR(MAX)
 );
 
--- Populate send table with data
+-- insert data
 INSERT INTO Child_Social.ssd_send (
     send_table_id,
     la_person_id, 
@@ -869,23 +1282,81 @@ LEFT JOIN
 */
 
 
-/* object name: ehcp_assessment
+/* 
+=============================================================================
+Object Name: ssd_ehcp_assessment
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: ehcp_named_plan
+
+/* 
+=============================================================================
+Object Name: ssd_ehcp_named_plan
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: ehcp_active_plans
+/* 
+=============================================================================
+Object Name: ssd_ehcp_active_plans
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: send_need
+
+
+/* 
+=============================================================================
+Object Name: ssd_send_need
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: social_worker
+/* 
+=============================================================================
+Object Name: ssd_social_worker
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 -- FACT_CASEWORKER.FACT_CASEWORKER_ID as sw_id
 -- sw_epi_start_date
@@ -897,20 +1368,45 @@ LEFT JOIN
 -- sw_qualification
 
 
-/* object name: pre_proceedings
+
+
+/* 
+=============================================================================
+Object Name: ssd_pre_proceedings
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
 */
 
 
-/* object name: voice_of_child [PLACEHOLDER STRUCTURE]
-*/
 
--- Check and drop the table if it already exists
+
+/* 
+=============================================================================
+Object Name: ssd_voice_of_child
+Description: 
+Author: D2I
+Last Modified Date: 
+Version: 1.0
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+-- Check if exists, & drop 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_voice_of_child')
 BEGIN
     DROP TABLE Child_Social.ssd_voice_of_child;
 END
 
--- Create 'ssd_voice_of_child' structure with placeholder data types
+-- Create structure
 CREATE TABLE Child_Social.ssd_voice_of_child (
     la_person_id NVARCHAR(255) PRIMARY KEY, -- Assuming NVARCHAR(255) as a generic type for id
     voc_explained_worries NVARCHAR(255),
@@ -920,7 +1416,7 @@ CREATE TABLE Child_Social.ssd_voice_of_child (
     voc_tablet_help_explain NVARCHAR(255)
 );
 
--- Insert placeholder data into 'ssd_voice_of_child'
+-- Insert placeholder data
 INSERT INTO Child_Social.ssd_voice_of_child (
     la_person_id,
     voc_explained_worries,
@@ -934,3 +1430,10 @@ VALUES
     ('ID002', 'Placeholder Data', 'Placeholder Data', 'Placeholder Data', 'Placeholder Data', 'Placeholder Data');
 
     
+
+
+
+
+-- Get & print run time 
+SET @EndTime = GETDATE();
+PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) AS NVARCHAR(50)) + ' ms';

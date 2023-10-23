@@ -1,4 +1,5 @@
 
+
 USE HDM;
 
 -- ssd time frame (YRS)
@@ -37,29 +38,32 @@ Version: 1.0
 Development Status: [Development | *Staging* | Production-Ready]
 Remarks: Need to confirm FACT_903_DATA as source of mother related data
 Dependencies: 
-- DIM_PERSON
-- FACT_REFERRALS
-- FACT_CONTACTS
-- FACT_EHCP_EPISODE
-- FACT_903_DATA
+- Child_Social.DIM_PERSON
+- Child_Social.FACT_REFERRALS
+- Child_Social.FACT_CONTACTS
+- Child_Social.FACT_EHCP_EPISODE
+- Child_Social.FACT_903_DATA
 =============================================================================
 */
-
-/* If the temporary table exists, drop it */
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
+-- Create the temporary table
 SELECT 
     p.[EXTERNAL_ID] AS la_person_id,
     p.[DIM_LOOKUP_VARIATION_OF_SEX_CODE] AS person_sex,
     p.[GENDER_MAIN_CODE] AS person_gender,
     p.[ETHNICITY_MAIN_CODE] AS person_ethnicity,
     p.[BIRTH_DTTM] AS person_dob,
+    NULL AS pers_common_child_id, -- Set to NULL
     p.[UPN] AS person_upn,
+
     (SELECT TOP 1 f.NO_UPN_CODE
     FROM Child_Social.FACT_903_DATA f
     WHERE f.EXTERNAL_ID = p.EXTERNAL_ID
     AND f.NO_UPN_CODE IS NOT NULL
     ORDER BY f.NO_UPN_CODE DESC) AS person_upn_unknown,
+
     p.[EHM_SEN_FLAG] AS person_send,
     p.[DOB_ESTIMATED] AS person_expected_dob,
     p.[DEATH_DTTM] AS person_death_date,
@@ -110,19 +114,26 @@ Version: 1.0
 Development Status: [Development | *Staging* | Production-Ready]
 Remarks: 
 Dependencies: 
-- 
+- Singleview.DIM_TF_FAMILY
+- ssd.ssd_person
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
--- Insert data from Singleview.DIM_TF_FAMILY into a new temporary table '#ssd_family'
-SELECT TOP 100
+-- Create the temporary table
+SELECT
     DIM_TF_FAMILY_ID,
     UNIQUE_FAMILY_NUMBER AS family_id,
     EXTERNAL_ID AS la_person_id
 INTO #ssd_family
-FROM Singleview.DIM_TF_FAMILY;
+FROM Singleview.DIM_TF_FAMILY AS dtf
+
+WHERE EXISTS ( -- only need address data for matching/relevant records
+    SELECT 1 
+    FROM #ssd_person AS p
+    WHERE dtf.EXTERNAL_ID = p.la_person_id
+);
 
 -- Create non-clustered index on la_person_id
 CREATE INDEX IDX_family_person ON #ssd_family(la_person_id);
@@ -142,10 +153,10 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
--- Create the temp table #address
+-- Create the temporary table
 SELECT TOP 100
     pa.[DIM_PERSON_ADDRESS_ID] as address_id,
     pa.[EXTERNAL_ID] as la_person_id, -- Assuming EXTERNAL_ID corresponds to la_person_id
@@ -154,7 +165,7 @@ SELECT TOP 100
     pa.[END_DTTM] as address_end,
     pa.[POSTCODE] as address_postcode,
         
-    -- Create the concatenated address field
+    -- Create the concatenated address field (Note: CONCAT_WS - wont run on earlier versions of SQL Server)
     CONCAT_WS(',', 
         NULLIF(pa.[ROOM_NO], ''), 
         NULLIF(pa.[FLOOR_NO], ''), 
@@ -197,11 +208,11 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL 
     DROP TABLE #ssd_disability;
 
--- Create the temp table #disability
+-- Create the temporary table
 SELECT TOP 100
     fd.[FACT_DISABILITY_ID] as disability_id,
     fd.[EXTERNAL_ID] as la_person_id,
@@ -223,6 +234,13 @@ CREATE INDEX IDX_disability_la_person_id ON #ssd_disability(la_person_id);
 
 
 
+
+
+
+/************************************************************************************************************
+DEvelopment clean up etc
+*/
+
 -- Get & print run time 
 SET @EndTime = GETDATE();
 PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) AS NVARCHAR(50)) + ' ms';
@@ -234,6 +252,8 @@ IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 
+
+/************************************************************************************************************/
 
 
 
@@ -253,9 +273,10 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
+-- Create the temporary table
 SELECT 
     is.[FACT_IMMIGRATION_STATUS_ID] as immigration_status_id,
     is.[EXTERNAL_ID] as la_person_id,
@@ -299,10 +320,9 @@ Remarks:
 Dependencies: 
 - 
 =============================================================================
-*/
-/* object name: mother
-*/
 
+
+-- Create the temporary table
 /*
 person_child_id
 la_person_id
@@ -323,9 +343,10 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_legal_status ') IS NOT NULL DROP TABLE #ssd_legal_status;
 
+-- Create the temporary table
 CREATE TABLE Child_Social.ssd_legal_status (
     legal_status_id NVARCHAR(255) PRIMARY KEY,
     la_person_id NVARCHAR(255),
@@ -367,9 +388,10 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_contact') IS NOT NULL DROP TABLE #ssd_contact;
 
+-- Create the temporary table
 SELECT
 	fc.[FACT_CONTACT_ID] as contact_id,
 	fc.[EXTERNAL_ID] as la_person_id,
@@ -410,8 +432,10 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_early_help') IS NOT NULL DROP TABLE #ssd_early_help;
+
+-- Create the temporary table
 /*
 eh_episode_id
 la_person_id
@@ -437,9 +461,10 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
+-- Create the temporary table
 /*
 cin_referral_id
 la_person_id
@@ -467,9 +492,10 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_assessment') IS NOT NULL DROP TABLE #ssd_assessment;
 
+-- Create the temporary table
 /*
 assessment_id
 la_person_id
@@ -502,8 +528,10 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_assessment') IS NOT NULL DROP TABLE #ssd_assessment_factors;
+
+-- Create the temporary table
 /*
 asmt_id
 asmt_factors
@@ -524,8 +552,10 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_cin_plans') IS NOT NULL DROP TABLE #ssd_cin_plans;
+
+-- Create the temporary table
 /*
 cin_plan_id
 la_person_id
@@ -548,9 +578,10 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
 
+-- Create the temporary table
 /*
 cin_visit_id
 cin_plan_id
@@ -577,10 +608,10 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_s47_enquiry_icpc') IS NOT NULL DROP TABLE #ssd_s47_enquiry_icpc;
 
--- Create the temp table #s47
+-- Create the temporary table
 SELECT
     s47.[FACT_S47_ID] as s47_enquiry_id,
     s47.[EXTERNAL_ID] as la_person_id,
@@ -623,8 +654,7 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
-IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
+
 
 /* 
 =============================================================================
@@ -764,11 +794,11 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_cla_Substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_Substance_misuse;
 
 
--- Create the temporary table #cla_Substance_misuse
+-- Create the temporary table
 SELECT 
     fsm.[FACT_SUBSTANCE_MISUSE_ID] as substance_misuse_id,
     fsm.[EXTERNAL_ID] as la_person_id,
@@ -790,12 +820,6 @@ ALTER TABLE #ssd_cla_Substance_misuse
 ADD CONSTRAINT PK_substance_misuse_id_temp
 PRIMARY KEY (substance_misuse_id);
 
--- Add the foreign key constraint for la_person_id
--- (You can only add FK constraints in temp tables if you're sure the related table will be available in the same session)
-ALTER TABLE #ssd_cla_Substance_misuse
-ADD CONSTRAINT FK_substance_misuse_person_temp
-FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
-/*END TMP TABLE */
 
 
 
@@ -813,7 +837,7 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_placement') IS NOT NULL DROP TABLE #ssd_placement;
 
 
@@ -832,25 +856,25 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
-IF OBJECT_ID('tempdb..#ssd_cla_reviews') IS NOT NULL DROP TABLE #ssd_cla_reviews;
+-- Check if exists, & drop 
+-- IF OBJECT_ID('tempdb..#ssd_cla_reviews') IS NOT NULL DROP TABLE #ssd_cla_reviews;
 
-SELECT 
-FACT_CLA_REVIEW.[FACT_CLA_REVIEW_ID] as cp_review_id
---FACT_CLA_REVIEW.[] as cp_plan_id -- FACT_CLA_ID? 
-FACT_CLA_REVIEW.[DUE_DTTM] as cp_rev_due
---FACT_CLA_REVIEW.[START_DTTM] as cp_rev_date
---FACT_CLA_REVIEW.[] as cp_rev_outcome
---FACT_CLA_REVIEW.[] as cp_rev_quorate
---FACT_CLA_REVIEW.[] as cp_rev_participation
---FACT_CLA_REVIEW.[] as cp_rev_cyp_views_quality
---FACT_CLA_REVIEW.[] as cp_rev_sufficient_prog
---FACT_CLA_REVIEW.[] as cp_review_id
---FACT_CLA_REVIEW.[] as cp_review_risks
+-- SELECT 
+-- FACT_CLA_REVIEW.[FACT_CLA_REVIEW_ID] as cp_review_id
+-- --FACT_CLA_REVIEW.[] as cp_plan_id -- FACT_CLA_ID? 
+-- FACT_CLA_REVIEW.[DUE_DTTM] as cp_rev_due
+-- --FACT_CLA_REVIEW.[START_DTTM] as cp_rev_date
+-- --FACT_CLA_REVIEW.[] as cp_rev_outcome
+-- --FACT_CLA_REVIEW.[] as cp_rev_quorate
+-- --FACT_CLA_REVIEW.[] as cp_rev_participation
+-- --FACT_CLA_REVIEW.[] as cp_rev_cyp_views_quality
+-- --FACT_CLA_REVIEW.[] as cp_rev_sufficient_prog
+-- --FACT_CLA_REVIEW.[] as cp_review_id
+-- --FACT_CLA_REVIEW.[] as cp_review_risks
 
-INTO #ssd_cla_reviews
+-- INTO #ssd_cla_reviews
 
-FROM FACT_CLA_REVIEW
+-- FROM FACT_CLA_REVIEW
 
 
 
@@ -867,7 +891,7 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
 
 
@@ -884,7 +908,7 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop it
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_cla_care_plan') IS NOT NULL DROP TABLE #ssd_cla_care_plan;
 
 
@@ -963,7 +987,7 @@ Remarks:
 Dependencies: 
 - 
 =============================================================================
-
+*/
 
 
 /* 
@@ -979,12 +1003,11 @@ Dependencies:
 - 
 =============================================================================
 */
-
--- Drop the temp table if it already exists
+-- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL
    DROP TABLE #ssd_send;
 
--- Create the temporary table 
+-- Create the temporary table
 SELECT 
     -- need id field
     f.EXTERNAL_ID, 
@@ -1032,6 +1055,7 @@ Remarks:
 Dependencies: 
 - 
 =============================================================================
+*/
 
 
 /* 
@@ -1060,7 +1084,7 @@ Remarks:
 Dependencies: 
 - 
 =============================================================================
-
+*/
 
 
 /* 
@@ -1075,6 +1099,7 @@ Remarks:
 Dependencies: 
 - 
 =============================================================================
+*/
 -- FACT_CASEWORKER.FACT_CASEWORKER_ID as sw_id
 -- sw_epi_start_date
 -- sw_epi_end_date
@@ -1097,7 +1122,7 @@ Remarks:
 Dependencies: 
 - 
 =============================================================================
-
+*/
 
 /* 
 =============================================================================
@@ -1111,7 +1136,7 @@ Remarks:
 Dependencies: 
 - 
 =============================================================================
-
+*/
 
 
 

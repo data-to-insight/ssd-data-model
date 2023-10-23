@@ -1,3 +1,5 @@
+USE HDM;
+
 /*
 Start of table checks 
 */
