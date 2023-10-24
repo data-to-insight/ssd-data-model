@@ -1,6 +1,7 @@
 
 
 USE HDM;
+GO
 
 -- ssd time frame (YRS)
 DECLARE @YearsBack INT = 6;
@@ -67,16 +68,12 @@ SELECT
     p.[EHM_SEN_FLAG] AS person_send,
     p.[DOB_ESTIMATED] AS person_expected_dob,
     p.[DEATH_DTTM] AS person_death_date,
-    p.[NATNL_CODE] AS person_nationality,
-    CASE WHEN fc.[DIM_PERSON_ID] IS NOT NULL THEN 'Y' ELSE 'N' END AS person_is_mother
+    p.[NATNL_CODE] AS person_nationality
+
 INTO 
     #ssd_person
 FROM 
     Child_Social.DIM_PERSON AS p
-LEFT JOIN
-    Child_Social.FACT_CPIS_UPLOAD AS fc
-ON 
-    p.[EXTERNAL_ID] = fc.[EXTERNAL_ID]
 WHERE 
     p.[EXTERNAL_ID] IS NOT NULL
 AND (
@@ -148,7 +145,7 @@ Author: D2I
 Last Modified Date: 
 Version: 1.0
 Development Status: [Development | *Staging* | Production-Ready]
-Remarks: 
+Remarks: Does not run on early versions of SQL Server. See ver2.x
 Dependencies: 
 - 
 =============================================================================
@@ -157,7 +154,7 @@ Dependencies:
 IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
 -- Create the temporary table
-SELECT TOP 100
+SELECT
     pa.[DIM_PERSON_ADDRESS_ID] as address_id,
     pa.[EXTERNAL_ID] as la_person_id, -- Assuming EXTERNAL_ID corresponds to la_person_id
     pa.[ADDSS_TYPE_CODE] as address_type,
@@ -191,6 +188,58 @@ CREATE INDEX IDX_address_person ON #ssd_address(la_person_id);
 -- Non-clustered indexes on address_start and address_end
 CREATE INDEX IDX_address_start ON #ssd_address(address_start);
 CREATE INDEX IDX_address_end ON #ssd_address(address_end);
+
+
+
+-- -- SQL Server 2014
+-- /* 
+-- =============================================================================
+-- Object Name: ssd_address
+-- Description: 
+-- Author: D2I
+-- Last Modified Date: 24/10/23
+-- Version: 2.0
+-- Development Status: [Development | *Staging* | Production-Ready]
+-- Remarks: This version for SQL server =<2014
+-- Dependencies: 
+-- - 
+-- =============================================================================
+-- */
+-- -- Check if exists, & drop 
+-- IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
+
+-- -- Create the temporary table
+-- SELECT 
+--     pa.[DIM_PERSON_ADDRESS_ID] as address_id,
+--     pa.[EXTERNAL_ID] as la_person_id, -- Assuming EXTERNAL_ID corresponds to la_person_id
+--     pa.[ADDSS_TYPE_CODE] as address_type,
+--     pa.[START_DTTM] as address_start,
+--     pa.[END_DTTM] as address_end,
+--     pa.[POSTCODE] as address_postcode,
+        
+--     -- Create the concatenated address field using + for string concatenation
+--     COALESCE(NULLIF(pa.[ROOM_NO], '') + ', ', '') +
+--     COALESCE(NULLIF(pa.[FLOOR_NO], '') + ', ', '') +
+--     COALESCE(NULLIF(pa.[FLAT_NO], '') + ', ', '') +
+--     COALESCE(NULLIF(pa.[BUILDING], '') + ', ', '') +
+--     COALESCE(NULLIF(pa.[HOUSE_NO], '') + ', ', '') +
+--     COALESCE(NULLIF(pa.[STREET], '') + ', ', '') +
+--     COALESCE(NULLIF(pa.[TOWN], ''), '') as address
+
+-- INTO #ssd_address
+-- FROM 
+--     Child_Social.DIM_PERSON_ADDRESS AS pa
+-- ORDER BY
+--     pa.[EXTERNAL_ID] ASC;
+-- -- Add primary key
+-- ALTER TABLE #ssd_address ADD CONSTRAINT PK_address_id PRIMARY KEY (address_id);
+
+-- -- Non-clustered index on la_person_id
+-- CREATE INDEX IDX_address_person ON #ssd_address(la_person_id);
+
+-- -- Non-clustered indexes on address_start and address_end
+-- CREATE INDEX IDX_address_start ON #ssd_address(address_start);
+-- CREATE INDEX IDX_address_end ON #ssd_address(address_end);
 
 
 
@@ -235,25 +284,6 @@ CREATE INDEX IDX_disability_la_person_id ON #ssd_disability(la_person_id);
 
 
 
-
-
-/************************************************************************************************************
-DEvelopment clean up etc
-*/
-
--- Get & print run time 
-SET @EndTime = GETDATE();
-PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) AS NVARCHAR(50)) + ' ms';
-
-
-/* cleanup */
-IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
-IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
-IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
-IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
-
-
-/************************************************************************************************************/
 
 
 
@@ -320,7 +350,7 @@ Remarks:
 Dependencies: 
 - 
 =============================================================================
-
+*/
 
 -- Create the temporary table
 /*
@@ -344,33 +374,20 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists, & drop 
-IF OBJECT_ID('tempdb..#ssd_legal_status ') IS NOT NULL DROP TABLE #ssd_legal_status;
+IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
 
--- Create the temporary table
-CREATE TABLE Child_Social.ssd_legal_status (
-    legal_status_id NVARCHAR(255) PRIMARY KEY,
-    la_person_id NVARCHAR(255),
-    legal_status_start DATETIME,
-    legal_status_end DATETIME,
-    person_dim_id NVARCHAR(255)
-);
-
--- Insert data 
-INSERT INTO Child_Social.ssd_legal_status (
-    legal_status_id,
-    la_person_id,
-    legal_status_start,
-    legal_status_end,
-    person_dim_id
-)
+-- Create and insert data into the temporary table using INTO
 SELECT
-    fls.[FACT_LEGAL_STATUS_ID],
-    fls.[EXTERNAL_ID],
-    fls.[START_DTTM],
-    fls.[END_DTTM],
-    fls.[DIM_PERSON_ID]
+    fls.[FACT_LEGAL_STATUS_ID] AS legal_status_id,
+    fls.[EXTERNAL_ID] AS la_person_id,
+    fls.[START_DTTM] AS legal_status_start,
+    fls.[END_DTTM] AS legal_status_end,
+    fls.[DIM_PERSON_ID] AS person_dim_id
+INTO 
+    #ssd_legal_status
 FROM 
     Child_Social.FACT_LEGAL_STATUS AS fls;
+
 
 
 
@@ -402,7 +419,7 @@ SELECT
 INTO #ssd_contact
 
 FROM 
-    Child_Social.FACT_CONTACT AS fc
+    Child_Social.FACT_CONTACTS AS fc
 
 ORDER BY
     fc.[EXTERNAL_ID] ASC;
@@ -458,25 +475,33 @@ Version: 1.0
 Development Status: [*Development* | Staging | Production-Ready]
 Remarks: 
 Dependencies: 
-- 
+- FACT_REFERRALS
 =============================================================================
 */
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
 -- Create the temporary table
-/*
-cin_referral_id
-la_person_id
-cin_ref_date
-cin_primary_need
-cin_ref_source
-cin_ref_outcome
-cin_close_reason
-cin_close_date
-cin_ref_team
-cin_ref_worker_id
-*/
+SELECT
+    fr.FACT_REFERRAL_ID AS cin_referral_id,
+    fr.EXTERNAL_ID AS la_person_id,
+    fr.REFRL_START_DTTM AS cin_ref_date,
+    fr.DIM_LOOKUP_CATEGORY_OF_NEED_ID AS cin_primary_need,
+    fr.DIM_LOOKUP_CONT_SORC_ID_DESC AS cin_ref_source,
+    -- Need the appropriate field for cin_ref_outcome
+    fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE AS cin_close_reason,
+    fr.REFRL_END_DTTM AS cin_close_date,
+    fr.DIM_DEPARTMENT_ID AS cin_ref_team,
+    fr.DIM_WORKER_ID AS cin_ref_worker_id
+
+INTO 
+    #ssd_cin_episodes
+
+FROM
+    Child_Social.FACT_REFERRALS AS fr
+WHERE 
+    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE());
+
 
 
 /* 
@@ -605,7 +630,8 @@ Version: 1.0
 Development Status: [Development | *Staging* | Production-Ready]
 Remarks: 
 Dependencies: 
-- 
+- FACT_S47
+- FACT_CP_CONFERENCE
 =============================================================================
 */
 -- Check if exists, & drop
@@ -1070,7 +1096,7 @@ Remarks:
 Dependencies: 
 - 
 =============================================================================
-
+*/
 
 /* 
 =============================================================================
@@ -1140,4 +1166,29 @@ Dependencies:
 
 
 
+
+
+
+
+
+
+
+/* ********************************************************************************************************** */
+/*
+Development clean up etc
+*/
+
+-- Get & print run time 
+SET @EndTime = GETDATE();
+PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) AS NVARCHAR(50)) + ' ms';
+
+
+/* cleanup */
+IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
+IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
+IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
+IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
+
+
+/* ********************************************************************************************************** */
 

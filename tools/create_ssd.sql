@@ -42,7 +42,6 @@ END
 CREATE TABLE ssd_person (
     la_person_id NVARCHAR(36) PRIMARY KEY, 
     pers_sex NVARCHAR(48),
-    --pers_gender NVARCHAR(MAX), -- not yet defined
     pers_ethnicity NVARCHAR(38),
     pers_dob DATETIME,
     pers_common_child_id NVARCHAR(10),
@@ -51,15 +50,13 @@ CREATE TABLE ssd_person (
     pers_send NVARCHAR(1),
     pers_expected_dob DATETIME,
     pers_death_date DATETIME,
-    pers_nationality NVARCHAR(48),
-    pers_is_mother CHAR(1)
+    pers_nationality NVARCHAR(48)
 );
 
 -- Insert data 
 INSERT INTO ssd_person (
     la_person_id,
     pers_sex,
-    pers_gender,
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,
@@ -68,13 +65,11 @@ INSERT INTO ssd_person (
     pers_send,
     pers_expected_dob,
     pers_death_date,
-    pers_nationality,
-    pers_is_mother
+    pers_nationality
 )
 SELECT 
     p.[EXTERNAL_ID],
     p.[DIM_LOOKUP_VARIATION_OF_SEX_CODE],
-    p.[GENDER_MAIN_CODE],
     p.[ETHNICITY_MAIN_CODE],
     p.[BIRTH_DTTM],
     NULL AS pers_common_child_id, -- Set to NULL
@@ -89,14 +84,10 @@ SELECT
     p.[EHM_SEN_FLAG],
     p.[DOB_ESTIMATED],
     p.[DEATH_DTTM],
-    p.[NATNL_CODE],
-    CASE WHEN fc.[DIM_PERSON_ID] IS NOT NULL THEN 'Y' ELSE 'N' END 
+    p.[NATNL_CODE]
+
 FROM 
     Child_Social.DIM_PERSON AS p
-LEFT JOIN
-    Child_Social.FACT_CPIS_UPLOAD AS fc
-ON 
-    p.[EXTERNAL_ID] = fc.[EXTERNAL_ID]
 WHERE 
     p.[EXTERNAL_ID] IS NOT NULL
 AND (
@@ -526,7 +517,7 @@ SELECT
     fc.[SOURCE_CONTACT],
     fc.[CONTACT_OUTCOMES]
 FROM 
-    Child_Social.FACT_CONTACT AS fc
+    Child_Social.FACT_CONTACTS AS fc
 ORDER BY
     fc.[EXTERNAL_ID] ASC;
 
@@ -763,7 +754,8 @@ Version: 1.0
 Development Status: [Development | *Staging* | Production-Ready]
 Remarks: 
 Dependencies: 
-- 
+- FACT_S47
+- FACT_CP_CONFERENCE
 =============================================================================
 */
 -- Check if exists & drop
@@ -1434,6 +1426,23 @@ VALUES
 
 
 
+
+/* ********************************************************************************************************** */
+/*
+Development clean up etc
+*/
+
 -- Get & print run time 
 SET @EndTime = GETDATE();
 PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) AS NVARCHAR(50)) + ' ms';
+
+
+/* cleanup */
+IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
+IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
+IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
+IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
+
+
+/* ********************************************************************************************************** */
+
