@@ -303,31 +303,27 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop 
+-- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
 -- Create the temporary table
 SELECT 
-    is.[FACT_IMMIGRATION_STATUS_ID] as immigration_status_id,
-    is.[EXTERNAL_ID] as la_person_id,
-    is.[START_DTTM] as immigration_status_start,
-    is.[END_DTTM] as immigration_status_end,
-    is.[DIM_LOOKUP_IMMGR_STATUS_CODE] as immigration_status
-
+    ims.[FACT_IMMIGRATION_STATUS_ID] as immigration_status_id,
+    ims.[EXTERNAL_ID] as la_person_id,
+    ims.[START_DTTM] as immigration_status_start,
+    ims.[END_DTTM] as immigration_status_end,
+    ims.[DIM_LOOKUP_IMMGR_STATUS_CODE] as immigration_status
 INTO 
     #ssd_immigration_status
-
 FROM 
-    Child_Social.FACT_IMMIGRATION_STATUS AS is
-
+    Child_Social.FACT_IMMIGRATION_STATUS AS ims
 ORDER BY
-    is.[EXTERNAL_ID] ASC;
+    ims.[EXTERNAL_ID] ASC;
 
 -- Set the primary key
 ALTER TABLE #ssd_immigration_status
 ADD CONSTRAINT PK_immigration_status_id
 PRIMARY KEY (immigration_status_id);
-
 
 -- Non-clustered index on immigration_status_start
 CREATE INDEX IDX_immigration_status_start 
@@ -336,6 +332,7 @@ ON #ssd_immigration_status(immigration_status_start);
 -- Non-clustered index on immigration_status_end
 CREATE INDEX IDX_immigration_status_end 
 ON #ssd_immigration_status(immigration_status_end);
+
 
 
 /* 
@@ -625,10 +622,10 @@ cin_visit_bedroom
 Object Name: ssd_s47
 Description: 
 Author: D2I
-Last Modified Date: 
-Version: 1.0
-Development Status: [Development | *Staging* | Production-Ready]
-Remarks: 
+Last Modified Date: 24/10/23
+Version: 0.2
+Development Status: [*Development* | Staging | Production-Ready]
+Remarks: s47.[OUTCOME_CP_FLAG] as icpc_outcome, -- needs checking snd s47_enquiry_id coming in as not unique?!? Duplicate vals on s47_enquiry_id. 
 Dependencies: 
 - FACT_S47
 - FACT_CP_CONFERENCE
@@ -643,27 +640,30 @@ SELECT
     s47.[EXTERNAL_ID] as la_person_id,
     s47.[START_DTTM] as s47_start_date,
     s47.[START_DTTM] as s47_authorised_date,
+    
     -- Checking for existence of a record in FACT_CP_CONFERENCE
     CASE 
         WHEN cpc.[FACT_S47_ID] IS NOT NULL THEN 'CP Plan Started'
         ELSE 'CP Plan not Required'
     END as s47_outcome,
+
     cpc.[TRANSFER_IN_FLAG] as icpc_transfer_in, 
     cpc.[MEETING_DTTM] as icpc_date,
-    s47.[OUTCOME_CP_FLAG] as icpc_outcome,
+    -- s47.[OUTCOME_CP_FLAG] as icpc_outcome, -- needs checking
     s47.[COMPLETED_BY_DEPT_ID] as icpc_team,
     s47.[COMPLETED_BY_USER_STAFF_ID] as icpc_worker_id
 INTO
     #ssd_s47_enquiry_icpc
 FROM 
     Child_Social.FACT_S47 AS s47
+
 -- all records from FACT_S47 even if they don't have a match in FACT_CP_CONFERENCE
 LEFT JOIN Child_Social.FACT_CP_CONFERENCE as cpc ON s47.[FACT_S47_ID] = cpc.[FACT_S47_ID]
+WHERE 
+    s47.[FACT_S47_ID] IS NOT NULL
 
--- Set s47_enquiry_id as the primary key for the temp table
-ALTER TABLE #ssd_s47_enquiry_icpc
-ADD PRIMARY KEY (s47_enquiry_id);
-
+-- Set s47_enquiry_id as the primary key
+ALTER TABLE #ssd_s47_enquiry_icpc ADD PRIMARY KEY (s47_enquiry_id);
 
 
 
@@ -675,11 +675,36 @@ Author: D2I
 Last Modified Date: 
 Version: 1.0
 Development Status: [*Development* | Staging | Production-Ready]
-Remarks: 
+Remarks:  worker details/fields to check. 
 Dependencies: 
-- 
+- FACT_CP_PLAN
 =============================================================================
 */
+-- Check if exists, & drop
+IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
+
+-- Create the temporary table
+SELECT 
+    cpp.FACT_CP_PLAN_ID AS cppl_cp_plan_id,
+    cpp.FACT_REFERRAL_ID AS cppl_referral_id,
+    cpp.FACT_INITIAL_CP_CONFERENCE_ID AS cppl_initial_cp_conference_id,
+    cpp.DIM_PERSON_ID AS cppl_person_id,
+    cpp.START_DTTM AS cppl_cp_plan_start_date,
+    cpp.END_DTTM AS cppl_cp_plan_end_date,
+
+    -- Fields for cppl_cp_plan_team and cppl_cp_plan_worker_id are missing
+    -- cpp.[] AS CPPL_cp_plan_team
+    -- cpp.[] AS CPPL_cp_plan_worker_id
+
+    cpp.INIT_CATEGORY_DESC AS cppl_cp_plan_initial_category,
+    cpp.CP_CATEGORY_DESC AS cppl_cp_plan_latest_category,
+    cpp.FACT_CP_PLAN_ID AS cppv_cp_plan_id
+
+INTO 
+    #ssd_cp_plans
+
+FROM 
+    Child_Social.FACT_CP_PLAN AS cpp
 
 
 /* 
@@ -706,12 +731,33 @@ Author: D2I
 Last Modified Date: 
 Version: 1.0
 Development Status: [*Development* | Staging | Production-Ready]
-Remarks: 
+Remarks: This has issues, where/what is the fk back to cp_plans? 
 Dependencies: 
-- 
+- FACT_CASENOTES
 =============================================================================
 */
+-- Check if exists, & drop
+IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
 
+-- Create the temporary table
+SELECT 
+    cn.FACT_CASENOTE_ID AS cppv_casenote_id, -- need to confirm this JH
+    cn.Child_Social.FACT_CASENOTES AS cppv_cp_visit_id,
+    cn.EVENT_DTTM AS cppv_cp_visit_date,
+    cn.SEEN_FLAG AS cppv_cp_visit_seen,
+    cn.SEEN_ALONE_FLAG AS cppv_cp_visit_seen_alone,
+    cn.SEEN_BEDROOM_FLAG AS cppv_cp_visit_bedroom
+INTO 
+    #ssd_cp_visits
+
+FROM 
+    Child_Social.FACT_CASENOTES AS cn;
+
+-- Set the primary key
+ALTER TABLE #ssd_cp_visits
+ADD CONSTRAINT PK_cppv_casenote_id PRIMARY KEY (cppv_casenote_id);
+
+-- WHERE DIM_LOOKUP_CASNT_TYPE_ID_DESC IN ( 'STVC','STVCPCOVID')
 
 /* 
 =============================================================================

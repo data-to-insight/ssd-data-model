@@ -1,7 +1,24 @@
 
 /* DEV Notes:
-- Ensure that extracted dates are in dd/MM/YYYY format and created fields are DATE, not DATETIME
+- Although returns expect dd/mm/YYYY formating on dates. Extract maintains DATETIME not DATE, nor formatted nvarchar string to avoid conversion issues.
 - Full review needed of max/exagerated/default new field type sizes e.g. family_id NVARCHAR(255)  (keys cannot use MAX)
+*/
+
+/*
+Should we consider this approach instead? 
+DECLARE @SchemaName NVARCHAR(255) = 'Child_Social';
+
+DECLARE @ExistingSourceTable NVARCHAR(500);
+DECLARE @SQL NVARCHAR(1000);
+
+-- Then for each
+DECLARE @TableName NVARCHAR(255) = 'cp_plans';
+SET @ExistingSourceTable = @SchemaName + '.' + @TableName;
+IF OBJECT_ID(@ExistingSourceTable) IS NOT NULL 
+BEGIN
+    SET @SQL = 'DROP TABLE ' + @ExistingSourceTable;
+    EXEC sp_executesql @SQL;
+END
 */
 
 
@@ -33,10 +50,7 @@ Dependencies:
 =============================================================================
 */
 -- check exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_person')
-BEGIN
-    DROP TABLE Child_Social.ssd_person;
-END
+IF OBJECT_ID('Child_Social.ssd_person') IS NOT NULL DROP TABLE Child_Social.ssd_person;
 
 -- Create structure
 CREATE TABLE ssd_person (
@@ -151,10 +165,8 @@ Dependencies:
 =============================================================================
 */
 -- check exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_family')
-BEGIN
-    DROP TABLE Child_Social.ssd_family;
-END
+IF OBJECT_ID('Child_Social.ssd_family') IS NOT NULL DROP TABLE Child_Social.ssd_family;
+
 
 -- Create structure
 CREATE TABLE Child_Social.ssd_family (
@@ -203,10 +215,8 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_address')
-BEGIN
-    DROP TABLE Child_Social.ssd_address;
-END
+IF OBJECT_ID('Child_Social.ssd_address') IS NOT NULL DROP TABLE Child_Social.ssd_address;
+
 
 -- Create structure
 CREATE TABLE Child_Social.ssd_address (
@@ -282,10 +292,7 @@ Dependencies:
 =============================================================================
 */
 -- Check if disability exists
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_disability')
-BEGIN
-    DROP TABLE Child_Social.ssd_disability;
-END
+IF OBJECT_ID('Child_Social.ssd_disability') IS NOT NULL DROP TABLE Child_Social.ssd_s47_disability;
 
 
 -- Create structure
@@ -334,14 +341,12 @@ Version: 1.0
 Development Status: [Development | *Staging* | Production-Ready]
 Remarks: 
 Dependencies: 
-- 
+- FACT_IMMIGRATION_STATUS
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_immigration_status')
-BEGIN
-    DROP TABLE Child_Social.ssd_immigration_status;
-END
+IF OBJECT_ID('Child_Social.ssd_immigration_status') IS NOT NULL DROP TABLE Child_Social.ssd_immigration_status;
+
 
 -- Create structure
 CREATE TABLE Child_Social.ssd_immigration_status (
@@ -377,15 +382,15 @@ INSERT INTO Child_Social.ssd_immigration_status (
     immigration_status
 )
 SELECT 
-    is.[FACT_IMMIGRATION_STATUS_ID],
-    is.[EXTERNAL_ID],
-    is.[START_DTTM],
-    is.[END_DTTM],
-    is.[DIM_LOOKUP_IMMGR_STATUS_CODE]
+    ims.[FACT_IMMIGRATION_STATUS_ID],
+    ims.[EXTERNAL_ID],
+    ims.[START_DTTM],
+    ims.[END_DTTM],
+    ims.[DIM_LOOKUP_IMMGR_STATUS_CODE]
 FROM 
-    Child_Social.FACT_IMMIGRATION_STATUS AS is
+    Child_Social.FACT_IMMIGRATION_STATUS AS ims
 ORDER BY
-    is.[EXTERNAL_ID] ASC;
+    ims.[EXTERNAL_ID] ASC;
 
 
 
@@ -403,10 +408,9 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_mother')
-BEGIN
-    DROP TABLE Child_Social.ssd_mother;
-END
+IF OBJECT_ID('Child_Social.ssd_mother') IS NOT NULL DROP TABLE Child_Social.ssd_mother;
+
+
 /*
 person_child_id
 la_person_id
@@ -425,14 +429,13 @@ Version: 1.0
 Development Status: [Development | *Staging* | Production-Ready]
 Remarks: 
 Dependencies: 
-- 
+- FACT_LEGAL_STATUS
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_legal_status')
-BEGIN
-    DROP TABLE Child_Social.ssd_legal_status;
-END
+IF OBJECT_ID('Child_Social.ssd_legal_status') IS NOT NULL DROP TABLE Child_Social.ssd_legal_status;
+
+
 -- Create structure
 CREATE TABLE Child_Social.ssd_legal_status (
     legal_status_id NVARCHAR(255) PRIMARY KEY,
@@ -476,14 +479,11 @@ Version: 1.0
 Development Status: [Development | *Staging* | Production-Ready]
 Remarks: 
 Dependencies: 
-- 
+- FACT_CONTACTS
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_contact')
-BEGIN
-    DROP TABLE Child_Social.ssd_contact;
-END
+IF OBJECT_ID('Child_Social.ssd_contact') IS NOT NULL DROP TABLE Child_Social.ssd_contact;
 
 -- Create structure
 CREATE TABLE Child_Social.ssd_contact (
@@ -538,10 +538,9 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_early_help')
-BEGIN
-    DROP TABLE Child_Social.ssd_early_help;
-END
+IF OBJECT_ID('Child_Social.ssd_early_help') IS NOT NULL DROP TABLE Child_Social.ssd_early_help;
+
+
 /*
 eh_episode_id
 la_person_id
@@ -565,14 +564,13 @@ Version: 1.0
 Development Status: [*Development* | Staging | Production-Ready]
 Remarks: 
 Dependencies: 
-- 
+- @YearsBack
+- FACT_REFERRALS
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cin_episodes')
-BEGIN
-    DROP TABLE Child_Social.ssd_cin_episodes;
-END
+IF OBJECT_ID('Child_Social.ssd_cin_episodes') IS NOT NULL DROP TABLE Child_Social.ssd_cin_episodes;
+
 
 -- create structure
 CREATE TABLE ssd_cin_episodes (
@@ -635,10 +633,8 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_assessments')
-BEGIN
-    DROP TABLE Child_Social.ssd_assessments;
-END
+IF OBJECT_ID('Child_Social.ssd_assessments') IS NOT NULL DROP TABLE Child_Social.ssd_assessments;
+
 /*
 assessment_id
 la_person_id
@@ -673,10 +669,7 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_assessment_factors')
-BEGIN
-    DROP TABLE Child_Social.ssd_assessment_factors;
-END
+IF OBJECT_ID('Child_Social.ssd_assessment_factors') IS NOT NULL DROP TABLE Child_Social.ssd_assessment_factors;
 
 
 /*
@@ -701,10 +694,8 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cin_plans')
-BEGIN
-    DROP TABLE Child_Social.ssd_cin_plans;
-END
+IF OBJECT_ID('Child_Social.ssd_cin_plans') IS NOT NULL DROP TABLE Child_Social.ssd_cin_plans;
+
 /*
 cin_plan_id
 la_person_id
@@ -729,10 +720,9 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cin_visits')
-BEGIN
-    DROP TABLE Child_Social.ssd_cin_visits;
-END
+IF OBJECT_ID('Child_Social.ssd_cin_visits') IS NOT NULL DROP TABLE Child_Social.ssd_cin_visits;
+
+
 /*
 cin_visit_id
 cin_plan_id
@@ -759,10 +749,8 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_s47_enquiry_icpc')
-BEGIN
-    DROP TABLE Child_Social.ssd_s47_enquiry_icpc;
-END
+IF OBJECT_ID('Child_Social.ssd_s47_enquiry_icpc') IS NOT NULL DROP TABLE Child_Social.ssd_s47_enquiry_icpc;
+
 
 --Create structure 
 CREATE TABLE Child_Social.ssd_s47_enquiry_icpc (
@@ -832,6 +820,8 @@ Dependencies:
 */
 
 
+
+
 /* 
 =============================================================================
 Object Name: ssd_category_of_abuse
@@ -856,11 +846,35 @@ Author: D2I
 Last Modified Date: 
 Version: 1.0
 Development Status: [*Development* | Staging | Production-Ready]
-Remarks: 
+Remarks: This has issues, where/what is the fk back to cp_plans? 
 Dependencies: 
-- 
+- FACT_CASENOTES
 =============================================================================
 */
+-- Check if the table exists, and drop if it does
+IF OBJECT_ID('Child_Social.ssd_cp_visits') IS NOT NULL DROP TABLE Child_Social.ssd_cp_visits;
+
+-- Create the permanent table with suitable data types
+CREATE TABLE Child_Social.ssd_cp_visits (
+    cppv_casenote_id INT PRIMARY KEY, -- Assuming FACT_CASENOTE_ID is of INT data type
+    cppv_cp_visit_id INT, -- Assuming the appropriate data type for Child_Social.FACT_CASENOTES
+    cppv_cp_visit_date DATETIME, -- Assuming EVENT_DTTM is of DATETIME data type
+    cppv_cp_visit_seen BIT, -- Assuming SEEN_FLAG is a BIT (true/false) data type
+    cppv_cp_visit_seen_alone BIT, -- Assuming SEEN_ALONE_FLAG is a BIT data type
+    cppv_cp_visit_bedroom BIT -- Assuming SEEN_BEDROOM_FLAG is a BIT data type
+);
+
+-- Populate the table
+INSERT INTO Child_Social.ssd_cp_visits
+SELECT 
+    cn.FACT_CASENOTE_ID,
+    cn.Child_Social.FACT_CASENOTES,
+    cn.EVENT_DTTM,
+    cn.SEEN_FLAG,
+    cn.SEEN_ALONE_FLAG,
+    cn.SEEN_BEDROOM_FLAG 
+FROM 
+    Child_Social.FACT_CASENOTES AS cn;
 
 
 /* 
@@ -970,11 +984,9 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists & drop
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_cla_substance_misuse')
-BEGIN
-    DROP TABLE Child_Social.ssd_cla_substance_misuse;
-END
+-- Check if exists, & drop
+IF OBJECT_ID('Child_Social.ssd_cp_visits') IS NOT NULL DROP TABLE Child_Social.ssd_cp_visits;
+
 BEGIN
     -- Create structure
     CREATE TABLE Child_Social.ssd_cla_Substance_misuse (
