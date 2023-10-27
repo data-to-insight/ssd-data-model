@@ -4,33 +4,27 @@
 - Full review needed of max/exagerated/default new field type sizes e.g. family_id NVARCHAR(255)  (keys cannot use MAX)
 */
 
-/*
-Should we consider this approach instead? 
-DECLARE @SchemaName NVARCHAR(255) = 'Child_Social';
 
-DECLARE @ExistingSourceTable NVARCHAR(500);
-DECLARE @SQL NVARCHAR(1000);
 
--- Then for each
-DECLARE @TableName NVARCHAR(255) = 'cp_plans';
-SET @ExistingSourceTable = @SchemaName + '.' + @TableName;
-IF OBJECT_ID(@ExistingSourceTable) IS NOT NULL 
-BEGIN
-    SET @SQL = 'DROP TABLE ' + @ExistingSourceTable;
-    EXEC sp_executesql @SQL;
-END
-*/
 
+
+/* ********************************************************************************************************** */
+/* Development set up */
 
 USE HDM;
-
--- ssd time frame (YRS)
-DECLARE @YearsBack INT = 6;
+GO
 
 -- Query run time vars
 DECLARE @StartTime DATETIME, @EndTime DATETIME;
 SET @StartTime = GETDATE(); -- Record the start time
+/* ********************************************************************************************************** */
 
+
+
+
+
+-- ssd time-frame (YRS)
+DECLARE @YearsBack INT = 6;
 
 /*
 =============================================================================
@@ -38,8 +32,11 @@ Object Name: ssd_person
 Description: person/child details
 Author: D2I
 Last Modified Date: 2023-10-20
-Version: 1.0
-Development Status: [Development | *Staging* | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+
 Remarks: Need to confirm FACT_903_DATA as source of mother related data
 Dependencies: 
 - Child_Social.DIM_PERSON
@@ -54,7 +51,7 @@ IF OBJECT_ID('Child_Social.ssd_person') IS NOT NULL DROP TABLE Child_Social.ssd_
 
 -- Create structure
 CREATE TABLE ssd_person (
-    la_person_id NVARCHAR(36) PRIMARY KEY, 
+    pers_la_person_id NVARCHAR(36) PRIMARY KEY, 
     pers_sex NVARCHAR(48),
     pers_ethnicity NVARCHAR(38),
     pers_dob DATETIME,
@@ -69,7 +66,7 @@ CREATE TABLE ssd_person (
 
 -- Insert data 
 INSERT INTO ssd_person (
-    la_person_id,
+    pers_la_person_id,
     pers_sex,
     pers_ethnicity,
     pers_dob,
@@ -137,7 +134,7 @@ ORDER BY
     p.[EXTERNAL_ID] ASC;
 
 -- Create a non-clustered index on la_person_id for quicker lookups and joins
-CREATE INDEX IDX_ssd_person_la_person_id ON Child_Social.ssd_person(la_person_id);
+CREATE INDEX IDX_ssd_person_la_person_id ON Child_Social.ssd_person(pers_la_person_id);
 
 -- [done]has open referral - FACT_REFERRALS.REFRL_START_DTTM
 -- [done]contact in last 6yrs - Child_Social.FACT_CONTACTS.CONTACT_DTTM
@@ -156,8 +153,9 @@ Object Name: ssd_family
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [Development | *Staging* | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 Dependencies: 
 - Singleview.DIM_TF_FAMILY
@@ -170,33 +168,33 @@ IF OBJECT_ID('Child_Social.ssd_family') IS NOT NULL DROP TABLE Child_Social.ssd_
 
 -- Create structure
 CREATE TABLE Child_Social.ssd_family (
-    DIM_TF_FAMILY_ID NVARCHAR(255) PRIMARY KEY, 
-    family_id NVARCHAR(255),
-    la_person_id NVARCHAR(255),
+    fami_DIM_TF_FAMILY_ID NVARCHAR(255) PRIMARY KEY, 
+    fami_family_id NVARCHAR(255),
+    fami_la_person_id NVARCHAR(255),
     
     -- Define foreign key constraint
-    FOREIGN KEY (la_person_id) REFERENCES Child_Social.person(la_person_id)
+    FOREIGN KEY (fami_la_person_id) REFERENCES Child_Social.person(pers_la_person_id)
 );
 
 -- Insert data 
 INSERT INTO Child_Social.ssd_family (
-    DIM_TF_FAMILY_ID, 
-    family_id, 
-    la_person_id
+    fami_DIM_TF_FAMILY_ID, 
+    fami_family_id, 
+    fami_la_person_id
     )
 SELECT 
     DIM_TF_FAMILY_ID,
-    UNIQUE_FAMILY_NUMBER    as family_id,
-    EXTERNAL_ID             as la_person_id
+    UNIQUE_FAMILY_NUMBER    as fami_family_id,
+    EXTERNAL_ID             as fami_la_person_id
 FROM Singleview.DIM_TF_FAMILY
 WHERE EXISTS ( -- only need address data for matching/relevant records
     SELECT 1 
     FROM Child_Social.ssd_person p
-    WHERE p.la_person_id = f.EXTERNAL_ID
+    WHERE p.pers_la_person_id = f.EXTERNAL_ID
     );
 
 -- Create a non-clustered index on foreign key
-CREATE INDEX IDX_family_person ON Child_Social.ssd_family(la_person_id);
+CREATE INDEX IDX_family_person ON Child_Social.ssd_family(fami_la_person_id);
 
 
 
@@ -207,11 +205,12 @@ Object Name: ssd_address
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [Development | *Staging* | Production-Ready]
-Remarks: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 Dependencies: 
-- 
+- DIM_PERSON_ADDRESS
 =============================================================================
 */
 -- Check if exists & drop
@@ -220,37 +219,37 @@ IF OBJECT_ID('Child_Social.ssd_address') IS NOT NULL DROP TABLE Child_Social.ssd
 
 -- Create structure
 CREATE TABLE Child_Social.ssd_address (
-    address_id NVARCHAR(255) PRIMARY KEY,
-    la_person_id NVARCHAR(255), -- Assuming EXTERNAL_ID corresponds to la_person_id
-    address_type NVARCHAR(MAX),
-    address_start DATETIME,
-    address_end DATETIME,
-    address_postcode NVARCHAR(MAX),
+    addr_address_id NVARCHAR(255) PRIMARY KEY,
+    addr_la_person_id NVARCHAR(255), -- Assuming EXTERNAL_ID corresponds to la_person_id
+    addr_address_type NVARCHAR(MAX),
+    addr_address_start DATETIME,
+    addr_address_end DATETIME,
+    addr_address_postcode NVARCHAR(MAX),
     address NVARCHAR(MAX)
 );
 
 -- Add foreign key constraint for la_person_id
 ALTER TABLE Child_Social.ssd_address
 ADD CONSTRAINT FK_address_person
-FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
+FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(addr_la_person_id);
 
 -- Non-clustered index on foreign key
-CREATE INDEX IDX_address_person ON Child_Social.ssd_address(la_person_id);
+CREATE INDEX IDX_address_person ON Child_Social.ssd_address(addr_la_person_id);
 
 -- Non-clustered indexes on address_start and address_end
-CREATE INDEX IDX_address_start ON Child_Social.ssd_address(address_start);
+CREATE INDEX IDX_address_start ON Child_Social.ssd_address(addr_address_start);
 
-CREATE INDEX IDX_address_end ON Child_Social.ssd_address(address_end);
+CREATE INDEX IDX_address_end ON Child_Social.ssd_address(addr_address_end);
 
 -- insert data
 INSERT INTO Child_Social.ssd_address (
-    address_id, 
-    la_person_id, 
-    address_type, 
-    address_start, 
-    address_end, 
-    address_postcode, 
-    address
+    addr_address_id, 
+    addr_la_person_id, 
+    addr_address_type, 
+    addr_address_start, 
+    addr_address_end, 
+    addr_address_postcode, 
+    addr_address_json
 )
 SELECT 
     pa.[DIM_PERSON_ADDRESS_ID],
@@ -259,21 +258,25 @@ SELECT
     pa.[START_DTTM],
     pa.[END_DTTM],
     pa.[POSTCODE],
-    -- Create concatenated address field
-    CONCAT_WS(',', 
-        NULLIF(pa.[ROOM_NO], ''), 
-        NULLIF(pa.[FLOOR_NO], ''), 
-        NULLIF(pa.[FLAT_NO], ''), 
-        NULLIF(pa.[BUILDING], ''), 
-        NULLIF(pa.[HOUSE_NO], ''), 
-        NULLIF(pa.[STREET], ''), 
-        NULLIF(pa.[TOWN], '')
+    -- Create JSON string for the address
+    (
+        SELECT 
+            NULLIF(pa.[ROOM_NO], '') AS ROOM, 
+            NULLIF(pa.[FLOOR_NO], '') AS FLOOR, 
+            NULLIF(pa.[FLAT_NO], '') AS FLAT, 
+            NULLIF(pa.[BUILDING], '') AS BUILDING, 
+            NULLIF(pa.[HOUSE_NO], '') AS HOUSE, 
+            NULLIF(pa.[STREET], '') AS STREET, 
+            NULLIF(pa.[TOWN], '') AS TOWN,
+            NULLIF(pa.[UPRN], '') AS UPRN,
+            NULLIF(pa.[EASTING], '') AS EASTING,
+            NULLIF(pa.[NORTHING], '') AS NORTHING
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     )
 FROM 
     Child_Social.DIM_PERSON_ADDRESS AS pa
 ORDER BY
     pa.[EXTERNAL_ID] ASC;
-
 
 
 
@@ -284,11 +287,12 @@ Object Name: ssd_disability
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [Development | *Staging* | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- FACT_DISABILITY
 =============================================================================
 */
 -- Check if disability exists
@@ -337,8 +341,9 @@ Object Name: ssd_immigration_status
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [Development | *Staging* | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - FACT_IMMIGRATION_STATUS
@@ -400,8 +405,9 @@ Object Name: ssd_mother
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -425,8 +431,9 @@ Object Name: ssd_legal_status
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [Development | *Staging* | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - FACT_LEGAL_STATUS
@@ -475,8 +482,9 @@ Object Name: ssd_contact
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [Development | *Staging* | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - FACT_CONTACTS
@@ -530,8 +538,9 @@ Object Name: ssd_Early_help
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -560,8 +569,9 @@ Object Name: ssd_cin_episodes
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - @YearsBack
@@ -625,8 +635,9 @@ Object Name: ssd_assessments
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -661,8 +672,9 @@ Object Name: ssd_assessment_factors
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -686,8 +698,9 @@ Object Name: ssd_cin_plans
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -712,8 +725,9 @@ Object Name: ssd_cin_visits
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -740,8 +754,9 @@ Object Name: ssd_s47
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [Development | *Staging* | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - FACT_S47
@@ -811,8 +826,9 @@ Object Name: ssd_cp_plans
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -828,8 +844,9 @@ Object Name: ssd_category_of_abuse
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -844,8 +861,9 @@ Object Name: ssd_cp_visits
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: This has issues, where/what is the fk back to cp_plans? 
 Dependencies: 
 - FACT_CASENOTES
@@ -883,8 +901,9 @@ Object Name: ssd_cp_reviews
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -898,8 +917,9 @@ Object Name: ssd_cp_reviews_risks
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -914,8 +934,9 @@ Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -930,8 +951,9 @@ Object Name: ssd_cla_convictions
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -947,8 +969,9 @@ Object Name: ssd_cla_health
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -962,8 +985,9 @@ Object Name: ssd_cla_immunisations
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -977,8 +1001,9 @@ Object Name: ssd_substance_misuse
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [Development | *Staging* | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1035,8 +1060,9 @@ Object Name: ssd_placement
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1053,8 +1079,9 @@ Object Name: ssd_cla_reviews
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1093,8 +1120,9 @@ Object Name: ssd_cla_previous_permanence
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1108,8 +1136,9 @@ Object Name: ssd_cla_care_plan
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1123,8 +1152,9 @@ Object Name: ssd_cla_visits
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1139,8 +1169,9 @@ Object Name: ssd_sdq_scores
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1156,8 +1187,9 @@ Object Name: ssd_missing
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1208,8 +1240,9 @@ Object Name: ssd_care_leavers
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1224,8 +1257,9 @@ Object Name: ssd_permanence
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1240,8 +1274,9 @@ Object Name: ssd_send
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1292,8 +1327,9 @@ Object Name: ssd_ehcp_assessment
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1308,8 +1344,9 @@ Object Name: ssd_ehcp_named_plan
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1323,8 +1360,9 @@ Object Name: ssd_ehcp_active_plans
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1339,9 +1377,10 @@ Dependencies:
 Object Name: ssd_send_need
 Description: 
 Author: D2I
-Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+Last Modified Date:
+DB Compatibility: SQL Server 2014+|... 
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1355,8 +1394,9 @@ Object Name: ssd_social_worker
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1380,8 +1420,9 @@ Object Name: ssd_pre_proceedings
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1397,8 +1438,9 @@ Object Name: ssd_voice_of_child
 Description: 
 Author: D2I
 Last Modified Date: 
-Version: 1.0
-Development Status: [*Development* | Staging | Production-Ready]
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1440,9 +1482,7 @@ VALUES
 
 
 /* ********************************************************************************************************** */
-/*
-Development clean up etc
-*/
+/* Development clean up */
 
 -- Get & print run time 
 SET @EndTime = GETDATE();

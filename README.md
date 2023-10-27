@@ -13,9 +13,9 @@ The dataset aims to 'flatten' existing local variation in collected data, thus e
 - SSDA903
 - Annex A
 - CIN Census
-- Regional Improvement and Innovation Alliance (RIIA)
 
 #### Iterative revisions based on developments in other (project)areas
+- Regional Improvement and Innovation Alliance (RIIA)
 - SEN2
 - ADCS Safeguarding
 - School Census
