@@ -1,0 +1,132 @@
+---
+nodes:
+- name: ssd_send
+  fields:
+  - name: send_table_id
+    description: send_table_id
+    item_ref: SEND001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - send
+    returns:
+    - ''
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:send_table_id
+    - mosaic:send_table_id
+    cms_table:
+    - liquid_logic:ssd_send
+    - mosaic:ssd_send
+    guidance: Permanence table record unique ID from system or auto-generated as part
+      of export.
+  - name: send_upn
+    description: UPN
+    item_ref: SEND002A
+    type: nvarchar
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - send
+    returns:
+    - ''
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:send_upn
+    - mosaic:send_upn
+    cms_table:
+    - liquid_logic:ssd_send
+    - mosaic:ssd_send
+    guidance: See PER006A
+  - name: send_uln
+    description: ULN
+    item_ref: SEND003A
+    type: nvarchar
+    categories:
+    - identity
+    - send
+    returns:
+    - ''
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:send_uln
+    - mosaic:send_uln
+    cms_table:
+    - liquid_logic:ssd_send
+    - mosaic:ssd_send
+    guidance: "The young person\u2019s unique learner number (ULN) as used in the\
+      \ Individualised Learner Record."
+  - name: send_upn_unknown
+    description: UPN and ULN unknown
+    item_ref: SEND004A
+    type: nvarchar
+    categories:
+    - identity
+    - send
+    returns:
+    - ''
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:send_upn_unknown
+    - mosaic:send_upn_unknown
+    cms_table:
+    - liquid_logic:ssd_send
+    - mosaic:ssd_send
+    guidance: "Where no identifier is available, please record one of the following\
+      \ options:\n-UN1 Child is aged under 6 years old and is not yet assigned a UPN\n\
+      -UN2 Child has never attended a state-funded school in England and has not been\
+      \ assigned a UPN\n-UN3 Child is educated outside of England and has not been\
+      \ assigned a UPN\n-UN5 Sources collating UPNs reflect discrepancy/ies for the\
+      \ child\u2019s name and/or surname and/or date of birth therefore prevent reliable\
+      \ matching (for example duplicated UPN)\n-UN8 Person is new to LA and the UPN\
+      \ or ULN is not yet known\n-UN9 Young person has never attended a state-funded\
+      \ school or further education setting in England and has not been assigned a\
+      \ UPN or ULN\n-UN10 Request for assessment resulted in no further action before\
+      \ UPN or ULN known"
+  - name: send_person_id
+    description: Person Unique ID
+    item_ref: SEND005A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - identity
+    - send
+    returns:
+    - SSDA903
+    - CINcensus
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:send_person_id
+    - mosaic:send_person_id
+    cms_table:
+    - liquid_logic:ssd_send
+    - mosaic:ssd_send
+    guidance: See PER001A

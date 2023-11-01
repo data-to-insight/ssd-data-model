@@ -149,7 +149,8 @@ in an interchange format. The description is optional, and is not provided where
 Set up the working environment (will prompt Y/N part-way through, type 'y'to continue):</p>
 <pre><code class="language-bash">./setup.sh
 </code></pre>
-<p>For ref: The above bash script contains and runs <all> the following required commands so there is no further setup required.: </p>
+<p>For ref: The above bash script contains and runs <all> the following required commands so there is no further setup required. In some rare occasions, where 
+  errors in running anything to do with Pygraphviz subsequently occur, running this setup.sh script twice usually fixes the issue(s): </p>
 <pre><code class="language-python">[$] pip install -r requirements.txt
 [$] sudo apt-get update
 [$] sudo apt-get install graphviz libgraphviz-dev pkg-config

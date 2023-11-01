@@ -1,0 +1,54 @@
+---
+nodes:
+- name: ssd_disability
+  fields:
+  - name: disa_person_id
+    description: Person Unique ID
+    item_ref: DIS001A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - disability
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:disa_person_id
+    - mosaic:disa_person_id
+    cms_table:
+    - liquid_logic:ssd_disability
+    - mosaic:ssd_disability
+    guidance: null
+  - name: disa_disability_code
+    description: Disability Code
+    item_ref: DIS002A
+    type: nvarchar
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - disability
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:disa_disability_code
+    - mosaic:disa_disability_code
+    cms_table:
+    - liquid_logic:ssd_disability
+    - mosaic:ssd_disability
+    guidance: null

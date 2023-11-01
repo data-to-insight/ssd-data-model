@@ -23,7 +23,7 @@ output_directory = paths['yml_data']
 
 # Full list of field names
 # If there are non-required fields in the spec csv, just dont include them here
-field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'name', 'description', 'returns', 
+field_names = ['item_ref','object_name', 'categories', 'constraints', 'type', 'field_name', 'description', 'returns', 
                'cms', 'cms_field','cms_table',
                'required_enabled','unique_enabled','primary_key','foreign_key', 
                'guidance', 
@@ -66,6 +66,8 @@ def save_relationships_yaml(relationships, output_directory):
                     'child_key': relation['child_key'],
                     'relation': '1:M'  # Hardcoded relationship type
                 }
+
+                #print(relationship_data)
 
                 data['relationships'].append(relationship_data)
 
@@ -112,6 +114,7 @@ def process_csv_file(csv_file, change_log_file, output_directory):
     nodes = []  # Initialize nodes here
 
     for row in data:
+
         object_name = row['object_name']
         field = {}
 
@@ -155,7 +158,7 @@ def process_csv_file(csv_file, change_log_file, output_directory):
             relationships[parent_object].append({
                 'child_object': object_name,
                 'parent_key': parent_key,
-                'child_key': field['name']
+                'child_key': field['field_name']
             })
 
     for node in nodes:
@@ -192,10 +195,14 @@ def save_node_yaml(node, output_directory):
 
         for field in node['fields']:
             field_data = {
-                'name': field['name'],
+                'name': field['field_name'], # consider renaming this throughout to field_name (RH 31/10/23)
                 'description': field['description'],
                 'item_ref': field['item_ref']
             }
+
+            # Dev note: 
+            # Due to revisions in spec 31/10/23, further clean-up work here required. 
+            # check spec col/field naming on spec, inclusion of max_field_size? Remove depreciated(unique_enabled,..)? 
 
             # Can be integrated into the above structure once all definitions in the spec are set
             # WE only requ the null checks due to in progress developement 
@@ -269,6 +276,7 @@ def save_node_yaml(node, output_directory):
 def delete_yml_objects(output_directory):
     """
     Delete all *.yml files from a directory.
+    Clean-up everything before re-creating to avoid removed/depreciated items being left behind during re-creation.
 
     :param output_directory: str, path to the directory to clean
     """

@@ -1,0 +1,154 @@
+---
+nodes:
+- name: ssd_professionals
+  fields:
+  - name: prof_professional_id
+    description: null
+    item_ref: PROF001A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - workforce
+    cms_field:
+    - liquid_logic:prof_professional_id
+    - mosaic:prof_professional_id
+    cms_table:
+    - liquid_logic:ssd_professionals
+    - mosaic:ssd_professionals
+    guidance: null
+  - name: prof_social_worker_registration_no
+    description: Social worker ID - Social Work England (SWE) registration number-
+      if available
+    item_ref: PROF002A
+    type: nvarchar
+    categories:
+    - workforce
+    cms_field:
+    - liquid_logic:prof_social_worker_registration_no
+    - mosaic:prof_social_worker_registration_no
+    cms_table:
+    - liquid_logic:ssd_professionals
+    - mosaic:ssd_professionals
+    guidance: "A social worker ID code will allow identification of episodes with\
+      \ the same social worker and will allow us to link social workers across episodes.\
+      \ This data item should be in the format \u2018AAnnnnnn\u2019 and is up to 12\
+      \ digits.\nWhere a child\u2019s primary social worker/caseworker is a qualified\
+      \ social worker, for each episode record the child and family social worker\
+      \ Social Work England (SWE) number (formerly HCPC code). For social workers\
+      \ this will start \u2018SW\u2019. This will allow us to link to the Children\u2019\
+      s Social Work Workforce Census, for example to pick up information on social\
+      \ worker characteristics.\nWhere this primary social worker is not a qualified\
+      \ social worker (or does not have an SWE number for another reason \u2013 such\
+      \ as being qualified in Scotland) please provide an alternative unique identifier\
+      \ for the worker. This can be any alphanumeric code though should start with\
+      \ \u2018XX\u2019 to prevent inadvertent matching with the Social Primary social\
+      \ worker The \u2018primary social worker\u2019 is the primary member of local\
+      \ authority staff responsible for managing the child\u2019s case. This may be\
+      \ known across authorities as \u2018allocated case worker\u2019, \u2018key worker\u2019\
+      \ or \u2018lead practitioner\u2019. Please note: for episodes where a child\
+      \ is not in care this may also include non-qualified social workers/caseworkers\
+      \ without a Social Work England (SWE) number.\nIt should also be consistent\
+      \ across the social worker\u2019s episodes in the data. Likewise, this should\
+      \ be done if a primary social worker is a qualified worker but it is not possible\
+      \ to provide their SWE number.\nWhere a worker has qualified in year or their\
+      \ SWE number has changed during the year, please use their latest SWE number\
+      \ for all episodes."
+  - name: prof_agency_worker_flag
+    description: Agency worker
+    item_ref: PROF006A
+    type: nchar
+    categories:
+    - workforce
+    returns:
+    - CSCWF
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prof_agency_worker_flag
+    - mosaic:prof_agency_worker_flag
+    cms_table:
+    - liquid_logic:ssd_professionals
+    - mosaic:ssd_professionals
+    guidance: "Record whether the child and family social worker is an agency worker:\n\
+      1 for Yes (agency worker)\n0 for No (not an agency worker)\nNote: for child\
+      \ and family social workers employed directly by your local authority, record\
+      \ \u201C0\u201D - No."
+  - name: prof_professional_role
+    description: Role within the organisation
+    item_ref: PROF007A
+    type: nvarchar
+    categories:
+    - workforce
+    returns:
+    - CSCWF
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prof_professional_role
+    - mosaic:prof_professional_role
+    cms_table:
+    - liquid_logic:ssd_professionals
+    - mosaic:ssd_professionals
+    guidance: "Record the role the social worker has within the organisation as one\
+      \ of the following six categories:\n\u2022 1 for Senior Manager\n\u2022 2 for\
+      \ Middle Manager\n\u2022 3 for First Line Manager\n\u2022 4 for Senior Practitioner\n\
+      \u2022 5 for Case Holder\n\u2022 6 for Qualified without cases"
+  - name: prof_professional_caseload
+    description: Number of cases held
+    item_ref: PROF008A
+    type: nvarchar
+    categories:
+    - workforce
+    returns:
+    - CSCWF
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prof_professional_caseload
+    - mosaic:prof_professional_caseload
+    cms_table:
+    - liquid_logic:ssd_professionals
+    - mosaic:ssd_professionals
+    guidance: "Record the number of cases held by the child and family social worker.\n\
+      For the purposes of this collection, a case is defined as: Any case allocated\
+      \ to a named social worker, where the work\ninvolves child and family social\
+      \ work.\nThis may include:\n\u2022 an individual child allocated to a social\
+      \ worker (for example a family of three siblings would be three individual cases)\n\
+      including those on a child protection plan, children in need, fostering and\
+      \ adoption cases and care leavers\n\u2022 a carer or carers (where they are\
+      \ allocated as a single case) allocated to a social worker for the purposes\
+      \ of fostering or\nadoption.\n\u2022 an adult(s) allocated to a social worker\
+      \ for the purpose of children and families work."
+  - name: prof_professional_qualification
+    description: Qualification level
+    item_ref: PROF009A
+    type: nvarchar
+    categories:
+    - workforce
+    returns:
+    - CSCWF
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prof_professional_qualification
+    - mosaic:prof_professional_qualification
+    cms_table:
+    - liquid_logic:ssd_professionals
+    - mosaic:ssd_professionals
+    guidance: "Record whether your worker is an undergraduate (for example Bachelor\u2019\
+      s degree or equivalent), a postgraduate (for example\nMaster\u2019s degree,\
+      \ PhD) or other (is qualified through another route).\nRecord the qualification\
+      \ level, as follows:\n\u2022 1 for Undergraduate\n\u2022 2 for Postgraduate\n\
+      \u2022 3 for Other (for example any other qualification)\nThe qualification\
+      \ recorded should be the one that is relevant to the social worker profession\
+      \ and where a social worker holds more than one the highest should be recorded.\n\
+      Diplomas in Social Work can be undergraduate or postgraduate. If LAs are unsure\
+      \ of the level, the qualification should be recorded as \u2018Other.\u2019"

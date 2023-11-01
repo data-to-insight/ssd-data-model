@@ -1,0 +1,148 @@
+---
+nodes:
+- name: ssd_cin_visits
+  fields:
+  - name: cinv_cin_visit_id
+    description: CIN Visit ID
+    item_ref: CINV001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - child_in_need
+    - cin_plan
+    - visit
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cinv_cin_visit_id
+    - mosaic:cinv_cin_visit_id
+    cms_table:
+    - liquid_logic:ssd_cin_visits
+    - mosaic:ssd_cin_visits
+    guidance: CIN Visit unique ID from system or auto-generated as part of export.
+  - name: cinv_cin_plan_id
+    description: CIN Plan ID
+    item_ref: CINV002A
+    type: nvarchar
+    foreign_key: ssd_cin_plans.cinp_cin_plan_id
+    categories:
+    - child_in_need
+    - cin_plan
+    - visit
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cinv_cin_plan_id
+    - mosaic:cinv_cin_plan_id
+    cms_table:
+    - liquid_logic:ssd_cin_visits
+    - mosaic:ssd_cin_visits
+    guidance: See CNP001A
+  - name: cinv_cin_visit_date
+    description: CIN Visit Date
+    item_ref: CINV003A
+    type: datetime
+    categories:
+    - child_in_need
+    - cin_plan
+    - visit
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cinv_cin_visit_date
+    - mosaic:cinv_cin_visit_date
+    cms_table:
+    - liquid_logic:ssd_cin_visits
+    - mosaic:ssd_cin_visits
+    guidance: Date of Visit
+    metadata:
+      release: In review|pending
+      change_id: SSD-547
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: cinv_cin_visit_seen
+    description: Child Seen
+    item_ref: CINV004A
+    type: nvarchar
+    categories:
+    - child_in_need
+    - cin_plan
+    - visit
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cinv_cin_visit_seen
+    - mosaic:cinv_cin_visit_seen
+    cms_table:
+    - liquid_logic:ssd_cin_visits
+    - mosaic:ssd_cin_visits
+    guidance: Was the child seen during this visit? Yes/ No
+  - name: cinv_cin_visit_seen_alone
+    description: Child Seen Alone
+    item_ref: CINV005A
+    type: nvarchar
+    categories:
+    - child_in_need
+    - cin_plan
+    - visit
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cinv_cin_visit_seen_alone
+    - mosaic:cinv_cin_visit_seen_alone
+    cms_table:
+    - liquid_logic:ssd_cin_visits
+    - mosaic:ssd_cin_visits
+    guidance: Was the child seen alone during this visit? Yes/ No
+    metadata:
+      release: In review|pending
+      change_id: SSD-548
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: cinv_cin_visit_bedroom
+    description: Child Bedroom Seen
+    item_ref: CINV006A
+    type: nvarchar
+    categories:
+    - child_in_need
+    - cin_plan
+    - visit
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cinv_cin_visit_bedroom
+    - mosaic:cinv_cin_visit_bedroom
+    cms_table:
+    - liquid_logic:ssd_cin_visits
+    - mosaic:ssd_cin_visits
+    guidance: Was the child's bedroom seen during this visit? Yes/ No
+    metadata:
+      release: In review|pending
+      change_id: SSD-549
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature

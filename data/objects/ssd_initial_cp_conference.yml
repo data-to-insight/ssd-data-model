@@ -1,0 +1,236 @@
+---
+nodes:
+- name: ssd_initial_cp_conference
+  fields:
+  - name: icpc_icpc_id
+    description: Initial CP Conference ID
+    item_ref: ICPC001A
+    primary_key: true
+    categories:
+    - initial_cp_conference
+    - child_protection
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: null
+  - name: icpc_icpc_meeting_id
+    description: Initial CP Conference Meeting ID
+    item_ref: ICPC009A
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: null
+  - name: icpc_s47_enquiry_id
+    description: S47 Enquiry ID
+    item_ref: ICPC002A
+    returns:
+    - ''
+    - RIIA
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: null
+  - name: icpc_person_id
+    description: Person Unique ID
+    item_ref: ICPC010A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - s47_enquiry
+    - child_protection
+    returns:
+    - SSDA903
+    - CINcensus
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:icpc_person_id
+    - mosaic:icpc_person_id
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: null
+  - name: icpc_cp_plan_id
+    description: CP Plan ID
+    item_ref: ICPC011A
+    type: nvarchar
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - child_protection
+    - cp_plan
+    returns:
+    - ''
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:CPPL_cp_plan_id
+    - mosaic:CPPL_cp_plan_id
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: null
+  - name: icpc_referral_id
+    description: Referral ID
+    item_ref: ICPC012A
+    cms_field:
+    - liquid_logic:icpc_referral_id
+    - mosaic:icpc_referral_id
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: null
+  - name: icpc_icpc_transfer_in
+    description: Is this a transferred in ICPC?
+    item_ref: ICPC003A
+    type: nvarchar
+    categories:
+    - initial_cp_conference
+    - child_protection
+    returns:
+    - Local
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:icpc_icpc_transfer_in
+    - mosaic:icpc_icpc_transfer_in
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: 'In this is a transfer in ICPC:
+
+      1 - Yes
+
+      0 - No'
+    metadata:
+      release: In review|pending
+      change_id: SSD-551
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: icpc_icpc_target_date
+    description: Target ICPC date
+    item_ref: ICPC004A
+    type: datetime
+    categories:
+    - initial_cp_conference
+    - child_protection
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:icpc_icpc_target_date
+    - mosaic:icpc_icpc_target_date
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: null
+  - name: icpc_icpc_date
+    description: Date of Initial CP Conference
+    item_ref: ICPC005A
+    type: datetime
+    categories:
+    - initial_cp_conference
+    - child_protection
+    returns:
+    - CINcensus
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:icpc_icpc_date
+    - mosaic:icpc_icpc_date
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: Enter the date on which the initial child protection conference takes
+      place, using the formatting covered in the general notes. If the initial child
+      protection conference has not yet taken place, please leave blank.
+  - name: icpc_icpc_outcome_json
+    description: Outcome of Initial CP Conference
+    item_ref: ICPC006A
+    type: nvarchar
+    categories:
+    - initial_cp_conference
+    - child_protection
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:icpc_icpc_outcome_json
+    - mosaic:icpc_icpc_outcome_json
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: 'Enter the outcome of the Initial CP Conference:
+
+      - Child/ young person to be subject of a Child Protection Plan
+
+      - Do not start Child Protection Plan'
+    metadata:
+      release: In review|pending
+      change_id: SSD-562
+      change_source: D2I
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: icpc_icpc_team
+    description: ICPC Allocated Team
+    item_ref: ICPC007A
+    type: nvarchar
+    categories:
+    - initial_cp_conference
+    - child_protection
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:icpc_icpc_team
+    - mosaic:icpc_icpc_team
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: Allocated Team responsible for S47 Enquiry/ ICPC
+  - name: icpc_icpc_worker_id
+    description: ICPC Allocated Worker ID
+    item_ref: ICPC008A
+    type: nvarchar
+    foreign_key: ssd_social_worker.socw_social_worker_id
+    categories:
+    - initial_cp_conference
+    - child_protection
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:icpc_icpc_worker_id
+    - mosaic:icpc_icpc_worker_id
+    cms_table:
+    - liquid_logic:ssd_initial_cp_conference
+    - mosaic:ssd_initial_cp_conference
+    guidance: Allocated worker responsible for S47 Enquiry/ ICPC
