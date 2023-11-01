@@ -1,0 +1,114 @@
+---
+nodes:
+- name: ssd_contacts
+  fields:
+  - name: cont_contact_id
+    description: Contact ID
+    item_ref: CONT001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - contact
+    returns:
+    - ''
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cont_contact_id
+    - mosaic:cont_contact_id
+    cms_table:
+    - liquid_logic:ssd_contacts
+    - mosaic:ssd_contacts
+    guidance: Contact Record unique ID from system or auto-generated as part of export.
+  - name: cont_person_id
+    description: Person Unique ID
+    item_ref: CONT002A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - contact
+    returns:
+    - SSDA903
+    - CINcensus
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cont_person_id
+    - mosaic:cont_person_id
+    cms_table:
+    - liquid_logic:ssd_contacts
+    - mosaic:ssd_contacts
+    guidance: See PER001A
+  - name: cont_contact_date
+    description: Date of Contact
+    item_ref: CONT003A
+    type: datetime
+    categories:
+    - contact
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cont_contact_date
+    - mosaic:cont_contact_date
+    cms_table:
+    - liquid_logic:ssd_contacts
+    - mosaic:ssd_contacts
+    guidance: Date Contact received into LA
+  - name: cont_contact_source
+    description: Contact Source
+    item_ref: CONT004A
+    type: nvarchar
+    categories:
+    - contact
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cont_contact_source
+    - mosaic:cont_contact_source
+    cms_table:
+    - liquid_logic:ssd_contacts
+    - mosaic:ssd_contacts
+    guidance: 'For each new contact, record the source of contact from the list.
+
+      Where there is more than one contact for the same child on the same day, the
+      first contact should be recorded and it is this contact source that should be
+      recorded here.'
+  - name: cont_contact_outcome_json
+    description: Contact Outcome
+    item_ref: CONT005A
+    type: nvarchar
+    categories:
+    - contact
+    returns:
+    - ADCS_SP
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cont_contact_outcome_json
+    - mosaic:cont_contact_outcome_json
+    cms_table:
+    - liquid_logic:ssd_contacts
+    - mosaic:ssd_contacts
+    guidance: EH Referral/ CIN Referral

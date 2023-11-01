@@ -1,0 +1,103 @@
+---
+nodes:
+- name: ssd_sen_need
+  fields:
+  - name: senn_sen_need_table_id
+    description: SEN Need Table ID
+    item_ref: SENN001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
+    - need
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:senn_sen_need_table_id
+    - mosaic:senn_sen_need_table_id
+    cms_table:
+    - liquid_logic:ssd_sen_need
+    - mosaic:ssd_sen_need
+    guidance: SEN need record unique ID from system or auto-generated as part of export.
+  - name: senn_active_ehcp_id
+    description: Plan ID
+    item_ref: SENN002A
+    type: nvarchar
+    foreign_key: ssd_ehcp_active_plans.ehcp_active_ehcp_id
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
+    - need
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:senn_active_ehcp_id
+    - mosaic:senn_active_ehcp_id
+    cms_table:
+    - liquid_logic:ssd_sen_need
+    - mosaic:ssd_sen_need
+    guidance: See EAP001A
+  - name: senn_active_ehcp_need_type
+    description: SEN Type
+    item_ref: SENN003A
+    type: nvarchar
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
+    - need
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:senn_active_ehcp_need_type
+    - mosaic:senn_active_ehcp_need_type
+    cms_table:
+    - liquid_logic:ssd_sen_need
+    - mosaic:ssd_sen_need
+    guidance: "Please record the nature of the person\u2019s special educational need.\
+      \ These options are consistent with those collected within the spring term school\
+      \ census. Where multiple types of need are recorded and ranked, the primary\
+      \ type of need should be ranked 1 under Type of need rank, and if applicable\
+      \ a secondary type of need should be ranked 2.\n-SPLD Specific learning difficulty\n\
+      -MLD Moderate learning difficulty\n-SLD Severe learning difficulty\n-PMLD Profound\
+      \ and multiple learning difficulty\n-SEMH Social, emotional and mental health\n\
+      -SLCN Speech, language and communication needs\n-HI Hearing impairment\n-VI\
+      \ Vision impairment\n-MSI Multi-sensory impairment\n-PD Physical disability\n\
+      -ASD Autistic spectrum disorder\n-OTH Other difficulty"
+  - name: senn_active_ehcp_need_rank
+    description: SEN Type Rank
+    item_ref: SENN004A
+    type: nvarchar
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
+    - need
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:senn_active_ehcp_need_rank
+    - mosaic:senn_active_ehcp_need_rank
+    cms_table:
+    - liquid_logic:ssd_sen_need
+    - mosaic:ssd_sen_need
+    guidance: If only one type of need is recorded, this should be recorded as rank
+      1. If multiple types of need are recorded, then the primary type of need should
+      be recorded as rank 1 and the secondary type of need should be recorded as rank
+      2. Up to two types of need can be recorded.

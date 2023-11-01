@@ -1,0 +1,71 @@
+---
+nodes:
+- name: ssd_ehcp_active_plans
+  fields:
+  - name: ehcp_active_ehcp_id
+    description: Plan ID
+    item_ref: EHCP001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:ehcp_active_ehcp_id
+    - mosaic:ehcp_active_ehcp_id
+    cms_table:
+    - liquid_logic:ssd_ehcp_active_plans
+    - mosaic:ssd_ehcp_active_plans
+    guidance: EHCP active plan unique ID from system or auto-generated as part of
+      export.
+  - name: ehcp_ehcp_request_id
+    description: Request ID
+    item_ref: EHCP002A
+    type: nvarchar
+    foreign_key: ssd_ehcp_requests.ehcr_ehcp_request_id
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:ehcp_ehcp_request_id
+    - mosaic:ehcp_ehcp_request_id
+    cms_table:
+    - liquid_logic:ssd_ehcp_active_plans
+    - mosaic:ssd_ehcp_active_plans
+    guidance: See ERQ001A
+  - name: ehcp_active_ehcp_last_review_date
+    description: Last Review
+    item_ref: EHCP003A
+    type: nvarchar
+    categories:
+    - send
+    - ehcp_request
+    - ehcp
+    returns:
+    - SEN2
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:ehcp_active_ehcp_last_review_date
+    - mosaic:ehcp_active_ehcp_last_review_date
+    cms_table:
+    - liquid_logic:ssd_ehcp_active_plans
+    - mosaic:ssd_ehcp_active_plans
+    guidance: Please enter the date when the local authority wrote to the parent or
+      young person with the notification of the decision as to whether to retain,
+      cease or amend the plan following the annual review meeting. Note that this
+      date will not be the same as the date of the review meeting.

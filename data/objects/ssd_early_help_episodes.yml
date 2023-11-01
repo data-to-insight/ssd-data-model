@@ -1,0 +1,192 @@
+---
+nodes:
+- name: ssd_early_help_episodes
+  fields:
+  - name: earl_episode_id
+    description: EH Episode ID
+    item_ref: EARL001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - early_help
+    returns:
+    - ''
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:earl_episode_id
+    - mosaic:earl_episode_id
+    cms_table:
+    - liquid_logic:ssd_early_help_episodes
+    - mosaic:ssd_early_help_episodes
+    guidance: Early Help Episode unique ID from system or auto-generated as part of
+      export.
+  - name: earl_person_id
+    description: Person Unique ID
+    item_ref: EARL002A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - early_help
+    returns:
+    - SSDA903
+    - CINcensus
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:earl_person_id
+    - mosaic:earl_person_id
+    cms_table:
+    - liquid_logic:ssd_early_help_episodes
+    - mosaic:ssd_early_help_episodes
+    guidance: See PER001A
+  - name: earl_episode_start_date
+    description: EH Episode Start Date
+    item_ref: EARL003A
+    type: datetime
+    categories:
+    - early_help
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:earl_episode_start_date
+    - mosaic:earl_episode_start_date
+    cms_table:
+    - liquid_logic:ssd_early_help_episodes
+    - mosaic:ssd_early_help_episodes
+    guidance: Date Early Help Episode Started
+  - name: earl_episode_end_date
+    description: EH Episode End Date
+    item_ref: EARL004A
+    type: datetime
+    categories:
+    - early_help
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:earl_episode_end_date
+    - mosaic:earl_episode_end_date
+    cms_table:
+    - liquid_logic:ssd_early_help_episodes
+    - mosaic:ssd_early_help_episodes
+    guidance: Date Early Help Episode Ended
+  - name: earl_episode_reason
+    description: EH Episode Reason for Involvement
+    item_ref: EARL005A
+    type: nvarchar
+    categories:
+    - early_help
+    returns:
+    - ADCS_SP
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:earl_episode_reason
+    - mosaic:earl_episode_reason
+    cms_table:
+    - liquid_logic:ssd_early_help_episodes
+    - mosaic:ssd_early_help_episodes
+    guidance: 'Broad categorisation of Reason for Involvement. Potential categories
+      could be:
+
+      -Alcohol/ Substance Misuse (Parent or Child)
+
+      -Mental Health (Parent or Child)
+
+      -Parenting and Family Dynamics
+
+      -Physical and Learning Disabilities/Illness (Parent or Child)
+
+      -Domestic Violence/ Abuse
+
+      -Child Abuse/ Neglect
+
+      -Special Circumstances/ Vulnerabilities
+
+      -Socio-economic Challenges
+
+      -Child Well-being and Development
+
+      -Information and Support Service
+
+      -Other'
+  - name: earl_episode_end_reason
+    description: EH Episode End Reason
+    item_ref: EARL006A
+    type: nvarchar
+    categories:
+    - early_help
+    returns:
+    - ADCS_SP
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:earl_episode_end_reason
+    - mosaic:earl_episode_end_reason
+    cms_table:
+    - liquid_logic:ssd_early_help_episodes
+    - mosaic:ssd_early_help_episodes
+    guidance: Outcomes met/ Step-up/ NFA
+  - name: earl_episode_organisation
+    description: EH Episode Allocated Organisation
+    item_ref: EARL007A
+    type: nvarchar
+    categories:
+    - early_help
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:earl_episode_organisation
+    - mosaic:earl_episode_organisation
+    cms_table:
+    - liquid_logic:ssd_early_help_episodes
+    - mosaic:ssd_early_help_episodes
+    guidance: Organisation responsible for Early Help provision
+  - name: earl_episode_worker_id
+    description: EH Episode Allocated Worker ID
+    item_ref: EARL008A
+    type: nvarchar
+    foreign_key: ssd_social_worker.socw_social_worker_id
+    categories:
+    - early_help
+    returns:
+    - Local
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:earl_episode_worker_id
+    - mosaic:earl_episode_worker_id
+    cms_table:
+    - liquid_logic:ssd_early_help_episodes
+    - mosaic:ssd_early_help_episodes
+    guidance: Allocated worker responsible for Early Help provision

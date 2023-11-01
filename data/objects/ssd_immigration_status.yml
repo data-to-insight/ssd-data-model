@@ -1,0 +1,114 @@
+---
+nodes:
+- name: ssd_immigration_status
+  fields:
+  - name: immi_person_id
+    description: Person Unique ID
+    item_ref: IMMI001A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - immigration
+    - uasc
+    returns:
+    - SSDA903
+    - CINcensus
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:immi_person_id
+    - mosaic:immi_person_id
+    cms_table:
+    - liquid_logic:ssd_immigration_status
+    - mosaic:ssd_immigration_status
+    guidance: See PER001A
+  - name: immi_immigration_status
+    description: Immigration Status
+    item_ref: IMMI002A
+    type: nvarchar
+    categories:
+    - identity
+    - immigration
+    - uasc
+    returns:
+    - Local
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:immi_immigration_status
+    - mosaic:immi_immigration_status
+    cms_table:
+    - liquid_logic:ssd_immigration_status
+    - mosaic:ssd_immigration_status
+    guidance: Immigration Status e.g. Unaccompanied Asylum Seeking Child
+    metadata:
+      release: In review|pending
+      change_id: SSD-540
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: immi_immigration_status_start_date
+    description: Immigration Status Start
+    item_ref: IMMI003A
+    type: datetime
+    categories:
+    - identity
+    - immigration
+    - uasc
+    returns:
+    - Local
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:immi_immigration_status_start_date
+    - mosaic:immi_immigration_status_start_date
+    cms_table:
+    - liquid_logic:ssd_immigration_status
+    - mosaic:ssd_immigration_status
+    guidance: Start Date of Immigration Status
+    metadata:
+      release: In review|pending
+      change_id: SSD-541
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: immi_immigration_status_end_date
+    description: Immigration Status End
+    item_ref: IMMI004A
+    type: datetime
+    categories:
+    - identity
+    - immigration
+    - uasc
+    returns:
+    - Local
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:immi_immigration_status_end_date
+    - mosaic:immi_immigration_status_end_date
+    cms_table:
+    - liquid_logic:ssd_immigration_status
+    - mosaic:ssd_immigration_status
+    guidance: End Date of Immigration Status
+    metadata:
+      release: In review|pending
+      change_id: SSD-542
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature

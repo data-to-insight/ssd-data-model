@@ -1,0 +1,79 @@
+---
+nodes:
+- name: ssd_cla_convictions
+  fields:
+  - name: clac_cla_conviction_id
+    description: Conviction ID
+    item_ref: CLAC001A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - looked_after
+    - convictions
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clac_cla_conviction_id
+    - mosaic:clac_cla_conviction_id
+    cms_table:
+    - liquid_logic:ssd_cla_convictions
+    - mosaic:ssd_cla_convictions
+    guidance: Conviction record unique ID from system or auto-generated as part of
+      export.
+  - name: clac_person_id
+    description: Person Unique ID
+    item_ref: CLAC002A
+    type: nvarchar
+    foreign_key: ssd_cla_episodes.la_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - looked_after
+    - convictions
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clac_person_id
+    - mosaic:clac_person_id
+    cms_table:
+    - liquid_logic:ssd_cla_convictions
+    - mosaic:ssd_cla_convictions
+    guidance: See PER001A
+  - name: clac_cla_conviction_date
+    description: Date of Offence
+    item_ref: CLAC003A
+    type: datetime
+    categories:
+    - looked_after
+    - convictions
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clac_cla_conviction_date
+    - mosaic:clac_cla_conviction_date
+    cms_table:
+    - liquid_logic:ssd_cla_convictions
+    - mosaic:ssd_cla_convictions
+    guidance: Date of Offence
+  - name: clac_cla_conviction_offence
+    description: Description
+    item_ref: CLAC004A
+    type: nvarchar
+    categories:
+    - looked_after
+    - convictions
+    cms_table:
+    - liquid_logic:ssd_cla_convictions
+    - mosaic:ssd_cla_convictions
+    guidance: Offence committed.
