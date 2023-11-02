@@ -22,6 +22,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
     cms_field:
     - liquid_logic:pers_person_id
     - mosaic:pers_person_id
@@ -53,6 +56,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
     cms_field:
     - liquid_logic:pers_sex
     - mosaic:pers_sex
@@ -141,6 +147,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
     cms_field:
     - liquid_logic:pers_dob
     - mosaic:pers_dob
@@ -237,7 +246,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:pers_send
     - mosaic:pers_send
@@ -257,7 +265,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:pers_expected_dob
     - mosaic:pers_expected_dob
@@ -293,7 +300,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:pers_death_date
     - mosaic:pers_death_date
@@ -326,7 +332,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:pers_is_mother
     - mosaic:pers_is_mother

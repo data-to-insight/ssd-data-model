@@ -11,9 +11,6 @@ nodes:
     - linked_identifiers
     returns:
     - 1aDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:link_link_id
     - mosaic:link_link_id
@@ -33,6 +30,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
     cms_field:
     - liquid_logic:link_person_id
     - mosaic:link_person_id
@@ -49,9 +49,6 @@ nodes:
     - linked_identifiers
     returns:
     - 1aDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:link_identifier_type
     - mosaic:link_identifier_type
@@ -67,9 +64,6 @@ nodes:
     - linked_identifiers
     returns:
     - 1aDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:link_identifier_value
     - mosaic:link_identifier_value
@@ -85,9 +79,6 @@ nodes:
     - linked_identifiers
     returns:
     - 1aDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:link_valid_from_date
     - mosaic:link_valid_from_date
@@ -103,9 +94,6 @@ nodes:
     - linked_identifiers
     returns:
     - 1aDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:link_valid_to_date
     - mosaic:link_valid_to_date

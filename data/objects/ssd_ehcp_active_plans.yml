@@ -18,7 +18,6 @@ nodes:
     - ehcp
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcp_active_ehcp_id
     - mosaic:ehcp_active_ehcp_id
@@ -38,7 +37,6 @@ nodes:
     - ehcp
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcp_ehcp_request_id
     - mosaic:ehcp_ehcp_request_id
@@ -58,7 +56,6 @@ nodes:
     - SEN2
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcp_active_ehcp_last_review_date
     - mosaic:ehcp_active_ehcp_last_review_date

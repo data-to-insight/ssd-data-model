@@ -18,7 +18,6 @@ nodes:
     - ehcp_assessment
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcn_named_plan_id
     - mosaic:ehcn_named_plan_id
@@ -45,7 +44,6 @@ nodes:
     - ehcp_assessment
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcn_ehcp_asmt_id
     - mosaic:ehcn_ehcp_asmt_id
@@ -65,7 +63,6 @@ nodes:
     - SEN2
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcn_named_plan_start_date
     - mosaic:ehcn_named_plan_start_date
@@ -85,7 +82,6 @@ nodes:
     - SEN2
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcn_named_plan_cease_date
     - mosaic:ehcn_named_plan_cease_date
@@ -109,7 +105,6 @@ nodes:
     - SEN2
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcn_named_plan_cease_reason
     - mosaic:ehcn_named_plan_cease_reason

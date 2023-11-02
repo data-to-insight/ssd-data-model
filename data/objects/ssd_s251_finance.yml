@@ -11,9 +11,6 @@ nodes:
     - finance
     returns:
     - 1aDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:s251_id
     - mosaic:s251_id
@@ -48,9 +45,6 @@ nodes:
     - finance
     returns:
     - 1aDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:s251_placeholder_1
     - mosaic:s251_placeholder_1
@@ -66,9 +60,6 @@ nodes:
     - finance
     returns:
     - 1aDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:s251_placeholder_2
     - mosaic:s251_placeholder_2
@@ -84,9 +75,6 @@ nodes:
     - finance
     returns:
     - 1aDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:s251_placeholder_3
     - mosaic:s251_placeholder_3
@@ -102,9 +90,6 @@ nodes:
     - finance
     returns:
     - 1aDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:s251_placeholder_4
     - mosaic:s251_placeholder_4

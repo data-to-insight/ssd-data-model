@@ -40,7 +40,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:socw_worker_episode_start_date
     - mosaic:socw_worker_episode_start_date
@@ -59,7 +58,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:socw_worker_episode_end_date
     - mosaic:socw_worker_episode_end_date
@@ -78,7 +76,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:socw_worker_change_reason
     - mosaic:socw_worker_change_reason

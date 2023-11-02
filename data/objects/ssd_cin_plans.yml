@@ -56,6 +56,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
     cms_field:
     - liquid_logic:cinp_person_id
     - mosaic:cinp_person_id

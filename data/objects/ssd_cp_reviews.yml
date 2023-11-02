@@ -96,7 +96,7 @@ nodes:
   - name: cppr_cp_review_outcome
     description: CP Plan to Continue?
     item_ref: CPPR005A
-    type: nvarchar
+    type: nchar
     categories:
     - child_protection
     - cp_plan
@@ -123,7 +123,7 @@ nodes:
   - name: cppr_cp_review_quorate
     description: Quorate?
     item_ref: CPPR006A
-    type: nvarchar
+    type: nchar
     categories:
     - child_protection
     - cp_plan
@@ -156,7 +156,7 @@ nodes:
   - name: cppr_cp_review_participation
     description: Child Participation at Review
     item_ref: CPPR007A
-    type: nvarchar
+    type: nchar
     categories:
     - child_protection
     - cp_plan
