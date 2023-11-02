@@ -75,7 +75,7 @@ nodes:
   - name: cinv_cin_visit_seen
     description: Child Seen
     item_ref: CINV004A
-    type: nvarchar
+    type: nchar
     categories:
     - child_in_need
     - cin_plan
@@ -95,7 +95,7 @@ nodes:
   - name: cinv_cin_visit_seen_alone
     description: Child Seen Alone
     item_ref: CINV005A
-    type: nvarchar
+    type: nchar
     categories:
     - child_in_need
     - cin_plan
@@ -122,7 +122,7 @@ nodes:
   - name: cinv_cin_visit_bedroom
     description: Child Bedroom Seen
     item_ref: CINV006A
-    type: nvarchar
+    type: NCHAR
     categories:
     - child_in_need
     - cin_plan

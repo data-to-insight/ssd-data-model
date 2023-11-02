@@ -20,7 +20,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcr_ehcp_request_id
     - mosaic:ehcr_ehcp_request_id
@@ -55,7 +54,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcr_send_table_id
     - mosaic:ehcr_send_table_id
@@ -75,7 +73,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcr_ehcp_req_date
     - mosaic:ehcr_ehcp_req_date
@@ -96,7 +93,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcr_ehcp_req_outcome_date
     - mosaic:ehcr_ehcp_req_outcome_date
@@ -120,7 +116,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcr_ehcp_req_outcome
     - mosaic:ehcr_ehcp_req_outcome

@@ -9,6 +9,9 @@ nodes:
     primary_key: true
     categories:
     - workforce
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prof_professional_id
     - mosaic:prof_professional_id
@@ -64,7 +67,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:prof_agency_worker_flag
     - mosaic:prof_agency_worker_flag
@@ -84,9 +86,6 @@ nodes:
     returns:
     - CSCWF
     - RIIA
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:prof_professional_role
     - mosaic:prof_professional_role
@@ -106,9 +105,6 @@ nodes:
     returns:
     - CSCWF
     - RIIA
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:prof_professional_caseload
     - mosaic:prof_professional_caseload
@@ -134,9 +130,6 @@ nodes:
     returns:
     - CSCWF
     - RIIA
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:prof_professional_qualification
     - mosaic:prof_professional_qualification

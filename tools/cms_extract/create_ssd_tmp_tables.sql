@@ -3,6 +3,11 @@
 /* ********************************************************************************************************** */
 /* Development set up */
 
+-- Note: 
+-- This script is for creating TMP(Temporary) tables within the temp DB name space for testing purposes. 
+-- SSD extract files with the suffix ..._per.sql - for creating the persistent table versions.
+-- SSD extract files with the suffix ..._tmp.sql - for creating the temporary table versions.
+
 USE HDM;
 GO
 
@@ -22,7 +27,7 @@ DECLARE @ssd_timeframe_years INT = 6;
 
 /* Template header
 =============================================================================
-Object Name: 
+Object Name: #temp_table_name
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -41,7 +46,7 @@ Dependencies:
 
 /*
 =============================================================================
-Object Name: ssd_person
+Object Name: #ssd_person
 Description: person/child details
 Author: D2I
 Last Modified Date: 2023-10-20
@@ -60,7 +65,7 @@ Dependencies:
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
--- Create the temporary table
+-- Create temporary structure
 SELECT 
     p.[EXTERNAL_ID] AS pers_la_person_id,
     p.[DIM_LOOKUP_VARIATION_OF_SEX_CODE] AS pers_sex,
@@ -114,7 +119,7 @@ CREATE INDEX IDX_ssd_pers_la_person_id ON #ssd_person(pers_la_person_id);
 
 /* 
 =============================================================================
-Object Name: ssd_family
+Object Name: #ssd_family
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -130,7 +135,7 @@ Dependencies:
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
--- Create the temporary table
+-- Create temporary structure
 SELECT
     DIM_TF_FAMILY_ID AS fami_id, -- to confirm
     UNIQUE_FAMILY_NUMBER AS fami_family_id,
@@ -151,7 +156,7 @@ CREATE INDEX IDX_family_person ON #ssd_family(fami_la_person_id);
 
 /* 
 =============================================================================
-Object Name: ssd_address
+Object Name: #ssd_address
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -166,7 +171,7 @@ Dependencies:
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
--- Create the temporary table
+-- Create temporary structure
 SELECT
     pa.[DIM_PERSON_ADDRESS_ID] as addr_address_id,
     pa.[EXTERNAL_ID] as addr_person_id, -- Assuming EXTERNAL_ID corresponds to la_person_id
@@ -219,7 +224,7 @@ IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
 /* 
 =============================================================================
-Object Name: ssd_disability
+Object Name: #ssd_disability
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -235,7 +240,7 @@ Dependencies:
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL 
     DROP TABLE #ssd_disability;
 
--- Create the temporary table
+-- Create temporary structure
 SELECT TOP 100
     fd.[FACT_DISABILITY_ID] as disability_id,
     fd.[EXTERNAL_ID] as la_person_id,
@@ -266,7 +271,7 @@ CREATE INDEX IDX_disability_la_person_id ON #ssd_disability(la_person_id);
 
 /* 
 =============================================================================
-Object Name: ssd_immigration_status
+Object Name: #ssd_immigration_status
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -281,7 +286,7 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
--- Create the temporary table
+-- Create temporary structure
 SELECT 
     ims.[FACT_IMMIGRATION_STATUS_ID] as immigration_status_id,
     ims.[EXTERNAL_ID] as la_person_id,
@@ -312,7 +317,7 @@ ON #ssd_immigration_status(immigration_status_end);
 
 /* 
 =============================================================================
-Object Name: ssd_mother
+Object Name: #ssd_mother
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -325,7 +330,7 @@ Dependencies:
 =============================================================================
 */
 
--- Create the temporary table
+-- Create temporary structure
 /*
 person_child_id
 la_person_id
@@ -335,7 +340,7 @@ person_child_dob
 
 /* 
 =============================================================================
-Object Name: ssd_legal_status
+Object Name: #ssd_legal_status
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -350,7 +355,7 @@ Dependencies:
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
 
--- Create and insert data into the temporary table using INTO
+-- Create temporary structure
 SELECT
     fls.[FACT_LEGAL_STATUS_ID] AS legal_status_id,
     fls.[EXTERNAL_ID] AS la_person_id,
@@ -368,7 +373,7 @@ FROM
 
 /* 
 =============================================================================
-Object Name: ssd_contact
+Object Name: #ssd_contact
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -383,7 +388,7 @@ Dependencies:
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_contact') IS NOT NULL DROP TABLE #ssd_contact;
 
--- Create the temporary table
+-- Create temporary structure
 SELECT
 	fc.[FACT_CONTACT_ID] as contact_id,
 	fc.[EXTERNAL_ID] as la_person_id,
@@ -410,7 +415,7 @@ CREATE INDEX IDX_contact_person ON #ssd_contact(la_person_id);
 
 /* 
 =============================================================================
-Object Name: ssd_early_help_episodes
+Object Name: #ssd_early_help_episodes
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -426,7 +431,7 @@ Dependencies:
 IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL 
     DROP TABLE #ssd_early_help_episodes;
 
--- Create the temporary table using SELECT INTO
+-- Create temporary structure
 SELECT
     cafe.FACT_CAF_EPISODE_ID AS earl_episode_id,
     cafe.DIM_PERSON_ID AS earl_person_id,
@@ -445,7 +450,7 @@ FROM
 
 /* 
 =============================================================================
-Object Name: ssd_cin_episodes
+Object Name: #ssd_cin_episodes
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -460,32 +465,74 @@ Dependencies:
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
--- Create the temporary table
-SELECT
-    fr.FACT_REFERRAL_ID AS cin_referral_id,
-    fr.EXTERNAL_ID AS la_person_id,
-    fr.REFRL_START_DTTM AS cin_ref_date,
-    fr.DIM_LOOKUP_CATEGORY_OF_NEED_ID AS cin_primary_need,
-    fr.DIM_LOOKUP_CONT_SORC_ID_DESC AS cin_ref_source,
-    -- Need the appropriate field for cin_ref_outcome
-    fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE AS cin_close_reason,
-    fr.REFRL_END_DTTM AS cin_close_date,
-    fr.DIM_DEPARTMENT_ID AS cin_ref_team,
-    fr.DIM_WORKER_ID AS cin_ref_worker_id
+-- Create temporary structure
+CREATE TABLE #ssd_cin_episodes
+(
+    cine_referral_id INT,
+    cine_person_id NVARCHAR(48),
+    cine_referral_date DATETIME,
+    cine_cin_primary_need INT,
+    cine_referral_source NVARCHAR(255),
+    cine_referral_outcome_json NVARCHAR(255),
+    cine_referral_nfa NCHAR(1),
+    cine_close_reason NVARCHAR(255),
+    cine_close_date DATETIME,
+    cine_referral_team NVARCHAR(255),
+    cine_referral_worker_id NVARCHAR(36)
+);
 
-INTO 
-    #ssd_cin_episodes
-
-FROM
+-- Insert data
+INSERT INTO #ssd_cin_episodes
+(
+    cine_referral_id,
+    cine_person_id,
+    cine_referral_date,
+    cine_cin_primary_need,
+    cine_referral_source,
+    cine_referral_outcome_json,
+    cine_referral_nfa,
+    cine_close_reason,
+    cine_close_date,
+    cine_referral_team,
+    cine_referral_worker_id
+)
+SELECT 
+    fr.FACT_REFERRAL_ID,
+    fr.DIM_PERSON_ID,
+    fr.REFRL_START_DTTM,
+    fr.DIM_LOOKUP_CATEGORY_OF_NEED_ID,
+    fr.DIM_LOOKUP_CONT_SORC_ID_DESC,
+    (
+        SELECT 
+            NULLIF(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS "OUTCOME_SINGLE_ASSESSMENT_FLAG",
+            NULLIF(fr.OUTCOME_NFA_FLAG, '')                 AS "OUTCOME_NFA_FLAG",
+            NULLIF(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS "OUTCOME_STRATEGY_DISCUSSION_FLAG",
+            NULLIF(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS "OUTCOME_CLA_REQUEST_FLAG",
+            NULLIF(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS "OUTCOME_NON_AGENCY_ADOPTION_FLAG",
+            NULLIF(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
+            NULLIF(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS "OUTCOME_CP_TRANSFER_IN_FLAG",
+            NULLIF(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS "OUTCOME_CP_CONFERENCE_FLAG",
+            NULLIF(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS "OUTCOME_CARE_LEAVER_FLAG",
+            NULLIF(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS "OTHER_OUTCOMES_EXIST_FLAG"
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ),
+    fr.OUTCOME_NFA_FLAG,
+    fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
+    fr.REFRL_END_DTTM,
+    fr.DIM_DEPARTMENT_ID_DESC,
+    fr.DIM_WORKER_ID_DESC
+FROM 
     Child_Social.FACT_REFERRALS AS fr
 WHERE 
-    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE());
+    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE());
+
+
 
 
 
 /* 
 =============================================================================
-Object Name: ssd_assessments
+Object Name: #ssd_assessments
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -498,26 +545,74 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists, & drop 
-IF OBJECT_ID('tempdb..#ssd_assessment') IS NOT NULL DROP TABLE #ssd_assessment;
+IF OBJECT_ID('tempdb..#ssd_cin_assessments') IS NOT NULL DROP TABLE #ssd_cin_assessments;
 
--- Create the temporary table
-/*
-assessment_id
-la_person_id
-asmt_start_date
-asmt_child_seen
-asmt_auth_date
-asmt_outcome
-asmt_team
-asmt_worker_id
+-- Create temporary structure
+CREATE TABLE #ssd_cin_assessments
+(
+    cina_assessment_id NVARCHAR(36) PRIMARY KEY,
+    cina_person_id NVARCHAR(36),
+    cina_referral_id NVARCHAR(36),
+    cina_assessment_start_date DATETIME,
+    cina_assessment_child_seen NCHAR(1),
+    cina_assessment_auth_date DATETIME, -- This needs checking !! 
+    cina_assessment_outcome_json NVARCHAR(255),
+    cina_assessment_outcome_nfa NCHAR(1),
+    cina_assessment_team NVARCHAR(255),
+    cina_assessment_worker_id NVARCHAR(36)
+);
 
--- ??
--- Child_Social FACT_CORE_ASSESSMENT	EXTERNAL_ID
--- Child_Social FACT_INITIAL_ASSESSMENT	EXTERNAL_ID
--- Child_Social FACT_SINGLE_ASSESSMENT	EXTERNAL_ID
+-- Insert data
+INSERT INTO #ssd_cin_assessments
+(
+    cina_assessment_id,
+    cina_person_id,
+    cina_referral_id,
+    cina_assessment_start_date,
+    cina_assessment_child_seen,
+    cina_assessment_auth_date, -- This needs checking !! 
+    cina_assessment_outcome_json,
+    cina_assessment_outcome_nfa,
+    cina_assessment_team,
+    cina_assessment_worker_id
+)
+SELECT 
+    fa.FACT_SINGLE_ASSESSMENT_ID,
+    fa.DIM_PERSON_ID,
+    fa.FACT_REFERRAL_ID,
+    fa.START_DTTM,
+    fa.SEEN_FLAG,
+    fa.START_DTTM, -- This needs checking !! 
+    (
+        SELECT 
+            NULLIF(fa.OUTCOME_NFA_FLAG, '')                     AS "OUTCOME_NFA_FLAG",
+            NULLIF(fa.OUTCOME_NFA_S47_END_FLAG, '')             AS "OUTCOME_NFA_S47_END_FLAG",
+            NULLIF(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '')     AS "OUTCOME_STRATEGY_DISCUSSION_FLAG",
+            NULLIF(fa.OUTCOME_CLA_REQUEST_FLAG, '')             AS "OUTCOME_CLA_REQUEST_FLAG",
+            NULLIF(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '')       AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
+            NULLIF(fa.OUTCOME_LEGAL_ACTION_FLAG, '')            AS "OUTCOME_LEGAL_ACTION_FLAG",
+            NULLIF(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '')        AS "OUTCOME_PROV_OF_SERVICES_FLAG",
+            NULLIF(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '')         AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
+            NULLIF(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '')   AS "OUTCOME_SPECIALIST_ASSESSMENT_FLAG",
+            NULLIF(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')   AS "OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG",
+            NULLIF(fa.OUTCOME_OTHER_ACTIONS_FLAG, '')           AS "OUTCOME_OTHER_ACTIONS_FLAG",
+            NULLIF(fa.OTHER_OUTCOMES_EXIST_FLAG, '')            AS "OTHER_OUTCOMES_EXIST_FLAG",
+            NULLIF(fa.TOTAL_NO_OF_OUTCOMES, '')                 AS "TOTAL_NO_OF_OUTCOMES",
+            NULLIF(fa.OUTCOME_COMMENTS, '')                     AS "OUTCOME_COMMENTS"
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ),
+    fa.OUTCOME_NFA_FLAG,
+    fa.COMPLETED_BY_DEPT_NAME,
+    fa.COMPLETED_BY_USER_STAFF_ID
+FROM 
+    FACT_SINGLE_ASSESSMENT AS fa;
 
--- dbo	DIM_ASSESSMENT_DETAILS	EXTERNAL_ID
-*/
+-- foreign key constraint(s)
+ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person FOREIGN KEY (cina_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_social_worker FOREIGN KEY (cina_assessment_worker_id) REFERENCES ssd_social_worker(socw_social_worker_id);
+
+
+
 
 
 /* 
@@ -537,7 +632,7 @@ Dependencies:
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_assessment') IS NOT NULL DROP TABLE #ssd_assessment_factors;
 
--- Create the temporary table
+-- Create temporary structure
 /*
 asmt_id
 asmt_factors
@@ -562,7 +657,7 @@ Dependencies:
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_cin_plans') IS NOT NULL DROP TABLE #ssd_cin_plans;
 
--- Create the temporary table
+-- Create temporary structure
 /*
 cin_plan_id
 la_person_id
@@ -574,7 +669,7 @@ cin_worker_id
 
 /* 
 =============================================================================
-Object Name: ssd_cin_visits
+Object Name: #ssd_cin_visits
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -589,23 +684,47 @@ Dependencies:
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
 
--- Create the temporary table
-/*
-cin_visit_id
-cin_plan_id
-cin_visit_date
-cin_visit_seen
-cin_visit_seen_alone
-cin_visit_bedroom
+-- Create structure for temporary table
+CREATE TABLE #ssd_cin_visits
+(
+    cinv_cin_casenote_id NVARCHAR(36) PRIMARY KEY, -- This needs checking!!
+    cinv_cin_visit_id NVARCHAR(36), -- This needs checking!!
+    cinv_cin_plan_id NVARCHAR(36),
+    cinv_cin_visit_date DATETIME,
+    cinv_cin_visit_seen NCHAR(1),
+    cinv_cin_visit_seen_alone NCHAR(1),
+    cinv_cin_visit_bedroom NCHAR(1)
+);
 
-*/
+-- Insert data into temporary table
+INSERT INTO #ssd_cin_visits
+(
+    cinv_cin_casenote_id, -- This needs checking!!
+    cinv_cin_visit_id, -- This needs checking!!
+    cinv_cin_plan_id,
+    cinv_cin_visit_date,
+    cinv_cin_visit_seen,
+    cinv_cin_visit_seen_alone,
+    cinv_cin_visit_bedroom
+)
+SELECT 
+    cn.FACT_CASENOTE_ID, -- This needs checking!!
+    'PLACEHOLDER DATA', -- This needs checking!!
+    cn.FACT_FORM_ID,
+    cn.EVENT_DTTM,
+    cn.SEEN_FLAG,
+    cn.SEEN_ALONE_FLAG,
+    cn.SEEN_BEDROOM_FLAG
+FROM 
+    Child_Social.FACT_CASENOTES cn;
 
-
+ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_cin_plans 
+FOREIGN KEY (cinv_cin_plan_id) REFERENCES ssd_cin_plans(cinp_cin_plan_id);
 
 
 /* 
 =============================================================================
-Object Name: ssd_s47
+Object Name: #ssd_s47
 Description: 
 Author: D2I
 Last Modified Date: 24/10/23
@@ -621,7 +740,7 @@ Dependencies:
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_s47_enquiry_icpc') IS NOT NULL DROP TABLE #ssd_s47_enquiry_icpc;
 
--- Create the temporary table
+-- Create temporary structure
 SELECT
     s47.[FACT_S47_ID] as s47_enquiry_id,
     s47.[EXTERNAL_ID] as la_person_id,
@@ -656,7 +775,7 @@ ALTER TABLE #ssd_s47_enquiry_icpc ADD PRIMARY KEY (s47_enquiry_id);
 
 /* 
 =============================================================================
-Object Name: ssd_cp_plans
+Object Name: #ssd_cp_plans
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -671,7 +790,7 @@ Dependencies:
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
 
--- Create the temporary table
+-- Create temporary structure
 SELECT 
     cpp.FACT_CP_PLAN_ID AS cppl_cp_plan_id,
     cpp.FACT_REFERRAL_ID AS cppl_referral_id,
@@ -697,7 +816,7 @@ FROM
 
 /* 
 =============================================================================
-Object Name: ssd_category_of_abuse
+Object Name: #ssd_category_of_abuse
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -714,7 +833,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_cp_visits
+Object Name: #ssd_cp_visits
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -730,7 +849,7 @@ Dependencies:
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
 
--- Create the temporary table
+-- Create temporary structure
 SELECT 
     cn.FACT_CASENOTE_ID AS cppv_casenote_id, -- need to confirm this JH
     cn.Child_Social.FACT_CASENOTES AS cppv_cp_visit_id,
@@ -750,9 +869,126 @@ ADD CONSTRAINT PK_cppv_casenote_id PRIMARY KEY (cppv_casenote_id);
 
 -- WHERE DIM_LOOKUP_CASNT_TYPE_ID_DESC IN ( 'STVC','STVCPCOVID')
 
+
+
+
+
 /* 
 =============================================================================
-Object Name: ssd_cp_reviews
+Object Name: #ssd_cp_reviews
+Description: 
+Author: D2I
+Last Modified Date: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+-- Check if table exists, & drop
+IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
+
+-- Create structure
+CREATE TABLE #ssd_cp_reviews
+(
+    cppr_cp_review_id NVARCHAR(36) PRIMARY KEY,
+    cppr_cp_plan_id NVARCHAR(36),
+    cppr_cp_review_due DATETIME NULL,
+    cppr_cp_review_date DATETIME NULL,
+    cppr_cp_review_outcome NCHAR(1),
+    cppr_cp_review_quorate NCHAR(1) DEFAULT '0', -- using '0' as placeholder
+    cppr_cp_review_participation NCHAR(1) DEFAULT '0' -- using '0' as placeholder
+);
+
+-- Insert data
+INSERT INTO #ssd_cp_reviews
+(
+    cppr_cp_review_id,
+    cppr_cp_plan_id,
+    cppr_cp_review_due,
+    cppr_cp_review_date,
+    cppr_cp_review_outcome,
+    cppr_cp_review_quorate,
+    cppr_cp_review_participation
+)
+SELECT 
+    FACT_CP_REVIEW_ID,
+    FACT_CP_PLAN_ID,
+    DUE_DTTM,
+    MEETING_DTTM,
+    OUTCOME_CONTINUE_CP_FLAG,
+    '0', -- Placeholder for cppr_cp_review_quorate
+    '0'  -- Placeholder for cppr_cp_review_participation
+FROM 
+    Child_Social.FACT_CP_REVIEW;
+
+
+ALTER TABLE #ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
+FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
+
+
+
+
+
+
+/* 
+=============================================================================
+Object Name: #ssd_cp_reviews_risks
+Description: 
+Author: D2I
+Last Modified Date: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+
+/* 
+=============================================================================
+Object Name: #ssd_cla_episodes
+Description: 
+Author: D2I
+Last Modified Date: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+
+/* 
+=============================================================================
+Object Name: #ssd_cla_convictions
+Description: 
+Author: D2I
+Last Modified Date: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+
+
+/* 
+=============================================================================
+Object Name: #ssd_cla_health
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -768,59 +1004,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_cp_reviews_risks
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_cla_episodes
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_cla_convictions
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_cla_health
+Object Name: #ssd_cla_immunisations
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -836,23 +1020,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_cla_immunisations
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
-/* 
-=============================================================================
-Object Name: ssd_substance_misuse
+Object Name: #ssd_substance_misuse
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -868,7 +1036,7 @@ Dependencies:
 IF OBJECT_ID('tempdb..#ssd_cla_Substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_Substance_misuse;
 
 
--- Create the temporary table
+-- Create temporary structure
 SELECT 
     fsm.[FACT_SUBSTANCE_MISUSE_ID] as substance_misuse_id,
     fsm.[EXTERNAL_ID] as la_person_id,
@@ -896,7 +1064,7 @@ PRIMARY KEY (substance_misuse_id);
 
 /* 
 =============================================================================
-Object Name: ssd_placement
+Object Name: #ssd_placement
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -916,7 +1084,7 @@ IF OBJECT_ID('tempdb..#ssd_placement') IS NOT NULL DROP TABLE #ssd_placement;
 
 /* 
 =============================================================================
-Object Name: ssd_cla_reviews
+Object Name: #ssd_cla_reviews
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -931,6 +1099,7 @@ Dependencies:
 -- Check if exists, & drop 
 -- IF OBJECT_ID('tempdb..#ssd_cla_reviews') IS NOT NULL DROP TABLE #ssd_cla_reviews;
 
+-- Create temporary structure
 -- SELECT 
 -- FACT_CLA_REVIEW.[FACT_CLA_REVIEW_ID] as cp_review_id
 -- --FACT_CLA_REVIEW.[] as cp_plan_id -- FACT_CLA_ID? 
@@ -952,7 +1121,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_cla_previous_permanence
+Object Name: #ssd_cla_previous_permanence
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -970,7 +1139,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd
 
 /* 
 =============================================================================
-Object Name: ssd_cla_care_plan
+Object Name: #ssd_cla_care_plan
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -988,7 +1157,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_care_plan') IS NOT NULL DROP TABLE #ssd_cla_care_
 
 /* 
 =============================================================================
-Object Name: ssd_cla_visits
+Object Name: #ssd_cla_visits
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1005,7 +1174,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_sdq_scores
+Object Name: #ssd_sdq_scores
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1021,7 +1190,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_missing
+Object Name: #ssd_missing
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1038,7 +1207,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_care_leavers
+Object Name: #ssd_care_leavers
 Description: 
 Author: D2I
 Last Modified Date:
@@ -1055,7 +1224,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_permanence
+Object Name: #ssd_permanence
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1071,7 +1240,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_send
+Object Name: #ssd_send
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1087,7 +1256,7 @@ Dependencies:
 IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL
    DROP TABLE #ssd_send;
 
--- Create the temporary table
+-- Create temporary structure
 SELECT 
     -- need id field
     f.EXTERNAL_ID, 
@@ -1109,7 +1278,7 @@ LEFT JOIN
 
 /* 
 =============================================================================
-Object Name: ssd_ehcp_assessment
+Object Name: #ssd_ehcp_assessment
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1126,7 +1295,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_ehcp_named_plan
+Object Name: #ssd_ehcp_named_plan
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1142,7 +1311,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_ehcp_active_plans
+Object Name: #ssd_ehcp_active_plans
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1157,7 +1326,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_send_need
+Object Name: #ssd_send_need
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1173,7 +1342,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_social_worker
+Object Name: #ssd_social_worker
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1197,7 +1366,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_pre_proceedings
+Object Name: #ssd_pre_proceedings
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1212,7 +1381,7 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: ssd_voice_of_child
+Object Name: #ssd_voice_of_child
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -1225,7 +1394,35 @@ Dependencies:
 =============================================================================
 */
 
+-- Check if exists, & drop 
+IF OBJECT_ID('tempdb..#ssd_voice_of_child') IS NOT NULL DROP TABLE #ssd_voice_of_child;
 
+-- Create structure
+CREATE TABLE #ssd_voice_of_child (
+    voch_person_id NVARCHAR(48) PRIMARY KEY, -- Assuming NVARCHAR() as a generic type for id
+    voch_explained_worries NCHAR(1),
+    voch_story_help_understand NCHAR(1),
+    voch_agree_worker NCHAR(1),
+    voch_plan_safe NCHAR(1),
+    voch_tablet_help_explain NCHAR(1)
+);
+
+-- Insert placeholder data
+INSERT INTO #ssd_voice_of_child (
+    voch_person_id,
+    voch_explained_worries,
+    voch_story_help_understand,
+    voch_agree_worker,
+    voch_plan_safe,
+    voch_tablet_help_explain
+)
+VALUES
+    ('ID001', 'Y', 'Y', 'Y', 'N', 'N'),
+    ('ID002', 'Y', 'Y', 'Y', 'N', 'N');
+
+
+ALTER TABLE Child_Social.#ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
+FOREIGN KEY (voch_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 

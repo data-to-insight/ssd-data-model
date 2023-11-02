@@ -9,6 +9,12 @@
 /* ********************************************************************************************************** */
 /* Development set up */
 
+-- Note: 
+-- This script is for creating PER(Persistent) tables within the temp DB name space for testing purposes. 
+-- SSD extract files with the suffix ..._per.sql - for creating the persistent table versions.
+-- SSD extract files with the suffix ..._tmp.sql - for creating the temporary table versions.
+
+
 USE HDM;
 GO
 
@@ -105,19 +111,19 @@ AND (
         -- has open referral
         SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
         WHERE fr.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
-        AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+        AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
     OR EXISTS (
         -- contact in last x@yrs
         SELECT 1 FROM Child_Social.FACT_CONTACTS fc
         WHERE fc.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
-        AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+        AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
     OR EXISTS (
         -- ehcp request in last x@yrs
         SELECT 1 FROM Child_Social.FACT_EHCP_EPISODE fe 
         WHERE fe.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
-        AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+        AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
     -- OR EXISTS (
         -- active plan or has been active in x@yrs
@@ -503,13 +509,6 @@ CREATE TABLE Child_Social.ssd_contact (
     contact_outcome NVARCHAR(MAX)
 );
 
--- Add foreign key constraint for la_person_id
-ALTER TABLE Child_Social.ssd_contact
-ADD CONSTRAINT FK_contact_person
-FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
-
--- Create a non-clustered index on la_person_id for quicker lookups and joins
-CREATE INDEX IDX_contact_person ON Child_Social.ssd_contact(la_person_id);
 
 -- Insert data
 INSERT INTO Child_Social.ssd_contact (
@@ -530,7 +529,11 @@ FROM
 ORDER BY
     fc.[EXTERNAL_ID] ASC;
 
+-- Add foreign key constraint(s)
+ALTER TABLE Child_Social.ssd_contact ADD CONSTRAINT FK_contact_person FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
 
+-- Create a non-clustered index on la_person_id for quicker lookups and joins
+CREATE INDEX IDX_contact_person ON Child_Social.ssd_contact(la_person_id);
 
 
 /* 
@@ -600,58 +603,78 @@ Version: 0.1
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- @YearsBack
+- @ssd_timeframe_years
 - FACT_REFERRALS
 =============================================================================
 */
 -- Check if exists & drop
 IF OBJECT_ID('Child_Social.ssd_cin_episodes') IS NOT NULL DROP TABLE Child_Social.ssd_cin_episodes;
 
-
--- create structure
-CREATE TABLE ssd_cin_episodes (
-    cin_referral_id NVARCHAR(255) PRIMARY KEY,
-    la_person_id NVARCHAR(255),
-    cin_ref_date DATETIME,
-    cin_primary_need NVARCHAR(255),
-    cin_ref_source NVARCHAR(255),
-    cin_ref_outcome NVARCHAR(255),
-    cin_close_reason NVARCHAR(255),
-    cin_close_date DATETIME,
-    cin_ref_team NVARCHAR(255),
-    cin_ref_worker_id NVARCHAR(255)
+-- Create structure
+CREATE TABLE Child_Social.ssd_cin_episodes
+(
+    cine_referral_id INT,
+    cine_person_id NVARCHAR(48),
+    cine_referral_date DATETIME,
+    cine_cin_primary_need INT,
+    cine_referral_source NVARCHAR(255),
+    cine_referral_outcome_json NVARCHAR(255),
+    cine_referral_nfa NCHAR(1),
+    cine_close_reason NVARCHAR(255),
+    cine_close_date DATETIME,
+    cine_referral_team NVARCHAR(255),
+    cine_referral_worker_id NVARCHAR(36)
 );
 
 -- Insert data 
-INSERT INTO ssd_cin_episodes (
-    cin_referral_id,
-    la_person_id,
-    cin_ref_date,
-    cin_primary_need,
-    cin_ref_source,
-    cin_ref_outcome,
-    cin_close_reason,
-    cin_close_date,
-    cin_ref_team,
-    cin_ref_worker_id
+INSERT INTO Child_Social.ssd_cin_episodes
+(
+    cine_referral_id,
+    cine_person_id,
+    cine_referral_date,
+    cine_cin_primary_need,
+    cine_referral_source,
+    cine_referral_outcome_json,
+    cine_referral_nfa,
+    cine_close_reason,
+    cine_close_date,
+    cine_referral_team,
+    cine_referral_worker_id
 )
-SELECT
+SELECT 
     fr.FACT_REFERRAL_ID,
-    fr.EXTERNAL_ID,
-    fr.EFRL_START_DTTM,
+    fr.DIM_PERSON_ID,
+    fr.REFRL_START_DTTM,
     fr.DIM_LOOKUP_CATEGORY_OF_NEED_ID,
     fr.DIM_LOOKUP_CONT_SORC_ID_DESC,
-    --fr.cin_ref_outcome, -- Need the appropriate field
+    (
+        SELECT 
+            NULLIF(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS "OUTCOME_SINGLE_ASSESSMENT_FLAG",
+            NULLIF(fr.OUTCOME_NFA_FLAG, '')                 AS "OUTCOME_NFA_FLAG",
+            NULLIF(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS "OUTCOME_STRATEGY_DISCUSSION_FLAG",
+            NULLIF(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS "OUTCOME_CLA_REQUEST_FLAG",
+            NULLIF(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS "OUTCOME_NON_AGENCY_ADOPTION_FLAG",
+            NULLIF(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
+            NULLIF(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS "OUTCOME_CP_TRANSFER_IN_FLAG",
+            NULLIF(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS "OUTCOME_CP_CONFERENCE_FLAG",
+            NULLIF(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS "OUTCOME_CARE_LEAVER_FLAG",
+            NULLIF(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS "OTHER_OUTCOMES_EXIST_FLAG"
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ),
+    fr.OUTCOME_NFA_FLAG,
     fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
     fr.REFRL_END_DTTM,
-    fr.DIM_DEPARTMENT_ID,
-    fr.DIM_WORKER_ID
-FROM
-    Child_Social.FACT_REFERRALS AS fr
-WHERE 
-    fr.EFRL_START_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE());
+    fr.DIM_DEPARTMENT_ID_DESC,
+    fr.DIM_WORKER_ID_DESC
+FROM 
+    Child_Social.FACT_REFERRALS AS fr;
 
-ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person FOREIGN KEY (la_person_id) REFERENCES person(la_person_id);
+WHERE 
+    fr.EFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE());
+
+-- foreign key constraint(s)
+ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
+
 
 
 
@@ -669,26 +692,73 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists & drop
-IF OBJECT_ID('Child_Social.ssd_assessments') IS NOT NULL DROP TABLE Child_Social.ssd_assessments;
+-- Check if exists, & drop 
+IF OBJECT_ID('ssd_cin_assessments') IS NOT NULL DROP TABLE ssd_cin_assessments;
 
-/*
-assessment_id
-la_person_id
-asmt_start_date
-asmt_child_seen
-asmt_auth_date
-asmt_outcome
-asmt_team
-asmt_worker_id
+-- Create structure
+CREATE TABLE ssd_cin_assessments
+(
+    cina_assessment_id NVARCHAR(36) PRIMARY KEY,
+    cina_person_id NVARCHAR(36),
+    cina_referral_id NVARCHAR(36),
+    cina_assessment_start_date DATETIME,
+    cina_assessment_child_seen NCHAR(1),
+    cina_assessment_auth_date DATETIME, -- This needs checking !! 
+    cina_assessment_outcome_json NVARCHAR(255),
+    cina_assessment_outcome_nfa NCHAR(1),
+    cina_assessment_team NVARCHAR(255),
+    cina_assessment_worker_id NVARCHAR(36)
+);
 
--- ??
--- Child_Social FACT_CORE_ASSESSMENT	EXTERNAL_ID
--- Child_Social FACT_INITIAL_ASSESSMENT	EXTERNAL_ID
--- Child_Social FACT_SINGLE_ASSESSMENT	EXTERNAL_ID
+-- Insert data
+INSERT INTO ssd_cin_assessments
+(
+    cina_assessment_id,
+    cina_person_id,
+    cina_referral_id,
+    cina_assessment_start_date,
+    cina_assessment_child_seen,
+    cina_assessment_auth_date, -- This needs checking !! 
+    cina_assessment_outcome_json,
+    cina_assessment_outcome_nfa,
+    cina_assessment_team,
+    cina_assessment_worker_id
+)
+SELECT 
+    fa.FACT_SINGLE_ASSESSMENT_ID,
+    fa.DIM_PERSON_ID,
+    fa.FACT_REFERRAL_ID,
+    fa.START_DTTM,
+    fa.SEEN_FLAG,
+    fa.START_DTTM, -- This needs checking !! 
+    (
+        SELECT 
+            NULLIF(fa.OUTCOME_NFA_FLAG, '')                     AS "OUTCOME_NFA_FLAG",
+            NULLIF(fa.OUTCOME_NFA_S47_END_FLAG, '')             AS "OUTCOME_NFA_S47_END_FLAG",
+            NULLIF(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '')     AS "OUTCOME_STRATEGY_DISCUSSION_FLAG",
+            NULLIF(fa.OUTCOME_CLA_REQUEST_FLAG, '')             AS "OUTCOME_CLA_REQUEST_FLAG",
+            NULLIF(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '')       AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
+            NULLIF(fa.OUTCOME_LEGAL_ACTION_FLAG, '')            AS "OUTCOME_LEGAL_ACTION_FLAG",
+            NULLIF(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '')        AS "OUTCOME_PROV_OF_SERVICES_FLAG",
+            NULLIF(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '')         AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
+            NULLIF(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '')   AS "OUTCOME_SPECIALIST_ASSESSMENT_FLAG",
+            NULLIF(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')   AS "OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG",
+            NULLIF(fa.OUTCOME_OTHER_ACTIONS_FLAG, '')           AS "OUTCOME_OTHER_ACTIONS_FLAG",
+            NULLIF(fa.OTHER_OUTCOMES_EXIST_FLAG, '')            AS "OTHER_OUTCOMES_EXIST_FLAG",
+            NULLIF(fa.TOTAL_NO_OF_OUTCOMES, '')                 AS "TOTAL_NO_OF_OUTCOMES",
+            NULLIF(fa.OUTCOME_COMMENTS, '')                     AS "OUTCOME_COMMENTS"
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ),
+    fa.OUTCOME_NFA_FLAG,
+    fa.COMPLETED_BY_DEPT_NAME,
+    fa.COMPLETED_BY_USER_STAFF_ID
+FROM 
+    FACT_SINGLE_ASSESSMENT AS fa;
 
--- dbo	DIM_ASSESSMENT_DETAILS	EXTERNAL_ID
-*/
+-- foreign key constraint(s)
+ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person FOREIGN KEY (cina_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_social_worker FOREIGN KEY (cina_assessment_worker_id) REFERENCES ssd_social_worker(socw_social_worker_id);
+
 
 
 
@@ -759,19 +829,48 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists & drop
-IF OBJECT_ID('Child_Social.ssd_cin_visits') IS NOT NULL DROP TABLE Child_Social.ssd_cin_visits;
+
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_cin_visits') IS NOT NULL DROP TABLE ssd_cin_visits;
+
+-- Create structure
+CREATE TABLE ssd_cin_visits
+(
+    cinv_cin_casenote_id NVARCHAR(36) PRIMARY KEY, -- This needs checking!!
+    cinv_cin_visit_id NVARCHAR(36), -- This needs checking!!
+    cinv_cin_plan_id NVARCHAR(36),
+    cinv_cin_visit_date DATETIME,
+    cinv_cin_visit_seen NCHAR(1),
+    cinv_cin_visit_seen_alone NCHAR(1),
+    cinv_cin_visit_bedroom NCHAR(1)
+);
+
+-- Insert data
+INSERT INTO ssd_cin_visits
+(
+    cinv_cin_casenote_id, -- This needs checking!!
+    cinv_cin_visit_id, -- This needs checking!!
+    cinv_cin_plan_id,
+    cinv_cin_visit_date,
+    cinv_cin_visit_seen,
+    cinv_cin_visit_seen_alone,
+    cinv_cin_visit_bedroom
+)
+SELECT 
+    cn.FACT_CASENOTE_ID, -- This needs checking!!
+    'PLACEHOLDER DATA', -- This needs checking!!
+    cn.FACT_FORM_ID,
+    cn.EVENT_DTTM,
+    cn.SEEN_FLAG,
+    cn.SEEN_ALONE_FLAG,
+    cn.SEEN_BEDROOM_FLAG
+FROM 
+    Child_Social.FACT_CASENOTES cn;
+
+ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_cin_plans 
+FOREIGN KEY (cinv_cin_plan_id) REFERENCES ssd_cin_plans(cinp_cin_plan_id);
 
 
-/*
-cin_visit_id
-cin_plan_id
-cin_visit_date
-cin_visit_seen
-cin_visit_seen_alone
-cin_visit_bedroom
-
-*/
 
 
 /* 
@@ -861,6 +960,42 @@ Dependencies:
 =============================================================================
 */
 
+-- Check if table exists, & drop if it does
+IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_cp_reviews;
+
+-- Create structure for ssd_cp_reviews table
+CREATE TABLE ssd_cp_reviews
+(
+    cppr_cp_review_id NVARCHAR(36) PRIMARY KEY,
+    cppr_cp_plan_id NVARCHAR(36),
+    cppr_cp_review_due DATETIME NULL,
+    cppr_cp_review_date DATETIME NULL,
+    cppr_cp_review_outcome NCHAR(1),
+    cppr_cp_review_quorate NCHAR(1) DEFAULT '0', -- using '0' as placeholder
+    cppr_cp_review_participation NCHAR(1) DEFAULT '0' -- using '0' as placeholder
+);
+
+-- Insert data from source table
+INSERT INTO ssd_cp_reviews
+(
+    cppr_cp_review_id,
+    cppr_cp_plan_id,
+    cppr_cp_review_due,
+    cppr_cp_review_date,
+    cppr_cp_review_outcome,
+    cppr_cp_review_quorate,
+    cppr_cp_review_participation
+)
+SELECT 
+    FACT_CP_REVIEW_ID,
+    FACT_CP_PLAN_ID,
+    DUE_DTTM,
+    MEETING_DTTM,
+    OUTCOME_CONTINUE_CP_FLAG,
+    '0', -- Placeholder for cppr_cp_review_quorate
+    '0'  -- Placeholder for cppr_cp_review_participation
+FROM 
+    Child_Social.FACT_CP_REVIEW;
 
 
 
@@ -921,6 +1056,8 @@ FROM
     Child_Social.FACT_CASENOTES AS cn;
 
 
+
+
 /* 
 =============================================================================
 Object Name: ssd_cp_reviews
@@ -929,12 +1066,53 @@ Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
 =============================================================================
 */
+
+-- Check if table exists, & drop
+IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_cp_reviews;
+
+-- Create structure
+CREATE TABLE ssd_cp_reviews
+(
+    cppr_cp_review_id NVARCHAR(36) PRIMARY KEY,
+    cppr_cp_plan_id NVARCHAR(36),
+    cppr_cp_review_due DATETIME NULL,
+    cppr_cp_review_date DATETIME NULL,
+    cppr_cp_review_outcome NCHAR(1),
+    cppr_cp_review_quorate NCHAR(1) DEFAULT '0', -- using '0' as placeholder
+    cppr_cp_review_participation NCHAR(1) DEFAULT '0' -- using '0' as placeholder
+);
+
+-- Insert data
+INSERT INTO ssd_cp_reviews
+(
+    cppr_cp_review_id,
+    cppr_cp_plan_id,
+    cppr_cp_review_due,
+    cppr_cp_review_date,
+    cppr_cp_review_outcome,
+    cppr_cp_review_quorate,
+    cppr_cp_review_participation
+)
+SELECT 
+    FACT_CP_REVIEW_ID,
+    FACT_CP_PLAN_ID,
+    DUE_DTTM,
+    MEETING_DTTM,
+    OUTCOME_CONTINUE_CP_FLAG,
+    '0', -- Placeholder for cppr_cp_review_quorate
+    '0'  -- Placeholder for cppr_cp_review_participation
+FROM 
+    Child_Social.FACT_CP_REVIEW;
+
+
+ALTER TABLE ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
+FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
 
 
 /* 
@@ -1443,65 +1621,237 @@ Dependencies:
 /* 
 =============================================================================
 Object Name: ssd_pre_proceedings
-Description: 
+Description: Currently only with placeholder structure as source data not yet conformed
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 02/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- Yet to be defined
 =============================================================================
 */
 
+-- Check if exists, & drop
+IF OBJECT_ID('Child_Social.ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE Child_Social.ssd_pre_proceedings;
+
+-- Create structure
+CREATE TABLE Child_Social.ssd_pre_proceedings (
+    prep_id INT PRIMARY KEY IDENTITY(1,1),
+    prep_person_id NVARCHAR(36),
+    prep_plo_family_id NVARCHAR(36),
+    prep_pre_pro_decision_date DATETIME,
+    prep_initial_pre_pro_meeting_date DATETIME,
+    prep_pre_pro_outcome NVARCHAR(255),
+    prep_agree_stepdown_issue_date DATETIME,
+    prep_cp_plans_referral_period INT,
+    prep_legal_gateway_outcome NVARCHAR(255),
+    prep_prev_pre_proc_child INT,
+    prep_prev_care_proc_child INT,
+    prep_pre_pro_letter_date DATETIME,
+    prep_care_pro_letter_date DATETIME,
+    prep_pre_pro_meetings_num INT,
+    prep_pre_pro_parents_legal_rep NCHAR(1),
+    prep_parents_legal_rep_point_of_issue NCHAR(2),
+    prep_court_reference NVARCHAR(36),
+    prep_care_proc_court_hearings INT,
+    prep_care_proc_short_notice NCHAR(1),
+    prep_proc_short_notice_reason NVARCHAR(255),
+    prep_la_inital_plan_approved NCHAR(1),
+    prep_la_initial_care_plan NVARCHAR(255),
+    prep_la_final_plan_approved NCHAR(1),
+    prep_la_final_care_plan NVARCHAR(255)
+);
+
+-- Insert placeholder data
+-- Insert placeholder data
+INSERT INTO Child_Social.ssd_pre_proceedings (
+    prep_person_id,
+    prep_plo_family_id,
+    prep_pre_pro_decision_date,
+    prep_initial_pre_pro_meeting_date,
+    prep_pre_pro_outcome,
+    prep_agree_stepdown_issue_date,
+    prep_cp_plans_referral_period,
+    prep_legal_gateway_outcome,
+    prep_prev_pre_proc_child,
+    prep_prev_care_proc_child,
+    prep_pre_pro_letter_date,
+    prep_care_pro_letter_date,
+    prep_pre_pro_meetings_num,
+    prep_pre_pro_parents_legal_rep,
+    prep_parents_legal_rep_point_of_issue,
+    prep_court_reference,
+    prep_care_proc_court_hearings,
+    prep_care_proc_short_notice,
+    prep_proc_short_notice_reason,
+    prep_la_inital_plan_approved,
+    prep_la_initial_care_plan,
+    prep_la_final_plan_approved,
+    prep_la_final_care_plan
+)
+VALUES
+    (
+    'DIM_PERSON1.PERSON_ID', 'PLO_FAMILY1', '2023-01-01', '2023-01-02', 'Outcome1', 
+    '2023-01-03', 3, 'Approved', 2, 1, '2023-01-04', '2023-01-05', 2, 'Y', 
+    'NA', 'COURT_REF_1', 1, 'N', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
+    ),
+    (
+    'DIM_PERSON2.PERSON_ID', 'PLO_FAMILY2', '2023-02-01', '2023-02-02', 'Outcome2',
+    '2023-02-03', 4, 'Denied', 1, 2, '2023-02-04', '2023-02-05', 3, 'N',
+    'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'N', 'Initial Plan 2', 'N', 'Final Plan 2'
+    );
+
+-- Add foreign key constraint
+ALTER TABLE Child_Social.ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
+FOREIGN KEY (prep_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 
 /* 
 =============================================================================
 Object Name: ssd_voice_of_child
-Description: 
+Description: Currently only with placeholder structure as source data not yet conformed
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 02/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- Yet to be defined
 =============================================================================
 */
 -- Check if exists, & drop 
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'Child_Social' AND TABLE_NAME = 'ssd_voice_of_child')
-BEGIN
-    DROP TABLE Child_Social.ssd_voice_of_child;
-END
+IF OBJECT_ID('Child_Social.ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE Child_Social.ssd_voice_of_child;
 
 -- Create structure
 CREATE TABLE Child_Social.ssd_voice_of_child (
-    la_person_id NVARCHAR(255) PRIMARY KEY, -- Assuming NVARCHAR(255) as a generic type for id
-    voc_explained_worries NVARCHAR(255),
-    voc_story_help_understand NVARCHAR(255),
-    voc_agree_worker NVARCHAR(255),
-    voc_plan_safe NVARCHAR(255),
-    voc_tablet_help_explain NVARCHAR(255)
+    voch_person_id NVARCHAR(48) PRIMARY KEY, 
+    voch_explained_worries NCHAR(1),
+    voch_story_help_understand NCHAR(1),
+    voch_agree_worker NCHAR(1),
+    voch_plan_safe NCHAR(1),
+    voch_tablet_help_explain NCHAR(1)
 );
 
 -- Insert placeholder data
 INSERT INTO Child_Social.ssd_voice_of_child (
-    la_person_id,
-    voc_explained_worries,
-    voc_story_help_understand,
-    voc_agree_worker,
-    voc_plan_safe,
-    voc_tablet_help_explain
+    voch_person_id,
+    voch_explained_worries,
+    voch_story_help_understand,
+    voch_agree_worker,
+    voch_plan_safe,
+    voch_tablet_help_explain
 )
 VALUES
-    ('ID001', 'Placeholder Data', 'Placeholder Data', 'Placeholder Data', 'Placeholder Data', 'Placeholder Data'),
-    ('ID002', 'Placeholder Data', 'Placeholder Data', 'Placeholder Data', 'Placeholder Data', 'Placeholder Data');
+    ('ID001', 'Y', 'Y', 'Y', 'N', 'N'),
+    ('ID002', 'Y', 'Y', 'Y', 'N', 'N');
 
-    
+
+
+ALTER TABLE Child_Social.ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
+FOREIGN KEY (voch_person_id) REFERENCES ssd_person(pers_person_id);
+
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_linked_identifiers
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 02/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+=============================================================================
+*/
+
+-- Check if exists, & drop 
+IF OBJECT_ID('Child_Social.ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE Child_Social.ssd_linked_identifiers;
+
+-- Create structure
+CREATE TABLE Child_Social.ssd_linked_identifiers (
+    link_link_id NVARCHAR(36) PRIMARY KEY, 
+    link_person_id NVARCHAR(36), 
+    link_identifier_type NVARCHAR(255),
+    link_identifier_value NVARCHAR(255),
+    link_valid_from_date DATETIME,
+    link_valid_to_date DATETIME
+);
+
+-- Insert placeholder data
+INSERT INTO Child_Social.ssd_linked_identifiers (
+    link_link_id,
+    link_person_id,
+    link_identifier_type,
+    link_identifier_value,
+    link_valid_from_date,
+    link_valid_to_date
+)
+VALUES
+    ('placeholder data', 'DIM_PERSON.PERSON_ID', 'placeholder data', 'placeholder data', NULL, NULL);
+
+-- Add foreign key constraint
+ALTER TABLE Child_Social.ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
+FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
+
+
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_s251_finance
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 02/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+=============================================================================
+*/
+
+-- Check if exists, & drop 
+IF OBJECT_ID('Child_Social.ssd_s251_finance', 'U') IS NOT NULL DROP TABLE Child_Social.ssd_s251_finance;
+
+-- Create structure
+CREATE TABLE Child_Social.ssd_s251_finance (
+    s251_id NVARCHAR(36) PRIMARY KEY, 
+    s251_cla_placement_id NVARCHAR(36), 
+    s251_placeholder_1 NVARCHAR(48),
+    s251_placeholder_2 NVARCHAR(48),
+    s251_placeholder_3 NVARCHAR(48),
+    s251_placeholder_4 NVARCHAR(48)
+);
+
+-- Insert placeholder data
+INSERT INTO Child_Social.ssd_s251_finance (
+    s251_id,
+    s251_cla_placement_id,
+    s251_placeholder_1,
+    s251_placeholder_2,
+    s251_placeholder_3,
+    s251_placeholder_4
+)
+VALUES
+    ('placeholder data', 'placeholder data', 'placeholder data', 'placeholder data', 'placeholder data', 'placeholder data');
+
+-- Add foreign key constraint
+ALTER TABLE Child_Social.ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
+FOREIGN KEY (s251_cla_placement_id) REFERENCES ssd_cla_placement(clap_cla_placement_id);
+
+
+
+
 
 
 

@@ -18,6 +18,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
     cms_field:
     - liquid_logic:la_person_id
     - mosaic:la_person_id
@@ -34,9 +37,6 @@ nodes:
     - voice_of_child
     returns:
     - 1bDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:voch_explained_worries
     - mosaic:voch_explained_worries
@@ -60,9 +60,6 @@ nodes:
     - voice_of_child
     returns:
     - 1bDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:voch_story_help_understand
     - mosaic:voch_story_help_understand
@@ -86,9 +83,6 @@ nodes:
     - voice_of_child
     returns:
     - 1bDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:voch_agree_worker
     - mosaic:voch_agree_worker
@@ -112,9 +106,6 @@ nodes:
     - voice_of_child
     returns:
     - 1bDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:voch_plan_safe
     - mosaic:voch_plan_safe
@@ -138,9 +129,6 @@ nodes:
     - voice_of_child
     returns:
     - 1bDraft
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:voch_tablet_help_explain
     - mosaic:voch_tablet_help_explain

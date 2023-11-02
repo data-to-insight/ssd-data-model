@@ -32,6 +32,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
     cms_field:
     - liquid_logic:clah_person_id
     - mosaic:clah_person_id

@@ -57,6 +57,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
     cms_field:
     - liquid_logic:s47e_person_id
     - mosaic:s47e_person_id

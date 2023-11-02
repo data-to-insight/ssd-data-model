@@ -19,7 +19,6 @@ nodes:
     - need
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:senn_sen_need_table_id
     - mosaic:senn_sen_need_table_id
@@ -39,7 +38,6 @@ nodes:
     - need
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:senn_active_ehcp_id
     - mosaic:senn_active_ehcp_id
@@ -60,7 +58,6 @@ nodes:
     - SEN2
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:senn_active_ehcp_need_type
     - mosaic:senn_active_ehcp_need_type
@@ -90,7 +87,6 @@ nodes:
     - SEN2
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:senn_active_ehcp_need_rank
     - mosaic:senn_active_ehcp_need_rank

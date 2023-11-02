@@ -21,7 +21,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehca_ehcp_assessment_id
     - mosaic:ehca_ehcp_assessment_id
@@ -57,7 +56,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehca_ehcp_request_id
     - mosaic:ehca_ehcp_request_id
@@ -78,7 +76,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehca_ehcp_assessment_outcome_date
     - mosaic:ehca_ehcp_assessment_outcome_date
@@ -103,7 +100,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehca_ehcp_assessment_outcome
     - mosaic:ehca_ehcp_assessment_outcome
@@ -139,7 +135,6 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:ehcp_asmt_outcome
     - mosaic:ehcp_asmt_outcome

@@ -81,6 +81,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
     cms_field:
     - liquid_logic:cina_person_id
     - mosaic:cina_person_id
@@ -91,6 +94,7 @@ nodes:
   - name: cina_referral_id
     description: Referral ID
     item_ref: CINA010A
+    type: nvarchar
     cms_field:
     - liquid_logic:cina_referral_id
     - mosaic:cina_referral_id
@@ -202,7 +206,7 @@ nodes:
   - name: cina_assessment_outcome_nfa
     description: Assessment NFA
     item_ref: CINA009A
-    type: nvarchar
+    type: NCHAR
     categories:
     - child_in_need
     - assessment
