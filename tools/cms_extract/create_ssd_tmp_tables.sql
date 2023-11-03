@@ -96,17 +96,17 @@ AND (
     EXISTS (
         SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
         WHERE fr.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
-        AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+        AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
     OR EXISTS (
         SELECT 1 FROM Child_Social.FACT_CONTACTS fc
         WHERE fc.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
-        AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+        AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
     OR EXISTS (
         SELECT 1 FROM Child_Social.FACT_EHCP_EPISODE fe 
         WHERE fe.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
-        AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@YearsBack, GETDATE())
+        AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
 )
 ORDER BY
