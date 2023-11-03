@@ -225,7 +225,7 @@ IF OBJECT_ID('Child_Social.ssd_address') IS NOT NULL DROP TABLE Child_Social.ssd
 -- Create structure
 CREATE TABLE Child_Social.ssd_address (
     addr_address_id NVARCHAR(255) PRIMARY KEY,
-    addr_person_id NVARCHAR(255), -- Assuming EXTERNAL_ID corresponds to la_person_id
+    addr_person_id NVARCHAR(255), 
     addr_address_type NVARCHAR(MAX),
     addr_address_start DATETIME,
     addr_address_end DATETIME,
@@ -293,49 +293,48 @@ ORDER BY
 Object Name: ssd_disability
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - FACT_DISABILITY
+- ssd_person
 =============================================================================
 */
--- Check if disability exists
-IF OBJECT_ID('Child_Social.ssd_disability') IS NOT NULL DROP TABLE Child_Social.ssd_s47_disability;
+-- Check if exists & drop
+IF OBJECT_ID('Child_Social.ssd_disability') IS NOT NULL DROP TABLE Child_Social.ssd_disability;
 
-
--- Create structure
-CREATE TABLE Child_Social.ssd_disability (
-    disability_id NVARCHAR(255) PRIMARY KEY,
-    la_person_id NVARCHAR(255),
-    person_disability NVARCHAR(MAX)
+-- Create the structure
+CREATE TABLE Child_Social.ssd_disability
+(
+    disa_id                 NVARCHAR(36) PRIMARY KEY,
+    disa_person_id          NVARCHAR(36) NOT NULL,
+    disa_disability_code    NVARCHAR(48) NOT NULL
 );
 
--- Add foreign key constraint for la_person_id
-ALTER TABLE Child_Social.ssd_disability
-ADD CONSTRAINT FK_disability_person
-FOREIGN KEY (la_person_id) REFERENCES Child_Social.ssd_person(la_person_id);
+ALTER TABLE Child_Social.ssd_disability ADD CONSTRAINT FK_disability_person 
+FOREIGN KEY (disa_person_id) REFERENCES Child_Social.ssd_person(pers_person_id);
 
--- Non-clustered index on foreign key
-CREATE INDEX IDX_disability_la_person_id 
-ON Child_Social.ssd_disability(la_person_id);
+-- Create non-clustered index on the foreign key column
+CREATE INDEX IDX_disability_person_id ON Child_Social.ssd_disability(disa_person_id);
 
--- insert data
+
+-- Insert data into the 'ssd_disability' table
 INSERT INTO Child_Social.ssd_disability (
-    disability_id, 
-    la_person_id, 
-    person_disability
+    disa_id, 
+    disa_person_id, 
+    disa_disability_code
 )
 SELECT 
-    fd.[FACT_DISABILITY_ID],
-    fd.[EXTERNAL_ID],
-    fd.[DISABILITY_GROUP_CODE]
+    fd.FACT_DISABILITY_ID, 
+    fd.EXTERNAL_ID, 
+    fd.DIM_LOOKUP_DISAB_CODE
 FROM 
-    Child_Social.FACT_DISABILITY AS fd
-ORDER BY
-    fd.[EXTERNAL_ID] ASC;
+    Child_Social.FACT_DISABILITY AS fd;
+
+
 
 
 
@@ -411,24 +410,46 @@ ORDER BY
 Object Name: ssd_mother
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- FACT_PERSON_RELATION
+- ssd_person
 =============================================================================
 */
 -- Check if exists & drop
-IF OBJECT_ID('Child_Social.ssd_mother') IS NOT NULL DROP TABLE Child_Social.ssd_mother;
+IF OBJECT_ID('ssd_mother') IS NOT NULL DROP TABLE ssd_mother;
+
+-- Create the structure
+CREATE TABLE ssd_mother
+(
+    moth_person_id          NVARCHAR(36) PRIMARY KEY,
+    moth_childs_person_id   NVARCHAR(36),
+    moth_childs_dob         DATETIME
+);
+
+-- Insert data
+INSERT INTO ssd_mother
+(
+    moth_person_id,
+    moth_childs_person_id,
+    moth_childs_dob
+)
+SELECT 
+    pr.DIM_PERSON_ID            AS moth_person_id,
+    pr.DIM_RELATED_PERSON_ID    AS moth_childs_person_id,
+    pr.DIM_RELATED_PERSON_DOB   AS moth_childs_dob
+FROM 
+    FACT_PERSON_RELATION AS pr;
+
+-- add the foreign key constraint
+ALTER TABLE ssd_mother ADD CONSTRAINT FK_ssd_mother_to_ssd_person
+FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
 
 
-/*
-person_child_id
-la_person_id
-person_child_dob
-*/
 
 
 
@@ -680,16 +701,17 @@ ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person FOREIG
 
 /* 
 =============================================================================
-Object Name: ssd_assessments
+Object Name: #ssd_assessments
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_SINGLE_ASSESSMENT
 =============================================================================
 */
 -- Check if exists, & drop 
@@ -803,16 +825,43 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF OBJECT_ID('Child_Social.ssd_cin_plans') IS NOT NULL DROP TABLE Child_Social.ssd_cin_plans;
+IF OBJECT_ID('Child_Social.ssd_cin_plans', 'U') IS NOT NULL DROP TABLE Child_Social.ssd_cin_plans;
 
-/*
-cin_plan_id
-la_person_id
-cin_plan_Start
-cin_plan_end
-cin_team
-cin_worker_id
-*/
+-- Create structure
+CREATE TABLE Child_Social.ssd_cin_plans (
+    cinp_referral_id NVARCHAR(36), 
+    cinp_person_id NVARCHAR(36), 
+    cinp_cin_plan_start DATETIME,
+    cinp_cin_plan_end DATETIME,
+    cinp_cin_plan_team NVARCHAR(255),
+    cinp_cin_plan_worker_id NVARCHAR(36)
+);
+
+-- Insert data
+INSERT INTO Child_Social.ssd_cin_plans (
+    cinp_referral_id,
+    cinp_person_id,
+    cinp_cin_plan_start,
+    cinp_cin_plan_end,
+    cinp_cin_plan_team,
+    cinp_cin_plan_worker_id
+)
+SELECT 
+    fp.FACT_REFERRAL_ID                AS cinp_referral_id,
+    fp.DIM_PERSON_ID                   AS cinp_person_id,
+    fp.START_DTTM                      AS cinp_cin_plan_start,
+    fp.END_DTTM                        AS cinp_cin_plan_end,
+    cpd.DIM_OUTCM_CREATE_BY_DEPT_ID    AS cinp_cin_plan_team,
+    cpd.DIM_NEED_CREATE_BY_ID          AS cinp_cin_plan_worker_id
+FROM FACT_CARE_PLANS AS fp
+
+JOIN FACT_CARE_PLAN_DETAILS AS cpd              -- Needs checking!!
+ON fp.FACT_REFERRAL_ID = cpd.FACT_REFERRAL_ID;  -- Needs checking!!
+
+-- Add foreign key constraint
+ALTER TABLE Child_Social.ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
+    FOREIGN KEY (cinp_person_id) REFERENCES ssd_person(pers_person_id);
+
 
 
 /* 

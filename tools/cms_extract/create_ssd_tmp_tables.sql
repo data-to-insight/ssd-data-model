@@ -112,9 +112,6 @@ AND (
 ORDER BY
     p.[EXTERNAL_ID] ASC;
 
--- Create a non-clustered index on la_person_id for quicker lookups and joins in the temp table
-CREATE INDEX IDX_ssd_pers_la_person_id ON #ssd_person(pers_la_person_id);
-
 
 
 /* 
@@ -137,7 +134,7 @@ IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
 -- Create temporary structure
 SELECT
-    DIM_TF_FAMILY_ID AS fami_id, -- to confirm
+    DIM_TF_FAMILY_ID AS fami_id, -- to confirm/needs checking
     UNIQUE_FAMILY_NUMBER AS fami_family_id,
     EXTERNAL_ID AS fami_la_person_id
 INTO #ssd_family
@@ -148,9 +145,6 @@ WHERE EXISTS ( -- only need address data for matching/relevant records
     FROM #ssd_person AS p
     WHERE dtf.EXTERNAL_ID = p.pers_la_person_id
 );
-
--- Create non-clustered index on la_person_id
-CREATE INDEX IDX_family_person ON #ssd_family(fami_la_person_id);
 
 
 
@@ -205,61 +199,44 @@ ORDER BY
 -- Add primary key
 ALTER TABLE #ssd_address ADD CONSTRAINT PK_address_id PRIMARY KEY (addr_address_id);
 
--- Non-clustered index on la_person_id
-CREATE INDEX IDX_address_person ON #ssd_address(addr_person_id);
-
--- Non-clustered indexes on address_start and address_end
-CREATE INDEX IDX_address_start ON #ssd_address(addr_address_start);
-CREATE INDEX IDX_address_end ON #ssd_address(addr_address_end);
-
-
--- clean up
-IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
-
-
-
 
 
 
 
 /* 
 =============================================================================
-Object Name: #ssd_disability
+Object Name: ssd_disability
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- FACT_DISABILITY
+- ssd_person
 =============================================================================
 */
 -- Check if exists, & drop 
-IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL 
-    DROP TABLE #ssd_disability;
+IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 
--- Create temporary structure
-SELECT TOP 100
-    fd.[FACT_DISABILITY_ID] as disability_id,
-    fd.[EXTERNAL_ID] as la_person_id,
-    fd.[DISABILITY_GROUP_CODE] as person_disability
-
+SELECT 
+    fd.FACT_DISABILITY_ID       AS disa_id, 
+    fd.EXTERNAL_ID              AS disa_person_id, 
+    fd.DIM_LOOKUP_DISAB_CODE    AS disa_disability_code
 INTO #ssd_disability
 FROM 
-    Child_Social.FACT_DISABILITY AS fd
-ORDER BY
-    fd.[EXTERNAL_ID] ASC;
+    Child_Social.FACT_DISABILITY AS fd;
 
--- Add primary key constraint to disability_id
-ALTER TABLE #ssd_disability
-ADD CONSTRAINT PK_disability_id
-PRIMARY KEY (disability_id);
 
--- Create non-clustered index on la_person_id
-CREATE INDEX IDX_disability_la_person_id ON #ssd_disability(la_person_id);
+-- Add a primary key constraint
+ALTER TABLE #ssd_disability ADD CONSTRAINT PK_ssd_disability 
+PRIMARY KEY (disa_id);
 
+-- Add a foreign key constraint
+ALTER TABLE #ssd_disability ADD CONSTRAINT FK_ssd_disability_person
+FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 
@@ -286,7 +263,7 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
--- Create temporary structure
+-- Create structure
 SELECT 
     ims.[FACT_IMMIGRATION_STATUS_ID] as immigration_status_id,
     ims.[EXTERNAL_ID] as la_person_id,
@@ -301,17 +278,8 @@ ORDER BY
     ims.[EXTERNAL_ID] ASC;
 
 -- Set the primary key
-ALTER TABLE #ssd_immigration_status
-ADD CONSTRAINT PK_immigration_status_id
+ALTER TABLE #ssd_immigration_status ADD CONSTRAINT PK_immigration_status_id
 PRIMARY KEY (immigration_status_id);
-
--- Non-clustered index on immigration_status_start
-CREATE INDEX IDX_immigration_status_start 
-ON #ssd_immigration_status(immigration_status_start);
-
--- Non-clustered index on immigration_status_end
-CREATE INDEX IDX_immigration_status_end 
-ON #ssd_immigration_status(immigration_status_end);
 
 
 
@@ -320,22 +288,43 @@ ON #ssd_immigration_status(immigration_status_end);
 Object Name: #ssd_mother
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- FACT_PERSON_RELATION
+- ssd_person
 =============================================================================
 */
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#ssd_mother') IS NOT NULL DROP TABLE #ssd_mother;
 
--- Create temporary structure
-/*
-person_child_id
-la_person_id
-person_child_dob
-*/
+-- Create structure
+CREATE TABLE #ssd_mother
+(
+    moth_person_id          NVARCHAR(36) PRIMARY KEY,
+    moth_childs_person_id   NVARCHAR(36),
+    moth_childs_dob         DATETIME
+    
+);
+
+-- Insert data
+INSERT INTO #ssd_mother
+(
+    moth_person_id,
+    moth_childs_person_id,
+    moth_childs_dob
+)
+SELECT 
+    pr.DIM_PERSON_ID            AS moth_person_id,
+    pr.DIM_RELATED_PERSON_ID    AS moth_childs_person_id,
+    pr.DIM_RELATED_PERSON_DOB   AS moth_childs_dob
+FROM 
+    FACT_PERSON_RELATION AS pr;
+
+
 
 
 /* 
@@ -406,9 +395,6 @@ ORDER BY
 
 -- Add primary key
 ALTER TABLE #ssd_contact ADD CONSTRAINT PK_contact_id PRIMARY KEY (contact_id);
-
--- Create non-clustered index on la_person_id
-CREATE INDEX IDX_contact_person ON #ssd_contact(la_person_id);
 
 
 
@@ -535,13 +521,14 @@ WHERE
 Object Name: #ssd_assessments
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_SINGLE_ASSESSMENT
 =============================================================================
 */
 -- Check if exists, & drop 
@@ -617,7 +604,7 @@ ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_social
 
 /* 
 =============================================================================
-Object Name: ssd_assessment_factors
+Object Name: #ssd_assessment_factors
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -642,7 +629,7 @@ asmt_factors
 
 /* 
 =============================================================================
-Object Name: ssd_cin_plans
+Object Name: #sd_cin_plans
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -654,18 +641,43 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop 
-IF OBJECT_ID('tempdb..#ssd_cin_plans') IS NOT NULL DROP TABLE #ssd_cin_plans;
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plans;
 
--- Create temporary structure
-/*
-cin_plan_id
-la_person_id
-cin_plan_Start
-cin_plan_end
-cin_team
-cin_worker_id
-*/
+-- Create structure
+CREATE TABLE #ssd_cin_plans (
+    cinp_referral_id NVARCHAR(36), 
+    cinp_person_id NVARCHAR(36), 
+    cinp_cin_plan_start DATETIME,
+    cinp_cin_plan_end DATETIME,
+    cinp_cin_plan_team NVARCHAR(255),
+    cinp_cin_plan_worker_id NVARCHAR(36)
+);
+
+-- Insert data
+INSERT INTO #ssd_cin_plans (
+    cinp_referral_id,
+    cinp_person_id,
+    cinp_cin_plan_start,
+    cinp_cin_plan_end,
+    cinp_cin_plan_team,
+    cinp_cin_plan_worker_id
+)
+SELECT 
+    fp.FACT_REFERRAL_ID                AS cinp_referral_id,
+    fp.DIM_PERSON_ID                   AS cinp_person_id,
+    fp.START_DTTM                      AS cinp_cin_plan_start,
+    fp.END_DTTM                        AS cinp_cin_plan_end,
+    cpd.DIM_OUTCM_CREATE_BY_DEPT_ID    AS cinp_cin_plan_team,
+    cpd.DIM_NEED_CREATE_BY_ID          AS cinp_cin_plan_worker_id
+FROM FACT_CARE_PLANS AS fp
+JOIN FACT_CARE_PLAN_DETAILS AS cpd              -- Needs checking!!
+ON fp.FACT_REFERRAL_ID = cpd.FACT_REFERRAL_ID;  -- Needs checking!!
+
+-- Add foreign key constraint
+ALTER TABLE #ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
+    FOREIGN KEY (cinp_person_id) REFERENCES #ssd_person(pers_person_id);
+
 
 /* 
 =============================================================================
