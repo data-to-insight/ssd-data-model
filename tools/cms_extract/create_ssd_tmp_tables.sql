@@ -67,24 +67,24 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 -- Create temporary structure
 SELECT 
-    p.[EXTERNAL_ID] AS pers_la_person_id,
-    p.[DIM_LOOKUP_VARIATION_OF_SEX_CODE] AS pers_sex,
-    p.[GENDER_MAIN_CODE] AS pers_gender, -- might need placholder, not available in every LA
-    p.[ETHNICITY_MAIN_CODE] AS pers_ethnicity,
-    p.[BIRTH_DTTM] AS pers_dob,
-    NULL AS pers_common_child_id, -- Set to NULL
-    p.[UPN] AS pers_upn,
+    p.[EXTERNAL_ID]                         AS pers_la_person_id,
+    p.[DIM_LOOKUP_VARIATION_OF_SEX_CODE]    AS pers_sex,
+    p.[GENDER_MAIN_CODE]                    AS pers_gender, -- might need placholder, not available in every LA
+    p.[ETHNICITY_MAIN_CODE]                 AS pers_ethnicity,
+    p.[BIRTH_DTTM]                          AS pers_dob,
+    NULL                                    AS pers_common_child_id, -- Set to NULL
+    p.[UPN]                                 AS pers_upn,
 
-    (SELECT TOP 1 f.NO_UPN_CODE
+    (SELECT f.NO_UPN_CODE
     FROM Child_Social.FACT_903_DATA f
     WHERE f.EXTERNAL_ID = p.EXTERNAL_ID
     AND f.NO_UPN_CODE IS NOT NULL
-    ORDER BY f.NO_UPN_CODE DESC) AS person_upn_unknown,
+    ORDER BY f.NO_UPN_CODE DESC)            AS pers_upn_unknown,
 
-    p.[EHM_SEN_FLAG] AS person_send,
-    p.[DOB_ESTIMATED] AS person_expected_dob,
-    p.[DEATH_DTTM] AS person_death_date,
-    p.[NATNL_CODE] AS person_nationality
+    p.[EHM_SEN_FLAG]                        AS pers_send,
+    p.[DOB_ESTIMATED]                       AS pers_expected_dob,
+    p.[DEATH_DTTM]                          AS pers_death_date,
+    p.[NATNL_CODE]                          AS pers_nationality
 
 INTO 
     #ssd_person
@@ -196,8 +196,10 @@ FROM
 ORDER BY
     pa.[EXTERNAL_ID] ASC;
 
--- Add primary key
-ALTER TABLE #ssd_address ADD CONSTRAINT PK_address_id PRIMARY KEY (addr_address_id);
+
+-- Create constraint(s)
+ALTER TABLE #ssd_address ADD CONSTRAINT PK_address_id 
+PRIMARY KEY (addr_address_id);
 
 
 
@@ -230,11 +232,11 @@ FROM
     Child_Social.FACT_DISABILITY AS fd;
 
 
--- Add a primary key constraint
+
+-- Create constraint(s)
 ALTER TABLE #ssd_disability ADD CONSTRAINT PK_ssd_disability 
 PRIMARY KEY (disa_id);
 
--- Add a foreign key constraint
 ALTER TABLE #ssd_disability ADD CONSTRAINT FK_ssd_disability_person
 FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
 
@@ -251,25 +253,26 @@ FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
 Object Name: #ssd_immigration_status
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_IMMIGRATION_STATUS
 =============================================================================
 */
--- Check if exists & drop
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
 -- Create structure
 SELECT 
-    ims.[FACT_IMMIGRATION_STATUS_ID] as immigration_status_id,
-    ims.[EXTERNAL_ID] as la_person_id,
-    ims.[START_DTTM] as immigration_status_start,
-    ims.[END_DTTM] as immigration_status_end,
-    ims.[DIM_LOOKUP_IMMGR_STATUS_CODE] as immigration_status
+    ims.[FACT_IMMIGRATION_STATUS_ID]    as immi_immigration_status_id,
+    ims.[EXTERNAL_ID]                   as immi__person_id,
+    ims.[START_DTTM]                    as immi_immigration_status_start,
+    ims.[END_DTTM]                      as immi_immigration_status_end,
+    ims.[DIM_LOOKUP_IMMGR_STATUS_CODE]  as immi_immigration_status
 INTO 
     #ssd_immigration_status
 FROM 
@@ -277,9 +280,10 @@ FROM
 ORDER BY
     ims.[EXTERNAL_ID] ASC;
 
--- Set the primary key
+)
+-- Create constraint(s)
 ALTER TABLE #ssd_immigration_status ADD CONSTRAINT PK_immigration_status_id
-PRIMARY KEY (immigration_status_id);
+PRIMARY KEY (immi_immigration_status_id);
 
 
 
@@ -302,29 +306,19 @@ Dependencies:
 IF OBJECT_ID('tempdb..#ssd_mother') IS NOT NULL DROP TABLE #ssd_mother;
 
 -- Create structure
-CREATE TABLE #ssd_mother
-(
-    moth_person_id          NVARCHAR(36) PRIMARY KEY,
-    moth_childs_person_id   NVARCHAR(36),
-    moth_childs_dob         DATETIME
-    
-);
-
--- Insert data
-INSERT INTO #ssd_mother
-(
-    moth_person_id,
-    moth_childs_person_id,
-    moth_childs_dob
-)
 SELECT 
-    pr.DIM_PERSON_ID            AS moth_person_id,
+    pr.DIM_PERSON_ID            AS moth_person_id PRIMARY KEY,
     pr.DIM_RELATED_PERSON_ID    AS moth_childs_person_id,
     pr.DIM_RELATED_PERSON_DOB   AS moth_childs_dob
+
+INTO #ssd_mother
 FROM 
     FACT_PERSON_RELATION AS pr;
 
 
+-- Create constraint(s)
+ALTER TABLE #ssd_mother ADD CONSTRAINT FK_mother_person
+FOREIGN KEY (moth_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 /* 
@@ -332,13 +326,14 @@ FROM
 Object Name: #ssd_legal_status
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_LEGAL_STATUS
 =============================================================================
 */
 -- Check if exists, & drop 
@@ -346,32 +341,34 @@ IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_stat
 
 -- Create temporary structure
 SELECT
-    fls.[FACT_LEGAL_STATUS_ID] AS legal_status_id,
-    fls.[EXTERNAL_ID] AS la_person_id,
-    fls.[START_DTTM] AS legal_status_start,
-    fls.[END_DTTM] AS legal_status_end,
-    fls.[DIM_PERSON_ID] AS person_dim_id
+    fls.[FACT_LEGAL_STATUS_ID]  AS lega_legal_status_id,
+    fls.[DIM_PERSON_ID]         AS lega_person_id,
+    fls.[START_DTTM]            AS lega_legal_status_start,
+    fls.[END_DTTM]              AS lega_legal_status_end
 INTO 
     #ssd_legal_status
 FROM 
     Child_Social.FACT_LEGAL_STATUS AS fls;
 
 
-
+-- Create constraint(s)
+ALTER TABLE #ssd_legal_status ADD CONSTRAINT FK_legal_status_person
+FOREIGN KEY (lega_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 /* 
 =============================================================================
-Object Name: #ssd_contact
+Object Name: ssd_contact
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_CONTACTS
 =============================================================================
 */
 -- Check if exists, & drop 
@@ -379,11 +376,11 @@ IF OBJECT_ID('tempdb..#ssd_contact') IS NOT NULL DROP TABLE #ssd_contact;
 
 -- Create temporary structure
 SELECT
-	fc.[FACT_CONTACT_ID] as contact_id,
-	fc.[EXTERNAL_ID] as la_person_id,
-    fc.[START_DTTM] as contact_start,
-    fc.[SOURCE_CONTACT] as contact_source,
-	fc.[CONTACT_OUTCOMES] as contact_outcome
+	fc.[FACT_CONTACT_ID]    as cont_contact_id,
+	fc.[EXTERNAL_ID]        as cont_person_id,
+    fc.[START_DTTM]         as cont_contact_start,
+    fc.[SOURCE_CONTACT]     as cont_contact_source,
+	fc.[CONTACT_OUTCOMES]   as cont_contact_outcome
 
 INTO #ssd_contact
 
@@ -393,8 +390,10 @@ FROM
 ORDER BY
     fc.[EXTERNAL_ID] ASC;
 
--- Add primary key
-ALTER TABLE #ssd_contact ADD CONSTRAINT PK_contact_id PRIMARY KEY (contact_id);
+
+-- Create constraint(s)
+ALTER TABLE #ssd_contact ADD CONSTRAINT PK_contact_id 
+PRIMARY KEY (cont_contact_id);
 
 
 
@@ -413,7 +412,7 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists & drop
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL 
     DROP TABLE #ssd_early_help_episodes;
 
@@ -594,9 +593,13 @@ SELECT
 FROM 
     FACT_SINGLE_ASSESSMENT AS fa;
 
--- foreign key constraint(s)
-ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person FOREIGN KEY (cina_person_id) REFERENCES ssd_person(pers_person_id);
-ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_social_worker FOREIGN KEY (cina_assessment_worker_id) REFERENCES ssd_social_worker(socw_social_worker_id);
+
+-- Create constraint(s)
+ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
+FOREIGN KEY (cina_person_id) REFERENCES ssd_person(pers_person_id);
+
+ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_social_worker 
+FOREIGN KEY (cina_assessment_worker_id) REFERENCES ssd_social_worker(socw_social_worker_id);
 
 
 
@@ -674,9 +677,10 @@ FROM FACT_CARE_PLANS AS fp
 JOIN FACT_CARE_PLAN_DETAILS AS cpd              -- Needs checking!!
 ON fp.FACT_REFERRAL_ID = cpd.FACT_REFERRAL_ID;  -- Needs checking!!
 
--- Add foreign key constraint
+
+-- Create constraint(s)
 ALTER TABLE #ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
-    FOREIGN KEY (cinp_person_id) REFERENCES #ssd_person(pers_person_id);
+FOREIGN KEY (cinp_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 /* 
@@ -696,7 +700,7 @@ Dependencies:
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
 
--- Create structure for temporary table
+-- Create structure
 CREATE TABLE #ssd_cin_visits
 (
     cinv_cin_casenote_id NVARCHAR(36) PRIMARY KEY, -- This needs checking!!
@@ -708,7 +712,7 @@ CREATE TABLE #ssd_cin_visits
     cinv_cin_visit_bedroom NCHAR(1)
 );
 
--- Insert data into temporary table
+-- Insert data
 INSERT INTO #ssd_cin_visits
 (
     cinv_cin_casenote_id, -- This needs checking!!
@@ -730,6 +734,7 @@ SELECT
 FROM 
     Child_Social.FACT_CASENOTES cn;
 
+-- Create constraint(s)
 ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_cin_plans 
 FOREIGN KEY (cinv_cin_plan_id) REFERENCES ssd_cin_plans(cinp_cin_plan_id);
 
@@ -780,7 +785,7 @@ LEFT JOIN Child_Social.FACT_CP_CONFERENCE as cpc ON s47.[FACT_S47_ID] = cpc.[FAC
 WHERE 
     s47.[FACT_S47_ID] IS NOT NULL
 
--- Set s47_enquiry_id as the primary key
+-- Create constraint(s)
 ALTER TABLE #ssd_s47_enquiry_icpc ADD PRIMARY KEY (s47_enquiry_id);
 
 
@@ -875,9 +880,9 @@ INTO
 FROM 
     Child_Social.FACT_CASENOTES AS cn;
 
--- Set the primary key
-ALTER TABLE #ssd_cp_visits
-ADD CONSTRAINT PK_cppv_casenote_id PRIMARY KEY (cppv_casenote_id);
+-- Create constraint(s)
+ALTER TABLE #ssd_cp_visits ADD CONSTRAINT PK_cppv_casenote_id 
+PRIMARY KEY (cppv_casenote_id);
 
 -- WHERE DIM_LOOKUP_CASNT_TYPE_ID_DESC IN ( 'STVC','STVCPCOVID')
 
@@ -900,18 +905,18 @@ Dependencies:
 =============================================================================
 */
 
--- Check if table exists, & drop
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
 
 -- Create structure
 CREATE TABLE #ssd_cp_reviews
 (
-    cppr_cp_review_id NVARCHAR(36) PRIMARY KEY,
-    cppr_cp_plan_id NVARCHAR(36),
-    cppr_cp_review_due DATETIME NULL,
-    cppr_cp_review_date DATETIME NULL,
-    cppr_cp_review_outcome NCHAR(1),
-    cppr_cp_review_quorate NCHAR(1) DEFAULT '0', -- using '0' as placeholder
+    cppr_cp_review_id           NVARCHAR(36) PRIMARY KEY,
+    cppr_cp_plan_id             NVARCHAR(36),
+    cppr_cp_review_due          DATETIME,
+    cppr_cp_review_date         DATETIME,
+    cppr_cp_review_outcome      NCHAR(1),
+    cppr_cp_review_quorate      NCHAR(1) DEFAULT '0', -- using '0' as placeholder
     cppr_cp_review_participation NCHAR(1) DEFAULT '0' -- using '0' as placeholder
 );
 
@@ -937,7 +942,7 @@ SELECT
 FROM 
     Child_Social.FACT_CP_REVIEW;
 
-
+-- Create constraint(s)
 ALTER TABLE #ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
 FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
 
@@ -1065,9 +1070,8 @@ INTO
 FROM 
     Child_Social.FACT_SUBSTANCE_MISUSE AS fsm;
 
--- Set the primary key on substance_misuse_id
-ALTER TABLE #ssd_cla_Substance_misuse
-ADD CONSTRAINT PK_substance_misuse_id_temp
+-- Create constraint(s)
+ALTER TABLE #ssd_cla_Substance_misuse ADD CONSTRAINT PK_substance_misuse_id_temp
 PRIMARY KEY (substance_misuse_id);
 
 
