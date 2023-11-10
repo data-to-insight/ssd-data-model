@@ -47,7 +47,7 @@ nodes:
   - name: ehcp_active_ehcp_last_review_date
     description: Last Review
     item_ref: EHCP003A
-    type: nvarchar
+    type: datetime
     categories:
     - send
     - ehcp_request

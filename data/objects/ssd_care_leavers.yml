@@ -2,7 +2,7 @@
 nodes:
 - name: ssd_care_leavers
   fields:
-  - name: clea_care_leaver_id
+  - name: clea_table_id
     description: Care Leaver Table ID
     item_ref: CLEA001A
     type: nvarchar
@@ -15,14 +15,13 @@ nodes:
     categories:
     - care_leavers
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:clea_care_leaver_id
-    - mosaic:clea_care_leaver_id
+    - liquid_logic:clea_table_id
+    - mosaic:clea_table_id
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
@@ -54,7 +53,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: clea_care_leaver_eligibility
     description: Eligibility Status/ Category
     item_ref: CLEA003A

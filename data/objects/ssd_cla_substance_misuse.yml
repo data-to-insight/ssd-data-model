@@ -20,7 +20,7 @@ nodes:
     description: Person Unique ID
     item_ref: CLAS002A
     type: nvarchar
-    foreign_key: ssd_cla_episodes.la_person_id
+    foreign_key: ssd_cla_episodes.clae_person_id
     validators:
     - required:
         enabled: true
@@ -43,7 +43,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_substance_misuse
     - mosaic:ssd_cla_substance_misuse
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: clas_substance_misuse_date
     description: Date of substance misuse
     item_ref: CLAS003A
@@ -59,7 +59,7 @@ nodes:
   - name: clas_substance_misused
     description: Substance misused
     item_ref: CLAS004A
-    type: nvarchar
+    type: nchar
     categories:
     - looked_after
     - health
@@ -79,7 +79,7 @@ nodes:
   - name: clas_intervention_received
     description: Child received intervention for substance misuse problem
     item_ref: CLAS005A
-    type: nvarchar
+    type: nchar
     categories:
     - looked_after
     - health

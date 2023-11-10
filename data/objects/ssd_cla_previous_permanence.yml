@@ -2,7 +2,7 @@
 nodes:
 - name: ssd_cla_previous_permanence
   fields:
-  - name: lapp_previous_permanence_id
+  - name: lapp_table_id
     description: Previous Permanence ID
     item_ref: LAPP001A
     type: nvarchar
@@ -16,8 +16,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:lapp_previous_permanence_id
-    - mosaic:lapp_previous_permanence_id
+    - liquid_logic:lapp_table_id
+    - mosaic:lapp_table_id
     cms_table:
     - liquid_logic:ssd_cla_previous_permanence
     - mosaic:ssd_cla_previous_permanence
@@ -50,11 +50,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_previous_permanence
     - mosaic:ssd_cla_previous_permanence
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: lapp_previous_permanence_order_date
     description: Date of Previous Permanence Order
     item_ref: LAPP003A
-    type: nvarchar
+    type: datetime
     categories:
     - looked_after
     - permanence

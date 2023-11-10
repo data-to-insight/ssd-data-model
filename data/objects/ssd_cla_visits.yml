@@ -61,7 +61,7 @@ nodes:
   - name: clav_cla_visit_seen
     description: Child Seen
     item_ref: CLAV004A
-    type: nvarchar
+    type: nchar
     categories:
     - looked_after
     - visit
@@ -87,7 +87,7 @@ nodes:
   - name: clav_cla_visit_seen_alone
     description: Child Seen Alone
     item_ref: CLAV005A
-    type: nvarchar
+    type: nchar
     categories:
     - looked_after
     - visit

@@ -167,13 +167,12 @@ IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
 -- Create temporary structure
 SELECT
-    pa.[DIM_PERSON_ADDRESS_ID] as addr_address_id,
+    pa.[DIM_PERSON_ADDRESS_ID] as addr_table_id,
     pa.[EXTERNAL_ID] as addr_person_id, -- Assuming EXTERNAL_ID corresponds to la_person_id
     pa.[ADDSS_TYPE_CODE] as addr_address_type,
     pa.[START_DTTM] as addr_address_start,
     pa.[END_DTTM] as addr_address_end,
-    pa.[POSTCODE] as addr_address_postcode,
-        
+    REPLACE(pa.[POSTCODE], ' ', '') as addr_address_postcode, -- whitespace removed to enforce data quality
     -- Create JSON string for the address
     (
         SELECT 
@@ -224,7 +223,7 @@ Dependencies:
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 
 SELECT 
-    fd.FACT_DISABILITY_ID       AS disa_id, 
+    fd.FACT_DISABILITY_ID       AS disa_table_id, 
     fd.EXTERNAL_ID              AS disa_person_id, 
     fd.DIM_LOOKUP_DISAB_CODE    AS disa_disability_code
 INTO #ssd_disability
@@ -371,29 +370,50 @@ Dependencies:
 - FACT_CONTACTS
 =============================================================================
 */
--- Check if exists, & drop 
+--- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_contact') IS NOT NULL DROP TABLE #ssd_contact;
 
 -- Create temporary structure
-SELECT
-	fc.[FACT_CONTACT_ID]    as cont_contact_id,
-	fc.[EXTERNAL_ID]        as cont_person_id,
-    fc.[START_DTTM]         as cont_contact_start,
-    fc.[SOURCE_CONTACT]     as cont_contact_source,
-	fc.[CONTACT_OUTCOMES]   as cont_contact_outcome
+CREATE TABLE #ssd_contact (
+    cont_contact_id         NVARCHAR(48) PRIMARY KEY,
+    cont_person_id          NVARCHAR(48),
+    cont_contact_start      DATETIME,
+    cont_contact_source     NVARCHAR(255), 
+    cont_contact_outcome_json NVARCHAR(MAX)
+);
 
-INTO #ssd_contact
-
+-- Insert data
+INSERT INTO #ssd_contact (
+    cont_contact_id, 
+    cont_person_id, 
+    cont_contact_start,
+    cont_contact_source,
+    cont_contact_outcome_json
+)
+SELECT 
+    fc.[FACT_CONTACT_ID],
+    fc.[EXTERNAL_ID],
+    fc.[CONTACT_DTTM],
+    fc.[DIM_LOOKUP_CONT_SORC_ID],
+    (
+        SELECT 
+            NULLIF(fc.OUTCOME_NEW_REFERRAL_FLAG, '')           AS "OUTCOME_NEW_REFERRAL_FLAG",
+            NULLIF(fc.OUTCOME_EXISTING_REFERRAL_FLAG, '')      AS "OUTCOME_EXISTING_REFERRAL_FLAG",
+            NULLIF(fc.OUTCOME_CP_ENQUIRY_FLAG, '')             AS "OUTCOME_CP_ENQUIRY_FLAG",
+            NULLIF(fc.OUTCOME_NFA_FLAG, '')                    AS "OUTCOME_NFA_FLAG",
+            NULLIF(fc.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '')    AS "OUTCOME_NON_AGENCY_ADOPTION_FLAG",
+            NULLIF(fc.OUTCOME_PRIVATE_FOSTERING_FLAG, '')      AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
+            NULLIF(fc.OUTCOME_ADVICE_FLAG, '')                 AS "OUTCOME_ADVICE_FLAG",
+            NULLIF(fc.OUTCOME_MISSING_FLAG, '')                AS "OUTCOME_MISSING_FLAG",
+            NULLIF(fc.OUTCOME_OLA_CP_FLAG, '')                 AS "OUTCOME_OLA_CP_FLAG",
+            NULLIF(fc.OTHER_OUTCOMES_EXIST_FLAG, '')           AS "OTHER_OUTCOMES_EXIST_FLAG"
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS cont_contact_outcome_json
 FROM 
-    Child_Social.FACT_CONTACTS AS fc
-
-ORDER BY
-    fc.[EXTERNAL_ID] ASC;
+    Child_Social.FACT_CONTACTS AS fc;
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_contact ADD CONSTRAINT PK_contact_id 
-PRIMARY KEY (cont_contact_id);
+
 
 
 
@@ -458,12 +478,12 @@ CREATE TABLE #ssd_cin_episodes
     cine_referral_date DATETIME,
     cine_cin_primary_need INT,
     cine_referral_source NVARCHAR(255),
-    cine_referral_outcome_json NVARCHAR(255),
+    cine_referral_outcome_json NVARCHAR(500),
     cine_referral_nfa NCHAR(1),
     cine_close_reason NVARCHAR(255),
     cine_close_date DATETIME,
     cine_referral_team NVARCHAR(255),
-    cine_referral_worker_id NVARCHAR(36)
+    cine_referral_worker_id NVARCHAR(48)
 );
 
 -- Insert data
@@ -536,16 +556,16 @@ IF OBJECT_ID('tempdb..#ssd_cin_assessments') IS NOT NULL DROP TABLE #ssd_cin_ass
 -- Create temporary structure
 CREATE TABLE #ssd_cin_assessments
 (
-    cina_assessment_id NVARCHAR(36) PRIMARY KEY,
-    cina_person_id NVARCHAR(36),
-    cina_referral_id NVARCHAR(36),
+    cina_assessment_id NVARCHAR(48) PRIMARY KEY,
+    cina_person_id NVARCHAR(48),
+    cina_referral_id NVARCHAR(48),
     cina_assessment_start_date DATETIME,
     cina_assessment_child_seen NCHAR(1),
     cina_assessment_auth_date DATETIME, -- This needs checking !! 
-    cina_assessment_outcome_json NVARCHAR(255),
+    cina_assessment_outcome_json NVARCHAR(500),
     cina_assessment_outcome_nfa NCHAR(1),
     cina_assessment_team NVARCHAR(255),
-    cina_assessment_worker_id NVARCHAR(36)
+    cina_assessment_worker_id NVARCHAR(48)
 );
 
 -- Insert data
@@ -649,12 +669,12 @@ IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plan
 
 -- Create structure
 CREATE TABLE #ssd_cin_plans (
-    cinp_referral_id NVARCHAR(36), 
-    cinp_person_id NVARCHAR(36), 
+    cinp_referral_id NVARCHAR(48), 
+    cinp_person_id NVARCHAR(48), 
     cinp_cin_plan_start DATETIME,
     cinp_cin_plan_end DATETIME,
     cinp_cin_plan_team NVARCHAR(255),
-    cinp_cin_plan_worker_id NVARCHAR(36)
+    cinp_cin_plan_worker_id NVARCHAR(48)
 );
 
 -- Insert data
@@ -703,9 +723,9 @@ IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
 -- Create structure
 CREATE TABLE #ssd_cin_visits
 (
-    cinv_cin_casenote_id NVARCHAR(36) PRIMARY KEY, -- This needs checking!!
-    cinv_cin_visit_id NVARCHAR(36), -- This needs checking!!
-    cinv_cin_plan_id NVARCHAR(36),
+    cinv_cin_casenote_id NVARCHAR(48) PRIMARY KEY, -- This needs checking!!
+    cinv_cin_visit_id NVARCHAR(48), -- This needs checking!!
+    cinv_cin_plan_id NVARCHAR(48),
     cinv_cin_visit_date DATETIME,
     cinv_cin_visit_seen NCHAR(1),
     cinv_cin_visit_seen_alone NCHAR(1),
@@ -836,15 +856,21 @@ FROM
 Object Name: #ssd_category_of_abuse
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 06/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- FACT_CONTEXT_CASE_WORKER
 =============================================================================
 */
+
+-- Check if exists, & drop
+IF OBJECT_ID('tempdb..#ssd_category_of_abuse') IS NOT NULL DROP TABLE #ssd_category_of_abuse;
+
+
+
 
 
 
@@ -1361,24 +1387,41 @@ Dependencies:
 Object Name: #ssd_social_worker
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 06/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- FACT_CONTEXT_CASE_WORKER
 =============================================================================
 */
--- FACT_CASEWORKER.FACT_CASEWORKER_ID as sw_id
--- sw_epi_start_date
--- sw_epi_end_date
--- sw_change_reason
--- FACT_CASEWORKER.AGENCY as sw_agency
--- FACT_CASEWORKER.DIM_LOOKUP_PROF_ROLE_ID_CODE as sw_role
--- sw_caseload
--- sw_qualification
 
+-- Check if exists, & drop
+IF OBJECT_ID('tempdb..#ssd_social_worker') IS NOT NULL DROP TABLE #ssd_social_worker;
+
+-- Create structure ,
+CREATE TABLE #ssd_social_worker(
+    socw_social_worker_id           NVARCHAR(48),
+    socw_worker_episode_start_date  DATETIME,
+    socw_worker_episode_end_date    DATETIME,
+    socw_worker_change_reason       NVARCHAR(48)
+);
+
+-- Insert data,
+INSERT INTO #ssd_social_worker (
+    socw_social_worker_id, 
+    socw_worker_episode_start_date, 
+    socw_worker_episode_end_date, 
+    socw_worker_change_reason
+)
+SELECT 
+    [DIM_WORKER_ID]             AS socw_social_worker_id,
+    [START_DTTM]                AS socw_worker_episode_start_date,
+    [END_DTTM]                  AS socw_worker_episode_end_date,
+    [DIM_LOOKUP_CWREASON_CODE]  AS socw_worker_change_reason
+FROM 
+    Child_Social.FACT_CONTEXT_CASE_WORKER;
 
 /* 
 =============================================================================
@@ -1458,10 +1501,13 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 
 
 /* cleanup */
+/* Drop commands only appear in the TEMP/TEST table defs script */
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
+
+
 
 
 /* ********************************************************************************************************** */

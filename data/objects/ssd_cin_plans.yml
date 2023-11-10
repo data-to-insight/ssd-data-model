@@ -16,7 +16,6 @@ nodes:
     - child_in_need
     - cin_plan
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -31,6 +30,8 @@ nodes:
   - name: cinp_referral_id
     description: Referral ID
     item_ref: CINP007A
+    type: nvarchar
+    foreign_key: ssd_cin_episodes.cine_referral_id
     cms_field:
     - liquid_logic:cinp_referral_id
     - mosaic:cinp_referral_id
@@ -65,7 +66,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_plans
     - mosaic:ssd_cin_plans
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: cinp_cin_plan_start
     description: CIN Plan Start Date
     item_ref: CINP003A

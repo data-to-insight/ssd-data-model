@@ -2,7 +2,7 @@
 nodes:
 - name: ssd_sdq_scores
   fields:
-  - name: csdq_sdq_id
+  - name: csdq_table_id
     description: SDQ ID
     item_ref: CSDQ001A
     type: nvarchar
@@ -19,8 +19,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:csdq_sdq_id
-    - mosaic:csdq_sdq_id
+    - liquid_logic:csdq_table_id
+    - mosaic:csdq_table_id
     cms_table:
     - liquid_logic:ssd_sdq_scores
     - mosaic:ssd_sdq_scores
@@ -51,7 +51,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sdq_scores
     - mosaic:ssd_sdq_scores
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: csdq_sdq_completed_date
     description: SDQ Completed Date
     item_ref: CSDQ003A

@@ -16,7 +16,6 @@ nodes:
     - identity
     - send
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -41,7 +40,6 @@ nodes:
     - identity
     - send
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -60,7 +58,6 @@ nodes:
     - identity
     - send
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -75,12 +72,11 @@ nodes:
   - name: send_upn_unknown
     description: UPN and ULN unknown
     item_ref: SEND004A
-    type: nvarchar
+    type: nchar
     categories:
     - identity
     - send
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -124,4 +120,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_send
     - mosaic:ssd_send
-    guidance: See PER001A
+    guidance: See PERS001A

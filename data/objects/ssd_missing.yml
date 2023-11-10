@@ -2,8 +2,8 @@
 nodes:
 - name: ssd_missing
   fields:
-  - name: miss_missing_episode_id
-    description: Missing Episode ID
+  - name: miss_table_id
+    description: Missing Episode Table ID
     item_ref: MISS001A
     type: nvarchar
     primary_key: true
@@ -19,8 +19,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:miss_missing_episode_id
-    - mosaic:miss_missing_episode_id
+    - liquid_logic:miss_table_id
+    - mosaic:miss_table_id
     cms_table:
     - liquid_logic:ssd_missing
     - mosaic:ssd_missing
@@ -50,11 +50,11 @@ nodes:
       \ whilst still missing (for example they turn 18) then please enter an end date\
       \ for the missing/away from placement without authorisation which is equal to\
       \ the date the child ceased to be looked-after."
-  - name: miss_cla_episode_id
-    description: Episode ID
+  - name: miss_la_person_id
+    description: Person Unique ID
     item_ref: MISS002A
     type: nvarchar
-    foreign_key: ssd_cla_episodes.clae_cla_episode_id
+    foreign_key: ssd_person.pers_person_id
     categories:
     - looked_after
     - missing
@@ -62,12 +62,12 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:miss_cla_episode_id
-    - mosaic:miss_cla_episode_id
+    - liquid_logic:miss_la_person_id
+    - mosaic:miss_la_person_id
     cms_table:
     - liquid_logic:ssd_missing
     - mosaic:ssd_missing
-    guidance: See CLA001A
+    guidance: See PERS001A
   - name: miss_mis_epi_start
     description: Missing Episode Start
     item_ref: MISS003A
@@ -162,7 +162,7 @@ nodes:
   - name: miss_mis_epi_rhi_offered
     description: RHI Offered
     item_ref: MISS006A
-    type: nvarchar
+    type: nchar
     categories:
     - looked_after
     - missing
@@ -183,7 +183,7 @@ nodes:
   - name: miss_mis_epi_rhi_accepted
     description: RHI Accepted
     item_ref: MISS007A
-    type: nvarchar
+    type: nchar
     categories:
     - looked_after
     - missing

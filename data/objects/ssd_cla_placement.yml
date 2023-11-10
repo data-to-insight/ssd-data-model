@@ -206,6 +206,11 @@ nodes:
       \ and their contact team telephone number is 03000 130020.\nWhere placements\
       \ are of a type or in a setting not inspected by Ofsted, such as placed with\
       \ parents, then no URN is expected."
+  - name: clap_cla_placement_distance
+    description: null
+    item_ref: CLAP011A
+    type: float
+    guidance: null
   - name: clap_cla_placement_la
     description: LA of Placement
     item_ref: CLAP006A

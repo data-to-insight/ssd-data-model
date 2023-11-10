@@ -15,7 +15,6 @@ nodes:
     categories:
     - contact
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -53,7 +52,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_contacts
     - mosaic:ssd_contacts
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: cont_contact_date
     description: Date of Contact
     item_ref: CONT003A

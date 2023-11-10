@@ -16,7 +16,6 @@ nodes:
     - identity
     - looked_after
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -56,7 +55,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_legal_status
     - mosaic:ssd_legal_status
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: lega_legal_status
     description: Legal Status
     item_ref: LEGA003A

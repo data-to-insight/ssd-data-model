@@ -19,7 +19,7 @@ nodes:
     description: Person Unique ID
     item_ref: CLAH002A
     type: nvarchar
-    foreign_key: ssd_cla_episodes.la_person_id
+    foreign_key: ssd_cla_episodes.clae_person_id
     validators:
     - required:
         enabled: true
@@ -41,7 +41,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_health
     - mosaic:ssd_cla_health
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: clah_health_check_type
     description: Health surveillance checks/ Health Assessment/ Dental Check
     item_ref: CLAH003A

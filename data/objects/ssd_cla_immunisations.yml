@@ -20,7 +20,7 @@ nodes:
     description: Person Unique ID
     item_ref: CLAI002A
     type: nvarchar
-    foreign_key: ssd_cla_episodes.la_person_id
+    foreign_key: ssd_cla_episodes.clae_person_id
     validators:
     - required:
         enabled: true
@@ -43,7 +43,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_immunisations
     - mosaic:ssd_cla_immunisations
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: clai_immunisations_status_date
     description: Date marked up to date
     item_ref: CLAI003A
@@ -59,16 +59,13 @@ nodes:
   - name: clai_immunisations_status
     description: Immunisations up to Date
     item_ref: CLAI004A
-    type: nvarchar
+    type: nchar
     categories:
     - looked_after
     - health
     - immunisations
     returns:
     - SSDA903
-    cms:
-    - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:clai_immunisations_status
     - mosaic:clai_immunisations_status

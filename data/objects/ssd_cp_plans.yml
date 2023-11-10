@@ -16,7 +16,6 @@ nodes:
     - child_protection
     - cp_plan
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -38,6 +37,9 @@ nodes:
   - name: cppl_referral_id
     description: Referral ID
     item_ref: CPPL007A
+    categories:
+    - child_protection
+    - cp_plan
     cms_field:
     - liquid_logic:cppl_referral_id
     - mosaic:cppl_referral_id
@@ -48,6 +50,10 @@ nodes:
   - name: cppl_initial_cp_conference_id
     description: Initial CP Conference ID
     item_ref: CPPL008A
+    foreign_key: ssd_initial_cp_conference.icpc_icpc_id
+    categories:
+    - child_protection
+    - cp_plan
     cms_field:
     - liquid_logic:cppl_initial_cp_conference_id
     - mosaic:cppl_initial_cp_conference_id
@@ -82,7 +88,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_plans
     - mosaic:ssd_cp_plans
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: cppl_cp_plan_start_date
     description: CP Plan Start Date
     item_ref: CPPL003A

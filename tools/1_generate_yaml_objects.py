@@ -17,8 +17,8 @@ paths = get_paths()
 # Data Structure spec
 data_spec_csv = paths['data_specification']
 change_log_file = paths['change_log']
-output_directory = paths['yml_data']
-
+output_directory_yaml = paths['yml_data']
+output_directory_erd = paths['erd_objects_publish']
 
 
 # Full list of field names
@@ -116,6 +116,7 @@ def process_csv_file(csv_file, change_log_file, output_directory):
     for row in data:
 
         object_name = row['object_name']
+        print(object_name)
         field = {}
 
         for name in field_names:
@@ -293,8 +294,30 @@ def delete_yml_objects(output_directory):
             
 
 
-delete_yml_objects(output_directory) # remove existing to prevent obsolete being left
-process_csv_file(data_spec_csv, change_log_file, output_directory) # create all new yml objects
+def delete_png_images(output_directory):
+    """
+    Delete all *.png files from a directory.
+    Clean-up everything before re-creating to avoid removed/depreciated items being left behind during re-creation.
+
+    :param output_directory: str, path to the directory to clean
+    """
+
+    # Get list of all .png files in the directory
+    files = glob.glob(os.path.join(output_directory, "*.png"))
+
+    # Iterate over the list of filepaths & remove each file.
+    for file in files:
+        try:
+            os.remove(file)
+        except OSError as e:
+            print("Error: %s : %s" % (file, e.strerror))
+
+
+
+delete_png_images(output_directory_erd)     # remove existing to prevent obsolete being left
+delete_yml_objects(output_directory_yaml)    # remove existing to prevent obsolete being left
+
+process_csv_file(data_spec_csv, change_log_file, output_directory_yaml) # create all new yml objects
 
 
 
