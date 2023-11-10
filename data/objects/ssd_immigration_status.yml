@@ -2,6 +2,27 @@
 nodes:
 - name: ssd_immigration_status
   fields:
+  - name: disa_table_id
+    description: Disability table row ID
+    item_ref: DISA003A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - identity
+    - immigration
+    - uasc
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:disa_table_id
+    - mosaic:disa_table_id
+    cms_table:
+    - liquid_logic:ssd_immigration_status
+    - mosaic:ssd_immigration_status
+    guidance: null
   - name: immi_person_id
     description: Person Unique ID
     item_ref: IMMI001A
@@ -30,7 +51,28 @@ nodes:
     cms_table:
     - liquid_logic:ssd_immigration_status
     - mosaic:ssd_immigration_status
-    guidance: See PER001A
+    guidance: See PERS001A
+  - name: immi_Immigration_status_id
+    description: Immigration Status ID
+    item_ref: IMMI005A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - identity
+    - immigration
+    - uasc
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:immi_Immigration_status_id
+    - mosaic:immi_Immigration_status_id
+    cms_table:
+    - liquid_logic:ssd_immigration_status
+    - mosaic:ssd_immigration_status
+    guidance: null
   - name: immi_immigration_status
     description: Immigration Status
     item_ref: IMMI002A

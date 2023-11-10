@@ -55,7 +55,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_mother
     - mosaic:ssd_mother
-    guidance: See PER001A
+    guidance: See PERS001A
     metadata:
       release: In review|pending
       change_id: SSD-543

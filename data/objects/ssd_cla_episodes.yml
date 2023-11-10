@@ -15,7 +15,6 @@ nodes:
     categories:
     - looked_after
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -53,7 +52,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_episodes
     - mosaic:ssd_cla_episodes
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: clae_cla_episode_start
     description: Date Episode Commenced
     item_ref: CLAE003A

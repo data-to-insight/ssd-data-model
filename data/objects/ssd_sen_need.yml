@@ -2,7 +2,7 @@
 nodes:
 - name: ssd_sen_need
   fields:
-  - name: senn_sen_need_table_id
+  - name: senn_table_id
     description: SEN Need Table ID
     item_ref: SENN001A
     type: nvarchar
@@ -20,8 +20,8 @@ nodes:
     cms:
     - liquid_logic
     cms_field:
-    - liquid_logic:senn_sen_need_table_id
-    - mosaic:senn_sen_need_table_id
+    - liquid_logic:senn_table_id
+    - mosaic:senn_table_id
     cms_table:
     - liquid_logic:ssd_sen_need
     - mosaic:ssd_sen_need

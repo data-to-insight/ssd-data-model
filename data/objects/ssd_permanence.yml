@@ -2,7 +2,7 @@
 nodes:
 - name: ssd_permanence
   fields:
-  - name: perm_permanence_id
+  - name: perm_table_id
     description: permanence_table_id
     item_ref: PERM001A
     type: nvarchar
@@ -18,8 +18,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:perm_permanence_id
-    - mosaic:perm_permanence_id
+    - liquid_logic:perm_table_id
+    - mosaic:perm_table_id
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
@@ -49,7 +49,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: perm_adm_decision_date
     description: Date of ADM Decision
     item_ref: PERM003A
@@ -150,7 +150,7 @@ nodes:
   - name: perm_placed_for_adoption_date
     description: Date Placed for Adoption
     item_ref: PERM007A
-    type: nvarchar
+    type: datetime
     categories:
     - looked_after
     - permanence
@@ -278,7 +278,7 @@ nodes:
   - name: perm_part_of_sibling_group
     description: Is the child a part of a sibling group?
     item_ref: PERM012A
-    type: nvarchar
+    type: nchar
     categories:
     - looked_after
     - permanence
@@ -299,7 +299,7 @@ nodes:
     description: Number of children placed, or planned to be placed, for adoption
       together as sibling group INCLUDING this child
     item_ref: PERM013A
-    type: nvarchar
+    type: int
     categories:
     - looked_after
     - permanence
@@ -459,7 +459,7 @@ nodes:
   - name: perm_guardian_age
     description: Age of Special Guardian
     item_ref: PERM020A
-    type: nvarchar
+    type: int
     categories:
     - looked_after
     - permanence

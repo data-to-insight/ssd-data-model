@@ -2,7 +2,7 @@
 nodes:
 - name: ssd_cla_care_plan
   fields:
-  - name: lacp_cla_care_plan_id
+  - name: lacp_table_id
     description: Care Plan Table ID
     item_ref: LACP001A
     type: nvarchar
@@ -14,8 +14,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:lacp_cla_care_plan_id
-    - mosaic:lacp_cla_care_plan_id
+    - liquid_logic:lacp_table_id
+    - mosaic:lacp_table_id
     cms_table:
     - liquid_logic:ssd_cla_care_plan
     - mosaic:ssd_cla_care_plan

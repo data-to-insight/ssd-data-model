@@ -4,8 +4,14 @@ nodes:
   fields:
   - name: cppv_visit_id
     description: null
-    item_ref: null
+    item_ref: CPPV007A
     primary_key: true
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - Local
     guidance: null
   - name: cppv_cp_plan_id
     description: CP Plan ID
@@ -73,7 +79,7 @@ nodes:
   - name: cppv_cp_visit_seen
     description: Child Seen
     item_ref: CPPV004A
-    type: nvarchar
+    type: nchar
     categories:
     - child_protection
     - cp_plan
@@ -100,7 +106,7 @@ nodes:
   - name: cppv_cp_visit_seen_alone
     description: Child Seen Alone
     item_ref: CPPV005A
-    type: nvarchar
+    type: nchar
     categories:
     - child_protection
     - cp_plan
@@ -120,7 +126,7 @@ nodes:
   - name: cppv_cp_visit_bedroom
     description: Child Bedroom Seen
     item_ref: CPPV006A
-    type: nvarchar
+    type: nchar
     categories:
     - child_protection
     - cp_plan

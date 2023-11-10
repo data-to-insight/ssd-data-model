@@ -2,12 +2,36 @@
 nodes:
 - name: ssd_address
   fields:
+  - name: addr_table_id
+    description: Address table row ID
+    item_ref: ADDR007A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:addr_table_id
+    - mosaic:addr_table_id
+    cms_table:
+    - liquid_logic:ssd_address
+    - mosaic:ssd_address
+    guidance: null
   - name: addr_address_json
     description: 'Address (combined dictionary/json type containing: room, floor,
       flat, building, house num, street, locality, town, county, uprn, easting, northing)'
     item_ref: ADDR001A
     type: nvarchar
-    primary_key: true
     validators:
     - required:
         enabled: true
@@ -61,7 +85,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: addr_address_type
     description: Address Type
     item_ref: ADDR003A

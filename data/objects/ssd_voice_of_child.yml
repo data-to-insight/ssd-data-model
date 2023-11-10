@@ -27,7 +27,15 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: See PER001A
+    guidance: See PERS001A
+  - name: voch_table_id
+    description: Voice of the Child table row ID
+    item_ref: VOCH007A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - voice_of_child
+    guidance: null
   - name: voch_explained_worries
     description: Has someone explained to you why people are worried for your family
       in a way that you can understand?

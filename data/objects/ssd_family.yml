@@ -27,8 +27,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_family
     - mosaic:ssd_family
-    guidance: For linking to adoptive family or Family-level interventions e.g. Early
-      Help
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]For linking to adoptive family
+      or Family-level interventions e.g. Early Help'
   - name: fami_person_id
     description: Person Unique ID
     item_ref: FAMI002A
@@ -52,4 +54,6 @@ nodes:
     cms_table:
     - liquid_logic:ssd_family
     - mosaic:ssd_family
-    guidance: See PER001A
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]See PERS001A'

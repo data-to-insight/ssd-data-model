@@ -16,7 +16,6 @@ nodes:
     - s47_enquiry
     - child_protection
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -32,6 +31,10 @@ nodes:
   - name: s47e_referral_id
     description: Referral ID
     item_ref: S47E010A
+    foreign_key: ssd_cin_episodes.cine_referral_id
+    categories:
+    - s47_enquiry
+    - child_protection
     cms_field:
     - liquid_logic:s47e_referral_id
     - mosaic:s47e_referral_id
@@ -66,7 +69,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: s47e_s47_start_date
     description: S47 Start Date
     item_ref: S47E004A

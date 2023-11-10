@@ -2,6 +2,17 @@
 nodes:
 - name: ssd_pre_proceedings
   fields:
+  - name: prep_table_id
+    description: Pre-proceedings table row ID
+    item_ref: PREP024A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - pre_proceedings
+    cms_field:
+    - liquid_logic:prep_table_id
+    - mosaic:prep_table_id
+    guidance: null
   - name: prep_person_id
     description: Person Unique ID
     item_ref: PREP001A
@@ -29,7 +40,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: prep_plo_family_id
     description: PLO Family ID
     item_ref: PREP002A

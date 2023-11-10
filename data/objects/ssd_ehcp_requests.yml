@@ -16,7 +16,6 @@ nodes:
     - send
     - ehcp_request
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -50,7 +49,6 @@ nodes:
     - send
     - ehcp_request
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic

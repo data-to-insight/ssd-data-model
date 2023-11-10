@@ -2,11 +2,24 @@
 nodes:
 - name: ssd_assessment_factors
   fields:
+  - name: cinf_table_id
+    description: null
+    item_ref: CINF003A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - child_in_need
+    - assessment
+    returns:
+    - Local
+    cms_field:
+    - liquid_logic:cinf_table_id
+    - mosaic:cinf_table_id
+    guidance: null
   - name: cinf_assessment_id
     description: Assessment ID
     item_ref: CINF001A
     type: nvarchar
-    primary_key: true
     foreign_key: ssd_cin_assessments.cina_assessment_id
     validators:
     - required:

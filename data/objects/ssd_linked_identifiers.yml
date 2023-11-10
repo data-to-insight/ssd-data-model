@@ -2,7 +2,7 @@
 nodes:
 - name: ssd_linked_identifiers
   fields:
-  - name: link_link_id
+  - name: link_table_id
     description: Link table row ID
     item_ref: LINK001A
     type: nvarchar
@@ -12,8 +12,8 @@ nodes:
     returns:
     - 1aDraft
     cms_field:
-    - liquid_logic:link_link_id
-    - mosaic:link_link_id
+    - liquid_logic:link_table_id
+    - mosaic:link_table_id
     cms_table:
     - liquid_logic:ssd_linked_identifiers
     - mosaic:ssd_linked_identifiers

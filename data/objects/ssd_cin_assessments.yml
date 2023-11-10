@@ -16,7 +16,6 @@ nodes:
     - child_in_need
     - assessment
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -90,11 +89,12 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: cina_referral_id
     description: Referral ID
     item_ref: CINA010A
     type: nvarchar
+    foreign_key: ssd_cin_episodes.cine_referral_id
     cms_field:
     - liquid_logic:cina_referral_id
     - mosaic:cina_referral_id

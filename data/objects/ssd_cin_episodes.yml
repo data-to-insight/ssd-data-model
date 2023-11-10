@@ -16,7 +16,6 @@ nodes:
     - child_in_need
     - referral
     returns:
-    - ''
     - RIIA
     cms:
     - liquid_logic
@@ -66,7 +65,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
-    guidance: See PER001A
+    guidance: See PERS001A
   - name: cine_referral_date
     description: CIN Referral Date
     item_ref: CINE003A
