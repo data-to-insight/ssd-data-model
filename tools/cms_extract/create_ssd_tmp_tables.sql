@@ -23,6 +23,15 @@ DECLARE @ssd_timeframe_years INT = 6;
         @ssd_sub1_range_years INT = 1;
 
 
+/* Temp notes: inner join alternative
+WHERE
+    EXISTS (
+        SELECT 1
+        FROM ssd_person AS sp
+        WHERE sp.pers_person_id = fsm.DIM_PERSON_ID
+    );
+*/
+
 
 
 /* Template header
@@ -1076,31 +1085,35 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists, & drop 
-IF OBJECT_ID('tempdb..#ssd_cla_Substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_Substance_misuse;
+IF OBJECT_ID('tempdb..#ssd_cla_substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_substance_misuse;
 
+-- Create structure 
+CREATE TABLE #ssd_cla_substance_misuse (
+    clas_substance_misuse_id       NVARCHAR(48) PRIMARY KEY,
+    clas_person_id                 NVARCHAR(48),
+    clas_substance_misuse_date     DATETIME,
+    clas_substance_misused         NCHAR(100),
+    clas_intervention_received     NCHAR(1)
+);
 
--- Create temporary structure
+-- Insert data 
+INSERT INTO #ssd_cla_substance_misuse (
+    clas_substance_misuse_id,
+    clas_person_id,
+    clas_substance_misuse_date,
+    clas_substance_misused,
+    clas_intervention_received
+)
 SELECT 
-    fsm.[FACT_SUBSTANCE_MISUSE_ID] as substance_misuse_id,
-    fsm.[EXTERNAL_ID] as la_person_id,
-    fsm.[CREATE_DTTM] as create_date,
-    fsm.[DIM_PERSON_ID] as person_dim_id,
-    fsm.[START_DTTM] as start_date,
-    fsm.[END_DTTM] as end_date,
-    fsm.[DIM_LOOKUP_SUBSTANCE_TYPE_ID] as substance_type_id,
-    fsm.[DIM_LOOKUP_SUBSTANCE_TYPE_CODE] as substance_type_code
-
-INTO 
-    #ssd_cla_Substance_misuse
-
+    fsm.FACT_SUBSTANCE_MISUSE_ID               AS clas_substance_misuse_id,
+    fsm.DIM_PERSON_ID                          AS clas_person_id,
+    fsm.START_DTTM                             AS clas_substance_misuse_date,
+    fsm.DIM_LOOKUP_SUBSTANCE_TYPE_CODE         AS clas_substance_misused,
+    fsm.ACCEPT_FLAG                            AS clas_intervention_received
 FROM 
     Child_Social.FACT_SUBSTANCE_MISUSE AS fsm;
-
--- Create constraint(s)
-ALTER TABLE #ssd_cla_Substance_misuse ADD CONSTRAINT PK_substance_misuse_id_temp
-PRIMARY KEY (substance_misuse_id);
-
-
+INNER JOIN 
+    ssd_person AS p ON fsm.DIM_PERSON_ID = p.pers_person_id;
 
 
 
@@ -1244,6 +1257,44 @@ Dependencies:
 - 
 =============================================================================
 */
+
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#ssd_missing') IS NOT NULL DROP TABLE #ssd_missing;
+
+-- Create structure
+CREATE TABLE #ssd_missing (
+    miss_table_id           NVARCHAR(48),
+    miss_la_person_id       NVARCHAR(48),
+    miss_mis_epi_start      DATETIME,
+    miss_mis_epi_type       NVARCHAR(100),
+    miss_mis_epi_end        DATETIME,
+    miss_mis_epi_rhi_offered NCHAR(1),
+    miss_mis_epi_rhi_accepted NCHAR(1)
+);
+
+-- Insert data
+INSERT INTO #ssd_missing (
+    miss_table_id,
+    miss_la_person_id,
+    miss_mis_epi_start,
+    miss_mis_epi_type,
+    miss_mis_epi_end,
+    miss_mis_epi_rhi_offered,
+    miss_mis_epi_rhi_accepted
+)
+SELECT 
+    fmp.FACT_MISSING_PERSON_ID      AS miss_table_id,
+    fmp.DIM_PERSON_ID               AS miss_la_person_id,
+    fmp.START_DTTM                  AS miss_mis_epi_start,
+    fmp.MISSING_STATUS              AS miss_mis_epi_type,
+    fmp.END_DTTM                    AS miss_mis_epi_end,
+    fmp.RETURN_INTERVIEW_OFFERED    AS miss_mis_epi_rhi_offered,
+    fmp.RETURN_INTERVIEW_ACCEPTED	AS miss_mis_epi_rhi_accepted
+FROM 
+    Child_Social.FACT_MISSING_PERSON AS fmp;
+
+INNER JOIN 
+    ssd_person AS p ON fmp.DIM_PERSON_ID = p.pers_person_id;
 
 
 
