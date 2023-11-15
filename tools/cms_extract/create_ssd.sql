@@ -541,7 +541,7 @@ INSERT INTO ssd_contact (
 )
 SELECT 
     fc.FACT_CONTACT_ID,
-    fc.EXTERNAL_ID, -- Should this be DIM_PERSON_ID
+    fc.DIM_PERSON_ID, -- Should this be DIM_PERSON_ID
     fc.CONTACT_DTTM,
     fc.DIM_LOOKUP_CONT_SORC_ID,
     (
@@ -560,8 +560,7 @@ SELECT
     ) AS cont_contact_outcome_json
 FROM 
     Child_Social.FACT_CONTACTS AS fc
-ORDER BY
-    fc.EXTERNAL_ID ASC;
+
 
 -- Create constraint(s)
 ALTER TABLE ssd_contact ADD CONSTRAINT FK_contact_person 
