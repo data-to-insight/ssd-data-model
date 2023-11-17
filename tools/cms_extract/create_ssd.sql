@@ -410,10 +410,10 @@ ORDER BY
 Object Name: ssd_mother
 Description: 
 Author: D2I
-Last Modified Date: 03/11/23
+Last Modified Date: 15/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 0.2
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -421,36 +421,35 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF OBJECT_ID('ssd_mother') IS NOT NULL DROP TABLE ssd_mother;
+IF OBJECT_ID('ssd_mother', 'U') IS NOT NULL DROP TABLE ssd_mother;
 
 -- Create structure
-CREATE TABLE ssd_mother
-(
-    moth_person_id          NVARCHAR(48) PRIMARY KEY,
-    moth_childs_person_id   NVARCHAR(48),
-    moth_childs_dob         DATETIME
+CREATE TABLE ssd_mother (
+    moth_person_id              NVARCHAR(48) PRIMARY KEY,
+    moth_childs_person_id       NVARCHAR(48),
+    moth_childs_dob             DATETIME
 );
 
 -- Insert data
-INSERT INTO ssd_mother
-(
-    moth_person_id,
-    moth_childs_person_id,
+INSERT INTO ssd_mother (
+    moth_person_id, 
+    moth_childs_person_id, 
     moth_childs_dob
 )
 SELECT 
-    pr.DIM_PERSON_ID            AS moth_person_id,
-    pr.DIM_RELATED_PERSON_ID    AS moth_childs_person_id,
-    pr.DIM_RELATED_PERSON_DOB   AS moth_childs_dob
+    fpr.DIM_PERSON_ID                   AS moth_person_id,
+    fpr.DIM_RELATED_PERSON_ID           AS moth_childs_person_id,
+    fpr.DIM_RELATED_PERSON_DOB          AS moth_childs_dob
 FROM 
-    FACT_PERSON_RELATION AS pr;
+    Child_Social.FACT_PERSON_RELATION AS fpr;
 
 
--- Create constraint(s)
-ALTER TABLE ssd_mother ADD CONSTRAINT FK_ssd_mother_to_ssd_person
+-- Add constraint(s)
+ALTER TABLE ssd_mother ADD CONSTRAINT FK_moth_to_person 
+FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
+
+ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
 FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
-
-
 
 
 
@@ -1223,15 +1222,68 @@ Dependencies:
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_involvements
+- FACT_CARE_EPISODES
 =============================================================================
 */
+
+-- Create structure
+CREATE TABLE ssd_cla_episodes (
+    clae_cla_episode_id             NVARCHAR(48) PRIMARY KEY,
+    clae_person_id                  NVARCHAR(48),
+    clae_cla_episode_start          DATETIME,
+    clae_cla_episode_start_reason   NVARCHAR(100),
+    clae_cla_primary_need           NVARCHAR(100),
+    clae_cla_episode_ceased         DATETIME,
+    clae_cla_episode_cease_reason   NVARCHAR(100),
+    clae_cla_team                   NVARCHAR(48),
+    clae_cla_worker_id              NVARCHAR(48)
+);
+
+-- Insert data 
+INSERT INTO ssd_cla_episodes (
+    clae_cla_episode_id, 
+    clae_person_id, 
+    clae_cla_episode_start,
+    clae_cla_episode_start_reason,
+    clae_cla_primary_need,
+    clae_cla_episode_ceased,
+    clae_cla_episode_cease_reason,
+    clae_cla_team,                      -- via .FACT_CLA->.FACT_REFERRAL
+    clae_cla_worker_id                  -- via .FACT_CLA->.FACT_REFERRAL
+)
+SELECT 
+    fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
+    fce.DIM_PERSON_ID                       AS clae_person_id,
+    fce.CARE_START_DATE                     AS clae_cla_episode_start,
+    fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
+    fce.CIN_903_CODE                        AS clae_cla_primary_need,
+    fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
+    fce.CARE_REASON_END_DESC                AS clae_cla_episode_cease_reason,
+    fr.DIM_DEPARTMENT_ID                    AS clae_cla_team,
+    fr.DIM_WORKER_ID                        AS clae_cla_worker_id
+FROM 
+    Child_Social.FACT_CARE_EPISODES AS fce
+JOIN 
+    Child_Social.FACT_CLA AS fc ON fce.FACT_CARE_EPISODES_ID = fc.fact_cla_id
+JOIN 
+    Child_Social.FACT_REFERRALS AS fr ON fc.fact_referral_id = fr.fact_referral_id;
+
+
+
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON ssd_cla_episodes (clae_cla_worker_id);
+
+-- Add constraint(s) 
+ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_professional 
+FOREIGN KEY (clae_cla_worker_id) REFERENCES ssd_involvements (invo_professional_id);
+
 
 
 
@@ -1240,13 +1292,14 @@ Dependencies:
 Object Name: ssd_cla_convictions
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_OFFENCE
 =============================================================================
 */
 
@@ -1285,13 +1338,14 @@ FOREIGN KEY (clac_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 Object Name: ssd_cla_health
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_HEALTH_CHECK 
 =============================================================================
 */
 
@@ -1342,7 +1396,7 @@ Dependencies:
 =============================================================================
 */
 
-
+-- awaiting detail on spec sheet
 
 
 /* 
@@ -1815,48 +1869,152 @@ Dependencies:
 */
 
 
+
+
 /* 
 =============================================================================
-Object Name: ssd_social_worker
+Object Name: ssd_professionals
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- FACT_CONTEXT_CASE_WORKER
+-
 =============================================================================
 */
 
--- Check if exists, & drop
-IF OBJECT_ID('ssd_social_worker') IS NOT NULL DROP TABLE ssd_social_worker;
+-- Check if exists & drop
+IF OBJECT_ID('ssd_professionals', 'U') IS NOT NULL DROP TABLE ssd_professionals;
 
 -- Create structure
-CREATE TABLE ssd_social_worker(
-    socw_social_worker_id           NVARCHAR(48),
-    socw_worker_episode_start_date  DATETIME,
-    socw_worker_episode_end_date    DATETIME,
-    socw_worker_change_reason       NVARCHAR(48)
+CREATE TABLE ssd_professionals (
+    prof_table_id                         NVARCHAR(48) PRIMARY KEY,
+    prof_professional_id                  NVARCHAR(48),
+    prof_social_worker_registration_no    NVARCHAR(48),
+    prof_agency_worker_flag               NCHAR(1),
+    prof_professional_job_title           NVARCHAR(500),
+    prof_professional_caseload            INT,
+    prof_professional_department          NVARCHAR(100),
+    prof_full_time_equivalency            FLOAT
+);
+
+-- Determine last September 30th date
+DECLARE @LastSept30th DATE
+SET @LastSept30th = CASE 
+                        WHEN CONVERT(DATE, GETDATE()) > DATEFROMPARTS(YEAR(GETDATE()), 9, 30) 
+                        THEN DATEFROMPARTS(YEAR(GETDATE()), 9, 30)
+                        ELSE DATEFROMPARTS(YEAR(GETDATE()) - 1, 9, 30)
+                    END
+
+-- Insert data
+INSERT INTO ssd_professionals (
+    prof_table_id, 
+    prof_professional_id, 
+    prof_social_worker_registration_no,
+    prof_agency_worker_flag,
+    prof_professional_job_title,
+    prof_professional_caseload,
+    prof_professional_department,
+    prof_full_time_equivalency
+)
+SELECT 
+    dw.DIM_WORKER_ID                  AS prof_table_id,
+    dw.STAFF_ID                       AS prof_professional_id,
+    dw.WORKER_ID_CODE                 AS prof_social_worker_registration_no,
+    'PLACEHOLDER_FLAG'                AS prof_agency_worker_flag,           -- Replace with actual data [TESTING]
+    dw.JOB_TITLE                      AS prof_professional_job_title,
+    ISNULL(rc.OpenCases, 0)           AS prof_professional_caseload,        -- 0 when no open cases on given date.
+    dw.DEPARTMENT_NAME                AS prof_professional_department,
+    dw.FULL_TIME_EQUIVALENCY          AS prof_full_time_equivalency
+FROM 
+    Child_Social.DIM_WORKER AS dw
+LEFT JOIN (
+    SELECT 
+        -- open cases count
+        DIM_WORKER_ID,
+        COUNT(*) AS OpenCases
+    FROM 
+        Child_Social.FACT_REFERRALS
+    WHERE 
+        REFRL_START_DTTM <= @LastSept30th AND 
+        (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM > @LastSept30th)
+    GROUP BY 
+        DIM_WORKER_ID
+) AS rc ON dw.DIM_WORKER_ID = rc.DIM_WORKER_ID;
+
+
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_prof_professional_id ON ssd_professionals (prof_professional_id);
+
+
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_involvements
+Description: 
+Author: D2I
+Last Modified Date: 16/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- ssd_professionals
+- FACT_INVOLVEMENTS
+=============================================================================
+*/
+
+-- Check if exists & drop
+IF OBJECT_ID('ssd_involvements', 'U') IS NOT NULL DROP TABLE ssd_involvements;
+
+-- Create structure
+CREATE TABLE ssd_involvements (
+    invo_involvements_id             NVARCHAR(48) PRIMARY KEY,
+    invo_professional_id             NVARCHAR(48),
+    invo_professional_role_id        NVARCHAR(48),
+    invo_professional_team           NVARCHAR(48),
+    invo_involvement_start_date      DATETIME,
+    invo_involvement_end_date        DATETIME,
+    invo_worker_change_reason        NVARCHAR(48)
 );
 
 -- Insert data
-INSERT INTO ssd_social_worker (
-    socw_social_worker_id, 
-    socw_worker_episode_start_date, 
-    socw_worker_episode_end_date, 
-    socw_worker_change_reason
+INSERT INTO ssd_involvements (
+    invo_involvements_id, 
+    invo_professional_id, 
+    invo_professional_role_id,
+    invo_professional_team,
+    invo_involvement_start_date,
+    invo_involvement_end_date,
+    invo_worker_change_reason
 )
 SELECT 
-    fcw.DIM_WORKER_ID               AS socw_social_worker_id,
-    fcw.START_DTTM                  AS socw_worker_episode_start_date,
-    fcw.END_DTTM                    AS socw_worker_episode_end_date,
-    fcw.DIM_LOOKUP_CWREASON_CODE    AS socw_worker_change_reason
+    fi.FACT_INVOLVEMENTS_ID                       AS invo_involvements_id,
+    fi.DIM_WORKER_ID                              AS invo_professional_id,
+    fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
+    fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC        AS invo_professional_team,
+    fi.START_DTTM                                 AS invo_involvement_start_date,
+    fi.END_DTTM                                   AS invo_involvement_end_date,
+    fi.DIM_LOOKUP_CWREASON_CODE                   AS invo_worker_change_reason
 FROM 
-    Child_Social.FACT_CONTEXT_CASE_WORKER as fcw;
+    Child_Social.FACT_INVOLVEMENTS AS fi;
 
--- Add INNER JOIN with episodes(?), cp(?) so that only relevant workers extracted
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_invo_professional_id ON ssd_involvements (invo_professional_id);
+
+-- Add constraint(s)
+ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
+FOREIGN KEY (invo_professional_id) REFERENCES ssd_professionals (prof_professional_id);
+
+ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional_role 
+FOREIGN KEY (invo_professional_role_id) REFERENCES ssd_professionals (prof_social_worker_registration_no);
+
+
     
 
 /* 
@@ -1867,7 +2025,7 @@ Author: D2I
 Last Modified Date: 02/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -1879,7 +2037,7 @@ IF OBJECT_ID('ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE ssd_pre_proceedi
 
 -- Create structure
 CREATE TABLE ssd_pre_proceedings (
-    prep_id                             NVARCHAR(48) PRIMARY KEY,
+    prep_table_id                       NVARCHAR(48) PRIMARY KEY,
     prep_person_id                      NVARCHAR(48),
     prep_plo_family_id                  NVARCHAR(48),
     prep_pre_pro_decision_date          DATETIME,
@@ -1906,7 +2064,8 @@ CREATE TABLE ssd_pre_proceedings (
 );
 
 -- Insert placeholder data
-INSERT INTO ssd_pre_proceedings (
+INSERT INTO ssd_pre_proceedings (#
+    prep_table_id,
     prep_person_id,
     prep_plo_family_id,
     prep_pre_pro_decision_date,
@@ -1933,12 +2092,12 @@ INSERT INTO ssd_pre_proceedings (
 )
 VALUES
     (
-    'DIM_PERSON1.PERSON_ID', 'PLO_FAMILY1', '2023-01-01', '2023-01-02', 'Outcome1', 
+    '10001', 'DIM_PERSON1.PERSON_ID', 'PLO_FAMILY1', '2023-01-01', '2023-01-02', 'Outcome1', 
     '2023-01-03', 3, 'Approved', 2, 1, '2023-01-04', '2023-01-05', 2, 'Y', 
     'NA', 'COURT_REF_1', 1, 'N', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
     ),
     (
-    'DIM_PERSON2.PERSON_ID', 'PLO_FAMILY2', '2023-02-01', '2023-02-02', 'Outcome2',
+    '10002', 'DIM_PERSON2.PERSON_ID', 'PLO_FAMILY2', '2023-02-01', '2023-02-02', 'Outcome2',
     '2023-02-03', 4, 'Denied', 1, 2, '2023-02-04', '2023-02-05', 3, 'N',
     'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'N', 'Initial Plan 2', 'N', 'Final Plan 2'
     );
@@ -1951,6 +2110,9 @@ VALUES
 ALTER TABLE ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
 FOREIGN KEY (prep_person_id) REFERENCES ssd_person(pers_person_id);
 
+-- Create nonclustered index
+CREATE NONCLUSTERED INDEX idx_prep_person_id ON ssd_pre_proceedings (prep_person_id);
+CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date ON ssd_pre_proceedings (prep_pre_pro_decision_date);
 
 
 /* 
@@ -1958,10 +2120,10 @@ FOREIGN KEY (prep_person_id) REFERENCES ssd_person(pers_person_id);
 Object Name: ssd_voice_of_child
 Description: Currently only with placeholder structure as source data not yet conformed
 Author: D2I
-Last Modified Date: 02/11/23
+Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -1972,7 +2134,8 @@ IF OBJECT_ID('ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE ssd_voice_of_chil
 
 -- Create structure
 CREATE TABLE ssd_voice_of_child (
-    voch_person_id              NVARCHAR(48) PRIMARY KEY, 
+    voch_table_id               NVARCHAR(48) PRIMARY KEY, 
+    voch_person_id              NVARCHAR(48), 
     voch_explained_worries      NCHAR(1), 
     voch_story_help_understand  NCHAR(1), 
     voch_agree_worker           NCHAR(1), 
@@ -1982,6 +2145,7 @@ CREATE TABLE ssd_voice_of_child (
 
 -- Insert placeholder data
 INSERT INTO ssd_voice_of_child (
+    voch_table_id,
     voch_person_id,
     voch_explained_worries,
     voch_story_help_understand,
@@ -1990,8 +2154,8 @@ INSERT INTO ssd_voice_of_child (
     voch_tablet_help_explain
 )
 VALUES
-    ('ID001', 'Y', 'Y', 'Y', 'N', 'N'),
-    ('ID002', 'Y', 'Y', 'Y', 'N', 'N');
+    ('ID001','P001', 'Y', 'Y', 'Y', 'N', 'N'),
+    ('ID002','P002', 'Y', 'Y', 'Y', 'N', 'N');
 
 -- To switch on once source data defined.
 -- INNER JOIN 
