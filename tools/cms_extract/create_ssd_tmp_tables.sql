@@ -19,7 +19,7 @@ SET @StartTime = GETDATE(); -- Record the start time
 
 
 -- ssd time-frame (YRS)
-DECLARE @ssd_timeframe_years INT = 6;
+DECLARE @ssd_timeframe_years INT = 6,
         @ssd_sub1_range_years INT = 1;
 
 
@@ -55,14 +55,14 @@ Dependencies:
 
 /*
 =============================================================================
-Object Name: #ssd_person
+Object Name: ssd_person
 Description: person/child details
 Author: D2I
-Last Modified Date: 2023-10-20
+Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: Need to confirm FACT_903_DATA as source of mother related data
+Remarks: 
 Dependencies: 
 - Child_Social.DIM_PERSON
 - Child_Social.FACT_REFERRALS
@@ -71,143 +71,216 @@ Dependencies:
 - Child_Social.FACT_903_DATA
 =============================================================================
 */
--- Check if exists, & drop
+
+-- Check exists & drop temporary table
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
--- Create temporary structure
+
+-- Create structure for temporary table
+CREATE TABLE #ssd_person (
+    pers_person_id          NVARCHAR(48) PRIMARY KEY, 
+    pers_sex                NVARCHAR(48),
+    pers_ethnicity          NVARCHAR(38),
+    pers_dob                DATETIME,
+    pers_common_child_id    NVARCHAR(10),
+    pers_send               NVARCHAR(1),
+    pers_expected_dob       DATETIME,       -- Date or NULL
+    pers_death_date         DATETIME,
+    pers_nationality        NVARCHAR(48)
+);
+
+-- Insert data into temporary table
+INSERT INTO #ssd_person (
+    pers_person_id,
+    pers_sex,
+    pers_ethnicity,
+    pers_dob,
+    pers_common_child_id,
+    pers_send,
+    pers_expected_dob,
+    pers_death_date,
+    pers_nationality
+)
 SELECT 
-    p.[EXTERNAL_ID]                         AS pers_la_person_id,
-    p.[DIM_LOOKUP_VARIATION_OF_SEX_CODE]    AS pers_sex,
-    p.[GENDER_MAIN_CODE]                    AS pers_gender, -- might need placholder, not available in every LA
-    p.[ETHNICITY_MAIN_CODE]                 AS pers_ethnicity,
-    p.[BIRTH_DTTM]                          AS pers_dob,
-    NULL                                    AS pers_common_child_id, -- Set to NULL
-    p.[UPN]                                 AS pers_upn,
-
-    (SELECT f.NO_UPN_CODE
-    FROM Child_Social.FACT_903_DATA f
-    WHERE f.EXTERNAL_ID = p.EXTERNAL_ID
-    AND f.NO_UPN_CODE IS NOT NULL
-    ORDER BY f.NO_UPN_CODE DESC)            AS pers_upn_unknown,
-
-    p.[EHM_SEN_FLAG]                        AS pers_send,
-    p.[DOB_ESTIMATED]                       AS pers_expected_dob,
-    p.[DEATH_DTTM]                          AS pers_death_date,
-    p.[NATNL_CODE]                          AS pers_nationality
-
-INTO 
-    #ssd_person
+    p.DIM_PERSON_ID,
+    p.DIM_LOOKUP_VARIATION_OF_SEX_CODE,
+    p.ETHNICITY_MAIN_CODE,
+    p.BIRTH_DTTM,
+    NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
+    p.EHM_SEN_FLAG,
+        CASE WHEN ISDATE(p.DOB_ESTIMATED) = 1               
+        THEN CONVERT(DATETIME, p.DOB_ESTIMATED, 121)        -- Coerce to either valid Date
+        ELSE NULL END,                                      --  or NULL
+    p.DEATH_DTTM,
+    p.NATNL_CODE
 FROM 
     Child_Social.DIM_PERSON AS p
-WHERE 
-    p.[EXTERNAL_ID] IS NOT NULL
-AND (
+
+WHERE                                                       -- Filter invalid rows
+    p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
+    AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
+
+AND (                                                       -- Filter irrelevant rows by timeframe
     EXISTS (
-        SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
-        WHERE fr.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
-        AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
-    )
-    OR EXISTS (
+        -- contact in last x@yrs
         SELECT 1 FROM Child_Social.FACT_CONTACTS fc
-        WHERE fc.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
+        WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
         AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
     OR EXISTS (
-        SELECT 1 FROM Child_Social.FACT_EHCP_EPISODE fe 
-        WHERE fe.[EXTERNAL_ID] = p.[EXTERNAL_ID] 
-        AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+        -- new or ongoing/active/unclosed referral in last x@yrs
+        SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
+        WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
+        AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
-)
-ORDER BY
-    p.[EXTERNAL_ID] ASC;
+
+);
+
+-- Create index(es)
+CREATE INDEX IDX_ssd_person_la_person_id ON #ssd_person(pers_la_person_id);
+
+
+
+/*SSD Person filter (notes): - Implemented*/
+-- [done]contact in last 6yrs - Child_Social.FACT_CONTACTS.CONTACT_DTTM - -- might have only contact, not yet RFRL 
+-- [changes needed] has open referral - FACT_REFERRALS.REFRL_START_DTTM or doesn't closed date or a closed date within last 6yrs
+-- [picked up within the referral] active plan or has been active in 6yrs 
+
+/*SSD Person filter (notes): - OnN HOLD/Not included in SSD Ver/Iteration 1*/
+--1
+-- ehcp request in last 6yrs - Child_Social.FACT_EHCP_EPISODE.REQUEST_DTTM ; [perhaps not in iteration|version 1]
+    -- OR EXISTS (
+    --     -- ehcp request in last x@yrs
+    --     SELECT 1 FROM Child_Social.FACT_EHCP_EPISODE fe 
+    --     WHERE fe.DIM_PERSON_ID = p.DIM_PERSON_ID
+    --     AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+    -- )
+    
+--2 (Uncertainty re access EH)
+-- Has eh_referral open in last 6yrs - 
+
+--3 (Uncertainty re access SEN)
+-- Has a record in send - Child_Social.FACT_SEN, DIM_LOOKUP_SEN, DIM_LOOKUP_SEN_TYPE ? 
 
 
 
 /* 
 =============================================================================
-Object Name: #ssd_family
+Object Name: ssd_family
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Version: 1.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 Dependencies: 
 - Singleview.DIM_TF_FAMILY
 - ssd.ssd_person
 =============================================================================
 */
--- Check if exists, & drop
+-- Check exists & drop temporary table
 IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
--- Create temporary structure
-SELECT
-    DIM_TF_FAMILY_ID AS fami_id, -- to confirm/needs checking
-    UNIQUE_FAMILY_NUMBER AS fami_family_id,
-    EXTERNAL_ID AS fami_la_person_id
-INTO #ssd_family
-FROM Singleview.DIM_TF_FAMILY AS dtf
-
-WHERE EXISTS ( -- only need address data for matching/relevant records
-    SELECT 1 
-    FROM #ssd_person AS p
-    WHERE dtf.EXTERNAL_ID = p.pers_la_person_id
+-- Create structure for temporary table
+CREATE TABLE #ssd_family (
+    fami_table_id           NVARCHAR(48) PRIMARY KEY, 
+    fami_family_id          NVARCHAR(48),
+    fami_person_id          NVARCHAR(48)
 );
+
+-- Insert data into temporary table
+INSERT INTO #ssd_family (
+    fami_table_id, 
+    fami_family_id, 
+    fami_person_id
+)
+SELECT 
+    EXTERNAL_ID                         AS fami_table_id,
+    fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID  AS fami_family_id,
+    DIM_PERSON_ID                       AS fami_person_id
+FROM Child_Social.FACT_CONTACTS AS fc
+WHERE EXISTS ( -- only need address data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = fc.DIM_PERSON_ID
+);
+
+
 
 
 
 /* 
 =============================================================================
-Object Name: #ssd_address
+Object Name: ssd_address
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 Dependencies: 
+- ssd_person
 - DIM_PERSON_ADDRESS
 =============================================================================
 */
--- Check if exists, & drop 
-IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
+-- Check if exists & drop
+IF OBJECT_ID('#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
--- Create temporary structure
-SELECT
-    pa.[DIM_PERSON_ADDRESS_ID] as addr_table_id,
-    pa.[EXTERNAL_ID] as addr_person_id, -- Assuming EXTERNAL_ID corresponds to la_person_id
-    pa.[ADDSS_TYPE_CODE] as addr_address_type,
-    pa.[START_DTTM] as addr_address_start,
-    pa.[END_DTTM] as addr_address_end,
-    REPLACE(pa.[POSTCODE], ' ', '') as addr_address_postcode, -- whitespace removed to enforce data quality
+
+-- Create structure
+CREATE TABLE #ssd_address (
+    addr_table_id           NVARCHAR(48) PRIMARY KEY,
+    addr_person_id          NVARCHAR(48), 
+    addr_address_type       NVARCHAR(48),
+    addr_address_start      DATETIME,
+    addr_address_end        DATETIME,
+    addr_address_postcode   NVARCHAR(8),
+    addr_address_json       NVARCHAR(500)
+);
+
+
+-- Create index(es)
+CREATE INDEX IDX_address_person ON #ssd_address(addr_person_id);
+CREATE INDEX IDX_address_start ON #ssd_address(addr_address_start);
+CREATE INDEX IDX_address_end ON #ssd_address(addr_address_end);
+
+
+-- insert data
+INSERT INTO #ssd_address (
+    addr_table_id, 
+    addr_person_id, 
+    addr_address_type, 
+    addr_address_start, 
+    addr_address_end, 
+    addr_address_postcode, 
+    addr_address_json
+)
+SELECT 
+    pa.DIM_PERSON_ADDRESS_ID,
+    pa.DIM_PERSON_ID, -- Assuming EXTERNAL_ID corresponds to pers_person_id
+    pa.ADDSS_TYPE_CODE,
+    pa.START_DTTM,
+    pa.END_DTTM,
+    REPLACE(pa.POSTCODE, ' ', ''), -- whitespace removed to enforce data quality
     -- Create JSON string for the address
     (
         SELECT 
-            NULLIF(pa.[ROOM_NO], '') AS ROOM, 
-            NULLIF(pa.[FLOOR_NO], '') AS FLOOR, 
-            NULLIF(pa.[FLAT_NO], '') AS FLAT, 
-            NULLIF(pa.[BUILDING], '') AS BUILDING, 
-            NULLIF(pa.[HOUSE_NO], '') AS HOUSE, 
-            NULLIF(pa.[STREET], '') AS STREET, 
-            NULLIF(pa.[TOWN], '') AS TOWN,
-            NULLIF(pa.[UPRN], '') AS UPRN,
-            NULLIF(pa.[EASTING], '') AS EASTING,
-            NULLIF(pa.[NORTHING], '') AS NORTHING
+            NULLIF(pa.ROOM_NO, '')    AS ROOM, 
+            NULLIF(pa.FLOOR_NO, '')   AS FLOOR, 
+            NULLIF(pa.FLAT_NO, '')    AS FLAT, 
+            NULLIF(pa.BUILDING, '')   AS BUILDING, 
+            NULLIF(pa.HOUSE_NO, '')   AS HOUSE, 
+            NULLIF(pa.STREET, '')     AS STREET, 
+            NULLIF(pa.TOWN, '')       AS TOWN,
+            NULLIF(pa.UPRN, '')       AS UPRN,
+            NULLIF(pa.EASTING, '')    AS EASTING,
+            NULLIF(pa.NORTHING, '')   AS NORTHING
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) as addr_address_json
-
-INTO #ssd_address
+    )
 FROM 
     Child_Social.DIM_PERSON_ADDRESS AS pa
-ORDER BY
-    pa.[EXTERNAL_ID] ASC;
-
-
--- Create constraint(s)
-ALTER TABLE #ssd_address ADD CONSTRAINT PK_address_id 
-PRIMARY KEY (addr_address_id);
 
 
 

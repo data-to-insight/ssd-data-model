@@ -1,6 +1,6 @@
 
 /* DEV Notes:
-- Although returns expect dd/mm/YYYY formating on dates. Extract maintains DATETIME not DATE, nor formatted nvarchar string to avoid conversion issues.
+- Although returns expect dd/mm/YYYY formating on dates. Extract maintains DATETIME not DATE, 
 - Full review needed of max/exagerated/default new field type sizes e.g. family_id NVARCHAR(48)  (keys cannot use MAX)
 */
 
@@ -29,17 +29,19 @@ SET @StartTime = GETDATE(); -- Record the start time
 
 -- ssd time-frame (YRS)
 DECLARE @ssd_timeframe_years INT = 6;
-        @ssd_sub1_range_years INT = 1;
+DECLARE @ssd_sub1_range_years INT = 1;
+
+DECLARE @LastSept30th DATE; -- Most recent past September 30th date towards case load calc
 
 /*
 =============================================================================
 Object Name: ssd_person
 Description: person/child details
 Author: D2I
-Last Modified Date: 2023-10-20
+Last Modified Date: 20/10/23
 DB Compatibility: SQL Server 2014+|...
 
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 
 Remarks: Need to confirm FACT_903_DATA as source of mother related data
@@ -54,99 +56,91 @@ Dependencies:
 -- check exists & drop
 IF OBJECT_ID('ssd_person') IS NOT NULL DROP TABLE ssd_person;
 
+
 -- Create structure
 CREATE TABLE ssd_person (
-    pers_la_person_id NVARCHAR(48) PRIMARY KEY, 
-    pers_sex NVARCHAR(48),
-    pers_ethnicity NVARCHAR(38),
-    pers_dob DATETIME,
-    pers_common_child_id NVARCHAR(10),
-    pers_upn NVARCHAR(20),
-    pers_upn_unknown NVARCHAR(96),
-    pers_send NVARCHAR(1),
-    pers_expected_dob DATETIME,
-    pers_death_date DATETIME,
-    pers_nationality NVARCHAR(48)
+    pers_person_id          NVARCHAR(48) PRIMARY KEY, 
+    pers_sex                NVARCHAR(48),
+    pers_ethnicity          NVARCHAR(38),
+    pers_dob                DATETIME,
+    pers_common_child_id    NVARCHAR(10),
+    pers_send               NVARCHAR(1),
+    pers_expected_dob       DATETIME,       -- Date or NULL
+    pers_death_date         DATETIME,
+    pers_nationality        NVARCHAR(48)
 );
 
 -- Insert data 
 INSERT INTO ssd_person (
-    pers_la_person_id,
+    pers_person_id,
     pers_sex,
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,
-    pers_upn,
-    pers_upn_unknown,
     pers_send,
     pers_expected_dob,
     pers_death_date,
     pers_nationality
 )
 SELECT 
-    p.EXTERNAL_ID,
+    p.DIM_PERSON_ID,
     p.DIM_LOOKUP_VARIATION_OF_SEX_CODE,
     p.ETHNICITY_MAIN_CODE,
     p.BIRTH_DTTM,
-    NULL AS pers_common_child_id, -- Set to NULL during dev / set to NHS#?
-    p.UPN,
-
-    (SELECT TOP 1 f.NO_UPN_CODE              -- Subquery to fetch ANY/MOST RECENT? NO_UPN_CODE.
-    FROM Child_Social.FACT_903_DATA f        -- This *unlikely* to be the best source
-    WHERE f.EXTERNAL_ID = p.EXTERNAL_ID
-    AND f.NO_UPN_CODE IS NOT NULL
-    ORDER BY f.NO_UPN_CODE DESC) AS pers_upn_unknown,  -- desc order to ensure a non-null value first
-
+    NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
     p.EHM_SEN_FLAG,
-    p.DOB_ESTIMATED,
+        CASE WHEN ISDATE(p.DOB_ESTIMATED) = 1               
+        THEN CONVERT(DATETIME, p.DOB_ESTIMATED, 121)        -- Coerce to either valid Date
+        ELSE NULL END,                                      --  or NULL
     p.DEATH_DTTM,
     p.NATNL_CODE
-
 FROM 
     Child_Social.DIM_PERSON AS p
-WHERE 
-    p.EXTERNAL_ID IS NOT NULL
-AND (
+
+WHERE                                                       -- Filter invalid rows
+    p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
+    AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
+
+AND (                                                       -- Filter irrelevant rows by timeframe
     EXISTS (
-        -- has open referral
-        SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
-        WHERE fr.EXTERNAL_ID = p.EXTERNAL_ID 
-        AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
-    )
-    OR EXISTS (
         -- contact in last x@yrs
         SELECT 1 FROM Child_Social.FACT_CONTACTS fc
-        WHERE fc.EXTERNAL_ID = p.EXTERNAL_ID 
+        WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
         AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
     OR EXISTS (
-        -- ehcp request in last x@yrs
-        SELECT 1 FROM Child_Social.FACT_EHCP_EPISODE fe 
-        WHERE fe.EXTERNAL_ID = p.EXTERNAL_ID 
-        AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+        -- new or ongoing/active/unclosed referral in last x@yrs
+        SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
+        WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
+        AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
-    -- OR EXISTS (
-        -- active plan or has been active in x@yrs
-    --)
-    -- OR EXISTS (
-        -- eh_referral open in last x@yrs
-    --)
-    -- OR EXISTS (
-        -- record in send
-    --)
-)
-ORDER BY
-    p.EXTERNAL_ID ASC;
+);
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_person_la_person_id ON ssd_person(pers_la_person_id);
 
--- [done]has open referral - FACT_REFERRALS.REFRL_START_DTTM
--- [done]contact in last 6yrs - Child_Social.FACT_CONTACTS.CONTACT_DTTM
--- [done]ehcp request in last 6yrs - Child_Social.FACT_EHCP_EPISODE.REQUEST_DTTM ;
--- active plan or has been active in 6yrs
--- eh_referral open in last 6yrs - Child_Social.FACT_REFERRALS.REFRL_START_DTTM
--- record in send - where from ? Child_Social.FACT_SEN, DIM_LOOKUP_SEN, DIM_LOOKUP_SEN_TYPE
+
+
+/*SSD Person filter (notes): - Implemented*/
+-- [done]contact in last 6yrs - Child_Social.FACT_CONTACTS.CONTACT_DTTM - -- might have only contact, not yet RFRL 
+-- [changes needed] has open referral - FACT_REFERRALS.REFRL_START_DTTM or doesn't closed date or a closed date within last 6yrs
+-- [picked up within the referral] active plan or has been active in 6yrs 
+
+/*SSD Person filter (notes): - OnN HOLD/Not included in SSD Ver/Iteration 1*/
+--1
+-- ehcp request in last 6yrs - Child_Social.FACT_EHCP_EPISODE.REQUEST_DTTM ; [perhaps not in iteration|version 1]
+    -- OR EXISTS (
+    --     -- ehcp request in last x@yrs
+    --     SELECT 1 FROM Child_Social.FACT_EHCP_EPISODE fe 
+    --     WHERE fe.DIM_PERSON_ID = p.DIM_PERSON_ID
+    --     AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+    -- )
+    
+--2 (Uncertainty re access EH)
+-- Has eh_referral open in last 6yrs - 
+
+--3 (Uncertainty re access SEN)
+-- Has a record in send - Child_Social.FACT_SEN, DIM_LOOKUP_SEN, DIM_LOOKUP_SEN_TYPE ? 
 
 
 
@@ -157,9 +151,9 @@ CREATE INDEX IDX_ssd_person_la_person_id ON ssd_person(pers_la_person_id);
 Object Name: ssd_family
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 Dependencies: 
@@ -173,35 +167,36 @@ IF OBJECT_ID('ssd_family') IS NOT NULL DROP TABLE ssd_family;
 
 -- Create structure
 CREATE TABLE ssd_family (
-    fami_DIM_TF_FAMILY_ID   NVARCHAR(48) PRIMARY KEY, 
+    fami_table_id           NVARCHAR(48) PRIMARY KEY, 
     fami_family_id          NVARCHAR(48),
-    fami_la_person_id       NVARCHAR(48),
+    fami_person_id          NVARCHAR(48),
     
-    -- Define foreign key constraint
-    FOREIGN KEY (fami_la_person_id) REFERENCES person(pers_la_person_id)
 );
 
 -- Insert data 
 INSERT INTO ssd_family (
-    fami_DIM_TF_FAMILY_ID, 
+    fami_table_id, 
     fami_family_id, 
-    fami_la_person_id
+    fami_person_id
     )
 SELECT 
-    DIM_TF_FAMILY_ID,
-    UNIQUE_FAMILY_NUMBER    as fami_family_id,
-    EXTERNAL_ID             as fami_la_person_id
-FROM Singleview.DIM_TF_FAMILY
-WHERE EXISTS ( -- only need address data for matching/relevant records
+    EXTERNAL_ID                         AS fami_table_id,
+    fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID  AS fami_family_id,
+    DIM_PERSON_ID                       AS fami_person_id
+FROM Child_Social.FACT_CONTACTS AS fc
+
+WHERE EXISTS ( -- only need address data for ssd relevant records
     SELECT 1 
-    FROM Child_Social.ssd_person p
-    WHERE p.pers_la_person_id = f.EXTERNAL_ID
+    FROM ssd_person p
+    WHERE p.pers_person_id = fc.DIM_PERSON_ID
     );
 
 -- Create index(es)
-CREATE INDEX IDX_family_person ON ssd_family(fami_la_person_id);
+CREATE INDEX IDX_family_person_id ON ssd_family(fami_person_id);
 
-
+-- Create constraint(s)
+ALTER TABLE ssd_family ADD CONSTRAINT FK_family_person
+FOREIGN KEY (fami_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 /* 
@@ -209,12 +204,13 @@ CREATE INDEX IDX_family_person ON ssd_family(fami_la_person_id);
 Object Name: ssd_address
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 Dependencies: 
+- ssd_person
 - DIM_PERSON_ADDRESS
 =============================================================================
 */
@@ -234,18 +230,6 @@ CREATE TABLE ssd_address (
 );
 
 
-
--- Create constraint(s)
-ALTER TABLE ssd_address ADD CONSTRAINT FK_address_person
-FOREIGN KEY (addr_person_id) REFERENCES ssd_person(pers_person_id);
-
-
--- Create index(es)
-CREATE INDEX IDX_address_person ON ssd_address(addr_person_id);
-CREATE INDEX IDX_address_start ON ssd_address(addr_address_start);
-CREATE INDEX IDX_address_end ON ssd_address(addr_address_end);
-
-
 -- insert data
 INSERT INTO ssd_address (
     addr_table_id, 
@@ -258,7 +242,7 @@ INSERT INTO ssd_address (
 )
 SELECT 
     pa.DIM_PERSON_ADDRESS_ID,
-    pa.EXTERNAL_ID, -- Assuming EXTERNAL_ID corresponds to pers_person_id
+    pa.DIM_PERSON_ID, 
     pa.ADDSS_TYPE_CODE,
     pa.START_DTTM,
     pa.END_DTTM,
@@ -277,12 +261,21 @@ SELECT
             NULLIF(pa.EASTING, '')    AS EASTING,
             NULLIF(pa.NORTHING, '')   AS NORTHING
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )
+    ) 
 FROM 
     Child_Social.DIM_PERSON_ADDRESS AS pa
 
-ORDER BY
-    pa.EXTERNAL_ID ASC;
+
+
+-- Create constraint(s)
+ALTER TABLE ssd_address ADD CONSTRAINT FK_address_person
+FOREIGN KEY (addr_person_id) REFERENCES ssd_person(pers_person_id);
+
+
+-- Create index(es)
+CREATE INDEX IDX_address_person ON ssd_address(addr_person_id);
+CREATE INDEX IDX_address_start ON ssd_address(addr_address_start);
+CREATE INDEX IDX_address_end ON ssd_address(addr_address_end);
 
 
 
@@ -294,8 +287,8 @@ Description:
 Author: D2I
 Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -308,22 +301,15 @@ IF OBJECT_ID('ssd_disability') IS NOT NULL DROP TABLE ssd_disability;
 -- Create the structure
 CREATE TABLE ssd_disability
 (
-    disa_table_id                 NVARCHAR(48) PRIMARY KEY,
+    disa_table_id           NVARCHAR(48) PRIMARY KEY,
     disa_person_id          NVARCHAR(48) NOT NULL,
     disa_disability_code    NVARCHAR(48) NOT NULL
 );
 
--- Create constraint(s)
-ALTER TABLE ssd_disability ADD CONSTRAINT FK_disability_person 
-FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
-
--- Create index(es)
-CREATE INDEX IDX_disability_person_id ON ssd_disability(disa_person_id);
-
 
 -- Insert data
 INSERT INTO ssd_disability (
-    disa_table_id,  -- Naming and inclusion to check/confirm 
+    disa_table_id,  
     disa_person_id, 
     disa_disability_code
 )
@@ -334,8 +320,12 @@ SELECT
 FROM 
     Child_Social.FACT_DISABILITY AS fd;
 
+-- Create constraint(s)
+ALTER TABLE ssd_disability ADD CONSTRAINT FK_disability_person 
+FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
 
-
+-- Create index(es)
+CREATE INDEX IDX_disability_person_id ON ssd_disability(disa_person_id);
 
 
 
@@ -362,26 +352,12 @@ IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_st
 
 -- Create structure
 CREATE TABLE ssd_immigration_status (
-    immi_immigration_status_id NVARCHAR(48) PRIMARY KEY,
-    immi_person_id NVARCHAR(48),
-    immi_mmigration_status_start DATETIME,
-    immi_immigration_status_end DATETIME,
-    immi_immigration_status NVARCHAR(48)
+    immi_immigration_status_id      NVARCHAR(48) PRIMARY KEY,
+    immi_person_id                  NVARCHAR(48),
+    immi_mmigration_status_start    DATETIME,
+    immi_immigration_status_end     DATETIME,
+    immi_immigration_status         NVARCHAR(48)
 );
-
--- Create constraint(s)
-ALTER TABLE ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
-FOREIGN KEY (immi_person_id) REFERENCES person(pers_person_id);
-
--- Create index(es)
-CREATE INDEX IDX_immigration_status_la_person_id 
-ON ssd_immigration_status(immi_person_id);
-
-CREATE INDEX IDX_immigration_status_start 
-ON ssd_immigration_status(immi_immigration_status_start);
-
-CREATE INDEX IDX_immigration_status_end 
-ON ssd_immigration_status(immi_immigration_status_end);
 
 
 -- insert data
@@ -404,6 +380,15 @@ ORDER BY
     ims.EXTERNAL_ID ASC;
 
 
+-- Create constraint(s)
+ALTER TABLE ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
+FOREIGN KEY (immi_person_id) REFERENCES person(pers_person_id);
+
+-- Create index(es)
+CREATE INDEX IDX_immigration_status_immi_person_id ON ssd_immigration_status(immi_person_id);
+CREATE INDEX IDX_immigration_status_start ON ssd_immigration_status(immi_immigration_status_start);
+CREATE INDEX IDX_immigration_status_end ON ssd_immigration_status(immi_immigration_status_end);
+
 
 /* 
 =============================================================================
@@ -412,7 +397,7 @@ Description:
 Author: D2I
 Last Modified Date: 15/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.2
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -444,6 +429,9 @@ FROM
     Child_Social.FACT_PERSON_RELATION AS fpr;
 
 
+-- Create index(es)
+CREATE INDEX IDX_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
+
 -- Add constraint(s)
 ALTER TABLE ssd_mother ADD CONSTRAINT FK_moth_to_person 
 FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
@@ -458,9 +446,9 @@ FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
 Object Name: #ssd_legal_status
 Description: 
 Author: D2I
-Last Modified Date: 03/11/23
+Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -474,11 +462,10 @@ IF OBJECT_ID('ssd_legal_status') IS NOT NULL DROP TABLE ssd_legal_status;
 
 -- Create structure
 CREATE TABLE ssd_legal_status (
-    lega_legal_status_id NVARCHAR(48) PRIMARY KEY,
-    lega_person_id NVARCHAR(48),
-    lega_legal_status_start DATETIME,
-    lega_legal_status_end DATETIME
-
+    lega_legal_status_id        NVARCHAR(48) PRIMARY KEY,
+    lega_person_id              NVARCHAR(48),
+    lega_legal_status_start     DATETIME,
+    lega_legal_status_end       DATETIME
 );
 
 -- Insert data 
@@ -497,6 +484,9 @@ SELECT
 FROM 
     Child_Social.FACT_LEGAL_STATUS AS fls;
 
+-- Create index(es)
+CREATE INDEX IDX_ssd_legal_status_lega_person_id ON ssd_legal_status(lega_person_id);
+
 -- Create constraint(s)
 ALTER TABLE ssd_legal_status ADD CONSTRAINT FK_legal_status_person
 FOREIGN KEY (lega_person_id) REFERENCES ssd_person(pers_person_id);
@@ -510,7 +500,7 @@ Description:
 Author: D2I
 Last Modified Date: 06/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -523,11 +513,11 @@ IF OBJECT_ID('ssd_contact') IS NOT NULL DROP TABLE ssd_contact;
 
 -- Create structure
 CREATE TABLE ssd_contact (
-    cont_contact_id         NVARCHAR(48) PRIMARY KEY,
-    cont_person_id          NVARCHAR(48),
-    cont_contact_start      DATETIME,
-    cont_contact_source     NVARCHAR(255), 
-    cont_contact_outcome_json NVARCHAR(500) 
+    cont_contact_id             NVARCHAR(48) PRIMARY KEY,
+    cont_person_id              NVARCHAR(48),
+    cont_contact_start          DATETIME,
+    cont_contact_source         NVARCHAR(255), 
+    cont_contact_outcome_json   NVARCHAR(500) 
 );
 
 -- Insert data
@@ -540,7 +530,7 @@ INSERT INTO ssd_contact (
 )
 SELECT 
     fc.FACT_CONTACT_ID,
-    fc.DIM_PERSON_ID, -- Should this be DIM_PERSON_ID
+    fc.DIM_PERSON_ID, 
     fc.CONTACT_DTTM,
     fc.DIM_LOOKUP_CONT_SORC_ID,
     (
@@ -556,17 +546,18 @@ SELECT
             NULLIF(fc.OUTCOME_OLA_CP_FLAG, '')                 AS "OUTCOME_OLA_CP_FLAG",
             NULLIF(fc.OTHER_OUTCOMES_EXIST_FLAG, '')           AS "OTHER_OUTCOMES_EXIST_FLAG"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) AS cont_contact_outcome_json
+    )
 FROM 
     Child_Social.FACT_CONTACTS AS fc
 
+    -- Create JSON string for the address
 
 -- Create constraint(s)
 ALTER TABLE ssd_contact ADD CONSTRAINT FK_contact_person 
 FOREIGN KEY (cont_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE INDEX IDX_contact_person ON ssd_contact(cont_person_id);
+CREATE INDEX IDX_contact_person_id ON ssd_contact(cont_person_id);
 
 
 /* 
@@ -574,13 +565,14 @@ CREATE INDEX IDX_contact_person ON ssd_contact(cont_person_id);
 Object Name: ssd_early_help_episodes
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 0.9
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_CAF_EPISODE
 =============================================================================
 */
 -- Check if exists & drop
@@ -617,10 +609,12 @@ SELECT
     cafe.START_REASON,
     cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE,
     cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
-    'placeholder data' -- placeholder value
+    'PLACEHOLDER_DATA' -- placeholder value [TESTING]
 FROM 
     Child_Social.FACT_CAF_EPISODE AS cafe;
 
+-- Create index(es)
+CREATE INDEX IDX_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
@@ -636,7 +630,7 @@ Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - @ssd_timeframe_years
@@ -649,17 +643,17 @@ IF OBJECT_ID('ssd_cin_episodes') IS NOT NULL DROP TABLE ssd_cin_episodes;
 -- Create structure
 CREATE TABLE ssd_cin_episodes
 (
-    cine_referral_id INT,
-    cine_person_id NVARCHAR(48),
-    cine_referral_date DATETIME,
-    cine_cin_primary_need INT,
-    cine_referral_source NVARCHAR(MAX),
-    cine_referral_outcome_json NVARCHAR(500),
-    cine_referral_nfa NCHAR(1), -- Possible case to use BIT type + CASE
-    cine_close_reason NVARCHAR(MAX),
-    cine_close_date DATETIME,
-    cine_referral_team NVARCHAR(MAX),
-    cine_referral_worker_id NVARCHAR(48)
+    cine_referral_id            INT,
+    cine_person_id              NVARCHAR(48),
+    cine_referral_date          DATETIME,
+    cine_cin_primary_need       INT,
+    cine_referral_source        NVARCHAR(100),
+    cine_referral_outcome_json  NVARCHAR(500),
+    cine_referral_nfa           NCHAR(1), 
+    cine_close_reason           NVARCHAR(100),
+    cine_close_date             DATETIME,
+    cine_referral_team          NVARCHAR(100),
+    cine_referral_worker_id     NVARCHAR(48)
 );
 
 -- Insert data 
@@ -708,6 +702,8 @@ FROM
 WHERE 
     fr.EFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE());
 
+-- Create index(es)
+CREATE INDEX IDX_ssd_cin_episodes_person_id ON ssd_cin_episodes(cine_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
@@ -737,16 +733,16 @@ IF OBJECT_ID('ssd_cin_assessments') IS NOT NULL DROP TABLE ssd_cin_assessments;
 -- Create structure
 CREATE TABLE ssd_cin_assessments
 (
-    cina_assessment_id NVARCHAR(48) PRIMARY KEY,
-    cina_person_id NVARCHAR(48),
-    cina_referral_id NVARCHAR(48),
-    cina_assessment_start_date DATETIME,
-    cina_assessment_child_seen NCHAR(1), -- Possible case to use BIT type + CASE
-    cina_assessment_auth_date DATETIME, -- This needs checking !! 
+    cina_assessment_id          NVARCHAR(48) PRIMARY KEY,
+    cina_person_id              NVARCHAR(48),
+    cina_referral_id            NVARCHAR(48),
+    cina_assessment_start_date  DATETIME,
+    cina_assessment_child_seen  NCHAR(1), 
+    cina_assessment_auth_date   DATETIME, -- This needs checking !! [TESTING]
     cina_assessment_outcome_json NVARCHAR(500),
-    cina_assessment_outcome_nfa NCHAR(1), -- Possible case to use BIT type + CASE
-    cina_assessment_team NVARCHAR(MAX),
-    cina_assessment_worker_id NVARCHAR(48)
+    cina_assessment_outcome_nfa NCHAR(1), 
+    cina_assessment_team        NVARCHAR(100),
+    cina_assessment_worker_id   NVARCHAR(48)
 );
 
 -- Insert data
@@ -757,7 +753,7 @@ INSERT INTO ssd_cin_assessments
     cina_referral_id,
     cina_assessment_start_date,
     cina_assessment_child_seen,
-    cina_assessment_auth_date, -- This needs checking !! 
+    cina_assessment_auth_date, -- This needs checking !! [TESTING]
     cina_assessment_outcome_json,
     cina_assessment_outcome_nfa,
     cina_assessment_team,
@@ -794,6 +790,8 @@ SELECT
 FROM 
     FACT_SINGLE_ASSESSMENT AS fa;
 
+-- Create index(es)
+CREATE INDEX IDX_ssd_cin_assessments_person_id ON ssd_cin_assessments(cina_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
@@ -883,6 +881,8 @@ FROM FACT_CARE_PLANS AS fp
 JOIN FACT_CARE_PLAN_DETAILS AS cpd              -- Needs checking!!
 ON fp.FACT_REFERRAL_ID = cpd.FACT_REFERRAL_ID;  -- Needs checking!!
 
+-- Create index(es)
+CREATE INDEX IDX_ssd_cin_plans_person_id ON ssd_cin_plans(cinp_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
@@ -911,20 +911,20 @@ IF OBJECT_ID('ssd_cin_visits') IS NOT NULL DROP TABLE ssd_cin_visits;
 -- Create structure
 CREATE TABLE ssd_cin_visits
 (
-    cinv_cin_casenote_id NVARCHAR(48) PRIMARY KEY, -- This needs checking!!
-    cinv_cin_visit_id NVARCHAR(48), -- This needs checking!!
+    cinv_cin_casenote_id NVARCHAR(48) PRIMARY KEY,  -- This needs checking!! [TESTING]
+    cinv_cin_visit_id NVARCHAR(48),                 -- This needs checking!! [TESTING]
     cinv_cin_plan_id NVARCHAR(48),
     cinv_cin_visit_date DATETIME,
-    cinv_cin_visit_seen NCHAR(1), -- Possible case to use BIT type + CASE
-    cinv_cin_visit_seen_alone NCHAR(1), -- Possible case to use BIT type + CASE
+    cinv_cin_visit_seen NCHAR(1), 
+    cinv_cin_visit_seen_alone NCHAR(1), 
     cinv_cin_visit_bedroom NCHAR(1)
 );
 
 -- Insert data
 INSERT INTO ssd_cin_visits
 (
-    cinv_cin_casenote_id, -- This needs checking!!
-    cinv_cin_visit_id, -- This needs checking!!
+    cinv_cin_casenote_id,   -- This needs checking!! [TESTING]
+    cinv_cin_visit_id,      -- This needs checking!! [TESTING]
     cinv_cin_plan_id,
     cinv_cin_visit_date,
     cinv_cin_visit_seen,
@@ -932,8 +932,8 @@ INSERT INTO ssd_cin_visits
     cinv_cin_visit_bedroom
 )
 SELECT 
-    cn.FACT_CASENOTE_ID, -- This needs checking!!
-    'PLACEHOLDER DATA', -- This needs checking!!
+    cn.FACT_CASENOTE_ID,    -- This needs checking!! [TESTING]
+    'PLACEHOLDER DATA',     -- This needs checking!! [TESTING]
     cn.FACT_FORM_ID,
     cn.EVENT_DTTM,
     cn.SEEN_FLAG,
@@ -941,7 +941,6 @@ SELECT
     cn.SEEN_BEDROOM_FLAG
 FROM 
     Child_Social.FACT_CASENOTES cn;
-
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_cin_plans 
@@ -952,7 +951,7 @@ FOREIGN KEY (cinv_cin_plan_id) REFERENCES ssd_cin_plans(cinp_cin_plan_id);
 
 /* 
 =============================================================================
-Object Name: ssd_s47
+Object Name: ssd_s47_enquiry
 Description: 
 Author: D2I
 Last Modified Date: 
@@ -966,62 +965,73 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF OBJECT_ID('ssd_s47_enquiry_icpc') IS NOT NULL DROP TABLE ssd_s47_enquiry_icpc;
-
+IF OBJECT_ID('ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_s47_enquiry;
 
 --Create structure 
-CREATE TABLE ssd_s47_enquiry_icpc (
-    s47_enquiry_id NVARCHAR(48) PRIMARY KEY,
-    la_person_id NVARCHAR(48),
-    s47_start_date DATETIME,
-    s47_authorised_date DATETIME,
-    s47_outcome NVARCHAR(MAX),
-    icpc_transfer_in NVARCHAR(MAX),
-    icpc_date DATETIME,
-    icpc_outcome NVARCHAR(MAX),
-    icpc_team NVARCHAR(MAX),
-    icpc_worker_id NVARCHAR(48)
+CREATE TABLE ssd_s47_enquiry (
+    s47e_s47_enquiry_id             NVARCHAR(48) PRIMARY KEY,
+    s47e_referral_id                NVARCHAR(48),
+    s47e_person_id                  NVARCHAR(48),
+    s47e_s47_start_date             DATETIME,
+    s47e_s47_end_date               DATETIME,
+    s47e_s47_nfa                    NCHAR(1),
+    s47e_s47_outcome_json           NVARCHAR(500),
+    s47e_s47_completed_by_team      NVARCHAR(100),
+    s47e_s47_completed_by_worker    NVARCHAR(48)
 );
 
-
-
 -- insert data
-INSERT INTO ssd_s47_enquiry_icpc (
-    s47_enquiry_id,
-    la_person_id,
-    s47_start_date,
-    s47_authorised_date,
-    s47_outcome,
-    icpc_transfer_in,
-    icpc_date,
-    icpc_outcome,
-    icpc_team,
-    icpc_worker_id
+INSERT INTO ssd_s47_enquiry(
+    s47e_s47_enquiry_id,
+    s47e_referral_id,
+    s47e_person_id,
+    s47e_s47_start_date,
+    s47e_s47_end_date,
+    s47e_s47_nfa,
+    s47e_s47_outcome_json ,
+    s47e_s47_completed_by_team,
+    s47e_s47_completed_by_worker
 )
 SELECT 
     s47.FACT_S47_ID,
-    s47.EXTERNAL_ID,
+    s47.FACT_REFERRAL_ID,
+    s47.DIM_PERSON_ID
     s47.START_DTTM,
-    s47.START_DTTM,
-    CASE 
-        WHEN cpc.FACT_S47_ID IS NOT NULL THEN 'CP Plan Started'
-        ELSE 'CP Plan not Required'
-    END,
-    cpc.TRANSFER_IN_FLAG,
-    cpc.MEETING_DTTM,
-    s47.OUTCOME_CP_FLAG,
+    s47.END_DTTM,
+    s47.OUTCOME_NFA_FLAG
+    (
+        SELECT 
+            NULLIF(s47.OUTCOME_NFA_FLAG, '')                   AS "OUTCOME_NFA_FLAG",
+            NULLIF(s47.OUTCOME_NFA_FLAG, '')                   AS "OUTCOME_NFA_FLAG",
+            NULLIF(s47.OUTCOME_NFA_FLAG, '')                   AS "OUTCOME_NFA_FLAG",
+
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS cont_contact_outcome_json
+
     s47.COMPLETED_BY_DEPT_ID,
     s47.COMPLETED_BY_USER_STAFF_ID
 FROM 
     Child_Social.FACT_S47 AS s47
-LEFT JOIN 
-    Child_Social.FACT_CP_CONFERENCE as cpc ON s47.FACT_S47_ID = cpc.FACT_S47_ID;
+
+-- Create index(es)
+CREATE INDEX IDX_ssd_s47_enquiry_icpc_person_id ON ssd_s47_enquiry_icpc(cinp_person_id);
+
 
 -- Create constraint(s)
 ALTER TABLE ssd_s47_enquiry_icpc ADD CONSTRAINT FK_s47_person
 FOREIGN KEY (la_person_id) REFERENCES ssd_person(la_person_id);
 
+/* Removed 22/11/23
+    CASE 
+        WHEN cpc.FACT_S47_ID IS NOT NULL 
+        THEN 'CP Plan Started'
+        ELSE 'CP Plan not Required'
+    END,
+&     
+LEFT JOIN 
+    Child_Social.FACT_CP_CONFERENCE as cpc ON s47.FACT_S47_ID = cpc.FACT_S47_ID;
 
+    */
 
 
 /* 
@@ -1032,7 +1042,7 @@ Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
@@ -1045,13 +1055,13 @@ IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_cp_reviews;
 -- Create structure
 CREATE TABLE ssd_cp_reviews
 (
-    cppr_cp_review_id NVARCHAR(48) PRIMARY KEY,
-    cppr_cp_plan_id NVARCHAR(48),
-    cppr_cp_review_due DATETIME NULL,
-    cppr_cp_review_date DATETIME NULL,
-    cppr_cp_review_outcome NCHAR(1), -- Possible case to use BIT type + CASE
-    cppr_cp_review_quorate NCHAR(1) DEFAULT '0', -- using '0' as placeholder
-    cppr_cp_review_participation NCHAR(1) DEFAULT '0' -- using '0' as placeholder
+    cppr_cp_review_id               NVARCHAR(48) PRIMARY KEY,
+    cppr_cp_plan_id                 NVARCHAR(48),
+    cppr_cp_review_due              DATETIME,
+    cppr_cp_review_date             DATETIME,
+    cppr_cp_review_outcome          NCHAR(1), 
+    cppr_cp_review_quorate          NCHAR(1) DEFAULT '0',   -- using '0' as PLACEHOLDER_DATA [TESTING]
+    cppr_cp_review_participation    NCHAR(1) DEFAULT '0'    -- using '0' as PLACEHOLDER_DATA [TESTING]
 );
 
 -- Insert data
@@ -1071,8 +1081,8 @@ SELECT
     DUE_DTTM,
     MEETING_DTTM,
     OUTCOME_CONTINUE_CP_FLAG,
-    '0', -- 'PLACEHOLDER_DATA' for cppr_cp_review_quorate
-    '0'  -- 'PLACEHOLDER_DATA' for cppr_cp_review_participation
+    '0', -- 'PLACEHOLDER_DATA' for cppr_cp_review_quorate [TESTING]
+    '0'  -- 'PLACEHOLDER_DATA' for cppr_cp_review_participation [TESTING]
 FROM 
     Child_Social.FACT_CP_REVIEW;
 
@@ -1106,8 +1116,8 @@ Description:
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: This has issues, where/what is the fk back to cp_plans? 
 Dependencies: 
 - FACT_CASENOTES
@@ -1167,7 +1177,7 @@ CREATE TABLE ssd_cp_reviews
     cppr_cp_review_due              DATETIME NULL,
     cppr_cp_review_date             DATETIME NULL,
     cppr_cp_review_outcome          NCHAR(1), 
-    cppr_cp_review_quorate          NCHAR(1) DEFAULT '0',   --  'PLACEHOLDER_DATA'
+    cppr_cp_review_quorate          NCHAR(1) DEFAULT '0',   -- 'PLACEHOLDER_DATA'
     cppr_cp_review_participation    NCHAR(1) DEFAULT '0'    -- 'PLACEHOLDER_DATA'
 );
 
@@ -1195,7 +1205,7 @@ FROM
 INNER JOIN 
     ssd_person AS p ON cpr.DIM_PERSON_ID = p.pers_person_id;
 
--- Create constraint(s)
+-- Add constraint(s)
 ALTER TABLE ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
 FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
 
@@ -1222,13 +1232,15 @@ Dependencies:
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 16/11/23
+Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_involvements
+- FACT_CLA
+- FACT_REFERRALS
 - FACT_CARE_EPISODES
 =============================================================================
 */
@@ -1276,11 +1288,10 @@ JOIN
     Child_Social.FACT_REFERRALS AS fr ON fc.fact_referral_id = fr.fact_referral_id;
 
 
-
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON ssd_cla_episodes (clae_cla_worker_id);
 
--- Add constraint(s) 
+-- Add constraint(s)
 ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_professional 
 FOREIGN KEY (clae_cla_worker_id) REFERENCES ssd_involvements (invo_professional_id);
 
@@ -1485,8 +1496,11 @@ CREATE TABLE ssd_cla_placement (
     clap_cla_placement_provider     NVARCHAR(48),
     clap_cla_placement_postcode     NVARCHAR(8),
     clap_cla_placement_end_date     DATETIME,
-    clap_cla_placement_change_reason NVARCHAR(100)
+    clap_cla_placement_change_reason NVARCHAR(100),
+    clap_cla_id                     NVARCHAR(48)   
 );
+
+
 
 -- Insert data 
 INSERT INTO ssd_cla_placement (
@@ -1500,7 +1514,8 @@ INSERT INTO ssd_cla_placement (
     clap_cla_placement_provider,
     clap_cla_placement_postcode,
     clap_cla_placement_end_date,
-    clap_cla_placement_change_reason
+    clap_cla_placement_change_reason,
+    clap_cla_id  
 )
 SELECT 
     fcp.FACT_CLA_PLACEMENT_ID                   AS clap_cla_placement_id,
@@ -1513,8 +1528,10 @@ SELECT
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
     fcp.POSTCODE                                AS clap_cla_placement_postcode,
     fcp.END_DTTM                                AS clap_cla_placement_end_date,
-    fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE          AS clap_cla_placement_change_reason
+    fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE          AS clap_cla_placement_change_reason,
+    fcp.FACT_CLA_ID                             AS clap_cla_id  
 FROM 
+
     Child_Social.FACT_CLA_PLACEMENT AS fcp
 JOIN 
     Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CARE_EPISODES_ID = fce.ID; -- Adjust with actual column name [TESTING]
@@ -1547,12 +1564,12 @@ IF OBJECT_ID('ssd_cla_review', 'U') IS NOT NULL DROP TABLE ssd_cla_review;
 
 -- Create structure
 CREATE TABLE ssd_cla_review (
-    clar_cla_review_id                 NVARCHAR(48) PRIMARY KEY,
-    clar_cla_episode_id                NVARCHAR(48),
-    clar_cla_review_due_date           DATETIME,
-    clar_cla_review_date               DATETIME,
-    clar_cla_review_participation      NVARCHAR(100),
-    clar_cla_review_last_iro_contact_date DATETIME
+    clar_cla_review_id                      NVARCHAR(48) PRIMARY KEY,
+    clar_cla_episode_id                     NVARCHAR(48),
+    clar_cla_review_due_date                DATETIME,
+    clar_cla_review_date                    DATETIME,
+    clar_cla_review_participation           NVARCHAR(100),
+    clar_cla_review_last_iro_contact_date   DATETIME
 );
 
 -- Insert data
@@ -1566,11 +1583,11 @@ INSERT INTO ssd_cla_review (
 )
 SELECT 
     fcr.FACT_CLA_REVIEW_ID                     AS clar_cla_review_id,
-    'PLACEHOLDER_EPISODE_ID'                   AS clar_cla_episode_id, -- Replace with actual data source [TESTING]
+    'PLACEHOLDER_EPISODE_ID'                   AS clar_cla_episode_id,                  -- Replace with actual data source [TESTING]
     fcr.DUE_DTTM                               AS clar_cla_review_due_date,
     fcr.MEETING_DTTM                           AS clar_cla_review_date,
-    'PLACEHOLDER_PARTICIPATION'                AS clar_cla_review_participation, -- Replace with actual data source [TESTING]
-    'PLACEHOLDER_LAST_CONTACT_DATE'            AS clar_cla_review_last_iro_contact_date -- Replace with actual data source [TESTING]
+    'PLACEHOLDER_DATA'                         AS clar_cla_review_participation,        -- Replace with actual data source [TESTING]
+    'PLACEHOLDER_DATA'                         AS clar_cla_review_last_iro_contact_date -- Replace with actual data source [TESTING]
 FROM 
     Child_Social.FACT_CLA_REVIEW AS fcr;
 
@@ -1578,7 +1595,7 @@ FROM
 ALTER TABLE ssd_cla_review ADD CONSTRAINT FK_clar_to_clae 
 FOREIGN KEY (clar_cla_episode_id) REFERENCES ssd_cla_episodes(clae_cla_episode_id);
 
--- Create nonclustered indexes
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clar_cla_episode_id ON ssd_cla_review (clar_cla_episode_id);
 CREATE NONCLUSTERED INDEX idx_clar_review_last_iro_contact_date ON ssd_cla_review (clar_cla_review_last_iro_contact_date);
 
@@ -1901,8 +1918,7 @@ CREATE TABLE ssd_professionals (
     prof_full_time_equivalency            FLOAT
 );
 
--- Determine last September 30th date
-DECLARE @LastSept30th DATE
+-- Determine/Define date on which CASELOAD count required (Currently: September 30th)
 SET @LastSept30th = CASE 
                         WHEN CONVERT(DATE, GETDATE()) > DATEFROMPARTS(YEAR(GETDATE()), 9, 30) 
                         THEN DATEFROMPARTS(YEAR(GETDATE()), 9, 30)
@@ -1924,7 +1940,7 @@ SELECT
     dw.DIM_WORKER_ID                  AS prof_table_id,
     dw.STAFF_ID                       AS prof_professional_id,
     dw.WORKER_ID_CODE                 AS prof_social_worker_registration_no,
-    'PLACEHOLDER_FLAG'                AS prof_agency_worker_flag,           -- Replace with actual data [TESTING]
+    'PLACEHOLDER_FLAG'                AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING]
     dw.JOB_TITLE                      AS prof_professional_job_title,
     ISNULL(rc.OpenCases, 0)           AS prof_professional_caseload,        -- 0 when no open cases on given date.
     dw.DEPARTMENT_NAME                AS prof_professional_department,
@@ -1933,8 +1949,8 @@ FROM
     Child_Social.DIM_WORKER AS dw
 LEFT JOIN (
     SELECT 
-        -- open cases count
-        DIM_WORKER_ID,
+        -- Calculate CASELOAD 
+        STAFF_ID,
         COUNT(*) AS OpenCases
     FROM 
         Child_Social.FACT_REFERRALS
@@ -1942,8 +1958,8 @@ LEFT JOIN (
         REFRL_START_DTTM <= @LastSept30th AND 
         (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM > @LastSept30th)
     GROUP BY 
-        DIM_WORKER_ID
-) AS rc ON dw.DIM_WORKER_ID = rc.DIM_WORKER_ID;
+        STAFF_ID
+) AS rc ON dw.STAFF_ID = rc.STAFF_ID;
 
 
 -- Create index(es)
@@ -2143,7 +2159,7 @@ CREATE TABLE ssd_voice_of_child (
     voch_tablet_help_explain    NCHAR(1)
 );
 
--- Insert placeholder data
+-- Insert placeholder data [TESTING]
 INSERT INTO ssd_voice_of_child (
     voch_table_id,
     voch_person_id,
@@ -2197,7 +2213,7 @@ CREATE TABLE ssd_linked_identifiers (
     link_valid_to_date DATETIME
 );
 
--- Insert placeholder data
+-- Insert placeholder data [TESTING]
 INSERT INTO ssd_linked_identifiers (
     link_link_id,
     link_person_id,
@@ -2207,7 +2223,7 @@ INSERT INTO ssd_linked_identifiers (
     link_valid_to_date
 )
 VALUES
-    ('placeholder data', 'DIM_PERSON.PERSON_ID', 'placeholder data', 'placeholder data', NULL, NULL);
+    ('PLACEHOLDER_DATA', 'DIM_PERSON.PERSON_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', NULL, NULL);
 
 -- To switch on once source data defined.
 -- INNER JOIN 
@@ -2249,7 +2265,7 @@ CREATE TABLE ssd_s251_finance (
     s251_placeholder_4 NVARCHAR(48)
 );
 
--- Insert placeholder data
+-- Insert placeholder data [TESTING]
 INSERT INTO ssd_s251_finance (
     s251_id,
     s251_cla_placement_id,
@@ -2259,7 +2275,7 @@ INSERT INTO ssd_s251_finance (
     s251_placeholder_4
 )
 VALUES
-    ('placeholder data', 'placeholder data', 'placeholder data', 'placeholder data', 'placeholder data', 'placeholder data');
+    ('PLACEHOLDER_DATA_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
 
 -- Create constraint(s)
 ALTER TABLE ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
