@@ -117,7 +117,7 @@ AND (                                                       -- Filter irrelevant
 );
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_person_la_person_id ON ssd_person(pers_la_person_id);
+CREATE INDEX IDX_ssd_person_la_person_id ON ssd_person(pers_person_id);
 
 
 
@@ -225,8 +225,8 @@ CREATE TABLE ssd_address (
     addr_address_type       NVARCHAR(48),
     addr_address_start      DATETIME,
     addr_address_end        DATETIME,
-    addr_address_postcode   NVARCHAR(8),
-    addr_address_json       NVARCHAR(500)
+    addr_address_postcode   NVARCHAR(15),
+    addr_address_json       NVARCHAR(1000)
 );
 
 
@@ -246,8 +246,11 @@ SELECT
     pa.ADDSS_TYPE_CODE,
     pa.START_DTTM,
     pa.END_DTTM,
-    REPLACE(pa.POSTCODE, ' ', ''), -- whitespace removed to enforce data quality
-    -- Create JSON string for the address
+    CASE 
+        WHEN REPLACE(pa.POSTCODE, ' ', '') NOT LIKE '%[^X]%' THEN ''
+        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''
+        ELSE REPLACE(pa.POSTCODE, ' ', '')
+    END AS CleanedPostcode,
     (
         SELECT 
             NULLIF(pa.ROOM_NO, '')    AS ROOM, 
@@ -261,10 +264,15 @@ SELECT
             NULLIF(pa.EASTING, '')    AS EASTING,
             NULLIF(pa.NORTHING, '')   AS NORTHING
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) 
+    ) AS addr_address_json
 FROM 
     Child_Social.DIM_PERSON_ADDRESS AS pa
-
+WHERE EXISTS 
+    ( -- only need address data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = pa.DIM_PERSON_ID
+    );
 
 
 -- Create constraint(s)
@@ -315,10 +323,16 @@ INSERT INTO ssd_disability (
 )
 SELECT 
     fd.FACT_DISABILITY_ID, 
-    fd.EXTERNAL_ID, 
+    fd.DIM_PERSON_ID, 
     fd.DIM_LOOKUP_DISAB_CODE
 FROM 
-    Child_Social.FACT_DISABILITY AS fd;
+    Child_Social.FACT_DISABILITY AS fd
+WHERE EXISTS 
+    ( -- only need address data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = fd.DIM_PERSON_ID
+    );
 
 -- Create constraint(s)
 ALTER TABLE ssd_disability ADD CONSTRAINT FK_disability_person 
@@ -336,9 +350,9 @@ CREATE INDEX IDX_disability_person_id ON ssd_disability(disa_person_id);
 Object Name: #ssd_immigration_status
 Description: 
 Author: D2I
-Last Modified Date: 03/11/23
+Last Modified Date: 23/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -370,15 +384,19 @@ INSERT INTO ssd_immigration_status (
 )
 SELECT 
     ims.FACT_IMMIGRATION_STATUS_ID,
-    ims.EXTERNAL_ID,
+    ims.DIM_PERSON_ID,
     ims.START_DTTM,
     ims.END_DTTM,
     ims.DIM_LOOKUP_IMMGR_STATUS_CODE
 FROM 
     Child_Social.FACT_IMMIGRATION_STATUS AS ims
-ORDER BY
-    ims.EXTERNAL_ID ASC;
-
+WHERE 
+    EXISTS 
+    ( -- only need data for ssd relevant records
+        SELECT 1
+        FROM ssd_person p
+        WHERE p.pers_person_id = ims.DIM_PERSON_ID
+    );
 
 -- Create constraint(s)
 ALTER TABLE ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
@@ -410,24 +428,32 @@ IF OBJECT_ID('ssd_mother', 'U') IS NOT NULL DROP TABLE ssd_mother;
 
 -- Create structure
 CREATE TABLE ssd_mother (
-    moth_person_id              NVARCHAR(48) PRIMARY KEY,
+    moth_table_id               NVARCHAR(48) PRIMARY KEY,
+    moth_person_id              NVARCHAR(48),
     moth_childs_person_id       NVARCHAR(48),
     moth_childs_dob             DATETIME
 );
 
 -- Insert data
 INSERT INTO ssd_mother (
+    moth_table_id
     moth_person_id, 
     moth_childs_person_id, 
     moth_childs_dob
 )
 SELECT 
+    fpr.FACT_PERSON_RELATION_ID         AS moth_table_id,
     fpr.DIM_PERSON_ID                   AS moth_person_id,
     fpr.DIM_RELATED_PERSON_ID           AS moth_childs_person_id,
     fpr.DIM_RELATED_PERSON_DOB          AS moth_childs_dob
 FROM 
-    Child_Social.FACT_PERSON_RELATION AS fpr;
-
+    Child_Social.FACT_PERSON_RELATION AS fpr
+WHERE EXISTS 
+    ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = fpr.DIM_PERSON_ID
+    );
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
@@ -482,7 +508,13 @@ SELECT
     fls.START_DTTM,
     fls.END_DTTM
 FROM 
-    Child_Social.FACT_LEGAL_STATUS AS fls;
+    Child_Social.FACT_LEGAL_STATUS AS fls
+WHERE EXISTS 
+    ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = fls.DIM_PERSON_ID
+    );
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_legal_status_lega_person_id ON ssd_legal_status(lega_person_id);
@@ -516,7 +548,7 @@ CREATE TABLE ssd_contact (
     cont_contact_id             NVARCHAR(48) PRIMARY KEY,
     cont_person_id              NVARCHAR(48),
     cont_contact_start          DATETIME,
-    cont_contact_source         NVARCHAR(255), 
+    cont_contact_source         NVARCHAR(100), -- Receives ID field not desc hence size
     cont_contact_outcome_json   NVARCHAR(500) 
 );
 
@@ -533,7 +565,7 @@ SELECT
     fc.DIM_PERSON_ID, 
     fc.CONTACT_DTTM,
     fc.DIM_LOOKUP_CONT_SORC_ID,
-    (
+    (                                                           -- Create JSON string for the address
         SELECT 
             NULLIF(fc.OUTCOME_NEW_REFERRAL_FLAG, '')           AS "OUTCOME_NEW_REFERRAL_FLAG",
             NULLIF(fc.OUTCOME_EXISTING_REFERRAL_FLAG, '')      AS "OUTCOME_EXISTING_REFERRAL_FLAG",
@@ -546,11 +578,16 @@ SELECT
             NULLIF(fc.OUTCOME_OLA_CP_FLAG, '')                 AS "OUTCOME_OLA_CP_FLAG",
             NULLIF(fc.OTHER_OUTCOMES_EXIST_FLAG, '')           AS "OTHER_OUTCOMES_EXIST_FLAG"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )
+    ) AS cont_contact_outcome_json
 FROM 
     Child_Social.FACT_CONTACTS AS fc
+WHERE EXISTS 
+    ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = fc.DIM_PERSON_ID
+    );
 
-    -- Create JSON string for the address
 
 -- Create constraint(s)
 ALTER TABLE ssd_contact ADD CONSTRAINT FK_contact_person 
@@ -612,6 +649,12 @@ SELECT
     'PLACEHOLDER_DATA' -- placeholder value [TESTING]
 FROM 
     Child_Social.FACT_CAF_EPISODE AS cafe;
+WHERE EXISTS 
+    ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = cafe.DIM_PERSON_ID
+    );
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
@@ -629,7 +672,7 @@ Description:
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -647,12 +690,12 @@ CREATE TABLE ssd_cin_episodes
     cine_person_id              NVARCHAR(48),
     cine_referral_date          DATETIME,
     cine_cin_primary_need       INT,
-    cine_referral_source        NVARCHAR(100),
+    cine_referral_source        NVARCHAR(255),
     cine_referral_outcome_json  NVARCHAR(500),
     cine_referral_nfa           NCHAR(1), 
     cine_close_reason           NVARCHAR(100),
     cine_close_date             DATETIME,
-    cine_referral_team          NVARCHAR(100),
+    cine_referral_team          NVARCHAR(255),
     cine_referral_worker_id     NVARCHAR(48)
 );
 
@@ -690,17 +733,16 @@ SELECT
             NULLIF(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS "OUTCOME_CARE_LEAVER_FLAG",
             NULLIF(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS "OTHER_OUTCOMES_EXIST_FLAG"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ),
+    ) AS cine_referral_outcome_json,
     fr.OUTCOME_NFA_FLAG,
     fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
     fr.REFRL_END_DTTM,
     fr.DIM_DEPARTMENT_ID_DESC,
     fr.DIM_WORKER_ID_DESC
 FROM 
-    Child_Social.FACT_REFERRALS AS fr;
-
+    Child_Social.FACT_REFERRALS AS fr
 WHERE 
-    fr.EFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE());
+    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE());
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_cin_episodes_person_id ON ssd_cin_episodes(cine_person_id);
@@ -714,12 +756,12 @@ FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
 
 /* 
 =============================================================================
-Object Name: #ssd_assessments
+Object Name: #ssd_cin_assessments
 Description: 
 Author: D2I
 Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 0.9
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -765,7 +807,7 @@ SELECT
     fa.FACT_REFERRAL_ID,
     fa.START_DTTM,
     fa.SEEN_FLAG,
-    fa.START_DTTM, -- This needs checking !! 
+    fa.START_DTTM,              -- This needs checking !! [TESTING]
     (
         SELECT 
             NULLIF(fa.OUTCOME_NFA_FLAG, '')                     AS "OUTCOME_NFA_FLAG",
@@ -788,7 +830,14 @@ SELECT
     fa.COMPLETED_BY_DEPT_NAME,
     fa.COMPLETED_BY_USER_STAFF_ID
 FROM 
-    FACT_SINGLE_ASSESSMENT AS fa;
+    Child_Social.FACT_SINGLE_ASSESSMENT AS fa
+
+WHERE EXISTS 
+    ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = fa.DIM_PERSON_ID
+    );
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_cin_assessments_person_id ON ssd_cin_assessments(cina_person_id);
@@ -1893,13 +1942,15 @@ Dependencies:
 Object Name: ssd_professionals
 Description: 
 Author: D2I
-Last Modified Date: 16/11/23
+Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
--
+- @LastSept30th
+- DIM_WORKER
+- FACT_REFERRALS
 =============================================================================
 */
 
@@ -1919,11 +1970,12 @@ CREATE TABLE ssd_professionals (
 );
 
 -- Determine/Define date on which CASELOAD count required (Currently: September 30th)
+DECLARE @LastSept30th DATE;
 SET @LastSept30th = CASE 
                         WHEN CONVERT(DATE, GETDATE()) > DATEFROMPARTS(YEAR(GETDATE()), 9, 30) 
                         THEN DATEFROMPARTS(YEAR(GETDATE()), 9, 30)
                         ELSE DATEFROMPARTS(YEAR(GETDATE()) - 1, 9, 30)
-                    END
+                    END;
 
 -- Insert data
 INSERT INTO ssd_professionals (
@@ -1940,7 +1992,7 @@ SELECT
     dw.DIM_WORKER_ID                  AS prof_table_id,
     dw.STAFF_ID                       AS prof_professional_id,
     dw.WORKER_ID_CODE                 AS prof_social_worker_registration_no,
-    'PLACEHOLDER_FLAG'                AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING]
+    'N'                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
     dw.JOB_TITLE                      AS prof_professional_job_title,
     ISNULL(rc.OpenCases, 0)           AS prof_professional_caseload,        -- 0 when no open cases on given date.
     dw.DEPARTMENT_NAME                AS prof_professional_department,
@@ -1950,7 +2002,7 @@ FROM
 LEFT JOIN (
     SELECT 
         -- Calculate CASELOAD 
-        STAFF_ID,
+        DIM_WORKER_ID,
         COUNT(*) AS OpenCases
     FROM 
         Child_Social.FACT_REFERRALS
@@ -1958,8 +2010,9 @@ LEFT JOIN (
         REFRL_START_DTTM <= @LastSept30th AND 
         (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM > @LastSept30th)
     GROUP BY 
-        STAFF_ID
-) AS rc ON dw.STAFF_ID = rc.STAFF_ID;
+        DIM_WORKER_ID
+) AS rc ON dw.DIM_WORKER_ID = rc.DIM_WORKER_ID;
+
 
 
 -- Create index(es)

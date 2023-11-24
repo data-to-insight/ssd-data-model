@@ -76,7 +76,7 @@ Dependencies:
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 
--- Create structure for temporary table
+-- Create structure
 CREATE TABLE #ssd_person (
     pers_person_id          NVARCHAR(48) PRIMARY KEY, 
     pers_sex                NVARCHAR(48),
@@ -137,7 +137,7 @@ AND (                                                       -- Filter irrelevant
 );
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_person_la_person_id ON #ssd_person(pers_la_person_id);
+CREATE INDEX IDX_ssd_person_la_person_id ON #ssd_person(pers_person_id);
 
 
 
@@ -200,6 +200,8 @@ SELECT
     fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID  AS fami_family_id,
     DIM_PERSON_ID                       AS fami_person_id
 FROM Child_Social.FACT_CONTACTS AS fc
+
+
 WHERE EXISTS ( -- only need address data for ssd relevant records
     SELECT 1 
     FROM #ssd_person p
@@ -226,8 +228,7 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
-IF OBJECT_ID('#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
-
+IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
 -- Create structure
 CREATE TABLE #ssd_address (
@@ -236,16 +237,9 @@ CREATE TABLE #ssd_address (
     addr_address_type       NVARCHAR(48),
     addr_address_start      DATETIME,
     addr_address_end        DATETIME,
-    addr_address_postcode   NVARCHAR(8),
-    addr_address_json       NVARCHAR(500)
+    addr_address_postcode   NVARCHAR(15),
+    addr_address_json       NVARCHAR(1000)
 );
-
-
--- Create index(es)
-CREATE INDEX IDX_address_person ON #ssd_address(addr_person_id);
-CREATE INDEX IDX_address_start ON #ssd_address(addr_address_start);
-CREATE INDEX IDX_address_end ON #ssd_address(addr_address_end);
-
 
 -- insert data
 INSERT INTO #ssd_address (
@@ -263,8 +257,11 @@ SELECT
     pa.ADDSS_TYPE_CODE,
     pa.START_DTTM,
     pa.END_DTTM,
-    REPLACE(pa.POSTCODE, ' ', ''), -- whitespace removed to enforce data quality
-    -- Create JSON string for the address
+    CASE 
+        WHEN REPLACE(pa.POSTCODE, ' ', '') NOT LIKE '%[^X]%' THEN ''
+        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''
+        ELSE REPLACE(pa.POSTCODE, ' ', '')
+    END AS CleanedPostcode,
     (
         SELECT 
             NULLIF(pa.ROOM_NO, '')    AS ROOM, 
@@ -278,11 +275,21 @@ SELECT
             NULLIF(pa.EASTING, '')    AS EASTING,
             NULLIF(pa.NORTHING, '')   AS NORTHING
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )
+    ) AS addr_address_json
 FROM 
     Child_Social.DIM_PERSON_ADDRESS AS pa
 
+WHERE EXISTS 
+    ( -- only need address data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = pa.DIM_PERSON_ID
+    )
 
+-- Create index(es)
+CREATE INDEX IDX_address_person ON #ssd_address(addr_person_id);
+CREATE INDEX IDX_address_start ON #ssd_address(addr_address_start);
+CREATE INDEX IDX_address_end ON #ssd_address(addr_address_end);
 
 
 
@@ -293,38 +300,48 @@ Description:
 Author: D2I
 Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- FACT_DISABILITY
 - ssd_person
+- FACT_DISABILITY
 =============================================================================
 */
--- Check if exists, & drop 
+-- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 
+-- Create the structure
+CREATE TABLE #ssd_disability
+(
+    disa_table_id           NVARCHAR(48) PRIMARY KEY,
+    disa_person_id          NVARCHAR(48) NOT NULL,
+    disa_disability_code    NVARCHAR(48) NOT NULL
+);
+
+
+-- Insert data
+INSERT INTO #ssd_disability (
+    disa_table_id,  
+    disa_person_id, 
+    disa_disability_code
+)
 SELECT 
-    fd.FACT_DISABILITY_ID       AS disa_table_id, 
-    fd.EXTERNAL_ID              AS disa_person_id, 
-    fd.DIM_LOOKUP_DISAB_CODE    AS disa_disability_code
-INTO #ssd_disability
+    fd.FACT_DISABILITY_ID, 
+    fd.DIM_PERSON_ID, 
+    fd.DIM_LOOKUP_DISAB_CODE
 FROM 
-    Child_Social.FACT_DISABILITY AS fd;
+    Child_Social.FACT_DISABILITY AS fd
 
-
-
--- Create constraint(s)
-ALTER TABLE #ssd_disability ADD CONSTRAINT PK_ssd_disability 
-PRIMARY KEY (disa_id);
-
-ALTER TABLE #ssd_disability ADD CONSTRAINT FK_ssd_disability_person
-FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
-
-
-
-
-
+WHERE EXISTS 
+    ( -- only need address data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = fd.DIM_PERSON_ID
+    )
+;
+-- Create index(es)
+CREATE INDEX IDX_disability_person_id ON #ssd_disability(disa_person_id);
 
 
 
@@ -334,9 +351,9 @@ FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
 Object Name: #ssd_immigration_status
 Description: 
 Author: D2I
-Last Modified Date: 03/11/23
+Last Modified Date: 23/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -344,62 +361,105 @@ Dependencies:
 - FACT_IMMIGRATION_STATUS
 =============================================================================
 */
--- Check if exists, & drop
+-- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
+
 -- Create structure
+CREATE TABLE #ssd_immigration_status (
+    immi_immigration_status_id      NVARCHAR(48) PRIMARY KEY,
+    immi_person_id                  NVARCHAR(48),
+    immi_immigration_status_start   DATETIME,
+    immi_immigration_status_end     DATETIME,
+    immi_immigration_status         NVARCHAR(48)
+);
+
+
+-- insert data
+INSERT INTO #ssd_immigration_status (
+    immi_immigration_status_id, 
+    immi_person_id, 
+    immi_immigration_status_start,
+    immi_immigration_status_end,
+    immi_immigration_status
+)
 SELECT 
-    ims.[FACT_IMMIGRATION_STATUS_ID]    as immi_immigration_status_id,
-    ims.[EXTERNAL_ID]                   as immi__person_id,
-    ims.[START_DTTM]                    as immi_immigration_status_start,
-    ims.[END_DTTM]                      as immi_immigration_status_end,
-    ims.[DIM_LOOKUP_IMMGR_STATUS_CODE]  as immi_immigration_status
-INTO 
-    #ssd_immigration_status
+    ims.FACT_IMMIGRATION_STATUS_ID,
+    ims.DIM_PERSON_ID,
+    ims.START_DTTM,
+    ims.END_DTTM,
+    ims.DIM_LOOKUP_IMMGR_STATUS_CODE
 FROM 
     Child_Social.FACT_IMMIGRATION_STATUS AS ims
-ORDER BY
-    ims.[EXTERNAL_ID] ASC;
 
-)
--- Create constraint(s)
-ALTER TABLE #ssd_immigration_status ADD CONSTRAINT PK_immigration_status_id
-PRIMARY KEY (immi_immigration_status_id);
+WHERE 
+    EXISTS (
+        SELECT 1
+        FROM #ssd_person p
+        WHERE p.pers_person_id = ims.DIM_PERSON_ID
+    );
+
+
+-- Create index(es)
+CREATE INDEX IDX_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
+CREATE INDEX IDX_immigration_status_start ON #ssd_immigration_status(immi_immigration_status_start);
+CREATE INDEX IDX_immigration_status_end ON #ssd_immigration_status(immi_immigration_status_end);
+
 
 
 
 /* 
 =============================================================================
-Object Name: #ssd_mother
+Object Name: ssd_mother
 Description: 
 Author: D2I
-Last Modified Date: 03/11/23
+Last Modified Date: 15/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- FACT_PERSON_RELATION
 - ssd_person
+- FACT_PERSON_RELATION
 =============================================================================
 */
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..#ssd_mother') IS NOT NULL DROP TABLE #ssd_mother;
+IF OBJECT_ID('tempdb..#ssd_mother', 'U') IS NOT NULL DROP TABLE #ssd_mother;
 
 -- Create structure
+CREATE TABLE #ssd_mother (
+    moth_table_id               NVARCHAR(48) PRIMARY KEY,
+    moth_person_id              NVARCHAR(48),
+    moth_childs_person_id       NVARCHAR(48),
+    moth_childs_dob             DATETIME
+);
+
+-- Insert data
+INSERT INTO #ssd_mother (
+    moth_table_id,
+    moth_person_id, 
+    moth_childs_person_id, 
+    moth_childs_dob
+)
 SELECT 
-    pr.DIM_PERSON_ID            AS moth_person_id PRIMARY KEY,
-    pr.DIM_RELATED_PERSON_ID    AS moth_childs_person_id,
-    pr.DIM_RELATED_PERSON_DOB   AS moth_childs_dob
-
-INTO #ssd_mother
+    fpr.FACT_PERSON_RELATION_ID         AS moth_table_id,
+    fpr.DIM_PERSON_ID                   AS moth_person_id,
+    fpr.DIM_RELATED_PERSON_ID           AS moth_childs_person_id,
+    fpr.DIM_RELATED_PERSON_DOB          AS moth_childs_dob
 FROM 
-    FACT_PERSON_RELATION AS pr;
+    Child_Social.FACT_PERSON_RELATION AS fpr
+    
+WHERE EXISTS 
+    ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = fpr.DIM_PERSON_ID
+    );
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_mother ADD CONSTRAINT FK_mother_person
-FOREIGN KEY (moth_person_id) REFERENCES #ssd_person(pers_person_id);
+-- Create index(es)
+CREATE INDEX IDX_ssd_mother_moth_person_id ON #ssd_mother(moth_person_id);
+
 
 
 /* 
@@ -407,9 +467,9 @@ FOREIGN KEY (moth_person_id) REFERENCES #ssd_person(pers_person_id);
 Object Name: #ssd_legal_status
 Description: 
 Author: D2I
-Last Modified Date: 03/11/23
+Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -417,24 +477,45 @@ Dependencies:
 - FACT_LEGAL_STATUS
 =============================================================================
 */
--- Check if exists, & drop 
+-- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
 
--- Create temporary structure
+
+-- Create structure
+CREATE TABLE #ssd_legal_status (
+    lega_legal_status_id        NVARCHAR(48) PRIMARY KEY,
+    lega_person_id              NVARCHAR(48),
+    lega_legal_status_start     DATETIME,
+    lega_legal_status_end       DATETIME
+);
+
+-- Insert data 
+INSERT INTO #ssd_legal_status (
+    lega_legal_status_id,
+    lega_person_id,
+    lega_legal_status_start,
+    lega_legal_status_end
+
+)
 SELECT
-    fls.[FACT_LEGAL_STATUS_ID]  AS lega_legal_status_id,
-    fls.[DIM_PERSON_ID]         AS lega_person_id,
-    fls.[START_DTTM]            AS lega_legal_status_start,
-    fls.[END_DTTM]              AS lega_legal_status_end
-INTO 
-    #ssd_legal_status
+    fls.FACT_LEGAL_STATUS_ID,
+    fls.DIM_PERSON_ID,
+    fls.START_DTTM,
+    fls.END_DTTM
 FROM 
-    Child_Social.FACT_LEGAL_STATUS AS fls;
+    Child_Social.FACT_LEGAL_STATUS AS fls
+
+WHERE 
+    EXISTS (
+        SELECT 1
+        FROM #ssd_person p
+        WHERE p.pers_person_id = fls.DIM_PERSON_ID
+    );
+
+-- Create index(es)
+CREATE INDEX IDX_ssd_legal_status_lega_person_id ON #ssd_legal_status(lega_person_id);
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_legal_status ADD CONSTRAINT FK_legal_status_person
-FOREIGN KEY (lega_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 /* 
@@ -442,9 +523,9 @@ FOREIGN KEY (lega_person_id) REFERENCES #ssd_person(pers_person_id);
 Object Name: ssd_contact
 Description: 
 Author: D2I
-Last Modified Date: 03/11/23
+Last Modified Date: 06/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -452,16 +533,16 @@ Dependencies:
 - FACT_CONTACTS
 =============================================================================
 */
---- Check if exists, & drop
+-- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_contact') IS NOT NULL DROP TABLE #ssd_contact;
 
--- Create temporary structure
+-- Create structure
 CREATE TABLE #ssd_contact (
-    cont_contact_id         NVARCHAR(48) PRIMARY KEY,
-    cont_person_id          NVARCHAR(48),
-    cont_contact_start      DATETIME,
-    cont_contact_source     NVARCHAR(255), 
-    cont_contact_outcome_json NVARCHAR(MAX)
+    cont_contact_id             NVARCHAR(48) PRIMARY KEY,
+    cont_person_id              NVARCHAR(48),
+    cont_contact_start          DATETIME,
+    cont_contact_source         NVARCHAR(255), 
+    cont_contact_outcome_json   NVARCHAR(500) 
 );
 
 -- Insert data
@@ -473,10 +554,10 @@ INSERT INTO #ssd_contact (
     cont_contact_outcome_json
 )
 SELECT 
-    fc.[FACT_CONTACT_ID],
-    fc.[EXTERNAL_ID],
-    fc.[CONTACT_DTTM],
-    fc.[DIM_LOOKUP_CONT_SORC_ID],
+    fc.FACT_CONTACT_ID,
+    fc.DIM_PERSON_ID, 
+    fc.CONTACT_DTTM,
+    fc.DIM_LOOKUP_CONT_SORC_ID,
     (
         SELECT 
             NULLIF(fc.OUTCOME_NEW_REFERRAL_FLAG, '')           AS "OUTCOME_NEW_REFERRAL_FLAG",
@@ -492,83 +573,122 @@ SELECT
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS cont_contact_outcome_json
 FROM 
-    Child_Social.FACT_CONTACTS AS fc;
+    Child_Social.FACT_CONTACTS AS fc
+
+WHERE 
+    EXISTS (
+        SELECT 1
+        FROM #ssd_person p
+        WHERE p.pers_person_id = fc.DIM_PERSON_ID
+    );
 
 
-
-
-
+-- Create index(es)
+CREATE INDEX IDX_contact_person_id ON #ssd_contact(cont_person_id);
 
 
 /* 
 =============================================================================
-Object Name: #ssd_early_help_episodes
+Object Name: ssd_early_help_episodes
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 0.9
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_CAF_EPISODE
 =============================================================================
 */
--- Check if exists, & drop
-IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL 
-    DROP TABLE #ssd_early_help_episodes;
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL DROP TABLE #ssd_early_help_episodes;
 
--- Create temporary structure
+-- Create structure
+CREATE TABLE #ssd_early_help_episodes (
+    earl_episode_id         NVARCHAR(48) PRIMARY KEY,
+    earl_person_id          NVARCHAR(48),
+    earl_episode_start_date DATETIME,
+    earl_episode_end_date   DATETIME,
+    earl_episode_reason     NVARCHAR(MAX),
+    earl_episode_end_reason NVARCHAR(MAX),
+    earl_episode_organisation NVARCHAR(MAX),
+    earl_episode_worker_id  NVARCHAR(48)
+);
+
+-- Insert data 
+INSERT INTO #ssd_early_help_episodes (
+    earl_episode_id,
+    earl_person_id,
+    earl_episode_start_date,
+    earl_episode_end_date,
+    earl_episode_reason,
+    earl_episode_end_reason,
+    earl_episode_organisation,
+    earl_episode_worker_id
+)
 SELECT
-    cafe.FACT_CAF_EPISODE_ID AS earl_episode_id,
-    cafe.DIM_PERSON_ID AS earl_person_id,
-    cafe.EPISODE_START_DTTM AS earl_episode_start_date,
-    cafe.EPISODE_END_DTTM AS earl_episode_end_date,
-    cafe.START_REASON AS earl_episode_reason,
-    cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE AS earl_episode_end_reason,
-    cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE AS earl_episode_organisation,
-    'placeholder data' AS earl_episode_worker_id
-INTO 
-    #ssd_early_help_episodes
+    cafe.FACT_CAF_EPISODE_ID,
+    cafe.DIM_PERSON_ID,
+    cafe.EPISODE_START_DTTM,
+    cafe.EPISODE_END_DTTM,
+    cafe.START_REASON,
+    cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE,
+    cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
+    'PLACEHOLDER_DATA' -- placeholder value [TESTING]
 FROM 
-    Child_Social.FACT_CAF_EPISODE AS cafe;
+    Child_Social.FACT_CAF_EPISODE AS cafe
+WHERE EXISTS 
+    ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = cafe.DIM_PERSON_ID
+    );
+
+-- Create index(es)
+CREATE INDEX IDX_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
+
+
+
 
 
 
 /* 
 =============================================================================
-Object Name: #ssd_cin_episodes
+Object Name: ssd_cin_episodes
 Description: 
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
+- @ssd_timeframe_years
 - FACT_REFERRALS
 =============================================================================
 */
--- Check if exists, & drop 
+-- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
--- Create temporary structure
+-- Create structure
 CREATE TABLE #ssd_cin_episodes
 (
-    cine_referral_id INT,
-    cine_person_id NVARCHAR(48),
-    cine_referral_date DATETIME,
-    cine_cin_primary_need INT,
-    cine_referral_source NVARCHAR(255),
-    cine_referral_outcome_json NVARCHAR(500),
-    cine_referral_nfa NCHAR(1),
-    cine_close_reason NVARCHAR(255),
-    cine_close_date DATETIME,
-    cine_referral_team NVARCHAR(255),
-    cine_referral_worker_id NVARCHAR(48)
+    cine_referral_id            INT,
+    cine_person_id              NVARCHAR(48),
+    cine_referral_date          DATETIME,
+    cine_cin_primary_need       INT,
+    cine_referral_source        NVARCHAR(100),
+    cine_referral_outcome_json  NVARCHAR(500),
+    cine_referral_nfa           NCHAR(1), 
+    cine_close_reason           NVARCHAR(100),
+    cine_close_date             DATETIME,
+    cine_referral_team          NVARCHAR(100),
+    cine_referral_worker_id     NVARCHAR(48)
 );
 
--- Insert data
+-- Insert data 
 INSERT INTO #ssd_cin_episodes
 (
     cine_referral_id,
@@ -610,8 +730,13 @@ SELECT
     fr.DIM_WORKER_ID_DESC
 FROM 
     Child_Social.FACT_REFERRALS AS fr
+
 WHERE 
     fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE());
+
+-- Create index(es)
+CREATE INDEX IDX_ssd_cin_episodes_person_id ON #ssd_cin_episodes(cine_person_id);
+
 
 
 
@@ -619,12 +744,12 @@ WHERE
 
 /* 
 =============================================================================
-Object Name: #ssd_assessments
+Object Name: #ssd_cin_assessments
 Description: 
 Author: D2I
 Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 0.9
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -635,19 +760,19 @@ Dependencies:
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_cin_assessments') IS NOT NULL DROP TABLE #ssd_cin_assessments;
 
--- Create temporary structure
+-- Create structure
 CREATE TABLE #ssd_cin_assessments
 (
-    cina_assessment_id NVARCHAR(48) PRIMARY KEY,
-    cina_person_id NVARCHAR(48),
-    cina_referral_id NVARCHAR(48),
-    cina_assessment_start_date DATETIME,
-    cina_assessment_child_seen NCHAR(1),
-    cina_assessment_auth_date DATETIME, -- This needs checking !! 
-    cina_assessment_outcome_json NVARCHAR(500),
-    cina_assessment_outcome_nfa NCHAR(1),
-    cina_assessment_team NVARCHAR(255),
-    cina_assessment_worker_id NVARCHAR(48)
+    cina_assessment_id          NVARCHAR(48) PRIMARY KEY,
+    cina_person_id              NVARCHAR(48),
+    cina_referral_id            NVARCHAR(48),
+    cina_assessment_start_date  DATETIME,
+    cina_assessment_child_seen  NCHAR(1), 
+    cina_assessment_auth_date   DATETIME, -- This needs checking !! [TESTING]
+    cina_assessment_outcome_json NVARCHAR(1000),
+    cina_assessment_outcome_nfa NCHAR(1), 
+    cina_assessment_team        NVARCHAR(100),
+    cina_assessment_worker_id   NVARCHAR(48)
 );
 
 -- Insert data
@@ -658,7 +783,7 @@ INSERT INTO #ssd_cin_assessments
     cina_referral_id,
     cina_assessment_start_date,
     cina_assessment_child_seen,
-    cina_assessment_auth_date, -- This needs checking !! 
+    cina_assessment_auth_date, -- This needs checking !! [TESTING]
     cina_assessment_outcome_json,
     cina_assessment_outcome_nfa,
     cina_assessment_team,
@@ -670,7 +795,7 @@ SELECT
     fa.FACT_REFERRAL_ID,
     fa.START_DTTM,
     fa.SEEN_FLAG,
-    fa.START_DTTM, -- This needs checking !! 
+    fa.START_DTTM,              -- This needs checking !! [TESTING]
     (
         SELECT 
             NULLIF(fa.OUTCOME_NFA_FLAG, '')                     AS "OUTCOME_NFA_FLAG",
@@ -693,15 +818,16 @@ SELECT
     fa.COMPLETED_BY_DEPT_NAME,
     fa.COMPLETED_BY_USER_STAFF_ID
 FROM 
-    FACT_SINGLE_ASSESSMENT AS fa;
+    Child_Social.FACT_SINGLE_ASSESSMENT AS fa
+WHERE EXISTS 
+    ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = fa.DIM_PERSON_ID
+    );
 
-
--- Create constraint(s)
-ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
-FOREIGN KEY (cina_person_id) REFERENCES ssd_person(pers_person_id);
-
-ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_social_worker 
-FOREIGN KEY (cina_assessment_worker_id) REFERENCES ssd_social_worker(socw_social_worker_id);
+-- Create index(es)
+CREATE INDEX IDX_ssd_cin_assessments_person_id ON #ssd_cin_assessments(cina_person_id);
 
 
 
@@ -1506,92 +1632,275 @@ Dependencies:
 */
 
 
+
+
 /* 
 =============================================================================
-Object Name: #ssd_social_worker
+Object Name: ssd_professionals
 Description: 
 Author: D2I
-Last Modified Date: 06/11/23
+Last Modified Date: 16/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+-
+=============================================================================
+*/
+
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL DROP TABLE #ssd_professionals;
+
+-- Create structure
+CREATE TABLE #ssd_professionals (
+    prof_table_id                         NVARCHAR(48) PRIMARY KEY,
+    prof_professional_id                  NVARCHAR(48),
+    prof_social_worker_registration_no    NVARCHAR(48),
+    prof_agency_worker_flag               NCHAR(1),
+    prof_professional_job_title           NVARCHAR(500),
+    prof_professional_caseload            INT,
+    prof_professional_department          NVARCHAR(100),
+    prof_full_time_equivalency            FLOAT
+);
+
+-- Determine/Define date on which CASELOAD count required (Currently: September 30th)
+DECLARE @LastSept30th DATE;
+SET @LastSept30th = CASE 
+                        WHEN CONVERT(DATE, GETDATE()) > DATEFROMPARTS(YEAR(GETDATE()), 9, 30) 
+                        THEN DATEFROMPARTS(YEAR(GETDATE()), 9, 30)
+                        ELSE DATEFROMPARTS(YEAR(GETDATE()) - 1, 9, 30)
+                    END;
+
+-- Insert data
+INSERT INTO #ssd_professionals (
+    prof_table_id, 
+    prof_professional_id, 
+    prof_social_worker_registration_no,
+    prof_agency_worker_flag,
+    prof_professional_job_title,
+    prof_professional_caseload,
+    prof_professional_department,
+    prof_full_time_equivalency
+)
+SELECT 
+    dw.DIM_WORKER_ID                  AS prof_table_id,
+    dw.STAFF_ID                       AS prof_professional_id,
+    dw.WORKER_ID_CODE                 AS prof_social_worker_registration_no,
+    'N'                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
+    dw.JOB_TITLE                      AS prof_professional_job_title,
+    ISNULL(rc.OpenCases, 0)           AS prof_professional_caseload,        -- 0 when no open cases on given date.
+    dw.DEPARTMENT_NAME                AS prof_professional_department,
+    dw.FULL_TIME_EQUIVALENCY          AS prof_full_time_equivalency
+FROM 
+    Child_Social.DIM_WORKER AS dw
+LEFT JOIN (
+    SELECT 
+        -- Calculate CASELOAD 
+        DIM_WORKER_ID,
+        COUNT(*) AS OpenCases
+    FROM 
+        Child_Social.FACT_REFERRALS
+    WHERE 
+        REFRL_START_DTTM <= @LastSept30th AND 
+        (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM > @LastSept30th)
+    GROUP BY 
+        DIM_WORKER_ID
+) AS rc ON dw.DIM_WORKER_ID = rc.DIM_WORKER_ID;
+
+
+
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_prof_professional_id ON #ssd_professionals (prof_professional_id);
+
+
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_involvements
+Description: 
+Author: D2I
+Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- FACT_CONTEXT_CASE_WORKER
+- ssd_professionals
+- FACT_INVOLVEMENTS
+=============================================================================
+*/
+
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#ssd_involvements', 'U') IS NOT NULL DROP TABLE #ssd_involvements;
+
+-- Create structure
+CREATE TABLE #ssd_involvements (
+    invo_involvements_id             NVARCHAR(48) PRIMARY KEY,
+    invo_professional_id             NVARCHAR(48),
+    invo_professional_role_id        NVARCHAR(48),
+    invo_professional_team           NVARCHAR(48),
+    invo_involvement_start_date      DATETIME,
+    invo_involvement_end_date        DATETIME,
+    invo_worker_change_reason        NVARCHAR(48)
+);
+
+-- Insert data
+INSERT INTO #ssd_involvements (
+    invo_involvements_id, 
+    invo_professional_id, 
+    invo_professional_role_id,
+    invo_professional_team,
+    invo_involvement_start_date,
+    invo_involvement_end_date,
+    invo_worker_change_reason
+)
+SELECT 
+    fi.FACT_INVOLVEMENTS_ID                       AS invo_involvements_id,
+    fi.DIM_WORKER_ID                              AS invo_professional_id,
+    fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
+    fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC        AS invo_professional_team,
+    fi.START_DTTM                                 AS invo_involvement_start_date,
+    fi.END_DTTM                                   AS invo_involvement_end_date,
+    fi.DIM_LOOKUP_CWREASON_CODE                   AS invo_worker_change_reason
+FROM 
+    Child_Social.FACT_INVOLVEMENTS AS fi;
+
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_invo_professional_id ON #ssd_involvements (invo_professional_id);
+
+
+
+    
+
+/* 
+=============================================================================
+Object Name: ssd_pre_proceedings
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 02/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
 =============================================================================
 */
 
 -- Check if exists, & drop
-IF OBJECT_ID('tempdb..#ssd_social_worker') IS NOT NULL DROP TABLE #ssd_social_worker;
-
--- Create structure ,
-CREATE TABLE #ssd_social_worker(
-    socw_social_worker_id           NVARCHAR(48),
-    socw_worker_episode_start_date  DATETIME,
-    socw_worker_episode_end_date    DATETIME,
-    socw_worker_change_reason       NVARCHAR(48)
-);
-
--- Insert data,
-INSERT INTO #ssd_social_worker (
-    socw_social_worker_id, 
-    socw_worker_episode_start_date, 
-    socw_worker_episode_end_date, 
-    socw_worker_change_reason
-)
-SELECT 
-    [DIM_WORKER_ID]             AS socw_social_worker_id,
-    [START_DTTM]                AS socw_worker_episode_start_date,
-    [END_DTTM]                  AS socw_worker_episode_end_date,
-    [DIM_LOOKUP_CWREASON_CODE]  AS socw_worker_change_reason
-FROM 
-    Child_Social.FACT_CONTEXT_CASE_WORKER;
-
-/* 
-=============================================================================
-Object Name: #ssd_pre_proceedings
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-/* 
-=============================================================================
-Object Name: #ssd_voice_of_child
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
--- Check if exists, & drop 
-IF OBJECT_ID('tempdb..#ssd_voice_of_child') IS NOT NULL DROP TABLE #ssd_voice_of_child;
+IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pre_proceedings;
 
 -- Create structure
-CREATE TABLE #ssd_voice_of_child (
-    voch_person_id NVARCHAR(48) PRIMARY KEY, -- Assuming NVARCHAR() as a generic type for id
-    voch_explained_worries NCHAR(1),
-    voch_story_help_understand NCHAR(1),
-    voch_agree_worker NCHAR(1),
-    voch_plan_safe NCHAR(1),
-    voch_tablet_help_explain NCHAR(1)
+CREATE TABLE #ssd_pre_proceedings (
+    prep_table_id                       NVARCHAR(48) PRIMARY KEY,
+    prep_person_id                      NVARCHAR(48),
+    prep_plo_family_id                  NVARCHAR(48),
+    prep_pre_pro_decision_date          DATETIME,
+    prep_initial_pre_pro_meeting_date   DATETIME,
+    prep_pre_pro_outcome                NVARCHAR(100),
+    prep_agree_stepdown_issue_date      DATETIME,
+    prep_cp_plans_referral_period       INT, -- SHOULD THIS BE A DATE?
+    prep_legal_gateway_outcome          NVARCHAR(100),
+    prep_prev_pre_proc_child            INT,
+    prep_prev_care_proc_child           INT,
+    prep_pre_pro_letter_date            DATETIME,
+    prep_care_pro_letter_date           DATETIME,
+    prep_pre_pro_meetings_num           INT,
+    prep_pre_pro_parents_legal_rep      NCHAR(1), 
+    prep_parents_legal_rep_point_of_issue NCHAR(2),
+    prep_court_reference                NVARCHAR(48),
+    prep_care_proc_court_hearings       INT,
+    prep_care_proc_short_notice         NCHAR(1), 
+    prep_proc_short_notice_reason       NVARCHAR(100),
+    prep_la_inital_plan_approved        NCHAR(1), 
+    prep_la_initial_care_plan           NVARCHAR(100),
+    prep_la_final_plan_approved         NCHAR(1), 
+    prep_la_final_care_plan             NVARCHAR(100)
 );
 
 -- Insert placeholder data
+INSERT INTO #ssd_pre_proceedings (
+    prep_table_id,
+    prep_person_id,
+    prep_plo_family_id,
+    prep_pre_pro_decision_date,
+    prep_initial_pre_pro_meeting_date,
+    prep_pre_pro_outcome,
+    prep_agree_stepdown_issue_date,
+    prep_cp_plans_referral_period,
+    prep_legal_gateway_outcome,
+    prep_prev_pre_proc_child,
+    prep_prev_care_proc_child,
+    prep_pre_pro_letter_date,
+    prep_care_pro_letter_date,
+    prep_pre_pro_meetings_num,
+    prep_pre_pro_parents_legal_rep,
+    prep_parents_legal_rep_point_of_issue,
+    prep_court_reference,
+    prep_care_proc_court_hearings,
+    prep_care_proc_short_notice,
+    prep_proc_short_notice_reason,
+    prep_la_inital_plan_approved,
+    prep_la_initial_care_plan,
+    prep_la_final_plan_approved,
+    prep_la_final_care_plan
+)
+VALUES
+    (
+    '10001', 'DIM_PERSON1.PERSON_ID', 'PLO_FAMILY1', '2023-01-01', '2023-01-02', 'Outcome1', 
+    '2023-01-03', 3, 'Approved', 2, 1, '2023-01-04', '2023-01-05', 2, 'Y', 
+    'NA', 'COURT_REF_1', 1, 'N', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
+    ),
+    (
+    '10002', 'DIM_PERSON2.PERSON_ID', 'PLO_FAMILY2', '2023-02-01', '2023-02-02', 'Outcome2',
+    '2023-02-03', 4, 'Denied', 1, 2, '2023-02-04', '2023-02-05', 3, 'N',
+    'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'N', 'Initial Plan 2', 'N', 'Final Plan 2'
+    );
+
+-- To switch on once source data defined.
+-- INNER JOIN 
+--     ssd_person AS p ON ssd_pre_proceedings.DIM_PERSON_ID = p.pers_person_id;
+
+
+-- Create nonclustered index
+CREATE NONCLUSTERED INDEX idx_prep_person_id ON #ssd_pre_proceedings (prep_person_id);
+CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date ON #ssd_pre_proceedings (prep_pre_pro_decision_date);
+
+
+/* 
+=============================================================================
+Object Name: ssd_voice_of_child
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 16/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+=============================================================================
+*/
+-- Check if exists, & drop 
+IF OBJECT_ID('tempdb..#ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voice_of_child;
+
+-- Create structure
+CREATE TABLE #ssd_voice_of_child (
+    voch_table_id               NVARCHAR(48) PRIMARY KEY, 
+    voch_person_id              NVARCHAR(48), 
+    voch_explained_worries      NCHAR(1), 
+    voch_story_help_understand  NCHAR(1), 
+    voch_agree_worker           NCHAR(1), 
+    voch_plan_safe              NCHAR(1), 
+    voch_tablet_help_explain    NCHAR(1)
+);
+
+-- Insert placeholder data [TESTING]
 INSERT INTO #ssd_voice_of_child (
+    voch_table_id,
     voch_person_id,
     voch_explained_worries,
     voch_story_help_understand,
@@ -1600,12 +1909,104 @@ INSERT INTO #ssd_voice_of_child (
     voch_tablet_help_explain
 )
 VALUES
-    ('ID001', 'Y', 'Y', 'Y', 'N', 'N'),
-    ('ID002', 'Y', 'Y', 'Y', 'N', 'N');
+    ('ID001','P001', 'Y', 'Y', 'Y', 'N', 'N'),
+    ('ID002','P002', 'Y', 'Y', 'Y', 'N', 'N');
+
+-- To switch on once source data defined.
+-- INNER JOIN 
+--     ssd_person AS p ON ssd_voice_of_child.DIM_PERSON_ID = p.pers_person_id;
 
 
-ALTER TABLE Child_Social.#ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
-FOREIGN KEY (voch_person_id) REFERENCES #ssd_person(pers_person_id);
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_linked_identifiers
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 02/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+=============================================================================
+*/
+
+-- Check if exists, & drop 
+IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
+
+-- Create structure
+CREATE TABLE #ssd_linked_identifiers (
+    link_link_id NVARCHAR(48) PRIMARY KEY, 
+    link_person_id NVARCHAR(48), 
+    link_identifier_type NVARCHAR(MAX),
+    link_identifier_value NVARCHAR(MAX),
+    link_valid_from_date DATETIME,
+    link_valid_to_date DATETIME
+);
+
+-- Insert placeholder data [TESTING]
+INSERT INTO #ssd_linked_identifiers (
+    link_link_id,
+    link_person_id,
+    link_identifier_type,
+    link_identifier_value,
+    link_valid_from_date,
+    link_valid_to_date
+)
+VALUES
+    ('PLACEHOLDER_DATA', 'DIM_PERSON.PERSON_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', NULL, NULL);
+
+-- To switch on once source data defined.
+-- INNER JOIN 
+--     ssd_person AS p ON ssd_linked_identifiers.DIM_PERSON_ID = p.pers_person_id;
+
+
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_s251_finance
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 02/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+=============================================================================
+*/
+
+-- Check if exists, & drop 
+IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_finance;
+
+-- Create structure
+CREATE TABLE #ssd_s251_finance (
+    s251_id NVARCHAR(48) PRIMARY KEY, 
+    s251_cla_placement_id NVARCHAR(48), 
+    s251_placeholder_1 NVARCHAR(48),
+    s251_placeholder_2 NVARCHAR(48),
+    s251_placeholder_3 NVARCHAR(48),
+    s251_placeholder_4 NVARCHAR(48)
+);
+
+-- Insert placeholder data [TESTING]
+INSERT INTO #ssd_s251_finance (
+    s251_id,
+    s251_cla_placement_id,
+    s251_placeholder_1,
+    s251_placeholder_2,
+    s251_placeholder_3,
+    s251_placeholder_4
+)
+VALUES
+    ('PLACEHOLDER_DATA_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
 
 
 
@@ -1615,9 +2016,7 @@ FOREIGN KEY (voch_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 /* ********************************************************************************************************** */
-/*
-Development clean up etc
-*/
+/* Development clean up */
 
 -- Get & print run time 
 SET @EndTime = GETDATE();
