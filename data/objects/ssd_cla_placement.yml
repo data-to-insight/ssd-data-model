@@ -15,6 +15,8 @@ nodes:
     categories:
     - looked_after
     - placement
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -34,6 +36,8 @@ nodes:
     categories:
     - looked_after
     - placement
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -54,6 +58,9 @@ nodes:
     returns:
     - SSDA903
     - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:clap_cla_placement_start_date
     - mosaic:clap_cla_placement_start_date
@@ -210,6 +217,11 @@ nodes:
     description: null
     item_ref: CLAP011A
     type: float
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     guidance: null
   - name: clap_cla_placement_la
     description: LA of Placement
@@ -232,6 +244,19 @@ nodes:
     - mosaic:ssd_cla_placement
     guidance: The Local Authority of the location where the child is placed. (In the
       SSDA903 this is calculated from the Placement Postcode by the DfE)
+  - name: clap_cla_id
+    description: null
+    item_ref: CLAP012A
+    type: nvarchar
+    categories:
+    - looked_after
+    - placement
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    guidance: null
   - name: clap_cla_placement_provider
     description: Placement Provider
     item_ref: CLAP007A
@@ -270,7 +295,7 @@ nodes:
     - looked_after
     - placement
     returns:
-    - AnnexA
+    - FACT_CARE_E+Z171:AC171.OFSTED_URN
     cms:
     - liquid_logic
     - mosaic
@@ -330,6 +355,9 @@ nodes:
     - placement
     returns:
     - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:clap_cla_placement_end_date
     - mosaic:clap_cla_placement_end_date

@@ -16,6 +16,8 @@ nodes:
     - child_protection
     - cp_plan
     - review
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -35,6 +37,8 @@ nodes:
     - child_protection
     - cp_plan
     - review
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic

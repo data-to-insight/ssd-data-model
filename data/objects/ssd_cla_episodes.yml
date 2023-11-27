@@ -393,3 +393,15 @@ nodes:
     - liquid_logic:ssd_cla_episodes
     - mosaic:ssd_cla_episodes
     guidance: Allocated worker responsible for Looked After Child
+  - name: clae_cla_id
+    description: null
+    item_ref: CLAE010A
+    type: nvarchar
+    categories:
+    - looked_after
+    returns:
+    - Local
+    cms_field:
+    - liquid_logic:clae_cla_id
+    - mosaic:clae_cla_id
+    guidance: null

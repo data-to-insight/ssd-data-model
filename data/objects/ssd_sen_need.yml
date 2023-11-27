@@ -17,6 +17,8 @@ nodes:
     - ehcp_request
     - ehcp
     - need
+    returns:
+    - Local
     cms:
     - liquid_logic
     cms_field:
@@ -36,6 +38,8 @@ nodes:
     - ehcp_request
     - ehcp
     - need
+    returns:
+    - Local
     cms:
     - liquid_logic
     cms_field:

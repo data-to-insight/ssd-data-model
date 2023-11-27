@@ -11,6 +11,8 @@ nodes:
     - looked_after
     - health
     - immunisations
+    returns:
+    - Local
     cms_table:
     - liquid_logic:ssd_cla_immunisations
     - mosaic:ssd_cla_immunisations
@@ -52,6 +54,11 @@ nodes:
     - looked_after
     - health
     - immunisations
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_table:
     - liquid_logic:ssd_cla_immunisations
     - mosaic:ssd_cla_immunisations
@@ -66,6 +73,9 @@ nodes:
     - immunisations
     returns:
     - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:clai_immunisations_status
     - mosaic:clai_immunisations_status

@@ -16,6 +16,8 @@ nodes:
     - send
     - ehcp_request
     - ehcp_assessment
+    returns:
+    - Local
     cms:
     - liquid_logic
     cms_field:
@@ -42,6 +44,8 @@ nodes:
     - send
     - ehcp_request
     - ehcp_assessment
+    returns:
+    - Local
     cms:
     - liquid_logic
     cms_field:

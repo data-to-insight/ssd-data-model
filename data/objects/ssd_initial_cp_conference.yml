@@ -9,6 +9,8 @@ nodes:
     categories:
     - initial_cp_conference
     - child_protection
+    returns:
+    - Local
     cms_table:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
@@ -16,6 +18,8 @@ nodes:
   - name: icpc_icpc_meeting_id
     description: Initial CP Conference Meeting ID
     item_ref: ICPC009A
+    returns:
+    - Local
     cms_table:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
@@ -86,6 +90,8 @@ nodes:
     description: Referral ID
     item_ref: ICPC012A
     foreign_key: ssd_cin_episodes.cine_referral_id
+    returns:
+    - Local
     cms_field:
     - liquid_logic:icpc_referral_id
     - mosaic:icpc_referral_id
@@ -169,6 +175,8 @@ nodes:
     description: ICPC Outcome CP Flag
     item_ref: ICPC013A
     type: nchar
+    returns:
+    - Local
     cms_field:
     - liquid_logic:icpc_icpc_outcome_cp_flag
     - mosaic:icpc_icpc_outcome_cp_flag

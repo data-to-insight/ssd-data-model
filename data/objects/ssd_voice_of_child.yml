@@ -2,6 +2,19 @@
 nodes:
 - name: ssd_voice_of_child
   fields:
+  - name: voch_table_id
+    description: Voice of the Child table row ID
+    item_ref: VOCH007A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - voice_of_child
+    returns:
+    - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
+    guidance: null
   - name: voch_person_id
     description: Person Unique ID
     item_ref: VOCH001A
@@ -28,14 +41,6 @@ nodes:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
     guidance: See PERS001A
-  - name: voch_table_id
-    description: Voice of the Child table row ID
-    item_ref: VOCH007A
-    type: nvarchar
-    primary_key: true
-    categories:
-    - voice_of_child
-    guidance: null
   - name: voch_explained_worries
     description: Has someone explained to you why people are worried for your family
       in a way that you can understand?
@@ -45,6 +50,9 @@ nodes:
     - voice_of_child
     returns:
     - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:voch_explained_worries
     - mosaic:voch_explained_worries
@@ -68,6 +76,9 @@ nodes:
     - voice_of_child
     returns:
     - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:voch_story_help_understand
     - mosaic:voch_story_help_understand
@@ -91,6 +102,9 @@ nodes:
     - voice_of_child
     returns:
     - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:voch_agree_worker
     - mosaic:voch_agree_worker
@@ -114,6 +128,9 @@ nodes:
     - voice_of_child
     returns:
     - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:voch_plan_safe
     - mosaic:voch_plan_safe
@@ -137,6 +154,9 @@ nodes:
     - voice_of_child
     returns:
     - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:voch_tablet_help_explain
     - mosaic:voch_tablet_help_explain

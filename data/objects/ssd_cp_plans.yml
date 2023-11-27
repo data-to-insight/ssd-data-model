@@ -40,6 +40,8 @@ nodes:
     categories:
     - child_protection
     - cp_plan
+    returns:
+    - Local
     cms_field:
     - liquid_logic:cppl_referral_id
     - mosaic:cppl_referral_id
@@ -54,6 +56,8 @@ nodes:
     categories:
     - child_protection
     - cp_plan
+    returns:
+    - Local
     cms_field:
     - liquid_logic:cppl_initial_cp_conference_id
     - mosaic:cppl_initial_cp_conference_id
@@ -182,6 +186,8 @@ nodes:
     categories:
     - child_protection
     - cp_plan
+    returns:
+    - Local
     cms_table:
     - liquid_logic:ssd_cp_plans
     - mosaic:ssd_cp_plans
@@ -193,6 +199,8 @@ nodes:
     categories:
     - child_protection
     - cp_plan
+    returns:
+    - Local
     cms_table:
     - liquid_logic:ssd_cp_plans
     - mosaic:ssd_cp_plans

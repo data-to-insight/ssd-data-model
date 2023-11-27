@@ -29,6 +29,8 @@ nodes:
     categories:
     - child_in_need
     - assessment
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
