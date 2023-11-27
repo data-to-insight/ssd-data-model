@@ -10,6 +10,8 @@ nodes:
     categories:
     - looked_after
     - health
+    returns:
+    - Local
     cms_table:
     - liquid_logic:ssd_cla_health
     - mosaic:ssd_cla_health

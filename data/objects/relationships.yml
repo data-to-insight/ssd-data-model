@@ -21,9 +21,14 @@ relationships:
   child_key: immi_person_id
   relation: 1:M
 - parent_object: ssd_person
-  parent_key: pers_person_id
+  parent_key: pers_person_id (field is both PK/FK)
   child_object: ssd_mother
   child_key: moth_person_id
+  relation: 1:M
+- parent_object: ssd_person
+  parent_key: pers_person_id
+  child_object: ssd_mother
+  child_key: moth_childs_person_id
   relation: 1:M
 - parent_object: ssd_person
   parent_key: pers_person_id
@@ -274,6 +279,16 @@ relationships:
   parent_key: ehcp_active_ehcp_id
   child_object: ssd_sen_need
   child_key: senn_active_ehcp_id
+  relation: 1:M
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
+  child_object: ssd_involvements
+  child_key: invo_professional_id
+  relation: 1:M
+- parent_object: ssd_professionals
+  parent_key: prof_social_worker_registration_no
+  child_object: ssd_involvements
+  child_key: invo_professional_role_id
   relation: 1:M
 - parent_object: ssd_involvements
   parent_key: invo_professional_id

@@ -9,6 +9,8 @@ nodes:
     primary_key: true
     categories:
     - workforce
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -20,12 +22,17 @@ nodes:
     - mosaic:ssd_professionals
     guidance: null
   - name: prof_professional_id
-    description: Worker ID
+    description: Staff Identifier
     item_ref: PROF010A
     type: nvarchar
     foreign_key: ssd_involvements.invo_professional_id
     categories:
     - workforce
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     guidance: null
   - name: prof_social_worker_registration_no
     description: Social worker ID - Social Work England (SWE) registration number-
@@ -34,6 +41,11 @@ nodes:
     type: nvarchar
     categories:
     - workforce
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prof_social_worker_registration_no
     - mosaic:prof_social_worker_registration_no
@@ -94,6 +106,9 @@ nodes:
     returns:
     - CSCWF
     - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prof_professional_job_title
     - mosaic:prof_professional_job_title
@@ -105,7 +120,7 @@ nodes:
       \ Middle Manager\n\u2022 3 for First Line Manager\n\u2022 4 for Senior Practitioner\n\
       \u2022 5 for Case Holder\n\u2022 6 for Qualified without cases"
   - name: prof_professional_caseload
-    description: Number of cases held
+    description: Number of cases held since previous Sept
     item_ref: PROF008A
     type: int
     categories:
@@ -113,6 +128,9 @@ nodes:
     returns:
     - CSCWF
     - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prof_professional_caseload
     - mosaic:prof_professional_caseload
@@ -135,6 +153,11 @@ nodes:
     type: nvarchar
     categories:
     - workforce
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prof_professional_department
     - mosaic:prof_professional_department
@@ -145,6 +168,11 @@ nodes:
     type: float
     categories:
     - workforce
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prof_full_time_equivalency
     - mosaic:prof_full_time_equivalency

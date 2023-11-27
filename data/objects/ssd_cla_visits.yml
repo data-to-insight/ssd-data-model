@@ -10,6 +10,8 @@ nodes:
     categories:
     - looked_after
     - visit
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -29,6 +31,8 @@ nodes:
     categories:
     - looked_after
     - visit
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic

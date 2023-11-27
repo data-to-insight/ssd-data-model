@@ -9,6 +9,11 @@ nodes:
     primary_key: true
     categories:
     - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_table_id
     - mosaic:prep_table_id
@@ -82,6 +87,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_pre_pro_decision_date
     - mosaic:prep_pre_pro_decision_date
@@ -106,6 +114,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_initial_pre_pro_meeting_date
     - mosaic:prep_initial_pre_pro_meeting_date
@@ -130,6 +141,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_pre_pro_outcome
     - mosaic:prep_pre_pro_outcome
@@ -158,6 +172,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_agree_stepdown_issue_date
     - mosaic:prep_agree_stepdown_issue_date
@@ -183,6 +200,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_cp_plans_referral_period
     - mosaic:prep_cp_plans_referral_period
@@ -207,6 +227,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_legal_gateway_outcome
     - mosaic:prep_legal_gateway_outcome
@@ -232,6 +255,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_prev_pre_proc_child
     - mosaic:prep_prev_pre_proc_child
@@ -256,6 +282,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_prev_care_proc_child
     - mosaic:prep_prev_care_proc_child
@@ -280,6 +309,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_pre_pro_letter_date
     - mosaic:prep_pre_pro_letter_date
@@ -307,6 +339,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_care_pro_letter_date
     - mosaic:prep_care_pro_letter_date
@@ -334,6 +369,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_pre_pro_meetings_num
     - mosaic:prep_pre_pro_meetings_num
@@ -357,6 +395,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_pre_pro_parents_legal_rep
     - mosaic:prep_pre_pro_parents_legal_rep
@@ -379,6 +420,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_parents_legal_rep_point_of_issue
     - mosaic:prep_parents_legal_rep_point_of_issue
@@ -401,6 +445,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_court_reference
     - mosaic:prep_court_reference
@@ -425,6 +472,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_care_proc_court_hearings
     - mosaic:prep_care_proc_court_hearings
@@ -448,6 +498,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_care_proc_short_notice
     - mosaic:prep_care_proc_short_notice
@@ -472,6 +525,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_proc_short_notice_reason
     - mosaic:prep_proc_short_notice_reason
@@ -501,6 +557,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_la_inital_plan_approved
     - mosaic:prep_la_inital_plan_approved
@@ -524,6 +583,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_la_initial_care_plan
     - mosaic:prep_la_initial_care_plan
@@ -553,6 +615,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_la_final_plan_approved
     - mosaic:prep_la_final_plan_approved
@@ -576,6 +641,9 @@ nodes:
     - pre_proceedings
     returns:
     - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:prep_la_final_care_plan
     - mosaic:prep_la_final_care_plan
