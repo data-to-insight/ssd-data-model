@@ -126,7 +126,7 @@ CREATE INDEX IDX_ssd_person_la_person_id ON ssd_person(pers_person_id);
 -- [changes needed] has open referral - FACT_REFERRALS.REFRL_START_DTTM or doesn't closed date or a closed date within last 6yrs
 -- [picked up within the referral] active plan or has been active in 6yrs 
 
-/*SSD Person filter (notes): - OnN HOLD/Not included in SSD Ver/Iteration 1*/
+/*SSD Person filter (notes): - ON HOLD/Not included in SSD Ver/Iteration 1*/
 --1
 -- ehcp request in last 6yrs - Child_Social.FACT_EHCP_EPISODE.REQUEST_DTTM ; [perhaps not in iteration|version 1]
     -- OR EXISTS (
@@ -180,9 +180,9 @@ INSERT INTO ssd_family (
     fami_person_id
     )
 SELECT 
-    EXTERNAL_ID                         AS fami_table_id,
-    fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID  AS fami_family_id,
-    DIM_PERSON_ID                       AS fami_person_id
+    fc.EXTERNAL_ID                          AS fami_table_id,
+    fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID      AS fami_family_id,
+    fc.DIM_PERSON_ID                        AS fami_person_id
 FROM Child_Social.FACT_CONTACTS AS fc
 
 WHERE EXISTS ( -- only need address data for ssd relevant records
@@ -788,7 +788,7 @@ CREATE TABLE ssd_cin_assessments
 );
 
 -- Insert data
-INSERT INTO ssd_cin_assessments
+INSERT INTO #ssd_cin_assessments
 (
     cina_assessment_id,
     cina_person_id,
@@ -807,37 +807,38 @@ SELECT
     fa.FACT_REFERRAL_ID,
     fa.START_DTTM,
     fa.SEEN_FLAG,
-    fa.START_DTTM,              -- This needs checking !! [TESTING]
+    fa.START_DTTM, -- This needs checking !! [TESTING]
     (
         SELECT 
-            NULLIF(fa.OUTCOME_NFA_FLAG, '')                     AS "OUTCOME_NFA_FLAG",
-            NULLIF(fa.OUTCOME_NFA_S47_END_FLAG, '')             AS "OUTCOME_NFA_S47_END_FLAG",
-            NULLIF(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '')     AS "OUTCOME_STRATEGY_DISCUSSION_FLAG",
-            NULLIF(fa.OUTCOME_CLA_REQUEST_FLAG, '')             AS "OUTCOME_CLA_REQUEST_FLAG",
-            NULLIF(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '')       AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
-            NULLIF(fa.OUTCOME_LEGAL_ACTION_FLAG, '')            AS "OUTCOME_LEGAL_ACTION_FLAG",
-            NULLIF(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '')        AS "OUTCOME_PROV_OF_SERVICES_FLAG",
-            NULLIF(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '')         AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
-            NULLIF(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '')   AS "OUTCOME_SPECIALIST_ASSESSMENT_FLAG",
-            NULLIF(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')   AS "OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG",
-            NULLIF(fa.OUTCOME_OTHER_ACTIONS_FLAG, '')           AS "OUTCOME_OTHER_ACTIONS_FLAG",
-            NULLIF(fa.OTHER_OUTCOMES_EXIST_FLAG, '')            AS "OTHER_OUTCOMES_EXIST_FLAG",
-            NULLIF(fa.TOTAL_NO_OF_OUTCOMES, '')                 AS "TOTAL_NO_OF_OUTCOMES",
-            NULLIF(fa.OUTCOME_COMMENTS, '')                     AS "OUTCOME_COMMENTS"
+            NULLIF(fa.OUTCOME_NFA_FLAG, '') AS "OUTCOME_NFA_FLAG",
+            NULLIF(fa.OUTCOME_NFA_S47_END_FLAG, '') AS "OUTCOME_NFA_S47_END_FLAG",
+            NULLIF(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS "OUTCOME_STRATEGY_DISCUSSION_FLAG",
+            NULLIF(fa.OUTCOME_CLA_REQUEST_FLAG, '') AS "OUTCOME_CLA_REQUEST_FLAG",
+            NULLIF(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '') AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
+            NULLIF(fa.OUTCOME_LEGAL_ACTION_FLAG, '') AS "OUTCOME_LEGAL_ACTION_FLAG",
+            NULLIF(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '') AS "OUTCOME_PROV_OF_SERVICES_FLAG",
+            NULLIF(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '') AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
+            NULLIF(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '') AS "OUTCOME_SPECIALIST_ASSESSMENT_FLAG",
+            NULLIF(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '') AS "OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG",
+            NULLIF(fa.OUTCOME_OTHER_ACTIONS_FLAG, '') AS "OUTCOME_OTHER_ACTIONS_FLAG",
+            NULLIF(fa.OTHER_OUTCOMES_EXIST_FLAG, '') AS "OTHER_OUTCOMES_EXIST_FLAG",
+            NULLIF(fa.TOTAL_NO_OF_OUTCOMES, '') AS "TOTAL_NO_OF_OUTCOMES",
+            NULLIF(fa.OUTCOME_COMMENTS, '') AS "OUTCOME_COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ),
-    fa.OUTCOME_NFA_FLAG,
-    fa.COMPLETED_BY_DEPT_NAME,
-    fa.COMPLETED_BY_USER_STAFF_ID
+    ) AS cina_assessment_outcome_json, 
+    fa.OUTCOME_NFA_FLAG AS cina_assessment_outcome_nfa,
+    fa.COMPLETED_BY_DEPT_NAME AS cina_assessment_team,
+    fa.COMPLETED_BY_USER_STAFF_ID AS cina_assessment_worker_id
 FROM 
     Child_Social.FACT_SINGLE_ASSESSMENT AS fa
-
 WHERE EXISTS 
-    ( -- only need data for ssd relevant records
+(
+    -- only need data for ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
-    );
+);
+
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_cin_assessments_person_id ON ssd_cin_assessments(cina_person_id);
@@ -1003,12 +1004,13 @@ FOREIGN KEY (cinv_cin_plan_id) REFERENCES ssd_cin_plans(cinp_cin_plan_id);
 Object Name: ssd_s47_enquiry
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
+- ssd_person
 - FACT_S47
 - FACT_CP_CONFERENCE
 =============================================================================
@@ -1016,7 +1018,7 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_s47_enquiry;
 
---Create structure 
+-- Create structure 
 CREATE TABLE ssd_s47_enquiry (
     s47e_s47_enquiry_id             NVARCHAR(48) PRIMARY KEY,
     s47e_referral_id                NVARCHAR(48),
@@ -1024,7 +1026,7 @@ CREATE TABLE ssd_s47_enquiry (
     s47e_s47_start_date             DATETIME,
     s47e_s47_end_date               DATETIME,
     s47e_s47_nfa                    NCHAR(1),
-    s47e_s47_outcome_json           NVARCHAR(500),
+    s47e_s47_outcome_json           NVARCHAR(1000),
     s47e_s47_completed_by_team      NVARCHAR(100),
     s47e_s47_completed_by_worker    NVARCHAR(48)
 );
@@ -1037,38 +1039,44 @@ INSERT INTO ssd_s47_enquiry(
     s47e_s47_start_date,
     s47e_s47_end_date,
     s47e_s47_nfa,
-    s47e_s47_outcome_json ,
+    s47e_s47_outcome_json,
     s47e_s47_completed_by_team,
     s47e_s47_completed_by_worker
 )
 SELECT 
     s47.FACT_S47_ID,
     s47.FACT_REFERRAL_ID,
-    s47.DIM_PERSON_ID
+    s47.DIM_PERSON_ID,
     s47.START_DTTM,
     s47.END_DTTM,
-    s47.OUTCOME_NFA_FLAG
+    s47.OUTCOME_NFA_FLAG,
     (
         SELECT 
             NULLIF(s47.OUTCOME_NFA_FLAG, '')                   AS "OUTCOME_NFA_FLAG",
-            NULLIF(s47.OUTCOME_NFA_FLAG, '')                   AS "OUTCOME_NFA_FLAG",
-            NULLIF(s47.OUTCOME_NFA_FLAG, '')                   AS "OUTCOME_NFA_FLAG",
-
+            NULLIF(s47.OUTCOME_LEGAL_ACTION_FLAG, '')          AS "OUTCOME_LEGAL_ACTION_FLAG",
+            NULLIF(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '')      AS "OUTCOME_PROV_OF_SERVICES_FLAG",
+            NULLIF(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '')       AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
+            NULLIF(s47.OUTCOME_CP_CONFERENCE_FLAG, '')         AS "OUTCOME_CP_CONFERENCE_FLAG",
+            NULLIF(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '')   AS "OUTCOME_NFA_CONTINUE_SINGLE_FLAG",
+            NULLIF(s47.OUTCOME_MONITOR_FLAG, '')               AS "OUTCOME_MONITOR_FLAG",
+            NULLIF(s47.OTHER_OUTCOMES_EXIST_FLAG, '')          AS "OTHER_OUTCOMES_EXIST_FLAG",
+            NULLIF(s47.TOTAL_NO_OF_OUTCOMES, '')               AS "TOTAL_NO_OF_OUTCOMES",
+            NULLIF(s47.OUTCOME_COMMENTS, '')                   AS "OUTCOME_COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) AS cont_contact_outcome_json
-
-    s47.COMPLETED_BY_DEPT_ID,
-    s47.COMPLETED_BY_USER_STAFF_ID
+    ) AS s47e_s47_outcome_json,
+    s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
+    s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker
 FROM 
-    Child_Social.FACT_S47 AS s47
+    Child_Social.FACT_S47 AS s47;
+
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_s47_enquiry_icpc_person_id ON ssd_s47_enquiry_icpc(cinp_person_id);
-
+CREATE INDEX IDX_ssd_s47_enquiry_person_id ON ssd_s47_enquiry(s47e_person_id);
 
 -- Create constraint(s)
-ALTER TABLE ssd_s47_enquiry_icpc ADD CONSTRAINT FK_s47_person
-FOREIGN KEY (la_person_id) REFERENCES ssd_person(la_person_id);
+ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
+FOREIGN KEY (s47e_person_id) REFERENCES ssd_person(pers_person_id);
+
 
 /* Removed 22/11/23
     CASE 
@@ -1083,60 +1091,100 @@ LEFT JOIN
     */
 
 
+
+
 /* 
 =============================================================================
-Object Name: ssd_cp_plans
+Object Name: ssd_initial_cp_conference
 Description: 
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- FACT_S47
+- FACT_CP_CONFERENCE
+=============================================================================
+*/
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_cp_plans
+Description: 
+Author: D2I
+Last Modified Date: 24/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 0.9
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- ssd_initial_cp_conference
+- FACT_CP_PLAN
 =============================================================================
 */
 
 -- Check if exists & drop 
-IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_cp_reviews;
+IF OBJECT_ID('ssd_cp_plans') IS NOT NULL DROP TABLE ssd_cp_plans;
 
 -- Create structure
-CREATE TABLE ssd_cp_reviews
-(
-    cppr_cp_review_id               NVARCHAR(48) PRIMARY KEY,
-    cppr_cp_plan_id                 NVARCHAR(48),
-    cppr_cp_review_due              DATETIME,
-    cppr_cp_review_date             DATETIME,
-    cppr_cp_review_outcome          NCHAR(1), 
-    cppr_cp_review_quorate          NCHAR(1) DEFAULT '0',   -- using '0' as PLACEHOLDER_DATA [TESTING]
-    cppr_cp_review_participation    NCHAR(1) DEFAULT '0'    -- using '0' as PLACEHOLDER_DATA [TESTING]
+CREATE TABLE ssd_cp_plans (
+    cppl_cp_plan_id                   NVARCHAR(48) PRIMARY KEY,
+    cppl_referral_id                  NVARCHAR(48),
+    cppl_initial_cp_conference_id     NVARCHAR(48),
+    cppl_person_id                    NVARCHAR(48),
+    cppl_cp_plan_start_date           DATETIME,
+    cppl_cp_plan_end_date             DATETIME,
+    cppl_cp_plan_team                 NVARCHAR(48), -- [PLACEHOLDER_DATA'] [TESTING]
+    cppl_cp_plan_worker_id            NVARCHAR(48), -- [PLACEHOLDER_DATA'] [TESTING]
+    cppl_cp_plan_initial_category     NVARCHAR(100),
+    cppl_cp_plan_latest_category      NVARCHAR(100)
 );
 
+
 -- Insert data
-INSERT INTO ssd_cp_reviews
-(
-    cppr_cp_review_id,
-    cppr_cp_plan_id,
-    cppr_cp_review_due,
-    cppr_cp_review_date,
-    cppr_cp_review_outcome,
-    cppr_cp_review_quorate,
-    cppr_cp_review_participation
+INSERT INTO ssd_cp_plans (
+    cppl_cp_plan_id, 
+    cppl_referral_id, 
+    cppl_initial_cp_conference_id, 
+    cppl_person_id, 
+    cppl_cp_plan_start_date, 
+    cppl_cp_plan_end_date, 
+    cppl_cp_plan_team, 
+    cppl_cp_plan_worker_id, 
+    cppl_cp_plan_initial_category, 
+    cppl_cp_plan_latest_category
 )
 SELECT 
-    FACT_CP_REVIEW_ID,
-    FACT_CP_PLAN_ID,
-    DUE_DTTM,
-    MEETING_DTTM,
-    OUTCOME_CONTINUE_CP_FLAG,
-    '0', -- 'PLACEHOLDER_DATA' for cppr_cp_review_quorate [TESTING]
-    '0'  -- 'PLACEHOLDER_DATA' for cppr_cp_review_participation [TESTING]
+    FACT_CP_PLAN_ID AS cppl_cp_plan_id,
+    FACT_REFERRAL_ID AS cppl_referral_id,
+    FACT_INITIAL_CP_CONFERENCE_ID AS cppl_initial_cp_conference_id,
+    DIM_PERSON_ID AS cppl_person_id,
+    START_DTTM AS cppl_cp_plan_start_date,
+    END_DTTM AS cppl_cp_plan_end_date,
+    'PLACEHOLDER_DATA' AS cppl_cp_plan_team,                -- [PLACEHOLDER_DATA'] [TESTING]
+    'PLACEHOLDER_DATA' AS cppl_cp_plan_worker_id,           -- [PLACEHOLDER_DATA'] [TESTING]
+    INIT_CATEGORY_DESC AS cppl_cp_plan_initial_category,
+    CP_CATEGORY_DESC AS cppl_cp_plan_latest_category
 FROM 
-    Child_Social.FACT_CP_REVIEW;
+    Child_Social.FACT_CP_PLAN;
+
+
 
 -- Create index(es)
+
+
 -- Create constraint(s)
+ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_cppl_person_id
+FOREIGN KEY (cppl_person_id) REFERENCES ssd_person(pers_person_id);
+
+ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_cppl_initial_cp_conference_id
+FOREIGN KEY (cppl_initial_cp_conference_id) REFERENCES ssd_initial_cp_conference(icpc_icpc_id);
+
 
 
 /* 
@@ -1163,9 +1211,9 @@ Dependencies:
 Object Name: ssd_cp_visits
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
+Version: 0.9
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: This has issues, where/what is the fk back to cp_plans? 
 Dependencies: 
@@ -1178,7 +1226,7 @@ IF OBJECT_ID('ssd_cp_visits') IS NOT NULL DROP TABLE ssd_cp_visits;
 -- Create structure
 CREATE TABLE ssd_cp_visits (
     cppv_casenote_id        INT PRIMARY KEY, 
-    cppv_cp_visit_id        INT, 
+    cppv_cp_visit_id        INT,                -- ??WHERE DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID') [TESTING]
     cppv_cp_visit_date      DATETIME, 
     cppv_cp_visit_seen      NCHAR(1), 
     cppv_cp_visit_seen_alone NCHAR(1), 
@@ -1189,13 +1237,15 @@ CREATE TABLE ssd_cp_visits (
 INSERT INTO ssd_cp_visits
 SELECT 
     cn.FACT_CASENOTE_ID,
-    cn.Child_Social.FACT_CASENOTES,
+    cn.DIM_LOOKUP_CASNT_TYPE_ID,                -- [TESTING]
     cn.EVENT_DTTM,
     cn.SEEN_FLAG,
     cn.SEEN_ALONE_FLAG,
     cn.SEEN_BEDROOM_FLAG 
 FROM 
     Child_Social.FACT_CASENOTES AS cn;
+
+-- Create constraint(s)
 
 
 
@@ -1207,11 +1257,13 @@ Description:
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Version: 1.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: Some fields - ON HOLD/Not included in SSD Ver/Iteration 1
 Dependencies: 
-- 
+- ssd_person
+- ssd_cp_plans
+- FACT_CP_REVIEW
 =============================================================================
 */
 
@@ -1226,8 +1278,8 @@ CREATE TABLE ssd_cp_reviews
     cppr_cp_review_due              DATETIME NULL,
     cppr_cp_review_date             DATETIME NULL,
     cppr_cp_review_outcome          NCHAR(1), 
-    cppr_cp_review_quorate          NCHAR(1) DEFAULT '0',   -- 'PLACEHOLDER_DATA'
-    cppr_cp_review_participation    NCHAR(1) DEFAULT '0'    -- 'PLACEHOLDER_DATA'
+    cppr_cp_review_quorate          NCHAR(1) DEFAULT '0',   -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    cppr_cp_review_participation    NCHAR(1) DEFAULT '0'    -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
 );
 
 -- Insert data
@@ -1247,10 +1299,11 @@ SELECT
     cpr.DUE_DTTM,
     cpr.MEETING_DTTM,
     cpr.OUTCOME_CONTINUE_CP_FLAG,
-    '0', -- 'PLACEHOLDER_DATA' for cppr_cp_review_quorate
-    '0'  -- 'PLACEHOLDER_DATA' for cppr_cp_review_participation
+    '0', -- 'PLACEHOLDER_DATA' for cppr_cp_review_quorate       ['PLACEHOLDER_DATA'] - ON HOLD/Not included in SSD Ver/Iteration 1
+    '0'  -- 'PLACEHOLDER_DATA' for cppr_cp_review_participation ['PLACEHOLDER_DATA'] - ON HOLD/Not included in SSD Ver/Iteration 1
 FROM 
     Child_Social.FACT_CP_REVIEW as cpr
+
 INNER JOIN 
     ssd_person AS p ON cpr.DIM_PERSON_ID = p.pers_person_id;
 
@@ -1283,7 +1336,7 @@ Description:
 Author: D2I
 Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -1346,7 +1399,6 @@ FOREIGN KEY (clae_cla_worker_id) REFERENCES ssd_involvements (invo_professional_
 
 
 
-
 /* 
 =============================================================================
 Object Name: ssd_cla_convictions
@@ -1354,7 +1406,7 @@ Description:
 Author: D2I
 Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -1365,6 +1417,7 @@ Dependencies:
 
 -- if exists, drop
 IF OBJECT_ID('ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE ssd_cla_convictions;
+--IF OBJECT_ID('tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cla_convictions;
 
 -- create structure
 CREATE TABLE ssd_cla_convictions (
@@ -1375,7 +1428,12 @@ CREATE TABLE ssd_cla_convictions (
 );
 
 -- insert data
-INSERT INTO ssd_cla_convictions (clac_cla_conviction_id, clac_person_id, clac_cla_conviction_date, clac_cla_conviction_offence)
+INSERT INTO ssd_cla_convictions (
+    clac_cla_conviction_id, 
+    clac_person_id, 
+    clac_cla_conviction_date, 
+    clac_cla_conviction_offence
+    )
 SELECT 
     fo.FACT_OFFENCE_ID,
     fo.DIM_PERSON_ID,
@@ -1383,6 +1441,7 @@ SELECT
     fo.DESCRIPTION
 FROM 
     Child_Social.FACT_OFFENCE as fo
+
 INNER JOIN 
     ssd_person AS p ON fo.DIM_PERSON_ID = p.pers_person_id;
 
@@ -1398,9 +1457,9 @@ FOREIGN KEY (clac_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 Object Name: ssd_cla_health
 Description: 
 Author: D2I
-Last Modified Date: 16/11/23
+Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -1408,7 +1467,6 @@ Dependencies:
 - FACT_HEALTH_CHECK 
 =============================================================================
 */
-
 
 -- if exists, drop
 IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_cla_health;
@@ -1422,7 +1480,12 @@ CREATE TABLE ssd_cla_health (
 );
 
 -- insert data
-INSERT INTO ssd_cla_health (clah_health_check_id, clah_person_id, clah_health_check_type, clah_health_check_date)
+INSERT INTO ssd_cla_health (
+    clah_health_check_id, 
+    clah_person_id, 
+    clah_health_check_type, 
+    clah_health_check_date
+    )
 SELECT 
     fhc.FACT_HEALTH_CHECK_ID,
     fhc.DIM_PERSON_ID,
@@ -1430,6 +1493,7 @@ SELECT
     fhc.START_DTTM
 FROM 
     Child_Social.FACT_HEALTH_CHECK as fhc
+
 INNER JOIN 
     ssd_person AS p ON fhc.DIM_PERSON_ID = p.pers_person_id;
 
@@ -1438,6 +1502,7 @@ INNER JOIN
 ALTER TABLE ssd_cla_health ADD CONSTRAINT FK_clah_to_clae 
 FOREIGN KEY (clah_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clah_person_id ON ssd_cla_health (clah_person_id);
 
 
@@ -1482,7 +1547,7 @@ CREATE TABLE ssd_cla_substance_misuse (
     clas_substance_misuse_id       NVARCHAR(48) PRIMARY KEY,
     clas_person_id                 NVARCHAR(48),
     clas_substance_misuse_date     DATETIME,
-    clas_substance_misused         NCHAR(100),
+    clas_substance_misused         NVARCHAR(100),
     clas_intervention_received     NCHAR(1)
 );
 
@@ -1520,7 +1585,7 @@ Description:
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 0.9
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -1528,7 +1593,6 @@ Dependencies:
 - FACT_CLA_PLACEMENT
 =============================================================================
 */
-
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_placement', 'U') IS NOT NULL DROP TABLE ssd_cla_placement;
@@ -1548,7 +1612,6 @@ CREATE TABLE ssd_cla_placement (
     clap_cla_placement_change_reason NVARCHAR(100),
     clap_cla_id                     NVARCHAR(48)   
 );
-
 
 
 -- Insert data 
@@ -1583,7 +1646,7 @@ FROM
 
     Child_Social.FACT_CLA_PLACEMENT AS fcp
 JOIN 
-    Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CARE_EPISODES_ID = fce.ID; -- Adjust with actual column name [TESTING]
+    Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CARE_EPISODES_ID = fce.FACT_CARE_EPISODES_ID; -- Adjust with actual column name [TESTING]
 
 -- Add constraint(s)
 ALTER TABLE ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
@@ -1600,11 +1663,12 @@ Description:
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 0.9
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+-- ssd_cla_episodes
+-- FACT_CLA_REVIEW
 =============================================================================
 */
 
@@ -1656,15 +1720,54 @@ CREATE NONCLUSTERED INDEX idx_clar_review_last_iro_contact_date ON ssd_cla_revie
 Object Name: ssd_cla_previous_permanence
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_903_DATA
 =============================================================================
 */
+
+-- Check if exists & drop
+IF OBJECT_ID('ssd_cla_previous_permanence', 'U') IS NOT NULL DROP TABLE ssd_cla_previous_permanence;
+
+-- Create structure
+CREATE TABLE ssd_cla_previous_permanence (
+    lapp_table_id                         NVARCHAR(48) PRIMARY KEY,
+    lapp_person_id                        NVARCHAR(48),
+    lapp_previous_permanence_order_date   DATETIME,
+    lapp_previous_permanence_option       NVARCHAR(100),
+    lapp_previous_permanence_la           NVARCHAR(100)
+);
+
+
+-- Insert data
+INSERT INTO ssd_cla_previous_permanence (
+    lapp_table_id, 
+    lapp_person_id, 
+    lapp_previous_permanence_order_date,
+    lapp_previous_permanence_option,
+    lapp_previous_permanence_la
+)
+SELECT 
+    FACT_903_DATA_ID    AS lapp_table_id,
+    DIM_PERSON_ID       AS lapp_person_id,
+    DATE_PERM           AS lapp_previous_permanence_order_date,
+    PREV_PERM           AS lapp_previous_permanence_option,
+    LA_PERM             AS lapp_previous_permanence_la
+FROM 
+    Child_Social.FACT_903_DATA;
+
+
+-- Create index(es)
+CREATE INDEX IDX_lapp_person_id ON ssd_cla_previous_permanence(lapp_person_id);
+
+-- Add contraint(s)
+ALTER TABLE ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
+FOREIGN KEY (lapp_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 /* 
@@ -1725,8 +1828,8 @@ Description:
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.1
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1739,13 +1842,13 @@ IF OBJECT_ID('ssd_missing', 'U') IS NOT NULL DROP TABLE ssd_missing;
 
 -- Create structure
 CREATE TABLE ssd_missing (
-    miss_table_id           NVARCHAR(48) PRIMARY KEY,
-    miss_la_person_id       NVARCHAR(48),
-    miss_mis_epi_start      DATETIME,
-    miss_mis_epi_type       NVARCHAR(100),
-    miss_mis_epi_end        DATETIME,
-    miss_mis_epi_rhi_offered NCHAR(1),
-    miss_mis_epi_rhi_accepted NCHAR(1)
+    miss_table_id               NVARCHAR(48) PRIMARY KEY,
+    miss_la_person_id           NVARCHAR(48),
+    miss_mis_epi_start          DATETIME,
+    miss_mis_epi_type           NVARCHAR(100),
+    miss_mis_epi_end            DATETIME,
+    miss_mis_epi_rhi_offered    NCHAR(2),                   -- Confirm source data/why is char 2 required
+    miss_mis_epi_rhi_accepted   NCHAR(2)                    -- Confirm source data/why is char 2 required
 );
 
 -- Insert data 
@@ -1759,15 +1862,16 @@ INSERT INTO ssd_missing (
     miss_mis_epi_rhi_accepted
 )
 SELECT 
-    fmp.FACT_MISSING_PERSON_ID      AS miss_table_id,
-    fmp.DIM_PERSON_ID               AS miss_la_person_id,
-    fmp.START_DTTM                  AS miss_mis_epi_start,
-    fmp.MISSING_STATUS              AS miss_mis_epi_type,
-    fmp.END_DTTM                    AS miss_mis_epi_end,
-    fsm.DIM_LOOKUP_SUBSTANCE_TYPE_ID AS substance_type_id,
-    fsm.DIM_LOOKUP_SUBSTANCE_TYPE_CODE AS substance_type_code
+    fmp.FACT_MISSING_PERSON_ID          AS miss_table_id,
+    fmp.DIM_PERSON_ID                   AS miss_la_person_id,
+    fmp.START_DTTM                      AS miss_mis_epi_start,
+    fmp.MISSING_STATUS                  AS miss_mis_epi_type,
+    fmp.END_DTTM                        AS miss_mis_epi_end,
+    fsm.DIM_LOOKUP_SUBSTANCE_TYPE_ID    AS substance_type_id,
+    fsm.DIM_LOOKUP_SUBSTANCE_TYPE_CODE  AS substance_type_code
 FROM 
     Child_Social.FACT_MISSING_PERSON AS fmp
+
 INNER JOIN 
     ssd_person AS p ON fmp.DIM_PERSON_ID = p.pers_person_id;
 
@@ -1819,11 +1923,13 @@ Description:
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 0.9
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- DIM_PERSON
+- FACT_903_DATA
+- ssd_person
+- Education.DIM_PERSON
 =============================================================================
 */
 -- Check if exists, & drop
@@ -1857,6 +1963,7 @@ SELECT
 
 FROM 
     Child_Social.FACT_903_DATA AS f
+
 LEFT JOIN 
     Education.DIM_PERSON AS p ON f.DIM_PERSON_ID = p.DIM_PERSON_ID;
 
@@ -2008,7 +2115,7 @@ LEFT JOIN (
         Child_Social.FACT_REFERRALS
     WHERE 
         REFRL_START_DTTM <= @LastSept30th AND 
-        (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM > @LastSept30th)
+        (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM >= @LastSept30th)
     GROUP BY 
         DIM_WORKER_ID
 ) AS rc ON dw.DIM_WORKER_ID = rc.DIM_WORKER_ID;
@@ -2045,11 +2152,11 @@ IF OBJECT_ID('ssd_involvements', 'U') IS NOT NULL DROP TABLE ssd_involvements;
 CREATE TABLE ssd_involvements (
     invo_involvements_id             NVARCHAR(48) PRIMARY KEY,
     invo_professional_id             NVARCHAR(48),
-    invo_professional_role_id        NVARCHAR(48),
-    invo_professional_team           NVARCHAR(48),
+    invo_professional_role_id        NVARCHAR(200),
+    invo_professional_team           NVARCHAR(200),
     invo_involvement_start_date      DATETIME,
     invo_involvement_end_date        DATETIME,
-    invo_worker_change_reason        NVARCHAR(48)
+    invo_worker_change_reason        NVARCHAR(200)
 );
 
 -- Insert data
@@ -2133,7 +2240,7 @@ CREATE TABLE ssd_pre_proceedings (
 );
 
 -- Insert placeholder data
-INSERT INTO ssd_pre_proceedings (#
+INSERT INTO ssd_pre_proceedings (
     prep_table_id,
     prep_person_id,
     prep_plo_family_id,
@@ -2179,7 +2286,7 @@ VALUES
 ALTER TABLE ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
 FOREIGN KEY (prep_person_id) REFERENCES ssd_person(pers_person_id);
 
--- Create nonclustered index
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_prep_person_id ON ssd_pre_proceedings (prep_person_id);
 CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date ON ssd_pre_proceedings (prep_pre_pro_decision_date);
 
@@ -2260,8 +2367,8 @@ IF OBJECT_ID('ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_linked_id
 CREATE TABLE ssd_linked_identifiers (
     link_link_id NVARCHAR(48) PRIMARY KEY, 
     link_person_id NVARCHAR(48), 
-    link_identifier_type NVARCHAR(MAX),
-    link_identifier_value NVARCHAR(MAX),
+    link_identifier_type NVARCHAR(100),
+    link_identifier_value NVARCHAR(100),
     link_valid_from_date DATETIME,
     link_valid_to_date DATETIME
 );
