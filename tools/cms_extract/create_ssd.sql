@@ -413,11 +413,11 @@ CREATE INDEX IDX_immigration_status_end ON ssd_immigration_status(immi_immigrati
 Object Name: ssd_mother
 Description: 
 Author: D2I
-Last Modified Date: 15/11/23
+Last Modified Date: 28/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
 Dependencies: 
 - ssd_person
 - FACT_PERSON_RELATION
@@ -453,7 +453,8 @@ WHERE EXISTS
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fpr.DIM_PERSON_ID
-    );
+    )
+ AND fpr.DIM_LOOKUP_RELTN_TYPE_CODE IN ('CHI', 'PAR'); -- only interested in parent/child relations
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
@@ -534,7 +535,10 @@ Last Modified Date: 06/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Remarks: Inclusion in contacts might differ between LAs. 
+        Baseline definition:
+        Contains safeguarding and referral to early help data.
+        
 Dependencies: 
 - ssd_person
 - FACT_CONTACTS
@@ -581,6 +585,7 @@ SELECT
     ) AS cont_contact_outcome_json
 FROM 
     Child_Social.FACT_CONTACTS AS fc
+    
 WHERE EXISTS 
     ( -- only need data for ssd relevant records
     SELECT 1 
@@ -780,10 +785,10 @@ CREATE TABLE ssd_cin_assessments
     cina_referral_id            NVARCHAR(48),
     cina_assessment_start_date  DATETIME,
     cina_assessment_child_seen  NCHAR(1), 
-    cina_assessment_auth_date   DATETIME, -- This needs checking !! [TESTING]
-    cina_assessment_outcome_json NVARCHAR(500),
+    cina_assessment_auth_date   DATETIME,               -- This needs checking !! [TESTING]
+    cina_assessment_outcome_json NVARCHAR(1000),        -- enlarged due to comments field    
     cina_assessment_outcome_nfa NCHAR(1), 
-    cina_assessment_team        NVARCHAR(100),
+    cina_assessment_team        NVARCHAR(255),
     cina_assessment_worker_id   NVARCHAR(48)
 );
 
@@ -795,7 +800,7 @@ INSERT INTO #ssd_cin_assessments
     cina_referral_id,
     cina_assessment_start_date,
     cina_assessment_child_seen,
-    cina_assessment_auth_date, -- This needs checking !! [TESTING]
+    cina_assessment_auth_date,      -- This needs checking !! [TESTING]
     cina_assessment_outcome_json,
     cina_assessment_outcome_nfa,
     cina_assessment_team,
@@ -807,30 +812,31 @@ SELECT
     fa.FACT_REFERRAL_ID,
     fa.START_DTTM,
     fa.SEEN_FLAG,
-    fa.START_DTTM, -- This needs checking !! [TESTING]
+    fa.START_DTTM,                  -- This needs checking !! [TESTING]
     (
         SELECT 
-            NULLIF(fa.OUTCOME_NFA_FLAG, '') AS "OUTCOME_NFA_FLAG",
-            NULLIF(fa.OUTCOME_NFA_S47_END_FLAG, '') AS "OUTCOME_NFA_S47_END_FLAG",
+            NULLIF(fa.OUTCOME_NFA_FLAG, '')                 AS "OUTCOME_NFA_FLAG",
+            NULLIF(fa.OUTCOME_NFA_S47_END_FLAG, '')         AS "OUTCOME_NFA_S47_END_FLAG",
             NULLIF(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS "OUTCOME_STRATEGY_DISCUSSION_FLAG",
-            NULLIF(fa.OUTCOME_CLA_REQUEST_FLAG, '') AS "OUTCOME_CLA_REQUEST_FLAG",
-            NULLIF(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '') AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
-            NULLIF(fa.OUTCOME_LEGAL_ACTION_FLAG, '') AS "OUTCOME_LEGAL_ACTION_FLAG",
-            NULLIF(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '') AS "OUTCOME_PROV_OF_SERVICES_FLAG",
-            NULLIF(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '') AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
+            NULLIF(fa.OUTCOME_CLA_REQUEST_FLAG, '')         AS "OUTCOME_CLA_REQUEST_FLAG",
+            NULLIF(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
+            NULLIF(fa.OUTCOME_LEGAL_ACTION_FLAG, '')        AS "OUTCOME_LEGAL_ACTION_FLAG",
+            NULLIF(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '')    AS "OUTCOME_PROV_OF_SERVICES_FLAG",
+            NULLIF(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '')     AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
             NULLIF(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '') AS "OUTCOME_SPECIALIST_ASSESSMENT_FLAG",
             NULLIF(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '') AS "OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG",
-            NULLIF(fa.OUTCOME_OTHER_ACTIONS_FLAG, '') AS "OUTCOME_OTHER_ACTIONS_FLAG",
-            NULLIF(fa.OTHER_OUTCOMES_EXIST_FLAG, '') AS "OTHER_OUTCOMES_EXIST_FLAG",
-            NULLIF(fa.TOTAL_NO_OF_OUTCOMES, '') AS "TOTAL_NO_OF_OUTCOMES",
-            NULLIF(fa.OUTCOME_COMMENTS, '') AS "OUTCOME_COMMENTS"
+            NULLIF(fa.OUTCOME_OTHER_ACTIONS_FLAG, '')       AS "OUTCOME_OTHER_ACTIONS_FLAG",
+            NULLIF(fa.OTHER_OUTCOMES_EXIST_FLAG, '')        AS "OTHER_OUTCOMES_EXIST_FLAG",
+            NULLIF(fa.TOTAL_NO_OF_OUTCOMES, '')             AS "TOTAL_NO_OF_OUTCOMES",
+            NULLIF(fa.OUTCOME_COMMENTS, '')                 AS "OUTCOME_COMMENTS" -- dictates a larger _json size
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS cina_assessment_outcome_json, 
-    fa.OUTCOME_NFA_FLAG AS cina_assessment_outcome_nfa,
-    fa.COMPLETED_BY_DEPT_NAME AS cina_assessment_team,
-    fa.COMPLETED_BY_USER_STAFF_ID AS cina_assessment_worker_id
+    fa.OUTCOME_NFA_FLAG                                     AS cina_assessment_outcome_nfa,
+    fa.COMPLETED_BY_DEPT_NAME                               AS cina_assessment_team,
+    fa.COMPLETED_BY_USER_STAFF_ID                           AS cina_assessment_worker_id
 FROM 
     Child_Social.FACT_SINGLE_ASSESSMENT AS fa
+
 WHERE EXISTS 
 (
     -- only need data for ssd relevant records
@@ -906,7 +912,7 @@ CREATE TABLE ssd_cin_plans (
     cinp_person_id NVARCHAR(48), 
     cinp_cin_plan_start DATETIME,
     cinp_cin_plan_end DATETIME,
-    cinp_cin_plan_team NVARCHAR(MAX),
+    cinp_cin_plan_team NVARCHAR(255),
     cinp_cin_plan_worker_id NVARCHAR(48)
 );
 
@@ -926,10 +932,10 @@ SELECT
     fp.END_DTTM                        AS cinp_cin_plan_end,
     cpd.DIM_OUTCM_CREATE_BY_DEPT_ID    AS cinp_cin_plan_team,
     cpd.DIM_NEED_CREATE_BY_ID          AS cinp_cin_plan_worker_id
-FROM FACT_CARE_PLANS AS fp
 
-JOIN FACT_CARE_PLAN_DETAILS AS cpd              -- Needs checking!!
-ON fp.FACT_REFERRAL_ID = cpd.FACT_REFERRAL_ID;  -- Needs checking!!
+FROM Child_Social.FACT_CARE_PLANS AS fp
+
+JOIN Child_Social.FACT_CARE_PLAN_DETAILS AS cpd ON fp.FACT_REFERRAL_ID = cpd.FACT_REFERRAL_ID;  -- Needs checking!!
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_cin_plans_person_id ON ssd_cin_plans(cinp_person_id);
