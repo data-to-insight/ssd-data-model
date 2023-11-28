@@ -436,11 +436,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_mother
 Description: 
 Author: D2I
-Last Modified Date: 15/11/23
+Last Modified Date: 28/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Remarks: Awareness needed that the source table can be sizable even limited to CHI/PAR. 
 Dependencies: 
 - ssd_person
 - FACT_PERSON_RELATION
@@ -477,7 +477,8 @@ WHERE EXISTS
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fpr.DIM_PERSON_ID
-    );
+    )
+ AND fpr.DIM_LOOKUP_RELTN_TYPE_CODE IN ('CHI', 'PAR'); -- only interested in parent/child relations
 
 
 -- Create index(es)
@@ -719,7 +720,7 @@ CREATE TABLE #ssd_cin_episodes
     cine_person_id              NVARCHAR(48),
     cine_referral_date          DATETIME,
     cine_cin_primary_need       INT,
-    cine_referral_source        NVARCHAR(100),
+    cine_referral_source        NVARCHAR(255),
     cine_referral_outcome_json  NVARCHAR(500),
     cine_referral_nfa           NCHAR(1), 
     cine_close_reason           NVARCHAR(100),
@@ -818,7 +819,7 @@ CREATE TABLE #ssd_cin_assessments
     cina_assessment_auth_date   DATETIME, -- This needs checking !! [TESTING]
     cina_assessment_outcome_json NVARCHAR(1000),
     cina_assessment_outcome_nfa NCHAR(1), 
-    cina_assessment_team        NVARCHAR(100),
+    cina_assessment_team        NVARCHAR(255),
     cina_assessment_worker_id   NVARCHAR(48)
 );
 
@@ -954,14 +955,9 @@ SELECT
     fp.END_DTTM                        AS cinp_cin_plan_end,
     cpd.DIM_OUTCM_CREATE_BY_DEPT_ID    AS cinp_cin_plan_team,
     cpd.DIM_NEED_CREATE_BY_ID          AS cinp_cin_plan_worker_id
-FROM FACT_CARE_PLANS AS fp
-JOIN FACT_CARE_PLAN_DETAILS AS cpd              -- Needs checking!!
-ON fp.FACT_REFERRAL_ID = cpd.FACT_REFERRAL_ID;  -- Needs checking!!
 
+FROM Child_Social.FACT_CARE_PLANS AS fp
 
--- Create constraint(s)
-ALTER TABLE #ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
-FOREIGN KEY (cinp_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- [TESTING]
