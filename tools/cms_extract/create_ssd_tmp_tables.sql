@@ -911,6 +911,8 @@ asmt_factors
 */
 
 
+/* issues with join [TESTING]
+-- The multi-part identifier "cpd.DIM_OUTCM_CREATE_BY_DEPT_ID" could not be bound.
 
 /* 
 =============================================================================
@@ -964,6 +966,9 @@ FROM Child_Social.FACT_CARE_PLANS AS fp
 -- Increment script progress counter
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+*/
+
 
 
 /* 
@@ -1123,7 +1128,7 @@ Dependencies:
 */
 
 -- Check if exists & drop 
-IF OBJECT_ID('temdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
+IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
 
 -- Create structure
 CREATE TABLE #ssd_cp_plans (
@@ -1218,7 +1223,7 @@ Dependencies:
 IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
 
 -- Create structure
-CREATE TABLE ssd_cp_visits (
+CREATE TABLE #ssd_cp_visits (
     cppv_casenote_id        INT PRIMARY KEY, 
     cppv_cp_visit_id        INT,                -- ??WHERE DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID') [TESTING]
     cppv_cp_visit_date      DATETIME, 
@@ -1228,7 +1233,7 @@ CREATE TABLE ssd_cp_visits (
 );
 
 -- Insert data
-INSERT INTO ssd_cp_visits
+INSERT INTO #ssd_cp_visits
 SELECT 
     cn.FACT_CASENOTE_ID,
     cn.DIM_LOOKUP_CASNT_TYPE_ID,                -- [TESTING]
@@ -1237,8 +1242,9 @@ SELECT
     cn.SEEN_ALONE_FLAG,
     cn.SEEN_BEDROOM_FLAG 
 FROM 
-    Child_Social.FACT_CASENOTES AS cn;
+    Child_Social.FACT_CASENOTES AS cn
 
+where cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID');
 
 -- Create constraint(s)
 
@@ -1333,6 +1339,9 @@ Dependencies:
 
 
 
+/* Issues [TESTING]
+-- Invalid column name 'FACT_CARE_EPISODES_ID'.
+
 /* 
 =============================================================================
 Object Name: ssd_cla_episodes
@@ -1353,7 +1362,6 @@ Dependencies:
 
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episodes;
-
 
 -- Create structure
 CREATE TABLE #ssd_cla_episodes (
@@ -1405,6 +1413,9 @@ CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON #ssd_cla_episodes (clae_cla_
 -- Increment script progress counter
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+*/
+
 
 
 /* 
@@ -1574,8 +1585,11 @@ FROM
     Child_Social.FACT_SUBSTANCE_MISUSE AS fsm
 
 INNER JOIN 
-    ssd_person AS p ON fsm.DIM_PERSON_ID = p.pers_person_id;
+    #ssd_person AS p ON fsm.DIM_PERSON_ID = p.pers_person_id;
 
+
+
+/* [TESTING]
 
 /* 
 =============================================================================
@@ -1657,6 +1671,10 @@ CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON #ssd_cla_substance_misuse (
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+*/
+
+
+
 
 /* 
 =============================================================================
@@ -1701,7 +1719,7 @@ SELECT
     fcr.DUE_DTTM                               AS clar_cla_review_due_date,
     fcr.MEETING_DTTM                           AS clar_cla_review_date,
     'PLACEHOLDER_DATA'                         AS clar_cla_review_participation,        -- Replace with actual data source [TESTING]
-    'PLACEHOLDER_DATA'                         AS clar_cla_review_last_iro_contact_date -- Replace with actual data source [TESTING]
+    '01/01/2001'                         AS clar_cla_review_last_iro_contact_date -- Replace with actual data source [TESTING]
 FROM 
     Child_Social.FACT_CLA_REVIEW AS fcr;
 
@@ -1847,8 +1865,8 @@ CREATE TABLE #ssd_missing (
     miss_mis_epi_start      DATETIME,
     miss_mis_epi_type       NVARCHAR(100),
     miss_mis_epi_end        DATETIME,
-    miss_mis_epi_rhi_offered NCHAR(1),
-    miss_mis_epi_rhi_accepted NCHAR(1)
+    miss_mis_epi_rhi_offered    NVARCHAR(10),                   -- Confirm source data/why >7 required
+    miss_mis_epi_rhi_accepted   NVARCHAR(10)                    -- Confirm source data/why >7 required
 );
 
 -- Insert data
@@ -1867,13 +1885,13 @@ SELECT
     fmp.START_DTTM                  AS miss_mis_epi_start,
     fmp.MISSING_STATUS              AS miss_mis_epi_type,
     fmp.END_DTTM                    AS miss_mis_epi_end,
-    fmp.RETURN_INTERVIEW_OFFERED    AS miss_mis_epi_rhi_offered,
-    fmp.RETURN_INTERVIEW_ACCEPTED	AS miss_mis_epi_rhi_accepted
+    fmp.RETURN_INTERVIEW_OFFERED        AS miss_mis_epi_rhi_offered,
+    fmp.RETURN_INTERVIEW_ACCEPTED       AS miss_mis_epi_rhi_accepted 
 FROM 
     Child_Social.FACT_MISSING_PERSON AS fmp
 
 INNER JOIN 
-    ssd_person AS p ON fmp.DIM_PERSON_ID = p.pers_person_id;
+    #ssd_person AS p ON fmp.DIM_PERSON_ID = p.pers_person_id;
 
 -- [TESTING]
 -- Increment script progress counter
@@ -1954,14 +1972,14 @@ INSERT INTO #ssd_send (
 
 )
 SELECT 
-    f.FACT_903_DATA_ID  AS send_table_id,
-    f.EXTERNAL_ID       AS send_person_id, -- DIM_PERSON_ID?? [TESTING]
-    f.FACT_903_DATA_ID  AS send_upn,
+    f903.FACT_903_DATA_ID  AS send_table_id,
+    f903.EXTERNAL_ID       AS send_person_id, -- DIM_PERSON_ID?? [TESTING]
+    f903.FACT_903_DATA_ID  AS send_upn,
     p.ULN               AS send_uln,
-    f.NO_UPN_CODE       AS upn_unknown
+    f903.NO_UPN_CODE       AS upn_unknown
 
 FROM 
-    Child_Social.FACT_903_DATA AS f
+    Child_Social.FACT_903_DATA AS f903
 
 LEFT JOIN 
     Education.DIM_PERSON AS p ON f.DIM_PERSON_ID = p.DIM_PERSON_ID;
@@ -2168,7 +2186,7 @@ INSERT INTO #ssd_involvements (
     invo_involvement_end_date,
     invo_worker_change_reason
 )
-SELECT 
+SELECT Top 10
     fi.FACT_INVOLVEMENTS_ID                       AS invo_involvements_id,
     fi.DIM_WORKER_ID                              AS invo_professional_id,
     fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
@@ -2454,16 +2472,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 SET @EndTime = GETDATE();
 PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) AS NVARCHAR(50)) + ' ms';
 
-
 /* cleanup */
 /* Drop commands only appear in the TEMP/TEST table defs script */
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
-
-
-
-
 /* ********************************************************************************************************** */
 
