@@ -6,6 +6,8 @@ nodes:
     description: Involvements table row ID
     item_ref: INVO005A
     type: nvarchar
+    categories:
+    - workforce
     returns:
     - Local
     cms:
@@ -20,6 +22,8 @@ nodes:
     item_ref: INVO006A
     type: nvarchar
     foreign_key: ssd_professionals.prof_professional_id
+    categories:
+    - workforce
     returns:
     - Local
     cms:
@@ -30,7 +34,8 @@ nodes:
     description: Worker role e.g. Allocated Case Worker
     item_ref: INVO007A
     type: nvarchar
-    foreign_key: ssd_professionals.prof_social_worker_registration_no
+    categories:
+    - workforce
     returns:
     - Local
     cms:
@@ -41,6 +46,8 @@ nodes:
     description: Worker Team
     item_ref: INVO009A
     type: nvarchar
+    categories:
+    - workforce
     returns:
     - Local
     cms:
@@ -51,6 +58,8 @@ nodes:
     description: Social worker episode start date
     item_ref: INVO002A
     type: datetime
+    categories:
+    - workforce
     returns:
     - SSDA903
     - RIIA
@@ -67,6 +76,8 @@ nodes:
     description: Social worker episode end date
     item_ref: INVO003A
     type: datetime
+    categories:
+    - workforce
     returns:
     - SSDA903
     - RIIA
@@ -83,6 +94,8 @@ nodes:
     description: Reason for worker change
     item_ref: INVO004A
     type: nvarchar
+    categories:
+    - workforce
     returns:
     - SSDA903
     - RIIA
@@ -99,6 +112,8 @@ nodes:
     description: Referral ID
     item_ref: INVO010A
     type: nvarchar
+    categories:
+    - workforce
     returns:
     - Local
     cms:

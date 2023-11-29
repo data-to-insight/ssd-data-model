@@ -32,7 +32,6 @@ nodes:
     description: Episode ID
     item_ref: CLAP002A
     type: nvarchar
-    foreign_key: ssd_cla_episodes.clae_cla_episode_id
     categories:
     - looked_after
     - placement
@@ -214,14 +213,23 @@ nodes:
       \ are of a type or in a setting not inspected by Ofsted, such as placed with\
       \ parents, then no URN is expected."
   - name: clap_cla_placement_distance
-    description: null
+    description: Distance of Placement from Home
     item_ref: CLAP011A
     type: float
+    categories:
+    - looked_after
+    - placement
     returns:
     - Local
     cms:
     - liquid_logic
     - mosaic
+    cms_field:
+    - liquid_logic:clap_cla_placement_distance
+    - mosaic:clap_cla_placement_distance
+    cms_table:
+    - liquid_logic:ssd_cla_placement
+    - mosaic:ssd_cla_placement
     guidance: null
   - name: clap_cla_placement_la
     description: LA of Placement
@@ -245,9 +253,10 @@ nodes:
     guidance: The Local Authority of the location where the child is placed. (In the
       SSDA903 this is calculated from the Placement Postcode by the DfE)
   - name: clap_cla_id
-    description: null
+    description: CLA Placement ID
     item_ref: CLAP012A
     type: nvarchar
+    foreign_key: ssd_cla_episodes.clae_cla_id
     categories:
     - looked_after
     - placement
@@ -256,6 +265,12 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    cms_field:
+    - liquid_logic:clap_cla_id
+    - mosaic:clap_cla_id
+    cms_table:
+    - liquid_logic:ssd_cla_placement
+    - mosaic:ssd_cla_placement
     guidance: null
   - name: clap_cla_placement_provider
     description: Placement Provider
@@ -295,7 +310,7 @@ nodes:
     - looked_after
     - placement
     returns:
-    - FACT_CARE_E+Z171:AC171.OFSTED_URN
+    - Local
     cms:
     - liquid_logic
     - mosaic

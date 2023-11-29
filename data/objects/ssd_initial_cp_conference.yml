@@ -5,6 +5,7 @@ nodes:
   - name: icpc_icpc_id
     description: Initial CP Conference ID
     item_ref: ICPC001A
+    type: nvarchar
     primary_key: true
     categories:
     - initial_cp_conference
@@ -18,6 +19,7 @@ nodes:
   - name: icpc_icpc_meeting_id
     description: Initial CP Conference Meeting ID
     item_ref: ICPC009A
+    type: nvarchar
     returns:
     - Local
     cms_table:
@@ -27,7 +29,8 @@ nodes:
   - name: icpc_s47_enquiry_id
     description: S47 Enquiry ID
     item_ref: ICPC002A
-    foreign_key: ssd_s47e.s47e_s47_enquiry_id
+    type: nvarchar
+    foreign_key: ssd_s47_enquiry.s47e_s47_enquiry_id
     returns:
     - RIIA
     cms_table:
@@ -89,6 +92,7 @@ nodes:
   - name: icpc_referral_id
     description: Referral ID
     item_ref: ICPC012A
+    type: nvarchar
     foreign_key: ssd_cin_episodes.cine_referral_id
     returns:
     - Local
@@ -239,7 +243,7 @@ nodes:
     description: ICPC Allocated Worker ID
     item_ref: ICPC008A
     type: nvarchar
-    foreign_key: ssd_social_worker.socw_social_worker_id
+    foreign_key: ssd_involvements.invo_professional_id
     categories:
     - initial_cp_conference
     - child_protection

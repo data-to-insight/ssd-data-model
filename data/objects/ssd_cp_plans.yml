@@ -37,6 +37,7 @@ nodes:
   - name: cppl_referral_id
     description: Referral ID
     item_ref: CPPL007A
+    type: nvarchar
     categories:
     - child_protection
     - cp_plan
@@ -52,6 +53,7 @@ nodes:
   - name: cppl_initial_cp_conference_id
     description: Initial CP Conference ID
     item_ref: CPPL008A
+    type: nvarchar
     foreign_key: ssd_initial_cp_conference.icpc_icpc_id
     categories:
     - child_protection
@@ -162,7 +164,7 @@ nodes:
     description: CP Plan Allocated Worker ID
     item_ref: CPPL006A
     type: nvarchar
-    foreign_key: ssd_social_worker.socw_social_worker_id
+    foreign_key: ssd_involvements.invo_professional_id
     categories:
     - child_protection
     - cp_plan

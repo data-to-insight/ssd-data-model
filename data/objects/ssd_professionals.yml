@@ -25,7 +25,6 @@ nodes:
     description: Staff Identifier
     item_ref: PROF010A
     type: nvarchar
-    foreign_key: ssd_involvements.invo_professional_id
     categories:
     - workforce
     returns:
@@ -120,7 +119,7 @@ nodes:
       \ Middle Manager\n\u2022 3 for First Line Manager\n\u2022 4 for Senior Practitioner\n\
       \u2022 5 for Case Holder\n\u2022 6 for Qualified without cases"
   - name: prof_professional_caseload
-    description: Number of cases held since previous Sept
+    description: Number of cases held on previous 30th Sept
     item_ref: PROF008A
     type: int
     categories:
