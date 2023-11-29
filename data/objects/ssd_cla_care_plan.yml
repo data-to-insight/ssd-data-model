@@ -10,6 +10,8 @@ nodes:
     categories:
     - looked_after
     - care_plan
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -31,6 +33,8 @@ nodes:
     categories:
     - looked_after
     - care_plan
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -48,6 +52,11 @@ nodes:
     categories:
     - looked_after
     - care_plan
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:lacp_cla_care_plan_start_date
     - mosaic:lacp_cla_care_plan_start_date
@@ -62,6 +71,11 @@ nodes:
     categories:
     - looked_after
     - care_plan
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_table:
     - liquid_logic:ssd_cla_care_plan
     - mosaic:ssd_cla_care_plan

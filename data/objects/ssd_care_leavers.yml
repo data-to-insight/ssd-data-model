@@ -429,7 +429,7 @@ nodes:
     description: Allocated Worker ID
     item_ref: CLEA012A
     type: nvarchar
-    foreign_key: ssd_social_worker.socw_social_worker_id
+    foreign_key: ssd_involvements.invo_professional_id
     categories:
     - care_leavers
     returns:

@@ -11,6 +11,11 @@ nodes:
     - looked_after
     - health
     - substance_misuse
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_table:
     - liquid_logic:ssd_cla_substance_misuse
     - mosaic:ssd_cla_substance_misuse
@@ -52,6 +57,11 @@ nodes:
     - looked_after
     - health
     - substance_misuse
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_table:
     - liquid_logic:ssd_cla_substance_misuse
     - mosaic:ssd_cla_substance_misuse

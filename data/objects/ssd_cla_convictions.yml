@@ -76,6 +76,8 @@ nodes:
     categories:
     - looked_after
     - convictions
+    returns:
+    - Local
     cms_table:
     - liquid_logic:ssd_cla_convictions
     - mosaic:ssd_cla_convictions

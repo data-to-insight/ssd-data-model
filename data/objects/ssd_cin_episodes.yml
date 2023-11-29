@@ -358,7 +358,7 @@ nodes:
     description: CIN Referral Completed by Worker ID
     item_ref: CINE009A
     type: nvarchar
-    foreign_key: ssd_social_worker.socw_social_worker_id
+    foreign_key: ssd_involvements.invo_professional_id
     categories:
     - child_in_need
     - referral

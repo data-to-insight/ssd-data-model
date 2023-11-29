@@ -6,6 +6,13 @@ nodes:
     description: Involvements table row ID
     item_ref: INVO005A
     type: nvarchar
+    categories:
+    - workforce
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:invo_involvements_id
     - mosaic:invo_involvements_id
@@ -14,21 +21,45 @@ nodes:
     description: Worker ID
     item_ref: INVO006A
     type: nvarchar
+    foreign_key: ssd_professionals.prof_professional_id
+    categories:
+    - workforce
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     guidance: null
   - name: invo_professional_role_id
     description: Worker role e.g. Allocated Case Worker
     item_ref: INVO007A
     type: nvarchar
+    categories:
+    - workforce
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     guidance: null
   - name: invo_professional_team
     description: Worker Team
     item_ref: INVO009A
     type: nvarchar
+    categories:
+    - workforce
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     guidance: null
   - name: invo_involvement_start_date
     description: Social worker episode start date
     item_ref: INVO002A
     type: datetime
+    categories:
+    - workforce
     returns:
     - SSDA903
     - RIIA
@@ -45,6 +76,8 @@ nodes:
     description: Social worker episode end date
     item_ref: INVO003A
     type: datetime
+    categories:
+    - workforce
     returns:
     - SSDA903
     - RIIA
@@ -61,6 +94,8 @@ nodes:
     description: Reason for worker change
     item_ref: INVO004A
     type: nvarchar
+    categories:
+    - workforce
     returns:
     - SSDA903
     - RIIA
@@ -72,4 +107,16 @@ nodes:
     cms_table:
     - liquid_logic:ssd_involvements
     - mosaic:ssd_involvements
+    guidance: null
+  - name: invo_referral_id
+    description: Referral ID
+    item_ref: INVO010A
+    type: nvarchar
+    categories:
+    - workforce
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
     guidance: null

@@ -11,6 +11,9 @@ nodes:
     - linked_identifiers
     returns:
     - 1aDraft
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:link_table_id
     - mosaic:link_table_id
@@ -41,14 +44,18 @@ nodes:
     - mosaic:ssd_linked_identifiers
     guidance: No guidance available yet
   - name: link_identifier_type
-    description: "Source/label of identifier, e.g youth_justice, adult_social_care,\
-      \ \u2026"
+    description: '[''Case Number'', ''Unique Pupil Number'', NHS Number'', ''Home
+      Office Registration'', National Insurance Number'', ''YOT Number'', Court Case
+      Number'', RAA ID'', ''Incident ID'']'
     item_ref: LINK003A
     type: nvarchar
     categories:
     - linked_identifiers
     returns:
     - 1aDraft
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:link_identifier_type
     - mosaic:link_identifier_type
@@ -64,6 +71,9 @@ nodes:
     - linked_identifiers
     returns:
     - 1aDraft
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:link_identifier_value
     - mosaic:link_identifier_value
@@ -79,6 +89,9 @@ nodes:
     - linked_identifiers
     returns:
     - 1aDraft
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:link_valid_from_date
     - mosaic:link_valid_from_date
@@ -94,6 +107,9 @@ nodes:
     - linked_identifiers
     returns:
     - 1aDraft
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:link_valid_to_date
     - mosaic:link_valid_to_date

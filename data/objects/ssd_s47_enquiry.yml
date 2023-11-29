@@ -31,10 +31,13 @@ nodes:
   - name: s47e_referral_id
     description: Referral ID
     item_ref: S47E010A
+    type: nvarchar
     foreign_key: ssd_cin_episodes.cine_referral_id
     categories:
     - s47_enquiry
     - child_protection
+    returns:
+    - Local
     cms_field:
     - liquid_logic:s47e_referral_id
     - mosaic:s47e_referral_id
@@ -188,6 +191,8 @@ nodes:
     categories:
     - s47_enquiry
     - child_protection
+    returns:
+    - Local
     cms_field:
     - liquid_logic:s47e_s47_completed_by_worker
     - mosaic:s47e_s47_completed_by_worker
@@ -202,6 +207,8 @@ nodes:
     categories:
     - s47_enquiry
     - child_protection
+    returns:
+    - Local
     cms_field:
     - liquid_logic:s47e_s47_completed_by_team
     - mosaic:s47e_s47_completed_by_team

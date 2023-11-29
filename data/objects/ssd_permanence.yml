@@ -14,6 +14,8 @@ nodes:
     - looked_after
     - permanence
     - adoption
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -50,6 +52,21 @@ nodes:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
     guidance: See PERS001A
+  - name: perm_cla_id
+    description: CLA Table ID
+    item_ref: PERM022A
+    type: nvarchar
+    categories:
+    - looked_after
+    - permanence
+    - adoption
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:perm_cla_id
+    - mosaic:perm_cla_id
+    guidance: null
   - name: perm_adm_decision_date
     description: Date of ADM Decision
     item_ref: PERM003A
@@ -207,6 +224,21 @@ nodes:
       \ prospective adopter(s). This decision will be made after the adoption panel\
       \ has made its recommendation on this matter (regulation 33(1) of the Adoption\
       \ Agencies Regulations 2005).\u201D"
+  - name: perm_adopted_by_carer_flag
+    description: adopted_by_carer_flag
+    item_ref: PERM021A
+    type: datetime
+    categories:
+    - looked_after
+    - permanence
+    - adoption
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:perm_adopted_by_carer_flag
+    - mosaic:perm_adopted_by_carer_flag
+    guidance: null
   - name: perm_placed_ffa_cp_date
     description: Date Placed in FFA/ CP Placement
     item_ref: PERM009A
@@ -425,69 +457,27 @@ nodes:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
     guidance: Type of Permanence order granted (Adoption/ SGO/ CAO)
-  - name: perm_guardian_status
-    description: Status of Special Guardian
-    item_ref: PERM019A
-    type: nvarchar
+  - name: perm_adoption_worker
+    description: Adoption social worker
+    item_ref: PERM023A
+    type: datetime
     categories:
     - looked_after
     - permanence
-    - SGO
-    returns:
-    - ASGLB
+    - adoption
     cms:
     - liquid_logic
     - mosaic
-    cms_field:
-    - liquid_logic:perm_guardian_status
-    - mosaic:perm_guardian_status
-    cms_table:
-    - liquid_logic:ssd_permanence
-    - mosaic:ssd_permanence
-    guidance: 'If child has been granted a Special Guardianship Order, enter the relationship
-      of the Special Guardian:
-
-      -Grandparent
-
-      -Other family relative
-
-      -Friend or other existing relationship
-
-      -Former foster carer
-
-      -Other carer'
-  - name: perm_guardian_age
-    description: Age of Special Guardian
-    item_ref: PERM020A
-    type: int
+    guidance: null
+  - name: perm_allocated_worker
+    description: allocated case worker
+    item_ref: PERM024A
+    type: datetime
     categories:
     - looked_after
     - permanence
-    - SGO
-    returns:
-    - ASGLB
+    - adoption
     cms:
     - liquid_logic
     - mosaic
-    cms_field:
-    - liquid_logic:perm_guardian_age
-    - mosaic:perm_guardian_age
-    cms_table:
-    - liquid_logic:ssd_permanence
-    - mosaic:ssd_permanence
-    guidance: 'If child has been granted a Special Guardianship Order, enter the relationship
-      of the Special Guardian:
-
-      -18 to 19
-
-      -20 to 29
-
-      -30 to 39
-
-      -40 to 49
-
-      -50 to 59
-
-      -60 and over
-
-      -Unknown'
+    guidance: null

@@ -31,6 +31,26 @@ nodes:
     - liquid_logic:ssd_disability
     - mosaic:ssd_disability
     guidance: See PERS001A
+  - name: disa_table_id
+    description: Disability table row ID
+    item_ref: DISA003A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - identity
+    - disability
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:disa_table_id
+    - mosaic:disa_table_id
+    cms_table:
+    - liquid_logic:ssd_disability
+    - mosaic:ssd_disability
+    guidance: null
   - name: disa_disability_code
     description: Disability Code
     item_ref: DISA002A

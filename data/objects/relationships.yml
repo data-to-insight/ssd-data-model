@@ -21,9 +21,14 @@ relationships:
   child_key: immi_person_id
   relation: 1:M
 - parent_object: ssd_person
-  parent_key: pers_person_id
+  parent_key: pers_person_id (field is both PK/FK)
   child_object: ssd_mother
   child_key: moth_person_id
+  relation: 1:M
+- parent_object: ssd_person
+  parent_key: pers_person_id
+  child_object: ssd_mother
+  child_key: moth_childs_person_id
   relation: 1:M
 - parent_object: ssd_person
   parent_key: pers_person_id
@@ -105,43 +110,43 @@ relationships:
   child_object: ssd_linked_identifiers
   child_key: link_person_id
   relation: 1:M
-- parent_object: ssd_social_worker
-  parent_key: socw_social_worker_id
+- parent_object: ssd_involvements
+  parent_key: invo_professional_id
   child_object: ssd_early_help_episodes
   child_key: earl_episode_worker_id
   relation: 1:M
-- parent_object: ssd_social_worker
-  parent_key: socw_social_worker_id
+- parent_object: ssd_involvements
+  parent_key: invo_professional_id
   child_object: ssd_cin_episodes
   child_key: cine_referral_worker_id
   relation: 1:M
-- parent_object: ssd_social_worker
-  parent_key: socw_social_worker_id
+- parent_object: ssd_involvements
+  parent_key: invo_professional_id
   child_object: ssd_cin_assessments
   child_key: cina_assessment_worker_id
   relation: 1:M
-- parent_object: ssd_social_worker
-  parent_key: socw_social_worker_id
+- parent_object: ssd_involvements
+  parent_key: invo_professional_id
   child_object: ssd_cin_plans
   child_key: cinp_cin_plan_worker_id
   relation: 1:M
-- parent_object: ssd_social_worker
-  parent_key: socw_social_worker_id
+- parent_object: ssd_involvements
+  parent_key: invo_professional_id
   child_object: ssd_initial_cp_conference
   child_key: icpc_icpc_worker_id
   relation: 1:M
-- parent_object: ssd_social_worker
-  parent_key: socw_social_worker_id
+- parent_object: ssd_involvements
+  parent_key: invo_professional_id
   child_object: ssd_cp_plans
   child_key: cppl_cp_plan_worker_id
   relation: 1:M
-- parent_object: ssd_social_worker
-  parent_key: socw_social_worker_id
+- parent_object: ssd_involvements
+  parent_key: invo_professional_id
   child_object: ssd_cla_episodes
   child_key: clae_cla_worker_id
   relation: 1:M
-- parent_object: ssd_social_worker
-  parent_key: socw_social_worker_id
+- parent_object: ssd_involvements
+  parent_key: invo_professional_id
   child_object: ssd_care_leavers
   child_key: clea_care_leaver_worker_id
   relation: 1:M
@@ -175,7 +180,7 @@ relationships:
   child_object: ssd_cin_visits
   child_key: cinv_cin_plan_id
   relation: 1:M
-- parent_object: ssd_s47e
+- parent_object: ssd_s47_enquiry
   parent_key: s47e_s47_enquiry_id
   child_object: ssd_initial_cp_conference
   child_key: icpc_s47_enquiry_id
@@ -216,9 +221,9 @@ relationships:
   child_key: clas_person_id
   relation: 1:M
 - parent_object: ssd_cla_episodes
-  parent_key: clae_cla_episode_id
+  parent_key: clae_cla_id
   child_object: ssd_cla_placement
-  child_key: clap_cla_episode_id
+  child_key: clap_cla_id
   relation: 1:M
 - parent_object: ssd_cla_episodes
   parent_key: clae_cla_episode_id
@@ -275,10 +280,10 @@ relationships:
   child_object: ssd_sen_need
   child_key: senn_active_ehcp_id
   relation: 1:M
-- parent_object: ssd_involvements
-  parent_key: invo_professional_id
-  child_object: ssd_professionals
-  child_key: prof_professional_id
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
+  child_object: ssd_involvements
+  child_key: invo_professional_id
   relation: 1:M
 - parent_object: ssd_cla_placement
   parent_key: clap_cla_placement_id

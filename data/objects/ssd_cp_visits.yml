@@ -2,9 +2,10 @@
 nodes:
 - name: ssd_cp_visits
   fields:
-  - name: cppv_visit_id
-    description: null
+  - name: cppv_casenote_id
+    description: Casenote ID (Visit record)
     item_ref: CPPV007A
+    type: nvarchar
     primary_key: true
     categories:
     - child_protection
@@ -27,6 +28,8 @@ nodes:
     - child_protection
     - cp_plan
     - visit
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -45,6 +48,8 @@ nodes:
     - child_protection
     - cp_plan
     - visit
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic

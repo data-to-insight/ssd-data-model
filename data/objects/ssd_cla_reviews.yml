@@ -15,6 +15,8 @@ nodes:
     categories:
     - looked_after
     - review
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -36,6 +38,8 @@ nodes:
     categories:
     - looked_after
     - review
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -46,6 +50,23 @@ nodes:
     - liquid_logic:ssd_cla_reviews
     - mosaic:ssd_cla_reviews
     guidance: See CLA001A
+  - name: clar_cla_id
+    description: CLA_ID
+    item_ref: CLAR011A
+    type: nvarchar
+    categories:
+    - looked_after
+    - review
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clar_cla_id
+    - mosaic:clar_cla_id
+    cms_table:
+    - liquid_logic:ssd_cla_reviews
+    - mosaic:ssd_cla_reviews
+    guidance: null
   - name: clar_cla_review_due_date
     description: CLA Review Due Date
     item_ref: CLAR003A

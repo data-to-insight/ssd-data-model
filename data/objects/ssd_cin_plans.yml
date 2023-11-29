@@ -32,6 +32,8 @@ nodes:
     item_ref: CINP007A
     type: nvarchar
     foreign_key: ssd_cin_episodes.cine_referral_id
+    returns:
+    - Local
     cms_field:
     - liquid_logic:cinp_referral_id
     - mosaic:cinp_referral_id
@@ -158,7 +160,7 @@ nodes:
     description: CIN Allocated Worker ID
     item_ref: CINP006A
     type: nvarchar
-    foreign_key: ssd_social_worker.socw_social_worker_id
+    foreign_key: ssd_involvements.invo_professional_id
     categories:
     - child_in_need
     - cin_plan

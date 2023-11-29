@@ -176,7 +176,7 @@ nodes:
     description: EH Episode Allocated Worker ID
     item_ref: EARL008A
     type: nvarchar
-    foreign_key: ssd_social_worker.socw_social_worker_id
+    foreign_key: ssd_involvements.invo_professional_id
     categories:
     - early_help
     returns:

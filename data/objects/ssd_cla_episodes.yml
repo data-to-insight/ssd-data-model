@@ -377,7 +377,7 @@ nodes:
     description: Allocated Worker ID
     item_ref: CLAE008A
     type: nvarchar
-    foreign_key: ssd_social_worker.socw_social_worker_id
+    foreign_key: ssd_involvements.invo_professional_id
     categories:
     - looked_after
     returns:
@@ -393,3 +393,55 @@ nodes:
     - liquid_logic:ssd_cla_episodes
     - mosaic:ssd_cla_episodes
     guidance: Allocated worker responsible for Looked After Child
+  - name: clae_cla_id
+    description: CLA ID
+    item_ref: CLAE010A
+    type: nvarchar
+    categories:
+    - looked_after
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_cla_id
+    - mosaic:clae_cla_id
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: null
+  - name: clae_referral_id
+    description: Referral ID
+    item_ref: CLAE011A
+    type: nvarchar
+    categories:
+    - looked_after
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_referral_id
+    - mosaic:clae_referral_id
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: null
+  - name: lacp_referral_id
+    description: Referral ID
+    item_ref: LACP006A
+    type: nvarchar
+    categories:
+    - looked_after
+    - care_plan
+    returns:
+    - Local
+    cms_field:
+    - liquid_logic:lacp_referral_id
+    - mosaic:lacp_referral_id
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: null
