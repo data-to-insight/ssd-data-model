@@ -1249,7 +1249,9 @@ SELECT
     cn.SEEN_ALONE_FLAG,
     cn.SEEN_BEDROOM_FLAG 
 FROM 
-    Child_Social.FACT_CASENOTES AS cn;
+    Child_Social.FACT_CASENOTES AS cn
+
+where cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID');
 
 -- Create constraint(s)
 
@@ -1310,8 +1312,11 @@ SELECT
 FROM 
     Child_Social.FACT_CP_REVIEW as cpr
 
-INNER JOIN 
-    ssd_person AS p ON cpr.DIM_PERSON_ID = p.pers_person_id;
+WHERE EXISTS ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = cpr.DIM_PERSON_ID
+    );
 
 -- Add constraint(s)
 ALTER TABLE ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
@@ -1448,9 +1453,12 @@ SELECT
 FROM 
     Child_Social.FACT_OFFENCE as fo
 
-INNER JOIN 
-    ssd_person AS p ON fo.DIM_PERSON_ID = p.pers_person_id;
 
+WHERE EXISTS ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = fo.DIM_PERSON_ID
+    );
 
 -- add constraint(s)
 ALTER TABLE ssd_cla_convictions ADD CONSTRAINT FK_clac_to_clae 
@@ -1500,9 +1508,11 @@ SELECT
 FROM 
     Child_Social.FACT_HEALTH_CHECK as fhc
 
-INNER JOIN 
-    ssd_person AS p ON fhc.DIM_PERSON_ID = p.pers_person_id;
-
+WHERE EXISTS ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = fhc.DIM_PERSON_ID
+    );
 
 -- add constraint(s)
 ALTER TABLE ssd_cla_health ADD CONSTRAINT FK_clah_to_clae 
@@ -1574,8 +1584,11 @@ SELECT
 FROM 
     Child_Social.FACT_SUBSTANCE_MISUSE AS fsm;
 
-INNER JOIN 
-    ssd_person AS p ON fSM.DIM_PERSON_ID = p.pers_person_id;
+WHERE EXISTS ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = fSM.DIM_PERSON_ID
+    );
 
 -- Add constraint(s)
 ALTER TABLE ssd_cla_substance_misuse ADD CONSTRAINT FK_ssd_cla_substance_misuse_clas_person_id 
@@ -1706,7 +1719,7 @@ SELECT
     fcr.DUE_DTTM                               AS clar_cla_review_due_date,
     fcr.MEETING_DTTM                           AS clar_cla_review_date,
     'PLACEHOLDER_DATA'                         AS clar_cla_review_participation,        -- Replace with actual data source [TESTING]
-    'PLACEHOLDER_DATA'                         AS clar_cla_review_last_iro_contact_date -- Replace with actual data source [TESTING]
+    '01/01/2001'                               AS clar_cla_review_last_iro_contact_date -- Replace with actual data source [TESTING]
 FROM 
     Child_Social.FACT_CLA_REVIEW AS fcr;
 
@@ -1853,8 +1866,8 @@ CREATE TABLE ssd_missing (
     miss_mis_epi_start          DATETIME,
     miss_mis_epi_type           NVARCHAR(100),
     miss_mis_epi_end            DATETIME,
-    miss_mis_epi_rhi_offered    NCHAR(2),                   -- Confirm source data/why is char 2 required
-    miss_mis_epi_rhi_accepted   NCHAR(2)                    -- Confirm source data/why is char 2 required
+    miss_mis_epi_rhi_offered    NVARCHAR(10),                   -- Confirm source data/why >7 required
+    miss_mis_epi_rhi_accepted   NVARCHAR(10)                    -- Confirm source data/why >7 required
 );
 
 -- Insert data 
@@ -1873,13 +1886,16 @@ SELECT
     fmp.START_DTTM                      AS miss_mis_epi_start,
     fmp.MISSING_STATUS                  AS miss_mis_epi_type,
     fmp.END_DTTM                        AS miss_mis_epi_end,
-    fsm.DIM_LOOKUP_SUBSTANCE_TYPE_ID    AS substance_type_id,
-    fsm.DIM_LOOKUP_SUBSTANCE_TYPE_CODE  AS substance_type_code
+    fmp.RETURN_INTERVIEW_OFFERED        AS miss_mis_epi_rhi_offered,
+    fmp.RETURN_INTERVIEW_ACCEPTED       AS miss_mis_epi_rhi_accepted 
 FROM 
     Child_Social.FACT_MISSING_PERSON AS fmp
 
-INNER JOIN 
-    ssd_person AS p ON fmp.DIM_PERSON_ID = p.pers_person_id;
+WHERE EXISTS ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = fmp.DIM_PERSON_ID
+    );
 
 -- Add constraint(s)
 ALTER TABLE ssd_missing ADD CONSTRAINT FK_missing_to_person
@@ -1961,14 +1977,14 @@ INSERT INTO ssd_send (
 
 )
 SELECT 
-    f.FACT_903_DATA_ID  AS send_table_id,
-    f.EXTERNAL_ID       AS send_person_id, -- DIM_PERSON_ID?? [TESTING]
-    f.FACT_903_DATA_ID  AS send_upn,
-    p.ULN               AS send_uln,
-    f.NO_UPN_CODE       AS upn_unknown
+    f903.FACT_903_DATA_ID   AS send_table_id,
+    f903.EXTERNAL_ID        AS send_person_id, -- DIM_PERSON_ID?? [TESTING]
+    f903.FACT_903_DATA_ID   AS send_upn,
+    p.ULN                   AS send_uln,
+    f903.NO_UPN_CODE        AS upn_unknown
 
 FROM 
-    Child_Social.FACT_903_DATA AS f
+    Child_Social.FACT_903_DATA AS f903
 
 LEFT JOIN 
     Education.DIM_PERSON AS p ON f.DIM_PERSON_ID = p.DIM_PERSON_ID;
@@ -2285,8 +2301,11 @@ VALUES
     );
 
 -- To switch on once source data defined.
--- INNER JOIN 
---     ssd_person AS p ON ssd_pre_proceedings.DIM_PERSON_ID = p.pers_person_id;
+-- WHERE EXISTS ( -- only need data for ssd relevant records
+--     SELECT 1 
+--     FROM ssd_person p
+--     WHERE p.pers_person_id = ssd_pre_proceedings.DIM_PERSON_ID
+--     );
 
 -- Create constraint(s)
 ALTER TABLE ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
@@ -2340,9 +2359,11 @@ VALUES
     ('ID002','P002', 'Y', 'Y', 'Y', 'N', 'N');
 
 -- To switch on once source data defined.
--- INNER JOIN 
---     ssd_person AS p ON ssd_voice_of_child.DIM_PERSON_ID = p.pers_person_id;
-
+-- WHERE EXISTS ( -- only need data for ssd relevant records
+--     SELECT 1 
+--     FROM ssd_person p
+--     WHERE p.pers_person_id = ssd_voice_of_child.DIM_PERSON_ID
+--     );
 
 -- Create constraint(s)
 ALTER TABLE ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
@@ -2392,9 +2413,11 @@ VALUES
     ('PLACEHOLDER_DATA', 'DIM_PERSON.PERSON_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', NULL, NULL);
 
 -- To switch on once source data defined.
--- INNER JOIN 
---     ssd_person AS p ON ssd_linked_identifiers.DIM_PERSON_ID = p.pers_person_id;
-
+-- WHERE EXISTS ( -- only need data for ssd relevant records
+--     SELECT 1 
+--     FROM ssd_person p
+--     WHERE p.pers_person_id = ssd_linked_identifiers.DIM_PERSON_ID
+--     );
 -- Create constraint(s)
 ALTER TABLE ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
 FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
