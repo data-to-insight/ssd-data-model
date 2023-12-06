@@ -15,11 +15,23 @@ GO
 DECLARE @StartTime DATETIME, @EndTime DATETIME;
 SET @StartTime = GETDATE(); -- Record the start time
 
-DECLARE @TestProgress INT = 0;
 
--- Increment script progress counter
+/* [TESTING] Set up */
+DECLARE @TestProgress INT = 0;
+DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder';
+
+
+-- To use the above vars add this around each test CREATE object
+/*
+[TESTING] Create marker
+SET @TableName = N'ssd_table_name_placeholder';
+PRINT 'Creating table: ' + @TableName;
+
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+*/
 
 /* ********************************************************************************************************** */
 
@@ -68,7 +80,7 @@ Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - Child_Social.DIM_PERSON
@@ -78,6 +90,10 @@ Dependencies:
 - Child_Social.FACT_903_DATA
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_person';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- Check exists & drop temporary table
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
@@ -147,8 +163,8 @@ AND (                                                       -- Filter irrelevant
 CREATE INDEX IDX_ssd_person_la_person_id ON #ssd_person(pers_person_id);
 
 -- [TESTING]
--- Increment script progress counter
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -183,13 +199,18 @@ Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 Dependencies: 
 - Singleview.DIM_TF_FAMILY
 - ssd.ssd_person
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_family';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check exists & drop temporary table
 IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
@@ -220,11 +241,11 @@ WHERE EXISTS ( -- only need address data for ssd relevant records
 );
 
 
--- [TESTING]
--- Increment script progress counter
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
@@ -234,13 +255,18 @@ Author: D2I
 Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 Dependencies: 
 - ssd_person
 - DIM_PERSON_ADDRESS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_address';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
@@ -305,9 +331,10 @@ CREATE INDEX IDX_address_person ON #ssd_address(addr_person_id);
 CREATE INDEX IDX_address_start ON #ssd_address(addr_address_start);
 CREATE INDEX IDX_address_end ON #ssd_address(addr_address_end);
 
--- [TESTING]
--- Increment script progress counter
+
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
@@ -318,13 +345,18 @@ Author: D2I
 Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_DISABILITY
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_disability';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 
@@ -361,10 +393,12 @@ WHERE EXISTS
 CREATE INDEX IDX_disability_person_id ON #ssd_disability(disa_person_id);
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
 
 /* 
 =============================================================================
@@ -374,13 +408,18 @@ Author: D2I
 Last Modified Date: 23/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_IMMIGRATION_STATUS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_immigration_status';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
@@ -425,9 +464,10 @@ CREATE INDEX IDX_immigration_status_immi_person_id ON #ssd_immigration_status(im
 CREATE INDEX IDX_immigration_status_start ON #ssd_immigration_status(immi_immigration_status_start);
 CREATE INDEX IDX_immigration_status_end ON #ssd_immigration_status(immi_immigration_status_end);
 
--- [TESTING]
--- Increment script progress counter
+
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -439,13 +479,17 @@ Author: D2I
 Last Modified Date: 28/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Awareness needed that the source table can be sizable even limited to CHI/PAR. 
 Dependencies: 
 - ssd_person
 - FACT_PERSON_RELATION
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_mother';
+PRINT 'Creating table: ' + @TableName;
+
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_mother', 'U') IS NOT NULL DROP TABLE #ssd_mother;
 
@@ -485,9 +529,9 @@ WHERE EXISTS
 CREATE INDEX IDX_ssd_mother_moth_person_id ON #ssd_mother(moth_person_id);
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
@@ -498,13 +542,18 @@ Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_LEGAL_STATUS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_legal_status';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
 
@@ -544,31 +593,36 @@ WHERE
 CREATE INDEX IDX_ssd_legal_status_lega_person_id ON #ssd_legal_status(lega_person_id);
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_contact
+Object Name: ssd_contacts
 Description: 
 Author: D2I
 Last Modified Date: 06/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_CONTACTS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_contacts';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..#ssd_contact') IS NOT NULL DROP TABLE #ssd_contact;
+IF OBJECT_ID('tempdb..#ssd_contacts') IS NOT NULL DROP TABLE #ssd_contacts;
 
 -- Create structure
-CREATE TABLE #ssd_contact (
+CREATE TABLE #ssd_contacts (
     cont_contact_id             NVARCHAR(48) PRIMARY KEY,
     cont_person_id              NVARCHAR(48),
     cont_contact_start          DATETIME,
@@ -577,7 +631,7 @@ CREATE TABLE #ssd_contact (
 );
 
 -- Insert data
-INSERT INTO #ssd_contact (
+INSERT INTO #ssd_contacts (
     cont_contact_id, 
     cont_person_id, 
     cont_contact_start,
@@ -616,12 +670,12 @@ WHERE
 
 
 -- Create index(es)
-CREATE INDEX IDX_contact_person_id ON #ssd_contact(cont_person_id);
+CREATE INDEX IDX_contact_person_id ON #ssd_contacts(cont_person_id);
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -632,14 +686,20 @@ Description:
 Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Version: 0.9 
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: [TESTING - NOT SENT TO KNOWSLEY]
 Dependencies: 
 - ssd_person
 - FACT_CAF_EPISODE
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_early_help_episodes';
+PRINT 'Creating table: ' + @TableName;
+
+
+
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL DROP TABLE #ssd_early_help_episodes;
 
@@ -690,9 +750,9 @@ CREATE INDEX IDX_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(e
 
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
@@ -703,13 +763,18 @@ Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - @ssd_timeframe_years
 - FACT_REFERRALS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cin_episodes';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
@@ -780,10 +845,10 @@ CREATE INDEX IDX_ssd_cin_episodes_person_id ON #ssd_cin_episodes(cine_person_id)
 
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));;
 
 
 
@@ -793,17 +858,19 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: #ssd_cin_assessments
 Description: 
 Author: D2I
-Last Modified Date: 03/11/23
+Last Modified Date: 04/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_SINGLE_ASSESSMENT
 =============================================================================
 */
-
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cin_assessments';
+PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_cin_assessments') IS NOT NULL DROP TABLE #ssd_cin_assessments;
@@ -880,11 +947,10 @@ WHERE EXISTS
 CREATE INDEX IDX_ssd_cin_assessments_person_id ON #ssd_cin_assessments(cina_person_id);
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
-
 
 
 /* 
@@ -901,8 +967,13 @@ Dependencies:
 - 
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#assessment_factors';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists, & drop 
-IF OBJECT_ID('tempdb..#ssd_assessment') IS NOT NULL DROP TABLE #ssd_assessment_factors;
+IF OBJECT_ID('tempdb..#ssd_assessment_factors') IS NOT NULL DROP TABLE #ssd_assessment_factors;
 
 -- Create temporary structure
 /*
@@ -919,15 +990,19 @@ asmt_factors
 Object Name: #sd_cin_plans
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 04/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- FACT_CARE_PLANS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cin_plans';
+PRINT 'Creating table: ' + @TableName;
+
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plans;
 
@@ -962,9 +1037,9 @@ FROM Child_Social.FACT_CARE_PLANS AS fp
 
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 */
@@ -985,6 +1060,10 @@ Dependencies:
 - 
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cin_visits';
+PRINT 'Creating table: ' + @TableName;
+
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
 
@@ -1023,9 +1102,9 @@ FROM
     Child_Social.FACT_CASENOTES cn;
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
@@ -1036,7 +1115,7 @@ Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1044,6 +1123,10 @@ Dependencies:
 - FACT_CP_CONFERENCE
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_s47_enquiry';
+PRINT 'Creating table: ' + @TableName;
+
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_s47_enquiry') IS NOT NULL DROP TABLE #ssd_s47_enquiry;
 
@@ -1103,9 +1186,9 @@ FROM
 -- Create index(es)
 CREATE INDEX IDX_ssd_s47_enquiry_person_id ON #ssd_s47_enquiry(s47e_person_id);
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -1117,7 +1200,7 @@ Description:
 Author: D2I
 Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
+Version: 1.3
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -1126,6 +1209,10 @@ Dependencies:
 - FACT_CP_PLAN
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cp_plans';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- Check if exists & drop 
 IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
@@ -1175,9 +1262,9 @@ FROM
 
 -- Create index(es)
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -1189,12 +1276,17 @@ Author: D2I
 Last Modified Date: 06/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - FACT_CONTEXT_CASE_WORKER
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_category_of_abuse';
+PRINT 'Creating table: ' + @TableName;
+
+
 
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_category_of_abuse') IS NOT NULL DROP TABLE #ssd_category_of_abuse;
@@ -1206,19 +1298,23 @@ IF OBJECT_ID('tempdb..#ssd_category_of_abuse') IS NOT NULL DROP TABLE #ssd_categ
 
 /* 
 =============================================================================
-Object Name: #ssd_cp_visits
+Object Name: ssd_cp_visits
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-
+Version: 0.9
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: This has issues, where/what is the fk back to cp_plans? 
 Dependencies: 
 - FACT_CASENOTES
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cp_visits';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
 
@@ -1249,30 +1345,42 @@ where cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID');
 -- Create constraint(s)
 
 
--- WHERE DIM_LOOKUP_CASNT_TYPE_ID_DESC IN ( 'STVC','STVCPCOVID')
-
-
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
 /* 
 =============================================================================
-Object Name: #ssd_cp_reviews
+Object Name: ssd_cp_reviews
 Description: 
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Status: [*Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks:    Some fields - ON HOLD/Not included in SSD Ver/Iteration 1
+            Tested in batch 1.3. But needs additions! for cppr_cp_review_quorate - 
+            FACT_FORM_ANSWERS.ANSWER
+            Link using FACT_CP_REVIEW.FACT_CASE_PATHWAY_STEP_ID to FACT_CASE_PATHWAY_STEP  
+            Link using FACT_CASE_PATHWAY_STEP.FACT_FORMS_ID to FACT_FORM_ANSWERS.ANSWER
+            WHERE 
+            ANSWER_NO = 'WasConf' AND DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'REVIEW%'
 Dependencies: 
-- 
+- ssd_person
+- ssd_cp_plans
+- FACT_CP_REVIEW
+- FACT_FORM_ANSWERS
+- FACT_CASE_PATHWAY_STEP
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cp_reviews';
+PRINT 'Creating table: ' + @TableName;
+
+
 
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
@@ -1316,31 +1424,13 @@ INNER JOIN
 
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
-/* 
-=============================================================================
-Object Name: #ssd_cp_reviews_risks
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
 
-
-
-/* Issues [TESTING]
--- Invalid column name 'FACT_CARE_EPISODES_ID'.
 
 /* 
 =============================================================================
@@ -1350,7 +1440,7 @@ Author: D2I
 Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_involvements
@@ -1359,6 +1449,10 @@ Dependencies:
 - FACT_CARE_EPISODES
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cla_episodes';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episodes;
@@ -1409,9 +1503,10 @@ JOIN
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON #ssd_cla_episodes (clae_cla_worker_id);
 
--- [TESTING]
--- Increment script progress counter
+
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 */
@@ -1426,13 +1521,18 @@ Author: D2I
 Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_OFFENCE
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cla_convictions';
+PRINT 'Creating table: ' + @TableName;
+
+
 
 -- if exists, drop
 IF OBJECT_ID('tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cla_convictions;
@@ -1464,9 +1564,9 @@ INNER JOIN
     #ssd_person AS p ON fo.DIM_PERSON_ID = p.pers_person_id;
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -1478,14 +1578,16 @@ Author: D2I
 Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_HEALTH_CHECK 
 =============================================================================
 */
-
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cla_health';
+PRINT 'Creating table: ' + @TableName;
 
 -- if exists, drop
 IF OBJECT_ID('tempdb..#ssd_cla_health', 'U') IS NOT NULL DROP TABLE #ssd_cla_health;
@@ -1519,9 +1621,11 @@ INNER JOIN
 
 CREATE NONCLUSTERED INDEX idx_clah_person_id ON #ssd_cla_health (clah_person_id);
 
--- [TESTING]
--- Increment script progress counter
+
+
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -1543,18 +1647,25 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: #ssd_substance_misuse
+Object Name: ssd_substance_misuse
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 14/11/2023
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_SUBSTANCE_MISUSE
 =============================================================================
 */
+
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_substance_misuse';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_cla_substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_substance_misuse;
 
@@ -1584,10 +1695,17 @@ SELECT
 FROM 
     Child_Social.FACT_SUBSTANCE_MISUSE AS fsm
 
-INNER JOIN 
-    #ssd_person AS p ON fsm.DIM_PERSON_ID = p.pers_person_id;
+WHERE EXISTS ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = fSM.DIM_PERSON_ID
+    );
 
 
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* [TESTING]
 
@@ -1606,6 +1724,10 @@ Dependencies:
 - FACT_CLA_PLACEMENT
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cla_placement';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_placement;
@@ -1666,9 +1788,9 @@ JOIN
 CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON #ssd_cla_substance_misuse (clap_cla_episode_id);
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 */
@@ -1684,12 +1806,21 @@ Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Status: [*Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: Still needs work on review_participation: 'FACT_FORM_ANSWERS.ANSWER
+Link using FACT_CLA_REVIEW.FACT_CASE_PATHWAY_STEP_ID to FACT_CASE_PATHWAY_STEP  
+Link using FACT_CASE_PATHWAY_STEP.FACT_FORMS_ID to FACT_FORM_ANSWERS.ANSWER
+WHERE 'FACT_FORM_ANSWERS.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('CLA Review Outcomes', 'LAC Outcome Record') AND FACT_FORM_ANSWERS.ANSWER_NO IN ('ChildPart', 'ICSParticipationCode')
+
 Dependencies: 
-- 
+-- ssd_cla_episodes
+-- FACT_CLA_REVIEW
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_cla_reviews';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_cla_review', 'U') IS NOT NULL DROP TABLE #ssd_cla_review;
@@ -1719,7 +1850,7 @@ SELECT
     fcr.DUE_DTTM                               AS clar_cla_review_due_date,
     fcr.MEETING_DTTM                           AS clar_cla_review_date,
     'PLACEHOLDER_DATA'                         AS clar_cla_review_participation,        -- Replace with actual data source [TESTING]
-    '01/01/2001'                         AS clar_cla_review_last_iro_contact_date -- Replace with actual data source [TESTING]
+    '01/01/2001'                         AS clar_cla_review_last_iro_contact_date       -- Replace with actual data source [TESTING]
 FROM 
     Child_Social.FACT_CLA_REVIEW AS fcr;
 
@@ -1729,9 +1860,9 @@ CREATE NONCLUSTERED INDEX idx_clar_cla_episode_id ON #ssd_cla_review (clar_cla_e
 CREATE NONCLUSTERED INDEX idx_clar_review_last_iro_contact_date ON #ssd_cla_review (clar_cla_review_last_iro_contact_date);
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -1743,13 +1874,18 @@ Author: D2I
 Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_903_DATA
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_previous_permanence';
+PRINT 'Creating table: ' + @TableName;
+
+
 
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence', 'U') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
@@ -1758,9 +1894,9 @@ IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence', 'U') IS NOT NULL DROP TABLE
 CREATE TABLE #ssd_cla_previous_permanence (
     lapp_table_id                         NVARCHAR(48) PRIMARY KEY,
     lapp_person_id                        NVARCHAR(48),
-    lapp_previous_permanence_order_date   DATETIME,
-    lapp_previous_permanence_option       NVARCHAR(100),
-    lapp_previous_permanence_la           NVARCHAR(100)
+    lapp_previous_permanence_order_date   NVARCHAR(100),    -- [TESTING] [ESCC 48?] 
+    lapp_previous_permanence_option       NVARCHAR(200),    -- [TESTING] [ESCC 128]
+    lapp_previous_permanence_la           NVARCHAR(100)     -- [TESTING] [ESCC 12?]
 );
 
 
@@ -1780,14 +1916,19 @@ SELECT
     LA_PERM             AS lapp_previous_permanence_la
 FROM 
     Child_Social.FACT_903_DATA;
-
+    
+WHERE
+    FACT_903_DATA_ID <> '-1';  -- Exclude rows with primary key '-1'
 
 -- Create index(es)
 CREATE INDEX IDX_lapp_person_id ON #ssd_cla_previous_permanence(lapp_person_id);
 
 
 
-
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
@@ -1803,8 +1944,6 @@ Dependencies:
 - 
 =============================================================================
 */
--- Check if exists, & drop 
-IF OBJECT_ID('tempdb..#ssd_cla_care_plan') IS NOT NULL DROP TABLE #ssd_cla_care_plan;
 
 
 /* 
@@ -1839,6 +1978,61 @@ Dependencies:
 =============================================================================
 */
 
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_sdq_scores';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
+
+-- Create structure
+CREATE TABLE #ssd_sdq_scores (
+    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
+    csdq_person_id             NVARCHAR(48),
+    csdq_sdq_completed_date    DATETIME,
+    csdq_sdq_reason            NVARCHAR(100),
+    csdq_sdq_score             NVARCHAR(100)
+);
+
+-- Insert data
+INSERT INTO #ssd_sdq_scores (
+    csdq_table_id,
+    csdq_person_id,
+    csdq_sdq_completed_date,
+    csdq_sdq_reason,
+    csdq_sdq_score
+)
+SELECT 
+    ffa.FACT_FORM_ID AS csdq_table_id,
+    ff.DIM_PERSON_ID AS csdq_person_id,
+    (
+        SELECT ANSWER 
+        FROM Child_Social.FACT_FORM_ANSWERS
+        WHERE DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)') 
+        AND ANSWER_NO = 'FormEndDate'
+        AND FACT_FORM_ID = ffa.FACT_FORM_ID
+    ) AS csdq_sdq_completed_date,
+    fd.SDQ_REASON AS csdq_sdq_reason,
+    (
+        SELECT ANSWER 
+        FROM Child_Social.FACT_FORM_ANSWERS
+        WHERE DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)') 
+        AND ANSWER_NO = 'SDQScore'
+        AND FACT_FORM_ID = ffa.FACT_FORM_ID
+    ) AS csdq_sdq_score
+FROM 
+    Child_Social.FACT_FORM_ANSWERS ffa
+JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
+LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 /* 
 =============================================================================
@@ -1848,12 +2042,16 @@ Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_missing';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_missing') IS NOT NULL DROP TABLE #ssd_missing;
@@ -1893,9 +2091,9 @@ FROM
 INNER JOIN 
     #ssd_person AS p ON fmp.DIM_PERSON_ID = p.pers_person_id;
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -1913,7 +2111,9 @@ Dependencies:
 - 
 =============================================================================
 */
-
+-- [TESTING] Create marker
+--SET @TableName = N'#ssd_';
+--PRINT 'Creating table: ' + @TableName;
 
 
 /* 
@@ -1930,7 +2130,9 @@ Dependencies:
 - 
 =============================================================================
 */
-
+-- [TESTING] Create marker
+--SET @TableName = N'#ssd_';
+--PRINT 'Creating table: ' + @TableName;
 
 
 /* 
@@ -1949,8 +2151,14 @@ Dependencies:
 - Education.DIM_PERSON
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_send';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL DROP TABLE #ssd_send;
+
 
 
 -- Create structure 
@@ -1982,16 +2190,18 @@ FROM
     Child_Social.FACT_903_DATA AS f903
 
 LEFT JOIN 
-    Education.DIM_PERSON AS p ON f.DIM_PERSON_ID = p.DIM_PERSON_ID;
+    Education.DIM_PERSON AS p ON f903.DIM_PERSON_ID = p.DIM_PERSON_ID;
 
 /* ?? Should this actually be pulling from Child_Social.FACT_SENRECORD.DIM_PERSON_ID | Child_Social.FACT_SEN.DIM_PERSON_ID
 */
 
 
--- [TESTING]
--- Increment script progress counter
+
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 /* 
 =============================================================================
@@ -2066,13 +2276,19 @@ Description:
 Author: D2I
 Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.3
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
--
+- @LastSept30th
+- DIM_WORKER
+- FACT_REFERRALS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_professionals';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL DROP TABLE #ssd_professionals;
@@ -2139,9 +2355,9 @@ LEFT JOIN (
 CREATE NONCLUSTERED INDEX idx_prof_professional_id ON #ssd_professionals (prof_professional_id);
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -2153,14 +2369,18 @@ Description:
 Author: D2I
 Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_professionals
 - FACT_INVOLVEMENTS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_involvements';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_involvements', 'U') IS NOT NULL DROP TABLE #ssd_involvements;
@@ -2173,7 +2393,8 @@ CREATE TABLE #ssd_involvements (
     invo_professional_team           NVARCHAR(200),
     invo_involvement_start_date      DATETIME,
     invo_involvement_end_date        DATETIME,
-    invo_worker_change_reason        NVARCHAR(200)
+    invo_worker_change_reason        NVARCHAR(200),
+    invo_referral_id                 NVARCHAR(48)
 );
 
 -- Insert data
@@ -2184,16 +2405,18 @@ INSERT INTO #ssd_involvements (
     invo_professional_team,
     invo_involvement_start_date,
     invo_involvement_end_date,
-    invo_worker_change_reason
+    invo_worker_change_reason,
+    invo_referral_id
 )
-SELECT Top 10
+SELECT 
     fi.FACT_INVOLVEMENTS_ID                       AS invo_involvements_id,
     fi.DIM_WORKER_ID                              AS invo_professional_id,
     fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
     fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC        AS invo_professional_team,
     fi.START_DTTM                                 AS invo_involvement_start_date,
     fi.END_DTTM                                   AS invo_involvement_end_date,
-    fi.DIM_LOOKUP_CWREASON_CODE                   AS invo_worker_change_reason
+    fi.DIM_LOOKUP_CWREASON_CODE                   AS invo_worker_change_reason,
+    fi.FACT_REFERRAL_ID                           AS invo_referral_id
 FROM 
     Child_Social.FACT_INVOLVEMENTS AS fi;
 
@@ -2201,9 +2424,9 @@ FROM
 CREATE NONCLUSTERED INDEX idx_invo_professional_id ON #ssd_involvements (invo_professional_id);
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
     
@@ -2216,12 +2439,16 @@ Author: D2I
 Last Modified Date: 02/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - Yet to be defined
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_pre_proceedings';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pre_proceedings;
@@ -2302,9 +2529,9 @@ VALUES
 CREATE NONCLUSTERED INDEX idx_prep_person_id ON #ssd_pre_proceedings (prep_person_id);
 CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date ON #ssd_pre_proceedings (prep_pre_pro_decision_date);
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -2316,12 +2543,17 @@ Author: D2I
 Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - Yet to be defined
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_voice_of_child';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voice_of_child;
 
@@ -2355,9 +2587,9 @@ VALUES
 --     ssd_person AS p ON ssd_voice_of_child.DIM_PERSON_ID = p.pers_person_id;
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -2376,6 +2608,9 @@ Dependencies:
 - Yet to be defined
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_linked_identifiers';
+PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
@@ -2407,9 +2642,9 @@ VALUES
 --     ssd_person AS p ON ssd_linked_identifiers.DIM_PERSON_ID = p.pers_person_id;
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -2428,6 +2663,10 @@ Dependencies:
 - Yet to be defined
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'#ssd_s251_finance';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- Check if exists, & drop 
 IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_finance;
@@ -2455,9 +2694,9 @@ VALUES
     ('PLACEHOLDER_DATA_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
 
 
--- [TESTING]
--- Increment script progress counter
+-- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
