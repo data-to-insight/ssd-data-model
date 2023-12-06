@@ -30,6 +30,10 @@ returns_categories = {
         "colour": "#FF2114",
         "description": "Specified item rejected from final spec.",
     },
+    "1aNotInCMS": {
+        "colour": "#1CFCF2",
+        "description": "Currently exists but commonly outside Social Care CMS. (SSD==Placeholder data)",
+    },
 }
 
 
