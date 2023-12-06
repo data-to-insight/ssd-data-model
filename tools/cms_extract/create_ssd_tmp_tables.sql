@@ -293,14 +293,15 @@ INSERT INTO #ssd_address (
 )
 SELECT 
     pa.DIM_PERSON_ADDRESS_ID,
-    pa.DIM_PERSON_ID, -- Assuming EXTERNAL_ID corresponds to pers_person_id
+    pa.DIM_PERSON_ID, --
     pa.ADDSS_TYPE_CODE,
     pa.START_DTTM,
     pa.END_DTTM,
     CASE 
-        WHEN REPLACE(pa.POSTCODE, ' ', '') NOT LIKE '%[^X]%' THEN ''
-        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''
-        ELSE REPLACE(pa.POSTCODE, ' ', '')
+    -- Some clean-up based on known data
+        WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', ''))) THEN '' -- clear pcode of containing all X's
+        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''                                -- clear pcode of containing nopostcode
+        ELSE REPLACE(pa.POSTCODE, ' ', '')                                                              -- remove all spaces for consistency
     END AS CleanedPostcode,
     (
         SELECT 
@@ -1439,7 +1440,7 @@ Description:
 Author: D2I
 Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
+Version: 1.4
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -1465,7 +1466,7 @@ CREATE TABLE #ssd_cla_episodes (
     clae_cla_episode_start_reason   NVARCHAR(100),
     clae_cla_primary_need           NVARCHAR(100),
     clae_cla_episode_ceased         DATETIME,
-    clae_cla_episode_cease_reason   NVARCHAR(100),
+    clae_cla_episode_cease_reason   NVARCHAR(255),
     clae_cla_team                   NVARCHAR(48),
     clae_cla_worker_id              NVARCHAR(48)
 );
@@ -1697,7 +1698,7 @@ FROM
 
 WHERE EXISTS ( -- only need data for ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fSM.DIM_PERSON_ID
     );
 
@@ -1965,16 +1966,18 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: #ssd_sdq_scores
+Object Name: ssd_sdq_scores
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 06/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_FORMS
+- FACT_FORM_ANSWERS
 =============================================================================
 */
 

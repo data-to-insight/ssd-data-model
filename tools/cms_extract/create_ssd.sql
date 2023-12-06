@@ -57,7 +57,7 @@ Author: D2I
 Last Modified Date: 20/10/23
 DB Compatibility: SQL Server 2014+|...
 
-Version: 1.1
+Version: 1.3
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 
 Remarks: Need to confirm FACT_903_DATA as source of mother related data
@@ -122,6 +122,7 @@ WHERE                                                       -- Filter invalid ro
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
     AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
 
+
 AND (                                                       -- Filter irrelevant rows by timeframe
     EXISTS (
         -- contact in last x@yrs
@@ -180,11 +181,11 @@ Description:
 Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 Dependencies: 
-- Singleview.DIM_TF_FAMILY
+- FACT_CONTACTS
 - ssd.ssd_person
 =============================================================================
 */
@@ -201,8 +202,7 @@ IF OBJECT_ID('ssd_family') IS NOT NULL DROP TABLE ssd_family;
 CREATE TABLE ssd_family (
     fami_table_id           NVARCHAR(48) PRIMARY KEY, 
     fami_family_id          NVARCHAR(48),
-    fami_person_id          NVARCHAR(48),
-    
+    fami_person_id          NVARCHAR(48)
 );
 
 -- Insert data 
@@ -215,6 +215,7 @@ SELECT
     fc.EXTERNAL_ID                          AS fami_table_id,
     fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID      AS fami_family_id,
     fc.DIM_PERSON_ID                        AS fami_person_id
+
 FROM Child_Social.FACT_CONTACTS AS fc
 
 WHERE EXISTS ( -- only need address data for ssd relevant records
@@ -222,8 +223,6 @@ WHERE EXISTS ( -- only need address data for ssd relevant records
     FROM ssd_person p
     WHERE p.pers_person_id = fc.DIM_PERSON_ID
     );
-AND
-    DIM_PERSON_ID <> '-1';  -- Exclude rows with '-1'
 
 
 -- Create index(es)
@@ -248,8 +247,8 @@ Description:
 Author: D2I
 Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 Dependencies: 
 - ssd_person
@@ -289,9 +288,10 @@ SELECT
     pa.START_DTTM,
     pa.END_DTTM,
     CASE 
-        WHEN REPLACE(pa.POSTCODE, ' ', '') NOT LIKE '%[^X]%' THEN ''
-        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''
-        ELSE REPLACE(pa.POSTCODE, ' ', '')
+    -- Some clean-up based on known data
+        WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', ''))) THEN '' -- clear pcode of containing all X's
+        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''                                -- clear pcode of containing nopostcode
+        ELSE REPLACE(pa.POSTCODE, ' ', '')                                                              -- remove all spaces for consistency
     END AS CleanedPostcode,
     (
         SELECT 
@@ -338,8 +338,8 @@ Description:
 Author: D2I
 Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -492,6 +492,7 @@ SELECT
     fpr.DIM_PERSON_ID                   AS moth_person_id,
     fpr.DIM_RELATED_PERSON_ID           AS moth_childs_person_id,
     fpr.DIM_RELATED_PERSON_DOB          AS moth_childs_dob
+
 FROM 
     Child_Social.FACT_PERSON_RELATION AS fpr
 WHERE EXISTS 
@@ -500,6 +501,7 @@ WHERE EXISTS
     FROM #ssd_person p
     WHERE p.pers_person_id = fpr.DIM_PERSON_ID
     )
+
  AND fpr.DIM_LOOKUP_RELTN_TYPE_CODE IN ('CHI', 'PAR'); -- only interested in parent/child relations
 
 -- Create index(es)
@@ -697,7 +699,7 @@ SELECT
     cafe.START_REASON,
     cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE,
     cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
-    'PLACEHOLDER_DATA' -- placeholder value [TESTING]
+    'PLACEHOLDER_DATA'                              -- [PLACEHOLDER_DATA] [TESTING]
 FROM 
     Child_Social.FACT_CAF_EPISODE AS cafe;
 WHERE EXISTS 
@@ -792,8 +794,12 @@ SELECT
     fr.DIM_WORKER_ID_DESC
 FROM 
     Child_Social.FACT_REFERRALS AS fr
+
 WHERE 
-    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE());
+    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+AND
+    DIM_PERSON_ID <> '-1';  -- Exclude rows with '-1'
+    ;
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_cin_episodes_person_id ON ssd_cin_episodes(cine_person_id);
@@ -931,7 +937,7 @@ IF OBJECT_ID('ssd_assessment_factors') IS NOT NULL DROP TABLE ssd_assessment_fac
 
 
 /* issues with join [TESTING]
--- The multi-part identifier "cpd.DIM_OUTCM_CREATE_BY_DEPT_ID" could not be bound.
+-- The multi-part identifier "cpd.DIM_OUTCM_CREATE_BY_DEPT_ID" could not be bound. */
 
 
 /* 
@@ -1233,8 +1239,8 @@ SELECT
     DIM_PERSON_ID AS cppl_person_id,
     START_DTTM AS cppl_cp_plan_start_date,
     END_DTTM AS cppl_cp_plan_end_date,
-    'PLACEHOLDER_DATA' AS cppl_cp_plan_team,                -- [PLACEHOLDER_DATA'] [TESTING]
-    'PLACEHOLDER_DATA' AS cppl_cp_plan_worker_id,           -- [PLACEHOLDER_DATA'] [TESTING]
+    'PLACEHOLDER_DATA' AS cppl_cp_plan_team,                -- [PLACEHOLDER_DATA] [TESTING]
+    'PLACEHOLDER_DATA' AS cppl_cp_plan_worker_id,           -- [PLACEHOLDER_DATA] [TESTING]
     INIT_CATEGORY_DESC AS cppl_cp_plan_initial_category,
     CP_CATEGORY_DESC AS cppl_cp_plan_latest_category
 FROM 
@@ -1376,8 +1382,8 @@ SELECT
     cpr.DUE_DTTM,
     cpr.MEETING_DTTM,
     cpr.OUTCOME_CONTINUE_CP_FLAG,
-    '0', -- 'PLACEHOLDER_DATA' for cppr_cp_review_quorate       ['PLACEHOLDER_DATA'] - ON HOLD/Not included in SSD Ver/Iteration 1
-    '0'  -- 'PLACEHOLDER_DATA' for cppr_cp_review_participation ['PLACEHOLDER_DATA'] - ON HOLD/Not included in SSD Ver/Iteration 1
+    '0', -- for cppr_cp_review_quorate       -- [PLACEHOLDER_DATA] [TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    '0'  -- for cppr_cp_review_participation -- [PLACEHOLDER_DATA] [TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
 FROM 
     Child_Social.FACT_CP_REVIEW as cpr
 
@@ -1421,7 +1427,7 @@ CREATE TABLE ssd_cla_episodes (
     clae_cla_episode_start_reason   NVARCHAR(100),
     clae_cla_primary_need           NVARCHAR(100),
     clae_cla_episode_ceased         DATETIME,
-    clae_cla_episode_cease_reason   NVARCHAR(100),
+    clae_cla_episode_cease_reason   NVARCHAR(255),
     clae_cla_team                   NVARCHAR(48),
     clae_cla_worker_id              NVARCHAR(48)
 );
@@ -1582,17 +1588,53 @@ CREATE NONCLUSTERED INDEX idx_clah_person_id ON ssd_cla_health (clah_person_id);
 Object Name: ssd_cla_immunisations
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 06/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_903_DATA
 =============================================================================
 */
 
--- awaiting detail on spec sheet
+-- Check if exists & drop
+IF OBJECT_ID('ssd_cla_immunisations') IS NOT NULL DROP TABLE ssd_cla_immunisations;
+
+-- Create structure 
+CREATE TABLE ssd_cla_immunisations (
+    clai_immunisations_id           NVARCHAR(48) PRIMARY KEY,
+    clas_person_id                  NVARCHAR(48),
+    clai_immunisations_status_date  DATETIME,
+    clai_immunisations_status       NHAR(1)
+);
+
+-- Insert data
+INSERT INTO ssd_cla_immunisations (
+    clai_immunisations_id,
+    clai_person_id,
+    clai_immunisations_status_date,
+    clai_immunisations_status
+)
+SELECT 
+    f903.FACT_903_DATA_ID,
+    f903.DIM_PERSON_ID,
+    '01/01/2001',           -- [PLACEHOLDER_DATA] [TESTING]
+    f903.IMMUN_CODE
+FROM 
+    Child_Social.FACT_903_DATA AS f903;
+
+WHERE EXISTS ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = fSM.DIM_PERSON_ID
+    );
+
+
+
+
+
 
 
 /* 
@@ -1641,7 +1683,7 @@ FROM
 
 WHERE EXISTS ( -- only need data for ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fSM.DIM_PERSON_ID
     );
 
@@ -1705,12 +1747,12 @@ INSERT INTO ssd_cla_placement (
 )
 SELECT 
     fcp.FACT_CLA_PLACEMENT_ID                   AS clap_cla_placement_id,
-    fce.FACT_CARE_EPISODES_ID                   AS clap_cla_episode_id, -- Adjust with actual column name [TESTING]
+    fce.FACT_CARE_EPISODES_ID                   AS clap_cla_episode_id,             -- [PLACEHOLDER_DATA] [TESTING]
     fcp.START_DTTM                              AS clap_cla_placement_start_date,
     fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE          AS clap_cla_placement_type,
     fce.OFSTED_URN                              AS clap_cla_placement_urn,
     fcp.DISTANCE_FROM_HOME                      AS clap_cla_placement_distance,
-    'PLACEHOLDER_DATA'                          AS clap_cla_placement_la, -- Replace with actual data source [TESTING]
+    'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,           -- [PLACEHOLDER_DATA] [TESTING]
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
     fcp.POSTCODE                                AS clap_cla_placement_postcode,
     fcp.END_DTTM                                AS clap_cla_placement_end_date,
@@ -1774,11 +1816,11 @@ INSERT INTO ssd_cla_review (
 )
 SELECT 
     fcr.FACT_CLA_REVIEW_ID                     AS clar_cla_review_id,
-    'PLACEHOLDER_EPISODE_ID'                   AS clar_cla_episode_id,                  -- Replace with actual data source [TESTING]
+    'PLACEHOLDER_EPISODE_ID'                   AS clar_cla_episode_id,                  -- [PLACEHOLDER_DATA] [TESTING]
     fcr.DUE_DTTM                               AS clar_cla_review_due_date,
     fcr.MEETING_DTTM                           AS clar_cla_review_date,
-    'PLACEHOLDER_DATA'                         AS clar_cla_review_participation,        -- Replace with actual data source [TESTING]
-    '01/01/2001'                               AS clar_cla_review_last_iro_contact_date -- Replace with actual data source [TESTING]
+    'PLACEHOLDER_DATA'                         AS clar_cla_review_participation,        -- [PLACEHOLDER_DATA] [TESTING]
+    '01/01/2001'                               AS clar_cla_review_last_iro_contact_date -- [PLACEHOLDER_DATA] [TESTING]
 FROM 
     Child_Social.FACT_CLA_REVIEW AS fcr;
 
@@ -1900,13 +1942,15 @@ Dependencies:
 Object Name: ssd_sdq_scores
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 06/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_FORMS
+- FACT_FORM_ANSWERS
 =============================================================================
 */
 
@@ -1955,8 +1999,11 @@ SELECT
     ) AS csdq_sdq_score
 FROM 
     FACT_FORM_ANSWERS ffa
+
 JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
+
 LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
+
 
 -- Add FK constraint for csdq_person_id
 ALTER TABLE ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
