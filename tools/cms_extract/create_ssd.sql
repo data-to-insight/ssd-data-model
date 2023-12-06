@@ -1408,7 +1408,7 @@ Description:
 Author: D2I
 Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
+Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -1456,6 +1456,7 @@ SELECT
     fr.DIM_WORKER_ID                        AS clae_cla_worker_id
 FROM 
     Child_Social.FACT_CARE_EPISODES AS fce
+
 JOIN 
     Child_Social.FACT_CLA AS fc ON fce.FACT_CARE_EPISODES_ID = fc.fact_cla_id
 JOIN 
@@ -1603,15 +1604,15 @@ Dependencies:
 IF OBJECT_ID('ssd_cla_immunisations') IS NOT NULL DROP TABLE ssd_cla_immunisations;
 
 -- Create structure 
-CREATE TABLE ssd_cla_immunisations (
-    clai_immunisations_id           NVARCHAR(48) PRIMARY KEY,
-    clas_person_id                  NVARCHAR(48),
-    clai_immunisations_status_date  DATETIME,
-    clai_immunisations_status       NHAR(1)
+CREATE TABLE #ssd_cla_immunisations (
+    clai_immunisations_id          NVARCHAR(48) PRIMARY KEY,
+    clai_person_id                 NVARCHAR(48),
+    clai_immunisations_status_date DATETIME,
+    clai_immunisations_status      NCHAR(1)
 );
 
 -- Insert data
-INSERT INTO ssd_cla_immunisations (
+INSERT INTO #ssd_cla_immunisations (
     clai_immunisations_id,
     clai_person_id,
     clai_immunisations_status_date,
@@ -1620,20 +1621,24 @@ INSERT INTO ssd_cla_immunisations (
 SELECT 
     f903.FACT_903_DATA_ID,
     f903.DIM_PERSON_ID,
-    '01/01/2001',           -- [PLACEHOLDER_DATA] [TESTING]
+    '20010101', -- [PLACEHOLDER_DATA] [TESTING] in YYYYMMDD format
     f903.IMMUN_CODE
 FROM 
-    Child_Social.FACT_903_DATA AS f903;
-
+    Child_Social.FACT_903_DATA AS f903
 WHERE EXISTS ( -- only need data for ssd relevant records
     SELECT 1 
-    FROM ssd_person p
-    WHERE p.pers_person_id = fSM.DIM_PERSON_ID
-    );
+    FROM #ssd_person p
+    WHERE p.pers_person_id = f903.DIM_PERSON_ID
+);
+
+-- add constraint(s)
+ALTER TABLE ssd_cla_immunisations
+ADD CONSTRAINT FK_ssd_cla_immunisations_person
+FOREIGN KEY (clas_person_id) REFERENCES ssd_person(pers_person_id);
 
 
-
-
+-- Create index(es)
+CREATE INDEX IX_ssd_cla_immunisations_person_id ON ssd_cla_immunisations (clai_person_id);
 
 
 

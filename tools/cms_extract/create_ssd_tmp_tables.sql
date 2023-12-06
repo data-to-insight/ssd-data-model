@@ -1632,18 +1632,55 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: #ssd_cla_immunisations
+Object Name: ssd_cla_immunisations
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 06/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_903_DATA
 =============================================================================
 */
+
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#ssd_cla_immunisations') IS NOT NULL DROP TABLE #ssd_cla_immunisations;
+
+-- Create structure 
+CREATE TABLE #ssd_cla_immunisations (
+    clai_immunisations_id          NVARCHAR(48) PRIMARY KEY,
+    clai_person_id                 NVARCHAR(48),
+    clai_immunisations_status_date DATETIME,
+    clai_immunisations_status      NCHAR(1)
+);
+
+-- Insert data
+INSERT INTO #ssd_cla_immunisations (
+    clai_immunisations_id,
+    clai_person_id,
+    clai_immunisations_status_date,
+    clai_immunisations_status
+)
+SELECT 
+    f903.FACT_903_DATA_ID,
+    f903.DIM_PERSON_ID,
+    '20010101', -- [PLACEHOLDER_DATA] [TESTING] in YYYYMMDD format
+    f903.IMMUN_CODE
+FROM 
+    Child_Social.FACT_903_DATA AS f903
+WHERE EXISTS ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = f903.DIM_PERSON_ID
+);
+
+
+-- Create index(es)
+CREATE INDEX IX_ssd_cla_immunisations_person_id ON #ssd_cla_immunisations (clai_person_id);
+
 
 
 /* 
@@ -2026,6 +2063,7 @@ SELECT
     ) AS csdq_sdq_score
 FROM 
     Child_Social.FACT_FORM_ANSWERS ffa
+
 JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
 LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
 
