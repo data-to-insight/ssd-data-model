@@ -13,7 +13,7 @@
 -- SSD extract files with the suffix ..._per.sql - for creating the persistent table versions.
 -- SSD extract files with the suffix ..._tmp.sql - for creating the temporary table versions.
 
-USE HDM;
+USE HDM_Local;
 GO
 
 
@@ -1002,11 +1002,12 @@ FOREIGN KEY (cinp_person_id) REFERENCES ssd_person(pers_person_id);
 Object Name: ssd_cin_visits
 Description: 
 Author: D2I
-Last Modified Date: 04/12/23
+Last Modified Date: 07/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.4
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: Added FACT_CASENOTES.FACT_FORM_ID on 041223
+Remarks:    Added FACT_CASENOTES.FACT_FORM_ID on 041223
+            Source table can be very large! Avoid any unfiltered queries. 
 Dependencies: 
 - FACT_CASENOTES
 =============================================================================
@@ -1030,8 +1031,8 @@ CREATE TABLE ssd_cin_visits
 -- Insert data
 INSERT INTO ssd_cin_visits
 (
-    cinv_cin_casenote_id,   -- This needs checking!! [TESTING]
-    cinv_cin_visit_id,      -- This needs checking!! [TESTING]
+    cinv_cin_casenote_id,               -- This needs checking!! [TESTING]
+    cinv_cin_visit_id,                  -- This needs checking!! [TESTING]
     cinv_cin_plan_id,
     cinv_cin_visit_date,
     cinv_cin_visit_seen,
@@ -1047,7 +1048,12 @@ SELECT
     cn.SEEN_ALONE_FLAG,
     cn.SEEN_BEDROOM_FLAG
 FROM 
-    Child_Social.FACT_CASENOTES cn;
+    Child_Social.FACT_CASENOTES cn
+
+WHERE
+    cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('CNSTAT', 'CNSTATCOVID', 'STAT', 'HVIS', 'DRCT', 'IRO', 
+    'SUPERCONT', 'STVL', 'STVLCOVID', 'CNSTAT', 'CNSTATCOVID', 'STVC', 'STVCPCOVID');
+
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_cin_plans 
