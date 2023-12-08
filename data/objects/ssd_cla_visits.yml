@@ -2,6 +2,19 @@
 nodes:
 - name: ssd_cla_visits
   fields:
+  - name: clav_casenote_id
+    description: null
+    item_ref: CLAV006A
+    type: nvarchar
+    cms_field:
+    - liquid_logic:clav_casenote_id
+    - mosaic:clav_casenote_id
+    guidance: null
+  - name: clav_cla_id
+    description: null
+    item_ref: CLAV007A
+    type: nvarchar
+    guidance: null
   - name: clav_cla_visit_id
     description: Visit ID
     item_ref: CLAV001A

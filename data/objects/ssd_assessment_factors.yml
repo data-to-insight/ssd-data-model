@@ -3,7 +3,7 @@ nodes:
 - name: ssd_assessment_factors
   fields:
   - name: cinf_table_id
-    description: null
+    description: Assessment Factors Table ID
     item_ref: CINF003A
     type: nvarchar
     primary_key: true
