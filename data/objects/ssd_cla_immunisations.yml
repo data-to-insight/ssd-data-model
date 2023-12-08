@@ -46,23 +46,6 @@ nodes:
     - liquid_logic:ssd_cla_immunisations
     - mosaic:ssd_cla_immunisations
     guidance: See PERS001A
-  - name: clai_immunisations_status_date
-    description: Date marked up to date
-    item_ref: CLAI003A
-    type: datetime
-    categories:
-    - looked_after
-    - health
-    - immunisations
-    returns:
-    - Local
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_table:
-    - liquid_logic:ssd_cla_immunisations
-    - mosaic:ssd_cla_immunisations
-    guidance: Date immunisations were marked up to date
   - name: clai_immunisations_status
     description: Immunisations up to Date
     item_ref: CLAI004A

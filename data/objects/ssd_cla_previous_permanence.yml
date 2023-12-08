@@ -54,7 +54,7 @@ nodes:
   - name: lapp_previous_permanence_order_date
     description: Date of Previous Permanence Order
     item_ref: LAPP003A
-    type: datetime
+    type: nvarchar
     categories:
     - looked_after
     - permanence

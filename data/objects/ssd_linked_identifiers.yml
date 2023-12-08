@@ -10,7 +10,7 @@ nodes:
     categories:
     - linked_identifiers
     returns:
-    - 1aDraft
+    - 1aNotInCMS
     cms:
     - liquid_logic
     - mosaic
@@ -29,7 +29,7 @@ nodes:
     categories:
     - linked_identifiers
     returns:
-    - 1aDraft
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -52,7 +52,7 @@ nodes:
     categories:
     - linked_identifiers
     returns:
-    - 1aDraft
+    - 1aNotInCMS
     cms:
     - liquid_logic
     - mosaic
@@ -70,7 +70,7 @@ nodes:
     categories:
     - linked_identifiers
     returns:
-    - 1aDraft
+    - 1aNotInCMS
     cms:
     - liquid_logic
     - mosaic
@@ -88,7 +88,7 @@ nodes:
     categories:
     - linked_identifiers
     returns:
-    - 1aDraft
+    - 1aNotInCMS
     cms:
     - liquid_logic
     - mosaic
@@ -106,7 +106,7 @@ nodes:
     categories:
     - linked_identifiers
     returns:
-    - 1aDraft
+    - 1aNotInCMS
     cms:
     - liquid_logic
     - mosaic
