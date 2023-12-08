@@ -8,7 +8,7 @@
 -- SSD extract files with the suffix ..._per.sql - for creating the persistent table versions.
 -- SSD extract files with the suffix ..._tmp.sql - for creating the temporary table versions.
 
-USE HDM;
+USE HDM_Local;
 GO
 
 -- Query run time vars
