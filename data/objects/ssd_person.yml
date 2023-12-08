@@ -205,34 +205,6 @@ nodes:
       versions_count: 1
       impact_title: Common Child Identifier
       type: New Feature
-  - name: pers_upn
-    description: UPN
-    item_ref: PERS006A
-    type: nvarchar
-    categories:
-    - identity
-    returns:
-    - SSDA903
-    - RIIA
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:pers_upn
-    - mosaic:pers_upn
-    cms_table:
-    - liquid_logic:ssd_person
-    - mosaic:ssd_person
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]The UPN must be 13 characters\
-      \ long. The first character is a letter (but cannot be I, O or S). The remaining\
-      \ characters are numeric. For example, H801200001001. If the UPN is temporary,\
-      \ then the last character must be a letter. The UPN field cannot be left blank\
-      \ unless the child is looked-after under an agreed series of short-term placements.\
-      \ For children looked after that have been adopted and subsequently return to\
-      \ being looked-after, the UPN on the child\u2019s pre- and post- adoption records\
-      \ should be different."
   - name: pers_upn_unknown
     description: UPN Unknown
     item_ref: PERS007A

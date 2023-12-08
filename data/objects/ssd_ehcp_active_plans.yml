@@ -17,7 +17,7 @@ nodes:
     - ehcp_request
     - ehcp
     returns:
-    - Local
+    - 1aNotInCMS
     cms:
     - liquid_logic
     cms_field:
@@ -38,7 +38,7 @@ nodes:
     - ehcp_request
     - ehcp
     returns:
-    - Local
+    - 1aNotInCMS
     cms:
     - liquid_logic
     cms_field:
@@ -57,6 +57,7 @@ nodes:
     - ehcp_request
     - ehcp
     returns:
+    - 1aNotInCMS
     - SEN2
     cms:
     - liquid_logic

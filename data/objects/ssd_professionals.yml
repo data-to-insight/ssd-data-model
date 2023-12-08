@@ -75,27 +75,6 @@ nodes:
       \ to provide their SWE number.\nWhere a worker has qualified in year or their\
       \ SWE number has changed during the year, please use their latest SWE number\
       \ for all episodes."
-  - name: prof_agency_worker_flag
-    description: Agency worker
-    item_ref: PROF006A
-    type: nchar
-    categories:
-    - workforce
-    returns:
-    - CSCWF
-    - RIIA
-    cms:
-    - liquid_logic
-    cms_field:
-    - liquid_logic:prof_agency_worker_flag
-    - mosaic:prof_agency_worker_flag
-    cms_table:
-    - liquid_logic:ssd_professionals
-    - mosaic:ssd_professionals
-    guidance: "Record whether the child and family social worker is an agency worker:\n\
-      1 for Yes (agency worker)\n0 for No (not an agency worker)\nNote: for child\
-      \ and family social workers employed directly by your local authority, record\
-      \ \u201C0\u201D - No."
   - name: prof_professional_job_title
     description: Worker job title e.g. Social Worker
     item_ref: PROF007A

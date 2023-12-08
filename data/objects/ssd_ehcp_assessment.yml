@@ -17,6 +17,7 @@ nodes:
     - ehcp_request
     - ehcp_assessment
     returns:
+    - 1aNotInCMS
     - RIIA
     cms:
     - liquid_logic
@@ -51,6 +52,7 @@ nodes:
     - ehcp_request
     - ehcp_assessment
     returns:
+    - 1aNotInCMS
     - RIIA
     cms:
     - liquid_logic
@@ -70,6 +72,7 @@ nodes:
     - ehcp_request
     - ehcp_assessment
     returns:
+    - 1aNotInCMS
     - SEN2
     - RIIA
     cms:
@@ -94,6 +97,7 @@ nodes:
     - ehcp_request
     - ehcp_assessment
     returns:
+    - 1aNotInCMS
     - SEN2
     - RIIA
     cms:
@@ -129,6 +133,7 @@ nodes:
     - ehcp_request
     - ehcp_assessment
     returns:
+    - 1aNotInCMS
     - SEN2
     - RIIA
     cms:

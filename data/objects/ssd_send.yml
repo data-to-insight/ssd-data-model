@@ -16,6 +16,7 @@ nodes:
     - identity
     - send
     returns:
+    - 1aNotInCMS
     - RIIA
     cms:
     - liquid_logic
@@ -40,6 +41,7 @@ nodes:
     - identity
     - send
     returns:
+    - 1aNotInCMS
     - RIIA
     cms:
     - liquid_logic
@@ -58,6 +60,7 @@ nodes:
     - identity
     - send
     returns:
+    - 1aNotInCMS
     - RIIA
     cms:
     - liquid_logic
@@ -77,6 +80,7 @@ nodes:
     - identity
     - send
     returns:
+    - 1aNotInCMS
     - RIIA
     cms:
     - liquid_logic
@@ -109,6 +113,7 @@ nodes:
     - identity
     - send
     returns:
+    - 1aNotInCMS
     - SSDA903
     - CINcensus
     - RIIA

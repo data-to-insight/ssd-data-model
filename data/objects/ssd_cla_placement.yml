@@ -231,27 +231,6 @@ nodes:
     - liquid_logic:ssd_cla_placement
     - mosaic:ssd_cla_placement
     guidance: null
-  - name: clap_cla_placement_la
-    description: LA of Placement
-    item_ref: CLAP006A
-    type: nvarchar
-    categories:
-    - looked_after
-    - placement
-    returns:
-    - SSDA903
-    - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:clap_cla_placement_la
-    - mosaic:clap_cla_placement_la
-    cms_table:
-    - liquid_logic:ssd_cla_placement
-    - mosaic:ssd_cla_placement
-    guidance: The Local Authority of the location where the child is placed. (In the
-      SSDA903 this is calculated from the Placement Postcode by the DfE)
   - name: clap_cla_id
     description: CLA Placement ID
     item_ref: CLAP012A
