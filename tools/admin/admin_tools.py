@@ -5,6 +5,15 @@ import re
 
 # Dictionary to store returns cats, and associated colour spec so that they
 # can be accssed for such as the diagram keys on the web front-end
+
+# Existing      (#CCCCCC) - Light grey
+# Local         (#C5E625) - Lime green
+# 1aDraft       (#1CFCF2) - Bright cyan
+# 1bDraft       (#F57C1D) - Orange
+# 1bSpecified   (#FFC91E) - Golden yellow
+# 1aRemove      (#FF2114) - Bright red
+# 1aNotInCMS    (#1CFCF2) - Bright cyan (same as 1aDraft)
+    
 returns_categories = {
     "Existing": {
         "colour": "#CCCCCC",
