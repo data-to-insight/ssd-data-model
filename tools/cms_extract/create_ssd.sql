@@ -1620,10 +1620,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 21/11/23
+Last Modified Date: 08/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_involvements
@@ -1651,7 +1651,9 @@ CREATE TABLE ssd_cla_episodes (
     clae_cla_episode_ceased         DATETIME,
     clae_cla_episode_cease_reason   NVARCHAR(255),
     clae_cla_team                   NVARCHAR(48),
-    clae_cla_worker_id              NVARCHAR(48)
+    clae_cla_worker_id              NVARCHAR(48),
+    clae_cla_id                     NVARCHAR(48),
+    clae_referral_id                NVARCHAR(48)
 );
 
 -- Insert data 
@@ -1663,10 +1665,12 @@ INSERT INTO ssd_cla_episodes (
     clae_cla_primary_need,
     clae_cla_episode_ceased,
     clae_cla_episode_cease_reason,
-    clae_cla_team,                      -- via .FACT_CLA->.FACT_REFERRAL
-    clae_cla_worker_id                  -- via .FACT_CLA->.FACT_REFERRAL
+    clae_cla_team,                       
+    clae_cla_worker_id,                  
+    clae_cla_id, 
+    clae_referral_id
 )
-SELECT 
+SELECT
     fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
     fce.DIM_PERSON_ID                       AS clae_person_id,
     fce.CARE_START_DATE                     AS clae_cla_episode_start,
@@ -1674,16 +1678,20 @@ SELECT
     fce.CIN_903_CODE                        AS clae_cla_primary_need,
     fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
     fce.CARE_REASON_END_DESC                AS clae_cla_episode_cease_reason,
-    fr.DIM_DEPARTMENT_ID                    AS clae_cla_team,
-    fr.DIM_WORKER_ID                        AS clae_cla_worker_id
-FROM 
+    fi.DIM_DEPARTMENT_ID                    AS clae_cla_team,               
+    fi.DIM_WORKER_NAME                      AS clae_cla_worker_id,           
+    fc.FACT_CLA_ID                          AS clae_cla_id,                    
+    fc.FACT_REFERRAL_ID                     AS clae_referral_id
+ 
+FROM
     Child_Social.FACT_CARE_EPISODES AS fce
-
-JOIN 
+JOIN
     Child_Social.FACT_CLA AS fc ON fce.FACT_CARE_EPISODES_ID = fc.fact_cla_id
-JOIN 
-    Child_Social.FACT_REFERRALS AS fr ON fc.fact_referral_id = fr.fact_referral_id;
-
+JOIN
+    Child_Social.FACT_INVOLVEMENTS AS fi ON fc.fact_referral_id = fi.fact_referral_id
+ 
+WHERE fi.IS_ALLOCATED_CW_FLAG = 'Y';
+ 
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON ssd_cla_episodes (clae_cla_worker_id);
