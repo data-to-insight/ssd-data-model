@@ -236,7 +236,7 @@ FOREIGN KEY (fami_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TTaleName;
+PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
@@ -314,6 +314,7 @@ SELECT
     ) AS addr_address_json
 FROM 
     Child_Social.DIM_PERSON_ADDRESS AS pa
+
 WHERE EXISTS 
     (   -- only need address data for ssd relevant records
         -- This also negates the need to apply DIM_PERSON_ID <> '-1';  
@@ -388,6 +389,7 @@ SELECT
     fd.DIM_LOOKUP_DISAB_CODE
 FROM 
     Child_Social.FACT_DISABILITY AS fd
+
 WHERE EXISTS 
     ( -- only need address data for ssd relevant records
     SELECT 1 
@@ -466,6 +468,7 @@ SELECT
     ims.DIM_LOOKUP_IMMGR_STATUS_CODE
 FROM 
     Child_Social.FACT_IMMIGRATION_STATUS AS ims
+
 WHERE 
     EXISTS 
     ( -- only need data for ssd relevant records
@@ -477,7 +480,7 @@ WHERE
 
 -- Create constraint(s)
 ALTER TABLE ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
-FOREIGN KEY (immi_person_id) REFERENCES person(pers_person_id);
+FOREIGN KEY (immi_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE INDEX IDX_immigration_status_immi_person_id ON ssd_immigration_status(immi_person_id);
@@ -526,7 +529,7 @@ CREATE TABLE ssd_mother (
 
 -- Insert data
 INSERT INTO ssd_mother (
-    moth_table_id
+    moth_table_id,
     moth_person_id, 
     moth_childs_person_id, 
     moth_childs_dob
@@ -539,6 +542,7 @@ SELECT
 
 FROM 
     Child_Social.FACT_PERSON_RELATION AS fpr
+
 WHERE EXISTS 
     ( -- only need data for ssd relevant records
     SELECT 1 
@@ -615,6 +619,7 @@ SELECT
     fls.END_DTTM
 FROM 
     Child_Social.FACT_LEGAL_STATUS AS fls
+
 WHERE EXISTS 
     ( -- only need data for ssd relevant records
     SELECT 1 
@@ -784,7 +789,8 @@ SELECT
     cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
     'PLACEHOLDER_DATA'                              -- [PLACEHOLDER_DATA] [TESTING]
 FROM 
-    Child_Social.FACT_CAF_EPISODE AS cafe;
+    Child_Social.FACT_CAF_EPISODE AS cafe
+
 WHERE EXISTS 
     ( -- only need data for ssd relevant records
     SELECT 1 
@@ -1190,7 +1196,7 @@ INSERT INTO ssd_cin_visits
 )
 SELECT 
     cn.FACT_CASENOTE_ID,                -- This needs checking!! [TESTING]
-    cn.FACT_CASENOTES.FACT_FORM_ID,     -- This needs checking!! [TESTING]
+    cn.FACT_FORM_ID,     -- This needs checking!! [TESTING]
     cn.FACT_FORM_ID,
     cn.EVENT_DTTM,
     cn.SEEN_FLAG,
@@ -1685,10 +1691,12 @@ SELECT
  
 FROM
     Child_Social.FACT_CARE_EPISODES AS fce
+
 JOIN
     Child_Social.FACT_CLA AS fc ON fce.FACT_CARE_EPISODES_ID = fc.fact_cla_id
 JOIN
     Child_Social.FACT_INVOLVEMENTS AS fi ON fc.fact_referral_id = fi.fact_referral_id
+
  
 WHERE fi.IS_ALLOCATED_CW_FLAG = 'Y';
  
@@ -1753,7 +1761,6 @@ SELECT
     fo.DESCRIPTION
 FROM 
     Child_Social.FACT_OFFENCE as fo
-
 
 WHERE EXISTS ( -- only need data for ssd relevant records
     SELECT 1 
@@ -1885,6 +1892,7 @@ SELECT
     f903.IMMUN_CODE
 FROM 
     Child_Social.FACT_903_DATA AS f903
+
 WHERE EXISTS ( -- only need data for ssd relevant records
     SELECT 1 
     FROM #ssd_person p
@@ -1952,7 +1960,7 @@ SELECT
     fsm.DIM_LOOKUP_SUBSTANCE_TYPE_CODE         AS clas_substance_misused,
     fsm.ACCEPT_FLAG                            AS clas_intervention_received
 FROM 
-    Child_Social.FACT_SUBSTANCE_MISUSE AS fsm;
+    Child_Social.FACT_SUBSTANCE_MISUSE AS fsm
 
 WHERE EXISTS ( -- only need data for ssd relevant records
     SELECT 1 
@@ -2044,8 +2052,8 @@ SELECT
     fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE          AS clap_cla_placement_change_reason,
     fcp.FACT_CLA_ID                             AS clap_cla_id  
 FROM 
-
     Child_Social.FACT_CLA_PLACEMENT AS fcp
+    
 JOIN 
     Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CARE_EPISODES_ID = fce.FACT_CARE_EPISODES_ID; -- Adjust with actual column name [TESTING]
 
@@ -2530,6 +2538,7 @@ LEFT JOIN (
         COUNT(*) AS OpenCases
     FROM 
         Child_Social.FACT_REFERRALS
+
     WHERE 
         REFRL_START_DTTM <= @LastSept30th AND 
         (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM >= @LastSept30th)
@@ -2687,6 +2696,7 @@ VALUES
 --     FROM ssd_person p
 --     WHERE p.pers_person_id = ssd_linked_identifiers.DIM_PERSON_ID
 --     );
+
 -- Create constraint(s)
 ALTER TABLE ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
 FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
