@@ -1436,6 +1436,10 @@ FOREIGN KEY (cppl_initial_cp_conference_id) REFERENCES ssd_initial_cp_conference
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_category_of_abuse
@@ -1460,10 +1464,10 @@ Dependencies:
 Object Name: ssd_cp_visits
 Description: 
 Author: D2I
-Last Modified Date: 24/11/23
+Last Modified Date: 08/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: This has issues, where/what is the fk back to cp_plans? 
 Dependencies: 
 - FACT_CASENOTES
@@ -1478,31 +1482,48 @@ PRINT 'Creating table: ' + @TableName;
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cp_visits') IS NOT NULL DROP TABLE ssd_cp_visits;
 
+
 -- Create structure
 CREATE TABLE ssd_cp_visits (
-    cppv_casenote_id        INT PRIMARY KEY, 
-    cppv_cp_visit_id        INT,                -- ??WHERE DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID') [TESTING]
-    cppv_cp_visit_date      DATETIME, 
-    cppv_cp_visit_seen      NCHAR(1), 
-    cppv_cp_visit_seen_alone NCHAR(1), 
-    cppv_cp_visit_bedroom   NCHAR(1) 
+    cppv_cp_visit_id        INT PRIMARY KEY,        -- [TESTING]  INT vs VARCHAR here? 
+    cppv_casenote_id        INT,                    -- [TESTING]  INT vs VARCHAR here? 
+    cppv_cp_plan_id         NVARCHAR(48),
+    cppv_cp_visit_date      DATETIME,
+    cppv_cp_visit_seen      NCHAR(1),
+    cppv_cp_visit_seen_alone NCHAR(1),
+    cppv_cp_visit_bedroom   NCHAR(1)
 );
-
+ 
 -- Insert data
 INSERT INTO ssd_cp_visits
-SELECT 
-    cn.FACT_CASENOTE_ID,
-    cn.DIM_LOOKUP_CASNT_TYPE_ID,                -- [TESTING]
-    cn.EVENT_DTTM,
-    cn.SEEN_FLAG,
-    cn.SEEN_ALONE_FLAG,
-    cn.SEEN_BEDROOM_FLAG 
-FROM 
-    Child_Social.FACT_CASENOTES AS cn
-
-where cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID');
+(
+    cppv_cp_visit_id,
+    cppv_casenote_id,        
+    cppv_cp_plan_id,          
+    cppv_cp_visit_date,      
+    cppv_cp_visit_seen,      
+    cppv_cp_visit_seen_alone,
+    cppv_cp_visit_bedroom  
+)
+ 
+SELECT
+    cpv.FACT_CP_VISIT_ID    AS cppv_cp_visit_id,                
+    cn.FACT_CASENOTE_ID     AS cppv_casenote_id,
+    cpv.FACT_CP_PLAN_ID     AS cppv_cp_plan_id,  
+    cn.EVENT_DTTM           AS cppv_cp_visit_date,
+    cn.SEEN_FLAG            AS cppv_cp_visit_seen,
+    cn.SEEN_ALONE_FLAG      AS cppv_cp_visit_seen_alone,
+    cn.SEEN_BEDROOM_FLAG    AS cppv_cp_visit_bedroom
+ 
+FROM
+    Child_Social.FACT_CP_VISIT AS cpv
+JOIN
+    Child_Social.FACT_CASENOTES AS cn ON cpv.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID
+ 
+WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID');
 
 -- Create constraint(s)
+
 
 
 -- [TESTING] Increment /print progress
@@ -1599,10 +1620,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 21/11/23
+Last Modified Date: 08/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_involvements
@@ -1630,7 +1651,9 @@ CREATE TABLE ssd_cla_episodes (
     clae_cla_episode_ceased         DATETIME,
     clae_cla_episode_cease_reason   NVARCHAR(255),
     clae_cla_team                   NVARCHAR(48),
-    clae_cla_worker_id              NVARCHAR(48)
+    clae_cla_worker_id              NVARCHAR(48),
+    clae_cla_id                     NVARCHAR(48),
+    clae_referral_id                NVARCHAR(48)
 );
 
 -- Insert data 
@@ -1642,10 +1665,12 @@ INSERT INTO ssd_cla_episodes (
     clae_cla_primary_need,
     clae_cla_episode_ceased,
     clae_cla_episode_cease_reason,
-    clae_cla_team,                      -- via .FACT_CLA->.FACT_REFERRAL
-    clae_cla_worker_id                  -- via .FACT_CLA->.FACT_REFERRAL
+    clae_cla_team,                       
+    clae_cla_worker_id,                  
+    clae_cla_id, 
+    clae_referral_id
 )
-SELECT 
+SELECT
     fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
     fce.DIM_PERSON_ID                       AS clae_person_id,
     fce.CARE_START_DATE                     AS clae_cla_episode_start,
@@ -1653,16 +1678,20 @@ SELECT
     fce.CIN_903_CODE                        AS clae_cla_primary_need,
     fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
     fce.CARE_REASON_END_DESC                AS clae_cla_episode_cease_reason,
-    fr.DIM_DEPARTMENT_ID                    AS clae_cla_team,
-    fr.DIM_WORKER_ID                        AS clae_cla_worker_id
-FROM 
+    fi.DIM_DEPARTMENT_ID                    AS clae_cla_team,               
+    fi.DIM_WORKER_NAME                      AS clae_cla_worker_id,           
+    fc.FACT_CLA_ID                          AS clae_cla_id,                    
+    fc.FACT_REFERRAL_ID                     AS clae_referral_id
+ 
+FROM
     Child_Social.FACT_CARE_EPISODES AS fce
-
-JOIN 
+JOIN
     Child_Social.FACT_CLA AS fc ON fce.FACT_CARE_EPISODES_ID = fc.fact_cla_id
-JOIN 
-    Child_Social.FACT_REFERRALS AS fr ON fc.fact_referral_id = fr.fact_referral_id;
-
+JOIN
+    Child_Social.FACT_INVOLVEMENTS AS fi ON fc.fact_referral_id = fi.fact_referral_id
+ 
+WHERE fi.IS_ALLOCATED_CW_FLAG = 'Y';
+ 
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON ssd_cla_episodes (clae_cla_worker_id);
@@ -2104,7 +2133,6 @@ CREATE NONCLUSTERED INDEX idx_clar_review_last_iro_contact_date ON ssd_cla_revie
 
 
 
-
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
@@ -2422,145 +2450,6 @@ Dependencies:
 
 
 
-/* 
-=============================================================================
-Object Name: ssd_send
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- FACT_903_DATA
-- ssd_person
-- Education.DIM_PERSON
-=============================================================================
-*/
--- [TESTING] Create marker
-SET @TableName = N'ssd_send';
-PRINT 'Creating table: ' + @TableName;
-
-
-
--- Check if exists, & drop
-IF OBJECT_ID('ssd_send') IS NOT NULL DROP TABLE ssd_send;
-
-
--- Create structure 
-CREATE TABLE ssd_send (
-    send_table_id       NVARCHAR(48),
-    send_person_id      NVARCHAR(48),
-    send_upn            NVARCHAR(48),
-    send_uln            NVARCHAR(48),
-    upn_unknown         NVARCHAR(48)
-    );
-
--- insert data
-INSERT INTO ssd_send (
-    send_table_id,
-    send_person_id, 
-    send_upn,
-    send_uln,
-    upn_unknown
-
-)
-SELECT 
-    f903.FACT_903_DATA_ID   AS send_table_id,
-    f903.DIM_PERSON_ID      AS send_person_id,      -- [TESTING]
-    f903.FACT_903_DATA_ID   AS send_upn,
-    p.ULN                   AS send_uln,
-    f903.NO_UPN_CODE        AS upn_unknown
-
-FROM 
-    Child_Social.FACT_903_DATA AS f903
-
-LEFT JOIN 
-    Education.DIM_PERSON AS p ON f903.DIM_PERSON_ID = p.DIM_PERSON_ID;
-
--- Add constraint(s)
-ALTER TABLE ssd_send ADD CONSTRAINT FK_send_to_person 
-FOREIGN KEY (send_person_id) REFERENCES ssd_person(pers_person_id);
-
-/* ?? Should this actually be pulling from Child_Social.FACT_SENRECORD.DIM_PERSON_ID | Child_Social.FACT_SEN.DIM_PERSON_ID
-*/
-
-
-
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_ehcp_assessment
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_ehcp_named_plan
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
-/* 
-=============================================================================
-Object Name: ssd_ehcp_active_plans
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_send_need
-Description: 
-Author: D2I
-Last Modified Date:
-DB Compatibility: SQL Server 2014+|... 
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
 
 
 
@@ -2746,6 +2635,212 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
+
+/* 
+=============================================================================
+Object Name: ssd_linked_identifiers
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 02/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_linked_identifiers';
+PRINT 'Creating table: ' + @TableName;
+
+
+
+-- Check if exists, & drop 
+IF OBJECT_ID('ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_linked_identifiers;
+
+-- Create structure
+CREATE TABLE ssd_linked_identifiers (
+    link_link_id NVARCHAR(48) PRIMARY KEY, 
+    link_person_id NVARCHAR(48), 
+    link_identifier_type NVARCHAR(100),
+    link_identifier_value NVARCHAR(100),
+    link_valid_from_date DATETIME,
+    link_valid_to_date DATETIME
+);
+
+-- Insert placeholder data [TESTING]
+INSERT INTO ssd_linked_identifiers (
+    link_link_id,
+    link_person_id,
+    link_identifier_type,
+    link_identifier_value,
+    link_valid_from_date,
+    link_valid_to_date
+)
+VALUES
+    ('PLACEHOLDER_DATA', 'DIM_PERSON.PERSON_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', NULL, NULL);
+
+-- To switch on once source data defined.
+-- WHERE EXISTS ( -- only need data for ssd relevant records
+--     SELECT 1 
+--     FROM ssd_person p
+--     WHERE p.pers_person_id = ssd_linked_identifiers.DIM_PERSON_ID
+--     );
+-- Create constraint(s)
+ALTER TABLE ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
+FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
+
+
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
+
+/* Start 
+
+        SSDF Other projects elements extracts 
+        
+        */
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_s251_finance
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 02/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_s251_finance';
+PRINT 'Creating table: ' + @TableName;
+
+
+
+
+-- Check if exists, & drop 
+IF OBJECT_ID('ssd_s251_finance', 'U') IS NOT NULL DROP TABLE ssd_s251_finance;
+
+-- Create structure
+CREATE TABLE ssd_s251_finance (
+    s251_id NVARCHAR(48) PRIMARY KEY, 
+    s251_cla_placement_id NVARCHAR(48), 
+    s251_placeholder_1 NVARCHAR(48),
+    s251_placeholder_2 NVARCHAR(48),
+    s251_placeholder_3 NVARCHAR(48),
+    s251_placeholder_4 NVARCHAR(48)
+);
+
+-- Insert placeholder data [TESTING]
+INSERT INTO ssd_s251_finance (
+    s251_id,
+    s251_cla_placement_id,
+    s251_placeholder_1,
+    s251_placeholder_2,
+    s251_placeholder_3,
+    s251_placeholder_4
+)
+VALUES
+    ('PLACEHOLDER_DATA_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+
+-- Create constraint(s)
+ALTER TABLE ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
+FOREIGN KEY (s251_cla_placement_id) REFERENCES ssd_cla_placement(clap_cla_placement_id);
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_voice_of_child
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 16/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_voice_of_child';
+PRINT 'Creating table: ' + @TableName;
+
+
+
+-- Check if exists, & drop 
+IF OBJECT_ID('ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE ssd_voice_of_child;
+
+-- Create structure
+CREATE TABLE ssd_voice_of_child (
+    voch_table_id               NVARCHAR(48) PRIMARY KEY, 
+    voch_person_id              NVARCHAR(48), 
+    voch_explained_worries      NCHAR(1), 
+    voch_story_help_understand  NCHAR(1), 
+    voch_agree_worker           NCHAR(1), 
+    voch_plan_safe              NCHAR(1), 
+    voch_tablet_help_explain    NCHAR(1)
+);
+
+-- Insert placeholder data [TESTING]
+INSERT INTO ssd_voice_of_child (
+    voch_table_id,
+    voch_person_id,
+    voch_explained_worries,
+    voch_story_help_understand,
+    voch_agree_worker,
+    voch_plan_safe,
+    voch_tablet_help_explain
+)
+VALUES
+    ('ID001','P001', 'Y', 'Y', 'Y', 'N', 'N'),
+    ('ID002','P002', 'Y', 'Y', 'Y', 'N', 'N');
+
+-- To switch on once source data defined.
+-- WHERE EXISTS ( -- only need data for ssd relevant records
+--     SELECT 1 
+--     FROM ssd_person p
+--     WHERE p.pers_person_id = ssd_voice_of_child.DIM_PERSON_ID
+--     );
+
+-- Create constraint(s)
+ALTER TABLE ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
+FOREIGN KEY (voch_person_id) REFERENCES ssd_person(pers_person_id);
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_pre_proceedings
@@ -2861,66 +2956,158 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
+/* End
+
+        SSDF Other projects elements extracts 
+        
+        */
+
+
+
+
+
+
+
+
+/* Start 
+
+        Non-Core Liquid Logic elements extracts (E.g. SEND/EH Module data)
+        
+        */
+
+
+
 /* 
 =============================================================================
-Object Name: ssd_voice_of_child
-Description: Currently only with placeholder structure as source data not yet conformed
+Object Name: ssd_ehcp_assessment
+Description: 
 Author: D2I
-Last Modified Date: 16/11/23
+Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- Yet to be defined
+- 
+=============================================================================
+*/
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_ehcp_named_plan
+Description: 
+Author: D2I
+Last Modified Date: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+/* 
+=============================================================================
+Object Name: ssd_ehcp_active_plans
+Description: 
+Author: D2I
+Last Modified Date: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_send_need
+Description: 
+Author: D2I
+Last Modified Date:
+DB Compatibility: SQL Server 2014+|... 
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- 
+=============================================================================
+*/
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_send
+Description: 
+Author: D2I
+Last Modified Date: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.9
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- FACT_903_DATA
+- ssd_person
+- Education.DIM_PERSON
 =============================================================================
 */
 -- [TESTING] Create marker
-SET @TableName = N'ssd_voice_of_child';
+SET @TableName = N'ssd_send';
 PRINT 'Creating table: ' + @TableName;
 
 
 
--- Check if exists, & drop 
-IF OBJECT_ID('ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE ssd_voice_of_child;
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_send') IS NOT NULL DROP TABLE ssd_send;
 
--- Create structure
-CREATE TABLE ssd_voice_of_child (
-    voch_table_id               NVARCHAR(48) PRIMARY KEY, 
-    voch_person_id              NVARCHAR(48), 
-    voch_explained_worries      NCHAR(1), 
-    voch_story_help_understand  NCHAR(1), 
-    voch_agree_worker           NCHAR(1), 
-    voch_plan_safe              NCHAR(1), 
-    voch_tablet_help_explain    NCHAR(1)
-);
 
--- Insert placeholder data [TESTING]
-INSERT INTO ssd_voice_of_child (
-    voch_table_id,
-    voch_person_id,
-    voch_explained_worries,
-    voch_story_help_understand,
-    voch_agree_worker,
-    voch_plan_safe,
-    voch_tablet_help_explain
+-- Create structure 
+CREATE TABLE ssd_send (
+    send_table_id       NVARCHAR(48),
+    send_person_id      NVARCHAR(48),
+    send_upn            NVARCHAR(48),
+    send_uln            NVARCHAR(48),
+    upn_unknown         NVARCHAR(48)
+    );
+
+-- insert data
+INSERT INTO ssd_send (
+    send_table_id,
+    send_person_id, 
+    send_upn,
+    send_uln,
+    upn_unknown
+
 )
-VALUES
-    ('ID001','P001', 'Y', 'Y', 'Y', 'N', 'N'),
-    ('ID002','P002', 'Y', 'Y', 'Y', 'N', 'N');
+SELECT 
+    f903.FACT_903_DATA_ID   AS send_table_id,
+    f903.DIM_PERSON_ID      AS send_person_id,      -- [TESTING]
+    f903.FACT_903_DATA_ID   AS send_upn,
+    p.ULN                   AS send_uln,
+    f903.NO_UPN_CODE        AS upn_unknown
 
--- To switch on once source data defined.
--- WHERE EXISTS ( -- only need data for ssd relevant records
---     SELECT 1 
---     FROM ssd_person p
---     WHERE p.pers_person_id = ssd_voice_of_child.DIM_PERSON_ID
---     );
+FROM 
+    Child_Social.FACT_903_DATA AS f903
 
--- Create constraint(s)
-ALTER TABLE ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
-FOREIGN KEY (voch_person_id) REFERENCES ssd_person(pers_person_id);
+LEFT JOIN 
+    Education.DIM_PERSON AS p ON f903.DIM_PERSON_ID = p.DIM_PERSON_ID;
 
+-- Add constraint(s)
+ALTER TABLE ssd_send ADD CONSTRAINT FK_send_to_person 
+FOREIGN KEY (send_person_id) REFERENCES ssd_person(pers_person_id);
 
+/* ?? Should this actually be pulling from Child_Social.FACT_SENRECORD.DIM_PERSON_ID | Child_Social.FACT_SEN.DIM_PERSON_ID
+*/
 
 
 
@@ -2930,132 +3117,11 @@ PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
+/* End
 
-/* 
-=============================================================================
-Object Name: ssd_linked_identifiers
-Description: Currently only with placeholder structure as source data not yet conformed
-Author: D2I
-Last Modified Date: 02/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- Yet to be defined
-=============================================================================
-*/
--- [TESTING] Create marker
-SET @TableName = N'ssd_linked_identifiers';
-PRINT 'Creating table: ' + @TableName;
-
-
-
--- Check if exists, & drop 
-IF OBJECT_ID('ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_linked_identifiers;
-
--- Create structure
-CREATE TABLE ssd_linked_identifiers (
-    link_link_id NVARCHAR(48) PRIMARY KEY, 
-    link_person_id NVARCHAR(48), 
-    link_identifier_type NVARCHAR(100),
-    link_identifier_value NVARCHAR(100),
-    link_valid_from_date DATETIME,
-    link_valid_to_date DATETIME
-);
-
--- Insert placeholder data [TESTING]
-INSERT INTO ssd_linked_identifiers (
-    link_link_id,
-    link_person_id,
-    link_identifier_type,
-    link_identifier_value,
-    link_valid_from_date,
-    link_valid_to_date
-)
-VALUES
-    ('PLACEHOLDER_DATA', 'DIM_PERSON.PERSON_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', NULL, NULL);
-
--- To switch on once source data defined.
--- WHERE EXISTS ( -- only need data for ssd relevant records
---     SELECT 1 
---     FROM ssd_person p
---     WHERE p.pers_person_id = ssd_linked_identifiers.DIM_PERSON_ID
---     );
--- Create constraint(s)
-ALTER TABLE ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
-FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
-
-
-
-
-
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_s251_finance
-Description: Currently only with placeholder structure as source data not yet conformed
-Author: D2I
-Last Modified Date: 02/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- Yet to be defined
-=============================================================================
-*/
--- [TESTING] Create marker
-SET @TableName = N'ssd_s251_finance';
-PRINT 'Creating table: ' + @TableName;
-
-
-
-
--- Check if exists, & drop 
-IF OBJECT_ID('ssd_s251_finance', 'U') IS NOT NULL DROP TABLE ssd_s251_finance;
-
--- Create structure
-CREATE TABLE ssd_s251_finance (
-    s251_id NVARCHAR(48) PRIMARY KEY, 
-    s251_cla_placement_id NVARCHAR(48), 
-    s251_placeholder_1 NVARCHAR(48),
-    s251_placeholder_2 NVARCHAR(48),
-    s251_placeholder_3 NVARCHAR(48),
-    s251_placeholder_4 NVARCHAR(48)
-);
-
--- Insert placeholder data [TESTING]
-INSERT INTO ssd_s251_finance (
-    s251_id,
-    s251_cla_placement_id,
-    s251_placeholder_1,
-    s251_placeholder_2,
-    s251_placeholder_3,
-    s251_placeholder_4
-)
-VALUES
-    ('PLACEHOLDER_DATA_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
-
--- Create constraint(s)
-ALTER TABLE ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
-FOREIGN KEY (s251_cla_placement_id) REFERENCES ssd_cla_placement(clap_cla_placement_id);
-
-
-
-
-
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+        Non-Core Liquid Logic elements extracts 
+        
+        */
 
 
 

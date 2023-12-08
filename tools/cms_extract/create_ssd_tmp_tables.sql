@@ -1335,48 +1335,66 @@ IF OBJECT_ID('tempdb..#ssd_category_of_abuse') IS NOT NULL DROP TABLE #ssd_categ
 Object Name: ssd_cp_visits
 Description: 
 Author: D2I
-Last Modified Date: 24/11/23
+Last Modified Date: 08/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: This has issues, where/what is the fk back to cp_plans? 
 Dependencies: 
 - FACT_CASENOTES
 =============================================================================
 */
 -- [TESTING] Create marker
-SET @TableName = N'#ssd_cp_visits';
+SET @TableName = N'ssd_cp_visits';
 PRINT 'Creating table: ' + @TableName;
 
 
--- Check if exists, & drop
-IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
+
+-- Check if exists & drop
+IF OBJECT_ID('TEMPDB..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
+
 
 -- Create structure
 CREATE TABLE #ssd_cp_visits (
-    cppv_casenote_id        INT PRIMARY KEY, 
-    cppv_cp_visit_id        INT,                -- ??WHERE DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID') [TESTING]
-    cppv_cp_visit_date      DATETIME, 
-    cppv_cp_visit_seen      NCHAR(1), 
-    cppv_cp_visit_seen_alone NCHAR(1), 
-    cppv_cp_visit_bedroom   NCHAR(1) 
+    cppv_cp_visit_id        INT PRIMARY KEY,        -- [TESTING]  INT vs VARCHAR here? 
+    cppv_casenote_id        INT,                    -- [TESTING]  INT vs VARCHAR here? 
+    cppv_cp_plan_id         NVARCHAR(48),
+    cppv_cp_visit_date      DATETIME,
+    cppv_cp_visit_seen      NCHAR(1),
+    cppv_cp_visit_seen_alone NCHAR(1),
+    cppv_cp_visit_bedroom   NCHAR(1)
 );
-
+ 
 -- Insert data
 INSERT INTO #ssd_cp_visits
-SELECT 
-    cn.FACT_CASENOTE_ID,
-    cn.DIM_LOOKUP_CASNT_TYPE_ID,                -- [TESTING]
-    cn.EVENT_DTTM,
-    cn.SEEN_FLAG,
-    cn.SEEN_ALONE_FLAG,
-    cn.SEEN_BEDROOM_FLAG 
-FROM 
-    Child_Social.FACT_CASENOTES AS cn
-
-where cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID');
+(
+    cppv_cp_visit_id,
+    cppv_casenote_id,        
+    cppv_cp_plan_id,          
+    cppv_cp_visit_date,      
+    cppv_cp_visit_seen,      
+    cppv_cp_visit_seen_alone,
+    cppv_cp_visit_bedroom  
+)
+ 
+SELECT
+    cpv.FACT_CP_VISIT_ID    AS cppv_cp_visit_id,                
+    cn.FACT_CASENOTE_ID     AS cppv_casenote_id,
+    cpv.FACT_CP_PLAN_ID     AS cppv_cp_plan_id,  
+    cn.EVENT_DTTM           AS cppv_cp_visit_date,
+    cn.SEEN_FLAG            AS cppv_cp_visit_seen,
+    cn.SEEN_ALONE_FLAG      AS cppv_cp_visit_seen_alone,
+    cn.SEEN_BEDROOM_FLAG    AS cppv_cp_visit_bedroom
+ 
+FROM
+    Child_Social.FACT_CP_VISIT AS cpv
+JOIN
+    Child_Social.FACT_CASENOTES AS cn ON cpv.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID
+ 
+WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID');
 
 -- Create constraint(s)
+
 
 
 -- [TESTING] Increment /print progress
