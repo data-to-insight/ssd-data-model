@@ -8,7 +8,7 @@
 -- SSD extract files with the suffix ..._per.sql - for creating the persistent table versions.
 -- SSD extract files with the suffix ..._tmp.sql - for creating the temporary table versions.
 
-USE HDM;
+USE HDM_Local;
 GO
 
 -- Query run time vars
@@ -293,14 +293,15 @@ INSERT INTO #ssd_address (
 )
 SELECT 
     pa.DIM_PERSON_ADDRESS_ID,
-    pa.DIM_PERSON_ID, -- Assuming EXTERNAL_ID corresponds to pers_person_id
+    pa.DIM_PERSON_ID, --
     pa.ADDSS_TYPE_CODE,
     pa.START_DTTM,
     pa.END_DTTM,
     CASE 
-        WHEN REPLACE(pa.POSTCODE, ' ', '') NOT LIKE '%[^X]%' THEN ''
-        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''
-        ELSE REPLACE(pa.POSTCODE, ' ', '')
+    -- Some clean-up based on known data
+        WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', ''))) THEN '' -- clear pcode of containing all X's
+        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''                                -- clear pcode of containing nopostcode
+        ELSE REPLACE(pa.POSTCODE, ' ', '')                                                              -- remove all spaces for consistency
     END AS CleanedPostcode,
     (
         SELECT 
@@ -984,40 +985,47 @@ asmt_factors
 
 /* issues with join [TESTING]
 -- The multi-part identifier "cpd.DIM_OUTCM_CREATE_BY_DEPT_ID" could not be bound.
+*/
+
 
 /* 
 =============================================================================
-Object Name: #sd_cin_plans
+Object Name: ssd_cin_plans
 Description: 
 Author: D2I
-Last Modified Date: 04/12/23
+Last Modified Date: 08/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: [TESTING] - not sent to knowsley
 Dependencies: 
+- ssd_person
 - FACT_CARE_PLANS
 =============================================================================
 */
+
+
 -- [TESTING] Create marker
-SET @TableName = N'#ssd_cin_plans';
+SET @TableName = N'ssd_cin_plans';
 PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plans;
+IF OBJECT_ID('ssd_cin_plans', 'U') IS NOT NULL DROP TABLE ssd_cin_plans;
 
 -- Create structure
-CREATE TABLE #ssd_cin_plans (
-    cinp_referral_id NVARCHAR(48), 
-    cinp_person_id NVARCHAR(48), 
-    cinp_cin_plan_start DATETIME,
-    cinp_cin_plan_end DATETIME,
-    cinp_cin_plan_team NVARCHAR(255),
-    cinp_cin_plan_worker_id NVARCHAR(48)
+CREATE TABLE ssd_cin_plans (
+    cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,
+    cinp_referral_id            NVARCHAR(48),
+    cinp_person_id              NVARCHAR(48),
+    cinp_cin_plan_start         DATETIME,
+    cinp_cin_plan_end           DATETIME,
+    cinp_cin_plan_team          NVARCHAR(255),
+    cinp_cin_plan_worker_id     NVARCHAR(48)
 );
-
+ 
 -- Insert data
-INSERT INTO #ssd_cin_plans (
+INSERT INTO ssd_cin_plans (
+    cinp_cin_plan_id,
     cinp_referral_id,
     cinp_person_id,
     cinp_cin_plan_start,
@@ -1025,15 +1033,36 @@ INSERT INTO #ssd_cin_plans (
     cinp_cin_plan_team,
     cinp_cin_plan_worker_id
 )
-SELECT 
+SELECT
+    fp.FACT_CARE_PLAN_ID               AS cinp_cin_plan_id, 
     fp.FACT_REFERRAL_ID                AS cinp_referral_id,
     fp.DIM_PERSON_ID                   AS cinp_person_id,
     fp.START_DTTM                      AS cinp_cin_plan_start,
     fp.END_DTTM                        AS cinp_cin_plan_end,
-    cpd.DIM_OUTCM_CREATE_BY_DEPT_ID    AS cinp_cin_plan_team,
-    cpd.DIM_NEED_CREATE_BY_ID          AS cinp_cin_plan_worker_id
+    fp.DIM_PLAN_COORD_DEPT_ID_DESC     AS cinp_cin_plan_team,
+    fp.DIM_PLAN_COORD_ID_DESC          AS cinp_cin_plan_worker_id
 
 FROM Child_Social.FACT_CARE_PLANS AS fp
+
+JOIN Child_Social.FACT_CARE_PLAN_SUMMARY AS cps ON fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID
+ 
+WHERE DIM_LOOKUP_PLAN_TYPE_CODE = 'FP' AND cps.DIM_LOOKUP_PLAN_STATUS_ID_CODE <> 'z'
+AND EXISTS 
+(
+    -- only need data for ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = fp.DIM_PERSON_ID
+);
+
+
+-- Create index(es)
+CREATE INDEX IDX_ssd_cin_plans_person_id ON ssd_cin_plans(cinp_person_id);
+
+-- Create constraint(s)
+ALTER TABLE ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
+FOREIGN KEY (cinp_person_id) REFERENCES ssd_person(pers_person_id);
+
 
 
 
@@ -1042,24 +1071,26 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
-*/
+
 
 
 
 /* 
 =============================================================================
-Object Name: #ssd_cin_visits
+Object Name: ssd_cin_visits
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 07/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Version: 1.4
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks:    Added FACT_CASENOTES.FACT_FORM_ID on 041223
+            Source table can be very large! Avoid any unfiltered queries. 
 Dependencies: 
-- 
+- FACT_CASENOTES
 =============================================================================
 */
+
 -- [TESTING] Create marker
 SET @TableName = N'#ssd_cin_visits';
 PRINT 'Creating table: ' + @TableName;
@@ -1099,8 +1130,11 @@ SELECT
     cn.SEEN_ALONE_FLAG,
     cn.SEEN_BEDROOM_FLAG
 FROM 
-    Child_Social.FACT_CASENOTES cn;
+    Child_Social.FACT_CASENOTES cn
 
+WHERE
+    cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('CNSTAT', 'CNSTATCOVID', 'STAT', 'HVIS', 'DRCT', 'IRO', 
+    'SUPERCONT', 'STVL', 'STVLCOVID', 'CNSTAT', 'CNSTATCOVID', 'STVC', 'STVCPCOVID');
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
@@ -1439,7 +1473,7 @@ Description:
 Author: D2I
 Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
+Version: 1.4
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -1465,7 +1499,7 @@ CREATE TABLE #ssd_cla_episodes (
     clae_cla_episode_start_reason   NVARCHAR(100),
     clae_cla_primary_need           NVARCHAR(100),
     clae_cla_episode_ceased         DATETIME,
-    clae_cla_episode_cease_reason   NVARCHAR(100),
+    clae_cla_episode_cease_reason   NVARCHAR(255),
     clae_cla_team                   NVARCHAR(48),
     clae_cla_worker_id              NVARCHAR(48)
 );
@@ -1631,18 +1665,55 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: #ssd_cla_immunisations
+Object Name: ssd_cla_immunisations
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 06/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_903_DATA
 =============================================================================
 */
+
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#ssd_cla_immunisations') IS NOT NULL DROP TABLE #ssd_cla_immunisations;
+
+-- Create structure 
+CREATE TABLE #ssd_cla_immunisations (
+    clai_immunisations_id          NVARCHAR(48) PRIMARY KEY,
+    clai_person_id                 NVARCHAR(48),
+    clai_immunisations_status_date DATETIME,
+    clai_immunisations_status      NCHAR(1)
+);
+
+-- Insert data
+INSERT INTO #ssd_cla_immunisations (
+    clai_immunisations_id,
+    clai_person_id,
+    clai_immunisations_status_date,
+    clai_immunisations_status
+)
+SELECT 
+    f903.FACT_903_DATA_ID,
+    f903.DIM_PERSON_ID,
+    '20010101', -- [PLACEHOLDER_DATA] [TESTING] in YYYYMMDD format
+    f903.IMMUN_CODE
+FROM 
+    Child_Social.FACT_903_DATA AS f903
+WHERE EXISTS ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = f903.DIM_PERSON_ID
+);
+
+
+-- Create index(es)
+CREATE INDEX IX_ssd_cla_immunisations_person_id ON #ssd_cla_immunisations (clai_person_id);
+
 
 
 /* 
@@ -1697,7 +1768,7 @@ FROM
 
 WHERE EXISTS ( -- only need data for ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fSM.DIM_PERSON_ID
     );
 
@@ -1965,16 +2036,18 @@ Dependencies:
 
 /* 
 =============================================================================
-Object Name: #ssd_sdq_scores
+Object Name: ssd_sdq_scores
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 06/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_FORMS
+- FACT_FORM_ANSWERS
 =============================================================================
 */
 
@@ -2023,6 +2096,7 @@ SELECT
     ) AS csdq_sdq_score
 FROM 
     Child_Social.FACT_FORM_ANSWERS ffa
+
 JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
 LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
 

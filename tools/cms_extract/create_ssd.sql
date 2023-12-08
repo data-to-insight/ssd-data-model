@@ -13,7 +13,7 @@
 -- SSD extract files with the suffix ..._per.sql - for creating the persistent table versions.
 -- SSD extract files with the suffix ..._tmp.sql - for creating the temporary table versions.
 
-USE HDM;
+USE HDM_Local;
 GO
 
 
@@ -57,7 +57,7 @@ Author: D2I
 Last Modified Date: 20/10/23
 DB Compatibility: SQL Server 2014+|...
 
-Version: 1.1
+Version: 1.3
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 
 Remarks: Need to confirm FACT_903_DATA as source of mother related data
@@ -122,6 +122,7 @@ WHERE                                                       -- Filter invalid ro
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
     AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
 
+
 AND (                                                       -- Filter irrelevant rows by timeframe
     EXISTS (
         -- contact in last x@yrs
@@ -180,11 +181,11 @@ Description:
 Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 Dependencies: 
-- Singleview.DIM_TF_FAMILY
+- FACT_CONTACTS
 - ssd.ssd_person
 =============================================================================
 */
@@ -201,8 +202,7 @@ IF OBJECT_ID('ssd_family') IS NOT NULL DROP TABLE ssd_family;
 CREATE TABLE ssd_family (
     fami_table_id           NVARCHAR(48) PRIMARY KEY, 
     fami_family_id          NVARCHAR(48),
-    fami_person_id          NVARCHAR(48),
-    
+    fami_person_id          NVARCHAR(48)
 );
 
 -- Insert data 
@@ -215,6 +215,7 @@ SELECT
     fc.EXTERNAL_ID                          AS fami_table_id,
     fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID      AS fami_family_id,
     fc.DIM_PERSON_ID                        AS fami_person_id
+
 FROM Child_Social.FACT_CONTACTS AS fc
 
 WHERE EXISTS ( -- only need address data for ssd relevant records
@@ -222,8 +223,6 @@ WHERE EXISTS ( -- only need address data for ssd relevant records
     FROM ssd_person p
     WHERE p.pers_person_id = fc.DIM_PERSON_ID
     );
-AND
-    DIM_PERSON_ID <> '-1';  -- Exclude rows with '-1'
 
 
 -- Create index(es)
@@ -248,14 +247,19 @@ Description:
 Author: D2I
 Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 Dependencies: 
 - ssd_person
 - DIM_PERSON_ADDRESS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_address';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_address') IS NOT NULL DROP TABLE ssd_address;
 
@@ -289,9 +293,10 @@ SELECT
     pa.START_DTTM,
     pa.END_DTTM,
     CASE 
-        WHEN REPLACE(pa.POSTCODE, ' ', '') NOT LIKE '%[^X]%' THEN ''
-        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''
-        ELSE REPLACE(pa.POSTCODE, ' ', '')
+    -- Some clean-up based on known data
+        WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', ''))) THEN '' -- clear pcode of containing all X's
+        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''                                -- clear pcode of containing nopostcode
+        ELSE REPLACE(pa.POSTCODE, ' ', '')                                                              -- remove all spaces for consistency
     END AS CleanedPostcode,
     (
         SELECT 
@@ -331,6 +336,14 @@ CREATE INDEX IDX_address_end ON ssd_address(addr_address_end);
 
 
 
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_disability
@@ -338,14 +351,19 @@ Description:
 Author: D2I
 Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.3
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_DISABILITY
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_disability';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_disability') IS NOT NULL DROP TABLE ssd_disability;
 
@@ -389,6 +407,14 @@ CREATE INDEX IDX_disability_person_id ON ssd_disability(disa_person_id);
 
 
 
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
 
 /* 
 =============================================================================
@@ -405,6 +431,11 @@ Dependencies:
 - FACT_IMMIGRATION_STATUS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_immigration_status';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_status;
 
@@ -454,6 +485,14 @@ CREATE INDEX IDX_immigration_status_start ON ssd_immigration_status(immi_immigra
 CREATE INDEX IDX_immigration_status_end ON ssd_immigration_status(immi_immigration_status_end);
 
 
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_mother
@@ -469,6 +508,11 @@ Dependencies:
 - FACT_PERSON_RELATION
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_mother';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_mother', 'U') IS NOT NULL DROP TABLE ssd_mother;
 
@@ -492,6 +536,7 @@ SELECT
     fpr.DIM_PERSON_ID                   AS moth_person_id,
     fpr.DIM_RELATED_PERSON_ID           AS moth_childs_person_id,
     fpr.DIM_RELATED_PERSON_DOB          AS moth_childs_dob
+
 FROM 
     Child_Social.FACT_PERSON_RELATION AS fpr
 WHERE EXISTS 
@@ -500,6 +545,7 @@ WHERE EXISTS
     FROM #ssd_person p
     WHERE p.pers_person_id = fpr.DIM_PERSON_ID
     )
+
  AND fpr.DIM_LOOKUP_RELTN_TYPE_CODE IN ('CHI', 'PAR'); -- only interested in parent/child relations
 
 -- Create index(es)
@@ -511,6 +557,14 @@ FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
 
 ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
 FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
+
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
@@ -529,6 +583,11 @@ Dependencies:
 - FACT_LEGAL_STATUS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_legal_status';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_legal_status') IS NOT NULL DROP TABLE ssd_legal_status;
 
@@ -572,6 +631,14 @@ FOREIGN KEY (lega_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_contact
@@ -590,6 +657,11 @@ Dependencies:
 - FACT_CONTACTS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_contact';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_contact') IS NOT NULL DROP TABLE ssd_contact;
 
@@ -648,6 +720,14 @@ FOREIGN KEY (cont_person_id) REFERENCES ssd_person(pers_person_id);
 CREATE INDEX IDX_contact_person_id ON ssd_contact(cont_person_id);
 
 
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_early_help_episodes
@@ -663,6 +743,11 @@ Dependencies:
 - FACT_CAF_EPISODE
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_early_help_episodes';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_early_help_episodes') IS NOT NULL DROP TABLE ssd_early_help_episodes;
 
@@ -697,7 +782,7 @@ SELECT
     cafe.START_REASON,
     cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE,
     cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
-    'PLACEHOLDER_DATA' -- placeholder value [TESTING]
+    'PLACEHOLDER_DATA'                              -- [PLACEHOLDER_DATA] [TESTING]
 FROM 
     Child_Social.FACT_CAF_EPISODE AS cafe;
 WHERE EXISTS 
@@ -716,6 +801,14 @@ FOREIGN KEY (earl_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_cin_episodes
@@ -731,6 +824,11 @@ Dependencies:
 - FACT_REFERRALS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cin_episodes';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cin_episodes') IS NOT NULL DROP TABLE ssd_cin_episodes;
 
@@ -792,8 +890,12 @@ SELECT
     fr.DIM_WORKER_ID_DESC
 FROM 
     Child_Social.FACT_REFERRALS AS fr
+
 WHERE 
-    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE());
+    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+AND
+    DIM_PERSON_ID <> '-1';  -- Exclude rows with '-1'
+    ;
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_cin_episodes_person_id ON ssd_cin_episodes(cine_person_id);
@@ -801,6 +903,14 @@ CREATE INDEX IDX_ssd_cin_episodes_person_id ON ssd_cin_episodes(cine_person_id);
 -- Create constraint(s)
 ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
 FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
+
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
@@ -820,6 +930,11 @@ Dependencies:
 - FACT_SINGLE_ASSESSMENT
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cin_assessments';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists, & drop 
 IF OBJECT_ID('ssd_cin_assessments') IS NOT NULL DROP TABLE ssd_cin_assessments;
 
@@ -905,6 +1020,14 @@ FOREIGN KEY (cina_assessment_worker_id) REFERENCES ssd_social_worker(socw_social
 
 
 
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_assessment_factors
@@ -919,9 +1042,8 @@ Dependencies:
 - 
 =============================================================================
 */
-
 -- [TESTING] Create marker
-SET @TableName = N'#assessment_factors';
+SET @TableName = N'ssd_assessment_factors';
 PRINT 'Creating table: ' + @TableName;
 
 
@@ -931,7 +1053,11 @@ IF OBJECT_ID('ssd_assessment_factors') IS NOT NULL DROP TABLE ssd_assessment_fac
 
 
 /* issues with join [TESTING]
--- The multi-part identifier "cpd.DIM_OUTCM_CREATE_BY_DEPT_ID" could not be bound.
+-- The multi-part identifier "cpd.DIM_OUTCM_CREATE_BY_DEPT_ID" could not be bound. */
+
+
+
+
 
 
 /* 
@@ -939,30 +1065,39 @@ IF OBJECT_ID('ssd_assessment_factors') IS NOT NULL DROP TABLE ssd_assessment_fac
 Object Name: ssd_cin_plans
 Description: 
 Author: D2I
-Last Modified Date: 06/11/12
+Last Modified Date: 08/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: [TESTING] - not sent to knowsley
 Dependencies: 
+- ssd_person
 - FACT_CARE_PLANS
 =============================================================================
 */
+
+
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cin_plans';
+PRINT 'Creating table: ' + @TableName;
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cin_plans', 'U') IS NOT NULL DROP TABLE ssd_cin_plans;
 
 -- Create structure
 CREATE TABLE ssd_cin_plans (
-    cinp_referral_id NVARCHAR(48), 
-    cinp_person_id NVARCHAR(48), 
-    cinp_cin_plan_start DATETIME,
-    cinp_cin_plan_end DATETIME,
-    cinp_cin_plan_team NVARCHAR(255),
-    cinp_cin_plan_worker_id NVARCHAR(48)
+    cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,
+    cinp_referral_id            NVARCHAR(48),
+    cinp_person_id              NVARCHAR(48),
+    cinp_cin_plan_start         DATETIME,
+    cinp_cin_plan_end           DATETIME,
+    cinp_cin_plan_team          NVARCHAR(255),
+    cinp_cin_plan_worker_id     NVARCHAR(48)
 );
-
+ 
 -- Insert data
 INSERT INTO ssd_cin_plans (
+    cinp_cin_plan_id,
     cinp_referral_id,
     cinp_person_id,
     cinp_cin_plan_start,
@@ -970,17 +1105,28 @@ INSERT INTO ssd_cin_plans (
     cinp_cin_plan_team,
     cinp_cin_plan_worker_id
 )
-SELECT 
+SELECT
+    fp.FACT_CARE_PLAN_ID               AS cinp_cin_plan_id, 
     fp.FACT_REFERRAL_ID                AS cinp_referral_id,
     fp.DIM_PERSON_ID                   AS cinp_person_id,
     fp.START_DTTM                      AS cinp_cin_plan_start,
     fp.END_DTTM                        AS cinp_cin_plan_end,
-    cpd.DIM_OUTCM_CREATE_BY_DEPT_ID    AS cinp_cin_plan_team,
-    cpd.DIM_NEED_CREATE_BY_ID          AS cinp_cin_plan_worker_id
+    fp.DIM_PLAN_COORD_DEPT_ID_DESC     AS cinp_cin_plan_team,
+    fp.DIM_PLAN_COORD_ID_DESC          AS cinp_cin_plan_worker_id
 
 FROM Child_Social.FACT_CARE_PLANS AS fp
 
-JOIN Child_Social.FACT_CARE_PLAN_DETAILS AS cpd ON fp.FACT_REFERRAL_ID = cpd.FACT_REFERRAL_ID;  -- Needs checking!!
+JOIN Child_Social.FACT_CARE_PLAN_SUMMARY AS cps ON fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID
+ 
+WHERE DIM_LOOKUP_PLAN_TYPE_CODE = 'FP' AND cps.DIM_LOOKUP_PLAN_STATUS_ID_CODE <> 'z'
+AND EXISTS 
+(
+    -- only need data for ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = fp.DIM_PERSON_ID
+);
+
 
 -- Create index(es)
 CREATE INDEX IDX_ssd_cin_plans_person_id ON ssd_cin_plans(cinp_person_id);
@@ -990,21 +1136,31 @@ ALTER TABLE ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person
 FOREIGN KEY (cinp_person_id) REFERENCES ssd_person(pers_person_id);
 
 
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
 Object Name: ssd_cin_visits
 Description: 
 Author: D2I
-Last Modified Date: 04/12/23
+Last Modified Date: 07/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.4
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: Added FACT_CASENOTES.FACT_FORM_ID on 041223
+Remarks:    Source table can be very large! Avoid any unfiltered queries. 
+            Notes: Does this need to be filtered by only visits in their current Referral episode? 
+                    however for some this ==2 weeks, others==~17 years
 Dependencies: 
 - FACT_CASENOTES
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cin_visits';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_cin_visits') IS NOT NULL DROP TABLE ssd_cin_visits;
@@ -1024,8 +1180,8 @@ CREATE TABLE ssd_cin_visits
 -- Insert data
 INSERT INTO ssd_cin_visits
 (
-    cinv_cin_casenote_id,   -- This needs checking!! [TESTING]
-    cinv_cin_visit_id,      -- This needs checking!! [TESTING]
+    cinv_cin_casenote_id,               -- This needs checking!! [TESTING]
+    cinv_cin_visit_id,                  -- This needs checking!! [TESTING]
     cinv_cin_plan_id,
     cinv_cin_visit_date,
     cinv_cin_visit_seen,
@@ -1041,14 +1197,22 @@ SELECT
     cn.SEEN_ALONE_FLAG,
     cn.SEEN_BEDROOM_FLAG
 FROM 
-    Child_Social.FACT_CASENOTES cn;
+    Child_Social.FACT_CASENOTES cn
+
+WHERE
+    cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('CNSTAT', 'CNSTATCOVID', 'STAT', 'HVIS', 'DRCT', 'IRO', 
+    'SUPERCONT', 'STVL', 'STVLCOVID', 'CNSTAT', 'CNSTATCOVID', 'STVC', 'STVCPCOVID');
+
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_cin_plans 
 FOREIGN KEY (cinv_cin_plan_id) REFERENCES ssd_cin_plans(cinp_cin_plan_id);
 
 
-
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
@@ -1066,6 +1230,12 @@ Dependencies:
 - FACT_CP_CONFERENCE
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_s47_enquiry';
+PRINT 'Creating table: ' + @TableName;
+
+
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_s47_enquiry;
 
@@ -1141,7 +1311,10 @@ LEFT JOIN
 
     */
 
-
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 /* 
@@ -1194,6 +1367,12 @@ Dependencies:
 - FACT_CP_PLAN
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cp_plans';
+PRINT 'Creating table: ' + @TableName;
+
+
+
 
 -- Check if exists & drop 
 IF OBJECT_ID('ssd_cp_plans') IS NOT NULL DROP TABLE ssd_cp_plans;
@@ -1233,8 +1412,8 @@ SELECT
     DIM_PERSON_ID AS cppl_person_id,
     START_DTTM AS cppl_cp_plan_start_date,
     END_DTTM AS cppl_cp_plan_end_date,
-    'PLACEHOLDER_DATA' AS cppl_cp_plan_team,                -- [PLACEHOLDER_DATA'] [TESTING]
-    'PLACEHOLDER_DATA' AS cppl_cp_plan_worker_id,           -- [PLACEHOLDER_DATA'] [TESTING]
+    'PLACEHOLDER_DATA' AS cppl_cp_plan_team,                -- [PLACEHOLDER_DATA] [TESTING]
+    'PLACEHOLDER_DATA' AS cppl_cp_plan_worker_id,           -- [PLACEHOLDER_DATA] [TESTING]
     INIT_CATEGORY_DESC AS cppl_cp_plan_initial_category,
     CP_CATEGORY_DESC AS cppl_cp_plan_latest_category
 FROM 
@@ -1253,7 +1432,10 @@ ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_cppl_initial_cp_conference_id
 FOREIGN KEY (cppl_initial_cp_conference_id) REFERENCES ssd_initial_cp_conference(icpc_icpc_id);
 
 
-
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_category_of_abuse
@@ -1287,6 +1469,12 @@ Dependencies:
 - FACT_CASENOTES
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cp_visits';
+PRINT 'Creating table: ' + @TableName;
+
+
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cp_visits') IS NOT NULL DROP TABLE ssd_cp_visits;
 
@@ -1317,7 +1505,10 @@ where cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID');
 -- Create constraint(s)
 
 
-
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
@@ -1343,6 +1534,11 @@ Dependencies:
 - FACT_CASE_PATHWAY_STEP
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cp_reviews';
+PRINT 'Creating table: ' + @TableName;
+
+
 
 -- Check if table exists, & drop
 IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_cp_reviews;
@@ -1376,8 +1572,8 @@ SELECT
     cpr.DUE_DTTM,
     cpr.MEETING_DTTM,
     cpr.OUTCOME_CONTINUE_CP_FLAG,
-    '0', -- 'PLACEHOLDER_DATA' for cppr_cp_review_quorate       ['PLACEHOLDER_DATA'] - ON HOLD/Not included in SSD Ver/Iteration 1
-    '0'  -- 'PLACEHOLDER_DATA' for cppr_cp_review_participation ['PLACEHOLDER_DATA'] - ON HOLD/Not included in SSD Ver/Iteration 1
+    '0', -- for cppr_cp_review_quorate       -- [PLACEHOLDER_DATA] [TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    '0'  -- for cppr_cp_review_participation -- [PLACEHOLDER_DATA] [TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
 FROM 
     Child_Social.FACT_CP_REVIEW as cpr
 
@@ -1392,7 +1588,10 @@ ALTER TABLE ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans
 FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
 
 
-
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 /* 
@@ -1402,7 +1601,7 @@ Description:
 Author: D2I
 Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
+Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -1412,6 +1611,14 @@ Dependencies:
 - FACT_CARE_EPISODES
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cla_episodes';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if table exists, & drop
+IF OBJECT_ID('ssd_cla_episodes') IS NOT NULL DROP TABLE ssd_cla_episodes;
+
 
 -- Create structure
 CREATE TABLE ssd_cla_episodes (
@@ -1421,7 +1628,7 @@ CREATE TABLE ssd_cla_episodes (
     clae_cla_episode_start_reason   NVARCHAR(100),
     clae_cla_primary_need           NVARCHAR(100),
     clae_cla_episode_ceased         DATETIME,
-    clae_cla_episode_cease_reason   NVARCHAR(100),
+    clae_cla_episode_cease_reason   NVARCHAR(255),
     clae_cla_team                   NVARCHAR(48),
     clae_cla_worker_id              NVARCHAR(48)
 );
@@ -1450,6 +1657,7 @@ SELECT
     fr.DIM_WORKER_ID                        AS clae_cla_worker_id
 FROM 
     Child_Social.FACT_CARE_EPISODES AS fce
+
 JOIN 
     Child_Social.FACT_CLA AS fc ON fce.FACT_CARE_EPISODES_ID = fc.fact_cla_id
 JOIN 
@@ -1463,6 +1671,11 @@ CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON ssd_cla_episodes (clae_cla_w
 ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_professional 
 FOREIGN KEY (clae_cla_worker_id) REFERENCES ssd_involvements (invo_professional_id);
 
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 /* 
@@ -1480,6 +1693,10 @@ Dependencies:
 - FACT_OFFENCE
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cla_convictions';
+PRINT 'Creating table: ' + @TableName;
+
 
 -- if exists, drop
 IF OBJECT_ID('ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE ssd_cla_convictions;
@@ -1519,7 +1736,10 @@ WHERE EXISTS ( -- only need data for ssd relevant records
 ALTER TABLE ssd_cla_convictions ADD CONSTRAINT FK_clac_to_clae 
 FOREIGN KEY (clac_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
-
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
@@ -1536,6 +1756,11 @@ Dependencies:
 - FACT_HEALTH_CHECK 
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cla_health';
+PRINT 'Creating table: ' + @TableName;
+
+
 
 -- if exists, drop
 IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_cla_health;
@@ -1577,23 +1802,79 @@ FOREIGN KEY (clah_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 CREATE NONCLUSTERED INDEX idx_clah_person_id ON ssd_cla_health (clah_person_id);
 
 
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_cla_immunisations
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 06/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_903_DATA
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cla_immunisations';
+PRINT 'Creating table: ' + @TableName;
 
--- awaiting detail on spec sheet
 
+
+-- Check if exists & drop
+IF OBJECT_ID('ssd_cla_immunisations') IS NOT NULL DROP TABLE ssd_cla_immunisations;
+
+-- Create structure 
+CREATE TABLE #ssd_cla_immunisations (
+    clai_immunisations_id          NVARCHAR(48) PRIMARY KEY,
+    clai_person_id                 NVARCHAR(48),
+    clai_immunisations_status_date DATETIME,
+    clai_immunisations_status      NCHAR(1)
+);
+
+-- Insert data
+INSERT INTO #ssd_cla_immunisations (
+    clai_immunisations_id,
+    clai_person_id,
+    clai_immunisations_status_date,
+    clai_immunisations_status
+)
+SELECT 
+    f903.FACT_903_DATA_ID,
+    f903.DIM_PERSON_ID,
+    '20010101', -- [PLACEHOLDER_DATA] [TESTING] in YYYYMMDD format
+    f903.IMMUN_CODE
+FROM 
+    Child_Social.FACT_903_DATA AS f903
+WHERE EXISTS ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM #ssd_person p
+    WHERE p.pers_person_id = f903.DIM_PERSON_ID
+);
+
+-- add constraint(s)
+ALTER TABLE ssd_cla_immunisations
+ADD CONSTRAINT FK_ssd_cla_immunisations_person
+FOREIGN KEY (clas_person_id) REFERENCES ssd_person(pers_person_id);
+
+
+-- Create index(es)
+CREATE INDEX IX_ssd_cla_immunisations_person_id ON ssd_cla_immunisations (clai_person_id);
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
@@ -1610,6 +1891,11 @@ Dependencies:
 - FACT_SUBSTANCE_MISUSE
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_substance_misuse';
+PRINT 'Creating table: ' + @TableName;
+
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_substance_misuse') IS NOT NULL DROP TABLE ssd_cla_substance_misuse;
 
@@ -1641,7 +1927,7 @@ FROM
 
 WHERE EXISTS ( -- only need data for ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fSM.DIM_PERSON_ID
     );
 
@@ -1650,6 +1936,13 @@ ALTER TABLE ssd_cla_substance_misuse ADD CONSTRAINT FK_ssd_cla_substance_misuse_
 FOREIGN KEY (clas_person_id) REFERENCES ssd_cla_episodes (clae_person_id);
 
 CREATE NONCLUSTERED INDEX idx_clas_person_id ON ssd_cla_substance_misuse (clas_person_id);
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 /* 
@@ -1667,6 +1960,11 @@ Dependencies:
 - FACT_CLA_PLACEMENT
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cla_placement';
+PRINT 'Creating table: ' + @TableName;
+
+
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_placement', 'U') IS NOT NULL DROP TABLE ssd_cla_placement;
@@ -1705,12 +2003,12 @@ INSERT INTO ssd_cla_placement (
 )
 SELECT 
     fcp.FACT_CLA_PLACEMENT_ID                   AS clap_cla_placement_id,
-    fce.FACT_CARE_EPISODES_ID                   AS clap_cla_episode_id, -- Adjust with actual column name [TESTING]
+    fce.FACT_CARE_EPISODES_ID                   AS clap_cla_episode_id,             -- [PLACEHOLDER_DATA] [TESTING]
     fcp.START_DTTM                              AS clap_cla_placement_start_date,
     fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE          AS clap_cla_placement_type,
     fce.OFSTED_URN                              AS clap_cla_placement_urn,
     fcp.DISTANCE_FROM_HOME                      AS clap_cla_placement_distance,
-    'PLACEHOLDER_DATA'                          AS clap_cla_placement_la, -- Replace with actual data source [TESTING]
+    'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,           -- [PLACEHOLDER_DATA] [TESTING]
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
     fcp.POSTCODE                                AS clap_cla_placement_postcode,
     fcp.END_DTTM                                AS clap_cla_placement_end_date,
@@ -1727,6 +2025,14 @@ ALTER TABLE ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae
 FOREIGN KEY (clap_cla_episode_id) REFERENCES ssd_cla_episodes(clae_cla_episode_id);
 
 CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_substance_misuse (clap_cla_episode_id);
+
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
@@ -1749,6 +2055,11 @@ Dependencies:
 -- FACT_CLA_REVIEW
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cla_reviews';
+PRINT 'Creating table: ' + @TableName;
+
+
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_review', 'U') IS NOT NULL DROP TABLE ssd_cla_review;
@@ -1774,11 +2085,11 @@ INSERT INTO ssd_cla_review (
 )
 SELECT 
     fcr.FACT_CLA_REVIEW_ID                     AS clar_cla_review_id,
-    'PLACEHOLDER_EPISODE_ID'                   AS clar_cla_episode_id,                  -- Replace with actual data source [TESTING]
+    'PLACEHOLDER_EPISODE_ID'                   AS clar_cla_episode_id,                  -- [PLACEHOLDER_DATA] [TESTING]
     fcr.DUE_DTTM                               AS clar_cla_review_due_date,
     fcr.MEETING_DTTM                           AS clar_cla_review_date,
-    'PLACEHOLDER_DATA'                         AS clar_cla_review_participation,        -- Replace with actual data source [TESTING]
-    '01/01/2001'                               AS clar_cla_review_last_iro_contact_date -- Replace with actual data source [TESTING]
+    'PLACEHOLDER_DATA'                         AS clar_cla_review_participation,        -- [PLACEHOLDER_DATA] [TESTING]
+    '01/01/2001'                               AS clar_cla_review_last_iro_contact_date -- [PLACEHOLDER_DATA] [TESTING]
 FROM 
     Child_Social.FACT_CLA_REVIEW AS fcr;
 
@@ -1790,6 +2101,14 @@ FOREIGN KEY (clar_cla_episode_id) REFERENCES ssd_cla_episodes(clae_cla_episode_i
 CREATE NONCLUSTERED INDEX idx_clar_cla_episode_id ON ssd_cla_review (clar_cla_episode_id);
 CREATE NONCLUSTERED INDEX idx_clar_review_last_iro_contact_date ON ssd_cla_review (clar_cla_review_last_iro_contact_date);
 
+
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
@@ -1822,6 +2141,11 @@ Dependencies:
 - FACT_903_DATA
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cla_previous_permanence';
+PRINT 'Creating table: ' + @TableName;
+
+
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_previous_permanence', 'U') IS NOT NULL DROP TABLE ssd_cla_previous_permanence;
@@ -1862,6 +2186,14 @@ ALTER TABLE ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
 FOREIGN KEY (lapp_person_id) REFERENCES ssd_person(pers_person_id);
 
 
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_cla_care_plan
@@ -1900,20 +2232,22 @@ Dependencies:
 Object Name: ssd_sdq_scores
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 06/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- ssd_person
+- FACT_FORMS
+- FACT_FORM_ANSWERS
 =============================================================================
 */
-
-
 -- [TESTING] Create marker
 SET @TableName = N'ssd_sdq_scores';
 PRINT 'Creating table: ' + @TableName;
+
+
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
@@ -1955,8 +2289,11 @@ SELECT
     ) AS csdq_sdq_score
 FROM 
     FACT_FORM_ANSWERS ffa
+
 JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
+
 LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
+
 
 -- Add FK constraint for csdq_person_id
 ALTER TABLE ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
@@ -1964,10 +2301,13 @@ FOREIGN KEY (csdq_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 
+
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
 
 
 /* 
@@ -1985,6 +2325,12 @@ Dependencies:
 - FACT_MISSING_PERSON
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_missing';
+PRINT 'Creating table: ' + @TableName;
+
+
+
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_missing', 'U') IS NOT NULL DROP TABLE ssd_missing;
@@ -2030,6 +2376,14 @@ WHERE EXISTS ( -- only need data for ssd relevant records
 -- Add constraint(s)
 ALTER TABLE ssd_missing ADD CONSTRAINT FK_missing_to_person
 FOREIGN KEY (miss_la_person_id) REFERENCES ssd_person(pers_person_id);
+
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
@@ -2084,6 +2438,12 @@ Dependencies:
 - Education.DIM_PERSON
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_send';
+PRINT 'Creating table: ' + @TableName;
+
+
+
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_send') IS NOT NULL DROP TABLE ssd_send;
 
@@ -2108,7 +2468,7 @@ INSERT INTO ssd_send (
 )
 SELECT 
     f903.FACT_903_DATA_ID   AS send_table_id,
-    f903.DIM_PERSON_ID        AS send_person_id, -- DIM_PERSON_ID?? [TESTING]
+    f903.DIM_PERSON_ID      AS send_person_id,      -- [TESTING]
     f903.FACT_903_DATA_ID   AS send_upn,
     p.ULN                   AS send_uln,
     f903.NO_UPN_CODE        AS upn_unknown
@@ -2125,6 +2485,14 @@ FOREIGN KEY (send_person_id) REFERENCES ssd_person(pers_person_id);
 
 /* ?? Should this actually be pulling from Child_Social.FACT_SENRECORD.DIM_PERSON_ID | Child_Social.FACT_SEN.DIM_PERSON_ID
 */
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 /* 
@@ -2212,6 +2580,12 @@ Dependencies:
 - FACT_REFERRALS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_professionals';
+PRINT 'Creating table: ' + @TableName;
+
+
+
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_professionals', 'U') IS NOT NULL DROP TABLE ssd_professionals;
@@ -2282,6 +2656,14 @@ CREATE NONCLUSTERED INDEX idx_prof_professional_id ON ssd_professionals (prof_pr
 
 
 
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
 
 /* 
 =============================================================================
@@ -2298,6 +2680,12 @@ Dependencies:
 - FACT_INVOLVEMENTS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_involvements';
+PRINT 'Creating table: ' + @TableName;
+
+
+
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_involvements', 'U') IS NOT NULL DROP TABLE ssd_involvements;
@@ -2350,6 +2738,14 @@ FOREIGN KEY (invo_professional_role_id) REFERENCES ssd_professionals (prof_socia
 
     
 
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_pre_proceedings
@@ -2364,6 +2760,12 @@ Dependencies:
 - Yet to be defined
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_pre_proceedings';
+PRINT 'Creating table: ' + @TableName;
+
+
+
 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE ssd_pre_proceedings;
@@ -2451,6 +2853,14 @@ CREATE NONCLUSTERED INDEX idx_prep_person_id ON ssd_pre_proceedings (prep_person
 CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date ON ssd_pre_proceedings (prep_pre_pro_decision_date);
 
 
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_voice_of_child
@@ -2465,6 +2875,12 @@ Dependencies:
 - Yet to be defined
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_voice_of_child';
+PRINT 'Creating table: ' + @TableName;
+
+
+
 -- Check if exists, & drop 
 IF OBJECT_ID('ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE ssd_voice_of_child;
 
@@ -2507,6 +2923,14 @@ FOREIGN KEY (voch_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_linked_identifiers
@@ -2521,6 +2945,11 @@ Dependencies:
 - Yet to be defined
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_linked_identifiers';
+PRINT 'Creating table: ' + @TableName;
+
+
 
 -- Check if exists, & drop 
 IF OBJECT_ID('ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_linked_identifiers;
@@ -2561,6 +2990,14 @@ FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_s251_finance
@@ -2575,6 +3012,12 @@ Dependencies:
 - Yet to be defined
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_s251_finance';
+PRINT 'Creating table: ' + @TableName;
+
+
+
 
 -- Check if exists, & drop 
 IF OBJECT_ID('ssd_s251_finance', 'U') IS NOT NULL DROP TABLE ssd_s251_finance;
@@ -2607,6 +3050,12 @@ FOREIGN KEY (s251_cla_placement_id) REFERENCES ssd_cla_placement(clap_cla_placem
 
 
 
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
