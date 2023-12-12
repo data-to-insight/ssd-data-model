@@ -1020,8 +1020,10 @@ CREATE INDEX IDX_ssd_cin_assessments_person_id ON ssd_cin_assessments(cina_perso
 ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
 FOREIGN KEY (cina_person_id) REFERENCES ssd_person(pers_person_id);
 
-ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_social_worker 
-FOREIGN KEY (cina_assessment_worker_id) REFERENCES ssd_social_worker(socw_social_worker_id);
+
+-- #DtoI-1564 121223 RH [TESTING]
+ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_ssd_involvements
+FOREIGN KEY (cina_assessment_worker_id) REFERENCES ssd_involvements(invo_professional_id);
 
 
 
