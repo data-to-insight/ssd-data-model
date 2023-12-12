@@ -402,7 +402,7 @@ WHERE EXISTS
 -- FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE INDEX IDX_disability_person_id ON ssd_disability(disa_person_id);
+CREATE INDEX IDX_disability_person_id ON #ssd_disability(disa_person_id);
 
 
 
@@ -444,7 +444,7 @@ IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immi
 CREATE TABLE #ssd_immigration_status (
     immi_immigration_status_id      NVARCHAR(48) PRIMARY KEY,
     immi_person_id                  NVARCHAR(48),
-    immi_mmigration_status_start    DATETIME,
+    immi_immigration_status_start   DATETIME,
     immi_immigration_status_end     DATETIME,
     immi_immigration_status         NVARCHAR(48)
 );
@@ -717,7 +717,7 @@ WHERE EXISTS
 -- FOREIGN KEY (cont_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE INDEX IDX_contact_person_id ON ssd_contact(cont_person_id);
+CREATE INDEX IDX_contact_person_id ON #ssd_contact(cont_person_id);
 
 
 
@@ -794,7 +794,7 @@ WHERE EXISTS
     );
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
+CREATE INDEX IDX_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
@@ -1009,7 +1009,7 @@ WHERE EXISTS
 
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_cin_assessments_person_id ON ssd_cin_assessments(cina_person_id);
+CREATE INDEX IDX_ssd_cin_assessments_person_id ON #ssd_cin_assessments(cina_person_id);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
@@ -2224,13 +2224,14 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_care_plan
 Description: 
 Author: D2I
-Last Modified Date: 11/12/23
+Last Modified Date: 12/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Replace 'PLACEHOLDER_DATA' with the actual logic for 'ICP' answer.
 Dependencies: 
 - FACT_CARE_PLAN_SUMMARY
+- FACT_CARE_PLANS
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2239,10 +2240,10 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_cla_care_plan;
+IF OBJECT_ID('tempdb..#ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_cla_care_plan;
 
 -- Create structure
-CREATE TABLE ssd_cla_care_plan (
+CREATE TABLE #ssd_cla_care_plan (
     lacp_table_id                 NVARCHAR(48) PRIMARY KEY,
     lacp_cla_episode_id           NVARCHAR(48),
     lacp_referral_id              NVARCHAR(48),
@@ -2250,9 +2251,9 @@ CREATE TABLE ssd_cla_care_plan (
     lacp_cla_care_plan_end_date   DATETIME,
     lacp_cla_care_plan            NVARCHAR(100)
 );
-
+ 
 -- Insert data
-INSERT INTO ssd_cla_care_plan (
+INSERT INTO #ssd_cla_care_plan (
     lacp_table_id,
     lacp_cla_episode_id,
     lacp_referral_id,
@@ -2260,19 +2261,23 @@ INSERT INTO ssd_cla_care_plan (
     lacp_cla_care_plan_end_date,
     lacp_cla_care_plan
 )
-SELECT 
+SELECT
     fcps.FACT_CARE_PLAN_SUMMARY_ID  AS lacp_table_id,
     fcps.DIM_PERSON_ID              AS lacp_cla_episode_id,
-    fcps.REFERRAL_ID                AS lacp_referral_id,
+    fcpl.FACT_REFERRAL_ID           AS lacp_referral_id,
     fcps.START_DTTM                 AS lacp_cla_care_plan_start_date,
     fcps.END_DTTM                   AS lacp_cla_care_plan_end_date,
     'PLACEHOLDER_DATA'              AS lacp_cla_care_plan                -- [TESTING] [PLACEHOLDER_DATA]
-FROM 
-    Child_Social.FACT_CARE_PLAN_SUMMARY fcps;
+FROM
+    Child_Social.FACT_CARE_PLAN_SUMMARY AS fcps
+ 
+JOIN
+    Child_Social.FACT_CARE_PLANS AS fcpl ON fcps.FACT_CARE_PLAN_SUMMARY_ID = fcpl.FACT_CARE_PLAN_SUMMARY_ID
 
--- Add constraint(s)
-ALTER TABLE ssd_cla_care_plan ADD CONSTRAINT FK_lacp_cla_episode_id
-FOREIGN KEY (lacp_cla_episode_id) REFERENCES ssd_cla_episodes(clae_person_id);
+
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_cla_care_plan ADD CONSTRAINT FK_lacp_cla_episode_id
+-- FOREIGN KEY (lacp_cla_episode_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 -- Replace 'PLACEHOLDER_DATA' with the actual logic for 'ICP' answer.
 
@@ -2291,7 +2296,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_visits
 Description: 
 Author: D2I
-Last Modified Date: 11/12/23
+Last Modified Date: 12/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
@@ -2331,7 +2336,7 @@ INSERT INTO #ssd_cla_visits (
     clav_cla_visit_seen,
     clav_cla_visit_seen_alone
 )
-SELECT 
+SELECT
     clav.FACT_CASENOTE_ID       AS clav_casenote_id,
     clav.FACT_CLA_ID            AS clav_cla_id,
     clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
@@ -2339,17 +2344,17 @@ SELECT
     clav.VISIT_DTTM             AS clav_cla_visit_date,
     cn.SEEN_FLAG                AS clav_cla_visit_seen,
     cn.SEEN_ALONE_FLAG          AS clav_cla_visit_seen_alone
-FROM 
+FROM
     Child_Social.FACT_CLA_VISIT AS clav
-JOIN 
-    Child_Social.FACT_CARE_EPISODES AS ceps ON clav.FACT_CASENOTE_ID = ceps.FACT_CASENOTE_ID
-JOIN 
-    Child_Social.FACT_CASENOTES AS cn ON clav.FACT_CASENOTE_ID = cn.CASENOTE_ID;
+JOIN
+    Child_Social.FACT_CARE_EPISODES AS ceps ON clav.FACT_CLA_ID = ceps.FACT_CLA_ID
+JOIN
+    Child_Social.FACT_CASENOTES AS cn ON clav.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID;
 
 
 -- -- Add constraint(s)
 -- ALTER TABLE #ssd_cla_visits ADD CONSTRAINT FK_clav_cla_episode_id 
---     FOREIGN KEY (clav_cla_episode_id) REFERENCES #ssd_cla_episodes(clae_cla_episode_id);
+-- FOREIGN KEY (clav_cla_episode_id) REFERENCES #ssd_cla_episodes(clae_cla_episode_id);
 
 
 -- [TESTING] Increment /print progress

@@ -446,7 +446,7 @@ IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_st
 CREATE TABLE ssd_immigration_status (
     immi_immigration_status_id      NVARCHAR(48) PRIMARY KEY,
     immi_person_id                  NVARCHAR(48),
-    immi_mmigration_status_start    DATETIME,
+    immi_immigration_status_start   DATETIME,
     immi_immigration_status_end     DATETIME,
     immi_immigration_status         NVARCHAR(48)
 );
@@ -2245,13 +2245,14 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_care_plan
 Description: 
 Author: D2I
-Last Modified Date: 11/12/23
+Last Modified Date: 12/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Replace 'PLACEHOLDER_DATA' with the actual logic for 'ICP' answer.
 Dependencies: 
 - FACT_CARE_PLAN_SUMMARY
+- FACT_CARE_PLANS
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2271,7 +2272,7 @@ CREATE TABLE ssd_cla_care_plan (
     lacp_cla_care_plan_end_date   DATETIME,
     lacp_cla_care_plan            NVARCHAR(100)
 );
-
+ 
 -- Insert data
 INSERT INTO ssd_cla_care_plan (
     lacp_table_id,
@@ -2281,15 +2282,19 @@ INSERT INTO ssd_cla_care_plan (
     lacp_cla_care_plan_end_date,
     lacp_cla_care_plan
 )
-SELECT 
+SELECT
     fcps.FACT_CARE_PLAN_SUMMARY_ID  AS lacp_table_id,
     fcps.DIM_PERSON_ID              AS lacp_cla_episode_id,
-    fcps.REFERRAL_ID                AS lacp_referral_id,
+    fcpl.FACT_REFERRAL_ID           AS lacp_referral_id,
     fcps.START_DTTM                 AS lacp_cla_care_plan_start_date,
     fcps.END_DTTM                   AS lacp_cla_care_plan_end_date,
     'PLACEHOLDER_DATA'              AS lacp_cla_care_plan                -- [TESTING] [PLACEHOLDER_DATA]
-FROM 
-    Child_Social.FACT_CARE_PLAN_SUMMARY fcps;
+FROM
+    Child_Social.FACT_CARE_PLAN_SUMMARY AS fcps
+ 
+JOIN
+    Child_Social.FACT_CARE_PLANS AS fcpl ON fcps.FACT_CARE_PLAN_SUMMARY_ID = fcpl.FACT_CARE_PLAN_SUMMARY_ID
+
 
 -- Add constraint(s)
 ALTER TABLE ssd_cla_care_plan ADD CONSTRAINT FK_lacp_cla_episode_id
@@ -2310,7 +2315,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_visits
 Description: 
 Author: D2I
-Last Modified Date: 11/12/23
+Last Modified Date: 12/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
@@ -2350,7 +2355,7 @@ INSERT INTO ssd_cla_visits (
     clav_cla_visit_seen,
     clav_cla_visit_seen_alone
 )
-SELECT 
+SELECT
     clav.FACT_CASENOTE_ID       AS clav_casenote_id,
     clav.FACT_CLA_ID            AS clav_cla_id,
     clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
@@ -2358,17 +2363,17 @@ SELECT
     clav.VISIT_DTTM             AS clav_cla_visit_date,
     cn.SEEN_FLAG                AS clav_cla_visit_seen,
     cn.SEEN_ALONE_FLAG          AS clav_cla_visit_seen_alone
-FROM 
+FROM
     Child_Social.FACT_CLA_VISIT AS clav
-JOIN 
-    Child_Social.FACT_CARE_EPISODES AS ceps ON clav.FACT_CASENOTE_ID = ceps.FACT_CASENOTE_ID
-JOIN 
-    Child_Social.FACT_CASENOTES AS cn ON clav.FACT_CASENOTE_ID = cn.CASENOTE_ID;
+JOIN
+    Child_Social.FACT_CARE_EPISODES AS ceps ON clav.FACT_CLA_ID = ceps.FACT_CLA_ID
+JOIN
+    Child_Social.FACT_CASENOTES AS cn ON clav.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID;
 
 
 -- Add constraint(s)
 ALTER TABLE ssd_cla_visits ADD CONSTRAINT FK_clav_cla_episode_id 
-    FOREIGN KEY (clav_cla_episode_id) REFERENCES ssd_cla_episodes(clae_cla_episode_id);
+FOREIGN KEY (clav_cla_episode_id) REFERENCES ssd_cla_episodes(clae_cla_episode_id);
 
 
 -- [TESTING] Increment /print progress
@@ -2631,28 +2636,28 @@ INSERT INTO ssd_permanence (
     perm_allocated_worker
 )
 SELECT 
-    fa.FACT_ADOPTION_ID                  AS perm_table_id,
-    fa.DIM_PERSON_ID                     AS perm_person_id,
-    fa.FACT_CLA_ID                       AS perm_cla_id,
-    fa.DECISION_DTTM                     AS perm_adm_decision_date,
-    @placeholderDate                     AS perm_entered_care_date,             -- Linking logic needed
-    @placeholderDate                     AS perm_ffa_cp_decision_date,          -- Linking logic needed
-    fa.PLACEMENT_ORDER_DTTM              AS perm_placement_order_date,
-    @placeholderDate                     AS perm_placed_for_adoption_date,      -- Linking logic needed
-    fa.MATCHING_DTTM                     AS perm_matched_date,
-    CAST(fa.ADOPTED_BY_CARER_FLAG AS NVARCHAR(1)) AS perm_adopted_by_carer_flag, -- Verify the datatype
-    fa.FOSTER_TO_ADOPT_DTTM              AS perm_placed_ffa_cp_date,
-    fa.NO_LONGER_PLACED_DTTM             AS perm_decision_reversed_date,
-    @placeholderDate                     AS perm_placed_foster_carer_date,      -- Linking logic needed
-    fa.SIBLING_GROUP                     AS perm_part_of_sibling_group,
-    fa.NUMBER_TOGETHER                   AS perm_siblings_placed_together,
-    fa.NUMBER_APART                      AS perm_siblings_placed_apart,
-    @placeholderNVARCHAR100              AS perm_placement_provider_urn,        -- Linking logic needed
-    fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE AS perm_decision_reversed_reason,
-    @placeholderDate                     AS perm_permanence_order_date,         -- Linking logic needed
-    @placeholderNVARCHAR100              AS perm_permanence_order_type,         -- Determined from above
-    CAST(fa.ADOPTION_SOCIAL_WORKER_ID AS NVARCHAR(1)) AS perm_adoption_worker,  -- Verify the datatype
-    CAST(fa.ALLOCATED_CASE_WORKER_ID AS NVARCHAR(1)) AS perm_allocated_worker   -- Verify the datatype
+    fa.FACT_ADOPTION_ID                     AS perm_table_id,
+    fa.DIM_PERSON_ID                        AS perm_person_id,
+    fa.FACT_CLA_ID                          AS perm_cla_id,
+    fa.DECISION_DTTM                        AS perm_adm_decision_date,
+    '01/01/2001'                            AS perm_entered_care_date,             -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    '01/01/2001'                            AS perm_ffa_cp_decision_date,          -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
+    '01/01/2001'                            AS perm_placed_for_adoption_date,      -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    fa.MATCHING_DTTM                        AS perm_matched_date,
+    CAST(fa.ADOPTED_BY_CARER_FLAG           AS NVARCHAR(1)) AS perm_adopted_by_carer_flag, -- Verify datatype [TESTING] [PLACEHOLDER_DATA]
+    fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
+    fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
+    '01/01/2001'                            AS perm_placed_foster_carer_date,      -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    fa.SIBLING_GROUP                        AS perm_part_of_sibling_group,
+    fa.NUMBER_TOGETHER                      AS perm_siblings_placed_together,
+    fa.NUMBER_APART                         AS perm_siblings_placed_apart,
+    'PLACEHOLDER_DATA'                      AS perm_placement_provider_urn,        -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE   AS perm_decision_reversed_reason,
+    '01/01/2001'                            AS perm_permanence_order_date,         -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    'PLACEHOLDER_DATA'                      AS perm_permanence_order_type,         -- Determined from above [TESTING] [PLACEHOLDER_DATA]
+    CAST(fa.ADOPTION_SOCIAL_WORKER_ID       AS NVARCHAR(1)) AS perm_adoption_worker,  -- Verify datatype [TESTING] [PLACEHOLDER_DATA]
+    CAST(fa.ALLOCATED_CASE_WORKER_ID        AS NVARCHAR(1)) AS perm_allocated_worker   -- Verify datatype [TESTING] [PLACEHOLDER_DATA]
 FROM 
     FACT_ADOPTION AS fa
 
