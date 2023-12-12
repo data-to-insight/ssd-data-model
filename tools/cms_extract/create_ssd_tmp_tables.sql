@@ -1987,12 +1987,13 @@ Description:
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_CLA_PLACEMENT
+- FACT_CARE_EPISODES
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2006,25 +2007,25 @@ IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_
 
 -- Create structure
 CREATE TABLE #ssd_cla_placement (
-    clap_cla_placement_id           NVARCHAR(48) PRIMARY KEY,
-    clap_cla_episode_id             NVARCHAR(48),
-    clap_cla_placement_start_date   DATETIME,
-    clap_cla_placement_type         NVARCHAR(100),
-    clap_cla_placement_urn          NVARCHAR(48),
-    clap_cla_placement_distance     FLOAT, -- Float precision determined by value (or use DECIMAL(3, 2), -- Adjusted to fixed precision)
-    clap_cla_placement_la           NVARCHAR(48),
-    clap_cla_placement_provider     NVARCHAR(48),
-    clap_cla_placement_postcode     NVARCHAR(8),
-    clap_cla_placement_end_date     DATETIME,
-    clap_cla_placement_change_reason NVARCHAR(100),
-    clap_cla_id                     NVARCHAR(48)   
+    clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,
+    clap_cla_episode_id                 NVARCHAR(48),
+    clap_cla_placement_start_date       DATETIME,
+    clap_cla_placement_type             NVARCHAR(100),
+    clap_cla_placement_urn              NVARCHAR(48),
+    clap_cla_placement_distance         FLOAT, -- Float precision determined by value (or use DECIMAL(3, 2), -- Adjusted to fixed precision)
+    clap_cla_placement_la               NVARCHAR(48),
+    clap_cla_placement_provider         NVARCHAR(48),
+    clap_cla_placement_postcode         NVARCHAR(8),
+    clap_cla_placement_end_date         DATETIME,
+    clap_cla_placement_change_reason    NVARCHAR(100),
+    clap_cla_id                         NVARCHAR(48)  
 );
-
-
--- Insert data 
+ 
+ 
+-- Insert data
 INSERT INTO #ssd_cla_placement (
-    clap_cla_placement_id, 
-    clap_cla_episode_id, 
+    clap_cla_placement_id,
+    clap_cla_episode_id,
     clap_cla_placement_start_date,
     clap_cla_placement_type,
     clap_cla_placement_urn,
@@ -2036,29 +2037,29 @@ INSERT INTO #ssd_cla_placement (
     clap_cla_placement_change_reason,
     clap_cla_id  
 )
-SELECT 
+SELECT
     fcp.FACT_CLA_PLACEMENT_ID                   AS clap_cla_placement_id,
-    fce.FACT_CARE_EPISODES_ID                   AS clap_cla_episode_id,             -- [PLACEHOLDER_DATA] [TESTING]
+    fce.FACT_CARE_EPISODES_ID                   AS clap_cla_episode_id,                                 
     fcp.START_DTTM                              AS clap_cla_placement_start_date,
     fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE          AS clap_cla_placement_type,
     fce.OFSTED_URN                              AS clap_cla_placement_urn,
     fcp.DISTANCE_FROM_HOME                      AS clap_cla_placement_distance,
-    'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,           -- [PLACEHOLDER_DATA] [TESTING]
+    'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,                               -- [PLACEHOLDER_DATA] [TESTING]
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
     fcp.POSTCODE                                AS clap_cla_placement_postcode,
     fcp.END_DTTM                                AS clap_cla_placement_end_date,
     fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE          AS clap_cla_placement_change_reason,
     fcp.FACT_CLA_ID                             AS clap_cla_id  
-FROM 
-
+FROM
+ 
     Child_Social.FACT_CLA_PLACEMENT AS fcp
-JOIN 
-    Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CARE_EPISODES_ID = fce.FACT_CARE_EPISODES_ID; -- Adjust with actual column name [TESTING]
+JOIN
+    Child_Social.FACT_CLA AS fcla ON fcla.FACT_CLA_ID = fcp.FACT_CLA_ID                                 -- [TESTING] [JH Fix]
+JOIN
+    Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID;    -- [TESTING] [JH Fix]
 
--- -- Add constraint(s)
--- ALTER TABLE #ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
--- FOREIGN KEY (clap_cla_episode_id) REFERENCES #ssd_cla_episodes(clae_cla_episode_id);
 
+-- Add constraint(s)
 CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON #ssd_cla_substance_misuse (clap_cla_episode_id);
 
 
@@ -2068,6 +2069,7 @@ CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON #ssd_cla_substance_misuse (
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
