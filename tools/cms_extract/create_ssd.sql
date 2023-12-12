@@ -2064,7 +2064,7 @@ SELECT
     fcp.START_DTTM                              AS clap_cla_placement_start_date,
     fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE          AS clap_cla_placement_type,
     fce.OFSTED_URN                              AS clap_cla_placement_urn,
-    fcp.DISTANCE_FROM_HOME                      AS clap_cla_placement_distance,
+    TRY_CAST(fcp.DISTANCE_FROM_HOME AS FLOAT)   AS clap_cla_placement_distance,                         -- convert to FLOAT (col also holds nulls/ints)
     'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,                               -- [PLACEHOLDER_DATA] [TESTING]
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
     fcp.POSTCODE                                AS clap_cla_placement_postcode,
