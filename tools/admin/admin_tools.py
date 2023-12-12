@@ -12,7 +12,7 @@ import re
 # 1bDraft       (#F57C1D) - Orange
 # 1bSpecified   (#FFC91E) - Golden yellow
 # 1aRemove      (#FF2114) - Bright red
-# 1aNotInCMS    (#1CFCF2) - Bright cyan (same as 1aDraft)
+# 1aNotInCMS    (#F08080) - Light coral
     
 returns_categories = {
     "Existing": {
@@ -40,7 +40,7 @@ returns_categories = {
         "description": "Specified item rejected from final spec.",
     },
     "1aNotInCMS": {
-        "colour": "#1CFCF2",
+        "colour": "#F08080",
         "description": "Currently exists but commonly outside Social Care CMS. (SSD==Placeholder data)",
     },
 }

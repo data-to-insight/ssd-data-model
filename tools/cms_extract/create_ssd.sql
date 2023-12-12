@@ -446,7 +446,7 @@ IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_st
 CREATE TABLE ssd_immigration_status (
     immi_immigration_status_id      NVARCHAR(48) PRIMARY KEY,
     immi_person_id                  NVARCHAR(48),
-    immi_mmigration_status_start    DATETIME,
+    immi_immigration_status_start   DATETIME,
     immi_immigration_status_end     DATETIME,
     immi_immigration_status         NVARCHAR(48)
 );
@@ -1620,6 +1620,18 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+/* To add 11/12/23
+CPPR006A cppr_cp_review_quorate Quorate?
+FACT_FORM_ANSWERS.ANSWER
+Link using FACT_CP_REVIEW.FACT_CASE_PATHWAY_STEP_ID to FACT_CASE_PATHWAY_STEP
+Link using FACT_CASE_PATHWAY_STEP.FACT_FORMS_ID to FACT_FORM_ANSWERS.ANSWER
+WHERE
+ANSWER_NO = 'WasConf' AND DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'REVIEW%'
+*/
+
+
+
+
 
 /* 
 =============================================================================
@@ -1782,14 +1794,15 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_health
 Description: 
 Author: D2I
-Last Modified Date: 24/11/23
+Last Modified Date: 12/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_HEALTH_CHECK 
+- ssd_cla_episodes (FK)
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -1797,32 +1810,38 @@ SET @TableName = N'ssd_cla_health';
 PRINT 'Creating table: ' + @TableName;
 
 
-
 -- if exists, drop
 IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_cla_health;
 
 -- create structure
 CREATE TABLE ssd_cla_health (
-    clah_health_check_id        NVARCHAR(48) PRIMARY KEY,
-    clah_person_id              NVARCHAR(48),
-    clah_health_check_type      NVARCHAR(500),
-    clah_health_check_date      DATETIME
+    clah_health_check_id             NVARCHAR(48) PRIMARY KEY,
+    clah_person_id                   NVARCHAR(48),
+    clah_health_check_type           NVARCHAR(500),
+    clah_health_check_date           DATETIME,
+    clah_health_check_status         NVARCHAR(48)
 );
-
+ 
 -- insert data
 INSERT INTO ssd_cla_health (
-    clah_health_check_id, 
-    clah_person_id, 
-    clah_health_check_type, 
-    clah_health_check_date
+    clah_health_check_id,
+    clah_person_id,
+    clah_health_check_type,
+    clah_health_check_date,
+    clah_health_check_status
     )
-SELECT 
+
+SELECT
     fhc.FACT_HEALTH_CHECK_ID,
     fhc.DIM_PERSON_ID,
     fhc.DIM_LOOKUP_HC_TYPE_DESC,
-    fhc.START_DTTM
-FROM 
+    fhc.START_DTTM,
+    fhc.DIM_LOOKUP_EXAM_STATUS_CODE
+FROM
     Child_Social.FACT_HEALTH_CHECK as fhc
+ 
+-- INNER JOIN
+--     #ssd_person AS p ON fhc.DIM_PERSON_ID = p.pers_person_id;
 
 WHERE EXISTS ( -- only need data for ssd relevant records
     SELECT 1 
@@ -1989,12 +2008,13 @@ Description:
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_CLA_PLACEMENT
+- FACT_CARE_EPISODES
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2008,25 +2028,25 @@ IF OBJECT_ID('ssd_cla_placement', 'U') IS NOT NULL DROP TABLE ssd_cla_placement;
 
 -- Create structure
 CREATE TABLE ssd_cla_placement (
-    clap_cla_placement_id           NVARCHAR(48) PRIMARY KEY,
-    clap_cla_episode_id             NVARCHAR(48),
-    clap_cla_placement_start_date   DATETIME,
-    clap_cla_placement_type         NVARCHAR(100),
-    clap_cla_placement_urn          NVARCHAR(48),
-    clap_cla_placement_distance     FLOAT, -- Float precision determined by value (or use DECIMAL(3, 2), -- Adjusted to fixed precision)
-    clap_cla_placement_la           NVARCHAR(48),
-    clap_cla_placement_provider     NVARCHAR(48),
-    clap_cla_placement_postcode     NVARCHAR(8),
-    clap_cla_placement_end_date     DATETIME,
-    clap_cla_placement_change_reason NVARCHAR(100),
-    clap_cla_id                     NVARCHAR(48)   
+    clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,
+    clap_cla_episode_id                 NVARCHAR(48),
+    clap_cla_placement_start_date       DATETIME,
+    clap_cla_placement_type             NVARCHAR(100),
+    clap_cla_placement_urn              NVARCHAR(48),
+    clap_cla_placement_distance         FLOAT, -- Float precision determined by value (or use DECIMAL(3, 2), -- Adjusted to fixed precision)
+    clap_cla_placement_la               NVARCHAR(48),
+    clap_cla_placement_provider         NVARCHAR(48),
+    clap_cla_placement_postcode         NVARCHAR(8),
+    clap_cla_placement_end_date         DATETIME,
+    clap_cla_placement_change_reason    NVARCHAR(100),
+    clap_cla_id                         NVARCHAR(48)  
 );
-
-
--- Insert data 
+ 
+ 
+-- Insert data
 INSERT INTO ssd_cla_placement (
-    clap_cla_placement_id, 
-    clap_cla_episode_id, 
+    clap_cla_placement_id,
+    clap_cla_episode_id,
     clap_cla_placement_start_date,
     clap_cla_placement_type,
     clap_cla_placement_urn,
@@ -2038,29 +2058,28 @@ INSERT INTO ssd_cla_placement (
     clap_cla_placement_change_reason,
     clap_cla_id  
 )
-SELECT 
+SELECT
     fcp.FACT_CLA_PLACEMENT_ID                   AS clap_cla_placement_id,
-    fce.FACT_CARE_EPISODES_ID                   AS clap_cla_episode_id,             -- [PLACEHOLDER_DATA] [TESTING]
+    fce.FACT_CARE_EPISODES_ID                   AS clap_cla_episode_id,                                 
     fcp.START_DTTM                              AS clap_cla_placement_start_date,
     fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE          AS clap_cla_placement_type,
     fce.OFSTED_URN                              AS clap_cla_placement_urn,
     fcp.DISTANCE_FROM_HOME                      AS clap_cla_placement_distance,
-    'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,           -- [PLACEHOLDER_DATA] [TESTING]
+    'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,                               -- [PLACEHOLDER_DATA] [TESTING]
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
     fcp.POSTCODE                                AS clap_cla_placement_postcode,
     fcp.END_DTTM                                AS clap_cla_placement_end_date,
     fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE          AS clap_cla_placement_change_reason,
     fcp.FACT_CLA_ID                             AS clap_cla_id  
-FROM 
+FROM
+ 
     Child_Social.FACT_CLA_PLACEMENT AS fcp
-    
-JOIN 
-    Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CARE_EPISODES_ID = fce.FACT_CARE_EPISODES_ID; -- Adjust with actual column name [TESTING]
+JOIN
+    Child_Social.FACT_CLA AS fcla ON fcla.FACT_CLA_ID = fcp.FACT_CLA_ID                                 -- [TESTING] [JH Fix]
+JOIN
+    Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID;    -- [TESTING] [JH Fix]
 
 -- Add constraint(s)
-ALTER TABLE ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
-FOREIGN KEY (clap_cla_episode_id) REFERENCES ssd_cla_episodes(clae_cla_episode_id);
-
 CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_substance_misuse (clap_cla_episode_id);
 
 
@@ -2070,6 +2089,7 @@ CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_substance_misuse (c
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -2153,28 +2173,17 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_previous_permanence
 Description: 
 Author: D2I
-Last Modified Date: 24/11/23
+Last Modified Date: 11/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
+Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: Needs further Dev work to add in:
-lapp_previous_permanence_order_date		y		"Combination of'
-FACT_FORM_ANSWERS.ANSWER
-WHERE 
-'FACT_FORM_ANSWERS.ANSWER_NO = 'ORDERYEAR'
-'FACT_FORM_ANSWERS.ANSWER_NO = 'ORDERMONTH' 
-'FACT_FORM_ANSWERS.ANSWER_NO = 'ORDERDATE'"
-lapp_previous_permanence_option		y		"FACT_FORM_ANSWERS.ANSWER
-WHERE 
-'FACT_FORM_ANSWERS.ANSWER_NO = 'PREVADOPTORD'"
-lapp_previous_permanence_la		y		"FACT_FORM_ANSWERS.ANSWER
-WHERE 
-'FACT_FORM_ANSWERS.ANSWER_NO = 'INENG'"
-
+Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley. 
 
 Dependencies: 
 - ssd_person
-- FACT_903_DATA
+- FACT_903_DATA [depreciated]
+- FACT_FORMS
+- FACT_FORM_ANSWERS
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2182,21 +2191,19 @@ SET @TableName = N'ssd_cla_previous_permanence';
 PRINT 'Creating table: ' + @TableName;
 
 
-
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_previous_permanence', 'U') IS NOT NULL DROP TABLE ssd_cla_previous_permanence;
 
 -- Create structure
 CREATE TABLE ssd_cla_previous_permanence (
-    lapp_table_id                         NVARCHAR(48) PRIMARY KEY,
-    lapp_person_id                        NVARCHAR(48),
-    lapp_previous_permanence_order_date   NVARCHAR(100),    -- [TESTING] [ESCC 48?] 
-    lapp_previous_permanence_option       NVARCHAR(200),    -- [TESTING] [ESCC 128]
-    lapp_previous_permanence_la           NVARCHAR(100)     -- [TESTING] [ESCC 12?]
+    lapp_table_id                             NVARCHAR(48) PRIMARY KEY,
+    lapp_person_id                            NVARCHAR(48),
+    lapp_previous_permanence_order_date       NVARCHAR(100), -- Placeholder for combination data
+    lapp_previous_permanence_option           NVARCHAR(200),
+    lapp_previous_permanence_la               NVARCHAR(100)
 );
 
-
--- Insert data
+-- Insert data 
 INSERT INTO ssd_cla_previous_permanence (
     lapp_table_id, 
     lapp_person_id, 
@@ -2205,21 +2212,25 @@ INSERT INTO ssd_cla_previous_permanence (
     lapp_previous_permanence_la
 )
 SELECT 
-    FACT_903_DATA_ID    AS lapp_table_id,
-    DIM_PERSON_ID       AS lapp_person_id,
-    DATE_PERM           AS lapp_previous_permanence_order_date,
-    PREV_PERM           AS lapp_previous_permanence_option,
-    LA_PERM             AS lapp_previous_permanence_la
+    ffa.FACT_FORM_ID                AS lapp_table_id,
+    ff.DIM_PERSON_ID                AS lapp_person_id,
+    'PLACEHOLDER_DATA'              AS lapp_previous_permanence_order_date,              -- [TESTING] {PLACEHOLDER_DATA}
+    ffa_answer_prev.PREVADOPTORD    AS lapp_previous_permanence_option,
+    ffa_answer_ineng.INENG          AS lapp_previous_permanence_la
 FROM 
-    Child_Social.FACT_903_DATA;
+    Child_Social.FACT_FORMS ff
 
+LEFT JOIN 
+    Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
+LEFT JOIN 
+    (SELECT FACT_FORM_ID, ANSWER AS PREVADOPTORD FROM Child_Social.FACT_FORM_ANSWERS WHERE ANSWER_NO = 'PREVADOPTORD') ffa_answer_prev ON ffa.FACT_FORM_ID = ffa_answer_prev.FACT_FORM_ID
+LEFT JOIN 
+    (SELECT FACT_FORM_ID, ANSWER AS INENG FROM Child_Social.FACT_FORM_ANSWERS WHERE ANSWER_NO = 'INENG') ffa_answer_ineng ON ffa.FACT_FORM_ID = ffa_answer_ineng.FACT_FORM_ID;
 
--- Create index(es)
-CREATE INDEX IDX_lapp_person_id ON ssd_cla_previous_permanence(lapp_person_id);
-
--- Add contraint(s)
+-- Add constraint(s)
 ALTER TABLE ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
-FOREIGN KEY (lapp_person_id) REFERENCES ssd_person(pers_person_id);
+FOREIGN KEY (lapp_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
+
 
 
 
@@ -2235,15 +2246,69 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_care_plan
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 12/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: Replace 'PLACEHOLDER_DATA' with the actual logic for 'ICP' answer.
 Dependencies: 
-- 
+- FACT_CARE_PLAN_SUMMARY
+- FACT_CARE_PLANS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cla_care_plan';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists & drop
+IF OBJECT_ID('ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_cla_care_plan;
+
+-- Create structure
+CREATE TABLE ssd_cla_care_plan (
+    lacp_table_id                 NVARCHAR(48) PRIMARY KEY,
+    lacp_cla_episode_id           NVARCHAR(48),
+    lacp_referral_id              NVARCHAR(48),
+    lacp_cla_care_plan_start_date DATETIME,
+    lacp_cla_care_plan_end_date   DATETIME,
+    lacp_cla_care_plan            NVARCHAR(100)
+);
+ 
+-- Insert data
+INSERT INTO ssd_cla_care_plan (
+    lacp_table_id,
+    lacp_cla_episode_id,
+    lacp_referral_id,
+    lacp_cla_care_plan_start_date,
+    lacp_cla_care_plan_end_date,
+    lacp_cla_care_plan
+)
+SELECT
+    fcps.FACT_CARE_PLAN_SUMMARY_ID  AS lacp_table_id,
+    fcps.DIM_PERSON_ID              AS lacp_cla_episode_id,
+    fcpl.FACT_REFERRAL_ID           AS lacp_referral_id,
+    fcps.START_DTTM                 AS lacp_cla_care_plan_start_date,
+    fcps.END_DTTM                   AS lacp_cla_care_plan_end_date,
+    'PLACEHOLDER_DATA'              AS lacp_cla_care_plan                -- [TESTING] [PLACEHOLDER_DATA]
+FROM
+    Child_Social.FACT_CARE_PLAN_SUMMARY AS fcps
+ 
+JOIN
+    Child_Social.FACT_CARE_PLANS AS fcpl ON fcps.FACT_CARE_PLAN_SUMMARY_ID = fcpl.FACT_CARE_PLAN_SUMMARY_ID
+
+
+-- Add constraint(s)
+ALTER TABLE ssd_cla_care_plan ADD CONSTRAINT FK_lacp_cla_episode_id
+FOREIGN KEY (lacp_cla_episode_id) REFERENCES ssd_cla_episodes(clae_person_id);
+
+-- Replace 'PLACEHOLDER_DATA' with the actual logic for 'ICP' answer.
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 /* 
@@ -2251,15 +2316,71 @@ Dependencies:
 Object Name: ssd_cla_visits
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 12/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- 
+- FACT_CARE_EPISODES
+- FACT_CASENOTES
+- FACT_CLA_VISIT
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cla_visits';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists & drop
+IF OBJECT_ID('ssd_cla_visits', 'U') IS NOT NULL DROP TABLE ssd_cla_visits;
+
+-- Create structure
+CREATE TABLE ssd_cla_visits (
+    clav_casenote_id           NVARCHAR(48) PRIMARY KEY,
+    clav_cla_id                NVARCHAR(48),
+    clav_cla_visit_id          NVARCHAR(48),
+    clav_cla_episode_id        NVARCHAR(48),
+    clav_cla_visit_date        DATETIME,
+    clav_cla_visit_seen        NCHAR(1),
+    clav_cla_visit_seen_alone  NCHAR(1)
+);
+
+-- Insert data
+INSERT INTO ssd_cla_visits (
+    clav_casenote_id,
+    clav_cla_id,
+    clav_cla_visit_id,
+    clav_cla_episode_id,
+    clav_cla_visit_date,
+    clav_cla_visit_seen,
+    clav_cla_visit_seen_alone
+)
+SELECT
+    clav.FACT_CASENOTE_ID       AS clav_casenote_id,
+    clav.FACT_CLA_ID            AS clav_cla_id,
+    clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
+    ceps.FACT_CARE_EPISODES_ID  AS clav_cla_episode_id,
+    clav.VISIT_DTTM             AS clav_cla_visit_date,
+    cn.SEEN_FLAG                AS clav_cla_visit_seen,
+    cn.SEEN_ALONE_FLAG          AS clav_cla_visit_seen_alone
+FROM
+    Child_Social.FACT_CLA_VISIT AS clav
+JOIN
+    Child_Social.FACT_CARE_EPISODES AS ceps ON clav.FACT_CLA_ID = ceps.FACT_CLA_ID
+JOIN
+    Child_Social.FACT_CASENOTES AS cn ON clav.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID;
+
+
+-- Add constraint(s)
+ALTER TABLE ssd_cla_visits ADD CONSTRAINT FK_clav_cla_episode_id 
+FOREIGN KEY (clav_cla_episode_id) REFERENCES ssd_cla_episodes(clae_cla_episode_id);
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
@@ -2446,18 +2567,123 @@ Dependencies:
 Object Name: ssd_permanence
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 11/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Version: 0.9
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: Not ready yet still in dev
 Dependencies: 
-- 
+- FACT_ADOPTION
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_permanence';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists & drop
+IF OBJECT_ID('ssd_permanence', 'U') IS NOT NULL DROP TABLE ssd_permanence;
+
+-- Create structure
+CREATE TABLE ssd_permanence (
+    perm_table_id                        NVARCHAR(48) PRIMARY KEY,
+    perm_person_id                       NVARCHAR(48),
+    perm_cla_id                          NVARCHAR(48),
+    perm_adm_decision_date               DATETIME,
+    perm_entered_care_date               DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+    perm_ffa_cp_decision_date            DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+    perm_placement_order_date            DATETIME,
+    perm_placed_for_adoption_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+    perm_matched_date                    DATETIME,
+    perm_adopted_by_carer_flag           NVARCHAR(1),           -- The datatype should be datetime?? [TESTING]
+    perm_placed_ffa_cp_date              DATETIME,
+    perm_decision_reversed_date          DATETIME,
+    perm_placed_foster_carer_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+    perm_part_of_sibling_group           NCHAR(1),
+    perm_siblings_placed_together        INT,
+    perm_siblings_placed_apart           INT,
+    perm_placement_provider_urn          NVARCHAR(48),          -- [TESTING] [PLACEHOLDER_DATA]
+    perm_decision_reversed_reason        NVARCHAR(100),
+    perm_permanence_order_date           DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+    perm_permanence_order_type           NVARCHAR(100),         -- [TESTING] [PLACEHOLDER_DATA]
+    perm_adoption_worker                 NVARCHAR(1),           -- [TESTING] [PLACEHOLDER_DATA]
+    perm_allocated_worker                NVARCHAR(1)           -- The datatype should be datetime?? [TESTING]
+);
+
+
+-- Insert data with placeholders for linked fields
+INSERT INTO ssd_permanence (
+    perm_table_id,
+    perm_person_id,
+    perm_cla_id,
+    perm_adm_decision_date,
+    perm_entered_care_date,
+    perm_ffa_cp_decision_date,
+    perm_placement_order_date,
+    perm_placed_for_adoption_date,
+    perm_matched_date,
+    perm_adopted_by_carer_flag,
+    perm_placed_ffa_cp_date,
+    perm_decision_reversed_date,
+    perm_placed_foster_carer_date,
+    perm_part_of_sibling_group,
+    perm_siblings_placed_together,
+    perm_siblings_placed_apart,
+    perm_placement_provider_urn,
+    perm_decision_reversed_reason,
+    perm_permanence_order_date,
+    perm_permanence_order_type,
+    perm_adoption_worker,
+    perm_allocated_worker
+)
+SELECT 
+    fa.FACT_ADOPTION_ID                     AS perm_table_id,
+    fa.DIM_PERSON_ID                        AS perm_person_id,
+    fa.FACT_CLA_ID                          AS perm_cla_id,
+    fa.DECISION_DTTM                        AS perm_adm_decision_date,
+    '01/01/2001'                            AS perm_entered_care_date,             -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    '01/01/2001'                            AS perm_ffa_cp_decision_date,          -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
+    '01/01/2001'                            AS perm_placed_for_adoption_date,      -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    fa.MATCHING_DTTM                        AS perm_matched_date,
+    CAST(fa.ADOPTED_BY_CARER_FLAG           AS NVARCHAR(1)) AS perm_adopted_by_carer_flag, -- Verify datatype [TESTING] [PLACEHOLDER_DATA]
+    fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
+    fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
+    '01/01/2001'                            AS perm_placed_foster_carer_date,      -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    fa.SIBLING_GROUP                        AS perm_part_of_sibling_group,
+    fa.NUMBER_TOGETHER                      AS perm_siblings_placed_together,
+    fa.NUMBER_APART                         AS perm_siblings_placed_apart,
+    'PLACEHOLDER_DATA'                      AS perm_placement_provider_urn,        -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE   AS perm_decision_reversed_reason,
+    '01/01/2001'                            AS perm_permanence_order_date,         -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    'PLACEHOLDER_DATA'                      AS perm_permanence_order_type,         -- Determined from above [TESTING] [PLACEHOLDER_DATA]
+    CAST(fa.ADOPTION_SOCIAL_WORKER_ID       AS NVARCHAR(1)) AS perm_adoption_worker,  -- Verify datatype [TESTING] [PLACEHOLDER_DATA]
+    CAST(fa.ALLOCATED_CASE_WORKER_ID        AS NVARCHAR(1)) AS perm_allocated_worker   -- Verify datatype [TESTING] [PLACEHOLDER_DATA]
+FROM 
+    FACT_ADOPTION AS fa
+
+
+WHERE EXISTS ( -- only need data for ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = fa.DIM_PERSON_ID
+    );
+
+
+-- Add constraint(s)
+ALTER TABLE ssd_permanence ADD CONSTRAINT FK_perm_person_id
+FOREIGN KEY (perm_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
 
 
+
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
