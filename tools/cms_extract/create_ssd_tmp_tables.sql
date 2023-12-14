@@ -54,11 +54,11 @@ DECLARE @LastSept30th DATE; -- Most recent past September 30th date towards case
 Object Name: ssd_person
 Description: person/child details
 Author: D2I
-Last Modified Date: 20/10/23
+Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
 
-Version: 1.3
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 
 Remarks: Need to confirm FACT_903_DATA as source of mother related data
 Dependencies: 
@@ -80,49 +80,71 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 -- Create structure
 CREATE TABLE #ssd_person (
-    pers_person_id          NVARCHAR(48) PRIMARY KEY, 
+    pers_person_id          NVARCHAR(48) PRIMARY KEY,
     pers_sex                NVARCHAR(48),
+    pers_gender             NVARCHAR(48),
     pers_ethnicity          NVARCHAR(38),
     pers_dob                DATETIME,
     pers_common_child_id    NVARCHAR(10),
+    pers_upn_unknown        NVARCHAR(10),
     pers_send               NVARCHAR(1),
     pers_expected_dob       DATETIME,       -- Date or NULL
     pers_death_date         DATETIME,
+    pers_is_mother          NVARCHAR(48),
     pers_nationality        NVARCHAR(48)
 );
-
--- Insert data 
+ 
+-- Insert data
 INSERT INTO #ssd_person (
     pers_person_id,
     pers_sex,
+    pers_gender,
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,
+    pers_upn_unknown,
     pers_send,
     pers_expected_dob,
     pers_death_date,
+    pers_is_mother,
     pers_nationality
 )
-SELECT 
+SELECT
     p.DIM_PERSON_ID,
-    p.DIM_LOOKUP_VARIATION_OF_SEX_CODE,
+    p.GENDER_MAIN_CODE,
+    'PLACEHOLDER DATA',                                 -- [TESTING] [PLACEHOLDER_DATA]
     p.ETHNICITY_MAIN_CODE,
-    p.BIRTH_DTTM,
+        CASE WHEN (p.DOB_ESTIMATED) = 'N'              
+        THEN p.BIRTH_DTTM                              -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
+        ELSE NULL END,                                  --  or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
+    f903.NO_UPN_CODE,
     p.EHM_SEN_FLAG,
-        CASE WHEN ISDATE(p.DOB_ESTIMATED) = 1               
-        THEN CONVERT(DATETIME, p.DOB_ESTIMATED, 121)        -- Coerce to either valid Date
-        ELSE NULL END,                                      --  or NULL
+        CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
+        THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
+        ELSE NULL END,                                  --  or NULL
     p.DEATH_DTTM,
+        CASE WHEN p.GENDER_MAIN_CODE <> 'M' AND fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI'              
+        THEN 'Y'                          
+        ELSE NULL END,
     p.NATNL_CODE
-FROM 
+   
+FROM
     Child_Social.DIM_PERSON AS p
-
+ 
+LEFT JOIN
+    Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
+ 
+JOIN    
+    Child_Social.FACT_PERSON_RELATION AS fpr ON fpr.DIM_PERSON_ID = p.DIM_PERSON_ID
+ 
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
     AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
-
-
+    AND f903.YEAR_TO_DATE = 'Y'                                 -- 903 table includes children looked after in previous year and year to date,
+                                                                -- this filters for those current in the current year to date to avoid duplicates
+   
+ 
 AND (                                                       -- Filter irrelevant rows by timeframe
     EXISTS (
         -- contact in last x@yrs
@@ -132,14 +154,15 @@ AND (                                                       -- Filter irrelevant
     )
     OR EXISTS (
         -- new or ongoing/active/unclosed referral in last x@yrs
-        SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
+        SELECT 1 FROM Child_Social.FACT_REFERRALS fr
         WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
         AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
 );
 
+
 -- Create index(es)
-CREATE INDEX IDX_ssd_person_la_person_id ON #ssd_person(pers_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_person_la_person_id ON #ssd_person(pers_person_id);
 
 
 
@@ -147,6 +170,7 @@ CREATE INDEX IDX_ssd_person_la_person_id ON #ssd_person(pers_person_id);
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 /*SSD Person filter (notes): - Implemented*/
@@ -226,7 +250,7 @@ WHERE EXISTS ( -- only need address data for ssd relevant records
 
 
 -- Create index(es)
-CREATE INDEX IDX_family_person_id ON #ssd_family(fami_person_id);
+CREATE NONCLUSTERED INDEX IDX_family_person_id ON #ssd_family(fami_person_id);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_family ADD CONSTRAINT FK_family_person
@@ -329,9 +353,9 @@ WHERE EXISTS
 
 
 -- Create index(es)
-CREATE INDEX IDX_address_person ON #ssd_address(addr_person_id);
-CREATE INDEX IDX_address_start ON #ssd_address(addr_address_start);
-CREATE INDEX IDX_address_end ON #ssd_address(addr_address_end);
+CREATE NONCLUSTERED INDEX IDX_address_person ON #ssd_address(addr_person_id);
+CREATE NONCLUSTERED INDEX IDX_address_start ON #ssd_address(addr_address_start);
+CREATE NONCLUSTERED INDEX IDX_address_end ON #ssd_address(addr_address_end);
 
 
 
@@ -402,7 +426,7 @@ WHERE EXISTS
 -- FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE INDEX IDX_disability_person_id ON #ssd_disability(disa_person_id);
+CREATE NONCLUSTERED INDEX IDX_disability_person_id ON #ssd_disability(disa_person_id);
 
 
 
@@ -480,9 +504,9 @@ WHERE
 -- FOREIGN KEY (immi_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE INDEX IDX_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
-CREATE INDEX IDX_immigration_status_start ON #ssd_immigration_status(immi_immigration_status_start);
-CREATE INDEX IDX_immigration_status_end ON #ssd_immigration_status(immi_immigration_status_end);
+CREATE NONCLUSTERED INDEX IDX_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
+CREATE NONCLUSTERED INDEX IDX_immigration_status_start ON #ssd_immigration_status(immi_immigration_status_start);
+CREATE NONCLUSTERED INDEX IDX_immigration_status_end ON #ssd_immigration_status(immi_immigration_status_end);
 
 
 
@@ -523,33 +547,39 @@ CREATE TABLE #ssd_mother (
     moth_childs_person_id       NVARCHAR(48),
     moth_childs_dob             DATETIME
 );
-
+ 
 -- Insert data
 INSERT INTO #ssd_mother (
     moth_table_id,
-    moth_person_id, 
-    moth_childs_person_id, 
+    moth_person_id,
+    moth_childs_person_id,
     moth_childs_dob
 )
-SELECT 
+SELECT
     fpr.FACT_PERSON_RELATION_ID         AS moth_table_id,
     fpr.DIM_PERSON_ID                   AS moth_person_id,
     fpr.DIM_RELATED_PERSON_ID           AS moth_childs_person_id,
     fpr.DIM_RELATED_PERSON_DOB          AS moth_childs_dob
-
-FROM 
+ 
+FROM
     Child_Social.FACT_PERSON_RELATION AS fpr
-WHERE EXISTS 
+JOIN
+    Child_Social.DIM_PERSON AS p ON fpr.DIM_PERSON_ID = p.DIM_PERSON_ID
+WHERE
+    p.GENDER_MAIN_CODE <> 'M'
+    AND
+    fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI' -- only interested in parent/child relations
+ 
+AND EXISTS
     ( -- only need data for ssd relevant records
-    SELECT 1 
+    SELECT 1
     FROM #ssd_person p
     WHERE p.pers_person_id = fpr.DIM_PERSON_ID
-    )
-
- AND fpr.DIM_LOOKUP_RELTN_TYPE_CODE IN ('CHI', 'PAR'); -- only interested in parent/child relations
+    );
+ 
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_mother_moth_person_id ON #ssd_mother(moth_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_mother_moth_person_id ON #ssd_mother(moth_person_id);
 
 -- -- Add constraint(s)
 -- ALTER TABLE #ssd_mother ADD CONSTRAINT FK_moth_to_person 
@@ -623,7 +653,7 @@ WHERE EXISTS
     );
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_legal_status_lega_person_id ON #ssd_legal_status(lega_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_legal_status_lega_person_id ON #ssd_legal_status(lega_person_id);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_legal_status ADD CONSTRAINT FK_legal_status_person
@@ -717,7 +747,7 @@ WHERE EXISTS
 -- FOREIGN KEY (cont_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE INDEX IDX_contact_person_id ON #ssd_contact(cont_person_id);
+CREATE NONCLUSTERED INDEX IDX_contact_person_id ON #ssd_contact(cont_person_id);
 
 
 
@@ -794,7 +824,7 @@ WHERE EXISTS
     );
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
@@ -815,10 +845,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cin_episodes
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - @ssd_timeframe_years
@@ -839,17 +869,17 @@ CREATE TABLE #ssd_cin_episodes
     cine_referral_id            INT,
     cine_person_id              NVARCHAR(48),
     cine_referral_date          DATETIME,
-    cine_cin_primary_need       INT,
+    cine_cin_primary_need       NVARCHAR(10),
     cine_referral_source        NVARCHAR(255),
     cine_referral_outcome_json  NVARCHAR(500),
-    cine_referral_nfa           NCHAR(1), 
+    cine_referral_nfa           NCHAR(1),
     cine_close_reason           NVARCHAR(100),
     cine_close_date             DATETIME,
     cine_referral_team          NVARCHAR(255),
     cine_referral_worker_id     NVARCHAR(48)
 );
-
--- Insert data 
+ 
+-- Insert data
 INSERT INTO #ssd_cin_episodes
 (
     cine_referral_id,
@@ -864,14 +894,14 @@ INSERT INTO #ssd_cin_episodes
     cine_referral_team,
     cine_referral_worker_id
 )
-SELECT 
+SELECT
     fr.FACT_REFERRAL_ID,
     fr.DIM_PERSON_ID,
     fr.REFRL_START_DTTM,
-    fr.DIM_LOOKUP_CATEGORY_OF_NEED_ID,
-    fr.DIM_LOOKUP_CONT_SORC_ID_DESC,
+    fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE,
+    fr.[DIM_LOOKUP_CONT_SORC_ID_DESC ],
     (
-        SELECT 
+        SELECT
             NULLIF(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS "OUTCOME_SINGLE_ASSESSMENT_FLAG",
             NULLIF(fr.OUTCOME_NFA_FLAG, '')                 AS "OUTCOME_NFA_FLAG",
             NULLIF(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS "OUTCOME_STRATEGY_DISCUSSION_FLAG",
@@ -889,21 +919,22 @@ SELECT
     fr.REFRL_END_DTTM,
     fr.DIM_DEPARTMENT_ID_DESC,
     fr.DIM_WORKER_ID_DESC
-FROM 
+FROM
     Child_Social.FACT_REFERRALS AS fr
-
-WHERE 
+ 
+WHERE
     fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
 AND
-    DIM_PERSON_ID <> '-1';  -- Exclude rows with '-1'
+    DIM_PERSON_ID <> -1;  -- Exclude rows with '-1'
     ;
 
+
 -- Create index(es)
-CREATE INDEX IDX_ssd_cin_episodes_person_id ON #ssd_cin_episodes(cine_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_cin_episodes_person_id ON #ssd_cin_episodes(cine_person_id);
 
 -- -- Create constraint(s)
--- ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
--- FOREIGN KEY (cine_person_id) REFERENCES #ssd_person(pers_person_id);
+-- ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
+-- FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 
@@ -912,8 +943,6 @@ CREATE INDEX IDX_ssd_cin_episodes_person_id ON #ssd_cin_episodes(cine_person_id)
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
-
-
 
 
 /* 
@@ -1009,7 +1038,7 @@ WHERE EXISTS
 
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_cin_assessments_person_id ON #ssd_cin_assessments(cina_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_cin_assessments_person_id ON #ssd_cin_assessments(cina_person_id);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
@@ -1050,10 +1079,114 @@ SET @TableName = N'ssd_assessment_factors';
 PRINT 'Creating table: ' + @TableName;
 
 
+
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_assessment_factors') IS NOT NULL DROP TABLE #ssd_assessment_factors;
+IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
 
 
+-- Create TMP structure with filtered answers
+SELECT 
+    ffa.FACT_FORM_ID,
+    ffa.ANSWER_NO,
+    ffa.ANSWER
+INTO #ssd_TMP_PRE_assessment_factors
+FROM 
+    Child_Social.FACT_FORM_ANSWERS ffa
+WHERE 
+    ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC = 'FAMILY ASSESSMENT'
+    AND ffa.ANSWER_NO IN ('1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C', 
+                                  '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', 
+                                  '7A', '8B', '8C', '8D', '8E', '8F', '9A', '10A', '11A', 
+                                  '12A', '13A', '14A', '15A', '16A', '17A', '18A', '18B', 
+                                  '18C', '19A', '19B', '19C', 
+                                  '20', '21', 
+                                  '22A', '23A', '24A');
+
+
+
+
+-- Create structure
+CREATE TABLE #ssd_assessment_factors (
+    cinf_table_id                    NVARCHAR(48) PRIMARY KEY,
+    cinf_assessment_id               NVARCHAR(48),
+    cinf_assessment_factors_json     NVARCHAR(1000) -- size might need testing
+);
+
+
+
+-- Insert data
+INSERT INTO #ssd_assessment_factors (
+               cinf_table_id, 
+               cinf_assessment_id, 
+               cinf_assessment_factors_json
+           )
+
+SELECT 
+    fsa.EXTERNAL_ID     AS cinf_table_id, 
+    fsa.FACT_FORM_ID    AS cinf_assessment_id,
+    (
+        SELECT 
+            -- 
+            CASE WHEN tmp_af.ANSWER_NO = '1A'  THEN tmp_af.ANSWER END AS '1A',
+            CASE WHEN tmp_af.ANSWER_NO = '1B'  THEN tmp_af.ANSWER END AS '1B',
+            CASE WHEN tmp_af.ANSWER_NO = '1C'  THEN tmp_af.ANSWER END AS '1C',
+            CASE WHEN tmp_af.ANSWER_NO = '2A'  THEN tmp_af.ANSWER END AS '2A',
+            CASE WHEN tmp_af.ANSWER_NO = '2B'  THEN tmp_af.ANSWER END AS '2B',
+            CASE WHEN tmp_af.ANSWER_NO = '2C'  THEN tmp_af.ANSWER END AS '2C',
+            CASE WHEN tmp_af.ANSWER_NO = '3A'  THEN tmp_af.ANSWER END AS '3A',
+            CASE WHEN tmp_af.ANSWER_NO = '3B'  THEN tmp_af.ANSWER END AS '3B',
+            CASE WHEN tmp_af.ANSWER_NO = '3C'  THEN tmp_af.ANSWER END AS '3C',
+            CASE WHEN tmp_af.ANSWER_NO = '4A'  THEN tmp_af.ANSWER END AS '4A',
+            CASE WHEN tmp_af.ANSWER_NO = '4B'  THEN tmp_af.ANSWER END AS '4B',
+            CASE WHEN tmp_af.ANSWER_NO = '4C'  THEN tmp_af.ANSWER END AS '4C',
+            CASE WHEN tmp_af.ANSWER_NO = '5A'  THEN tmp_af.ANSWER END AS '5A',
+            CASE WHEN tmp_af.ANSWER_NO = '5B'  THEN tmp_af.ANSWER END AS '5B',
+            CASE WHEN tmp_af.ANSWER_NO = '5C'  THEN tmp_af.ANSWER END AS '5C',
+            CASE WHEN tmp_af.ANSWER_NO = '6A'  THEN tmp_af.ANSWER END AS '6A',
+            CASE WHEN tmp_af.ANSWER_NO = '6B'  THEN tmp_af.ANSWER END AS '6B',
+            CASE WHEN tmp_af.ANSWER_NO = '6C'  THEN tmp_af.ANSWER END AS '6C',
+            CASE WHEN tmp_af.ANSWER_NO = '7A'  THEN tmp_af.ANSWER END AS '7A',
+            CASE WHEN tmp_af.ANSWER_NO = '8B'  THEN tmp_af.ANSWER END AS '8B',
+            CASE WHEN tmp_af.ANSWER_NO = '8C'  THEN tmp_af.ANSWER END AS '8C',
+            CASE WHEN tmp_af.ANSWER_NO = '8D'  THEN tmp_af.ANSWER END AS '8D',
+            CASE WHEN tmp_af.ANSWER_NO = '8E'  THEN tmp_af.ANSWER END AS '8E',
+            CASE WHEN tmp_af.ANSWER_NO = '8F'  THEN tmp_af.ANSWER END AS '8F',
+            CASE WHEN tmp_af.ANSWER_NO = '9A'  THEN tmp_af.ANSWER END AS '9A',
+            CASE WHEN tmp_af.ANSWER_NO = '10A' THEN tmp_af.ANSWER END AS '10A',
+            CASE WHEN tmp_af.ANSWER_NO = '11A' THEN tmp_af.ANSWER END AS '11A',
+            CASE WHEN tmp_af.ANSWER_NO = '12A' THEN tmp_af.ANSWER END AS '12A',
+            CASE WHEN tmp_af.ANSWER_NO = '13A' THEN tmp_af.ANSWER END AS '13A',
+            CASE WHEN tmp_af.ANSWER_NO = '14A' THEN tmp_af.ANSWER END AS '14A',
+            CASE WHEN tmp_af.ANSWER_NO = '15A' THEN tmp_af.ANSWER END AS '15A',
+            CASE WHEN tmp_af.ANSWER_NO = '16A' THEN tmp_af.ANSWER END AS '16A',
+            CASE WHEN tmp_af.ANSWER_NO = '17A' THEN tmp_af.ANSWER END AS '17A',
+            CASE WHEN tmp_af.ANSWER_NO = '18A' THEN tmp_af.ANSWER END AS '18A',
+            CASE WHEN tmp_af.ANSWER_NO = '18B' THEN tmp_af.ANSWER END AS '18B',
+            CASE WHEN tmp_af.ANSWER_NO = '18C' THEN tmp_af.ANSWER END AS '18C',
+            CASE WHEN tmp_af.ANSWER_NO = '19A' THEN tmp_af.ANSWER END AS '19A',
+            CASE WHEN tmp_af.ANSWER_NO = '19B' THEN tmp_af.ANSWER END AS '19B',
+            CASE WHEN tmp_af.ANSWER_NO = '19C' THEN tmp_af.ANSWER END AS '19C',
+            CASE WHEN tmp_af.ANSWER_NO = '20'  THEN tmp_af.ANSWER END AS '20',
+            CASE WHEN tmp_af.ANSWER_NO = '21'  THEN tmp_af.ANSWER END AS '21',
+            CASE WHEN tmp_af.ANSWER_NO = '22A' THEN tmp_af.ANSWER END AS '22A',
+            CASE WHEN tmp_af.ANSWER_NO = '23A' THEN tmp_af.ANSWER END AS '23A',
+            CASE WHEN tmp_af.ANSWER_NO = '24A' THEN tmp_af.ANSWER END AS '24A'
+        FROM 
+            #ssd_TMP_PRE_assessment_factors tmp_af
+        WHERE 
+            tmp_af.FACT_FORM_ID = fsa.FACT_FORM_ID
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS cinf_assessment_factors_json
+FROM 
+    Child_Social.FACT_SINGLE_ASSESSMENT fsa
+WHERE 
+    fsa.EXTERNAL_ID <> -1;
+
+
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
+-- FOREIGN KEY (cinf_assessment_id) REFERENCES #ssd_cin_assessments(cina_assessment_id);
 
 /* issues with join [TESTING]
 -- The multi-part identifier "cpd.DIM_OUTCM_CREATE_BY_DEPT_ID" could not be bound. */
@@ -1132,7 +1265,7 @@ AND EXISTS
 
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_cin_plans_person_id ON #ssd_cin_plans(cinp_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_cin_plans_person_id ON #ssd_cin_plans(cinp_person_id);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
@@ -1295,7 +1428,7 @@ FROM
 
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_s47_enquiry_person_id ON #ssd_s47_enquiry(s47e_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_s47_enquiry_person_id ON #ssd_s47_enquiry(s47e_person_id);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
@@ -1906,7 +2039,7 @@ WHERE EXISTS ( -- only need data for ssd relevant records
 
 
 -- Create index(es)
-CREATE INDEX IX_ssd_cla_immunisations_person_id ON #ssd_cla_immunisations (clai_person_id);
+CREATE NONCLUSTERED INDEX IX_ssd_cla_immunisations_person_id ON #ssd_cla_immunisations (clai_person_id);
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
@@ -2023,7 +2156,6 @@ CREATE TABLE #ssd_cla_placement (
     clap_cla_id                         NVARCHAR(48)  
 );
  
- 
 -- Insert data
 INSERT INTO #ssd_cla_placement (
     clap_cla_placement_id,
@@ -2055,14 +2187,17 @@ SELECT
 FROM
  
     Child_Social.FACT_CLA_PLACEMENT AS fcp
+
 JOIN
     Child_Social.FACT_CLA AS fcla ON fcla.FACT_CLA_ID = fcp.FACT_CLA_ID                                 -- [TESTING] [JH Fix]
 JOIN
     Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID;    -- [TESTING] [JH Fix]
 
 
+
+
 -- Add constraint(s)
-CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON #ssd_cla_substance_misuse (clap_cla_episode_id);
+CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_placement(clap_cla_episode_id);
 
 
 
@@ -2201,6 +2336,7 @@ SELECT
     ffa_answer_ineng.INENG          AS lapp_previous_permanence_la
 FROM 
     Child_Social.FACT_FORMS ff
+
 LEFT JOIN 
     Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
 LEFT JOIN 
@@ -2429,7 +2565,7 @@ SELECT
         AND FACT_FORM_ID = ffa.FACT_FORM_ID
     ) AS csdq_sdq_score
 FROM 
-    FACT_FORM_ANSWERS ffa
+    Child_Social.FACT_FORM_ANSWERS ffa
 
 JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
 

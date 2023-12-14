@@ -54,11 +54,10 @@ DECLARE @LastSept30th DATE; -- Most recent past September 30th date towards case
 Object Name: ssd_person
 Description: person/child details
 Author: D2I
-Last Modified Date: 20/10/23
+Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
-
-Version: 1.3
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 
 Remarks: Need to confirm FACT_903_DATA as source of mother related data
 Dependencies: 
@@ -78,51 +77,134 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('ssd_person') IS NOT NULL DROP TABLE ssd_person;
 
 
+-- -- Create structure
+-- CREATE TABLE ssd_person (
+--     pers_person_id          NVARCHAR(48) PRIMARY KEY, 
+--     pers_sex                NVARCHAR(48),
+--     pers_ethnicity          NVARCHAR(38),
+--     pers_dob                DATETIME,
+--     pers_common_child_id    NVARCHAR(10),
+--     pers_send               NVARCHAR(1),
+--     pers_expected_dob       DATETIME,       -- Date or NULL
+--     pers_death_date         DATETIME,
+--     pers_nationality        NVARCHAR(48)
+-- );
+
+-- -- Insert data 
+-- INSERT INTO ssd_person (
+--     pers_person_id,
+--     pers_sex,
+--     pers_ethnicity,
+--     pers_dob,
+--     pers_common_child_id,
+--     pers_send,
+--     pers_expected_dob,
+--     pers_death_date,
+--     pers_nationality
+-- )
+-- SELECT 
+--     p.DIM_PERSON_ID,
+--     p.DIM_LOOKUP_VARIATION_OF_SEX_CODE,
+--     p.ETHNICITY_MAIN_CODE,
+--     p.BIRTH_DTTM,
+--     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
+--     p.EHM_SEN_FLAG,
+--         CASE WHEN ISDATE(p.DOB_ESTIMATED) = 1               
+--         THEN CONVERT(DATETIME, p.DOB_ESTIMATED, 121)        -- Coerce to either valid Date
+--         ELSE NULL END,                                      --  or NULL
+--     p.DEATH_DTTM,
+--     p.NATNL_CODE
+-- FROM 
+--     Child_Social.DIM_PERSON AS p
+
+-- WHERE                                                       -- Filter invalid rows
+--     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
+
+-- AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
+
+-- AND (                                                       -- Filter irrelevant rows by timeframe
+--     EXISTS (
+--         -- contact in last x@yrs
+--         SELECT 1 FROM Child_Social.FACT_CONTACTS fc
+--         WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
+--         AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+--     )
+--     OR EXISTS (
+--         -- new or ongoing/active/unclosed referral in last x@yrs
+--         SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
+--         WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
+--         AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+--     )
+-- );
+
+
 -- Create structure
 CREATE TABLE ssd_person (
-    pers_person_id          NVARCHAR(48) PRIMARY KEY, 
+    pers_person_id          NVARCHAR(48) PRIMARY KEY,
     pers_sex                NVARCHAR(48),
+    pers_gender             NVARCHAR(48),
     pers_ethnicity          NVARCHAR(38),
     pers_dob                DATETIME,
     pers_common_child_id    NVARCHAR(10),
+    pers_upn_unknown        NVARCHAR(10),
     pers_send               NVARCHAR(1),
     pers_expected_dob       DATETIME,       -- Date or NULL
     pers_death_date         DATETIME,
+    pers_is_mother          NVARCHAR(48),
     pers_nationality        NVARCHAR(48)
 );
-
--- Insert data 
+ 
+-- Insert data
 INSERT INTO ssd_person (
     pers_person_id,
     pers_sex,
+    pers_gender,
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,
+    pers_upn_unknown,
     pers_send,
     pers_expected_dob,
     pers_death_date,
+    pers_is_mother,
     pers_nationality
 )
-SELECT 
+SELECT
     p.DIM_PERSON_ID,
-    p.DIM_LOOKUP_VARIATION_OF_SEX_CODE,
+    p.GENDER_MAIN_CODE,
+    'PLACEHOLDER DATA',
     p.ETHNICITY_MAIN_CODE,
-    p.BIRTH_DTTM,
+        CASE WHEN (p.DOB_ESTIMATED) = 'N'              
+        THEN p.BIRTH_DTTM                              -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
+        ELSE NULL END,                                  --  or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
+    f903.NO_UPN_CODE,
     p.EHM_SEN_FLAG,
-        CASE WHEN ISDATE(p.DOB_ESTIMATED) = 1               
-        THEN CONVERT(DATETIME, p.DOB_ESTIMATED, 121)        -- Coerce to either valid Date
-        ELSE NULL END,                                      --  or NULL
+        CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
+        THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
+        ELSE NULL END,                                  --  or NULL
     p.DEATH_DTTM,
+        CASE WHEN p.GENDER_MAIN_CODE <> 'M' AND fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI'              
+        THEN 'Y'                          
+        ELSE NULL END,
     p.NATNL_CODE
-FROM 
+   
+FROM
     Child_Social.DIM_PERSON AS p
-
+ 
+LEFT JOIN
+    Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
+ 
+JOIN    
+    Child_Social.FACT_PERSON_RELATION AS fpr ON fpr.DIM_PERSON_ID = p.DIM_PERSON_ID
+ 
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
     AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
-
-
+    AND f903.YEAR_TO_DATE = 'Y'                                 -- 903 table includes children looked after in previous year and year to date,
+                                                                -- this filters for those current in the current year to date to avoid duplicates
+   
+ 
 AND (                                                       -- Filter irrelevant rows by timeframe
     EXISTS (
         -- contact in last x@yrs
@@ -132,14 +214,15 @@ AND (                                                       -- Filter irrelevant
     )
     OR EXISTS (
         -- new or ongoing/active/unclosed referral in last x@yrs
-        SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
+        SELECT 1 FROM Child_Social.FACT_REFERRALS fr
         WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
         AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
 );
 
+
 -- Create index(es)
-CREATE INDEX IDX_ssd_person_la_person_id ON ssd_person(pers_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_person_la_person_id ON ssd_person(pers_person_id);
 
 
 
@@ -218,7 +301,9 @@ SELECT
 
 FROM Child_Social.FACT_CONTACTS AS fc
 
-WHERE EXISTS ( -- only need address data for ssd relevant records
+
+WHERE EXISTS 
+    ( -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fc.DIM_PERSON_ID
@@ -226,7 +311,7 @@ WHERE EXISTS ( -- only need address data for ssd relevant records
 
 
 -- Create index(es)
-CREATE INDEX IDX_family_person_id ON ssd_family(fami_person_id);
+CREATE NONCLUSTERED INDEX IDX_family_person_id ON ssd_family(fami_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_family ADD CONSTRAINT FK_family_person
@@ -316,10 +401,10 @@ FROM
     Child_Social.DIM_PERSON_ADDRESS AS pa
 
 WHERE EXISTS 
-    (   -- only need address data for ssd relevant records
+    (   -- only ssd relevant records
         -- This also negates the need to apply DIM_PERSON_ID <> '-1';  
     SELECT 1 
-    FROM #ssd_person p
+    FROM ssd_person p
     WHERE p.pers_person_id = pa.DIM_PERSON_ID
     );
 
@@ -330,9 +415,9 @@ FOREIGN KEY (addr_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 -- Create index(es)
-CREATE INDEX IDX_address_person ON ssd_address(addr_person_id);
-CREATE INDEX IDX_address_start ON ssd_address(addr_address_start);
-CREATE INDEX IDX_address_end ON ssd_address(addr_address_end);
+CREATE NONCLUSTERED INDEX IDX_address_person ON ssd_address(addr_person_id);
+CREATE NONCLUSTERED INDEX IDX_address_start ON ssd_address(addr_address_start);
+CREATE NONCLUSTERED INDEX IDX_address_end ON ssd_address(addr_address_end);
 
 
 
@@ -391,9 +476,9 @@ FROM
     Child_Social.FACT_DISABILITY AS fd
 
 WHERE EXISTS 
-    ( -- only need address data for ssd relevant records
+    ( -- only ssd relevant records
     SELECT 1 
-    FROM #ssd_person p
+    FROM ssd_person p
     WHERE p.pers_person_id = fd.DIM_PERSON_ID
     );
 
@@ -404,7 +489,7 @@ ALTER TABLE ssd_disability ADD CONSTRAINT FK_disability_person
 FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE INDEX IDX_disability_person_id ON ssd_disability(disa_person_id);
+CREATE NONCLUSTERED INDEX IDX_disability_person_id ON ssd_disability(disa_person_id);
 
 
 
@@ -483,9 +568,9 @@ ALTER TABLE ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
 FOREIGN KEY (immi_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE INDEX IDX_immigration_status_immi_person_id ON ssd_immigration_status(immi_person_id);
-CREATE INDEX IDX_immigration_status_start ON ssd_immigration_status(immi_immigration_status_start);
-CREATE INDEX IDX_immigration_status_end ON ssd_immigration_status(immi_immigration_status_end);
+CREATE NONCLUSTERED INDEX IDX_immigration_status_immi_person_id ON ssd_immigration_status(immi_person_id);
+CREATE NONCLUSTERED INDEX IDX_immigration_status_start ON ssd_immigration_status(immi_immigration_status_start);
+CREATE NONCLUSTERED INDEX IDX_immigration_status_end ON ssd_immigration_status(immi_immigration_status_end);
 
 
 
@@ -501,10 +586,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_mother
 Description: 
 Author: D2I
-Last Modified Date: 28/11/23
+Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
 Dependencies: 
 - ssd_person
@@ -526,32 +611,37 @@ CREATE TABLE ssd_mother (
     moth_childs_person_id       NVARCHAR(48),
     moth_childs_dob             DATETIME
 );
-
+ 
 -- Insert data
 INSERT INTO ssd_mother (
     moth_table_id,
-    moth_person_id, 
-    moth_childs_person_id, 
+    moth_person_id,
+    moth_childs_person_id,
     moth_childs_dob
 )
-SELECT 
+SELECT
     fpr.FACT_PERSON_RELATION_ID         AS moth_table_id,
     fpr.DIM_PERSON_ID                   AS moth_person_id,
     fpr.DIM_RELATED_PERSON_ID           AS moth_childs_person_id,
     fpr.DIM_RELATED_PERSON_DOB          AS moth_childs_dob
-
-FROM 
+ 
+FROM
     Child_Social.FACT_PERSON_RELATION AS fpr
-
-WHERE EXISTS 
+JOIN
+    Child_Social.DIM_PERSON AS p ON fpr.DIM_PERSON_ID = p.DIM_PERSON_ID
+WHERE
+    p.GENDER_MAIN_CODE <> 'M'
+    AND
+    fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI' -- only interested in parent/child relations
+ 
+AND EXISTS
     ( -- only need data for ssd relevant records
-    SELECT 1 
-    FROM #ssd_person p
+    SELECT 1
+    FROM ssd_person p
     WHERE p.pers_person_id = fpr.DIM_PERSON_ID
-    )
-
- AND fpr.DIM_LOOKUP_RELTN_TYPE_CODE IN ('CHI', 'PAR'); -- only interested in parent/child relations
-
+    );
+ 
+ 
 -- Create index(es)
 CREATE INDEX IDX_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
 
@@ -574,12 +664,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: #ssd_legal_status
+Object Name: ssd_legal_status
 Description: 
 Author: D2I
-Last Modified Date: 22/11/23
+Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
+Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -600,35 +690,38 @@ IF OBJECT_ID('ssd_legal_status') IS NOT NULL DROP TABLE ssd_legal_status;
 CREATE TABLE ssd_legal_status (
     lega_legal_status_id        NVARCHAR(48) PRIMARY KEY,
     lega_person_id              NVARCHAR(48),
+    lega_legal_status           NVARCHAR(256),
     lega_legal_status_start     DATETIME,
     lega_legal_status_end       DATETIME
 );
-
--- Insert data 
+ 
+-- Insert data
 INSERT INTO ssd_legal_status (
     lega_legal_status_id,
     lega_person_id,
+    lega_legal_status,
     lega_legal_status_start,
     lega_legal_status_end
-
+ 
 )
 SELECT
     fls.FACT_LEGAL_STATUS_ID,
     fls.DIM_PERSON_ID,
+    fls.DIM_LOOKUP_LGL_STATUS_DESC,
     fls.START_DTTM,
     fls.END_DTTM
-FROM 
+FROM
     Child_Social.FACT_LEGAL_STATUS AS fls
 
-WHERE EXISTS 
-    ( -- only need data for ssd relevant records
-    SELECT 1 
-    FROM #ssd_person p
+WHERE EXISTS
+    ( -- only ssd relevant records
+    SELECT 1
+    FROM ssd_person p
     WHERE p.pers_person_id = fls.DIM_PERSON_ID
     );
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_legal_status_lega_person_id ON ssd_legal_status(lega_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_legal_status_lega_person_id ON ssd_legal_status(lega_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_legal_status ADD CONSTRAINT FK_legal_status_person
@@ -710,9 +803,9 @@ FROM
     Child_Social.FACT_CONTACTS AS fc
     
 WHERE EXISTS 
-    ( -- only need data for ssd relevant records
+    ( -- only ssd relevant records
     SELECT 1 
-    FROM #ssd_person p
+    FROM ssd_person p
     WHERE p.pers_person_id = fc.DIM_PERSON_ID
     );
 
@@ -722,7 +815,7 @@ ALTER TABLE ssd_contact ADD CONSTRAINT FK_contact_person
 FOREIGN KEY (cont_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE INDEX IDX_contact_person_id ON ssd_contact(cont_person_id);
+CREATE NONCLUSTERED INDEX IDX_contact_person_id ON ssd_contact(cont_person_id);
 
 
 
@@ -792,14 +885,14 @@ FROM
     Child_Social.FACT_CAF_EPISODE AS cafe
 
 WHERE EXISTS 
-    ( -- only need data for ssd relevant records
+    ( -- only ssd relevant records
     SELECT 1 
-    FROM #ssd_person p
+    FROM ssd_person p
     WHERE p.pers_person_id = cafe.DIM_PERSON_ID
     );
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
@@ -820,10 +913,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cin_episodes
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - @ssd_timeframe_years
@@ -844,17 +937,17 @@ CREATE TABLE ssd_cin_episodes
     cine_referral_id            INT,
     cine_person_id              NVARCHAR(48),
     cine_referral_date          DATETIME,
-    cine_cin_primary_need       INT,
+    cine_cin_primary_need       NVARCHAR(10),
     cine_referral_source        NVARCHAR(255),
     cine_referral_outcome_json  NVARCHAR(500),
-    cine_referral_nfa           NCHAR(1), 
+    cine_referral_nfa           NCHAR(1),
     cine_close_reason           NVARCHAR(100),
     cine_close_date             DATETIME,
     cine_referral_team          NVARCHAR(255),
     cine_referral_worker_id     NVARCHAR(48)
 );
-
--- Insert data 
+ 
+-- Insert data
 INSERT INTO ssd_cin_episodes
 (
     cine_referral_id,
@@ -869,14 +962,14 @@ INSERT INTO ssd_cin_episodes
     cine_referral_team,
     cine_referral_worker_id
 )
-SELECT 
+SELECT
     fr.FACT_REFERRAL_ID,
     fr.DIM_PERSON_ID,
     fr.REFRL_START_DTTM,
-    fr.DIM_LOOKUP_CATEGORY_OF_NEED_ID,
-    fr.DIM_LOOKUP_CONT_SORC_ID_DESC,
+    fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE,
+    fr.[DIM_LOOKUP_CONT_SORC_ID_DESC ],
     (
-        SELECT 
+        SELECT
             NULLIF(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS "OUTCOME_SINGLE_ASSESSMENT_FLAG",
             NULLIF(fr.OUTCOME_NFA_FLAG, '')                 AS "OUTCOME_NFA_FLAG",
             NULLIF(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS "OUTCOME_STRATEGY_DISCUSSION_FLAG",
@@ -894,17 +987,18 @@ SELECT
     fr.REFRL_END_DTTM,
     fr.DIM_DEPARTMENT_ID_DESC,
     fr.DIM_WORKER_ID_DESC
-FROM 
+FROM
     Child_Social.FACT_REFERRALS AS fr
-
-WHERE 
+ 
+WHERE
     fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
 AND
-    DIM_PERSON_ID <> '-1';  -- Exclude rows with '-1'
+    DIM_PERSON_ID <> -1;  -- Exclude rows with '-1'
     ;
 
+
 -- Create index(es)
-CREATE INDEX IDX_ssd_cin_episodes_person_id ON ssd_cin_episodes(cine_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_cin_episodes_person_id ON ssd_cin_episodes(cine_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
@@ -1005,16 +1099,15 @@ FROM
     Child_Social.FACT_SINGLE_ASSESSMENT AS fa
 
 WHERE EXISTS 
-(
-    -- only need data for ssd relevant records
+    ( -- only ssd relevant records
     SELECT 1 
-    FROM #ssd_person p
+    FROM ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
-);
+    );
 
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_cin_assessments_person_id ON ssd_cin_assessments(cina_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_cin_assessments_person_id ON ssd_cin_assessments(cina_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
@@ -1041,13 +1134,15 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_assessment_factors
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: This object referrences some large source tables- Instances of 45m+. 
 Dependencies: 
-- 
+- ssd_cin_assessments
+- FACT_SINGLE_ASSESSMENT
+- FACT_FORM_ANSWERS
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -1057,6 +1152,109 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_assessment_factors') IS NOT NULL DROP TABLE ssd_assessment_factors;
+IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE ssd_TMP_PRE_assessment_factors;
+
+
+-- Create TMP structure with filtered answers
+SELECT 
+    ffa.FACT_FORM_ID,
+    ffa.ANSWER_NO,
+    ffa.ANSWER
+INTO #ssd_TMP_PRE_assessment_factors
+FROM 
+    Child_Social.FACT_FORM_ANSWERS ffa
+WHERE 
+    ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC = 'FAMILY ASSESSMENT'
+    AND ffa.ANSWER_NO IN ('1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C', 
+                                  '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', 
+                                  '7A', '8B', '8C', '8D', '8E', '8F', '9A', '10A', '11A', 
+                                  '12A', '13A', '14A', '15A', '16A', '17A', '18A', '18B', 
+                                  '18C', '19A', '19B', '19C', 
+                                  '20', '21', 
+                                  '22A', '23A', '24A');
+
+
+
+
+-- Create structure
+CREATE TABLE ssd_assessment_factors (
+    cinf_table_id                    NVARCHAR(48) PRIMARY KEY,
+    cinf_assessment_id               NVARCHAR(48),
+    cinf_assessment_factors_json     NVARCHAR(500) -- size might need testing
+);
+
+-- Insert data
+INSERT INTO ssd_assessment_factors (
+               cinf_table_id, 
+               cinf_assessment_id, 
+               cinf_assessment_factors_json
+           )
+
+SELECT 
+    fsa.EXTERNAL_ID     AS cinf_table_id, 
+    fsa.FACT_FORM_ID    AS cinf_assessment_id,
+    (
+        SELECT 
+            -- 
+            CASE WHEN tmp_af.ANSWER_NO = '1A'  THEN tmp_af.ANSWER END AS '1A',
+            CASE WHEN tmp_af.ANSWER_NO = '1B'  THEN tmp_af.ANSWER END AS '1B',
+            CASE WHEN tmp_af.ANSWER_NO = '1C'  THEN tmp_af.ANSWER END AS '1C',
+            CASE WHEN tmp_af.ANSWER_NO = '2A'  THEN tmp_af.ANSWER END AS '2A',
+            CASE WHEN tmp_af.ANSWER_NO = '2B'  THEN tmp_af.ANSWER END AS '2B',
+            CASE WHEN tmp_af.ANSWER_NO = '2C'  THEN tmp_af.ANSWER END AS '2C',
+            CASE WHEN tmp_af.ANSWER_NO = '3A'  THEN tmp_af.ANSWER END AS '3A',
+            CASE WHEN tmp_af.ANSWER_NO = '3B'  THEN tmp_af.ANSWER END AS '3B',
+            CASE WHEN tmp_af.ANSWER_NO = '3C'  THEN tmp_af.ANSWER END AS '3C',
+            CASE WHEN tmp_af.ANSWER_NO = '4A'  THEN tmp_af.ANSWER END AS '4A',
+            CASE WHEN tmp_af.ANSWER_NO = '4B'  THEN tmp_af.ANSWER END AS '4B',
+            CASE WHEN tmp_af.ANSWER_NO = '4C'  THEN tmp_af.ANSWER END AS '4C',
+            CASE WHEN tmp_af.ANSWER_NO = '5A'  THEN tmp_af.ANSWER END AS '5A',
+            CASE WHEN tmp_af.ANSWER_NO = '5B'  THEN tmp_af.ANSWER END AS '5B',
+            CASE WHEN tmp_af.ANSWER_NO = '5C'  THEN tmp_af.ANSWER END AS '5C',
+            CASE WHEN tmp_af.ANSWER_NO = '6A'  THEN tmp_af.ANSWER END AS '6A',
+            CASE WHEN tmp_af.ANSWER_NO = '6B'  THEN tmp_af.ANSWER END AS '6B',
+            CASE WHEN tmp_af.ANSWER_NO = '6C'  THEN tmp_af.ANSWER END AS '6C',
+            CASE WHEN tmp_af.ANSWER_NO = '7A'  THEN tmp_af.ANSWER END AS '7A',
+            CASE WHEN tmp_af.ANSWER_NO = '8B'  THEN tmp_af.ANSWER END AS '8B',
+            CASE WHEN tmp_af.ANSWER_NO = '8C'  THEN tmp_af.ANSWER END AS '8C',
+            CASE WHEN tmp_af.ANSWER_NO = '8D'  THEN tmp_af.ANSWER END AS '8D',
+            CASE WHEN tmp_af.ANSWER_NO = '8E'  THEN tmp_af.ANSWER END AS '8E',
+            CASE WHEN tmp_af.ANSWER_NO = '8F'  THEN tmp_af.ANSWER END AS '8F',
+            CASE WHEN tmp_af.ANSWER_NO = '9A'  THEN tmp_af.ANSWER END AS '9A',
+            CASE WHEN tmp_af.ANSWER_NO = '10A' THEN tmp_af.ANSWER END AS '10A',
+            CASE WHEN tmp_af.ANSWER_NO = '11A' THEN tmp_af.ANSWER END AS '11A',
+            CASE WHEN tmp_af.ANSWER_NO = '12A' THEN tmp_af.ANSWER END AS '12A',
+            CASE WHEN tmp_af.ANSWER_NO = '13A' THEN tmp_af.ANSWER END AS '13A',
+            CASE WHEN tmp_af.ANSWER_NO = '14A' THEN tmp_af.ANSWER END AS '14A',
+            CASE WHEN tmp_af.ANSWER_NO = '15A' THEN tmp_af.ANSWER END AS '15A',
+            CASE WHEN tmp_af.ANSWER_NO = '16A' THEN tmp_af.ANSWER END AS '16A',
+            CASE WHEN tmp_af.ANSWER_NO = '17A' THEN tmp_af.ANSWER END AS '17A',
+            CASE WHEN tmp_af.ANSWER_NO = '18A' THEN tmp_af.ANSWER END AS '18A',
+            CASE WHEN tmp_af.ANSWER_NO = '18B' THEN tmp_af.ANSWER END AS '18B',
+            CASE WHEN tmp_af.ANSWER_NO = '18C' THEN tmp_af.ANSWER END AS '18C',
+            CASE WHEN tmp_af.ANSWER_NO = '19A' THEN tmp_af.ANSWER END AS '19A',
+            CASE WHEN tmp_af.ANSWER_NO = '19B' THEN tmp_af.ANSWER END AS '19B',
+            CASE WHEN tmp_af.ANSWER_NO = '19C' THEN tmp_af.ANSWER END AS '19C',
+            CASE WHEN tmp_af.ANSWER_NO = '20'  THEN tmp_af.ANSWER END AS '20',
+            CASE WHEN tmp_af.ANSWER_NO = '21'  THEN tmp_af.ANSWER END AS '21',
+            CASE WHEN tmp_af.ANSWER_NO = '22A' THEN tmp_af.ANSWER END AS '22A',
+            CASE WHEN tmp_af.ANSWER_NO = '23A' THEN tmp_af.ANSWER END AS '23A',
+            CASE WHEN tmp_af.ANSWER_NO = '24A' THEN tmp_af.ANSWER END AS '24A'
+        FROM 
+            #ssd_TMP_PRE_assessment_factors tmp_af
+        WHERE 
+            tmp_af.FACT_FORM_ID = fsa.FACT_FORM_ID
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS cinf_assessment_factors_json
+FROM 
+    Child_Social.FACT_SINGLE_ASSESSMENT fsa
+WHERE 
+    fsa.EXTERNAL_ID <> -1;
+
+
+-- Add constraint(s)
+ALTER TABLE ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
+FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_cin_assessments(cina_assessment_id);
 
 
 
@@ -1137,7 +1335,7 @@ AND EXISTS
 
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_cin_plans_person_id ON ssd_cin_plans(cinp_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_cin_plans_person_id ON ssd_cin_plans(cinp_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
@@ -1300,7 +1498,7 @@ FROM
 
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_s47_enquiry_person_id ON ssd_s47_enquiry(s47e_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_s47_enquiry_person_id ON ssd_s47_enquiry(s47e_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
@@ -1606,7 +1804,8 @@ SELECT
 FROM 
     Child_Social.FACT_CP_REVIEW as cpr
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS 
+    ( -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = cpr.DIM_PERSON_ID
@@ -1711,9 +1910,9 @@ JOIN
 JOIN
     Child_Social.FACT_INVOLVEMENTS AS fi ON fc.fact_referral_id = fi.fact_referral_id
 
- 
 WHERE fi.IS_ALLOCATED_CW_FLAG = 'Y';
  
+
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON ssd_cla_episodes (clae_cla_worker_id);
@@ -1776,7 +1975,8 @@ SELECT
 FROM 
     Child_Social.FACT_OFFENCE as fo
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS 
+    ( -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fo.DIM_PERSON_ID
@@ -1845,7 +2045,8 @@ FROM
 -- INNER JOIN
 --     #ssd_person AS p ON fhc.DIM_PERSON_ID = p.pers_person_id;
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS 
+    ( -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fhc.DIM_PERSON_ID
@@ -1914,11 +2115,12 @@ SELECT
 FROM 
     Child_Social.FACT_903_DATA AS f903
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS 
+    ( -- only ssd relevant records
     SELECT 1 
-    FROM #ssd_person p
+    FROM ssd_person p
     WHERE p.pers_person_id = f903.DIM_PERSON_ID
-);
+    );
 
 -- add constraint(s)
 ALTER TABLE ssd_cla_immunisations
@@ -1927,7 +2129,7 @@ FOREIGN KEY (clas_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 -- Create index(es)
-CREATE INDEX IX_ssd_cla_immunisations_person_id ON ssd_cla_immunisations (clai_person_id);
+CREATE NONCLUSTERED INDEX IX_ssd_cla_immunisations_person_id ON ssd_cla_immunisations (clai_person_id);
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
@@ -1983,9 +2185,10 @@ SELECT
 FROM 
     Child_Social.FACT_SUBSTANCE_MISUSE AS fsm
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS 
+    ( -- only ssd relevant records
     SELECT 1 
-    FROM #ssd_person p
+    FROM ssd_person p
     WHERE p.pers_person_id = fSM.DIM_PERSON_ID
     );
 
@@ -2076,13 +2279,15 @@ SELECT
 FROM
  
     Child_Social.FACT_CLA_PLACEMENT AS fcp
+
 JOIN
     Child_Social.FACT_CLA AS fcla ON fcla.FACT_CLA_ID = fcp.FACT_CLA_ID                                 -- [TESTING] [JH Fix]
 JOIN
     Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID;    -- [TESTING] [JH Fix]
 
+
 -- Add constraint(s)
-CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_substance_misuse (clap_cla_episode_id);
+CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_placement(clap_cla_episode_id);
 
 
 
@@ -2225,9 +2430,19 @@ FROM
 LEFT JOIN 
     Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
 LEFT JOIN 
-    (SELECT FACT_FORM_ID, ANSWER AS PREVADOPTORD FROM Child_Social.FACT_FORM_ANSWERS WHERE ANSWER_NO = 'PREVADOPTORD') ffa_answer_prev ON ffa.FACT_FORM_ID = ffa_answer_prev.FACT_FORM_ID
+    (
+    SELECT FACT_FORM_ID, ANSWER AS PREVADOPTORD 
+    FROM Child_Social.FACT_FORM_ANSWERS 
+    WHERE ANSWER_NO = 'PREVADOPTORD'
+    ) 
+    ffa_answer_prev ON ffa.FACT_FORM_ID = ffa_answer_prev.FACT_FORM_ID
 LEFT JOIN 
-    (SELECT FACT_FORM_ID, ANSWER AS INENG FROM Child_Social.FACT_FORM_ANSWERS WHERE ANSWER_NO = 'INENG') ffa_answer_ineng ON ffa.FACT_FORM_ID = ffa_answer_ineng.FACT_FORM_ID;
+    (
+    SELECT FACT_FORM_ID, ANSWER AS INENG 
+    FROM Child_Social.FACT_FORM_ANSWERS 
+    WHERE ANSWER_NO = 'INENG'
+    ) 
+    ffa_answer_ineng ON ffa.FACT_FORM_ID = ffa_answer_ineng.FACT_FORM_ID;
 
 -- Add constraint(s)
 ALTER TABLE ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
@@ -2304,7 +2519,13 @@ ALTER TABLE ssd_cla_care_plan ADD CONSTRAINT FK_lacp_cla_episode_id
 FOREIGN KEY (lacp_cla_episode_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
 -- Replace 'PLACEHOLDER_DATA' with the actual logic for 'ICP' answer.
-
+/*
+FACT_FORM_ANSWERS.ANSWER
+Link using FACT_CARE_PLAN.DIM_PERSON_ID to FACT_FORMS
+Link using FACT_FORMS.FACT_FORM_ID to FACT_FORM_ANSWERS WHERE
+FACT_FORM_ANSWERS.ANSWER_NO = 'ICP' 
+Most recent date in FACT_FORM_ANSWERS.ANSWERED_DTTM once above filter applied
+*/
 
 
 -- [TESTING] Increment /print progress
@@ -2388,14 +2609,14 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_sdq_scores
+Object Name: ssd_sdq_scores V1 (less efficient, but more readable?)
 Description: 
 Author: D2I
-Last Modified Date: 06/12/23
+Last Modified Date: 13/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
 Dependencies: 
 - ssd_person
 - FACT_FORMS
@@ -2428,26 +2649,41 @@ INSERT INTO ssd_sdq_scores (
     csdq_sdq_reason,
     csdq_sdq_score
 )
+-- Each sub-select targets a specific ANSWER_NO
+-- Approach used for readability over single join and conditional aggregation
 SELECT 
     ffa.FACT_FORM_ID AS csdq_table_id,
     ff.DIM_PERSON_ID AS csdq_person_id,
     (
         SELECT ANSWER 
         FROM Child_Social.FACT_FORM_ANSWERS
-        WHERE DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)') 
-        AND ANSWER_NO = 'FormEndDate'
-        AND FACT_FORM_ID = ffa.FACT_FORM_ID
+        WHERE 
+            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
+                -- filter on both here to ensure reliability
+                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
+                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
+            )
+            AND ANSWER_NO = 'FormEndDate'
+            AND FACT_FORM_ID = ffa.FACT_FORM_ID
     ) AS csdq_sdq_completed_date,
+
     fd.SDQ_REASON AS csdq_sdq_reason,
+
     (
         SELECT ANSWER 
         FROM Child_Social.FACT_FORM_ANSWERS
-        WHERE DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)') 
-        AND ANSWER_NO = 'SDQScore'
-        AND FACT_FORM_ID = ffa.FACT_FORM_ID
+        WHERE 
+            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
+                -- filter on both here to ensure reliability
+                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
+                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
+            )
+            AND ANSWER_NO = 'SDQScore'
+            AND FACT_FORM_ID = ffa.FACT_FORM_ID
     ) AS csdq_sdq_score
+
 FROM 
-    FACT_FORM_ANSWERS ffa
+    Child_Social.FACT_FORM_ANSWERS ffa
 
 JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
 
@@ -2465,6 +2701,84 @@ FOREIGN KEY (csdq_person_id) REFERENCES ssd_person(pers_person_id);
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+/* 
+=============================================================================
+Object Name: ssd_sdq_scoresV2 (Might be more efficient)
+Description: 
+Author: D2I
+Last Modified Date: 12/12/23
+DB Compatibility: SQL Server 2014+|...
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks:    Uses a single join with conditional aggregation unlike v1
+Dependencies: 
+- ssd_person
+- FACT_FORMS
+- FACT_FORM_ANSWERS
+=============================================================================
+
+-- [TESTING] Create marker
+SET @TableName = N'ssd_sdq_scoresV2';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists & drop
+IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
+
+-- Create structure
+CREATE TABLE ssd_sdq_scores (
+    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
+    csdq_person_id             NVARCHAR(48),
+    csdq_sdq_completed_date    DATETIME,
+    csdq_sdq_reason            NVARCHAR(100),
+    csdq_sdq_score             NVARCHAR(100)
+);
+
+-- Insert data
+INSERT INTO ssd_sdq_scores (
+    csdq_table_id,
+    csdq_person_id,
+    csdq_sdq_completed_date,
+    csdq_sdq_reason,
+    csdq_sdq_score
+)
+
+
+SELECT 
+    ffa.FACT_FORM_ID AS csdq_table_id,
+    ff.DIM_PERSON_ID AS csdq_person_id,
+    MAX(CASE WHEN ffa_inner.ANSWER_NO = 'FormEndDate' THEN ffa_inner.ANSWER ELSE NULL END) AS csdq_sdq_completed_date,
+    MAX(CASE WHEN ffa_inner.ANSWER_NO = 'SDQScore' THEN ffa_inner.ANSWER ELSE NULL END) AS csdq_sdq_score,
+    fd.SDQ_REASON AS csdq_sdq_reason
+FROM 
+    Child_Social.FACT_FORMS ff
+LEFT JOIN 
+    Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID
+LEFT JOIN 
+    Child_Social.FACT_FORM_ANSWERS ffa_inner ON ff.FACT_FORM_ID = ffa_inner.FACT_FORM_ID 
+    AND ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)') 
+    AND ffa_inner.ANSWER_NO IN ('FormEndDate', 'SDQScore')
+GROUP BY
+    ffa.FACT_FORM_ID,
+    ff.DIM_PERSON_ID,
+    fd.SDQ_REASON
+WHERE 
+    ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)') 
+    OR ffa.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183);
+
+-- Add FK constraint for csdq_person_id
+ALTER TABLE ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
+FOREIGN KEY (csdq_person_id) REFERENCES ssd_person(pers_person_id);
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+*/ -- end of V2 of ssd_sdq_scoresV2
 
 
 
@@ -2526,7 +2840,8 @@ SELECT
 FROM 
     Child_Social.FACT_MISSING_PERSON AS fmp
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS 
+    ( -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fmp.DIM_PERSON_ID
@@ -2665,7 +2980,8 @@ FROM
     FACT_ADOPTION AS fa
 
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS 
+    ( -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
@@ -2812,7 +3128,6 @@ PRINT 'Creating table: ' + @TableName;
 
 
 
-
 -- Check if exists & drop
 IF OBJECT_ID('ssd_involvements', 'U') IS NOT NULL DROP TABLE ssd_involvements;
 
@@ -2919,7 +3234,8 @@ VALUES
     ('PLACEHOLDER_DATA', 'DIM_PERSON.PERSON_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', NULL, NULL);
 
 -- To switch on once source data defined.
--- WHERE EXISTS ( -- only need data for ssd relevant records
+-- WHERE EXISTS 
+--      ( -- only ssd relevant records
 --     SELECT 1 
 --     FROM ssd_person p
 --     WHERE p.pers_person_id = ssd_linked_identifiers.DIM_PERSON_ID
@@ -3059,7 +3375,8 @@ VALUES
     ('ID002','P002', 'Y', 'Y', 'Y', 'N', 'N');
 
 -- To switch on once source data defined.
--- WHERE EXISTS ( -- only need data for ssd relevant records
+-- WHERE EXISTS 
+--  ( -- only ssd relevant records
 --     SELECT 1 
 --     FROM ssd_person p
 --     WHERE p.pers_person_id = ssd_voice_of_child.DIM_PERSON_ID
@@ -3171,7 +3488,8 @@ VALUES
     );
 
 -- To switch on once source data defined.
--- WHERE EXISTS ( -- only need data for ssd relevant records
+-- WHERE EXISTS 
+-- ( -- only ssd relevant records
 --     SELECT 1 
 --     FROM ssd_person p
 --     WHERE p.pers_person_id = ssd_pre_proceedings.DIM_PERSON_ID
