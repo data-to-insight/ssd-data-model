@@ -1548,8 +1548,8 @@ Description:
 Author: D2I
 Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [*Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Still need to add: 
 cppl_cp_plan_team		y		"Link to [Child_Social].[FACT_INVOLVEMENTS.FACT_REFERRAL_ID] using [FACT_CP_PLAN.FACT_REFERRAL_ID]
 WHERE [FACT_INVOLVEMENTS].[DIM_LOOKUP_INVOLVEMENT_TYPE_CODE] = 'CW'
@@ -1576,8 +1576,6 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cp_plans';
 PRINT 'Creating table: ' + @TableName;
-
-
 
 
 -- Check if exists & drop 
@@ -2353,7 +2351,8 @@ SELECT
     fcr.DUE_DTTM                               AS clar_cla_review_due_date,
     fcr.MEETING_DTTM                           AS clar_cla_review_date,
     'PLACEHOLDER_DATA'                         AS clar_cla_review_participation,        -- [PLACEHOLDER_DATA] [TESTING]
-    '01/01/2001'                               AS clar_cla_review_last_iro_contact_date -- [PLACEHOLDER_DATA] [TESTING]
+    '20010101'                                 AS clar_cla_review_last_iro_contact_date -- [PLACEHOLDER_DATA] [TESTING] in YYYYMMDD format
+    
 FROM 
     Child_Social.FACT_CLA_REVIEW AS fcr;
 
@@ -2398,9 +2397,83 @@ SET @TableName = N'ssd_cla_previous_permanence';
 PRINT 'Creating table: ' + @TableName;
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_cla_previous_permanence', 'U') IS NOT NULL DROP TABLE ssd_cla_previous_permanence;
 
+-- Check if exists & drop
+IF OBJECT_ID('ssd_cla_previous_permanence') IS NOT NULL DROP TABLE ssd_cla_previous_permanence;
+IF OBJECT_ID('tempdb..#ssd_TMP_PRE_previous_permanence') IS NOT NULL DROP TABLE #ssd_TMP_PRE_previous_permanence;
+ 
+-- Create TMP structure with filtered answers
+SELECT
+    ffa.FACT_FORM_ID,
+    ffa.FACT_FORM_ANSWER_ID,
+    ffa.ANSWER_NO,
+    ffa.ANSWER
+INTO #ssd_TMP_PRE_previous_permanence
+FROM
+    Child_Social.FACT_FORM_ANSWERS ffa
+WHERE
+    ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
+    AND
+    ffa.ANSWER_NO IN ('ORDERYEAR', 'ORDERMONTH', 'ORDERDATE', 'PREVADOPTORD', 'INENG');
+
+
+
+
+-- Create structure
+CREATE TABLE ssd_cla_previous_permanence (
+    lapp_table_id                               NVARCHAR(48) PRIMARY KEY,
+    lapp_person_id                              NVARCHAR(48),
+    lapp_previous_permanence_option             NVARCHAR(200),
+    lapp_previous_permanence_la                 NVARCHAR(100),
+    lapp_previous_permanence_order_date_json    NVARCHAR(MAX)
+);
+
+-- Insert data 
+INSERT INTO ssd_cla_previous_permanence (
+               lapp_table_id,
+               lapp_person_id,
+               lapp_previous_permanence_option,
+               lapp_previous_permanence_la,
+               lapp_previous_permanence_order_date_json
+           )
+SELECT
+    ff.FACT_FORM_ID AS lapp_table_id,
+    ff.DIM_PERSON_ID AS lapp_person_id,
+    MAX(CASE WHEN ffa.ANSWER_NO = 'PREVADOPTORD' THEN ffa.ANSWER END) AS lapp_previous_permanence_option,
+    MAX(CASE WHEN ffa.ANSWER_NO = 'INENG' THEN ffa.ANSWER END) AS lapp_previous_permanence_la,
+    (
+        SELECT 
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'       THEN sub.ANSWER END) as 'ORDERYEAR',
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH'      THEN sub.ANSWER END) as 'ORDERMONTH',
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'       THEN sub.ANSWER END) as 'ORDERDATE',
+            MAX(CASE WHEN sub.ANSWER_NO = 'PREVADOPTORD'    THEN sub.ANSWER END) as 'PREVADOPTORD',
+            MAX(CASE WHEN sub.ANSWER_NO = 'INENG'           THEN sub.ANSWER END) as 'INENG'
+        FROM 
+            Child_Social.FACT_FORM_ANSWERS sub
+        WHERE 
+            sub.FACT_FORM_ID = ff.FACT_FORM_ID
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS lapp_previous_permanence_order_date_json
+FROM
+    Child_Social.FACT_FORM_ANSWERS ffa
+JOIN
+    Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
+WHERE
+    ffa.EXTERNAL_ID <> -1 
+    AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
+    AND ffa.ANSWER_NO IN (
+        'ORDERYEAR', 
+        'ORDERMONTH', 
+        'ORDERDATE', 
+        'PREVADOPTORD', 
+        'INENG')
+
+GROUP BY ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
+
+
+
+
+/* PREVIOUS VERSION 
 -- Create structure
 CREATE TABLE ssd_cla_previous_permanence (
     lapp_table_id                             NVARCHAR(48) PRIMARY KEY,
@@ -2443,6 +2516,13 @@ LEFT JOIN
     WHERE ANSWER_NO = 'INENG'
     ) 
     ffa_answer_ineng ON ffa.FACT_FORM_ID = ffa_answer_ineng.FACT_FORM_ID;
+
+
+*/
+
+
+-- create index(es)
+
 
 -- Add constraint(s)
 ALTER TABLE ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
@@ -2952,21 +3032,21 @@ INSERT INTO ssd_permanence (
     perm_permanence_order_type,
     perm_adoption_worker,
     perm_allocated_worker
-)
+)  
 SELECT 
     fa.FACT_ADOPTION_ID                     AS perm_table_id,
     fa.DIM_PERSON_ID                        AS perm_person_id,
     fa.FACT_CLA_ID                          AS perm_cla_id,
     fa.DECISION_DTTM                        AS perm_adm_decision_date,
-    '01/01/2001'                            AS perm_entered_care_date,             -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
-    '01/01/2001'                            AS perm_ffa_cp_decision_date,          -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    '20010101'                            AS perm_entered_care_date,             -- Linking logic needed [TESTING] [PLACEHOLDER_DATA] in YYYYMMDD format
+    '20010101'                            AS perm_ffa_cp_decision_date,          -- Linking logic needed [TESTING] [PLACEHOLDER_DATA] in YYYYMMDD format
     fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
-    '01/01/2001'                            AS perm_placed_for_adoption_date,      -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    '20010101'                            AS perm_placed_for_adoption_date,      -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
     fa.MATCHING_DTTM                        AS perm_matched_date,
     CAST(fa.ADOPTED_BY_CARER_FLAG           AS NVARCHAR(1)) AS perm_adopted_by_carer_flag, -- Verify datatype [TESTING] [PLACEHOLDER_DATA]
     fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
     fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
-    '01/01/2001'                            AS perm_placed_foster_carer_date,      -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+    '20010101'                            AS perm_placed_foster_carer_date,      -- Linking logic needed [TESTING] [PLACEHOLDER_DATA] in YYYYMMDD format
     fa.SIBLING_GROUP                        AS perm_part_of_sibling_group,
     fa.NUMBER_TOGETHER                      AS perm_siblings_placed_together,
     fa.NUMBER_APART                         AS perm_siblings_placed_apart,
@@ -3292,12 +3372,12 @@ IF OBJECT_ID('ssd_s251_finance', 'U') IS NOT NULL DROP TABLE ssd_s251_finance;
 
 -- Create structure
 CREATE TABLE ssd_s251_finance (
-    s251_id NVARCHAR(48) PRIMARY KEY, 
-    s251_cla_placement_id NVARCHAR(48), 
-    s251_placeholder_1 NVARCHAR(48),
-    s251_placeholder_2 NVARCHAR(48),
-    s251_placeholder_3 NVARCHAR(48),
-    s251_placeholder_4 NVARCHAR(48)
+    s251_id                 NVARCHAR(48) PRIMARY KEY, 
+    s251_cla_placement_id   NVARCHAR(48), 
+    s251_placeholder_1      NVARCHAR(48),
+    s251_placeholder_2      NVARCHAR(48),
+    s251_placeholder_3      NVARCHAR(48),
+    s251_placeholder_4      NVARCHAR(48)
 );
 
 -- Insert placeholder data [TESTING]

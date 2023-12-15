@@ -1478,8 +1478,8 @@ Description:
 Author: D2I
 Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [*Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Still need to add: 
 cppl_cp_plan_team		y		"Link to [Child_Social].[FACT_INVOLVEMENTS.FACT_REFERRAL_ID] using [FACT_CP_PLAN.FACT_REFERRAL_ID]
 WHERE [FACT_INVOLVEMENTS].[DIM_LOOKUP_INVOLVEMENT_TYPE_CODE] = 'CW'
@@ -2307,46 +2307,83 @@ Dependencies:
 SET @TableName = N'ssd_cla_previous_permanence';
 PRINT 'Creating table: ' + @TableName;
 
-
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence', 'U') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
+IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
+IF OBJECT_ID('tempdb..#ssd_TMP_PRE_previous_permanence') IS NOT NULL DROP TABLE #ssd_TMP_PRE_previous_permanence;
+ 
+-- Create TMP structure with filtered answers
+SELECT
+    ffa.FACT_FORM_ID,
+    ffa.FACT_FORM_ANSWER_ID,
+    ffa.ANSWER_NO,
+    ffa.ANSWER
+INTO #ssd_TMP_PRE_previous_permanence
+FROM
+    Child_Social.FACT_FORM_ANSWERS ffa
+WHERE
+    ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
+    AND
+    ffa.ANSWER_NO IN ('ORDERYEAR', 'ORDERMONTH', 'ORDERDATE', 'PREVADOPTORD', 'INENG');
+
+
+
 
 -- Create structure
 CREATE TABLE #ssd_cla_previous_permanence (
-    lapp_table_id                             NVARCHAR(48) PRIMARY KEY,
-    lapp_person_id                            NVARCHAR(48),
-    lapp_previous_permanence_order_date       NVARCHAR(100), -- Placeholder for combination data
-    lapp_previous_permanence_option           NVARCHAR(200),
-    lapp_previous_permanence_la               NVARCHAR(100)
+    lapp_table_id                               NVARCHAR(48) PRIMARY KEY,
+    lapp_person_id                              NVARCHAR(48),
+    lapp_previous_permanence_option             NVARCHAR(200),
+    lapp_previous_permanence_la                 NVARCHAR(100),
+    lapp_previous_permanence_order_date_json    NVARCHAR(MAX)
 );
 
--- Insert data with placeholder for the combination of date parts
+-- Insert data 
 INSERT INTO #ssd_cla_previous_permanence (
-    lapp_table_id, 
-    lapp_person_id, 
-    lapp_previous_permanence_order_date,
-    lapp_previous_permanence_option,
-    lapp_previous_permanence_la
-)
-SELECT 
-    ffa.FACT_FORM_ID                AS lapp_table_id,
-    ff.DIM_PERSON_ID                AS lapp_person_id,
-    'PLACEHOLDER_DATA'              AS lapp_previous_permanence_order_date,              -- [TESTING] {PLACEHOLDER_DATA}
-    ffa_answer_prev.PREVADOPTORD    AS lapp_previous_permanence_option,
-    ffa_answer_ineng.INENG          AS lapp_previous_permanence_la
-FROM 
-    Child_Social.FACT_FORMS ff
+               lapp_table_id,
+               lapp_person_id,
+               lapp_previous_permanence_option,
+               lapp_previous_permanence_la,
+               lapp_previous_permanence_order_date_json
+           )
+SELECT
+    ff.FACT_FORM_ID AS lapp_table_id,
+    ff.DIM_PERSON_ID AS lapp_person_id,
+    MAX(CASE WHEN ffa.ANSWER_NO = 'PREVADOPTORD' THEN ffa.ANSWER END) AS lapp_previous_permanence_option,
+    MAX(CASE WHEN ffa.ANSWER_NO = 'INENG' THEN ffa.ANSWER END) AS lapp_previous_permanence_la,
+    (
+        SELECT 
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'       THEN sub.ANSWER END) as 'ORDERYEAR',
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH'      THEN sub.ANSWER END) as 'ORDERMONTH',
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'       THEN sub.ANSWER END) as 'ORDERDATE',
+            MAX(CASE WHEN sub.ANSWER_NO = 'PREVADOPTORD'    THEN sub.ANSWER END) as 'PREVADOPTORD',
+            MAX(CASE WHEN sub.ANSWER_NO = 'INENG'           THEN sub.ANSWER END) as 'INENG'
+        FROM 
+            Child_Social.FACT_FORM_ANSWERS sub
+        WHERE 
+            sub.FACT_FORM_ID = ff.FACT_FORM_ID
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS lapp_previous_permanence_order_date_json
+FROM
+    Child_Social.FACT_FORM_ANSWERS ffa
+JOIN
+    Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
+WHERE
+    ffa.EXTERNAL_ID <> -1 
+    AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
+    AND ffa.ANSWER_NO IN (
+        'ORDERYEAR', 
+        'ORDERMONTH', 
+        'ORDERDATE', 
+        'PREVADOPTORD', 
+        'INENG')
 
-LEFT JOIN 
-    Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
-LEFT JOIN 
-    (SELECT FACT_FORM_ID, ANSWER AS PREVADOPTORD FROM Child_Social.FACT_FORM_ANSWERS WHERE ANSWER_NO = 'PREVADOPTORD') ffa_answer_prev ON ffa.FACT_FORM_ID = ffa_answer_prev.FACT_FORM_ID
-LEFT JOIN 
-    (SELECT FACT_FORM_ID, ANSWER AS INENG FROM Child_Social.FACT_FORM_ANSWERS WHERE ANSWER_NO = 'INENG') ffa_answer_ineng ON ffa.FACT_FORM_ID = ffa_answer_ineng.FACT_FORM_ID;
+GROUP BY ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 
--- -- Add FK constraint for lapp_person_id
--- ALTER TABLE #ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
--- FOREIGN KEY (lapp_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
+
+
+-- Add constraint(s)
+ALTER TABLE #ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
+FOREIGN KEY (lapp_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 
 
