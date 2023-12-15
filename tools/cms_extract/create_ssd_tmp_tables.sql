@@ -2354,9 +2354,7 @@ SELECT
         SELECT 
             MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'       THEN sub.ANSWER END) as 'ORDERYEAR',
             MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH'      THEN sub.ANSWER END) as 'ORDERMONTH',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'       THEN sub.ANSWER END) as 'ORDERDATE',
-            MAX(CASE WHEN sub.ANSWER_NO = 'PREVADOPTORD'    THEN sub.ANSWER END) as 'PREVADOPTORD',
-            MAX(CASE WHEN sub.ANSWER_NO = 'INENG'           THEN sub.ANSWER END) as 'INENG'
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'       THEN sub.ANSWER END) as 'ORDERDATE'
         FROM 
             Child_Social.FACT_FORM_ANSWERS sub
         WHERE 
