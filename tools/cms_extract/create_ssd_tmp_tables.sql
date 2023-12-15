@@ -2368,12 +2368,6 @@ JOIN
 WHERE
     ffa.EXTERNAL_ID <> -1 
     AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
-    AND ffa.ANSWER_NO IN (
-        'ORDERYEAR', 
-        'ORDERMONTH', 
-        'ORDERDATE', 
-        'PREVADOPTORD', 
-        'INENG')
 
 GROUP BY ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 
