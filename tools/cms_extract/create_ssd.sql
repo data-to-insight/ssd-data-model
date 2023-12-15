@@ -2439,15 +2439,14 @@ INSERT INTO ssd_cla_previous_permanence (
 SELECT
     ff.FACT_FORM_ID AS lapp_table_id,
     ff.DIM_PERSON_ID AS lapp_person_id,
-    MAX(CASE WHEN ffa.ANSWER_NO = 'PREVADOPTORD' THEN ffa.ANSWER END) AS lapp_previous_permanence_option,
-    MAX(CASE WHEN ffa.ANSWER_NO = 'INENG' THEN ffa.ANSWER END) AS lapp_previous_permanence_la,
+    MAX(CASE WHEN ffa.ANSWER_NO = 'PREVADOPTORD'    THEN ffa.ANSWER END) AS lapp_previous_permanence_option,
+    MAX(CASE WHEN ffa.ANSWER_NO = 'INENG'           THEN ffa.ANSWER END) AS lapp_previous_permanence_la,
     (
         SELECT 
             MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'       THEN sub.ANSWER END) as 'ORDERYEAR',
             MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH'      THEN sub.ANSWER END) as 'ORDERMONTH',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'       THEN sub.ANSWER END) as 'ORDERDATE',
-            MAX(CASE WHEN sub.ANSWER_NO = 'PREVADOPTORD'    THEN sub.ANSWER END) as 'PREVADOPTORD',
-            MAX(CASE WHEN sub.ANSWER_NO = 'INENG'           THEN sub.ANSWER END) as 'INENG'
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'       THEN sub.ANSWER END) as 'ORDERDATE'
+
         FROM 
             Child_Social.FACT_FORM_ANSWERS sub
         WHERE 
@@ -2461,12 +2460,6 @@ JOIN
 WHERE
     ffa.EXTERNAL_ID <> -1 
     AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
-    AND ffa.ANSWER_NO IN (
-        'ORDERYEAR', 
-        'ORDERMONTH', 
-        'ORDERDATE', 
-        'PREVADOPTORD', 
-        'INENG')
 
 GROUP BY ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 
