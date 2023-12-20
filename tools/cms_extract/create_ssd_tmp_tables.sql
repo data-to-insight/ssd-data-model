@@ -2486,6 +2486,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_vis
 
 -- Create structure
 CREATE TABLE #ssd_cla_visits (
+    clav_table_id              UNIQUEIDENTIFIER PRIMARY KEY,
     clav_casenote_id           NVARCHAR(48) PRIMARY KEY,
     clav_cla_id                NVARCHAR(48),
     clav_cla_visit_id          NVARCHAR(48),
@@ -2497,6 +2498,7 @@ CREATE TABLE #ssd_cla_visits (
 
 -- Insert data
 INSERT INTO #ssd_cla_visits (
+    clav_table_id,
     clav_casenote_id,
     clav_cla_id,
     clav_cla_visit_id,
@@ -2506,7 +2508,8 @@ INSERT INTO #ssd_cla_visits (
     clav_cla_visit_seen_alone
 )
 SELECT
-    clav.FACT_CASENOTE_ID       AS clav_casenote_id,
+    DEFAULT NEWID()             AS clav_table_id,
+    clav.FACT_CASENOTE_ID       AS clav_casenote_id, 
     clav.FACT_CLA_ID            AS clav_cla_id,
     clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
     ceps.FACT_CARE_EPISODES_ID  AS clav_cla_episode_id,
@@ -2806,12 +2809,12 @@ SELECT
     fc.START_DTTM                           AS perm_entered_care_date,             
     fa.DECISION_DTTM                        AS perm_ffa_cp_decision_date,          
     fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
-    fcpAdoption.START_DTTM                  AS perm_placed_for_adoption_date,      
+    fcpl.START_DTTM                         AS perm_placed_for_adoption_date,      
     fa.MATCHING_DTTM                        AS perm_matched_date,
     fa.ADOPTED_BY_CARER_FLAG                AS perm_adopted_by_carer_flag, 
     fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
     fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
-    fcpAdopted.START_DTTM                   AS perm_placed_foster_carer_date,      
+    fcpl.START_DTTM                         AS perm_placed_foster_carer_date,      
     fa.SIBLING_GROUP                        AS perm_part_of_sibling_group,
     fa.NUMBER_TOGETHER                      AS perm_siblings_placed_together,
     fa.NUMBER_APART                         AS perm_siblings_placed_apart,
@@ -2832,27 +2835,30 @@ SELECT
     fa.ADOPTION_SOCIAL_WORKER_ID            AS perm_adoption_worker,            -- Note that duplicate -1 seen in raw data
     fa.ALLOCATED_CASE_WORKER_ID             AS perm_allocated_worker            -- Note that duplicate -1 seen in raw data
 FROM 
-    FACT_ADOPTION AS fa
+    Child_Social.FACT_ADOPTION AS fa
     
-LEFT JOIN FACT_CLA AS fc                                
+LEFT JOIN Child_Social.FACT_CLA AS fc                                
     ON fa.FACT_CLA_ID = fc.FACT_CLA_ID                                          -- towards perm_adm_decision_date
-LEFT JOIN FACT_CLA_PLACEMENT AS fcpAdoption             
-    ON fa.FACT_CLA_ID = fcpAdoption.FACT_CLA_ID                                 -- towards perm_ffa_cp_decision_date
-    AND fcpAdoption.DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%' -- towards perm_placed_for_adoption_date
-    AND fcpAdoption.ADOPTED_BY_CARER_FLAG = 'Y'                                 -- towards perm_placed_foster_carer_date
-LEFT JOIN FACT_CARE_EPISODES AS fce                                             
+LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl             
+    ON fa.FACT_CLA_ID = fcpl.FACT_CLA_ID                                        -- towards perm_ffa_cp_decision_date
+    AND fcpl.DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'        -- towards perm_placed_for_adoption_date
+    AND fa.ADOPTED_BY_CARER_FLAG = 'Y'                                          -- towards perm_placed_foster_carer_date [TESTING... should this be on fa. ?]
+LEFT JOIN Child_Social.FACT_CARE_EPISODES AS fce                                             
     ON fa.FACT_CLA_ID = fce.FACT_CLA_ID                                         -- towards perm_placement_provider_urn
-LEFT JOIN FACT_LEGAL_STATUS AS fls
+LEFT JOIN Child_Social.FACT_LEGAL_STATUS AS fls
     ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
     AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512')       -- towards perm_permanence_order_type
-    AND fa.ADOPTION_DTTM IS NOT NULL;                                           -- so only if there is a permanence order
+    AND fa.ADOPTION_DTTM IS NOT NULL;                                           -- and only if there is a permanence order
 
-WHERE EXISTS 
+WHERE 
+fa.FACT_ADOPTION_ID <> -1 -- Filter out -1 values
+AND EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
-    FROM #ssd_person p
+    FROM ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
     );
+
 
 
 -- -- Add constraint(s)
