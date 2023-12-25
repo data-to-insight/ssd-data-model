@@ -54,12 +54,12 @@ DECLARE @LastSept30th DATE; -- Most recent past September 30th date towards case
 Object Name: ssd_person
 Description: person/child details
 Author: D2I
-Last Modified Date: 14/12/23
+Last Modified Date: 24/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 
-Remarks: Need to confirm FACT_903_DATA as source of mother related data
+Remarks: Removed non-required join to Child_Social.FACT_PERSON_RELATION
 Dependencies: 
 - Child_Social.DIM_PERSON
 - Child_Social.FACT_REFERRALS
@@ -75,67 +75,6 @@ PRINT 'Creating table: ' + @TableName;
 
 -- check exists & drop
 IF OBJECT_ID('ssd_person') IS NOT NULL DROP TABLE ssd_person;
-
-
--- -- Create structure
--- CREATE TABLE ssd_person (
---     pers_person_id          NVARCHAR(48) PRIMARY KEY, 
---     pers_sex                NVARCHAR(48),
---     pers_ethnicity          NVARCHAR(38),
---     pers_dob                DATETIME,
---     pers_common_child_id    NVARCHAR(10),
---     pers_send               NVARCHAR(1),
---     pers_expected_dob       DATETIME,       -- Date or NULL
---     pers_death_date         DATETIME,
---     pers_nationality        NVARCHAR(48)
--- );
-
--- -- Insert data 
--- INSERT INTO ssd_person (
---     pers_person_id,
---     pers_sex,
---     pers_ethnicity,
---     pers_dob,
---     pers_common_child_id,
---     pers_send,
---     pers_expected_dob,
---     pers_death_date,
---     pers_nationality
--- )
--- SELECT 
---     p.DIM_PERSON_ID,
---     p.DIM_LOOKUP_VARIATION_OF_SEX_CODE,
---     p.ETHNICITY_MAIN_CODE,
---     p.BIRTH_DTTM,
---     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
---     p.EHM_SEN_FLAG,
---         CASE WHEN ISDATE(p.DOB_ESTIMATED) = 1               
---         THEN CONVERT(DATETIME, p.DOB_ESTIMATED, 121)        -- Coerce to either valid Date
---         ELSE NULL END,                                      --  or NULL
---     p.DEATH_DTTM,
---     p.NATNL_CODE
--- FROM 
---     Child_Social.DIM_PERSON AS p
-
--- WHERE                                                       -- Filter invalid rows
---     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
-
--- AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
-
--- AND (                                                       -- Filter irrelevant rows by timeframe
---     EXISTS (
---         -- contact in last x@yrs
---         SELECT 1 FROM Child_Social.FACT_CONTACTS fc
---         WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
---         AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
---     )
---     OR EXISTS (
---         -- new or ongoing/active/unclosed referral in last x@yrs
---         SELECT 1 FROM Child_Social.FACT_REFERRALS fr 
---         WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
---         AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
---     )
--- );
 
 
 -- Create structure
@@ -184,9 +123,14 @@ SELECT
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
         ELSE NULL END,                                  --  or NULL
     p.DEATH_DTTM,
-        CASE WHEN p.GENDER_MAIN_CODE <> 'M' AND fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI'              
-        THEN 'Y'                          
-        ELSE NULL END,
+    CASE 
+        WHEN p.GENDER_MAIN_CODE <> 'M' AND              -- Assumption that if male is not mother
+             EXISTS (SELECT 1 FROM Child_Social.FACT_PERSON_RELATION fpr 
+                     WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND 
+                           fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI')  -- check for child relation only
+        THEN 'Y' 
+        ELSE NULL -- No child relation found
+    END,
     p.NATNL_CODE
    
 FROM
@@ -195,9 +139,7 @@ FROM
 LEFT JOIN
     Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
  
-JOIN    
-    Child_Social.FACT_PERSON_RELATION AS fpr ON fpr.DIM_PERSON_ID = p.DIM_PERSON_ID
- 
+
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
     AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
@@ -1315,7 +1257,7 @@ INSERT INTO ssd_cin_visits
 )
 SELECT 
     cn.FACT_CASENOTE_ID,                -- This needs checking!! [TESTING]
-    cn.FACT_FORM_ID,     -- This needs checking!! [TESTING]
+    cn.FACT_FORM_ID,                    -- This needs checking!! [TESTING]
     cn.FACT_FORM_ID,
     cn.EVENT_DTTM,
     cn.SEEN_FLAG,
@@ -1756,7 +1698,7 @@ ANSWER_NO = 'WasConf' AND DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'REVIEW%'
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 08/12/23
+Last Modified Date: 24/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
@@ -1779,7 +1721,7 @@ IF OBJECT_ID('ssd_cla_episodes') IS NOT NULL DROP TABLE ssd_cla_episodes;
 
 -- Create structure
 CREATE TABLE ssd_cla_episodes (
-    clae_cla_episode_id             NVARCHAR(48) PRIMARY KEY,
+    clae_cla_episode_id             NVARCHAR(48),
     clae_person_id                  NVARCHAR(48),
     clae_cla_episode_start          DATETIME,
     clae_cla_episode_start_reason   NVARCHAR(100),
@@ -1788,7 +1730,7 @@ CREATE TABLE ssd_cla_episodes (
     clae_cla_episode_cease_reason   NVARCHAR(255),
     clae_cla_team                   NVARCHAR(48),
     clae_cla_worker_id              NVARCHAR(48),
-    clae_cla_id                     NVARCHAR(48),
+    clae_cla_id                     NVARCHAR(48)  PRIMARY KEY,
     clae_referral_id                NVARCHAR(48)
 );
 
@@ -1814,21 +1756,19 @@ SELECT
     fce.CIN_903_CODE                        AS clae_cla_primary_need,
     fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
     fce.CARE_REASON_END_DESC                AS clae_cla_episode_cease_reason,
-    fi.DIM_DEPARTMENT_ID                    AS clae_cla_team,               
-    fi.DIM_WORKER_NAME                      AS clae_cla_worker_id,           
+    'PLACEHOLDER DATA'                      AS clae_cla_team,           --      
+    'PLACEHOLDER DATA'                      AS clae_cla_worker_id,      -- [PLACEHOLDER] [TESTING]
     fc.FACT_CLA_ID                          AS clae_cla_id,                    
     fc.FACT_REFERRAL_ID                     AS clae_referral_id
- 
 FROM
     Child_Social.FACT_CARE_EPISODES AS fce
-
 JOIN
     Child_Social.FACT_CLA AS fc ON fce.FACT_CARE_EPISODES_ID = fc.fact_cla_id
-JOIN
-    Child_Social.FACT_INVOLVEMENTS AS fi ON fc.fact_referral_id = fi.fact_referral_id
 
-WHERE fi.IS_ALLOCATED_CW_FLAG = 'Y';
- 
+-- Removed 24/12/23
+--JOIN
+ --   Child_Social.FACT_INVOLVEMENTS AS fi ON fc.fact_referral_id = fi.fact_referral_id
+--WHERE fi.IS_ALLOCATED_CW_FLAG = 'Y';
 
 
 -- Create index(es)
@@ -2222,10 +2162,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_reviews
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 24/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [*Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.4
+Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: Still needs work on review_participation: 'FACT_FORM_ANSWERS.ANSWER
 Link using FACT_CLA_REVIEW.FACT_CASE_PATHWAY_STEP_ID to FACT_CASE_PATHWAY_STEP  
 Link using FACT_CASE_PATHWAY_STEP.FACT_FORMS_ID to FACT_FORM_ANSWERS.ANSWER
@@ -2241,12 +2181,11 @@ SET @TableName = N'ssd_cla_reviews';
 PRINT 'Creating table: ' + @TableName;
 
 
-
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_review', 'U') IS NOT NULL DROP TABLE ssd_cla_review;
 
 -- Create structure
-CREATE TABLE ssd_cla_review (
+CREATE TABLE #ssd_cla_review (
     clar_cla_review_id                      NVARCHAR(48) PRIMARY KEY,
     clar_cla_episode_id                     NVARCHAR(48),
     clar_cla_review_due_date                DATETIME,
@@ -2254,26 +2193,27 @@ CREATE TABLE ssd_cla_review (
     clar_cla_review_participation           NVARCHAR(100),
     clar_cla_review_last_iro_contact_date   DATETIME
 );
-
+ 
 -- Insert data
-INSERT INTO ssd_cla_review (
-    clar_cla_review_id, 
-    clar_cla_episode_id, 
+INSERT INTO #ssd_cla_review (
+    clar_cla_review_id,
+    clar_cla_episode_id,
     clar_cla_review_due_date,
     clar_cla_review_date,
     clar_cla_review_participation,
     clar_cla_review_last_iro_contact_date
 )
-SELECT 
+SELECT
     fcr.FACT_CLA_REVIEW_ID                     AS clar_cla_review_id,
-    'PLACEHOLDER_EPISODE_ID'                   AS clar_cla_episode_id,                  -- [PLACEHOLDER_DATA] [TESTING]
+    fcla.FACT_CLA_ID                           AS clar_cla_episode_id,                 
     fcr.DUE_DTTM                               AS clar_cla_review_due_date,
     fcr.MEETING_DTTM                           AS clar_cla_review_date,
     'PLACEHOLDER_DATA'                         AS clar_cla_review_participation,        -- [PLACEHOLDER_DATA] [TESTING]
-    '20010101'                                 AS clar_cla_review_last_iro_contact_date -- [PLACEHOLDER_DATA] [TESTING] in YYYYMMDD format
-    
-FROM 
-    Child_Social.FACT_CLA_REVIEW AS fcr;
+    '01/01/2001'                               AS clar_cla_review_last_iro_contact_date -- [PLACEHOLDER_DATA] [TESTING]
+FROM
+    Child_Social.FACT_CLA_REVIEW AS fcr
+ 
+LEFT JOIN Child_Social.FACT_CLA fcla ON fcr.FACT_CLA_ID = fcla.FACT_CLA_ID
 
 -- Add constraint(s)
 ALTER TABLE ssd_cla_review ADD CONSTRAINT FK_clar_to_clae 
@@ -3894,6 +3834,7 @@ FROM
 
 LEFT JOIN 
     Education.DIM_PERSON AS p ON f903.DIM_PERSON_ID = p.DIM_PERSON_ID;
+
 
 -- Add constraint(s)
 ALTER TABLE ssd_send ADD CONSTRAINT FK_send_to_person 
