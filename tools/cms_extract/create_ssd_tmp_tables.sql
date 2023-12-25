@@ -78,17 +78,18 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 
+
 -- Create structure
 CREATE TABLE #ssd_person (
     pers_person_id          NVARCHAR(48) PRIMARY KEY,
     pers_sex                NVARCHAR(48),
-    pers_gender             NVARCHAR(48),
+    pers_gender             NVARCHAR(48),                   -- [PLACEHOLDER_DATA] [TESTING]
     pers_ethnicity          NVARCHAR(38),
     pers_dob                DATETIME,
     pers_common_child_id    NVARCHAR(10),
     pers_upn_unknown        NVARCHAR(10),
     pers_send               NVARCHAR(1),
-    pers_expected_dob       DATETIME,       -- Date or NULL
+    pers_expected_dob       DATETIME,                       -- Date or NULL
     pers_death_date         DATETIME,
     pers_is_mother          NVARCHAR(48),
     pers_nationality        NVARCHAR(48)
@@ -112,10 +113,10 @@ INSERT INTO #ssd_person (
 SELECT
     p.DIM_PERSON_ID,
     p.GENDER_MAIN_CODE,
-    'PLACEHOLDER DATA',                                 -- [TESTING] [PLACEHOLDER_DATA]
+    'PLACEHOLDER DATA',                                 -- [PLACEHOLDER_DATA] [TESTING]
     p.ETHNICITY_MAIN_CODE,
         CASE WHEN (p.DOB_ESTIMATED) = 'N'              
-        THEN p.BIRTH_DTTM                              -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
+        THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL END,                                  --  or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
     f903.NO_UPN_CODE,
@@ -124,9 +125,14 @@ SELECT
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
         ELSE NULL END,                                  --  or NULL
     p.DEATH_DTTM,
-        CASE WHEN p.GENDER_MAIN_CODE <> 'M' AND fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI'              
-        THEN 'Y'                          
-        ELSE NULL END,
+    CASE 
+        WHEN p.GENDER_MAIN_CODE <> 'M' AND              -- Assumption that if male is not mother
+             EXISTS (SELECT 1 FROM Child_Social.FACT_PERSON_RELATION fpr 
+                     WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND 
+                           fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI')  -- check for child relation only
+        THEN 'Y' 
+        ELSE NULL -- No child relation found
+    END,
     p.NATNL_CODE
    
 FROM
@@ -135,8 +141,6 @@ FROM
 LEFT JOIN
     Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
  
-JOIN    
-    Child_Social.FACT_PERSON_RELATION AS fpr ON fpr.DIM_PERSON_ID = p.DIM_PERSON_ID
  
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
@@ -1756,7 +1760,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 08/12/23
+Last Modified Date: 24/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
@@ -1814,19 +1818,14 @@ SELECT
     fce.CIN_903_CODE                        AS clae_cla_primary_need,
     fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
     fce.CARE_REASON_END_DESC                AS clae_cla_episode_cease_reason,
-    fi.DIM_DEPARTMENT_ID                    AS clae_cla_team,               
-    fi.DIM_WORKER_NAME                      AS clae_cla_worker_id,           
+    'PLACEHOLDER DATA'                      AS clae_cla_team,           -- [PLACEHOLDER] [TESTING]      
+    'PLACEHOLDER DATA'                      AS clae_cla_worker_id,      -- [PLACEHOLDER] [TESTING]
     fc.FACT_CLA_ID                          AS clae_cla_id,                    
     fc.FACT_REFERRAL_ID                     AS clae_referral_id
- 
 FROM
     Child_Social.FACT_CARE_EPISODES AS fce
 JOIN
     Child_Social.FACT_CLA AS fc ON fce.FACT_CARE_EPISODES_ID = fc.fact_cla_id
-JOIN
-    Child_Social.FACT_INVOLVEMENTS AS fi ON fc.fact_referral_id = fi.fact_referral_id
- 
-WHERE fi.IS_ALLOCATED_CW_FLAG = 'Y';
  
 
 -- Create index(es)
@@ -2486,6 +2485,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_vis
 
 -- Create structure
 CREATE TABLE #ssd_cla_visits (
+    clav_table_id              UNIQUEIDENTIFIER PRIMARY KEY,
     clav_casenote_id           NVARCHAR(48) PRIMARY KEY,
     clav_cla_id                NVARCHAR(48),
     clav_cla_visit_id          NVARCHAR(48),
@@ -2497,6 +2497,7 @@ CREATE TABLE #ssd_cla_visits (
 
 -- Insert data
 INSERT INTO #ssd_cla_visits (
+    clav_table_id,
     clav_casenote_id,
     clav_cla_id,
     clav_cla_visit_id,
@@ -2506,7 +2507,8 @@ INSERT INTO #ssd_cla_visits (
     clav_cla_visit_seen_alone
 )
 SELECT
-    clav.FACT_CASENOTE_ID       AS clav_casenote_id,
+    DEFAULT NEWID()             AS clav_table_id,
+    clav.FACT_CASENOTE_ID       AS clav_casenote_id, 
     clav.FACT_CLA_ID            AS clav_cla_id,
     clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
     ceps.FACT_CARE_EPISODES_ID  AS clav_cla_episode_id,
@@ -2806,12 +2808,12 @@ SELECT
     fc.START_DTTM                           AS perm_entered_care_date,             
     fa.DECISION_DTTM                        AS perm_ffa_cp_decision_date,          
     fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
-    fcpAdoption.START_DTTM                  AS perm_placed_for_adoption_date,      
+    fcpl.START_DTTM                         AS perm_placed_for_adoption_date,      
     fa.MATCHING_DTTM                        AS perm_matched_date,
     fa.ADOPTED_BY_CARER_FLAG                AS perm_adopted_by_carer_flag, 
     fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
     fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
-    fcpAdopted.START_DTTM                   AS perm_placed_foster_carer_date,      
+    fcpl.START_DTTM                         AS perm_placed_foster_carer_date,      
     fa.SIBLING_GROUP                        AS perm_part_of_sibling_group,
     fa.NUMBER_TOGETHER                      AS perm_siblings_placed_together,
     fa.NUMBER_APART                         AS perm_siblings_placed_apart,
@@ -2832,27 +2834,30 @@ SELECT
     fa.ADOPTION_SOCIAL_WORKER_ID            AS perm_adoption_worker,            -- Note that duplicate -1 seen in raw data
     fa.ALLOCATED_CASE_WORKER_ID             AS perm_allocated_worker            -- Note that duplicate -1 seen in raw data
 FROM 
-    FACT_ADOPTION AS fa
+    Child_Social.FACT_ADOPTION AS fa
     
-LEFT JOIN FACT_CLA AS fc                                
+LEFT JOIN Child_Social.FACT_CLA AS fc                                
     ON fa.FACT_CLA_ID = fc.FACT_CLA_ID                                          -- towards perm_adm_decision_date
-LEFT JOIN FACT_CLA_PLACEMENT AS fcpAdoption             
-    ON fa.FACT_CLA_ID = fcpAdoption.FACT_CLA_ID                                 -- towards perm_ffa_cp_decision_date
-    AND fcpAdoption.DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%' -- towards perm_placed_for_adoption_date
-    AND fcpAdoption.ADOPTED_BY_CARER_FLAG = 'Y'                                 -- towards perm_placed_foster_carer_date
-LEFT JOIN FACT_CARE_EPISODES AS fce                                             
+LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl             
+    ON fa.FACT_CLA_ID = fcpl.FACT_CLA_ID                                        -- towards perm_ffa_cp_decision_date
+    AND fcpl.DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'        -- towards perm_placed_for_adoption_date
+    AND fa.ADOPTED_BY_CARER_FLAG = 'Y'                                          -- towards perm_placed_foster_carer_date [TESTING... should this be on fa. ?]
+LEFT JOIN Child_Social.FACT_CARE_EPISODES AS fce                                             
     ON fa.FACT_CLA_ID = fce.FACT_CLA_ID                                         -- towards perm_placement_provider_urn
-LEFT JOIN FACT_LEGAL_STATUS AS fls
+LEFT JOIN Child_Social.FACT_LEGAL_STATUS AS fls
     ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
     AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512')       -- towards perm_permanence_order_type
-    AND fa.ADOPTION_DTTM IS NOT NULL;                                           -- so only if there is a permanence order
+    AND fa.ADOPTION_DTTM IS NOT NULL;                                           -- and only if there is a permanence order
 
-WHERE EXISTS 
+WHERE 
+fa.FACT_ADOPTION_ID <> -1 -- Filter out -1 values
+AND EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
-    FROM #ssd_person p
+    FROM ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
     );
+
 
 
 -- -- Add constraint(s)
