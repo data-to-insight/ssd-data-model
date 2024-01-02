@@ -1825,8 +1825,7 @@ SELECT
 FROM
     Child_Social.FACT_CARE_EPISODES AS fce
 JOIN
-    Child_Social.FACT_CLA AS fc ON fce.FACT_CARE_EPISODES_ID = fc.fact_cla_id
- 
+    Child_Social.FACT_CLA AS fc ON fce.fact_cla_id = fc.FACT_CLA_ID
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON #ssd_cla_episodes (clae_cla_worker_id);
