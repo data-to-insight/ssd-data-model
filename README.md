@@ -149,7 +149,7 @@ The project is following a transparent and iterative development cycle, within t
 
 ### Local Authorities guiding development
 
-**Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority | Essex CC : Project Management | **ADCS North West** (hosted by **Stockport Council**)
+**Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority | Essex CC : Project Management and Mosaic Pilot Development | **ADCS North West** (hosted by **Stockport Council**) | **Blackpool CC** : Mosaic Pilot Development | **East Riding CC** : Azeus Pilot Development  
 
 Repo forks, and direct involvement with the project are welcomed and you can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/)
 

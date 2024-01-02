@@ -175,47 +175,43 @@ generate_full_erd(paths['yml_data'], paths['erd_publish'], returns_categories, '
 # 
 
 # RIIA
-#
-RIIA = ['person', 'legal_status', 'immigration_status', 'social_worker', 'contacts', 'early_help_episodes', 'cin_episodes', 'cin_plans', 'assessments', 's47_enquiry_icpc', 'cp_plans', 'cla_episodes', 'care_leavers', 'send', 'ehcp_requests', 'ehcp_assessment']
+# Previous Quarter
+RIIA = ['ssd_person', 'ssd_legal_status', 'ssd_immigration_status', 'ssd_contacts', 'ssd_early_help_episodes', 'ssd_cin_episodes', 'ssd_assessments', 'ssd_cin_plans', 'ssd_s47_enquiry', 'ssd_cp_plans', 'ssd_cla_episodes', 'ssd_care_leavers', 'ssd_send', 'ssd_ehcp_requests', 'ssd_ehcp_assessment', 'ssd_professionals', 'ssd_involvements']
 generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_riia_last_quarter_diagram', output_filetype='jpg', node_list=RIIA)
 
 # CURRENT CLA
-#
-CLA = ['person', 'legal_status', 'immigration_status', 'disability','mother', 'social_worker', 'cla_episodes','placement', 'cla_immunisations','missing','cla_health', 'cla_substance_misuse','cla_care_plan','cla_visits','cla_convictions']
+# Snapshot at run date
+CLA = ['ssd_person', 'ssd_disability', 'ssd_immigration_status', 'ssd_legal_status', 'ssd_mother', 'ssd_cla_episodes', 'ssd_cla_convictions', 'ssd_cla_health', 'ssd_cla_immunisations', 'ssd_cla_substance_misuse', 'ssd_placement', 'ssd_cla_care_plan', 'ssd_missing', 'ssd_professionals', 'ssd_involvements']
 generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_current_cla_cohort_diagram', output_filetype='jpg', node_list=CLA)
 
 # ANNEXA
-#
-ANNEXA = ['person', 'legal_status', 'immigration_status', 'disability',
-          'contacts', 'early_help_episodes', 'cin_episodes', 'cin_plans', 'cin_visits',
-          'assessments', 's47_enquiry_icpc', 
-          'cp_plans', 'cp_reviews', 'category_of_abuse', 'cp_visits',
-          'cla_episodes', 'cla_visits', 'cla_reviews', 'missing', 'permanence', 'care_leavers', 'social_worker']
+# Last 6 Years
+ANNEXA = ['ssd_person', 'ssd_legal_status', 'ssd_immigration_status', 'ssd_disability', 'ssd_contacts', 'ssd_early_help_episodes', 'ssd_cin_episodes', 'ssd_cin_plans', 'ssd_cin_visits', 'ssd_assessments', 'ssd_s47_enquiry', 'ssd_cp_plans', 'ssd_cp_visits', 'ssd_cp_reviews', 'ssd_cla_episodes', 'ssd_cla_reviews', 'ssd_cla_visits', 'ssd_missing', 'ssd_permanence', 'ssd_care_leavers', 'ssd_professionals', 'ssd_involvements']
 generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_annexa_plus_diagram', output_filetype='jpg', node_list=ANNEXA)
 
 # CURRENT CP
-#
-CURRENTCP = ['person, address', 'disability', 'cp_plans', 'category_of_abuse', 'cp_visits', 'cp_reviews', 'cp_reviews_risks']
+# Snapshot at run date
+CURRENTCP = ['ssd_person', 'ssd_address', 'ssd_disability', 'ssd_cp_plans', 'ssd_category_of_abuse', 'ssd_cp_visits', 'ssd_cp_reviews', 'ssd_cp_reviews_risks']
 generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_current_cp_cohort_diagram', output_filetype='jpg', node_list=CURRENTCP)
 
 # CIN
 #
-CIN = ['person', 'disability', 'cin_episodes', 'assessments', 'assessment_factors', 's47_enquiry_icpc', 'cp_plans', 'category_of_abuse', 'cp_reviews']
+CIN = ['ssd_person', 'ssd_disability', 'ssd_cin_episodes', 'ssd_assessments', 'ssd_assessment_factors', 'ssd_s47_enquiry', 'ssd_cp_plans', 'ssd_cp_reviews']
 generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_cin_census_diagram', output_filetype='jpg', node_list=CIN)
 
 # SSDA903
 #
-SSDA903 = ['person', 'address', 'immigration_status', 'mother', 'legal_status', 'cla_episodes', 'cla_convictions', 'cla_health', 'cla_immunisations', 'cla_substance_misuse', 'placement', 'cla_reviews', 'cla_previous_permanence', 'sdq_scores', 'missing', 'care_leavers', 'permanence']
+SSDA903 = ['ssd_person', 'ssd_address', 'ssd_immigration_status', 'ssd_mother', 'ssd_legal_status', 'ssd_cla_episodes', 'ssd_cla_convictions', 'ssd_cla_health', 'ssd_cla_immunisations', 'ssd_cla_substance_misuse', 'ssd_placement', 'ssd_cla_reviews', 'ssd_cla_previous_permanence', 'ssd_sdq_scores', 'ssd_missing', 'ssd_care_leavers', 'ssd_permanence']
 generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_ssda903_diagram', output_filetype='jpg', node_list=SSDA903)
 
 # DfE CSC Dashboard
 #
-CSCDASH = ['person', 'address', 'legal_status', 'cin_episodes', 'assessments', 's47_enquiry_icpc', 'cp_plans', 'cla_episodes', 'placement', 'sdq_scores', 'care_leavers']
+CSCDASH = ['ssd_person', 'ssd_address', 'ssd_legal_status', 'ssd_cin_episodes', 'ssd_assessments', 'ssd_s47_enquiry', 'ssd_cp_plans', 'ssd_cla_episodes', 'ssd_placement', 'ssd_sdq_scores', 'ssd_care_leavers']
 generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_dfe_csc_dashboard_diagram', output_filetype='jpg', node_list=CSCDASH)
 
 # Child Journey
 #
-CHILDJOURNEY = ['person', 'family', 'address', 'disability', 'immigration_status', 'legal_status', 'contacts', 'early_help_episodes', 'cin_episodes', 'assessments', 'cin_plans', 's47_enquiry_icpc', 'cp_plans', 'cla_episodes', 'care_leavers', 'permanence']
+CHILDJOURNEY = ['ssd_person', 'ssd_family', 'ssd_address', 'ssd_disability', 'ssd_immigration_status', 'ssd_legal_status', 'ssd_contacts', 'ssd_early_help_episodes', 'ssd_cin_episodes', 'ssd_assessments', 'ssd_cin_plans', 'ssd_s47_enquiry', 'ssd_cp_plans', 'ssd_cla_episodes', 'ssd_care_leavers', 'ssd_permanence']
 generate_full_erd(paths['yml_data'], paths['returns_maps'], returns_categories, 'ssd_child_journey_diagram', output_filetype='jpg', node_list=CHILDJOURNEY)
 
 
