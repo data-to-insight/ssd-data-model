@@ -1763,7 +1763,7 @@ SELECT
 FROM
     Child_Social.FACT_CARE_EPISODES AS fce
 JOIN
-    Child_Social.FACT_CLA AS fc ON fce.FACT_CARE_EPISODES_ID = fc.fact_cla_id
+    Child_Social.FACT_CLA AS fc ON fce.fact_cla_id = fc.FACT_CLA_ID
 
 -- Removed 24/12/23
 --JOIN
