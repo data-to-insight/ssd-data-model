@@ -103,7 +103,7 @@ type, description, which cms systems the data item/field is available on and any
     cms_table:
     - liquid_logic:&lt;ll_tbl_name&gt;
     - mosaic: &lt;mosaic_tbl_name&gt;
-    guidance: &lt;DfE or similar guidance txt&gt;
+    guidance: &lt;DfE of similar guidance txt&gt;
     metadata:
       release_datetime: 
       change_id: 
@@ -140,7 +140,7 @@ in an interchange format. The description is optional, and is not provided where
 <tr><td>2</td><td>Continuous Deployment</td><td>Maintenance roadmap and framework agreement towards iterative improvement-driven approach.</td></tr>
 </tbody></table>
 <h3>Local Authorities guiding development</h3>
-<p><strong>Hertfordshire CC</strong> : Bid Lead | <strong>Knowsley CC</strong> : Steering Group | <strong>Data2Insight</strong> : Project Lead | <strong>East Sussex CC</strong> : Host Authority | Essex CC : Project Management | <strong>ADCS North West</strong> (hosted by <strong>Stockport Council</strong>)</p>
+<p><strong>Hertfordshire CC</strong> : Bid Lead | <strong>Knowsley CC</strong> : Steering Group | <strong>Data2Insight</strong> : Project Lead | <strong>East Sussex CC</strong> : Host Authority | Essex CC : Project Management and Mosaic Pilot Development | <strong>ADCS North West</strong> (hosted by <strong>Stockport Council</strong>) | <strong>Blackpool CC</strong> : Mosaic Pilot Development | <strong>East Riding CC</strong> : Azeus Pilot Development  </p>
 <p>Repo forks, and direct involvement with the project are welcomed and you can find more information about Data2Insight on our website <a href="https://www.datatoinsight.org/">https://www.datatoinsight.org/</a></p>
 <h2>Repo workflow</h2>
 <p>In brief, folders <a href="./data/">data</a>, <a href="./docs/">docs</a> &amp; <a href="./sql/">sql</a> are output folders. Python scripts within the tools folder generate those files with the exception of <a href="./docs/admin">docs/admin</a> which contains the import csv definitions of all data objects &amp; relationships. <a href="./tools/">tools/*.py</a> are numbered to dictate their required run order when updating the specification. This workflow enables the entire project and all outputs to be instantly updated enabling full development transparency and ease of later updates both minor modifications and new modules/objects. It is anticipated that most LA's will only need to access the generated extract <a href="./sql/">SQL files</a> for their particular CMS. </p>
