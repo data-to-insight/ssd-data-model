@@ -2895,7 +2895,7 @@ LEFT JOIN Child_Social.FACT_CLA AS fc
 LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl             
     ON fa.FACT_CLA_ID = fcpl.FACT_CLA_ID                                        -- towards perm_ffa_cp_decision_date
     AND fcpl.DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'        -- towards perm_placed_for_adoption_date
-    AND fa.ADOPTED_BY_CARER_FLAG = 'Y'                                          -- towards perm_placed_foster_carer_date [TESTING... should this be on fa. ?]
+    -- AND fa.ADOPTED_BY_CARER_FLAG = 'Y'                                          -- towards perm_placed_foster_carer_date [TESTING... should this be on fa. ?]
 LEFT JOIN Child_Social.FACT_CARE_EPISODES AS fce                                             
     ON fa.FACT_CLA_ID = fce.FACT_CLA_ID                                         -- towards perm_placement_provider_urn
 LEFT JOIN Child_Social.FACT_LEGAL_STATUS AS fls
@@ -2905,10 +2905,12 @@ LEFT JOIN Child_Social.FACT_LEGAL_STATUS AS fls
 
 WHERE 
 fa.FACT_ADOPTION_ID <> -1 -- Filter out -1 values
+AND fa.ADOPTED_BY_CARER_FLAG = 'Y'
+
 AND EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
     );
 
