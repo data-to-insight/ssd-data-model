@@ -4,6 +4,9 @@
 - Full review needed of max/exagerated/default new field type sizes e.g. family_id NVARCHAR(48)  (keys cannot use MAX)
 */
 
+
+
+
 /* 
 -- Get basic table infos ref
 SELECT 
