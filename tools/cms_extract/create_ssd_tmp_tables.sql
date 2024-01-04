@@ -1580,22 +1580,6 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/* 
-=============================================================================
-Object Name: ssd_category_of_abuse
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
 
 
 
@@ -1671,22 +1655,19 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+
+
 /* 
 =============================================================================
 Object Name: ssd_cp_reviews
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 02/01/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks:    Some fields - ON HOLD/Not included in SSD Ver/Iteration 1
-            Tested in batch 1.3. But needs additions! for cppr_cp_review_quorate - 
-            FACT_FORM_ANSWERS.ANSWER
-            Link using FACT_CP_REVIEW.FACT_CASE_PATHWAY_STEP_ID to FACT_CASE_PATHWAY_STEP  
-            Link using FACT_CASE_PATHWAY_STEP.FACT_FORMS_ID to FACT_FORM_ANSWERS.ANSWER
-            WHERE 
-            ANSWER_NO = 'WasConf' AND DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'REVIEW%'
+            Tested in batch 1.3. But now has additional  cppr_cp_review_quorate
 Dependencies: 
 - ssd_person
 - ssd_cp_plans
@@ -1704,6 +1685,7 @@ PRINT 'Creating table: ' + @TableName;
 -- Check if table exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
 
+
 -- Create structure
 CREATE TABLE #ssd_cp_reviews
 (
@@ -1712,7 +1694,7 @@ CREATE TABLE #ssd_cp_reviews
     cppr_cp_review_due              DATETIME NULL,
     cppr_cp_review_date             DATETIME NULL,
     cppr_cp_review_outcome          NCHAR(1), 
-    cppr_cp_review_quorate          NCHAR(1) DEFAULT '0',   -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    cppr_cp_review_quorate          NCHAR(1),
     cppr_cp_review_participation    NCHAR(1) DEFAULT '0'    -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
 );
 
@@ -1728,15 +1710,27 @@ INSERT INTO #ssd_cp_reviews
     cppr_cp_review_participation
 )
 SELECT 
-    cpr.FACT_CP_REVIEW_ID,
-    cpr.FACT_CP_PLAN_ID,
-    cpr.DUE_DTTM,
-    cpr.MEETING_DTTM,
-    cpr.OUTCOME_CONTINUE_CP_FLAG,
-    '0', -- for cppr_cp_review_quorate       -- [PLACEHOLDER_DATA] [TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
-    '0'  -- for cppr_cp_review_participation -- [PLACEHOLDER_DATA] [TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    cpr.FACT_CP_REVIEW_ID           AS cppr_cp_review_id ,
+    cpr.FACT_CP_PLAN_ID             AS cppr_cp_plan_id,
+    cpr.DUE_DTTM                    AS cppr_cp_review_due,
+    cpr.MEETING_DTTM                AS cppr_cp_review_date,
+    cpr.OUTCOME_CONTINUE_CP_FLAG    AS cppr_cp_review_outcome,
+    ISNULL(ffa.ANSWER, '0')         AS cppr_cp_review_quorate,      -- ISNULL for cases where no answer found
+    '0'                             AS cppr_cp_review_participation -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
 FROM 
     Child_Social.FACT_CP_REVIEW as cpr
+
+LEFT JOIN Child_Social.FACT_CASE_PATHWAY_STEP as fcps       -- towards CPPR006A cppr_cp_review_quorate 
+    ON cpr.FACT_CASE_PATHWAY_STEP_ID = fcps.FACT_CASE_PATHWAY_STEP_ID
+
+LEFT JOIN Child_Social.FACT_FORMS as ff                     -- towards CPPR006A cppr_cp_review_quorate 
+    ON fcps.FACT_FORMS_ID = ff.FACT_FORM_ID
+
+LEFT JOIN Child_Social.FACT_FORM_ANSWERS as ffa             -- towards CPPR006A cppr_cp_review_quorate 
+    ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
+    AND ffa.ANSWER_NO = 'WasConf'
+    AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'REVIEW%'
+
 
 WHERE EXISTS ( -- only need data for ssd relevant records
     SELECT 1 
