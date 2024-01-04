@@ -2379,76 +2379,137 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-
 /* 
 =============================================================================
 Object Name: ssd_cla_care_plan
 Description: 
 Author: D2I
-Last Modified Date: 12/12/23
+Last Modified Date: 04/01/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: Replace 'PLACEHOLDER_DATA' with the actual logic for 'ICP' answer.
+Remarks:    FACT_FORM_ANSWERS.ANSWER_NO = 'ICP' 
+            Most recent date in FACT_FORM_ANSWERS.ANSWERED_DTTM once above filter applied
 Dependencies: 
-- FACT_CARE_PLAN_SUMMARY
 - FACT_CARE_PLANS
+- FACT_FORMS
+- FACT_FORM_ANSWERS
+- #ssd_TMP_PRE_cla_care_plan - Used to stage/prep most recent relevant form response
 =============================================================================
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_care_plan';
 PRINT 'Creating table: ' + @TableName;
 
-
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_cla_care_plan;
+IF OBJECT_ID('tempdb..#ssd_TMP_PRE_cla_care_plan') IS NOT NULL DROP TABLE #ssd_TMP_PRE_cla_care_plan;
+
+
+WITH MostRecentQuestionResponse AS (
+    SELECT  -- Return the most recent response for each question for each persons
+        ff.DIM_PERSON_ID,
+        ffa.ANSWER_NO,
+        MAX(ffa.FACT_FORM_ID) AS MaxFormID
+    FROM
+        Child_Social.FACT_FORM_ANSWERS ffa
+    JOIN
+        Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID    -- obtain the relevant person_id
+    WHERE
+        ffa.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN ('2066', '29')
+        AND ffa.ANSWER_NO                   IN ('CPFUP1', 'CPFUP10', 'CPFUP2', 'CPFUP3', 'CPFUP4', 'CPFUP5', 'CPFUP6', 'CPFUP7', 'CPFUP8', 'CPFUP9')
+    GROUP BY
+        ff.DIM_PERSON_ID,
+        ffa.ANSWER_NO
+),
+LatestResponses AS (
+    SELECT  -- Now add the answered_date (only indirectly of use here/cross referencing)
+        mrqr.DIM_PERSON_ID,
+        mrqr.ANSWER_NO,
+        mrqr.MaxFormID AS FACT_FORM_ID,
+        ffa.ANSWER,
+        ffa.ANSWERED_DTTM AS LatestResponseDate
+    FROM
+        MostRecentQuestionResponse mrqr
+    JOIN
+        Child_Social.FACT_FORM_ANSWERS ffa ON mrqr.MaxFormID = ffa.FACT_FORM_ID AND mrqr.ANSWER_NO = ffa.ANSWER_NO
+)
+
+SELECT
+    -- Add the now aggregated reponses into tmp table
+    lr.FACT_FORM_ID,
+    lr.DIM_PERSON_ID,
+    lr.ANSWER_NO,
+    lr.ANSWER,
+    lr.LatestResponseDate
+INTO #ssd_TMP_PRE_cla_care_plan
+FROM
+    LatestResponses lr
+ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
+
 
 -- Create structure
 CREATE TABLE #ssd_cla_care_plan (
-    lacp_table_id                 NVARCHAR(48) PRIMARY KEY,
-    lacp_cla_episode_id           NVARCHAR(48),
-    lacp_referral_id              NVARCHAR(48),
-    lacp_cla_care_plan_start_date DATETIME,
-    lacp_cla_care_plan_end_date   DATETIME,
-    lacp_cla_care_plan            NVARCHAR(100)
+    lacp_table_id                       NVARCHAR(48) PRIMARY KEY,
+    lacp_person_id                      NVARCHAR(48),
+    --lacp_referral_id                  NVARCHAR(48),
+    lacp_cla_care_plan_start_date       DATETIME,
+    lacp_cla_care_plan_end_date         DATETIME,
+    lacp_cla_care_plan_json             NVARCHAR(1000)
 );
  
 -- Insert data
 INSERT INTO #ssd_cla_care_plan (
     lacp_table_id,
-    lacp_cla_episode_id,
-    lacp_referral_id,
+    lacp_person_id,
     lacp_cla_care_plan_start_date,
     lacp_cla_care_plan_end_date,
-    lacp_cla_care_plan
+    lacp_cla_care_plan_json
 )
 SELECT
-    fcps.FACT_CARE_PLAN_SUMMARY_ID  AS lacp_table_id,
-    fcps.DIM_PERSON_ID              AS lacp_cla_episode_id,
-    fcpl.FACT_REFERRAL_ID           AS lacp_referral_id,
-    fcps.START_DTTM                 AS lacp_cla_care_plan_start_date,
-    fcps.END_DTTM                   AS lacp_cla_care_plan_end_date,
-    'PLACEHOLDER_DATA'              AS lacp_cla_care_plan                -- [TESTING] [PLACEHOLDER_DATA]
+    fcp.FACT_CARE_PLAN_ID          AS lacp_table_id,
+    fcp.DIM_PERSON_ID              AS lacp_person_id,
+    fcp.START_DTTM                 AS lacp_cla_care_plan_start_date,
+    fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
+    (
+        SELECT  -- Combined _json field with 'ICP' responses
+                
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN tmp_cpl.ANSWER END), NULL) AS CPFUP1,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN tmp_cpl.ANSWER END), NULL) AS CPFUP2,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN tmp_cpl.ANSWER END), NULL) AS CPFUP3,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN tmp_cpl.ANSWER END), NULL) AS CPFUP4,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN tmp_cpl.ANSWER END), NULL) AS CPFUP5,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN tmp_cpl.ANSWER END), NULL) AS CPFUP6,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN tmp_cpl.ANSWER END), NULL) AS CPFUP7,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN tmp_cpl.ANSWER END), NULL) AS CPFUP8,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER END), NULL) AS CPFUP9,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END), NULL) AS CPFUP10
+    
+        FROM
+            #ssd_TMP_PRE_cla_care_plan tmp_cpl
+
+        WHERE
+            tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+
+        GROUP BY tmp_cpl.DIM_PERSON_ID
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS lacp_cla_care_plan_json
+
 FROM
-    Child_Social.FACT_CARE_PLAN_SUMMARY AS fcps
- 
-JOIN
-    Child_Social.FACT_CARE_PLANS AS fcpl ON fcps.FACT_CARE_PLAN_SUMMARY_ID = fcpl.FACT_CARE_PLAN_SUMMARY_ID
+    Child_Social.FACT_CARE_PLANS AS fcp
+
+WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A';
 
 
 -- -- Add constraint(s)
 -- ALTER TABLE #ssd_cla_care_plan ADD CONSTRAINT FK_lacp_cla_episode_id
 -- FOREIGN KEY (lacp_cla_episode_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
--- Replace 'PLACEHOLDER_DATA' with the actual logic for 'ICP' answer.
-
-
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
-
 
 
 
