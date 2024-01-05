@@ -2908,7 +2908,8 @@ fa.FACT_ADOPTION_ID <> -1 -- Filter out -1 values
 AND fa.ADOPTED_BY_CARER_FLAG = 'Y'
 
 AND EXISTS 
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
+        -- This also negates the need to apply DIM_PERSON_ID <> '-1';  
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
