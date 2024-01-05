@@ -1621,23 +1621,25 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+
 /* 
 =============================================================================
 Object Name: ssd_cp_reviews
 Description: 
 Author: D2I
-Last Modified Date: 02/01/23
+Last Modified Date: 05/01/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.5
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks:    Some fields - ON HOLD/Not included in SSD Ver/Iteration 1
-            Tested in batch 1.3. But now has additional  cppr_cp_review_quorate
+            Tested in batch 1.3.
+            Placeholder used for cppr_cp_review_quorate- FACT_CASE_PATHWAY_STEP does not 
+            contain any data in the FACT_FORM_ID column so unable to link on this 
 Dependencies: 
 - ssd_person
 - ssd_cp_plans
 - FACT_CP_REVIEW
-- FACT_FORM_ANSWERS
-- FACT_CASE_PATHWAY_STEP
+- FACT_FORM_ANSWERS [Quoracy and Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -1649,6 +1651,7 @@ PRINT 'Creating table: ' + @TableName;
 -- Check if table exists, & drop
 IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_cp_reviews;
 
+
 -- Create structure
 CREATE TABLE ssd_cp_reviews
 (
@@ -1657,8 +1660,8 @@ CREATE TABLE ssd_cp_reviews
     cppr_cp_review_due              DATETIME NULL,
     cppr_cp_review_date             DATETIME NULL,
     cppr_cp_review_outcome          NCHAR(1), 
-    cppr_cp_review_quorate          NVARCHAR(3),
-    cppr_cp_review_participation    NCHAR(0) DEFAULT '0'    -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    cppr_cp_review_quorate          NVARCHAR(18),       -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    cppr_cp_review_participation    NVARCHAR(18)        -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
 );
 
 -- Insert data
@@ -1677,26 +1680,27 @@ SELECT
     cpr.FACT_CP_PLAN_ID             AS cppr_cp_plan_id,
     cpr.DUE_DTTM                    AS cppr_cp_review_due,
     cpr.MEETING_DTTM                AS cppr_cp_review_date,
-    cpr.OUTCOME_CONTINUE_CP_FLAG    AS cppr_cp_review_outcome,      -- Y/U/NULL expected
-    ffa.ANSWER                      AS cppr_cp_review_quorate,      -- Yes/No/NULL expected
-    '0'                             AS cppr_cp_review_participation -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    cpr.OUTCOME_CONTINUE_CP_FLAG    AS cppr_cp_review_outcome,
+    'PLACEHOLDER DATA'              AS cppr_cp_review_quorate,      -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    'PLACEHOLDER DATA'              AS cppr_cp_review_participation -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+
 FROM 
     Child_Social.FACT_CP_REVIEW as cpr
 
-LEFT JOIN Child_Social.FACT_CASE_PATHWAY_STEP as fcps       -- towards CPPR006A cppr_cp_review_quorate 
-    ON cpr.FACT_CASE_PATHWAY_STEP_ID = fcps.FACT_CASE_PATHWAY_STEP_ID
+/* --- Partially successful code for linking to Review form for Quoracy information ---
 
 LEFT JOIN Child_Social.FACT_FORMS as ff                     -- towards CPPR006A cppr_cp_review_quorate 
-    ON fcps.FACT_FORMS_ID = ff.FACT_FORM_ID
+    ON cpr.FACT_REFERRAL_ID = ff.FACT_REFERRAL_ID
 
 LEFT JOIN Child_Social.FACT_FORM_ANSWERS as ffa             -- towards CPPR006A cppr_cp_review_quorate 
     ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
     AND ffa.ANSWER_NO = 'WasConf'
     AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'REVIEW%'
+    AND cpr.MEETING_DTTM = ff.FORM_DTTM
 
+*/
 
-WHERE EXISTS 
-    (   -- only ssd relevant records
+WHERE EXISTS ( -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = cpr.DIM_PERSON_ID
@@ -1711,16 +1715,6 @@ FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
-
-/* To add 11/12/23
-CPPR006A cppr_cp_review_quorate Quorate?
-FACT_FORM_ANSWERS.ANSWER
-Link using FACT_CP_REVIEW.FACT_CASE_PATHWAY_STEP_ID to FACT_CASE_PATHWAY_STEP
-Link using FACT_CASE_PATHWAY_STEP.FACT_FORMS_ID to FACT_FORM_ANSWERS.ANSWER
-WHERE
-ANSWER_NO = 'WasConf' AND DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'REVIEW%'
-*/
-
 
 
 

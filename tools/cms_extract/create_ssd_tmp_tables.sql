@@ -496,7 +496,7 @@ FROM
     Child_Social.FACT_IMMIGRATION_STATUS AS ims
 WHERE 
     EXISTS 
-    ( -- only need data for ssd relevant records
+    ( -- only ssd relevant records
         SELECT 1
         FROM #ssd_person p
         WHERE p.pers_person_id = ims.DIM_PERSON_ID
@@ -575,7 +575,7 @@ WHERE
     fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI' -- only interested in parent/child relations
  
 AND EXISTS
-    ( -- only need data for ssd relevant records
+    ( -- only ssd relevant records
     SELECT 1
     FROM #ssd_person p
     WHERE p.pers_person_id = fpr.DIM_PERSON_ID
@@ -650,7 +650,7 @@ SELECT
 FROM 
     Child_Social.FACT_LEGAL_STATUS AS fls
 WHERE EXISTS 
-    ( -- only need data for ssd relevant records
+    ( -- only ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fls.DIM_PERSON_ID
@@ -739,7 +739,7 @@ FROM
     Child_Social.FACT_CONTACTS AS fc
     
 WHERE EXISTS 
-    ( -- only need data for ssd relevant records
+    ( -- only ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fc.DIM_PERSON_ID
@@ -821,7 +821,7 @@ FROM
     Child_Social.FACT_CAF_EPISODE AS cafe
 
 WHERE EXISTS 
-    ( -- only need data for ssd relevant records
+    ( -- only ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = cafe.DIM_PERSON_ID
@@ -1034,7 +1034,7 @@ FROM
 
 WHERE EXISTS 
 (
-    -- only need data for ssd relevant records
+    -- only ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
@@ -1261,7 +1261,7 @@ JOIN Child_Social.FACT_CARE_PLAN_SUMMARY AS cps ON fp.FACT_CARE_PLAN_SUMMARY_ID 
 WHERE DIM_LOOKUP_PLAN_TYPE_CODE = 'FP' AND cps.DIM_LOOKUP_PLAN_STATUS_ID_CODE <> 'z'
 AND EXISTS 
 (
-    -- only need data for ssd relevant records
+    -- only ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fp.DIM_PERSON_ID
@@ -1662,7 +1662,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cp_reviews
 Description: 
 Author: D2I
-Last Modified Date: 02/01/23
+Last Modified Date: 05/01/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
@@ -1735,7 +1735,7 @@ LEFT JOIN Child_Social.FACT_FORM_ANSWERS as ffa             -- towards CPPR006A 
 
 */
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS ( -- only ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = cpr.DIM_PERSON_ID
@@ -1886,7 +1886,7 @@ FROM
     Child_Social.FACT_OFFENCE as fo
 
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS ( -- only ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fo.DIM_PERSON_ID
@@ -1953,7 +1953,7 @@ FROM
 -- INNER JOIN
 --     #ssd_person AS p ON fhc.DIM_PERSON_ID = p.pers_person_id;
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS ( -- only ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fhc.DIM_PERSON_ID
@@ -2021,7 +2021,7 @@ SELECT
     f903.IMMUN_CODE
 FROM 
     Child_Social.FACT_903_DATA AS f903
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS ( -- only ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = f903.DIM_PERSON_ID
@@ -2090,7 +2090,7 @@ SELECT
 FROM 
     Child_Social.FACT_SUBSTANCE_MISUSE AS fsm
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS ( -- only ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fSM.DIM_PERSON_ID
@@ -2592,16 +2592,17 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
+
 /* 
 =============================================================================
-Object Name: ssd_sdq_scores
+Object Name: ssd_sdq_scores V1 (less efficient, but more readable?)
 Description: 
 Author: D2I
-Last Modified Date: 06/12/23
+Last Modified Date: 13/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
 Dependencies: 
 - ssd_person
 - FACT_FORMS
@@ -2634,24 +2635,39 @@ INSERT INTO #ssd_sdq_scores (
     csdq_sdq_reason,
     csdq_sdq_score
 )
+-- Each sub-select targets a specific ANSWER_NO
+-- Approach used for readability over single join and conditional aggregation
 SELECT 
     ffa.FACT_FORM_ID AS csdq_table_id,
     ff.DIM_PERSON_ID AS csdq_person_id,
     (
         SELECT ANSWER 
         FROM Child_Social.FACT_FORM_ANSWERS
-        WHERE DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)') 
-        AND ANSWER_NO = 'FormEndDate'
-        AND FACT_FORM_ID = ffa.FACT_FORM_ID
+        WHERE 
+            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
+                -- filter on both here to ensure reliability
+                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
+                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
+            )
+            AND ANSWER_NO = 'FormEndDate'
+            AND FACT_FORM_ID = ffa.FACT_FORM_ID
     ) AS csdq_sdq_completed_date,
+
     fd.SDQ_REASON AS csdq_sdq_reason,
+
     (
         SELECT ANSWER 
         FROM Child_Social.FACT_FORM_ANSWERS
-        WHERE DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)') 
-        AND ANSWER_NO = 'SDQScore'
-        AND FACT_FORM_ID = ffa.FACT_FORM_ID
+        WHERE 
+            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
+                -- filter on both here to ensure reliability
+                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
+                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
+            )
+            AND ANSWER_NO = 'SDQScore'
+            AND FACT_FORM_ID = ffa.FACT_FORM_ID
     ) AS csdq_sdq_score
+
 FROM 
     Child_Social.FACT_FORM_ANSWERS ffa
 
@@ -2732,7 +2748,7 @@ SELECT
 FROM 
     Child_Social.FACT_MISSING_PERSON AS fmp
 
-WHERE EXISTS ( -- only need data for ssd relevant records
+WHERE EXISTS ( -- only ssd relevant records
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fmp.DIM_PERSON_ID
@@ -3164,7 +3180,7 @@ VALUES
     ('PLACEHOLDER_DATA', 'DIM_PERSON.PERSON_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', NULL, NULL);
 
 -- SWITCH ON once source data for linked ids added/defined.
--- WHERE EXISTS ( -- only need data for ssd relevant records
+-- WHERE EXISTS ( -- only ssd relevant records
 --     SELECT 1 
 --     FROM #ssd_person p
 --     WHERE p.pers_person_id = #ssd_linked_identifiers.DIM_PERSON_ID
@@ -3306,7 +3322,7 @@ VALUES
 
 
 -- To switch on once source data defined.
--- WHERE EXISTS ( -- only need data for ssd relevant records
+-- WHERE EXISTS ( -- only ssd relevant records
 --     SELECT 1 
 --     FROM #ssd_person p
 --     WHERE p.pers_person_id = ssd_voice_of_child.DIM_PERSON_ID
@@ -3419,7 +3435,7 @@ VALUES
     );
 
 -- To switch on once source data defined.
--- WHERE EXISTS ( -- only need data for ssd relevant records
+-- WHERE EXISTS ( -- only ssd relevant records
 --     SELECT 1 
 --     FROM #ssd_person p
 --     WHERE p.pers_person_id = ssd_pre_proceedings.DIM_PERSON_ID
