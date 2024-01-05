@@ -2907,14 +2907,13 @@ Dependencies:
 Object Name: ssd_permanence
 Description: 
 Author: D2I
-Last Modified Date: 19/12/23
+Last Modified Date: 04/01/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 181223: Assumed that only one permanence order per child. But in the v.rare cases where this has
-        broken down, we might need to implement further work here. 
-        perm_permanence_order_date/type ref only:
-        ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+        DEV: 181223: Assumed that only one permanence order per child. 
+        - In order to handle/reflect the v.rare cases where this has broken down, further work is required.
 
         DEV: Some fields need spec checking for datatypes e.g. perm_adopted_by_carer_flag and others
 
@@ -2927,6 +2926,7 @@ Dependencies:
 - FACT_CLA
 =============================================================================
 */
+
 -- [TESTING] Create marker
 SET @TableName = N'ssd_permanence';
 PRINT 'Creating table: ' + @TableName;
