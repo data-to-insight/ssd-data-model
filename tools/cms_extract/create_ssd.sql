@@ -3153,14 +3153,17 @@ SELECT
 FROM 
     Child_Social.FACT_ADOPTION AS fa
     
-LEFT JOIN Child_Social.FACT_CLA AS fc                                
-    ON fa.FACT_CLA_ID = fc.FACT_CLA_ID                                          -- towards perm_adm_decision_date
+LEFT JOIN Child_Social.FACT_CLA AS fc                                           -- towards perm_adm_decision_date                             
+    ON fa.FACT_CLA_ID = fc.FACT_CLA_ID                              
+                
 LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl            
     ON fa.FACT_CLA_ID = fcpl .FACT_CLA_ID                                       -- towards perm_ffa_cp_decision_date
     AND fcpl .DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'       -- towards perm_placed_for_adoption_date
-    -- AND fa   .ADOPTED_BY_CARER_FLAG = 'Y'                                    -- towards perm_placed_foster_carer_date
+    -- AND fa   .ADOPTED_BY_CARER_FLAG = 'Y'             
+                           -- towards perm_placed_foster_carer_date
 LEFT JOIN Child_Social.FACT_CARE_EPISODES AS fce                                             
     ON fa.FACT_CLA_ID = fce.FACT_CLA_ID                                         -- towards perm_placement_provider_urn
+
 LEFT JOIN Child_Social.FACT_LEGAL_STATUS AS fls
     ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
     AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512')       -- towards perm_permanence_order_type
@@ -3171,7 +3174,8 @@ WHERE
 AND fa .ADOPTED_BY_CARER_FLAG = 'Y'     
 
 AND EXISTS 
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
+        -- This also negates the need to apply DIM_PERSON_ID <> '-1';  
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
