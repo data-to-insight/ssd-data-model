@@ -183,7 +183,7 @@ LEFT JOIN
 
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
-    AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
+    AND p.DIM_PERSON_ID >= 1                                    -- Erronous/system rows with -1 seen (filter applied here to avoid requ elsewhere)
     AND f903.YEAR_TO_DATE = 'Y'                                 -- 903 table includes children looked after in previous year and year to date,
                                                                 -- this filters for those current in the current year to date to avoid duplicates
    
@@ -385,7 +385,6 @@ FROM
 
 WHERE EXISTS 
     (   -- only ssd relevant records
-        -- This also negates the need to apply DIM_PERSON_ID <> '-1';  
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = pa.DIM_PERSON_ID
@@ -459,7 +458,7 @@ FROM
     Child_Social.FACT_DISABILITY AS fd
 
 WHERE EXISTS 
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fd.DIM_PERSON_ID
@@ -539,7 +538,7 @@ FROM
 
 WHERE 
     EXISTS 
-    ( -- only need data for ssd relevant records
+    (   -- only ssd relevant records
         SELECT 1
         FROM ssd_person p
         WHERE p.pers_person_id = ims.DIM_PERSON_ID
@@ -618,7 +617,7 @@ WHERE
     fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI' -- only interested in parent/child relations
  
 AND EXISTS
-    ( -- only need data for ssd relevant records
+    (   -- only ssd relevant records
     SELECT 1
     FROM ssd_person p
     WHERE p.pers_person_id = fpr.DIM_PERSON_ID
@@ -697,7 +696,7 @@ FROM
     Child_Social.FACT_LEGAL_STATUS AS fls
 
 WHERE EXISTS
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
     SELECT 1
     FROM ssd_person p
     WHERE p.pers_person_id = fls.DIM_PERSON_ID
@@ -786,7 +785,7 @@ FROM
     Child_Social.FACT_CONTACTS AS fc
     
 WHERE EXISTS 
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fc.DIM_PERSON_ID
@@ -1001,7 +1000,7 @@ FROM
     Child_Social.FACT_SINGLE_ASSESSMENT AS fa
 
 WHERE EXISTS 
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
@@ -1229,7 +1228,7 @@ JOIN Child_Social.FACT_CARE_PLAN_SUMMARY AS cps ON fp.FACT_CARE_PLAN_SUMMARY_ID 
 WHERE DIM_LOOKUP_PLAN_TYPE_CODE = 'FP' AND cps.DIM_LOOKUP_PLAN_STATUS_ID_CODE <> 'z'
 AND EXISTS 
 (
-    -- only need data for ssd relevant records
+    (   -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fp.DIM_PERSON_ID
@@ -1698,7 +1697,6 @@ LEFT JOIN Child_Social.FACT_FORM_ANSWERS as ffa             -- towards CPPR006A 
 
 WHERE EXISTS 
     (   -- only ssd relevant records
-        -- This also negates the need to apply DIM_PERSON_ID <> '-1';  
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = cpr.DIM_PERSON_ID
@@ -1867,7 +1865,7 @@ FROM
     Child_Social.FACT_OFFENCE as fo
 
 WHERE EXISTS 
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fo.DIM_PERSON_ID
@@ -1937,7 +1935,7 @@ FROM
 --     #ssd_person AS p ON fhc.DIM_PERSON_ID = p.pers_person_id;
 
 WHERE EXISTS 
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fhc.DIM_PERSON_ID
@@ -2007,7 +2005,7 @@ FROM
     Child_Social.FACT_903_DATA AS f903
 
 WHERE EXISTS 
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = f903.DIM_PERSON_ID
@@ -2077,7 +2075,7 @@ FROM
     Child_Social.FACT_SUBSTANCE_MISUSE AS fsm
 
 WHERE EXISTS 
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fSM.DIM_PERSON_ID
