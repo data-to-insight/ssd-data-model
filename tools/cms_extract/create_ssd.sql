@@ -4,6 +4,9 @@
 - Full review needed of max/exagerated/default new field type sizes e.g. family_id NVARCHAR(48)  (keys cannot use MAX)
 */
 
+
+
+
 /* 
 -- Get basic table infos ref
 SELECT 
@@ -2907,14 +2910,13 @@ Dependencies:
 Object Name: ssd_permanence
 Description: 
 Author: D2I
-Last Modified Date: 19/12/23
+Last Modified Date: 04/01/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 181223: Assumed that only one permanence order per child. But in the v.rare cases where this has
-        broken down, we might need to implement further work here. 
-        perm_permanence_order_date/type ref only:
-        ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+        DEV: 181223: Assumed that only one permanence order per child. 
+        - In order to handle/reflect the v.rare cases where this has broken down, further work is required.
 
         DEV: Some fields need spec checking for datatypes e.g. perm_adopted_by_carer_flag and others
 
@@ -2927,6 +2929,7 @@ Dependencies:
 - FACT_CLA
 =============================================================================
 */
+
 -- [TESTING] Create marker
 SET @TableName = N'ssd_permanence';
 PRINT 'Creating table: ' + @TableName;
@@ -3150,14 +3153,17 @@ SELECT
 FROM 
     Child_Social.FACT_ADOPTION AS fa
     
-LEFT JOIN Child_Social.FACT_CLA AS fc                                
-    ON fa.FACT_CLA_ID = fc.FACT_CLA_ID                                          -- towards perm_adm_decision_date
+LEFT JOIN Child_Social.FACT_CLA AS fc                                           -- towards perm_adm_decision_date                             
+    ON fa.FACT_CLA_ID = fc.FACT_CLA_ID                              
+                
 LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl            
     ON fa.FACT_CLA_ID = fcpl .FACT_CLA_ID                                       -- towards perm_ffa_cp_decision_date
     AND fcpl .DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'       -- towards perm_placed_for_adoption_date
-    -- AND fa   .ADOPTED_BY_CARER_FLAG = 'Y'                                    -- towards perm_placed_foster_carer_date
+    -- AND fa   .ADOPTED_BY_CARER_FLAG = 'Y'             
+                           -- towards perm_placed_foster_carer_date
 LEFT JOIN Child_Social.FACT_CARE_EPISODES AS fce                                             
     ON fa.FACT_CLA_ID = fce.FACT_CLA_ID                                         -- towards perm_placement_provider_urn
+
 LEFT JOIN Child_Social.FACT_LEGAL_STATUS AS fls
     ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
     AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512')       -- towards perm_permanence_order_type
@@ -3168,7 +3174,8 @@ WHERE
 AND fa .ADOPTED_BY_CARER_FLAG = 'Y'     
 
 AND EXISTS 
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
+        -- This also negates the need to apply DIM_PERSON_ID <> '-1';  
     SELECT 1 
     FROM ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID

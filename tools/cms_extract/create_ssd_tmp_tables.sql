@@ -1664,16 +1664,17 @@ Description:
 Author: D2I
 Last Modified Date: 02/01/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.5
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks:    Some fields - ON HOLD/Not included in SSD Ver/Iteration 1
-            Tested in batch 1.3. But now has additional  cppr_cp_review_quorate
+            Tested in batch 1.3.
+            Placeholder used for cppr_cp_review_quorate- FACT_CASE_PATHWAY_STEP does not 
+            contain any data in the FACT_FORM_ID column so unable to link on this 
 Dependencies: 
 - ssd_person
 - ssd_cp_plans
 - FACT_CP_REVIEW
-- FACT_FORM_ANSWERS
-- FACT_CASE_PATHWAY_STEP
+- FACT_FORM_ANSWERS [Quoracy and Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -1694,8 +1695,8 @@ CREATE TABLE #ssd_cp_reviews
     cppr_cp_review_due              DATETIME NULL,
     cppr_cp_review_date             DATETIME NULL,
     cppr_cp_review_outcome          NCHAR(1), 
-    cppr_cp_review_quorate          NCHAR(1),
-    cppr_cp_review_participation    NCHAR(1) DEFAULT '0'    -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    cppr_cp_review_quorate          NVARCHAR(18),       -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    cppr_cp_review_participation    NVARCHAR(18)        -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
 );
 
 -- Insert data
@@ -1715,22 +1716,24 @@ SELECT
     cpr.DUE_DTTM                    AS cppr_cp_review_due,
     cpr.MEETING_DTTM                AS cppr_cp_review_date,
     cpr.OUTCOME_CONTINUE_CP_FLAG    AS cppr_cp_review_outcome,
-    ISNULL(ffa.ANSWER, '0')         AS cppr_cp_review_quorate,      -- ISNULL for cases where no answer found
-    '0'                             AS cppr_cp_review_participation -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    'PLACEHOLDER DATA'              AS cppr_cp_review_quorate,      -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    'PLACEHOLDER DATA'              AS cppr_cp_review_participation -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+
 FROM 
     Child_Social.FACT_CP_REVIEW as cpr
 
-LEFT JOIN Child_Social.FACT_CASE_PATHWAY_STEP as fcps       -- towards CPPR006A cppr_cp_review_quorate 
-    ON cpr.FACT_CASE_PATHWAY_STEP_ID = fcps.FACT_CASE_PATHWAY_STEP_ID
+/* --- Partially successful code for linking to Review form for Quoracy information ---
 
 LEFT JOIN Child_Social.FACT_FORMS as ff                     -- towards CPPR006A cppr_cp_review_quorate 
-    ON fcps.FACT_FORMS_ID = ff.FACT_FORM_ID
+    ON cpr.FACT_REFERRAL_ID = ff.FACT_REFERRAL_ID
 
 LEFT JOIN Child_Social.FACT_FORM_ANSWERS as ffa             -- towards CPPR006A cppr_cp_review_quorate 
     ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
     AND ffa.ANSWER_NO = 'WasConf'
     AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'REVIEW%'
+    AND cpr.MEETING_DTTM = ff.FORM_DTTM
 
+*/
 
 WHERE EXISTS ( -- only need data for ssd relevant records
     SELECT 1 
@@ -2772,14 +2775,13 @@ Dependencies:
 Object Name: ssd_permanence
 Description: 
 Author: D2I
-Last Modified Date: 19/12/23
+Last Modified Date: 04/01/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 181223: Assumed that only one permanence order per child. But in the v.rare cases where this has
-        broken down, we might need to implement further work here. 
-        perm_permanence_order_date/type ref only:
-        ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+        DEV: 181223: Assumed that only one permanence order per child. 
+        - In order to handle/reflect the v.rare cases where this has broken down, further work is required.
 
         DEV: Some fields need spec checking for datatypes e.g. perm_adopted_by_carer_flag and others
 
@@ -2908,7 +2910,8 @@ fa.FACT_ADOPTION_ID <> -1 -- Filter out -1 values
 AND fa.ADOPTED_BY_CARER_FLAG = 'Y'
 
 AND EXISTS 
-    ( -- only ssd relevant records
+    (   -- only ssd relevant records
+        -- This also negates the need to apply DIM_PERSON_ID <> '-1';  
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
