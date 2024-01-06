@@ -2094,11 +2094,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_placement
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 05/01/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: 
+Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
 Dependencies: 
 - ssd_person
 - FACT_CLA_PLACEMENT
@@ -2110,13 +2110,12 @@ SET @TableName = N'ssd_cla_placement';
 PRINT 'Creating table: ' + @TableName;
 
 
-
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_placement', 'U') IS NOT NULL DROP TABLE ssd_cla_placement;
-
+IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_placement;
+ 
 -- Create structure
-CREATE TABLE ssd_cla_placement (
-    clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,
+CREATE TABLE #ssd_cla_placement (
+    clap_cla_placement_id               NVARCHAR(48),-- PRIMARY KEY,
     clap_cla_episode_id                 NVARCHAR(48),
     clap_cla_placement_start_date       DATETIME,
     clap_cla_placement_type             NVARCHAR(100),
@@ -2126,13 +2125,11 @@ CREATE TABLE ssd_cla_placement (
     clap_cla_placement_provider         NVARCHAR(48),
     clap_cla_placement_postcode         NVARCHAR(8),
     clap_cla_placement_end_date         DATETIME,
-    clap_cla_placement_change_reason    NVARCHAR(100),
-    clap_cla_id                         NVARCHAR(48)  
+    clap_cla_placement_change_reason    NVARCHAR(100)
 );
  
- 
 -- Insert data
-INSERT INTO ssd_cla_placement (
+INSERT INTO #ssd_cla_placement (
     clap_cla_placement_id,
     clap_cla_episode_id,
     clap_cla_placement_start_date,
@@ -2143,31 +2140,31 @@ INSERT INTO ssd_cla_placement (
     clap_cla_placement_provider,
     clap_cla_placement_postcode,
     clap_cla_placement_end_date,
-    clap_cla_placement_change_reason,
-    clap_cla_id  
+    clap_cla_placement_change_reason  
 )
 SELECT
     fcp.FACT_CLA_PLACEMENT_ID                   AS clap_cla_placement_id,
-    fce.FACT_CARE_EPISODES_ID                   AS clap_cla_episode_id,                                 
+    fcp.FACT_CLA_ID                             AS clap_cla_episode_id,                                
     fcp.START_DTTM                              AS clap_cla_placement_start_date,
     fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE          AS clap_cla_placement_type,
     fce.OFSTED_URN                              AS clap_cla_placement_urn,
-    TRY_CAST(fcp.DISTANCE_FROM_HOME AS FLOAT)   AS clap_cla_placement_distance,                         -- convert to FLOAT (col also holds nulls/ints)
+    TRY_CAST(fcp.DISTANCE_FROM_HOME AS FLOAT)   AS clap_cla_placement_distance,                         -- convert to FLOAT (source col is nvarchar, also holds nulls/ints)
     'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,                               -- [PLACEHOLDER_DATA] [TESTING]
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
     fcp.POSTCODE                                AS clap_cla_placement_postcode,
     fcp.END_DTTM                                AS clap_cla_placement_end_date,
-    fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE          AS clap_cla_placement_change_reason,
-    fcp.FACT_CLA_ID                             AS clap_cla_id  
+    fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE          AS clap_cla_placement_change_reason
+ 
 FROM
  
     Child_Social.FACT_CLA_PLACEMENT AS fcp
-
+ 
 JOIN
-    Child_Social.FACT_CLA AS fcla ON fcla.FACT_CLA_ID = fcp.FACT_CLA_ID                                 -- [TESTING] [JH Fix]
-JOIN
-    Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID;    -- [TESTING] [JH Fix]
+    Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID    -- [TESTING] [JH Fix]
 
+AND fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1','F2','F3','F4','F5','F6','H1','H2','H3',
+                                            'H4','H5','H5a','K1','K2','M2','M3','P1','P2','Q1','Q2','R1','R2','R3',
+                                            'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
 -- Add constraint(s)
 CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_placement(clap_cla_episode_id);
@@ -2650,6 +2647,11 @@ PRINT 'Creating table: ' + @TableName;
 -- Check if exists & drop
 IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
 
+
+
+/* 
+-- V1 On hold 
+
 -- Create structure
 CREATE TABLE ssd_sdq_scores (
     csdq_table_id              NVARCHAR(48) PRIMARY KEY,
@@ -2706,6 +2708,68 @@ FROM
 JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
 
 LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
+
+
+-- End of V1
+*/
+
+
+
+-- Start V2
+-- Create structure
+CREATE TABLE ssd_sdq_scores (
+    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
+    csdq_person_id             NVARCHAR(48),
+    --csdq_sdq_completed_date  DATETIME,        -- combined with sdq score in _json field
+    csdq_sdq_reason            NVARCHAR(100),
+    csdq_sdq_score_json        NVARCHAR(500)    -- {'csdq_sdq_completed_date':dateVal, 'csdq_sdq_score':scoreVal }
+);
+
+-- Insert data
+INSERT INTO ssd_sdq_scores (
+    csdq_table_id,
+    csdq_person_id,
+    --csdq_sdq_completed_date,
+    csdq_sdq_reason,
+    csdq_sdq_score_json
+)
+
+SELECT 
+    ffa_outer.FACT_FORM_ID                  AS csdq_table_id,
+    ff.DIM_PERSON_ID                        AS csdq_person_id,
+
+    ( -- [TESTING] Need to ensure that only single/most recent reason is required here
+        SELECT TOP 1 f903_inner.SDQ_REASON 
+        FROM Child_Social.FACT_903_DATA f903_inner 
+        WHERE f903_inner.DIM_PERSON_ID = ff.DIM_PERSON_ID
+    )                                       AS csdq_sdq_reason,
+    (
+        SELECT
+            MAX(ISNULL(CASE WHEN ffa_inner.ANSWER_NO = 'FormEndDate' 
+            THEN ffa_inner.answer END, ''))      AS csdq_sdq_completed_date, -- new field alias becomes key in _json field
+            MAX(ISNULL(CASE WHEN ffa_inner.ANSWER_NO = 'SDQScore' 
+            THEN ffa_inner.answer END, ''))      AS csdq_sdq_score           -- new field alias becomes key in _json field
+        FROM 
+            Child_Social.FACT_FORM_ANSWERS ffa_inner
+        WHERE 
+            ffa_inner.fact_form_id = ffa_outer.fact_form_id
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    )                                       AS csdq_sdq_score_json
+FROM 
+    Child_Social.FACT_FORM_ANSWERS ffa_outer
+JOIN 
+    Child_Social.FACT_FORMS ff ON ffa_outer.FACT_FORM_ID = ff.FACT_FORM_ID
+WHERE 
+    ( -- filter on both code and desc (code appears to change, string desc not so)
+        ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
+        OR ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
+    )
+    AND ffa_outer.ANSWER_NO IN ('FormEndDate', 'SDQScore')
+GROUP BY 
+    ffa_outer.FACT_FORM_ID,
+    ff.DIM_PERSON_ID;
+-- End V2
+
 
 
 -- Add FK constraint for csdq_person_id
