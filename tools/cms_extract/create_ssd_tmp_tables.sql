@@ -2843,15 +2843,98 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_care_leavers
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 07/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 0.9
+Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - 
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_care_leavers';
+PRINT 'Creating table: ' + @TableName;
+
+
+
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
+
+-- Create structure
+CREATE TABLE #ssd_care_leavers
+(
+    clea_table_id                       NVARCHAR(48) PRIMARY KEY,
+    clea_person_id                      NVARCHAR(48),
+    clea_care_leaver_eligibility        NVARCHAR(100),
+    clea_care_leaver_in_touch           NVARCHAR(100),
+    clea_care_leaver_latest_contact     DATETIME,
+    clea_care_leaver_accommodation      NVARCHAR(100),
+    clea_care_leaver_accom_suitable     NVARCHAR(100),
+    clea_care_leaver_activity           NVARCHAR(100),
+    clea_pathway_plan_review_date       DATETIME,
+    clea_care_leaver_personal_advisor   NVARCHAR(100)   DEFAULT 'PLACEHOLDER_DATA', -- [TESTING] [PLACEHOLDER_DATA]
+    clea_care_leaver_allocated_team     NVARCHAR(48)    DEFAULT 'PLACEHOLDER_DATA', -- [TESTING] [PLACEHOLDER_DATA]
+    clea_care_leaver_worker_id          NVARCHAR(48)    DEFAULT 'PLACEHOLDER_DATA'  -- [TESTING] [PLACEHOLDER_DATA]
+);
+
+-- Insert data
+INSERT INTO #ssd_care_leavers
+(
+    clea_table_id,
+    clea_person_id,
+    clea_care_leaver_eligibility,
+    clea_care_leaver_in_touch,
+    clea_care_leaver_latest_contact,
+    clea_care_leaver_accommodation,
+    clea_care_leaver_accom_suitable,
+    clea_care_leaver_activity,
+    clea_pathway_plan_review_date,
+    clea_care_leaver_personal_advisor,
+    clea_care_leaver_allocated_team,
+    clea_care_leaver_worker_id
+)
+SELECT 
+    fccl.FACT_CLA_CARE_LEAVERS_ID           AS clea_table_id, 
+    fccl.DIM_PERSON_ID                      AS clea_person_id, 
+    dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC  AS clea_care_leaver_eligibility, 
+    fccl.DIM_LOOKUP_IN_TOUCH_CODE           AS clea_care_leaver_in_touch, 
+    fccl.IN_TOUCH_DTTM                      AS clea_care_leaver_latest_contact, 
+    fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC AS clea_care_leaver_accommodation, 
+    fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC AS clea_care_leaver_accom_suitable, 
+    fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC      AS clea_care_leaver_activity, 
+    fcp.MODIF_DTTM                          AS clea_pathway_plan_review_date, 
+    'PLACEHOLDER_DATA'                      AS clea_care_leaver_personal_advisor,   -- [TESTING] [PLACEHOLDER_DATA]
+    'PLACEHOLDER_DATA'                      AS clea_care_leaver_allocated_team,     -- [TESTING] [PLACEHOLDER_DATA]
+    'PLACEHOLDER_DATA'                      AS clea_care_leaver_worker_id           -- [TESTING] [PLACEHOLDER_DATA]
+FROM 
+    Child_Social.FACT_CLA_CARE_LEAVERS AS fccl
+
+LEFT JOIN Child_Social.DIM_CLA_ELIGIBILITY AS dce 
+    ON fccl.DIM_ELIGIBILITY_ID = dce.DIM_ELIGIBILITY_ID         -- towards clea_care_leaver_eligibility
+
+LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp
+    ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID 
+    AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'               -- towards clea_pathway_plan_review_date
+
+
+CREATE INDEX IDX_clea_person_id ON #ssd_care_leavers(clea_person_id);
+
+
+-- -- Add constraint(s)
+-- ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
+-- FOREIGN KEY (clea_person_id) REFERENCES ssd_person(pers_person_id);
+
+-- ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leaver_worker
+-- FOREIGN KEY (clea_care_leaver_worker_id) REFERENCES ssd_involvements(invo_professional_id);
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
