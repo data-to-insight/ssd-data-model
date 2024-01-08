@@ -1,0 +1,75 @@
+item_ref,old_item_ref,release_datetime,change_id,change_object_name,change_impact_title,change_status,change_type,change_source,change_impact_notes
+CLAR005A,CLR005A,,SSD-505,cla_reviews,,pending,New Feature,D2I,1aDraft - Suggested new item
+CLAR006A,CLR006A,,SSD-506,cla_reviews,,pending,New Feature,D2I,1aDraft - Suggested new item
+CLAR008A,CLR008A,,SSD-507,cla_reviews,,pending,New Feature,D2I,1aDraft - Suggested new item
+CPK011A,CPK011A,,SSD-503,cp_reviews_risks,,pending,New Feature,D2I,1aDraft - Suggested new item
+CPPR008A,CPR008A,,SSD-501,cp_reviews,,pending,New Feature,D2I,1aDraft - Suggested new item
+CPPR009A,CPR009A,,SSD-502,cp_reviews,,pending,New Feature,D2I,1aDraft - Suggested new item
+PREP002A,PLB002A,04/08/2023 10:00,SSD-508,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP003A,PLB011A,04/08/2023 10:00,SSD-509,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP004A,PLB012A,04/08/2023 10:00,SSD-510,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP005A,PLB013A,04/08/2023 10:00,SSD-511,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP006A,PLB014A,04/08/2023 10:00,SSD-512,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP007A,PLS001A,04/08/2023 10:00,SSD-513,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP008A,PLS002A,04/08/2023 10:00,SSD-514,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP009A,PLS003A,04/08/2023 10:00,SSD-515,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP010A,PLS004A,04/08/2023 10:00,SSD-516,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP011A,PLS005A,04/08/2023 10:00,SSD-517,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP012A,PLS006A,04/08/2023 10:00,SSD-518,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP013A,PLS007A,04/08/2023 10:00,SSD-519,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP014A,PLS008A,04/08/2023 10:00,SSD-520,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP015A,PLS009A,04/08/2023 10:00,SSD-521,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP016A,PLS010A,04/08/2023 10:00,SSD-522,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP017A,PLS011A,04/08/2023 10:00,SSD-523,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP018A,PLS012A,04/08/2023 10:00,SSD-524,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP019A,PLS013A,04/08/2023 10:00,SSD-525,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP020A,PLS014A,04/08/2023 10:00,SSD-526,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP021A,PLS015A,04/08/2023 10:00,SSD-527,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP022A,PLS016A,04/08/2023 10:00,SSD-528,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+PREP023A,PLS017A,04/08/2023 10:00,SSD-529,pre_proceedings,,released,New Feature,1bSpecified,1bSpecified - Agreed new item
+VOCH002A,VOC002A,,SSD-530,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
+VOCH003A,VOC003A,,SSD-531,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
+VOCH004A,VOC004A,,SSD-532,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
+VOCH005A,VOC005A,,SSD-533,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
+VOCH006A,VOC006A,,SSD-534,voice_of_child,,pending,New Feature,1bDraft,1bDraft - Suggested new item
+ADDR001A,ADD001A,,SSD-535,address,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+ADDR003A,ADD003A,,SSD-536,address,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+ADDR004A,ADD004A,,SSD-537,address,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+ADDR005A,ADD005A,,SSD-538,address,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+ADDR006A,ADD006A,,SSD-539,address,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+IMMI002A,IMM002A,,SSD-540,immigration_status,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+IMMI003A,IMM003A,,SSD-541,immigration_status,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+IMMI004A,IMM004A,,SSD-542,immigration_status,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+MOTH001A,MOT001A,,SSD-543,mother,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+LEGA004A,LEG004A,,SSD-544,legal_status,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+LEGA005A,LEG005A,,SSD-545,legal_status,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+EAR008A,EAR008A,,SSD-546,early_help_episodes,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CINV003A,CNV003A,,SSD-547,cin_visits,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CINV005A,CNV005A,,SSD-548,cin_visits,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CINV006A,CNV006A,,SSD-549,cin_visits,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+S47E005A,S47005A,,SSD-550,s47_enquiry_icpc,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+ICPC003A,S47011A,,SSD-551,s47_enquiry_icpc,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CPPL010A,CAT004A,,SSD-552,category_of_abuse,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CPPV004A,CPV004A,,SSD-553,cp_visits,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CPPV006A,CPV006A,,SSD-554,cp_visits,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CPPR003A,CPR003A,,SSD-555,cp_reviews,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CPPR005A,CPR005A,,SSD-556,cp_reviews,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CPPR006A,CPR006A,,SSD-557,cp_reviews,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CPPR007A,CPR007A,,SSD-558,cp_reviews,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CLAR003A,CLR003A,,SSD-559,cla_reviews,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CLAV004A,CLV004A,,SSD-560,cla_visits,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CLAV005A,CLV005A,,SSD-561,cla_visits,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+CSDQ003A,SDQ003A,,SSD-562,sdq_scores,,pending,New Feature,Local,Local - Recorded but not incl. in any data collections
+ICPC006A,S47008A,,SSD-562,S47_enquiry_icpc,,released,New Feature,D2I,Existing - Current returned data
+CPPR008A,CPPR008A,,SSD-563,ssd_cp_reviews,,pending,New Feature,D2I,1aRemove
+CPPR009A,CPPR009A,,SSD-564,ssd_cp_reviews,,pending,New Feature,D2I,1aRemove
+CPK010A,CPK010A,,SSD-565,ssd_cp_reviews_risks,,pending,New Feature,D2I,1aRemove
+CPK011A,CPK011A,,SSD-566,ssd_cp_reviews_risks,,pending,New Feature,D2I,1aRemove
+CLAR005A,CLAR005A,,SSD-567,ssd_cla_reviews,,pending,New Feature,D2I,1aRemove
+CLAR006A,CLAR006A,,SSD-568,ssd_cla_reviews,,pending,New Feature,D2I,1aRemove
+CLAR008A,CLAR008A,,SSD-569,ssd_cla_reviews,,pending,New Feature,D2I,1aRemove
+CPPC001A,CPPC001A,,SSD-570,ssd_category_of_abuse,,pending,New Feature,D2I,1aRemove
+CPPC002A,CPPC002A,,SSD-571,ssd_category_of_abuse,,pending,New Feature,D2I,1aRemove
+CPPC003A,CPPC003A,,SSD-572,ssd_category_of_abuse,,pending,New Feature,D2I,1aRemove
+CPPC004A,CPPC004A,,SSD-573,ssd_category_of_abuse,,pending,New Feature,D2I,1aRemove
+PERS013A,PERS012A,,SSD-574,pers_common_child_id,Common Child Identifier,pending,New Feature,D2I,1aRemove

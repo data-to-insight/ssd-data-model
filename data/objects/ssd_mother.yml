@@ -1,0 +1,86 @@
+---
+nodes:
+- name: ssd_mother
+  fields:
+  - name: moth_person_id
+    description: Person Unique ID (Mother)
+    item_ref: MOTH002A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id (field is both PK/FK)
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - identity
+    - looked_after
+    - mother
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:moth_person_id
+    - mosaic:moth_person_id
+    cms_table:
+    - liquid_logic:ssd_mother
+    - mosaic:ssd_mother
+    guidance: The unique identifier of the mother's child
+  - name: moth_childs_person_id
+    description: Mother's Child's Unique ID
+    item_ref: MOTH001A
+    type: nvarchar
+    primary_key: true
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - looked_after
+    - mother
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:moth_childs_person_id
+    - mosaic:moth_childs_person_id
+    cms_table:
+    - liquid_logic:ssd_mother
+    - mosaic:ssd_mother
+    guidance: See PERS001A
+    metadata:
+      release: In review|pending
+      change_id: SSD-543
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: moth_childs_dob
+    description: Date of birth of mother's child
+    item_ref: MOTH003A
+    type: datetime
+    categories:
+    - identity
+    - looked_after
+    - mother
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:moth_childs_dob
+    - mosaic:moth_childs_dob
+    cms_table:
+    - liquid_logic:ssd_mother
+    - mosaic:ssd_mother
+    guidance: Currently collected for CLA only, only first child dob collected

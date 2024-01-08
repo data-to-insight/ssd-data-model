@@ -1,0 +1,97 @@
+# Example
+- name: CIN Plan
+  color: '#b3e2cd'
+  steps:
+    - name: Contact
+    - name: Social Care Referral
+    - name: Socail CAre Assessment
+    - name: Child in Need Plan
+    - name: Child in Need Visits
+      records:
+        - id: cin_plans
+
+
+
+- name: Assessment NFA
+  steps:
+  	- name: Contact
+  	- name: Social Care Referral
+  	- name: Social Care Assesment
+  	- name: NFA
+  		records:
+  			- id: cin_assessment_nfa
+
+ - name: Early Help
+  steps:
+  	- name: Contact
+  	- name: Referral to Early Help
+  	- name: Early Help Assessment/ work
+  		records:
+  			- id: early_help_episodes
+
+
+- name: CP Plan
+  steps:
+  	- name: Contact
+  	- name: Social Care Referral
+  	- name: Social Care Assesment
+  	- name: Strategy Discussion
+  	- name: Section 47 Enquiry
+  	- name: Initial CP Conference
+  	- name: Child Protection Plan
+  	- name: Review CP Conference
+  	- name: CP Visits
+  		records:
+  			- id: cp_plans
+
+
+
+- name: Child Looked After
+  steps:
+  	- name: Contact
+  	- name: Social Care Referral
+  	- name: Social Care Assesment
+  	- name: Strategy Discussion
+  	- name: Section 47 Enquiry
+  	- name: Initial CP Conference
+  	- name: Child Protection Plan
+  	- name: Review CP Conference
+  	- name: Child Looked After
+   	- name: CLA Reveiw Conference
+  	- name: CLA Visits
+  		records:
+  			- id: cla_episodes
+
+
+- name: CP Plan Step-down
+  steps:
+  	- name: Contact
+  	- name: Social Care Referral
+  	- name: Social Care Assesment
+  	- name: Strategy Discussion
+  	- name: Section 47 Enquiry
+  	- name: Initial CP Conference
+  	- name: Child Protection Plan
+  	- name: Review CP Conference
+  	- name: Child in Need Plan
+  	- name: CIN Visits
+  		records:
+  			- id: cp_plans_stepdown
+
+
+
+- name: Adoption
+  steps:
+  	- name: Contact
+  	- name: Social Care Referral
+  	- name: Social Care Assesment
+  	- name: Strategy Discussion
+  	- name: Section 47 Enquiry
+  	- name: Initial CP Conference
+  	- name: Child Protection Plan
+  	- name: Review CP Conference
+  	- name: Child Looked After
+   	- name: CLA Reveiw Conference
+  	- name: Adoption
+  		records:
+  			- id: permanence

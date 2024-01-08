@@ -1,0 +1,178 @@
+---
+nodes:
+- name: ssd_cla_reviews
+  fields:
+  - name: clar_cla_review_id
+    description: Review ID
+    item_ref: CLAR001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - looked_after
+    - review
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clar_cla_review_id
+    - mosaic:clar_cla_review_id
+    cms_table:
+    - liquid_logic:ssd_cla_reviews
+    - mosaic:ssd_cla_reviews
+    guidance: CLA Review unique ID from system or auto-generated as part of export.
+  - name: clar_cla_episode_id
+    description: Episode ID
+    item_ref: CLAR002A
+    type: nvarchar
+    foreign_key: ssd_cla_episodes.clae_cla_episode_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - looked_after
+    - review
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clar_cla_episode_id
+    - mosaic:clar_cla_episode_id
+    cms_table:
+    - liquid_logic:ssd_cla_reviews
+    - mosaic:ssd_cla_reviews
+    guidance: See CLA001A
+  - name: clar_cla_id
+    description: CLA_ID
+    item_ref: CLAR011A
+    type: nvarchar
+    categories:
+    - looked_after
+    - review
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clar_cla_id
+    - mosaic:clar_cla_id
+    cms_table:
+    - liquid_logic:ssd_cla_reviews
+    - mosaic:ssd_cla_reviews
+    guidance: null
+  - name: clar_cla_review_due_date
+    description: CLA Review Due Date
+    item_ref: CLAR003A
+    type: datetime
+    categories:
+    - looked_after
+    - review
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clar_cla_review_due_date
+    - mosaic:clar_cla_review_due_date
+    cms_table:
+    - liquid_logic:ssd_cla_reviews
+    - mosaic:ssd_cla_reviews
+    guidance: Date the CLA review was due
+    metadata:
+      release: In review|pending
+      change_id: SSD-559
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: clar_cla_review_date
+    description: CLA Review Date
+    item_ref: CLAR004A
+    type: datetime
+    categories:
+    - looked_after
+    - review
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clar_cla_review_date
+    - mosaic:clar_cla_review_date
+    cms_table:
+    - liquid_logic:ssd_cla_reviews
+    - mosaic:ssd_cla_reviews
+    guidance: Actual date of Review conference
+  - name: clar_cla_review_participation
+    description: Participation code
+    item_ref: CLAR007A
+    type: nvarchar
+    categories:
+    - looked_after
+    - review
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clar_cla_review_participation
+    - mosaic:clar_cla_review_participation
+    cms_table:
+    - liquid_logic:ssd_cla_reviews
+    - mosaic:ssd_cla_reviews
+    guidance: 'Record the method of participation in each review using the codes below:
+      -PN0 Child aged under 4 at the time of the review
+
+      -PN1 Child physically attends and speaks for him or herself (Attendance).
+
+      -PN2 Child physically attends and an advocate speaks on his or her behalf. (Attendance
+      views represented by advocate or Independent Reviewing Officer (IRO))
+
+      -PN3 Child attends and conveys his or her view symbolically (non-verbally) (Attendance
+      symbols)
+
+      -PN4 Child physically attends but does not speak for him or herself, does not
+      convey his or her view symbolically (non-verbally) and does not ask an advocate
+      to speak for him or her (Attendance without contribution)
+
+      -PN5 Child does not attend physically but briefs an advocate to speak for him
+      or her (Views represented by advocate or independent reviewing officer (IRO)
+      through texting, written format, phone, audio/video, viewpoint)
+
+      -PN6 Child does not attend but conveys his or her feelings to the review by
+      a facilitative medium (Texting the chair, written format, phone, audio/video,
+      viewpoint)
+
+      -PN7 Child does not attend nor are his or her views conveyed to the review'
+  - name: clar_cla_review_last_iro_contact_date
+    description: Date of Last IRO Visit / Contact to the Child
+    item_ref: CLAR010A
+    type: datetime
+    categories:
+    - looked_after
+    - review
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clar_cla_review_last_iro_contact_date
+    - mosaic:clar_cla_review_last_iro_contact_date
+    cms_table:
+    - liquid_logic:ssd_cla_reviews
+    - mosaic:ssd_cla_reviews
+    guidance: Confirm the date of the last visit or contact by the LAs Independent
+      Reviewing Officer (IRO). This may in some instances be the same date as the
+      date of the last statutory review and if so please repeat the date here.

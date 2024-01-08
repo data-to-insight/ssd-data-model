@@ -1,0 +1,119 @@
+---
+nodes:
+- name: ssd_linked_identifiers
+  fields:
+  - name: link_table_id
+    description: Link table row ID
+    item_ref: LINK001A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - linked_identifiers
+    returns:
+    - 1aNotInCMS
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:link_table_id
+    - mosaic:link_table_id
+    cms_table:
+    - liquid_logic:ssd_linked_identifiers
+    - mosaic:ssd_linked_identifiers
+    guidance: No guidance available yet
+  - name: link_person_id
+    description: Person Unique ID
+    item_ref: LINK002A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    categories:
+    - linked_identifiers
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:link_person_id
+    - mosaic:link_person_id
+    cms_table:
+    - liquid_logic:ssd_linked_identifiers
+    - mosaic:ssd_linked_identifiers
+    guidance: No guidance available yet
+  - name: link_identifier_type
+    description: '[''Case Number'', ''Unique Pupil Number'', NHS Number'', ''Home
+      Office Registration'', National Insurance Number'', ''YOT Number'', Court Case
+      Number'', RAA ID'', ''Incident ID'']'
+    item_ref: LINK003A
+    type: nvarchar
+    categories:
+    - linked_identifiers
+    returns:
+    - 1aNotInCMS
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:link_identifier_type
+    - mosaic:link_identifier_type
+    cms_table:
+    - liquid_logic:ssd_linked_identifiers
+    - mosaic:ssd_linked_identifiers
+    guidance: No guidance available yet
+  - name: link_identifier_value
+    description: Identifier or reference code
+    item_ref: LINK004A
+    type: nvarchar
+    categories:
+    - linked_identifiers
+    returns:
+    - 1aNotInCMS
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:link_identifier_value
+    - mosaic:link_identifier_value
+    cms_table:
+    - liquid_logic:ssd_linked_identifiers
+    - mosaic:ssd_linked_identifiers
+    guidance: No guidance available yet
+  - name: link_valid_from_date
+    description: Date the identifier is known/valid from
+    item_ref: LINK005A
+    type: datetime
+    categories:
+    - linked_identifiers
+    returns:
+    - 1aNotInCMS
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:link_valid_from_date
+    - mosaic:link_valid_from_date
+    cms_table:
+    - liquid_logic:ssd_linked_identifiers
+    - mosaic:ssd_linked_identifiers
+    guidance: No guidance available yet
+  - name: link_valid_to_date
+    description: Date the identifier ceases to be known/valid
+    item_ref: LINK006A
+    type: datetime
+    categories:
+    - linked_identifiers
+    returns:
+    - 1aNotInCMS
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:link_valid_to_date
+    - mosaic:link_valid_to_date
+    cms_table:
+    - liquid_logic:ssd_linked_identifiers
+    - mosaic:ssd_linked_identifiers
+    guidance: No guidance available yet

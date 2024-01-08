@@ -1,0 +1,108 @@
+---
+nodes:
+- name: ssd_cla_substance_misuse
+  fields:
+  - name: clas_substance_misuse_id
+    description: Substance Misuse ID
+    item_ref: CLAS001A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - looked_after
+    - health
+    - substance_misuse
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_table:
+    - liquid_logic:ssd_cla_substance_misuse
+    - mosaic:ssd_cla_substance_misuse
+    guidance: Substance misuse record unique ID from system or auto-generated as part
+      of export.
+  - name: clas_person_id
+    description: Person Unique ID
+    item_ref: CLAS002A
+    type: nvarchar
+    foreign_key: ssd_cla_episodes.clae_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - looked_after
+    - health
+    - substance_misuse
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:clas_person_id
+    - mosaic:clas_person_id
+    cms_table:
+    - liquid_logic:ssd_cla_substance_misuse
+    - mosaic:ssd_cla_substance_misuse
+    guidance: See PERS001A
+  - name: clas_substance_misuse_date
+    description: Date of substance misuse
+    item_ref: CLAS003A
+    type: datetime
+    categories:
+    - looked_after
+    - health
+    - substance_misuse
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_table:
+    - liquid_logic:ssd_cla_substance_misuse
+    - mosaic:ssd_cla_substance_misuse
+    guidance: Date of substance misuse
+  - name: clas_substance_misused
+    description: Substance misused
+    item_ref: CLAS004A
+    type: nchar
+    categories:
+    - looked_after
+    - health
+    - substance_misuse
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clas_substance_misused
+    - mosaic:clas_substance_misused
+    cms_table:
+    - liquid_logic:ssd_cla_substance_misuse
+    - mosaic:ssd_cla_substance_misuse
+    guidance: Substance that was being misused
+  - name: clas_intervention_received
+    description: Child received intervention for substance misuse problem
+    item_ref: CLAS005A
+    type: nchar
+    categories:
+    - looked_after
+    - health
+    - substance_misuse
+    returns:
+    - SSDA903
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clas_intervention_received
+    - mosaic:clas_intervention_received
+    cms_table:
+    - liquid_logic:ssd_cla_substance_misuse
+    - mosaic:ssd_cla_substance_misuse
+    guidance: Did child receive intervention for substance misuse problem?

@@ -1,0 +1,102 @@
+---
+nodes:
+- name: ssd_disability
+  fields:
+  - name: disa_person_id
+    description: Person Unique ID
+    item_ref: DISA001A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - disability
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:disa_person_id
+    - mosaic:disa_person_id
+    cms_table:
+    - liquid_logic:ssd_disability
+    - mosaic:ssd_disability
+    guidance: See PERS001A
+  - name: disa_table_id
+    description: Disability table row ID
+    item_ref: DISA003A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - identity
+    - disability
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:disa_table_id
+    - mosaic:disa_table_id
+    cms_table:
+    - liquid_logic:ssd_disability
+    - mosaic:ssd_disability
+    guidance: null
+  - name: disa_disability_code
+    description: Disability Code
+    item_ref: DISA002A
+    type: nvarchar
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - disability
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:disa_disability_code
+    - mosaic:disa_disability_code
+    cms_table:
+    - liquid_logic:ssd_disability
+    - mosaic:ssd_disability
+    guidance: "The Disability Discrimination Act 2005 (DDA) defines a disabled person\
+      \ as a person with a physical or mental impairment which has a substantial and\
+      \ long-term adverse effect on his/her ability to carry out normal day-to-day\
+      \ activities. The condition must have lasted, or be likely to last at least\
+      \ 12 months in order to be counted as a disability.\nCertain conditions are\
+      \ not regarded as impairments for the purposes of the act:\n\u2022 addiction\
+      \ to, or dependency on, alcohol, nicotine, or any other substance (other than\
+      \ as a result of the substance being medically prescribed);\n\u2022 the condition\
+      \ known as seasonal allergic rhinitis (hay fever), except where it aggravates\
+      \ the effect of another condition;\n\u2022 tendency to start fires;\n\u2022\
+      \ tendency to steal;\n\u2022 tendency to physically or sexually abuse other\
+      \ persons;\n\u2022 exhibitionism;\n\u2022 voyeurism\nIn addition, disfigurements\
+      \ such as tattoos, non-medical body piercing, or something attached through\
+      \ such piercing, are not regarded as having a substantial adverse effect on\
+      \ the person\u2019s ability to carry out normal day-to-day activities.\nIf a\
+      \ child is disabled or becomes disabled at any time during the collection year,\
+      \ record all the relevant disabilities that have affected the child. For example,\
+      \ children may have multiple disabilities in which case more than one category\
+      \ from the below list can be selected. \u2018Other DDA\u2019 can also be used\
+      \ in conjunction with any of the other categories.\nIf your MIS does not allow\
+      \ for the identification of individual disabilities, then the code \u2018Other\
+      \ DDA\u2019 may be used for all children with a disability. However, this must\
+      \ be recorded in your COLLECT return level notes so your data can be analysed\
+      \ appropriately.\nIf a child has no disability, do not leave this item blank;\
+      \ use the code \u2018NONE\u2019. However, if a child is unborn then the disability\
+      \ item should be left blank."

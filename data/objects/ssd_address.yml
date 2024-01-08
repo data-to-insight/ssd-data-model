@@ -1,0 +1,197 @@
+---
+nodes:
+- name: ssd_address
+  fields:
+  - name: addr_table_id
+    description: Address table row ID
+    item_ref: ADDR007A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:addr_table_id
+    - mosaic:addr_table_id
+    cms_table:
+    - liquid_logic:ssd_address
+    - mosaic:ssd_address
+    guidance: null
+  - name: addr_address_json
+    description: 'Address (combined dictionary/json type containing: room, floor,
+      flat, building, house num, street, locality, town, county, uprn, easting, northing)'
+    item_ref: ADDR001A
+    type: nvarchar
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:addr_address_json
+    - mosaic:addr_address_json
+    cms_table:
+    - liquid_logic:ssd_address
+    - mosaic:ssd_address
+    guidance: Address detail
+    metadata:
+      release: In review|pending
+      change_id: SSD-535
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: addr_person_id
+    description: Person Unique ID
+    item_ref: ADDR002A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    categories:
+    - identity
+    - address
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:addr_person_id
+    - mosaic:addr_person_id
+    cms_table:
+    - liquid_logic:ssd_address
+    - mosaic:ssd_address
+    guidance: See PERS001A
+  - name: addr_address_type
+    description: Address Type
+    item_ref: ADDR003A
+    type: nvarchar
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:addr_address_type
+    - mosaic:addr_address_type
+    cms_table:
+    - liquid_logic:ssd_address
+    - mosaic:ssd_address
+    guidance: Home/ Placement/ Primary/ Secondary
+    metadata:
+      release: In review|pending
+      change_id: SSD-536
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: addr_address_start_date
+    description: Address Start Date/ From
+    item_ref: ADDR004A
+    type: datetime
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:addr_address_start_date
+    - mosaic:addr_address_start_date
+    cms_table:
+    - liquid_logic:ssd_address
+    - mosaic:ssd_address
+    guidance: Date person started living at the address
+    metadata:
+      release: In review|pending
+      change_id: SSD-537
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: addr_address_end_date
+    description: Address End Date/ To
+    item_ref: ADDR005A
+    type: datetime
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:address_end
+    - mosaic:address_end
+    cms_table:
+    - liquid_logic:ssd_address
+    - mosaic:ssd_address
+    guidance: Date person left the address
+    metadata:
+      release: In review|pending
+      change_id: SSD-538
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: addr_postcode
+    description: Address Postcode
+    item_ref: ADDR006A
+    type: nvarchar
+    categories:
+    - identity
+    - address
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:addr_postcode
+    - mosaic:addr_postcode
+    cms_table:
+    - liquid_logic:ssd_address
+    - mosaic:ssd_address
+    guidance: You should provide a current post code for most persons and every effort
+      should be made to obtain valid details. If it is not possible to get the post
+      code, you should leave this field blank and provide an explanatory note.
+    metadata:
+      release: In review|pending
+      change_id: SSD-539
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature

@@ -1,0 +1,275 @@
+---
+nodes:
+- name: ssd_cp_plans
+  fields:
+  - name: cppl_cp_plan_id
+    description: CP Plan ID
+    item_ref: CPPL001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - child_protection
+    - cp_plan
+    returns:
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cppl_cp_plan_id
+    - mosaic:cppl_cp_plan_id
+    cms_table:
+    - liquid_logic:ssd_cp_plans
+    - mosaic:ssd_cp_plans
+    guidance: CP Plan unique ID from system or auto-generated as part of export. This
+      module contains information on child protection plans. A child can have none,
+      one or more than one child protection plan (CPP). A child who is not in need
+      cannot have a child protection plan. The collection allows more than one plan
+      review date to be provided and all reviews within the year should be included.
+      A child protection plan being transferred from another local authority should
+      be recorded as a new plan, even if the child had previously received services
+      in the local authority they are transferring to.
+  - name: cppl_referral_id
+    description: Referral ID
+    item_ref: CPPL007A
+    type: nvarchar
+    categories:
+    - child_protection
+    - cp_plan
+    returns:
+    - Local
+    cms_field:
+    - liquid_logic:cppl_referral_id
+    - mosaic:cppl_referral_id
+    cms_table:
+    - liquid_logic:ssd_cp_plans
+    - mosaic:ssd_cp_plans
+    guidance: null
+  - name: cppl_initial_cp_conference_id
+    description: Initial CP Conference ID
+    item_ref: CPPL008A
+    type: nvarchar
+    foreign_key: ssd_initial_cp_conference.icpc_icpc_id
+    categories:
+    - child_protection
+    - cp_plan
+    returns:
+    - Local
+    cms_field:
+    - liquid_logic:cppl_initial_cp_conference_id
+    - mosaic:cppl_initial_cp_conference_id
+    cms_table:
+    - liquid_logic:ssd_cp_plans
+    - mosaic:ssd_cp_plans
+    guidance: null
+  - name: cppl_person_id
+    description: Person Unique ID
+    item_ref: CPPL002A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - child_protection
+    - cp_plan
+    returns:
+    - SSDA903
+    - CINcensus
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:cppl_person_id
+    - mosaic:cppl_person_id
+    cms_table:
+    - liquid_logic:ssd_cp_plans
+    - mosaic:ssd_cp_plans
+    guidance: See PERS001A
+  - name: cppl_cp_plan_start_date
+    description: CP Plan Start Date
+    item_ref: CPPL003A
+    type: datetime
+    categories:
+    - child_protection
+    - cp_plan
+    returns:
+    - CINcensus
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cppl_cp_plan_start_date
+    - mosaic:cppl_cp_plan_start_date
+    cms_table:
+    - liquid_logic:ssd_cp_plans
+    - mosaic:ssd_cp_plans
+    guidance: If a child is the subject of a child protection plan, enter the start
+      date of that plan, using the formatting covered in the general notes. Otherwise,
+      leave blank.
+  - name: cppl_cp_plan_end_date
+    description: CP Plan End Date
+    item_ref: CPPL004A
+    type: datetime
+    categories:
+    - child_protection
+    - cp_plan
+    returns:
+    - CINcensus
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cppl_cp_plan_end_date
+    - mosaic:cppl_cp_plan_end_date
+    cms_table:
+    - liquid_logic:ssd_cp_plans
+    - mosaic:ssd_cp_plans
+    guidance: Enter the end date of the plan, using the formatting covered in the
+      general notes. Otherwise, leave blank.
+  - name: cppl_cp_plan_team
+    description: CP Plan Allocated Team
+    item_ref: CPPL005A
+    type: nvarchar
+    categories:
+    - child_protection
+    - cp_plan
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cppl_cp_plan_team
+    - mosaic:cppl_cp_plan_team
+    cms_table:
+    - liquid_logic:ssd_cp_plans
+    - mosaic:ssd_cp_plans
+    guidance: Allocated Team responsible for CP Plan
+  - name: cppl_cp_plan_worker_id
+    description: CP Plan Allocated Worker ID
+    item_ref: CPPL006A
+    type: nvarchar
+    foreign_key: ssd_involvements.invo_professional_id
+    categories:
+    - child_protection
+    - cp_plan
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:CPPL_cp_plan_worker_id
+    - mosaic:CPPL_cp_plan_worker_id
+    cms_table:
+    - liquid_logic:ssd_cp_plans
+    - mosaic:ssd_cp_plans
+    guidance: Allocated worker responsible for CP Plan
+  - name: cppl_cp_plan_initial_category
+    description: CP Plan Initial Category of Abuse
+    item_ref: CPPL009A
+    type: nvarchar
+    categories:
+    - child_protection
+    - cp_plan
+    returns:
+    - Local
+    cms_table:
+    - liquid_logic:ssd_cp_plans
+    - mosaic:ssd_cp_plans
+    guidance: null
+  - name: cppl_cp_plan_latest_category
+    description: CP Plan Latest Category of Abuse
+    item_ref: CPPL010A
+    type: nvarchar
+    categories:
+    - child_protection
+    - cp_plan
+    returns:
+    - Local
+    cms_table:
+    - liquid_logic:ssd_cp_plans
+    - mosaic:ssd_cp_plans
+    guidance: "Using the code set in the table below record the category of abuse\
+      \ as assessed when the child protection plan commenced and any subsequent category\
+      \ of abuse assigned to the child protection plan. The latest category of abuse\
+      \ may be the same as the initial category of abuse. -NEG Neglect\n-PHY Physical\
+      \ abuse\n-SAB Sexual abuse\n-EMO Emotional abuse\n-MUL Multiple/not recommended\
+      \ The multiple category is for when more than one category of abuse is relevant\
+      \ to the child\u2019s current protection plan. It is not intended to record\
+      \ information for children who have been the subject of more than one child\
+      \ protection plan during the year.\nThe category of abuse under which a child\
+      \ is made the subject of a child protection plan will have been decided upon\
+      \ at the child protection conference. However, if the category of abuse applicable\
+      \ to the current child protection plan has changed as a result of subsequent\
+      \ child protection conferences, then enter the latest category of abuse. Overall,\
+      \ the initial category of abuse is that decided upon at the conference; any\
+      \ amended category is to be recorded as the latest category of abuse. The categories\
+      \ are defined for the purpose of this collection as follows:\n-Neglect\nNeglect\
+      \ is the persistent failure to meet a child\u2019s basic physical and/or psychological\
+      \ needs, which is likely to result in the serious impairment of the child\u2019\
+      s health or development. For instance, a parent or carer may fail to:\n\u2022\
+      \ provide adequate food, shelter, or clothing (including exclusion from home\
+      \ or abandonment);\n\u2022 protect a child from physical harm, emotional harm,\
+      \ or danger;\n\u2022 ensure adequate supervision (including the use of inadequate\
+      \ care-givers);\n\u2022 ensure access to appropriate medical care or treatment.\n\
+      It may also include neglect of, or unresponsiveness to, a child\u2019s basic\
+      \ emotional needs.\nMore information on childhood neglect including training\
+      \ and resource materials can be found in Safeguarding children. -Physical abuse\n\
+      Physical abuse may involve hitting, shaking, throwing, poisoning, burning or\
+      \ scalding, drowning, suffocating, or otherwise causing physical harm to a child.\
+      \ Physical harm may also be caused when a parent or carer deliberately fabricates\
+      \ symptoms or induces illness in a child. The fabrication and deliberate inducement\
+      \ or symptoms relate to conditions such as Munchausen syndrome by proxy.\n-Sexual\
+      \ abuse\nSexual abuse involves forcing or enticing a child to take part in sexual\
+      \ activities, including prostitution, regardless of whether or not the child\
+      \ is aware of what is happening. Such activities may involve physical contact,\
+      \ including non-penetrative and penetrative acts (for example rape, buggery,\
+      \ or oral sex) or non-penetrative acts such as masturbation, kissing, rubbing\
+      \ and touching outside of clothing. They may also include non-contact activities,\
+      \ such as involving children in looking at, or in the production of, sexual\
+      \ images, watching sexual activities, encouraging children to behave in sexually\
+      \ inappropriate ways, or grooming a child in preparation for abuse (including\
+      \ via the internet). Sexual abuse is not solely perpetrated by adult males.\
+      \ Women can also commit acts of sexual abuse, as can other children.\n-Emotional\
+      \ abuse\nEmotional abuse is the persistent ill-treatment of a child that causes\
+      \ severe and continual adverse effects on the child\u2019s emotional development.\
+      \ It may involve conveying to the child that they are inadequate, worthless\
+      \ or unloved, or valued only as far as they meet the needs of another person.\
+      \ It may include not giving the child opportunities to express their views,\
+      \ deliberately silencing them or making fun of what they say or how they communicate.\
+      \ It may feature the imposing of age or developmentally inappropriate expectations\
+      \ on the child. Such expectations may include interactions that are beyond the\
+      \ child\u2019s developmental capability. It includes overprotection and limitation\
+      \ of exploration and learning, or preventing the child from participating in\
+      \ normal social interactions. It may involve the child seeing or hearing the\
+      \ ill-treatment of another. It may also involve serious bullying (including\
+      \ cyber bullying), causing children frequently to feel frightened or in danger,\
+      \ or the exploitation or corruption of children. Some level of emotional abuse\
+      \ is implied in all types of ill-treatment of a child, although it may occur\
+      \ on its own. Use this category when it is the main or sole form of abuse.\n\
+      -Multiple/not recommended\nThis category is used to record multiple categories\
+      \ or where no category is recommended."
+    metadata:
+      release: In review|pending
+      change_id: SSD-552
+      change_source: Local
+      versions_count: 1
+      impact_title: null
+      type: New Feature

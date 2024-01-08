@@ -1,0 +1,447 @@
+---
+nodes:
+- name: ssd_cla_episodes
+  fields:
+  - name: clae_cla_episode_id
+    description: Episode ID
+    item_ref: CLAE001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - looked_after
+    returns:
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_cla_episode_id
+    - mosaic:clae_cla_episode_id
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: CLA Episode unique ID from system or auto-generated as part of export.
+  - name: clae_person_id
+    description: Person Unique ID
+    item_ref: CLAE002A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - looked_after
+    returns:
+    - SSDA903
+    - CINcensus
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:clae_person_id
+    - mosaic:clae_person_id
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: See PERS001A
+  - name: clae_cla_episode_start
+    description: Date Episode Commenced
+    item_ref: CLAE003A
+    type: datetime
+    categories:
+    - looked_after
+    returns:
+    - SSDA903
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_cla_episode_start
+    - mosaic:clae_cla_episode_start
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: "This item records the date that each episode began. For the first episode\
+      \ in the year, this date can be in the current data year, or an earlier data\
+      \ year. When loading data using CSV or XML, dates must be recorded in a DD/MM/YYYY\
+      \ format. Example: 4 November 2023 should be entered as 04/11/2023.\nExceptionally,\
+      \ once loaded, the dates in the episode fields will appear as DD/MM/YY (year\
+      \ as a 2-digit number). Manual amendments to episode dates may be made using\
+      \ either format DD/MM/YY or DD/MM/YYYY, though the latter will appear as DD/MM/YY\
+      \ when saved). This is intended to make the episodes easier to read and manually\
+      \ amend, particularly when a record contains several episodes.\nWhere episodes\
+      \ are consecutive, the new episode must start on the same day that the previous\
+      \ episode finished.\nWhen recording an agreement to provide a series of short-term\
+      \ placements (legal status V3/V4), enter in this field the date the first placement\
+      \ under the agreement began. For further information about children being looked-after\
+      \ under a series of short-term placements see Section 1.10.\nWhere an episode\
+      \ began in a previous statistical year, but is still open on 31 March, do not\
+      \ complete \u2018Reason Episode Ceased\u2019 or \u2018Date Episode Ceased\u2019\
+      . The following year\u2019s record must then start with the same episode details\
+      \ showing the actual date the episode commenced if the episode subsequently\
+      \ closes, both the \u2018Reason Episode Ceased\u2019 and the \u2018Date Episode\
+      \ Ceased\u2019 should be recorded).\nEpisodes cannot start and end on the same\
+      \ day. If a child has two changes of legal status in one day only the second\
+      \ legal status is recorded. Similarly, in the unlikely event of two placements\
+      \ starting on the same day, only the status at the end of the day should be\
+      \ recorded. In such cases we no longer regard the first move of the day as being\
+      \ a placement. It follows from this that an essential component of a placement\
+      \ for SSDA903 purposes is that a placement must involve an overnight stay. A\
+      \ \u2018placement\u2019 that does not include an overnight stay should be regarded\
+      \ as a \u2018visit\u2019 and not shown on the SSDA903."
+  - name: clae_cla_episode_start_reason
+    description: Reason for New CLA Episode
+    item_ref: CLAE004A
+    type: nvarchar
+    categories:
+    - looked_after
+    returns:
+    - SSDA903
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_cla_episode_start_reason
+    - mosaic:clae_cla_episode_start_reason
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: "Use Code S where a child is starting to be looked-after for the first\
+      \ time, or had previously ceased to be looked-after, and is now starting to\
+      \ be looked-after again. Also use code S when recording agreements to provide\
+      \ short-term placements (legal status V4), and for individual breaks under such\
+      \ an agreement, if these are being recorded separately (legal status V3).\n\
+      Use Code L where there is a change of legal status, but the placement does not\
+      \ change. By \u2018legal status\u2019 we mean the legal status underlying the\
+      \ fact that the child is looked-after.\nUse Code P where there is a change of\
+      \ placement and carer, but the legal status does not change. This would include\
+      \ the following scenarios:\n\u2022 Move from one foster carer to another foster\
+      \ carer (for example, U3 to another U3 placement type code).\n\u2022 Move from\
+      \ a foster carer to a children\u2019s home (for example, U3 to K2 placement\
+      \ types).\nIn both scenarios there has been a change of carer. When a child\
+      \ is living independently, a new episode should be created each time they move,\
+      \ and code P should be used.\nUse Code T where there is a change of placement,\
+      \ but the child remains with the same carer and the legal status does not change.\
+      \ This would include the following scenarios:\n\u2022 Child moves to a new house\
+      \ with current foster carer (either inside or outside of local authority boundary).\n\
+      \u2022 Child remains with same carer or within same setting but either the URN\
+      \ of the setting changes or the provider type changes (for example, a foster\
+      \ carer moves from an IFA to the local authority provider, or a placement for\
+      \ adoption transferring to a regional adoption agency, or an unregulated independent\
+      \ or semi independent setting registering with Ofsted).\nIn both scenarios,\
+      \ the child has remained with the same carer, but for some other reason, a new\
+      \ placement is required on the SSDA903.\nUse Code B where both legal status\
+      \ and placement change, with a change of carer, on the same day. The two changes\
+      \ do not need to be simultaneous or consequent one upon the other. The code\
+      \ simply reflects that there was a change in carer and a change in legal status,\
+      \ for whatever reason, on the same day.\nUse Code U where both legal status\
+      \ and placement change on the same day, but the child remains with the same\
+      \ carer. The two changes do not need to be simultaneous or consequent one upon\
+      \ the other. The code simply reflects that there was a change in placement and\
+      \ a change in legal status, for whatever reason, on the same day."
+  - name: clae_cla_primary_need
+    description: CIN Primary Need Code
+    item_ref: CLAE009A
+    type: nvarchar
+    categories:
+    - looked_after
+    returns:
+    - SSDA903
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_cla_primary_need
+    - mosaic:clae_cla_primary_need
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: "This code indicates the main reason why a child started to receive\
+      \ services. It should not be left blank. Only one reason can be recorded.\n\
+      If a child is also looked after, the primary need code for children in need\
+      \ might not necessarily be the same as that recorded in the children looked\
+      \ after data collection. For example, this may occur if a child became looked\
+      \ after at a later date than when they became a child in need.\nThe categories\
+      \ are designed only to identify what kind of pressures are placed on social\
+      \ services. They have no diagnostic value with regard to the children themselves\
+      \ and must not be used to determine what type of service the child should receive.\n\
+      If there is difficulty choosing between two or more categories of need, choose\
+      \ the category that comes highest up in the table, for example, if trying to\
+      \ decide between family in acute stress and family dysfunction, choose family\
+      \ in acute stress.\nThe order of the categories relates to the specificity of\
+      \ the description and not necessarily importance. However, the order is fixed\
+      \ so that there is consistency.\nFurther information on choosing a primary need\
+      \ category is in appendix A.\nThe children in need census for 2005 and earlier\
+      \ tried to account for all money spent in a census week. To allow for this,\
+      \ \u2018N9\u2019 was created, but as this census is specifically child based,\
+      \ the definition of \u2018N9\u2019 from 2005 is not applicable. As in previous\
+      \ years, \u2018N9\u2019 can be used if a child is no longer in need and the\
+      \ only service they are receiving is adoption support (on an open case) immediately\
+      \ after they have been in need. Enter the primary need code, selecting from\
+      \ the table below:\n-N1 Abuse or neglect\nChildren in need as a result of, or\
+      \ at risk of, abuse or neglect; also includes children at risk because of domestic\
+      \ violence.\n-N2 Child\u2019s disability\nChildren and families whose main need\
+      \ for services arises because of their child\u2019s disability, illness or intrinsic\
+      \ condition.\n-N3 Parental disability or illness\nChildren whose main need for\
+      \ services arises because the capacity of their parent(s) (or carer(s)) to care\
+      \ for them is impaired by the parent(s) (or carer(s)) disability, physical or\
+      \ mental illness, or addictions.\n-N4 Family in acute stress\nChildren whose\
+      \ needs arise from living in a family that is going through a temporary crisis\
+      \ that diminishes the parental capacity to adequately meet some of the children\u2019\
+      s needs.\n-N5 Family dysfunction\nChildren whose needs primarily arise from\
+      \ living in a family where the parenting capacity is chronically inadequate.\n\
+      -N6 Socially unacceptable behaviour\nChildren and families whose need for services\
+      \ primarily arise out of the child\u2019s behaviour impacting detrimentally\
+      \ on the community.\n-N7 Low income\nChildren, living in families or independently,\
+      \ whose needs primarily arise from being dependent on an income below the standard\
+      \ state entitlements.\n-N8 Absent parenting\nChildren whose needs for services\
+      \ arise mainly from having no parents available to provide for them.\n-N9 Cases\
+      \ other than children in need\nChildren who have been adopted and, although\
+      \ they are no longer a child in need, receive adoption support from children\u2019\
+      s social services immediately after adoption. This should not be used where\
+      \ a child receives an adoption payment only as these children should not be\
+      \ included in the census.\nThe previous definition of \u2018N9\u2019 from 2005\
+      \ was casework which is required for a legal and administrative reason only\
+      \ and there is no child in the case who is in need.\n-N0 Not stated\nChildren\
+      \ whose reference data is not completely entered on the system and whose need\
+      \ code is yet to be determined, or the case is a referral that has been closed\
+      \ following assessment."
+  - name: clae_cla_episode_ceased
+    description: Date Episode Ceased
+    item_ref: CLAE005A
+    type: datetime
+    categories:
+    - looked_after
+    returns:
+    - SSDA903
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_cla_episode_ceased
+    - mosaic:clae_cla_episode_ceased
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: "This item records the date that each episode ended. Code day and month\
+      \ as two-digit numbers and year as a four-digit number. Example: 4 November\
+      \ 2022 should be entered as 04/11/2022.\nAn episode cannot start and end on\
+      \ the same day. Where a child has not left care, a new episode must start on\
+      \ the same day as the previous episode finished.\nWhen a child ceases to be\
+      \ looked-after because of adoption (reason episode ceased codes of E11 or E12),\
+      \ the date episode ceased is the date the court makes the adoption order.\n\
+      When a child ceases to be looked-after because he/she dies whilst being looked-after\
+      \ (reason episode ceased code E2), the date episode ceased must be the same\
+      \ as the date of death as recorded on the death certificate.\nPeriods of care\
+      \ in local authority accommodation of less than 24 hours must not be recorded\
+      \ on the SSDA903. The only exceptions to this rule are:\n\u2022 Children who\
+      \ are being regularly accommodated under an agreed series of short-term placements\
+      \ (legal status codes V3 and V4). Overnight stays of less than 24 hours may\
+      \ be treated as 24 hours for statistical purposes\n\u2022 UASC. They should\
+      \ be recorded as a children looked after as soon as they come to the attention\
+      \ of local authorities, rather than only when they have been accommodated for\
+      \ 24 hours. Unlike other children, all UASC who come to the attention of local\
+      \ authorities will become looked-after so the 24-hour rule should not apply\
+      \ for this group of children."
+  - name: clae_cla_episode_cease_reason
+    description: Reason Episode Ceased
+    item_ref: CLAE006A
+    type: nvarchar
+    categories:
+    - looked_after
+    returns:
+    - SSDA903
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_cla_episode_cease_reason
+    - mosaic:clae_cla_episode_cease_reason
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: "When an episode has ended and a further episode, in the same period\
+      \ of care, has started, use the code, X1. All other \u2018reason episode ceased\u2019\
+      \ codes record the circumstances when a child ceases to be looked-after.\nIf\
+      \ a child ceases to be looked-after because he/she has turned 18, this can already\
+      \ be deduced from his/her date of birth. Therefore, the appropriate code below\
+      \ should be used to capture the destination of the young person.\n-X1 Episode\
+      \ ceases, and new episode begins on same day, for any reason\n-E11 Adopted -\
+      \ application for an adoption order unopposed\nE12 Adopted \u2013 consent dispensed\
+      \ with by the court\nE2 Died\nE3 Care taken over by another local authority\
+      \ in the UK\nE4A Returned home to live with parent(s), relative(s), or other\
+      \ person(s) with parental responsibility as part of the care planning process\
+      \ (not under a special guardianship order or residence order/ child arrangement\
+      \ order).\nE4B Returned home to live with parent(s), relative(s), or other person(s)\
+      \ with parental responsibility which was not part of the current care planning\
+      \ process (not under a special guardianship order or residence order or (from\
+      \ 22 April 2014) a child arrangement order).\nE13 Left care to live with parent(s),\
+      \ relative(s), or other person(s) with no parental responsibility.\nE41 Residence\
+      \ order/ child arrangement order which sets out with whom the child is to live)\
+      \ granted\nE45 Special guardianship order made to former foster carer(s), who\
+      \ was/are a relative(s) or friend(s)\nE46 Special guardianship order made to\
+      \ former foster carer(s), other than relative(s) or friend(s)\nE47 Special guardianship\
+      \ order made to carer(s), other than former foster carer(s), who was/are a relative(s)\
+      \ or friend(s)\nE48 Special guardianship order made to carer(s), other than\
+      \ former foster carer(s), other than relative(s) or friend(s)\nE5 Moved into\
+      \ independent living arrangement and no longer looked-after: supportive accommodation\
+      \ providing formalised advice/support arrangements (such as most hostels, young\
+      \ men\u2019s Christian association, foyers, staying close and care leavers projects).\
+      \ Includes both children leaving care before and at age 18\nE6 Moved into independent\
+      \ living arrangement and no longer looked-after: accommodation providing no\
+      \ formalised advice/support arrangements (such as bedsit, own flat, living with\
+      \ friend(s)). Includes both children leaving care before and at age 18\nE7 Transferred\
+      \ to residential care funded by adult social care services\nE9 Sentenced to\
+      \ custody\nE14 Accommodation on remand ended\nE15 Age assessment determined\
+      \ child is aged 18 or over and E5, E6 and E7 do not apply, such as an unaccompanied\
+      \ asylum-seeking child (UASC) whose age has been disputed\nE16 Child moved abroad\n\
+      E17 Aged 18 (or over) and remained with current carers (inc under staying put\
+      \ arrangements)\nE8 Period of being looked-after ceased for any other reason\
+      \ (where none of the other reasons apply) Further detail on when some of the\
+      \ codes should be used is provided below:\nE4A - Relates to a planned move where\
+      \ the child returns home as part of their agreed care plan. This return home\
+      \ has been discussed as part of the care planning process and happens within\
+      \ a planned timeframe.\nE4B - Relates to an unplanned move - includes instances\
+      \ where the child\u2019s return home is immediate (for example, within 24 hours)\
+      \ and has not been discussed as part of the care planning process or does not\
+      \ occur within the planned timeframe. This would include instances where a child\
+      \ under a voluntary arrangement is removed from care by their parents and this\
+      \ was not agreed as part of the care planning process.\nE13 - Left care to live\
+      \ with parents, relatives, or other person with no parental responsibility \u2013\
+      \ this code should be used if the child left care to live with parents, relatives\
+      \ or another person, but this person did not have parental responsibility.\n\
+      E14 - Accommodation on remand ended \u2013 this code should be used if a child\
+      \ was remanded to youth detention accommodation and has stopped their episode\
+      \ of care because they are no longer remanded.\nE15 - Age assessment determined\
+      \ child is aged 18 or over and E5, E6 and E7 do not apply, for example, an unaccompanied\
+      \ asylum seeking child whose age has been disputed \u2013 this code should be\
+      \ used if the episode of care ended because the age was disputed, an assessment\
+      \ revealed the child was 18 or over and the young person was not transferred\
+      \ to residential care and did not move into independent living arrangements.\
+      \ E16 - Moved abroad \u2013 use this code if the child left care because they\
+      \ moved to another country, including when a child is deported.\nE17 - Aged\
+      \ 18 (or over) and remained with current carers (inc under staying put arrangements)\
+      \ \u2013 use this code whenever the young person has ceased care and remains\
+      \ with their former carers, irrespective of placement type. Young people in\
+      \ foster care who are \u2018staying put\u2019 are only a subset of this group.\n\
+      E8 - Period of being looked-after ceased for any other reason \u2013 this code\
+      \ should never be used purely because a child has reached the age of 18 as this\
+      \ can already be deduced from his/her date of birth. It should only be used\
+      \ when none of the alternative destinations listed are appropriate. E8 should\
+      \ also be used when a child turns 18 and continues to be missing.\nIf a looked-after\
+      \ child is sentenced to custody and placed in a secure children\u2019s home,\
+      \ secure training centre or young offenders\u2019 institution, their status\
+      \ in that setting depends on the legislative framework under which the custodial\
+      \ sentence is applied. If the child is subject to a Care Order (Section 31 Children\
+      \ Act 1989) then they remain looked-after regardless of being sentenced to custody.\
+      \ If the child is accommodated in care by a voluntary agreement under Section\
+      \ 20 of the Children Act 1989, then they cease to be looked-after when they\
+      \ are admitted to custody."
+  - name: clae_cla_team
+    description: Allocated Team
+    item_ref: CLAE007A
+    type: nvarchar
+    categories:
+    - looked_after
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_cla_team
+    - mosaic:clae_cla_team
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: Allocated Team responsible for Looked After Child
+  - name: clae_cla_worker_id
+    description: Allocated Worker ID
+    item_ref: CLAE008A
+    type: nvarchar
+    foreign_key: ssd_involvements.invo_professional_id
+    categories:
+    - looked_after
+    returns:
+    - AnnexA
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_cla_worker_id
+    - mosaic:clae_cla_worker_id
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: Allocated worker responsible for Looked After Child
+  - name: clae_cla_id
+    description: CLA ID
+    item_ref: CLAE010A
+    type: nvarchar
+    categories:
+    - looked_after
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_cla_id
+    - mosaic:clae_cla_id
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: null
+  - name: clae_referral_id
+    description: Referral ID
+    item_ref: CLAE011A
+    type: nvarchar
+    categories:
+    - looked_after
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clae_referral_id
+    - mosaic:clae_referral_id
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: null
+  - name: lacp_referral_id
+    description: Referral ID
+    item_ref: LACP006A
+    type: nvarchar
+    categories:
+    - looked_after
+    - care_plan
+    returns:
+    - Local
+    cms_field:
+    - liquid_logic:lacp_referral_id
+    - mosaic:lacp_referral_id
+    cms_table:
+    - liquid_logic:ssd_cla_episodes
+    - mosaic:ssd_cla_episodes
+    guidance: null
