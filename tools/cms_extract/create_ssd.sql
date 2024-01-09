@@ -2095,7 +2095,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_placement
 Description: 
 Author: D2I
-Last Modified Date: 05/01/23
+Last Modified Date: 09/01/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
@@ -2112,11 +2112,11 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_placement;
+IF OBJECT_ID('ssd_cla_placement', 'U') IS NOT NULL DROP TABLE ssd_cla_placement;
  
 -- Create structure
-CREATE TABLE #ssd_cla_placement (
-    clap_cla_placement_id               NVARCHAR(48),-- PRIMARY KEY,
+CREATE TABLE ssd_cla_placement (
+    clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,
     clap_cla_episode_id                 NVARCHAR(48),
     clap_cla_placement_start_date       DATETIME,
     clap_cla_placement_type             NVARCHAR(100),
@@ -2130,7 +2130,7 @@ CREATE TABLE #ssd_cla_placement (
 );
  
 -- Insert data
-INSERT INTO #ssd_cla_placement (
+INSERT INTO ssd_cla_placement (
     clap_cla_placement_id,
     clap_cla_episode_id,
     clap_cla_placement_start_date,
@@ -2148,20 +2148,32 @@ SELECT
     fcp.FACT_CLA_ID                             AS clap_cla_episode_id,                                
     fcp.START_DTTM                              AS clap_cla_placement_start_date,
     fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE          AS clap_cla_placement_type,
-    fce.OFSTED_URN                              AS clap_cla_placement_urn,
+    (
+        SELECT
+            TOP(1) fce.OFSTED_URN
+            FROM   Child_Social.FACT_CARE_EPISODES fce
+            WHERE  fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
+            AND    fce.OFSTED_URN LIKE 'SC%' 
+            AND fce.OFSTED_URN IS NOT NULL        
+    )                                           AS clap_cla_placement_urn,
+
     TRY_CAST(fcp.DISTANCE_FROM_HOME AS FLOAT)   AS clap_cla_placement_distance,                         -- convert to FLOAT (source col is nvarchar, also holds nulls/ints)
     'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,                               -- [PLACEHOLDER_DATA] [TESTING]
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
-    fcp.POSTCODE                                AS clap_cla_placement_postcode,
+
+    CASE -- removal of common/invalid placeholder data i.e ZZZ, XX
+        WHEN LEN(LTRIM(RTRIM(fcp.POSTCODE))) <= 4 THEN NULL
+        ELSE LTRIM(RTRIM(fcp.POSTCODE))        -- simplistic clean-up
+    END                                         AS clap_cla_placement_postcode,
     fcp.END_DTTM                                AS clap_cla_placement_end_date,
     fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE          AS clap_cla_placement_change_reason
  
+
 FROM
- 
     Child_Social.FACT_CLA_PLACEMENT AS fcp
  
 JOIN
-    Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID    -- [TESTING] [JH Fix]
+    Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID    -- [TESTING]
 
 AND fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1','F2','F3','F4','F5','F6','H1','H2','H3',
                                             'H4','H5','H5a','K1','K2','M2','M3','P1','P2','Q1','Q2','R1','R2','R3',
