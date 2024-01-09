@@ -17,6 +17,7 @@ FROM
     INFORMATION_SCHEMA.COLUMNS 
 WHERE 
     COLUMN_NAME LIKE '%FACT_......%' 
+    --AND TABLE_NAME LIKE '%%'
     AND TABLE_SCHEMA = 'Child_Social';
 
 
@@ -2954,7 +2955,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_care_leavers
 Description: 
 Author: D2I
-Last Modified Date: 07/01/24
+Last Modified Date: 09/01/24
 DB Compatibility: SQL Server 2014+|...
 Version: 0.9
 Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
@@ -2972,10 +2973,12 @@ PRINT 'Creating table: ' + @TableName;
 -- Check if exists & drop
 IF OBJECT_ID('ssd_care_leavers', 'U') IS NOT NULL DROP TABLE ssd_care_leavers;
 
+
+/* V2 */
 -- Create structure
-CREATE TABLE ssd_care_leavers
+CREATE TABLE ssd_care_leavers_results
 (
-    clea_table_id                       NVARCHAR(48) PRIMARY KEY,
+    clea_table_id                       NVARCHAR(48),
     clea_person_id                      NVARCHAR(48),
     clea_care_leaver_eligibility        NVARCHAR(100),
     clea_care_leaver_in_touch           NVARCHAR(100),
@@ -2984,51 +2987,104 @@ CREATE TABLE ssd_care_leavers
     clea_care_leaver_accom_suitable     NVARCHAR(100),
     clea_care_leaver_activity           NVARCHAR(100),
     clea_pathway_plan_review_date       DATETIME,
-    clea_care_leaver_personal_advisor   NVARCHAR(100)   DEFAULT 'PLACEHOLDER_DATA', -- [TESTING] [PLACEHOLDER_DATA]
-    clea_care_leaver_allocated_team     NVARCHAR(48)    DEFAULT 'PLACEHOLDER_DATA', -- [TESTING] [PLACEHOLDER_DATA]
-    clea_care_leaver_worker_id          NVARCHAR(48)    DEFAULT 'PLACEHOLDER_DATA'  -- [TESTING] [PLACEHOLDER_DATA]
+    clea_care_leaver_personal_advisor   NVARCHAR(100),
+    clea_care_leaver_allocated_team     NVARCHAR(48),
+    clea_care_leaver_worker_id          NVARCHAR(48),    -- [TESTING] [PLACEHOLDER_DATA]
+    clea_interaction_history            NVARCHAR(5000),     -- [TESTING] [PLACEHOLDER_DATA]
+    clea_involvement_type_story_json    NVARCHAR(1000)  -- [TESTING] [PLACEHOLDER_DATA]
 );
 
--- Insert data
-INSERT INTO ssd_care_leavers
-(
-    clea_table_id,
-    clea_person_id,
-    clea_care_leaver_eligibility,
-    clea_care_leaver_in_touch,
-    clea_care_leaver_latest_contact,
-    clea_care_leaver_accommodation,
-    clea_care_leaver_accom_suitable,
-    clea_care_leaver_activity,
-    clea_pathway_plan_review_date,
-    clea_care_leaver_personal_advisor,
-    clea_care_leaver_allocated_team,
-    clea_care_leaver_worker_id
+-- CTE for interaction history
+WITH InteractionHistoryCTE AS (
+    SELECT 
+        fi.DIM_PERSON_ID,
+        JSON_QUERY((
+            SELECT                                      -- suggested interaction history KEYS
+                fi2.FACT_INVOLVEMENTS_ID                AS 'involvement_id',
+                fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE    AS 'involvement_type_code',
+                fi2.START_DTTM                          AS 'start_date', 
+                fi2.END_DTTM                            AS 'end_date', 
+                fi2.DIM_WORKER_ID                       AS 'worker_id', 
+                fi2.DIM_DEPARTMENT_ID                   AS 'department_id'
+            FROM 
+                Child_Social.FACT_INVOLVEMENTS fi2
+            WHERE 
+                fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        )) AS interaction_history
+    FROM 
+        Child_Social.FACT_INVOLVEMENTS fi
+    GROUP BY 
+        fi.DIM_PERSON_ID
+), 
+-- CTE for involvement type story
+InvolvementTypeStoryCTE AS (
+    SELECT 
+        fi.DIM_PERSON_ID,
+        STUFF((
+            -- Concat involvement type codes into string
+            -- can't use STRING AGG as appears to not work (Needs v2017+)
+            SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
+            FROM Child_Social.FACT_INVOLVEMENTS fi3
+            WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
+            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
+            FOR XML PATH('')
+        ), 1, 1, '') AS InvolvementTypeStory
+    FROM 
+        Child_Social.FACT_INVOLVEMENTS fi
+    GROUP BY 
+        fi.DIM_PERSON_ID
 )
+
+-- Insert data
+INSERT INTO ssd_care_leavers_results
+(
+    clea_table_id, 
+    clea_person_id, 
+    clea_care_leaver_eligibility, 
+    clea_care_leaver_in_touch, 
+    clea_care_leaver_latest_contact, 
+    clea_care_leaver_accommodation, 
+    clea_care_leaver_accom_suitable, 
+    clea_care_leaver_activity, 
+    clea_pathway_plan_review_date, 
+    clea_care_leaver_personal_advisor,          -- [TESTING] [PLACEHOLDER_DATA]
+    clea_care_leaver_allocated_team,            -- [TESTING] [PLACEHOLDER_DATA]
+    clea_care_leaver_worker_id,                 -- [TESTING] [PLACEHOLDER_DATA]
+    clea_interaction_history,                   -- [TESTING] 
+    clea_involvement_type_story_json            -- [TESTING]
+)
+
 SELECT 
-    fccl.FACT_CLA_CARE_LEAVERS_ID           AS clea_table_id, 
-    fccl.DIM_PERSON_ID                      AS clea_person_id, 
-    dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC  AS clea_care_leaver_eligibility, 
-    fccl.DIM_LOOKUP_IN_TOUCH_CODE           AS clea_care_leaver_in_touch, 
-    fccl.IN_TOUCH_DTTM                      AS clea_care_leaver_latest_contact, 
-    fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC AS clea_care_leaver_accommodation, 
+    fccl.FACT_CLA_CARE_LEAVERS_ID               AS clea_table_id, 
+    fccl.DIM_PERSON_ID                          AS clea_person_id, 
+    dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC      AS clea_care_leaver_eligibility, 
+    fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE          AS clea_care_leaver_in_touch, 
+    fccl.IN_TOUCH_DTTM                          AS clea_care_leaver_latest_contact, 
+    fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC     AS clea_care_leaver_accommodation, 
     fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC AS clea_care_leaver_accom_suitable, 
-    fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC      AS clea_care_leaver_activity, 
-    fcp.MODIF_DTTM                          AS clea_pathway_plan_review_date, 
-    'PLACEHOLDER_DATA'                      AS clea_care_leaver_personal_advisor,   -- [TESTING] [PLACEHOLDER_DATA]
-    'PLACEHOLDER_DATA'                      AS clea_care_leaver_allocated_team,     -- [TESTING] [PLACEHOLDER_DATA]
-    'PLACEHOLDER_DATA'                      AS clea_care_leaver_worker_id           -- [TESTING] [PLACEHOLDER_DATA]
+    fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC          AS clea_care_leaver_activity, 
+    fcp.MODIF_DTTM                              AS clea_pathway_plan_review_date, 
+    'PLACEHOLDER_DATA'                          AS clea_care_leaver_personal_advisor,   -- [TESTING] [PLACEHOLDER_DATA]
+    'PLACEHOLDER_DATA'                          AS clea_care_leaver_allocated_team,     -- [TESTING] [PLACEHOLDER_DATA]
+    'PLACEHOLDER_DATA'                          AS clea_care_leaver_worker_id,          -- [TESTING] [PLACEHOLDER_DATA]
+    ih.interaction_history                      AS clea_interaction_history,            -- [TESTING] 
+    CONCAT('[', its.InvolvementTypeStory, ']')  AS clea_involvement_type_story_json     -- [TESTING] 
+
 FROM 
     Child_Social.FACT_CLA_CARE_LEAVERS AS fccl
 
-LEFT JOIN Child_Social.DIM_CLA_ELIGIBILITY AS dce 
-    ON fccl.DIM_ELIGIBILITY_ID = dce.DIM_ELIGIBILITY_ID         -- towards clea_care_leaver_eligibility
+LEFT JOIN Child_Social.DIM_CLA_ELIGIBILITY AS dce ON fccl.DIM_PERSON_ID = dce.DIM_PERSON_ID     -- towards clea_care_leaver_eligibility
 
-LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp
-    ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID 
-    AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'               -- towards clea_pathway_plan_review_date
+LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID         -- towards clea_pathway_plan_review_date
+    AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'               
+
+LEFT JOIN InteractionHistoryCTE ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID
+LEFT JOIN InvolvementTypeStoryCTE its ON fccl.DIM_PERSON_ID = its.DIM_PERSON_ID;
 
 
+
+-- Add index(es)
 CREATE INDEX IDX_clea_person_id ON ssd_care_leavers(clea_person_id);
 
 -- Add constraint(s)
