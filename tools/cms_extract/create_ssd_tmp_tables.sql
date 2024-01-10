@@ -141,14 +141,12 @@ FROM
 LEFT JOIN
     Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
  
- 
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
     AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
     AND f903.YEAR_TO_DATE = 'Y'                                 -- 903 table includes children looked after in previous year and year to date,
                                                                 -- this filters for those current in the current year to date to avoid duplicates
    
- 
 AND (                                                       -- Filter irrelevant rows by timeframe
     EXISTS (
         -- contact in last x@yrs
@@ -342,6 +340,7 @@ SELECT
     ) AS addr_address_json
 FROM 
     Child_Social.DIM_PERSON_ADDRESS AS pa
+
 WHERE EXISTS 
     (   -- only need address data for ssd relevant records
         -- This also negates the need to apply DIM_PERSON_ID <> '-1';  
@@ -494,6 +493,7 @@ SELECT
     ims.DIM_LOOKUP_IMMGR_STATUS_CODE
 FROM 
     Child_Social.FACT_IMMIGRATION_STATUS AS ims
+
 WHERE 
     EXISTS 
     ( -- only ssd relevant records
@@ -2539,9 +2539,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_visits
 Description: 
 Author: D2I
-Last Modified Date: 12/12/23
+Last Modified Date: 10/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -2560,7 +2560,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_vis
 
 -- Create structure
 CREATE TABLE #ssd_cla_visits (
-    clav_table_id              UNIQUEIDENTIFIER PRIMARY KEY,
+    clav_table_id              NVARCHAR(48),    -- [TESTING] Review PK 100124
     clav_casenote_id           NVARCHAR(48) PRIMARY KEY,
     clav_cla_id                NVARCHAR(48),
     clav_cla_visit_id          NVARCHAR(48),
@@ -2582,7 +2582,7 @@ INSERT INTO #ssd_cla_visits (
     clav_cla_visit_seen_alone
 )
 SELECT
-    DEFAULT NEWID()             AS clav_table_id,
+    NEWID()                     AS clav_table_id,   -- [TESTING] Review PK 100124
     clav.FACT_CASENOTE_ID       AS clav_casenote_id, 
     clav.FACT_CLA_ID            AS clav_cla_id,
     clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
@@ -2599,15 +2599,14 @@ JOIN
 
 
 -- -- Add constraint(s)
--- ALTER TABLE #ssd_cla_visits ADD CONSTRAINT FK_clav_cla_episode_id 
--- FOREIGN KEY (clav_cla_episode_id) REFERENCES #ssd_cla_episodes(clae_cla_episode_id);
+-- ALTER TABLE ssd_cla_visits ADD CONSTRAINT FK_clav_cla_episode_id 
+-- FOREIGN KEY (clav_cla_episode_id) REFERENCES ssd_cla_episodes(clae_cla_episode_id);
 
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
-
 
 
 
@@ -2862,8 +2861,9 @@ Last Modified Date: 10/01/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: Depreciated V2 left intact below for ref. Revised into V3 to aid performance on large involvements table aggr
-Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
+Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions. 
+            Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
+            Depreciated V2 left intact below for ref. Revised into V3 to aid performance on large involvements table aggr
 Dependencies: 
 - FACT_INVOLVEMENTS
 - FACT_CLA_CARE_LEAVERS
@@ -2946,10 +2946,10 @@ WITH InvolvementHistoryCTE AS (
     ) fi
     WHERE fi.rn = 1
 
-    -- AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-    --     SELECT 1 FROM ssd_person p
-    --     WHERE p.pers_person_id = fi.DIM_PERSON_ID
-    -- )
+    AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+        SELECT 1 FROM #ssd_person p
+        WHERE p.pers_person_id = fi.DIM_PERSON_ID
+    )
 
     GROUP BY 
         fi.DIM_PERSON_ID
@@ -2960,15 +2960,15 @@ InvolvementTypeStoryCTE AS (
         fi.DIM_PERSON_ID,
         STUFF((
             -- Concat involvement type codes into string
-            -- can't use STRING AGG as appears to not work (Needs v2017+)
+            -- cannot use STRING AGG as appears to not work (Needs v2017+)
             SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
             FROM Child_Social.FACT_INVOLVEMENTS fi3
             WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
 
-            -- AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-            --     SELECT 1 FROM ssd_person p
-            --     WHERE p.pers_person_id = fi3.DIM_PERSON_ID
-            -- )
+            AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+                SELECT 1 FROM #ssd_person p
+                WHERE p.pers_person_id = fi3.DIM_PERSON_ID
+            )
 
             ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
             FOR XML PATH('')
@@ -2976,11 +2976,11 @@ InvolvementTypeStoryCTE AS (
     FROM 
         Child_Social.FACT_INVOLVEMENTS fi
     
-    -- WHERE 
-    --     EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-    --         SELECT 1 FROM ssd_person p
-    --         WHERE p.pers_person_id = fi.DIM_PERSON_ID
-    --     )
+    WHERE 
+        EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+            SELECT 1 FROM #ssd_person p
+            WHERE p.pers_person_id = fi.DIM_PERSON_ID
+        )
     GROUP BY 
         fi.DIM_PERSON_ID
 )
@@ -3188,7 +3188,7 @@ LEFT JOIN Child_Social.FACT_CARE_EPISODES AS fce
 LEFT JOIN Child_Social.FACT_LEGAL_STATUS AS fls
     ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
     AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512')       -- towards perm_permanence_order_type
-    AND fa.ADOPTION_DTTM IS NOT NULL;                                           -- and only if there is a permanence order
+    AND fa.ADOPTION_DTTM IS NOT NULL                                            -- and only if there is a permanence order
 
 WHERE 
 fa.FACT_ADOPTION_ID <> -1 -- Filter out -1 values
@@ -3196,7 +3196,6 @@ AND fa.ADOPTED_BY_CARER_FLAG = 'Y'
 
 AND EXISTS 
     (   -- only ssd relevant records
-        -- This also negates the need to apply DIM_PERSON_ID <> '-1';  
     SELECT 1 
     FROM #ssd_person p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
