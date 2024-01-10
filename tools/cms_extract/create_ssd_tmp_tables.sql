@@ -2191,10 +2191,10 @@ SELECT
 FROM
     Child_Social.FACT_CLA_PLACEMENT AS fcp
  
-JOIN
-    Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID    -- [TESTING]
+-- JOIN
+--     Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID    -- [TESTING]
 
-AND fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1','F2','F3','F4','F5','F6','H1','H2','H3',
+WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1','F2','F3','F4','F5','F6','H1','H2','H3',
                                             'H4','H5','H5a','K1','K2','M2','M3','P1','P2','Q1','Q2','R1','R2','R3',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
@@ -2846,13 +2846,17 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_care_leavers
 Description: 
 Author: D2I
-Last Modified Date: 09/01/24
+Last Modified Date: 10/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Version: 1.4
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: Depreciated V2 left intact below for ref. Revised into V3 to aid performance on large involvements table aggr
+Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
 Dependencies: 
-- 
+- FACT_INVOLVEMENTS
+- FACT_CLA_CARE_LEAVERS
+- DIM_CLA_ELIGIBILITY
+- FACT_CARE_PLANS
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2865,9 +2869,9 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
 
 
-/* V2 */
+
 -- Create structure
-CREATE TABLE #ssd_care_leavers_results
+CREATE TABLE #ssd_care_leavers
 (
     clea_table_id                       NVARCHAR(48),
     clea_person_id                      NVARCHAR(48),
@@ -2880,17 +2884,23 @@ CREATE TABLE #ssd_care_leavers_results
     clea_pathway_plan_review_date       DATETIME,
     clea_care_leaver_personal_advisor   NVARCHAR(100),
     clea_care_leaver_allocated_team     NVARCHAR(48),
-    clea_care_leaver_worker_id          NVARCHAR(48),    -- [TESTING] [PLACEHOLDER_DATA]
-    clea_interaction_history            NVARCHAR(5000),     -- [TESTING] [PLACEHOLDER_DATA]
-    clea_involvement_type_story_json    NVARCHAR(1000)  -- [TESTING] [PLACEHOLDER_DATA]
+    clea_care_leaver_worker_id          NVARCHAR(48),    -- [TESTING] 
+    clea_interaction_history            NVARCHAR(5000),  -- [TESTING] 
+    clea_involvement_type_story_json    NVARCHAR(1000)   -- [TESTING] 
 );
 
--- CTE for interaction history
+
+/* V3 */
+-- Alternative for performance testing
 WITH InteractionHistoryCTE AS (
     SELECT 
         fi.DIM_PERSON_ID,
+        MAX(CASE WHEN fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' THEN fi.DIM_WORKER_ID END) AS CurrentWorkerID,
+        MAX(CASE WHEN fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END) AS AllocatedTeam,
+        MAX(CASE WHEN fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = '16PLUS' THEN fi.DIM_WORKER_ID END) AS PersonalAdvisorID,
+
         JSON_QUERY((
-            SELECT                                      -- suggested interaction history KEYS
+            SELECT 
                 fi2.FACT_INVOLVEMENTS_ID                AS 'involvement_id',
                 fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE    AS 'involvement_type_code',
                 fi2.START_DTTM                          AS 'start_date', 
@@ -2905,6 +2915,13 @@ WITH InteractionHistoryCTE AS (
         )) AS interaction_history
     FROM 
         Child_Social.FACT_INVOLVEMENTS fi
+    WHERE 
+        fi.END_DTTM IS NULL 
+
+        AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+            SELECT 1 FROM ssd_person p
+            WHERE p.pers_person_id = fi.DIM_PERSON_ID
+        )
     GROUP BY 
         fi.DIM_PERSON_ID
 ), 
@@ -2917,18 +2934,29 @@ InvolvementTypeStoryCTE AS (
             -- can't use STRING AGG as appears to not work (Needs v2017+)
             SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
             FROM Child_Social.FACT_INVOLVEMENTS fi3
-            WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
-            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
+            WHERE 
+                fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
+
+                AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+                    SELECT 1 FROM ssd_person p
+                    WHERE p.pers_person_id = fi3.DIM_PERSON_ID
+                )
+            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC  -- most recent first
             FOR XML PATH('')
         ), 1, 1, '') AS InvolvementTypeStory
     FROM 
         Child_Social.FACT_INVOLVEMENTS fi
+    WHERE 
+        EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+            SELECT 1 FROM ssd_person p
+            WHERE p.pers_person_id = fi.DIM_PERSON_ID
+        )
     GROUP BY 
         fi.DIM_PERSON_ID
 )
 
 -- Insert data
-INSERT INTO #ssd_care_leavers_results
+INSERT INTO ssd_care_leavers
 (
     clea_table_id, 
     clea_person_id, 
@@ -2939,44 +2967,45 @@ INSERT INTO #ssd_care_leavers_results
     clea_care_leaver_accom_suitable, 
     clea_care_leaver_activity, 
     clea_pathway_plan_review_date, 
-    clea_care_leaver_personal_advisor,          -- [TESTING] [PLACEHOLDER_DATA]
-    clea_care_leaver_allocated_team,            -- [TESTING] [PLACEHOLDER_DATA]
-    clea_care_leaver_worker_id,                 -- [TESTING] [PLACEHOLDER_DATA]
+    clea_care_leaver_personal_advisor,          -- [TESTING] 
+    clea_care_leaver_allocated_team,            -- [TESTING] 
+    clea_care_leaver_worker_id,                 -- [TESTING] 
     clea_interaction_history,                   -- [TESTING] 
     clea_involvement_type_story_json            -- [TESTING]
 )
-
 SELECT 
-    fccl.FACT_CLA_CARE_LEAVERS_ID               AS clea_table_id, 
-    fccl.DIM_PERSON_ID                          AS clea_person_id, 
-    dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC      AS clea_care_leaver_eligibility, 
-    fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE          AS clea_care_leaver_in_touch, 
-    fccl.IN_TOUCH_DTTM                          AS clea_care_leaver_latest_contact, 
-    fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC     AS clea_care_leaver_accommodation, 
-    fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC AS clea_care_leaver_accom_suitable, 
-    fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC          AS clea_care_leaver_activity, 
-    fcp.MODIF_DTTM                              AS clea_pathway_plan_review_date, 
-    'PLACEHOLDER_DATA'                          AS clea_care_leaver_personal_advisor,   -- [TESTING] [PLACEHOLDER_DATA]
-    'PLACEHOLDER_DATA'                          AS clea_care_leaver_allocated_team,     -- [TESTING] [PLACEHOLDER_DATA]
-    'PLACEHOLDER_DATA'                          AS clea_care_leaver_worker_id,          -- [TESTING] [PLACEHOLDER_DATA]
-    ih.interaction_history                      AS clea_interaction_history,            -- [TESTING] 
-    CONCAT('[', its.InvolvementTypeStory, ']')  AS clea_involvement_type_story_json     -- [TESTING] 
-
+    fccl.FACT_CLA_CARE_LEAVERS_ID                   AS clea_table_id, 
+    fccl.DIM_PERSON_ID                              AS clea_person_id, 
+    dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC          AS clea_care_leaver_eligibility, 
+    fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE              AS clea_care_leaver_in_touch, 
+    fccl.IN_TOUCH_DTTM                              AS clea_care_leaver_latest_contact, 
+    fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC         AS clea_care_leaver_accommodation, 
+    fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC     AS clea_care_leaver_accom_suitable, 
+    fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC              AS clea_care_leaver_activity, 
+    fcp.MODIF_DTTM                                  AS clea_pathway_plan_review_date, 
+    ih.CurrentWorkerID                              AS clea_care_leaver_worker_id,
+    ih.PersonalAdvisorID                            AS clea_care_leaver_personal_advisor,
+    ih.AllocatedTeam                                AS clea_care_leaver_allocated_team,
+    ih.interaction_history                          AS clea_interaction_history,
+    CONCAT('[', its.InvolvementTypeStory, ']')      AS clea_involvement_type_story_json
 FROM 
     Child_Social.FACT_CLA_CARE_LEAVERS AS fccl
+
 
 LEFT JOIN Child_Social.DIM_CLA_ELIGIBILITY AS dce ON fccl.DIM_PERSON_ID = dce.DIM_PERSON_ID     -- towards clea_care_leaver_eligibility
 
 LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID         -- towards clea_pathway_plan_review_date
     AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'               
 
+-- from CTE(s)
 LEFT JOIN InteractionHistoryCTE ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID
 LEFT JOIN InvolvementTypeStoryCTE its ON fccl.DIM_PERSON_ID = its.DIM_PERSON_ID;
-
+/* End V3 */ 
 
 
 -- Add index(es)
-CREATE INDEX IDX_clea_person_id ON ssd_care_leavers(clea_person_id);
+CREATE INDEX IDX_clea_person_id ON #ssd_care_leavers(clea_person_id);
+
 
 -- -- Add constraint(s)
 -- ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
