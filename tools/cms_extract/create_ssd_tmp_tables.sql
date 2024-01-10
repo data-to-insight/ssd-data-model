@@ -2386,9 +2386,9 @@ GROUP BY ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 
 
 
--- Add constraint(s)
-ALTER TABLE #ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
-FOREIGN KEY (lapp_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
+-- FOREIGN KEY (lapp_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 
 
