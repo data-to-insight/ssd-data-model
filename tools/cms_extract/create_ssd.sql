@@ -1249,78 +1249,91 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
-/* 
+
+
+/*
 =============================================================================
 Object Name: ssd_cin_visits
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 07/12/23
+Last Modified Date: 10/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks:    Source table can be very large! Avoid any unfiltered queries. 
-            Notes: Does this need to be filtered by only visits in their current Referral episode? 
+Version: 1.5
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks:    Source table can be very large! Avoid any unfiltered queries.
+            Notes: Does this need to be filtered by only visits in their current Referral episode?
                     however for some this ==2 weeks, others==~17 years
-Dependencies: 
+                --> when run for records in ssd_person c.64k records 29s runtime
+Dependencies:
 - FACT_CASENOTES
 =============================================================================
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cin_visits';
 PRINT 'Creating table: ' + @TableName;
-
-
+ 
+ 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_cin_visits') IS NOT NULL DROP TABLE ssd_cin_visits;
-
+ 
 -- Create structure
 CREATE TABLE ssd_cin_visits
 (
-    cinv_cin_casenote_id        NVARCHAR(48) PRIMARY KEY,       -- This needs checking!! [TESTING]
-    cinv_cin_visit_id           NVARCHAR(48),                   -- This needs checking!! [TESTING]
-    cinv_cin_plan_id            NVARCHAR(48),
+    -- cinv_cin_casenote_id,                -- [DEPRECIATED in Iteration1] [TESTING]
+    -- cinv_cin_plan_id,                    -- [DEPRECIATED in Iteration1] [TESTING]
+    cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,      
+    cinv_person_id              NVARCHAR(48),
     cinv_cin_visit_date         DATETIME,
-    cinv_cin_visit_seen         NCHAR(1), 
-    cinv_cin_visit_seen_alone   NCHAR(1), 
+    cinv_cin_visit_seen         NCHAR(1),
+    cinv_cin_visit_seen_alone   NCHAR(1),
     cinv_cin_visit_bedroom      NCHAR(1)
 );
-
+ 
 -- Insert data
 INSERT INTO ssd_cin_visits
 (
-    cinv_cin_casenote_id,               -- This needs checking!! [TESTING]
-    cinv_cin_visit_id,                  -- This needs checking!! [TESTING]
-    cinv_cin_plan_id,
+    cinv_cin_visit_id,                  
+    cinv_person_id,
     cinv_cin_visit_date,
     cinv_cin_visit_seen,
     cinv_cin_visit_seen_alone,
     cinv_cin_visit_bedroom
 )
-SELECT 
-    cn.FACT_CASENOTE_ID,                -- This needs checking!! [TESTING]
-    cn.FACT_FORM_ID,                    -- This needs checking!! [TESTING]
-    cn.FACT_FORM_ID,
+SELECT
+    cn.FACT_CASENOTE_ID,                
+    cn.DIM_PERSON_ID,
     cn.EVENT_DTTM,
     cn.SEEN_FLAG,
     cn.SEEN_ALONE_FLAG,
     cn.SEEN_BEDROOM_FLAG
-FROM 
+FROM
     Child_Social.FACT_CASENOTES cn
-
+ 
 WHERE
-    cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('CNSTAT', 'CNSTATCOVID', 'STAT', 'HVIS', 'DRCT', 'IRO', 
-    'SUPERCONT', 'STVL', 'STVLCOVID', 'CNSTAT', 'CNSTATCOVID', 'STVC', 'STVCPCOVID');
+    cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('CNSTAT', 'CNSTATCOVID', 'STAT', 'HVIS', 'DRCT', 'IRO',
+    'SUPERCONT', 'STVL', 'STVLCOVID', 'CNSTAT', 'CNSTATCOVID', 'STVC', 'STVCPCOVID')
+ 
+AND EXISTS ( -- only ssd relevant records
+    SELECT 1
+    FROM ssd_person p
+    WHERE p.pers_person_id = cn.DIM_PERSON_ID
+    );
+ 
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_cin_plans 
-FOREIGN KEY (cinv_cin_plan_id) REFERENCES ssd_cin_plans(cinp_cin_plan_id);
+ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_person
+FOREIGN KEY (cinv_person_id) REFERENCES ssd_person(pers_person_id);
+ 
 
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
 
 /* 
 =============================================================================
