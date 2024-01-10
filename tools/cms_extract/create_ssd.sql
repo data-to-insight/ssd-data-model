@@ -1249,78 +1249,91 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
-/* 
+
+
+/*
 =============================================================================
 Object Name: ssd_cin_visits
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 07/12/23
+Last Modified Date: 10/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks:    Source table can be very large! Avoid any unfiltered queries. 
-            Notes: Does this need to be filtered by only visits in their current Referral episode? 
+Version: 1.5
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks:    Source table can be very large! Avoid any unfiltered queries.
+            Notes: Does this need to be filtered by only visits in their current Referral episode?
                     however for some this ==2 weeks, others==~17 years
-Dependencies: 
+                --> when run for records in ssd_person c.64k records 29s runtime
+Dependencies:
 - FACT_CASENOTES
 =============================================================================
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cin_visits';
 PRINT 'Creating table: ' + @TableName;
-
-
+ 
+ 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_cin_visits') IS NOT NULL DROP TABLE ssd_cin_visits;
-
+ 
 -- Create structure
 CREATE TABLE ssd_cin_visits
 (
-    cinv_cin_casenote_id        NVARCHAR(48) PRIMARY KEY,       -- This needs checking!! [TESTING]
-    cinv_cin_visit_id           NVARCHAR(48),                   -- This needs checking!! [TESTING]
-    cinv_cin_plan_id            NVARCHAR(48),
+    -- cinv_cin_casenote_id,                -- [DEPRECIATED in Iteration1] [TESTING]
+    -- cinv_cin_plan_id,                    -- [DEPRECIATED in Iteration1] [TESTING]
+    cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,      
+    cinv_person_id              NVARCHAR(48),
     cinv_cin_visit_date         DATETIME,
-    cinv_cin_visit_seen         NCHAR(1), 
-    cinv_cin_visit_seen_alone   NCHAR(1), 
+    cinv_cin_visit_seen         NCHAR(1),
+    cinv_cin_visit_seen_alone   NCHAR(1),
     cinv_cin_visit_bedroom      NCHAR(1)
 );
-
+ 
 -- Insert data
 INSERT INTO ssd_cin_visits
 (
-    cinv_cin_casenote_id,               -- This needs checking!! [TESTING]
-    cinv_cin_visit_id,                  -- This needs checking!! [TESTING]
-    cinv_cin_plan_id,
+    cinv_cin_visit_id,                  
+    cinv_person_id,
     cinv_cin_visit_date,
     cinv_cin_visit_seen,
     cinv_cin_visit_seen_alone,
     cinv_cin_visit_bedroom
 )
-SELECT 
-    cn.FACT_CASENOTE_ID,                -- This needs checking!! [TESTING]
-    cn.FACT_FORM_ID,                    -- This needs checking!! [TESTING]
-    cn.FACT_FORM_ID,
+SELECT
+    cn.FACT_CASENOTE_ID,                
+    cn.DIM_PERSON_ID,
     cn.EVENT_DTTM,
     cn.SEEN_FLAG,
     cn.SEEN_ALONE_FLAG,
     cn.SEEN_BEDROOM_FLAG
-FROM 
+FROM
     Child_Social.FACT_CASENOTES cn
-
+ 
 WHERE
-    cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('CNSTAT', 'CNSTATCOVID', 'STAT', 'HVIS', 'DRCT', 'IRO', 
-    'SUPERCONT', 'STVL', 'STVLCOVID', 'CNSTAT', 'CNSTATCOVID', 'STVC', 'STVCPCOVID');
+    cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('CNSTAT', 'CNSTATCOVID', 'STAT', 'HVIS', 'DRCT', 'IRO',
+    'SUPERCONT', 'STVL', 'STVLCOVID', 'CNSTAT', 'CNSTATCOVID', 'STVC', 'STVCPCOVID')
+ 
+AND EXISTS ( -- only ssd relevant records
+    SELECT 1
+    FROM ssd_person p
+    WHERE p.pers_person_id = cn.DIM_PERSON_ID
+    );
+ 
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_cin_plans 
-FOREIGN KEY (cinv_cin_plan_id) REFERENCES ssd_cin_plans(cinp_cin_plan_id);
+ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_person
+FOREIGN KEY (cinv_person_id) REFERENCES ssd_person(pers_person_id);
+ 
 
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
 
 /* 
 =============================================================================
@@ -2969,7 +2982,7 @@ Description:
 Author: D2I
 Last Modified Date: 10/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Depreciated V2 left intact below for ref. Revised into V3 to aid performance on large involvements table aggr
 Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
@@ -2978,6 +2991,7 @@ Dependencies:
 - FACT_CLA_CARE_LEAVERS
 - DIM_CLA_ELIGIBILITY
 - FACT_CARE_PLANS
+- ssd_person
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -3005,20 +3019,22 @@ CREATE TABLE ssd_care_leavers
     clea_pathway_plan_review_date       DATETIME,
     clea_care_leaver_personal_advisor   NVARCHAR(100),
     clea_care_leaver_allocated_team     NVARCHAR(48),
-    clea_care_leaver_worker_id          NVARCHAR(48),    -- [TESTING] 
-    clea_interaction_history            NVARCHAR(5000),  -- [TESTING] 
-    clea_involvement_type_story_json    NVARCHAR(1000)   -- [TESTING] 
+    clea_care_leaver_worker_id          NVARCHAR(48),    
+    clea_involvement_history            NVARCHAR(4000),  -- Non-SSD additional reference field [TESTING]  Is this a case for type MAX...
+    clea_involvement_type_story_json    NVARCHAR(1000)   -- Non-SSD additional reference field [TESTING]  
 );
 
 
-/* V3 */
+/* V4 */
 -- Alternative for performance testing
-WITH InteractionHistoryCTE AS (
+
+-- CTE for involvement history incl. worker data
+WITH InvolvementHistoryCTE AS (
     SELECT 
         fi.DIM_PERSON_ID,
-        MAX(CASE WHEN fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' THEN fi.DIM_WORKER_ID END) AS CurrentWorkerID,
-        MAX(CASE WHEN fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END) AS AllocatedTeam,
-        MAX(CASE WHEN fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = '16PLUS' THEN fi.DIM_WORKER_ID END) AS PersonalAdvisorID,
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
+        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
 
         JSON_QUERY((
             SELECT 
@@ -3033,19 +3049,33 @@ WITH InteractionHistoryCTE AS (
             WHERE 
                 fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        )) AS interaction_history
-    FROM 
-        Child_Social.FACT_INVOLVEMENTS fi
-    WHERE 
-        fi.END_DTTM IS NULL 
+        )) AS involvement_history
+    FROM (
+        SELECT *,
+            ROW_NUMBER() OVER (
+                PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
+                ORDER BY FACT_INVOLVEMENTS_ID DESC
+            ) AS rn,
+            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
+        FROM Child_Social.FACT_INVOLVEMENTS
+        WHERE 
+            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
+            -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
+            AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+            AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+            AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
+                                                -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
+    ) fi
+    WHERE fi.rn = 1
 
-        AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-            SELECT 1 FROM ssd_person p
-            WHERE p.pers_person_id = fi.DIM_PERSON_ID
-        )
+    -- AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+    --     SELECT 1 FROM ssd_person p
+    --     WHERE p.pers_person_id = fi.DIM_PERSON_ID
+    -- )
+
     GROUP BY 
         fi.DIM_PERSON_ID
-), 
+),
 -- CTE for involvement type story
 InvolvementTypeStoryCTE AS (
     SELECT 
@@ -3055,27 +3085,27 @@ InvolvementTypeStoryCTE AS (
             -- can't use STRING AGG as appears to not work (Needs v2017+)
             SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
             FROM Child_Social.FACT_INVOLVEMENTS fi3
-            WHERE 
-                fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
+            WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
 
-                AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-                    SELECT 1 FROM ssd_person p
-                    WHERE p.pers_person_id = fi3.DIM_PERSON_ID
-                )
-            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC  -- most recent first
+            -- AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+            --     SELECT 1 FROM ssd_person p
+            --     WHERE p.pers_person_id = fi3.DIM_PERSON_ID
+            -- )
+
+            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
             FOR XML PATH('')
         ), 1, 1, '') AS InvolvementTypeStory
     FROM 
         Child_Social.FACT_INVOLVEMENTS fi
-    WHERE 
-        EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-            SELECT 1 FROM ssd_person p
-            WHERE p.pers_person_id = fi.DIM_PERSON_ID
-        )
+    
+    -- WHERE 
+    --     EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+    --         SELECT 1 FROM ssd_person p
+    --         WHERE p.pers_person_id = fi.DIM_PERSON_ID
+    --     )
     GROUP BY 
         fi.DIM_PERSON_ID
 )
-
 -- Insert data
 INSERT INTO ssd_care_leavers
 (
@@ -3088,11 +3118,11 @@ INSERT INTO ssd_care_leavers
     clea_care_leaver_accom_suitable, 
     clea_care_leaver_activity, 
     clea_pathway_plan_review_date, 
-    clea_care_leaver_personal_advisor,          -- [TESTING] 
-    clea_care_leaver_allocated_team,            -- [TESTING] 
-    clea_care_leaver_worker_id,                 -- [TESTING] 
-    clea_interaction_history,                   -- [TESTING] 
-    clea_involvement_type_story_json            -- [TESTING]
+    clea_care_leaver_personal_advisor,          
+    clea_care_leaver_allocated_team,            
+    clea_care_leaver_worker_id,                 
+    clea_involvement_history,                   -- Non-SSD additional reference field [TESTING] 
+    clea_involvement_type_story_json            -- Non-SSD additional reference field [TESTING] 
 )
 SELECT 
     fccl.FACT_CLA_CARE_LEAVERS_ID                   AS clea_table_id, 
@@ -3107,11 +3137,10 @@ SELECT
     ih.CurrentWorkerID                              AS clea_care_leaver_worker_id,
     ih.PersonalAdvisorID                            AS clea_care_leaver_personal_advisor,
     ih.AllocatedTeam                                AS clea_care_leaver_allocated_team,
-    ih.interaction_history                          AS clea_interaction_history,
-    CONCAT('[', its.InvolvementTypeStory, ']')      AS clea_involvement_type_story_json
+    ih.involvement_history                          AS clea_involvement_history,                -- Non-SSD additional reference field
+    CONCAT('[', its.InvolvementTypeStory, ']')      AS clea_involvement_type_story_json         -- Non-SSD additional reference field
 FROM 
     Child_Social.FACT_CLA_CARE_LEAVERS AS fccl
-
 
 LEFT JOIN Child_Social.DIM_CLA_ELIGIBILITY AS dce ON fccl.DIM_PERSON_ID = dce.DIM_PERSON_ID     -- towards clea_care_leaver_eligibility
 
@@ -3119,17 +3148,21 @@ LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp ON fccl.DIM_PERSON_ID = fcp.DIM_PE
     AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'               
 
 -- from CTE(s)
-LEFT JOIN InteractionHistoryCTE ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID
-LEFT JOIN InvolvementTypeStoryCTE its ON fccl.DIM_PERSON_ID = its.DIM_PERSON_ID;
-/* End V3 */ 
+LEFT JOIN InvolvementHistoryCTE ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID
+LEFT JOIN InvolvementTypeStoryCTE its ON fccl.DIM_PERSON_ID = its.DIM_PERSON_ID
 
+WHERE 
+    -- Exists-on ssd_person clause should already filter these, this only a fail-safe
+    fccl.FACT_CLA_CARE_LEAVERS_ID <> -1;
+
+/* End V4 */
 
 
 
 /*
 /* V2 */
 -- CTE for interaction history
-WITH InteractionHistoryCTE AS (
+WITH InvolvementHistoryCTE AS (
     SELECT 
         fi.DIM_PERSON_ID,
         JSON_QUERY((
@@ -3145,7 +3178,7 @@ WITH InteractionHistoryCTE AS (
             WHERE 
                 fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        )) AS interaction_history
+        )) AS involvement_history
     FROM 
         Child_Social.FACT_INVOLVEMENTS fi
     GROUP BY 
@@ -3191,7 +3224,7 @@ SELECT
         ELSE NULL
     END                                             AS clea_care_leaver_worker_id,
     fi_worker.FACT_WORKER_HISTORY_DEPARTMENT_DESC   AS clea_care_leaver_allocated_team,     -- [TESTING] 
-    ih.interaction_history                          AS clea_interaction_history,            -- [TESTING] 
+    ih.involvement_history                          AS clea_involvement_history,            -- [TESTING] 
     CONCAT('[', its.InvolvementTypeStory, ']')      AS clea_involvement_type_story_json     -- [TESTING] 
 
 FROM 
@@ -3202,7 +3235,7 @@ LEFT JOIN Child_Social.DIM_CLA_ELIGIBILITY AS dce ON fccl.DIM_PERSON_ID = dce.DI
 LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID         -- towards clea_pathway_plan_review_date
     AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'               
 
-LEFT JOIN InteractionHistoryCTE ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID
+LEFT JOIN InvolvementHistoryCTE ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID
 LEFT JOIN InvolvementTypeStoryCTE its ON fccl.DIM_PERSON_ID = its.DIM_PERSON_ID;
 
 LEFT JOIN (
