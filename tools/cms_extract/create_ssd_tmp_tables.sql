@@ -13,7 +13,7 @@
 -- SSD extract files with the suffix ..._per.sql - for creating the persistent table versions.
 -- SSD extract files with the suffix ..._tmp.sql - for creating the temporary table versions.
 
-USE HDM_Local;
+USE HDM;
 GO
 
 
@@ -2561,7 +2561,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_vis
 -- Create structure
 CREATE TABLE #ssd_cla_visits (
     clav_table_id              NVARCHAR(48),    -- [TESTING] Review PK 100124
-    clav_casenote_id           NVARCHAR(48) PRIMARY KEY,
+    clav_casenote_id           NVARCHAR(48),    -- PRIMARY KEY,
     clav_cla_id                NVARCHAR(48),
     clav_cla_visit_id          NVARCHAR(48),
     clav_cla_episode_id        NVARCHAR(48),
@@ -2730,7 +2730,8 @@ SELECT
         SELECT
             MAX(ISNULL(CASE                                             -- isnull to ensure key:value pair structure exists regardless of data existance
                 WHEN ffa_inner.ANSWER_NO = 'FormEndDate' 
-                THEN TRY_CONVERT(DATE, ffa_inner.answer, 106)           -- Data has format: '25-Feb-2016'. Ref use 101 for mm/dd/yyyy | 103 for dd/mm/yyyy
+                THEN ffa_inner.answer   
+                --THEN TRY_CONVERT(DATE, ffa_inner.answer, 106)           -- Data has format: '25-Feb-2016'. Ref use 101 for mm/dd/yyyy | 103 for dd/mm/yyyy
             END, ''))                       AS csdq_sdq_completed_date, -- new field alias becomes key in _json field
 
             MAX(ISNULL(CASE 
@@ -3383,12 +3384,12 @@ FROM
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_invo_professional_id ON #ssd_involvements (invo_professional_id);
 
--- Add constraint(s)
-ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
-FOREIGN KEY (invo_professional_id) REFERENCES #ssd_professionals (prof_professional_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
+-- FOREIGN KEY (invo_professional_id) REFERENCES #ssd_professionals (prof_professional_id);
 
-ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional_role 
-FOREIGN KEY (invo_professional_role_id) REFERENCES #ssd_professionals (prof_social_worker_registration_no);
+-- ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional_role 
+-- FOREIGN KEY (invo_professional_role_id) REFERENCES #ssd_professionals (prof_social_worker_registration_no);
 
 
     

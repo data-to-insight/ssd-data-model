@@ -55,7 +55,7 @@ WHERE
 -- SSD extract files with the suffix ..._per.sql - for creating the persistent table versions.
 -- SSD extract files with the suffix ..._tmp.sql - for creating the temporary table versions.
 
-USE HDM_Local;
+USE HDM;
 GO
 
 
@@ -2773,7 +2773,8 @@ SELECT
         SELECT
             MAX(ISNULL(CASE                                             -- isnull to ensure key:value pair structure exists regardless of data existance
                 WHEN ffa_inner.ANSWER_NO = 'FormEndDate' 
-                THEN TRY_CONVERT(DATE, ffa_inner.answer, 106)           -- Data has format: '25-Feb-2016'. Ref use 101 for mm/dd/yyyy | 103 for dd/mm/yyyy
+                THEN ffa_inner.answer   
+                --THEN TRY_CONVERT(DATE, ffa_inner.answer, 106)           -- Data has format: '25-Feb-2016'. Ref use 101 for mm/dd/yyyy | 103 for dd/mm/yyyy
             END, ''))                       AS csdq_sdq_completed_date, -- new field alias becomes key in _json field
 
             MAX(ISNULL(CASE 
