@@ -722,7 +722,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_contact
+Object Name: ssd_contacts
 Description: 
 Author: D2I
 Last Modified Date: 06/11/23
@@ -1166,6 +1166,11 @@ FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_cin_assessments(cina_assessment_
 
 
 
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 /* 
@@ -1443,16 +1448,100 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_initial_cp_conference
 Description: 
 Author: D2I
-Last Modified Date: 
+Last Modified Date: 11/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: maping now available.... 
+Version: 1.0
+Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
 Dependencies: 
 - FACT_S47
 - FACT_CP_CONFERENCE
+- FACT_MEETINGS
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N'ssd_initial_cp_conference';
+PRINT 'Creating table: ' + @TableName;
+ 
+-- Check if exists & drop
+IF OBJECT_ID('ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_initial_cp_conference;
+ 
+-- Create structure
+CREATE TABLE ssd_initial_cp_conference (
+    icpc_icpc_id                    NVARCHAR(48) PRIMARY KEY,
+    icpc_icpc_meeting_id            NVARCHAR(48),
+    icpc_s47_enquiry_id             NVARCHAR(48),
+    icpc_person_id                  NVARCHAR(48),
+    icpc_cp_plan_id                 NVARCHAR(48),
+    icpc_referral_id                NVARCHAR(48),
+    icpc_icpc_transfer_in           NCHAR(1),
+    icpc_icpc_target_date           DATETIME,
+    icpc_icpc_date                  DATETIME,
+    icpc_icpc_outcome_cp_flag       NCHAR(1),
+    icpc_icpc_outcome_json          NVARCHAR(1000)
+    --icpc_icpc_team                  NVARCHAR(100),
+    --icpc_icpc_worker_id             NVARCHAR(48)
+);
+ 
+-- insert data
+INSERT INTO ssd_initial_cp_conference(
+    icpc_icpc_id,
+    icpc_icpc_meeting_id,
+    icpc_s47_enquiry_id,
+    icpc_person_id,
+    icpc_cp_plan_id,
+    icpc_referral_id,
+    icpc_icpc_transfer_in,
+    icpc_icpc_target_date,
+    icpc_icpc_date,
+    icpc_icpc_outcome_cp_flag,
+    icpc_icpc_outcome_json
+    --icpc_icpc_team,
+    --icpc_icpc_worker_id
+)
+ 
+SELECT
+    fcpc.FACT_CP_CONFERENCE_ID,
+    fcpc.FACT_MEETING_ID,
+    fcpc.FACT_S47_ID,
+    fcpc.DIM_PERSON_ID,
+    fcpc.FACT_CP_PLAN_ID,
+    fcpc.FACT_REFERRAL_ID,
+    fcpc.TRANSFER_IN_FLAG,
+    fcpc.DUE_DTTM,
+    fm.ACTUAL_DTTM,
+    fcpc.OUTCOME_CP_FLAG,
+    (
+        SELECT
+            NULLIF(fcpc.OUTCOME_NFA_FLAG, '')                       AS "OUTCOME_NFA_FLAG",
+            NULLIF(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS "OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG",
+            NULLIF(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS "OUTCOME_PROV_OF_SERVICES_FLAG",
+            NULLIF(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
+            NULLIF(fcpc.OUTCOME_CP_FLAG, '')                        AS "OUTCOME_CP_CONFERENCE_FLAG",
+            NULLIF(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')              AS "OTHER_OUTCOMES_EXIST_FLAG",
+            NULLIF(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS "TOTAL_NO_OF_OUTCOMES",
+            NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "OUTCOME_COMMENTS"
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    )                                                               AS icpc_icpc_outcome_json
+    --fm.DIM_DEPARTMENT_ID_DESC                                      AS icpc_icpc_team,
+    --fm.DIM_WORKER_ID_DESC                                          AS icpc_icpc_worker_id
+ 
+FROM
+    Child_Social.FACT_CP_CONFERENCE AS fcpc
+JOIN
+    Child_Social.FACT_MEETINGS AS fm ON fcpc.FACT_MEETING_ID = fm.FACT_MEETING_ID
+ 
+WHERE
+    fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
+ 
+-- Create index(es)
+CREATE INDEX IDX_ssd_initial_cp_conference_ ON ssd_initial_cp_conference(icpc_person_id);
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
@@ -2035,7 +2124,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_substance_misuse
+Object Name: ssd_cla_substance_misuse
 Description: 
 Author: D2I
 Last Modified Date: 14/11/2023
@@ -2049,7 +2138,7 @@ Dependencies:
 =============================================================================
 */
 -- [TESTING] Create marker
-SET @TableName = N'ssd_substance_misuse';
+SET @TableName = N'ssd_cla_substance_misuse';
 PRINT 'Creating table: ' + @TableName;
 
 
