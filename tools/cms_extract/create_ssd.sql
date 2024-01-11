@@ -744,10 +744,10 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_contact') IS NOT NULL DROP TABLE ssd_contact;
+IF OBJECT_ID('ssd_contacts') IS NOT NULL DROP TABLE ssd_contacts;
 
 -- Create structure
-CREATE TABLE ssd_contact (
+CREATE TABLE ssd_contacts (
     cont_contact_id             NVARCHAR(48) PRIMARY KEY,
     cont_person_id              NVARCHAR(48),
     cont_contact_start          DATETIME,
@@ -756,7 +756,7 @@ CREATE TABLE ssd_contact (
 );
 
 -- Insert data
-INSERT INTO ssd_contact (
+INSERT INTO ssd_contacts (
     cont_contact_id, 
     cont_person_id, 
     cont_contact_start,
@@ -794,11 +794,11 @@ WHERE EXISTS
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_contact ADD CONSTRAINT FK_contact_person 
+ALTER TABLE ssd_contacts ADD CONSTRAINT FK_contact_person 
 FOREIGN KEY (cont_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_contact_person_id ON ssd_contact(cont_person_id);
+CREATE NONCLUSTERED INDEX IDX_contact_person_id ON ssd_contacts(cont_person_id);
 
 
 
