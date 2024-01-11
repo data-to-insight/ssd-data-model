@@ -2329,7 +2329,7 @@ Dependencies:
 =============================================================================
 */
 -- [TESTING] Create marker
-SET @TableName = N'ssd_cla_placement';
+SET @TableName = N'ssd_cla_review';
 PRINT 'Creating table: ' + @TableName;
 
 
