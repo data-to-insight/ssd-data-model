@@ -2297,61 +2297,83 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_cla_reviews
+Object Name: ssd_cla_review
 Description: 
 Author: D2I
-Last Modified Date: 24/12/23
+Last Modified Date: 11/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
 Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: Still needs work on review_participation: 'FACT_FORM_ANSWERS.ANSWER
-Link using FACT_CLA_REVIEW.FACT_CASE_PATHWAY_STEP_ID to FACT_CASE_PATHWAY_STEP  
-Link using FACT_CASE_PATHWAY_STEP.FACT_FORMS_ID to FACT_FORM_ANSWERS.ANSWER
-WHERE 'FACT_FORM_ANSWERS.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('CLA Review Outcomes', 'LAC Outcome Record') AND FACT_FORM_ANSWERS.ANSWER_NO IN ('ChildPart', 'ICSParticipationCode')
-
+Remarks: 
 Dependencies: 
--- ssd_cla_episodes
--- FACT_CLA_REVIEW
+- ssd_cla_episodes
+- FACT_CLA_REVIEW
+- FACT_MEETING_SUBJECTS 
+- FACT_MEETINGS
 =============================================================================
 */
 -- [TESTING] Create marker
-SET @TableName = N'ssd_cla_reviews';
+SET @TableName = N'ssd_cla_placement';
 PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_review', 'U') IS NOT NULL DROP TABLE ssd_cla_review;
-
+ 
 -- Create structure
-CREATE TABLE #ssd_cla_review (
+ 
+CREATE TABLE ssd_cla_review (
     clar_cla_review_id                      NVARCHAR(48) PRIMARY KEY,
     clar_cla_episode_id                     NVARCHAR(48),
     clar_cla_review_due_date                DATETIME,
     clar_cla_review_date                    DATETIME,
+    clar_cla_review_cancelled               NVARCHAR(48),
     clar_cla_review_participation           NVARCHAR(100),
-    clar_cla_review_last_iro_contact_date   DATETIME
+    clar_cla_review_last_iro_contact_date   DATETIME,
 );
  
 -- Insert data
-INSERT INTO #ssd_cla_review (
+INSERT INTO ssd_cla_review (
     clar_cla_review_id,
     clar_cla_episode_id,
     clar_cla_review_due_date,
     clar_cla_review_date,
+    clar_cla_review_cancelled,
     clar_cla_review_participation,
     clar_cla_review_last_iro_contact_date
 )
+ 
 SELECT
-    fcr.FACT_CLA_REVIEW_ID                     AS clar_cla_review_id,
-    fcla.FACT_CLA_ID                           AS clar_cla_episode_id,                 
-    fcr.DUE_DTTM                               AS clar_cla_review_due_date,
-    fcr.MEETING_DTTM                           AS clar_cla_review_date,
-    'PLACEHOLDER_DATA'                         AS clar_cla_review_participation,        -- [PLACEHOLDER_DATA] [TESTING]
-    '01/01/2001'                               AS clar_cla_review_last_iro_contact_date -- [PLACEHOLDER_DATA] [TESTING]
+    fcr.FACT_CLA_REVIEW_ID                          AS clar_cla_review_id,
+    fcr.FACT_CLA_ID                                 AS clar_cla_episode_id,                  
+    fcr.DUE_DTTM                                    AS clar_cla_review_due_date,
+    fcr.MEETING_DTTM                                AS clar_cla_review_date,
+    fm.CANCELLED                                    AS clar_cla_review_cancelled,
+    MAX(CASE WHEN fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
+        AND fms.DIM_PERSON_ID = fcr.DIM_PERSON_ID
+        THEN fms.DIM_LOOKUP_PARTICIPATION_CODE_DESC END)          
+                                                    AS clar_cla_review_participation,        
+    '01/01/1901'                                    AS clar_cla_review_last_iro_contact_date -- [PLACEHOLDER_DATA]
+ 
 FROM
     Child_Social.FACT_CLA_REVIEW AS fcr
  
-LEFT JOIN Child_Social.FACT_CLA fcla ON fcr.FACT_CLA_ID = fcla.FACT_CLA_ID
+LEFT JOIN
+    Child_Social.FACT_MEETINGS fm               ON fcr.FACT_MEETING_ID = fm.FACT_MEETING_ID
+ 
+LEFT JOIN
+    Child_Social.FACT_MEETING_SUBJECTS fms      ON fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
+    AND fms.DIM_PERSON_ID = fcr.DIM_PERSON_ID
+ 
+GROUP BY fcr.FACT_CLA_REVIEW_ID,
+    fcr.FACT_CLA_ID,                                            
+    fcr.DIM_PERSON_ID,                              
+    fcr.DUE_DTTM,                                    
+    fcr.MEETING_DTTM,                              
+    fm.CANCELLED,
+    fms.FACT_MEETINGS_ID
+
 
 -- Add constraint(s)
 ALTER TABLE ssd_cla_review ADD CONSTRAINT FK_clar_to_clae 
