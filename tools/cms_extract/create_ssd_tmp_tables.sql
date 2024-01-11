@@ -86,8 +86,8 @@ CREATE TABLE #ssd_person (
     pers_gender             NVARCHAR(48),                   -- [PLACEHOLDER_DATA] [TESTING]
     pers_ethnicity          NVARCHAR(38),
     pers_dob                DATETIME,
-    pers_common_child_id    NVARCHAR(10),
-    pers_upn_unknown        NVARCHAR(10),
+    pers_common_child_id    NVARCHAR(10),                   -- [TESTING]
+    -- pers_upn_unknown        NVARCHAR(10),                
     pers_send               NVARCHAR(1),
     pers_expected_dob       DATETIME,                       -- Date or NULL
     pers_death_date         DATETIME,
@@ -103,7 +103,7 @@ INSERT INTO #ssd_person (
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,
-    pers_upn_unknown,
+    -- pers_upn_unknown,                                -- [TESTING]
     pers_send,
     pers_expected_dob,
     pers_death_date,
@@ -119,7 +119,7 @@ SELECT
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL END,                                  --  or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
-    f903.NO_UPN_CODE,
+    -- f903.NO_UPN_CODE,                                -- [TESTING] as 903 table refresh only in reporting period
     p.EHM_SEN_FLAG,
         CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
@@ -138,13 +138,14 @@ SELECT
 FROM
     Child_Social.DIM_PERSON AS p
  
-LEFT JOIN
-    Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
+-- Removed only to allow [TESTING] as 903 table refresh only in reporting period
+-- LEFT JOIN
+--     Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
  
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
     AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
-    AND f903.YEAR_TO_DATE = 'Y'                                 -- 903 table includes children looked after in previous year and year to date,
+    -- [TESTING] AND f903.YEAR_TO_DATE = 'Y'                    -- 903 table includes children looked after in previous year and year to date,
                                                                 -- this filters for those current in the current year to date to avoid duplicates
    
 AND (                                                       -- Filter irrelevant rows by timeframe
@@ -1763,7 +1764,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cp_reviews
 Description: 
 Author: D2I
-Last Modified Date: 05/01/23
+Last Modified Date: 11/01/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
@@ -1783,23 +1784,23 @@ SET @TableName = N'ssd_cp_reviews';
 PRINT 'Creating table: ' + @TableName;
 
 
-
 -- Check if table exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
-
-
+ 
+ 
 -- Create structure
 CREATE TABLE #ssd_cp_reviews
 (
-    cppr_cp_review_id               NVARCHAR(48) PRIMARY KEY,
-    cppr_cp_plan_id                 NVARCHAR(48),
-    cppr_cp_review_due              DATETIME NULL,
-    cppr_cp_review_date             DATETIME NULL,
-    cppr_cp_review_outcome          NCHAR(1), 
-    cppr_cp_review_quorate          NVARCHAR(18),       -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
-    cppr_cp_review_participation    NVARCHAR(18)        -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    cppr_cp_review_id                   NVARCHAR(48) PRIMARY KEY,
+    cppr_cp_plan_id                     NVARCHAR(48),
+    cppr_cp_review_due                  DATETIME NULL,
+    cppr_cp_review_date                 DATETIME NULL,
+    cppr_cp_review_cancelled            NVARCHAR(1),
+    cppr_cp_review_outcome_continue_cp  NCHAR(1),
+    cppr_cp_review_quorate              NVARCHAR(18),      
+    cppr_cp_review_participation        NVARCHAR(18)        -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
 );
-
+ 
 -- Insert data
 INSERT INTO #ssd_cp_reviews
 (
@@ -1807,40 +1808,57 @@ INSERT INTO #ssd_cp_reviews
     cppr_cp_plan_id,
     cppr_cp_review_due,
     cppr_cp_review_date,
-    cppr_cp_review_outcome,
+    cppr_cp_review_cancelled,
+    cppr_cp_review_outcome_continue_cp,
     cppr_cp_review_quorate,
     cppr_cp_review_participation
 )
-SELECT 
-    cpr.FACT_CP_REVIEW_ID           AS cppr_cp_review_id ,
-    cpr.FACT_CP_PLAN_ID             AS cppr_cp_plan_id,
-    cpr.DUE_DTTM                    AS cppr_cp_review_due,
-    cpr.MEETING_DTTM                AS cppr_cp_review_date,
-    cpr.OUTCOME_CONTINUE_CP_FLAG    AS cppr_cp_review_outcome,
-    'PLACEHOLDER DATA'              AS cppr_cp_review_quorate,      -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
-    'PLACEHOLDER DATA'              AS cppr_cp_review_participation -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
-
-FROM 
+SELECT
+    cpr.FACT_CP_REVIEW_ID                       AS cppr_cp_review_id ,
+    cpr.FACT_CP_PLAN_ID                         AS cppr_cp_plan_id,
+    cpr.DUE_DTTM                                AS cppr_cp_review_due,
+    cpr.MEETING_DTTM                            AS cppr_cp_review_date,
+    fm.CANCELLED                                AS cppr_cp_review_cancelled,
+    cpr.OUTCOME_CONTINUE_CP_FLAG                AS cppr_cp_review_outcome_continue_cp,
+    (CASE WHEN ffa.ANSWER_NO = 'WasConf'
+        AND fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
+        THEN ffa.ANSWER END)                    AS cppr_cp_review_quorate,    
+    'PLACEHOLDER DATA'                          AS cppr_cp_review_participation
+ 
+FROM
     Child_Social.FACT_CP_REVIEW as cpr
-
-/* --- Partially successful code for linking to Review form for Quoracy information ---
-
-LEFT JOIN Child_Social.FACT_FORMS as ff                     -- towards CPPR006A cppr_cp_review_quorate 
-    ON cpr.FACT_REFERRAL_ID = ff.FACT_REFERRAL_ID
-
-LEFT JOIN Child_Social.FACT_FORM_ANSWERS as ffa             -- towards CPPR006A cppr_cp_review_quorate 
-    ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
+ 
+LEFT JOIN
+    Child_Social.FACT_MEETINGS fm               ON cpr.FACT_MEETING_ID = fm.FACT_MEETING_ID
+ 
+LEFT JOIN
+    Child_Social.FACT_MEETING_SUBJECTS fms      ON cpr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
+    AND cpr.DIM_PERSON_ID = fms.DIM_PERSON_ID
+ 
+LEFT JOIN    
+    Child_Social.FACT_FORM_ANSWERS ffa          ON fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
     AND ffa.ANSWER_NO = 'WasConf'
-    AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'REVIEW%'
-    AND cpr.MEETING_DTTM = ff.FORM_DTTM
+    AND fms.FACT_OUTCM_FORM_ID IS NOT NULL
+    AND fms.FACT_OUTCM_FORM_ID <> '-1'
+ 
+GROUP BY cpr.FACT_CP_REVIEW_ID,
+    cpr.FACT_CP_PLAN_ID,
+    cpr.DUE_DTTM,
+    cpr.MEETING_DTTM,
+    fm.CANCELLED,
+    cpr.OUTCOME_CONTINUE_CP_FLAG,
+    fms.FACT_OUTCM_FORM_ID,
+    ffa.ANSWER_NO,
+    ffa.FACT_FORM_ID,
+    ffa.ANSWER
 
-*/
+-- WHERE EXISTS ( -- only ssd relevant records
+--     SELECT 1 
+--     FROM ssd_person p
+--     WHERE p.pers_person_id = cpr.DIM_PERSON_ID
+--     )
+    ;
 
-WHERE EXISTS ( -- only ssd relevant records
-    SELECT 1 
-    FROM #ssd_person p
-    WHERE p.pers_person_id = cpr.DIM_PERSON_ID
-    );
 
 -- -- Add constraint(s)
 -- ALTER TABLE #ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
