@@ -2669,7 +2669,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_visits
 Description: 
 Author: D2I
-Last Modified Date: 10/01/24
+Last Modified Date: 11/01/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
@@ -2684,53 +2684,45 @@ Dependencies:
 SET @TableName = N'ssd_cla_visits';
 PRINT 'Creating table: ' + @TableName;
 
-
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_visits;
-
+ 
 -- Create structure
 CREATE TABLE #ssd_cla_visits (
-    clav_table_id              NVARCHAR(48),    -- [TESTING] Review PK 100124
-    clav_casenote_id           NVARCHAR(48),    -- PRIMARY KEY,
-    clav_cla_id                NVARCHAR(48),
-    clav_cla_visit_id          NVARCHAR(48),
+    clav_cla_visit_id          NVARCHAR(48) PRIMARY KEY,
+    clav_casenote_id           NVARCHAR(48),
     clav_cla_episode_id        NVARCHAR(48),
     clav_cla_visit_date        DATETIME,
     clav_cla_visit_seen        NCHAR(1),
     clav_cla_visit_seen_alone  NCHAR(1)
 );
-
+ 
 -- Insert data
 INSERT INTO #ssd_cla_visits (
-    clav_table_id,
-    clav_casenote_id,
-    clav_cla_id,
     clav_cla_visit_id,
+    clav_casenote_id,
     clav_cla_episode_id,
     clav_cla_visit_date,
     clav_cla_visit_seen,
     clav_cla_visit_seen_alone
 )
 SELECT
-    NEWID()                     AS clav_table_id,   -- [TESTING] Review PK 100124
-    clav.FACT_CASENOTE_ID       AS clav_casenote_id, 
-    clav.FACT_CLA_ID            AS clav_cla_id,
     clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
-    ceps.FACT_CARE_EPISODES_ID  AS clav_cla_episode_id,
+    clav.FACT_CASENOTE_ID       AS clav_casenote_id,
+    clav.FACT_CLA_ID            AS clav_cla_episode_id,
     clav.VISIT_DTTM             AS clav_cla_visit_date,
     cn.SEEN_FLAG                AS clav_cla_visit_seen,
     cn.SEEN_ALONE_FLAG          AS clav_cla_visit_seen_alone
 FROM
     Child_Social.FACT_CLA_VISIT AS clav
-JOIN
-    Child_Social.FACT_CARE_EPISODES AS ceps ON clav.FACT_CLA_ID = ceps.FACT_CLA_ID
+ 
 JOIN
     Child_Social.FACT_CASENOTES AS cn ON clav.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID;
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_visits ADD CONSTRAINT FK_clav_cla_episode_id 
--- FOREIGN KEY (clav_cla_episode_id) REFERENCES ssd_cla_episodes(clae_cla_episode_id);
+-- ALTER TABLE #ssd_cla_visits ADD CONSTRAINT FK_clav_cla_episode_id 
+-- FOREIGN KEY (clav_cla_episode_id) REFERENCES #ssd_cla_episodes(clae_cla_episode_id);
 
 
 -- [TESTING] Increment /print progress
