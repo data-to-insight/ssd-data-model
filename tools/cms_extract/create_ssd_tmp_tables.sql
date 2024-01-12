@@ -859,7 +859,9 @@ Description:
 Author: D2I
 Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
+            1.4: contact_source_desc added, _source now populated with ID
+
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -882,7 +884,8 @@ CREATE TABLE #ssd_cin_episodes
     cine_person_id              NVARCHAR(48),
     cine_referral_date          DATETIME,
     cine_cin_primary_need       NVARCHAR(10),
-    cine_referral_source        NVARCHAR(255),
+    cine_referral_source        NVARCHAR(48),    
+    cine_referral_source_desc   NVARCHAR(255),
     cine_referral_outcome_json  NVARCHAR(500),
     cine_referral_nfa           NCHAR(1),
     cine_close_reason           NVARCHAR(100),
@@ -899,6 +902,7 @@ INSERT INTO #ssd_cin_episodes
     cine_referral_date,
     cine_cin_primary_need,
     cine_referral_source,
+    cine_referral_source_desc,
     cine_referral_outcome_json,
     cine_referral_nfa,
     cine_close_reason,
@@ -911,7 +915,8 @@ SELECT
     fr.DIM_PERSON_ID,
     fr.REFRL_START_DTTM,
     fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE,
-    fr.[DIM_LOOKUP_CONT_SORC_ID_DESC ],
+    fr.DIM_LOOKUP_CONT_SORC_ID,
+    fr.DIM_LOOKUP_CONT_SORC_ID_DESC,
     (
         SELECT
             NULLIF(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS "OUTCOME_SINGLE_ASSESSMENT_FLAG",
@@ -945,8 +950,8 @@ AND
 CREATE NONCLUSTERED INDEX IDX_ssd_cin_episodes_person_id ON #ssd_cin_episodes(cine_person_id);
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
--- FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
+-- FOREIGN KEY (cine_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 
@@ -2288,7 +2293,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_
 -- Create structure
 CREATE TABLE #ssd_cla_placement (
     clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,
-    clap_cla_episode_id                 NVARCHAR(48),
+    clap_cla_id                         NVARCHAR(48),
     clap_cla_placement_start_date       DATETIME,
     clap_cla_placement_type             NVARCHAR(100),
     clap_cla_placement_urn              NVARCHAR(48),
@@ -2303,7 +2308,7 @@ CREATE TABLE #ssd_cla_placement (
 -- Insert data
 INSERT INTO #ssd_cla_placement (
     clap_cla_placement_id,
-    clap_cla_episode_id,
+    clap_cla_id,
     clap_cla_placement_start_date,
     clap_cla_placement_type,
     clap_cla_placement_urn,
@@ -2316,7 +2321,7 @@ INSERT INTO #ssd_cla_placement (
 )
 SELECT
     fcp.FACT_CLA_PLACEMENT_ID                   AS clap_cla_placement_id,
-    fcp.FACT_CLA_ID                             AS clap_cla_episode_id,                                
+    fcp.FACT_CLA_ID                             AS clap_cla_id,                                
     fcp.START_DTTM                              AS clap_cla_placement_start_date,
     fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE          AS clap_cla_placement_type,
     (
@@ -2324,27 +2329,27 @@ SELECT
             TOP(1) fce.OFSTED_URN
             FROM   Child_Social.FACT_CARE_EPISODES fce
             WHERE  fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
-            AND    fce.OFSTED_URN LIKE 'SC%' 
+            AND    fce.OFSTED_URN LIKE 'SC%'
             AND fce.OFSTED_URN IS NOT NULL        
     )                                           AS clap_cla_placement_urn,
-
+ 
     TRY_CAST(fcp.DISTANCE_FROM_HOME AS FLOAT)   AS clap_cla_placement_distance,                         -- convert to FLOAT (source col is nvarchar, also holds nulls/ints)
     'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,                               -- [PLACEHOLDER_DATA] [TESTING]
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
-
+ 
     CASE -- removal of common/invalid placeholder data i.e ZZZ, XX
         WHEN LEN(LTRIM(RTRIM(fcp.POSTCODE))) <= 4 THEN NULL
         ELSE LTRIM(RTRIM(fcp.POSTCODE))        -- simplistic clean-up
     END                                         AS clap_cla_placement_postcode,
     fcp.END_DTTM                                AS clap_cla_placement_end_date,
     fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE          AS clap_cla_placement_change_reason
-
+ 
 FROM
     Child_Social.FACT_CLA_PLACEMENT AS fcp
  
 -- JOIN
 --     Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID    -- [TESTING]
-
+ 
 WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1','F2','F3','F4','F5','F6','H1','H2','H3',
                                             'H4','H5','H5a','K1','K2','M2','M3','P1','P2','Q1','Q2','R1','R2','R3',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
@@ -2366,10 +2371,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_review
 Description: 
 Author: D2I
-Last Modified Date: 11/01/24
+Last Modified Date: 12/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.6
+            1.5: clar_cla_id change from clar_cla_episode_id
+
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_cla_episodes
@@ -2387,39 +2394,39 @@ PRINT 'Creating table: ' + @TableName;
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_cla_review', 'U') IS NOT NULL DROP TABLE #ssd_cla_review;
  
+
 -- Create structure
 CREATE TABLE #ssd_cla_review (
     clar_cla_review_id                      NVARCHAR(48) PRIMARY KEY,
-    clar_cla_episode_id                     NVARCHAR(48),
+    clar_cla_id                             NVARCHAR(48),
     clar_cla_review_due_date                DATETIME,
     clar_cla_review_date                    DATETIME,
     clar_cla_review_cancelled               NVARCHAR(48),
-    clar_cla_review_participation           NVARCHAR(100),
-    clar_cla_review_last_iro_contact_date   DATETIME,
-);
+    clar_cla_review_participation           NVARCHAR(100)
+    );
  
 -- Insert data
 INSERT INTO #ssd_cla_review (
     clar_cla_review_id,
-    clar_cla_episode_id,
+    clar_cla_id,
     clar_cla_review_due_date,
     clar_cla_review_date,
     clar_cla_review_cancelled,
-    clar_cla_review_participation,
-    clar_cla_review_last_iro_contact_date
+    clar_cla_review_participation
 )
  
 SELECT
     fcr.FACT_CLA_REVIEW_ID                          AS clar_cla_review_id,
-    fcr.FACT_CLA_ID                                 AS clar_cla_episode_id,                  
+    fcr.FACT_CLA_ID                                 AS clar_cla_id,                
     fcr.DUE_DTTM                                    AS clar_cla_review_due_date,
     fcr.MEETING_DTTM                                AS clar_cla_review_date,
     fm.CANCELLED                                    AS clar_cla_review_cancelled,
-    MAX(CASE WHEN fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
+ 
+    (SELECT MAX(CASE WHEN fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
         AND fms.DIM_PERSON_ID = fcr.DIM_PERSON_ID
-        THEN fms.DIM_LOOKUP_PARTICIPATION_CODE_DESC END)          
-                                                    AS clar_cla_review_participation,        
-    '01/01/1901'                                    AS clar_cla_review_last_iro_contact_date -- [PLACEHOLDER_DATA]
+        THEN fms.DIM_LOOKUP_PARTICIPATION_CODE_DESC END))  
+ 
+                                                    AS clar_cla_review_participation
  
 FROM
     Child_Social.FACT_CLA_REVIEW AS fcr
@@ -2431,6 +2438,7 @@ LEFT JOIN
     Child_Social.FACT_MEETING_SUBJECTS fms      ON fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
     AND fms.DIM_PERSON_ID = fcr.DIM_PERSON_ID
  
+ 
 GROUP BY fcr.FACT_CLA_REVIEW_ID,
     fcr.FACT_CLA_ID,                                            
     fcr.DIM_PERSON_ID,                              
@@ -2438,6 +2446,7 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
     fcr.MEETING_DTTM,                              
     fm.CANCELLED,
     fms.FACT_MEETINGS_ID
+    ;
 
 
 -- -- Add constraint(s)
@@ -2703,7 +2712,9 @@ Description:
 Author: D2I
 Last Modified Date: 11/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.6
+            1.5 pers_id and cla_id added
+
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -2723,7 +2734,8 @@ IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_vis
 CREATE TABLE #ssd_cla_visits (
     clav_cla_visit_id          NVARCHAR(48) PRIMARY KEY,
     clav_casenote_id           NVARCHAR(48),
-    clav_cla_episode_id        NVARCHAR(48),
+    clav_person_id             NVARCHAR(48),
+    clav_cla_id                NVARCHAR(48),
     clav_cla_visit_date        DATETIME,
     clav_cla_visit_seen        NCHAR(1),
     clav_cla_visit_seen_alone  NCHAR(1)
@@ -2733,22 +2745,25 @@ CREATE TABLE #ssd_cla_visits (
 INSERT INTO #ssd_cla_visits (
     clav_cla_visit_id,
     clav_casenote_id,
-    clav_cla_episode_id,
+    clav_person_id,
+    clav_cla_id,
     clav_cla_visit_date,
     clav_cla_visit_seen,
     clav_cla_visit_seen_alone
 )
+ 
 SELECT
     clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
     clav.FACT_CASENOTE_ID       AS clav_casenote_id,
-    clav.FACT_CLA_ID            AS clav_cla_episode_id,
+    clav.DIM_PERSON_ID          AS clav_person_id,
+    clav.FACT_CLA_ID            AS clav_cla_id,
     clav.VISIT_DTTM             AS clav_cla_visit_date,
     cn.SEEN_FLAG                AS clav_cla_visit_seen,
     cn.SEEN_ALONE_FLAG          AS clav_cla_visit_seen_alone
 FROM
     Child_Social.FACT_CLA_VISIT AS clav
  
-JOIN
+LEFT JOIN
     Child_Social.FACT_CASENOTES AS cn ON clav.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID;
 
 
@@ -2787,7 +2802,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
+IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
 
 
 
@@ -3089,10 +3104,8 @@ SET @TableName = N'ssd_care_leavers';
 PRINT 'Creating table: ' + @TableName;
 
 
-
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
-
 
 
 -- Create structure
@@ -3109,93 +3122,48 @@ CREATE TABLE #ssd_care_leavers
     clea_pathway_plan_review_date       DATETIME,
     clea_care_leaver_personal_advisor   NVARCHAR(100),
     clea_care_leaver_allocated_team     NVARCHAR(48),
-    clea_care_leaver_worker_id          NVARCHAR(48),    
-    clea_involvement_history            NVARCHAR(4000),  -- Non-SSD additional reference field [TESTING]  Is this a case for type MAX...
-    clea_involvement_type_story_json    NVARCHAR(1000)   -- Non-SSD additional reference field [TESTING]  
+    clea_care_leaver_worker_id          NVARCHAR(48)        -- [TESTING] Should this field retain the _id suffix post v1.5 changes? 
 );
 
 
 /* V4 */
--- Alternative for performance testing
-
 -- CTE for involvement history incl. worker data
+-- aggregate/extract current worker infos, allocated team, and p.advisor ID
 WITH InvolvementHistoryCTE AS (
-    SELECT 
+    SELECT
         fi.DIM_PERSON_ID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
-        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
-
-        JSON_QUERY((
-            SELECT 
-                fi2.FACT_INVOLVEMENTS_ID                AS 'involvement_id',
-                fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE    AS 'involvement_type_code',
-                fi2.START_DTTM                          AS 'start_date', 
-                fi2.END_DTTM                            AS 'end_date', 
-                fi2.DIM_WORKER_ID                       AS 'worker_id', 
-                fi2.DIM_DEPARTMENT_ID                   AS 'department_id'
-            FROM 
-                Child_Social.FACT_INVOLVEMENTS fi2
-            WHERE 
-                fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
-            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        )) AS involvement_history
+        -- worker, alloc team, and p.advisor dets <<per involvement type>>
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.DIM_WORKER_NAME END)                      AS CurrentWorkerName,  -- c.w name for the 'CW' inv type
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)  AS AllocatedTeamName,  -- team desc for the 'CW' inv type
+        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS' THEN fi.DIM_WORKER_NAME END)                  AS PersonalAdvisorName -- p.a. for the '16PLUS' inv type
     FROM (
         SELECT *,
+            -- Assign a row number, partition by p + inv type
             ROW_NUMBER() OVER (
-                PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
+                PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE
                 ORDER BY FACT_INVOLVEMENTS_ID DESC
             ) AS rn,
+            -- Mark the involvement type ('CW' or '16PLUS')
             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
         FROM Child_Social.FACT_INVOLVEMENTS
-        WHERE 
-            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
-            -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
-            AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-            AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+        WHERE
+            -- Filter records to just 'CW' and '16PLUS' inv types
+            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS')
+                                                    -- Switched off in v1.6 [TESTING]
+            -- AND END_DTTM IS NULL                 -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
+            -- AND DIM_WORKER_ID IS NOT NULL        -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+            AND DIM_WORKER_ID <> -1                 -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+
+            -- where the inv type is 'CW' + flagged as allocated
             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
-                                                -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
+                                                    -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
     ) fi
-    WHERE fi.rn = 1
-
-    AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-        SELECT 1 FROM #ssd_person p
-        WHERE p.pers_person_id = fi.DIM_PERSON_ID
-    )
-
-    GROUP BY 
-        fi.DIM_PERSON_ID
-),
--- CTE for involvement type story
-InvolvementTypeStoryCTE AS (
-    SELECT 
-        fi.DIM_PERSON_ID,
-        STUFF((
-            -- Concat involvement type codes into string
-            -- cannot use STRING AGG as appears to not work (Needs v2017+)
-            SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
-            FROM Child_Social.FACT_INVOLVEMENTS fi3
-            WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
-
-            AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-                SELECT 1 FROM #ssd_person p
-                WHERE p.pers_person_id = fi3.DIM_PERSON_ID
-            )
-
-            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
-            FOR XML PATH('')
-        ), 1, 1, '') AS InvolvementTypeStory
-    FROM 
-        Child_Social.FACT_INVOLVEMENTS fi
-    
-    WHERE 
-        EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-            SELECT 1 FROM #ssd_person p
-            WHERE p.pers_person_id = fi.DIM_PERSON_ID
-        )
-    GROUP BY 
+ 
+    -- aggregate the result(s)
+    GROUP BY
         fi.DIM_PERSON_ID
 )
+
 -- Insert data
 INSERT INTO #ssd_care_leavers
 (
@@ -3208,11 +3176,9 @@ INSERT INTO #ssd_care_leavers
     clea_care_leaver_accom_suitable, 
     clea_care_leaver_activity, 
     clea_pathway_plan_review_date, 
-    clea_care_leaver_personal_advisor,           
-    clea_care_leaver_allocated_team,             
-    clea_care_leaver_worker_id,                  
-    clea_involvement_history,                   -- Non-SSD additional reference field [TESTING] 
-    clea_involvement_type_story_json            -- Non-SSD additional reference field [TESTING] 
+    clea_care_leaver_personal_advisor,                  
+    clea_care_leaver_worker_id, 
+    clea_care_leaver_allocated_team                    
 )
 SELECT 
     fccl.FACT_CLA_CARE_LEAVERS_ID                   AS clea_table_id, 
@@ -3223,12 +3189,14 @@ SELECT
     fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC         AS clea_care_leaver_accommodation, 
     fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC     AS clea_care_leaver_accom_suitable, 
     fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC              AS clea_care_leaver_activity, 
-    fcp.MODIF_DTTM                                  AS clea_pathway_plan_review_date, 
-    ih.CurrentWorkerID                              AS clea_care_leaver_worker_id,
-    ih.PersonalAdvisorID                            AS clea_care_leaver_personal_advisor,
-    ih.AllocatedTeam                                AS clea_care_leaver_allocated_team,
-    ih.involvement_history                          AS clea_involvement_history,                -- Non-SSD additional reference field [TESTING] 
-    CONCAT('[', its.InvolvementTypeStory, ']')      AS clea_involvement_type_story_json         -- Non-SSD additional reference field [TESTING] 
+
+    MAX(CASE WHEN fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+        AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'
+        THEN fcp.MODIF_DTTM END)                    AS clea_pathway_plan_review_date,
+
+    ih.PersonalAdvisorName                          AS clea_care_leaver_personal_advisor,
+    ih.CurrentWorkerName                            AS clea_care_leaver_worker_id,
+    ih.AllocatedTeamName                            AS clea_care_leaver_allocated_team
 FROM 
     Child_Social.FACT_CLA_CARE_LEAVERS AS fccl
 
@@ -3237,19 +3205,31 @@ LEFT JOIN Child_Social.DIM_CLA_ELIGIBILITY AS dce ON fccl.DIM_PERSON_ID = dce.DI
 LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID         -- towards clea_pathway_plan_review_date
     AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'               
 
--- from CTE(s)
-LEFT JOIN InvolvementHistoryCTE ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID
-LEFT JOIN InvolvementTypeStoryCTE its ON fccl.DIM_PERSON_ID = its.DIM_PERSON_ID
-
-WHERE 
+LEFT JOIN InvolvementHistoryCTE AS ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID                  -- connect with CTE aggr data      
+ 
+WHERE
     -- Exists-on ssd_person clause should already filter these, this only a fail-safe
-    fccl.FACT_CLA_CARE_LEAVERS_ID <> -1;
+    fccl.FACT_CLA_CARE_LEAVERS_ID <> -1
+ 
+GROUP BY
+    fccl.FACT_CLA_CARE_LEAVERS_ID,
+    fccl.DIM_PERSON_ID,
+    dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC,
+    fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE,
+    fccl.IN_TOUCH_DTTM,
+    fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC,
+    fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC,
+    fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC,
+    ih.PersonalAdvisorName,
+    ih.CurrentWorkerName,
+    ih.AllocatedTeamName          
+    ;
 
 /* End V4 */
 
 
--- Add index(es)
-CREATE INDEX IDX_clea_person_id ON #ssd_care_leavers(clea_person_id);
+-- -- Add index(es)
+-- CREATE INDEX IDX_clea_person_id ON #ssd_care_leavers(clea_person_id);
 
 
 -- -- Add constraint(s)
@@ -4123,3 +4103,128 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 
 /* ********************************************************************************************************** */
 
+
+
+
+/* Start
+
+        Non-SDD Bespoke extract mods
+        
+        Examples of how to build on the ssd with bespoke additional fields. These can be 
+        refreshed|incl. within the rebuild script and rebuilt at the same time as the SSD
+        Changes should be limited to additional, non-destructive enhancements that do not
+        alter the core structure of the SSD. 
+        */
+
+
+
+/* 
+=============================================================================
+MOD Name: involvements history, involvements type history
+Description: 
+Author: D2I
+Last Modified Date: 12/01/24
+DB Compatibility: SQL Server 2014+|...
+Version: 0.9
+Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+
+- FACT_INVOLVEMENTS
+- ssd_person
+=============================================================================
+*/
+ALTER TABLE #ssd_person
+ADD involvement_history NVARCHAR(4000),  -- Adjust data type as needed
+    involvement_type_story_json NVARCHAR(1000);  -- Adjust data type as needed
+
+
+-- CTE for involvement history incl. worker data
+WITH InvolvementHistoryCTE AS (
+    SELECT 
+        fi.DIM_PERSON_ID,
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
+        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
+
+        JSON_QUERY((
+            -- structure of the main|complete invovements history json
+            SELECT 
+                fi2.FACT_INVOLVEMENTS_ID                AS 'involvement_id',
+                fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE    AS 'involvement_type_code',
+                fi2.START_DTTM                          AS 'start_date', 
+                fi2.END_DTTM                            AS 'end_date', 
+                fi2.DIM_WORKER_ID                       AS 'worker_id', 
+                fi2.DIM_DEPARTMENT_ID                   AS 'department_id'
+            FROM 
+                Child_Social.FACT_INVOLVEMENTS fi2
+            WHERE 
+                fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        )) AS involvement_history
+    FROM (
+        SELECT *,
+            ROW_NUMBER() OVER (
+                PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
+                ORDER BY FACT_INVOLVEMENTS_ID DESC
+            ) AS rn,
+            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
+        FROM Child_Social.FACT_INVOLVEMENTS
+        WHERE 
+            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
+            -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
+            AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+            AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+            AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
+                                                -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
+    ) fi
+    WHERE fi.rn = 1
+
+    AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+        SELECT 1 FROM #ssd_person p
+        WHERE p.pers_person_id = fi.DIM_PERSON_ID
+    )
+
+    GROUP BY 
+        fi.DIM_PERSON_ID
+),
+-- CTE for involvement type story
+InvolvementTypeStoryCTE AS (
+    SELECT 
+        fi.DIM_PERSON_ID,
+        STUFF((
+            -- Concat involvement type codes into string
+            -- cannot use STRING AGG as appears to not work (Needs v2017+)
+            SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
+            FROM Child_Social.FACT_INVOLVEMENTS fi3
+            WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
+
+            AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+                SELECT 1 FROM #ssd_person p
+                WHERE p.pers_person_id = fi3.DIM_PERSON_ID
+            )
+
+            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
+            FOR XML PATH('')
+        ), 1, 1, '') AS InvolvementTypeStory
+    FROM 
+        Child_Social.FACT_INVOLVEMENTS fi
+    
+    WHERE 
+        EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+            SELECT 1 FROM #ssd_person p
+            WHERE p.pers_person_id = fi.DIM_PERSON_ID
+        )
+    GROUP BY 
+        fi.DIM_PERSON_ID
+)
+
+
+-- Update
+UPDATE p
+SET
+    p.involvement_history = ih.involvement_history,
+    p.involvement_type_story_json = CONCAT('[', its.InvolvementTypeStory, ']')
+FROM #ssd_person p
+LEFT JOIN InvolvementHistoryCTE ih ON p.per_person_id = ih.DIM_PERSON_ID
+LEFT JOIN InvolvementTypeStoryCTE its ON p.per_person_id = its.DIM_PERSON_ID;
