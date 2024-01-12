@@ -54,10 +54,10 @@ DECLARE @LastSept30th DATE; -- Most recent past September 30th date towards case
 Object Name: ssd_person
 Description: person/child details
 Author: D2I
-Last Modified Date: 14/12/23
+Last Modified Date: 12/01/24 RH
 DB Compatibility: SQL Server 2014+|...
 
-Version: 1.4
+Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 
 Remarks: Need to confirm FACT_903_DATA as source of mother related data
@@ -81,12 +81,13 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 -- Create structure
 CREATE TABLE #ssd_person (
+    pers_legacy_id          NVARCHAR(48),
     pers_person_id          NVARCHAR(48) PRIMARY KEY,
     pers_sex                NVARCHAR(48),
-    pers_gender             NVARCHAR(48),                   -- [PLACEHOLDER_DATA] [TESTING]
+    pers_gender             NVARCHAR(48),                   
     pers_ethnicity          NVARCHAR(38),
     pers_dob                DATETIME,
-    pers_common_child_id    NVARCHAR(10),                   -- [TESTING]
+    pers_common_child_id    NVARCHAR(10),                   -- [TESTING] [Takes NHS Number]
     -- pers_upn_unknown        NVARCHAR(10),                
     pers_send               NVARCHAR(1),
     pers_expected_dob       DATETIME,                       -- Date or NULL
@@ -97,12 +98,13 @@ CREATE TABLE #ssd_person (
  
 -- Insert data
 INSERT INTO #ssd_person (
+    pers_legacy_id,
     pers_person_id,
     pers_sex,
     pers_gender,
     pers_ethnicity,
     pers_dob,
-    pers_common_child_id,
+    pers_common_child_id,                               -- [TESTING] [Takes NHS Number]
     -- pers_upn_unknown,                                -- [TESTING]
     pers_send,
     pers_expected_dob,
@@ -111,9 +113,10 @@ INSERT INTO #ssd_person (
     pers_nationality
 )
 SELECT
+    p.LEGACY_ID,
     p.DIM_PERSON_ID,
     p.GENDER_MAIN_CODE,
-    'PLACEHOLDER DATA',                                 -- [PLACEHOLDER_DATA] [TESTING]
+    p.NHS_NUMBER,                                       -- [TESTING]
     p.ETHNICITY_MAIN_CODE,
         CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
@@ -2759,19 +2762,18 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_sdq_scores V2 
+Object Name: ssd_sdq_scores V4
 Description: 
 Author: D2I
-Last Modified Date: 06/01/23
+Last Modified Date: 12/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5 (V4)
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
 Dependencies: 
 - ssd_person
 - FACT_FORMS
 - FACT_FORM_ANSWERS
-- FACT_903_DATA (sdq reason
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2781,12 +2783,130 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
+IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
 
-/*
--- Start V1
+
+
+/* Start V4 JH */
+
 -- Create structure
 CREATE TABLE #ssd_sdq_scores (
+    csdq_table_id               NVARCHAR(48),-- PRIMARY KEY,
+    csdq_form_id                NVARCHAR(48),
+    csdq_person_id              NVARCHAR(48),
+    csdq_sdq_details_json       NVARCHAR(1000)          
+);
+ 
+ 
+-- Insert data
+INSERT INTO #ssd_sdq_scores (
+    csdq_table_id,
+    csdq_form_id,
+    csdq_person_id,
+    csdq_sdq_details_json
+)
+ 
+SELECT
+    ff.FACT_FORM_ID         AS csdq_table_id,
+    ffa.FACT_FORM_ID        AS csdq_form_id,
+    ff.DIM_PERSON_ID        AS csdq_person_id,
+    (SELECT
+        CASE WHEN ffa.ANSWER_NO = 'FormEndDate'
+        THEN ffa.ANSWER END
+                            AS "SDQ_COMPLETED_DATE",
+ 
+        CASE WHEN ffa.ANSWER_NO = 'SDQScore'
+        THEN ffa.ANSWER END
+                            AS "SDQ_SCORE"
+ 
+    FROM Child_Social.FACT_FORM_ANSWERS ffa
+ 
+    WHERE ff.FACT_FORM_ID = ffa.FACT_FORM_ID
+        AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+        AND ANSWER_NO IN ('FormEndDate','SDQScore')
+        AND ANSWER IS NOT NULL
+ 
+    FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS csdq_sdq_details_json
+ 
+FROM
+    Child_Social.FACT_FORMS ff
+ 
+JOIN
+    Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
+    AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+    AND ffa.ANSWER_NO IN ('FormEndDate','SDQScore')
+    AND ffa.ANSWER IS NOT NULL
+/* End V4 JH */
+
+
+/*
+-- Start V3
+-- Create structure
+CREATE TABLE ssd_sdq_scores (
+    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
+    csdq_person_id             NVARCHAR(48),
+    --csdq_sdq_completed_date  DATETIME,        -- combined with sdq score in _json field
+    csdq_sdq_reason            NVARCHAR(100),
+    csdq_sdq_score_json        NVARCHAR(500)    -- {'csdq_sdq_completed_date':dateVal, 'csdq_sdq_score':scoreVal }
+);
+
+-- Insert data
+INSERT INTO ssd_sdq_scores (
+    csdq_table_id,
+    csdq_person_id,
+    --csdq_sdq_completed_date,
+    csdq_sdq_reason,
+    csdq_sdq_score_json
+)
+
+SELECT 
+    ffa_outer.FACT_FORM_ID                  AS csdq_table_id,
+    ff.DIM_PERSON_ID                        AS csdq_person_id,
+
+    ( -- [TESTING] Need to ensure that only single/most recent reason is required here
+        SELECT TOP 1 f903_inner.SDQ_REASON 
+        FROM Child_Social.FACT_903_DATA f903_inner 
+        WHERE f903_inner.DIM_PERSON_ID = ff.DIM_PERSON_ID
+    )                                       AS csdq_sdq_reason,
+    (
+        SELECT
+            MAX(ISNULL(CASE                                             -- isnull to ensure key:value pair structure exists regardless of data existance
+                WHEN ffa_inner.ANSWER_NO = 'FormEndDate' 
+                THEN ffa_inner.answer   
+                --THEN TRY_CONVERT(DATE, ffa_inner.answer, 106)           -- Data has format: '25-Feb-2016'. Ref use 101 for mm/dd/yyyy | 103 for dd/mm/yyyy
+            END, ''))                       AS csdq_sdq_completed_date, -- new field alias becomes key in _json field
+
+            MAX(ISNULL(CASE 
+                WHEN ffa_inner.ANSWER_NO = 'SDQScore' 
+                THEN ffa_inner.answer 
+            END, ''))                       AS csdq_sdq_score           -- new field alias becomes key in _json field
+        FROM 
+            Child_Social.FACT_FORM_ANSWERS ffa_inner
+        WHERE 
+            ffa_inner.fact_form_id = ffa_outer.fact_form_id
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    )                                       AS csdq_sdq_score_json
+FROM 
+    Child_Social.FACT_FORM_ANSWERS ffa_outer
+JOIN 
+    Child_Social.FACT_FORMS ff ON ffa_outer.FACT_FORM_ID = ff.FACT_FORM_ID
+WHERE 
+    ( -- filter on both code and desc (code appears to change, string desc not so)
+        ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
+        OR ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
+    )
+    AND ffa_outer.ANSWER_NO IN ('FormEndDate', 'SDQScore')
+GROUP BY 
+    ffa_outer.FACT_FORM_ID,
+    ff.DIM_PERSON_ID;
+-- End V3
+*/
+
+/* 
+-- V1 On hold 
+-- Create structure
+CREATE TABLE ssd_sdq_scores (
     csdq_table_id              NVARCHAR(48) PRIMARY KEY,
     csdq_person_id             NVARCHAR(48),
     csdq_sdq_completed_date    DATETIME,
@@ -2795,7 +2915,7 @@ CREATE TABLE #ssd_sdq_scores (
 );
 
 -- Insert data
-INSERT INTO #ssd_sdq_scores (
+INSERT INTO ssd_sdq_scores (
     csdq_table_id,
     csdq_person_id,
     csdq_sdq_completed_date,
@@ -2841,70 +2961,10 @@ FROM
 JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
 
 LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
--- End V1
+
+-- End of V1
 */
 
-
--- Start V2
--- Create structure
-CREATE TABLE #ssd_sdq_scores (
-    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
-    csdq_person_id             NVARCHAR(48),
-    --csdq_sdq_completed_date  DATETIME,        -- combined with sdq score in _json field
-    csdq_sdq_reason            NVARCHAR(100),
-    csdq_sdq_score_json        NVARCHAR(500)    -- {'csdq_sdq_completed_date':dateVal, 'csdq_sdq_score':scoreVal }
-);
-
--- Insert data
-INSERT INTO #ssd_sdq_scores (
-    csdq_table_id,
-    csdq_person_id,
-    --csdq_sdq_completed_date,
-    csdq_sdq_reason,
-    csdq_sdq_score_json
-)
-
-SELECT 
-    ffa_outer.FACT_FORM_ID                  AS csdq_table_id,
-    ff.DIM_PERSON_ID                        AS csdq_person_id,
-
-    ( -- [TESTING] Need to ensure that only single/most recent reason is required here
-        SELECT TOP 1 f903_inner.SDQ_REASON 
-        FROM Child_Social.FACT_903_DATA f903_inner 
-        WHERE f903_inner.DIM_PERSON_ID = ff.DIM_PERSON_ID
-    )                                       AS csdq_sdq_reason,
-    (
-        SELECT
-            MAX(ISNULL(CASE                                             -- isnull to ensure key:value pair structure exists regardless of data existance
-                WHEN ffa_inner.ANSWER_NO = 'FormEndDate' 
-                THEN ffa_inner.answer   
-                --THEN TRY_CONVERT(DATE, ffa_inner.answer, 106)           -- Data has format: '25-Feb-2016'. Ref use 101 for mm/dd/yyyy | 103 for dd/mm/yyyy
-            END, ''))                       AS csdq_sdq_completed_date, -- new field alias becomes key in _json field
-
-            MAX(ISNULL(CASE 
-                WHEN ffa_inner.ANSWER_NO = 'SDQScore' 
-                THEN ffa_inner.answer 
-            END, ''))                       AS csdq_sdq_score           -- new field alias becomes key in _json fiel
-        FROM 
-            Child_Social.FACT_FORM_ANSWERS ffa_inner
-        WHERE 
-            ffa_inner.fact_form_id = ffa_outer.fact_form_id
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )                                       AS csdq_sdq_score_json
-FROM 
-    Child_Social.FACT_FORM_ANSWERS ffa_outer
-JOIN 
-    Child_Social.FACT_FORMS ff ON ffa_outer.FACT_FORM_ID = ff.FACT_FORM_ID
-WHERE 
-    ( -- filter on both code and desc (code appears to change, string desc not so)
-        ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
-        OR ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
-    )
-    AND ffa_outer.ANSWER_NO IN ('FormEndDate', 'SDQScore')
-GROUP BY 
-    ffa_outer.FACT_FORM_ID,
-    ff.DIM_PERSON_ID;
--- End V2
 
 
 -- -- Add FK constraint for csdq_person_id

@@ -96,9 +96,9 @@ DECLARE @LastSept30th DATE; -- Most recent past September 30th date towards case
 Object Name: ssd_person
 Description: person/child details
 Author: D2I
-Last Modified Date: 24/12/23
+Last Modified Date: 12/01/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 
 Remarks: Removed non-required join to Child_Social.FACT_PERSON_RELATION
@@ -121,6 +121,7 @@ IF OBJECT_ID('ssd_person') IS NOT NULL DROP TABLE ssd_person;
 
 -- Create structure
 CREATE TABLE ssd_person (
+    pers_legacy_id          NVARCHAR(48),
     pers_person_id          NVARCHAR(48) PRIMARY KEY,
     pers_sex                NVARCHAR(48),
     pers_gender             NVARCHAR(48),                   -- [PLACEHOLDER_DATA] [TESTING]
@@ -137,6 +138,7 @@ CREATE TABLE ssd_person (
  
 -- Insert data
 INSERT INTO ssd_person (
+    pers_legacy_id,
     pers_person_id,
     pers_sex,
     pers_gender,
@@ -151,9 +153,10 @@ INSERT INTO ssd_person (
     pers_nationality
 )
 SELECT
+    p.LEGACY_ID,
     p.DIM_PERSON_ID,
     p.GENDER_MAIN_CODE,
-    'PLACEHOLDER DATA',                                 -- [PLACEHOLDER_DATA] [TESTING]
+    p.NHS_NUMBER,                                       -- [PLACEHOLDER_DATA] [TESTING]
     p.ETHNICITY_MAIN_CODE,
         CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
@@ -2791,12 +2794,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_sdq_scores V3
+Object Name: ssd_sdq_scores V4
 Description: 
 Author: D2I
-Last Modified Date: 06/01/24
+Last Modified Date: 12/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5 (V4)
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
 Dependencies: 
@@ -2816,72 +2819,60 @@ IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
 
 
 
-/* 
--- V1 On hold 
+/* Start V4 JH */
 
 -- Create structure
-CREATE TABLE ssd_sdq_scores (
-    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
-    csdq_person_id             NVARCHAR(48),
-    csdq_sdq_completed_date    DATETIME,
-    csdq_sdq_reason            NVARCHAR(100),
-    csdq_sdq_score             NVARCHAR(100)
+CREATE TABLE #ssd_sdq_scores (
+    csdq_table_id               NVARCHAR(48),-- PRIMARY KEY,
+    csdq_form_id                NVARCHAR(48),
+    csdq_person_id              NVARCHAR(48),
+    csdq_sdq_details_json       NVARCHAR(1000)          
 );
-
+ 
+ 
 -- Insert data
-INSERT INTO ssd_sdq_scores (
+INSERT INTO #ssd_sdq_scores (
     csdq_table_id,
+    csdq_form_id,
     csdq_person_id,
-    csdq_sdq_completed_date,
-    csdq_sdq_reason,
-    csdq_sdq_score
+    csdq_sdq_details_json
 )
--- Each sub-select targets a specific ANSWER_NO
--- Approach used for readability over single join and conditional aggregation
-SELECT 
-    ffa.FACT_FORM_ID AS csdq_table_id,
-    ff.DIM_PERSON_ID AS csdq_person_id,
-    (
-        SELECT ANSWER 
-        FROM Child_Social.FACT_FORM_ANSWERS
-        WHERE 
-            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
-                -- filter on both here to ensure reliability
-                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
-                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
-            )
-            AND ANSWER_NO = 'FormEndDate'
-            AND FACT_FORM_ID = ffa.FACT_FORM_ID
-    ) AS csdq_sdq_completed_date,
-
-    fd.SDQ_REASON AS csdq_sdq_reason,
-
-    (
-        SELECT ANSWER 
-        FROM Child_Social.FACT_FORM_ANSWERS
-        WHERE 
-            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
-                -- filter on both here to ensure reliability
-                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
-                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
-            )
-            AND ANSWER_NO = 'SDQScore'
-            AND FACT_FORM_ID = ffa.FACT_FORM_ID
-    ) AS csdq_sdq_score
-
-FROM 
-    Child_Social.FACT_FORM_ANSWERS ffa
-
-JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
-
-LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
+ 
+SELECT
+    ff.FACT_FORM_ID         AS csdq_table_id,
+    ffa.FACT_FORM_ID        AS csdq_form_id,
+    ff.DIM_PERSON_ID        AS csdq_person_id,
+    (SELECT
+        CASE WHEN ffa.ANSWER_NO = 'FormEndDate'
+        THEN ffa.ANSWER END
+                            AS "SDQ_COMPLETED_DATE",
+ 
+        CASE WHEN ffa.ANSWER_NO = 'SDQScore'
+        THEN ffa.ANSWER END
+                            AS "SDQ_SCORE"
+ 
+    FROM Child_Social.FACT_FORM_ANSWERS ffa
+ 
+    WHERE ff.FACT_FORM_ID = ffa.FACT_FORM_ID
+        AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+        AND ANSWER_NO IN ('FormEndDate','SDQScore')
+        AND ANSWER IS NOT NULL
+ 
+    FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS csdq_sdq_details_json
+ 
+FROM
+    Child_Social.FACT_FORMS ff
+ 
+JOIN
+    Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
+    AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+    AND ffa.ANSWER_NO IN ('FormEndDate','SDQScore')
+    AND ffa.ANSWER IS NOT NULL
+/* End V4 JH */
 
 
--- End of V1
-*/
-
-
-
+/*
 -- Start V3
 -- Create structure
 CREATE TABLE ssd_sdq_scores (
@@ -2942,6 +2933,72 @@ GROUP BY
     ffa_outer.FACT_FORM_ID,
     ff.DIM_PERSON_ID;
 -- End V3
+*/
+
+/* 
+-- V1 On hold 
+-- Create structure
+CREATE TABLE ssd_sdq_scores (
+    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
+    csdq_person_id             NVARCHAR(48),
+    csdq_sdq_completed_date    DATETIME,
+    csdq_sdq_reason            NVARCHAR(100),
+    csdq_sdq_score             NVARCHAR(100)
+);
+
+-- Insert data
+INSERT INTO ssd_sdq_scores (
+    csdq_table_id,
+    csdq_person_id,
+    csdq_sdq_completed_date,
+    csdq_sdq_reason,
+    csdq_sdq_score
+)
+-- Each sub-select targets a specific ANSWER_NO
+-- Approach used for readability over single join and conditional aggregation
+SELECT 
+    ffa.FACT_FORM_ID AS csdq_table_id,
+    ff.DIM_PERSON_ID AS csdq_person_id,
+    (
+        SELECT ANSWER 
+        FROM Child_Social.FACT_FORM_ANSWERS
+        WHERE 
+            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
+                -- filter on both here to ensure reliability
+                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
+                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
+            )
+            AND ANSWER_NO = 'FormEndDate'
+            AND FACT_FORM_ID = ffa.FACT_FORM_ID
+    ) AS csdq_sdq_completed_date,
+
+    fd.SDQ_REASON AS csdq_sdq_reason,
+
+    (
+        SELECT ANSWER 
+        FROM Child_Social.FACT_FORM_ANSWERS
+        WHERE 
+            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
+                -- filter on both here to ensure reliability
+                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
+                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
+            )
+            AND ANSWER_NO = 'SDQScore'
+            AND FACT_FORM_ID = ffa.FACT_FORM_ID
+    ) AS csdq_sdq_score
+
+FROM 
+    Child_Social.FACT_FORM_ANSWERS ffa
+
+JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
+
+LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
+
+-- End of V1
+*/
+
+
+
 
 
 
