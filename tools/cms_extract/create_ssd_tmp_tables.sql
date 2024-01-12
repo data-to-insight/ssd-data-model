@@ -2707,7 +2707,9 @@ Description:
 Author: D2I
 Last Modified Date: 11/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.6
+            1.5 pers_id and cla_id added
+            
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -2727,7 +2729,8 @@ IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_vis
 CREATE TABLE #ssd_cla_visits (
     clav_cla_visit_id          NVARCHAR(48) PRIMARY KEY,
     clav_casenote_id           NVARCHAR(48),
-    clav_cla_episode_id        NVARCHAR(48),
+    clav_person_id             NVARCHAR(48),
+    clav_cla_id                NVARCHAR(48),
     clav_cla_visit_date        DATETIME,
     clav_cla_visit_seen        NCHAR(1),
     clav_cla_visit_seen_alone  NCHAR(1)
@@ -2737,22 +2740,25 @@ CREATE TABLE #ssd_cla_visits (
 INSERT INTO #ssd_cla_visits (
     clav_cla_visit_id,
     clav_casenote_id,
-    clav_cla_episode_id,
+    clav_person_id,
+    clav_cla_id,
     clav_cla_visit_date,
     clav_cla_visit_seen,
     clav_cla_visit_seen_alone
 )
+ 
 SELECT
     clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
     clav.FACT_CASENOTE_ID       AS clav_casenote_id,
-    clav.FACT_CLA_ID            AS clav_cla_episode_id,
+    clav.DIM_PERSON_ID          AS clav_person_id,
+    clav.FACT_CLA_ID            AS clav_cla_id,
     clav.VISIT_DTTM             AS clav_cla_visit_date,
     cn.SEEN_FLAG                AS clav_cla_visit_seen,
     cn.SEEN_ALONE_FLAG          AS clav_cla_visit_seen_alone
 FROM
     Child_Social.FACT_CLA_VISIT AS clav
  
-JOIN
+LEFT JOIN
     Child_Social.FACT_CASENOTES AS cn ON clav.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID;
 
 
