@@ -33,7 +33,7 @@ IF OBJECT_ID('tempdb..#AA_1_contacts') IS NOT NULL DROP TABLE #AA_1_contacts;
 
 -- Create stat-return structure
 SELECT
-    p.pers_person_id                        AS CHILD_ID,
+    p.pers_legacy_id                        AS CHILD_ID,
     p.pers_sex                              AS GENDER,
     p.pers_ethnicity                        AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')        AS DATE_OF_BIRTH,
@@ -62,7 +62,7 @@ SELECT
 
 
     FORMAT(c.cont_contact_start, 'dd/MM/yyyy')  AS DATE_OF_CONTACT,
-    c.cont_contact_source                       AS CONTACT_SOURCE
+    c.cont_contact_source_desc                  AS CONTACT_SOURCE
 
 INTO #AA_1_contacts
 FROM
