@@ -708,7 +708,8 @@ CREATE TABLE #ssd_contacts (
     cont_contact_id             NVARCHAR(48) PRIMARY KEY,
     cont_person_id              NVARCHAR(48),
     cont_contact_start          DATETIME,
-    cont_contact_source         NVARCHAR(100), -- Receives ID field not desc hence size
+    cont_contact_source         NVARCHAR(48),   -- 
+    cont_contact_source_desc    NVARCHAR(200),  -- 
     cont_contact_outcome_json   NVARCHAR(500) 
 );
 
@@ -718,6 +719,7 @@ INSERT INTO #ssd_contacts (
     cont_person_id, 
     cont_contact_start,
     cont_contact_source,
+    cont_contact_source_desc,
     cont_contact_outcome_json
 )
 SELECT 
@@ -725,6 +727,8 @@ SELECT
     fc.DIM_PERSON_ID, 
     fc.CONTACT_DTTM,
     fc.DIM_LOOKUP_CONT_SORC_ID,
+    fc.DIM_LOOKUP_CONT_SORC_ID_DESC,
+
     (                                                           -- Create JSON string for the address
         SELECT 
             NULLIF(fc.OUTCOME_NEW_REFERRAL_FLAG, '')           AS "OUTCOME_NEW_REFERRAL_FLAG",
