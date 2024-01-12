@@ -859,7 +859,9 @@ Description:
 Author: D2I
 Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
+            1.4: contact_source_desc added, _source now populated with ID
+
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -882,7 +884,8 @@ CREATE TABLE #ssd_cin_episodes
     cine_person_id              NVARCHAR(48),
     cine_referral_date          DATETIME,
     cine_cin_primary_need       NVARCHAR(10),
-    cine_referral_source        NVARCHAR(255),
+    cine_referral_source        NVARCHAR(48),    
+    cine_referral_source_desc   NVARCHAR(255),
     cine_referral_outcome_json  NVARCHAR(500),
     cine_referral_nfa           NCHAR(1),
     cine_close_reason           NVARCHAR(100),
@@ -899,6 +902,7 @@ INSERT INTO #ssd_cin_episodes
     cine_referral_date,
     cine_cin_primary_need,
     cine_referral_source,
+    cine_referral_source_desc,
     cine_referral_outcome_json,
     cine_referral_nfa,
     cine_close_reason,
@@ -911,7 +915,8 @@ SELECT
     fr.DIM_PERSON_ID,
     fr.REFRL_START_DTTM,
     fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE,
-    fr.[DIM_LOOKUP_CONT_SORC_ID_DESC ],
+    fr.DIM_LOOKUP_CONT_SORC_ID,
+    fr.DIM_LOOKUP_CONT_SORC_ID_DESC,
     (
         SELECT
             NULLIF(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS "OUTCOME_SINGLE_ASSESSMENT_FLAG",
@@ -945,8 +950,8 @@ AND
 CREATE NONCLUSTERED INDEX IDX_ssd_cin_episodes_person_id ON #ssd_cin_episodes(cine_person_id);
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
--- FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
+-- FOREIGN KEY (cine_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 
@@ -2709,7 +2714,7 @@ Last Modified Date: 11/01/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.6
             1.5 pers_id and cla_id added
-            
+
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
