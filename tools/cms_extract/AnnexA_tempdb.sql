@@ -33,10 +33,10 @@ IF OBJECT_ID('tempdb..#AA_1_contacts') IS NOT NULL DROP TABLE #AA_1_contacts;
 
 -- Create stat-return structure
 SELECT
-    p.pers_person_id,
-    p.pers_sex,
-    p.pers_ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy') AS formatted_pers_dob,
+    p.pers_person_id                        AS CHILD_ID,
+    p.pers_sex                              AS GENDER,
+    p.pers_ethnicity                        AS ETHNICITY,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')        AS DATE_OF_BIRTH,
     CASE
         -- If DoB is in the future, set age as -1 (unborn)
         WHEN p.pers_dob > GETDATE() THEN -1
@@ -58,11 +58,11 @@ SELECT
                 THEN 1 
                 ELSE 0
             END
-    END as CurrentAge,
+    END                                         AS AGE,
 
 
-    FORMAT(c.cont_contact_start, 'dd/MM/yyyy') AS formatted_cont_contact_start,
-    c.cont_contact_source
+    FORMAT(c.cont_contact_start, 'dd/MM/yyyy')  AS DATE_OF_CONTACT,
+    c.cont_contact_source                       AS CONTACT_SOURCE
 
 INTO #AA_1_contacts
 FROM

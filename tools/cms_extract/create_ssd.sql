@@ -1844,16 +1844,18 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 24/12/23
+Last Modified Date: 12/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.5
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_involvements
+- ssd_person
 - FACT_CLA
 - FACT_REFERRALS
 - FACT_CARE_EPISODES
+- FACT_CASENOTES
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -1864,35 +1866,33 @@ PRINT 'Creating table: ' + @TableName;
 -- Check if table exists, & drop
 IF OBJECT_ID('ssd_cla_episodes') IS NOT NULL DROP TABLE ssd_cla_episodes;
 
-
+ 
 -- Create structure
 CREATE TABLE ssd_cla_episodes (
-    clae_cla_episode_id             NVARCHAR(48),
-    clae_person_id                  NVARCHAR(48),
-    clae_cla_episode_start          DATETIME,
-    clae_cla_episode_start_reason   NVARCHAR(100),
-    clae_cla_primary_need           NVARCHAR(100),
-    clae_cla_episode_ceased         DATETIME,
-    clae_cla_episode_cease_reason   NVARCHAR(255),
-    clae_cla_team                   NVARCHAR(48),
-    clae_cla_worker_id              NVARCHAR(48),
-    clae_cla_id                     NVARCHAR(48)  PRIMARY KEY,
-    clae_referral_id                NVARCHAR(48)
+    clae_cla_episode_id                 NVARCHAR(48) PRIMARY KEY,
+    clae_person_id                      NVARCHAR(48),
+    clae_cla_episode_start              DATETIME,
+    clae_cla_episode_start_reason       NVARCHAR(100),
+    clae_cla_primary_need               NVARCHAR(100),
+    clae_cla_episode_ceased             DATETIME,
+    clae_cla_episode_cease_reason       NVARCHAR(255),
+    clae_cla_id                         NVARCHAR(48),
+    clae_referral_id                    NVARCHAR(48),
+    clae_cla_review_last_iro_contact_date DATETIME
 );
-
--- Insert data 
+ 
+-- Insert data
 INSERT INTO ssd_cla_episodes (
-    clae_cla_episode_id, 
-    clae_person_id, 
+    clae_cla_episode_id,
+    clae_person_id,
     clae_cla_episode_start,
     clae_cla_episode_start_reason,
     clae_cla_primary_need,
     clae_cla_episode_ceased,
     clae_cla_episode_cease_reason,
-    clae_cla_team,                       
-    clae_cla_worker_id,                  
-    clae_cla_id, 
-    clae_referral_id
+    clae_cla_id,
+    clae_referral_id,
+    clae_cla_review_last_iro_contact_date
 )
 SELECT
     fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
@@ -1902,19 +1902,40 @@ SELECT
     fce.CIN_903_CODE                        AS clae_cla_primary_need,
     fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
     fce.CARE_REASON_END_DESC                AS clae_cla_episode_cease_reason,
-    'PLACEHOLDER DATA'                      AS clae_cla_team,           --      
-    'PLACEHOLDER DATA'                      AS clae_cla_worker_id,      -- [PLACEHOLDER] [TESTING]
     fc.FACT_CLA_ID                          AS clae_cla_id,                    
-    fc.FACT_REFERRAL_ID                     AS clae_referral_id
+    fc.FACT_REFERRAL_ID                     AS clae_referral_id,
+        (SELECT MAX(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+        --AND cn.DIM_CREATED_BY_DEPT_ID IN (5956,727)
+        AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+        THEN cn.EVENT_DTTM END))                                                        
+                                            AS clae_cla_review_last_iro_contact_date
+ 
+ 
 FROM
     Child_Social.FACT_CARE_EPISODES AS fce
 JOIN
     Child_Social.FACT_CLA AS fc ON fce.fact_cla_id = fc.FACT_CLA_ID
-
--- Removed 24/12/23
---JOIN
- --   Child_Social.FACT_INVOLVEMENTS AS fi ON fc.fact_referral_id = fi.fact_referral_id
---WHERE fi.IS_ALLOCATED_CW_FLAG = 'Y';
+ 
+LEFT JOIN
+    Child_Social.FACT_CASENOTES cn               ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+ 
+WHERE EXISTS ( -- only ssd relevant records
+    SELECT 1
+    FROM ssd_person p
+    WHERE p.pers_person_id = fce.DIM_PERSON_ID
+    )
+ 
+GROUP BY
+    fce.FACT_CARE_EPISODES_ID,
+    fce.DIM_PERSON_ID,
+    fce.CARE_START_DATE,
+    fce.CARE_REASON_DESC,
+    fce.CIN_903_CODE,
+    fce.CARE_END_DATE,
+    fce.CARE_REASON_END_DESC,
+    fc.FACT_CLA_ID,                    
+    fc.FACT_REFERRAL_ID,
+    cn.DIM_PERSON_ID;
 
 
 -- Create index(es)
