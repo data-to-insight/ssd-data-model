@@ -83,6 +83,10 @@ select * from #AA_1_contacts;
 
 
 
+
+
+
+
 /* 
 =============================================================================
 Report Name: Ofsted List 3 - Referrals YYYY
@@ -94,13 +98,13 @@ Description:
 Author: D2I
 Last Modified Date: 12/01/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 0.3
-
+Version: 1.0
+            0.3: Removed old obj/item naming. 
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - @ssd_timeframe_years
-- ssd_contacts
+- ssd_cin_episodes
 - ssd_person
 =============================================================================
 */
@@ -137,38 +141,37 @@ SELECT
     END                                         AS AGE,
     
     /* Returns fields */
-    ce.cin_referral_id                          AS REFERRAL_ID,
-    FORMAT(ce.cin_ref_date, 'dd/MM/yyyy')       AS REFERRAL_DATE,
-    ce.cin_primary_need,
+    ce.cine_referral_id                         AS REFERRAL_ID,
+    FORMAT(ce.cine_referral_date, 'dd/MM/yyyy') AS REFERRAL_DATE,
+    ce.cine_referral_source_desc                AS REFERRAL_SOURCE,
     CASE -- indicate if the most recent referral (or individual referral) resulted in 'No Further Action' (NFA)
-        WHEN ce.cin_ref_outcomec = 'NFA' THEN 'Yes'
+        WHEN ce.cine_referral_nfa = 'NFA' THEN 'Yes'
         ELSE 'No'
     END                                         AS NFA,
-    ce.cin_ref_team,
-    ce.cin_ref_worker_id,
-    COALESCE(sub.count_12months, 0)             AS count_12months
+    ce.cine_referral_team                       AS ALLOCATED_TEAM,
+    ce.cine_referral_worker_id                  AS ALLOCATED_WORKER, 
+    COALESCE(sub.count_12months, 0)             AS NUMBER_REFERRALS_LAST12MTHS
 
 INTO #AA_3_referrals
 
-
 FROM
-    cin_episodes ce
+    #ssd_cin_episodes ce
 INNER JOIN
-    person p ON ce.la_person_id = p.la_person_id
+    #ssd_person p ON ce.cine_person_id = p.pers_person_id
 LEFT JOIN
     (
         SELECT 
-            la_person_id,
+            cine_person_id,
             CASE -- referrals the child has received within the **12** months prior to their latest referral.
                 WHEN COUNT(*) > 0 THEN COUNT(*) - 1
                 ELSE 0
             END as count_12months
         FROM 
-            cin_episodes
+            #ssd_cin_episodes
         WHERE
-            cin_ref_date >= DATEADD(MONTH, -12, GETDATE())
+            cine_referral_date >= DATEADD(MONTH, -12, GETDATE())
         GROUP BY
-            la_person_id
-    ) sub ON ce.la_person_id = sub.la_person_id
+            cine_person_id
+    ) sub ON ce.cine_person_id = sub.cine_person_id
 WHERE
-    ce.cin_ref_date >= DATEADD(MONTH, -6, GETDATE());
+    ce.cine_referral_date >= DATEADD(MONTH, -6, GETDATE());
