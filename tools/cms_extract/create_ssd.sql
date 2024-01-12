@@ -2346,10 +2346,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_review
 Description: 
 Author: D2I
-Last Modified Date: 11/01/24
+Last Modified Date: 12/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.6
+            1.5: clar_cla_id change from clar_cla_episode_id
+            
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_cla_episodes
@@ -2368,39 +2370,37 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('ssd_cla_review', 'U') IS NOT NULL DROP TABLE ssd_cla_review;
  
 -- Create structure
- 
 CREATE TABLE ssd_cla_review (
     clar_cla_review_id                      NVARCHAR(48) PRIMARY KEY,
-    clar_cla_episode_id                     NVARCHAR(48),
+    clar_cla_id                             NVARCHAR(48),
     clar_cla_review_due_date                DATETIME,
     clar_cla_review_date                    DATETIME,
     clar_cla_review_cancelled               NVARCHAR(48),
-    clar_cla_review_participation           NVARCHAR(100),
-    clar_cla_review_last_iro_contact_date   DATETIME,
-);
+    clar_cla_review_participation           NVARCHAR(100)
+    );
  
 -- Insert data
 INSERT INTO ssd_cla_review (
     clar_cla_review_id,
-    clar_cla_episode_id,
+    clar_cla_id,
     clar_cla_review_due_date,
     clar_cla_review_date,
     clar_cla_review_cancelled,
-    clar_cla_review_participation,
-    clar_cla_review_last_iro_contact_date
+    clar_cla_review_participation
 )
  
 SELECT
     fcr.FACT_CLA_REVIEW_ID                          AS clar_cla_review_id,
-    fcr.FACT_CLA_ID                                 AS clar_cla_episode_id,                  
+    fcr.FACT_CLA_ID                                 AS clar_cla_id,                
     fcr.DUE_DTTM                                    AS clar_cla_review_due_date,
     fcr.MEETING_DTTM                                AS clar_cla_review_date,
     fm.CANCELLED                                    AS clar_cla_review_cancelled,
-    MAX(CASE WHEN fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
+ 
+    (SELECT MAX(CASE WHEN fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
         AND fms.DIM_PERSON_ID = fcr.DIM_PERSON_ID
-        THEN fms.DIM_LOOKUP_PARTICIPATION_CODE_DESC END)          
-                                                    AS clar_cla_review_participation,        
-    '01/01/1901'                                    AS clar_cla_review_last_iro_contact_date -- [PLACEHOLDER_DATA]
+        THEN fms.DIM_LOOKUP_PARTICIPATION_CODE_DESC END))  
+ 
+                                                    AS clar_cla_review_participation
  
 FROM
     Child_Social.FACT_CLA_REVIEW AS fcr
@@ -2411,6 +2411,7 @@ LEFT JOIN
 LEFT JOIN
     Child_Social.FACT_MEETING_SUBJECTS fms      ON fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
     AND fms.DIM_PERSON_ID = fcr.DIM_PERSON_ID
+ 
  
 GROUP BY fcr.FACT_CLA_REVIEW_ID,
     fcr.FACT_CLA_ID,                                            
