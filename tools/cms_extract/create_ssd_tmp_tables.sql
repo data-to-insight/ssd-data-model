@@ -2802,7 +2802,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
+IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
 
 
 
@@ -3104,10 +3104,8 @@ SET @TableName = N'ssd_care_leavers';
 PRINT 'Creating table: ' + @TableName;
 
 
-
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
-
 
 
 -- Create structure
@@ -3124,93 +3122,48 @@ CREATE TABLE #ssd_care_leavers
     clea_pathway_plan_review_date       DATETIME,
     clea_care_leaver_personal_advisor   NVARCHAR(100),
     clea_care_leaver_allocated_team     NVARCHAR(48),
-    clea_care_leaver_worker_id          NVARCHAR(48),    
-    clea_involvement_history            NVARCHAR(4000),  -- Non-SSD additional reference field [TESTING]  Is this a case for type MAX...
-    clea_involvement_type_story_json    NVARCHAR(1000)   -- Non-SSD additional reference field [TESTING]  
+    clea_care_leaver_worker_id          NVARCHAR(48)        -- [TESTING] Should this field retain the _id suffix post v1.5 changes? 
 );
 
 
 /* V4 */
--- Alternative for performance testing
-
 -- CTE for involvement history incl. worker data
+-- aggregate/extract current worker infos, allocated team, and p.advisor ID
 WITH InvolvementHistoryCTE AS (
-    SELECT 
+    SELECT
         fi.DIM_PERSON_ID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
-        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
-
-        JSON_QUERY((
-            SELECT 
-                fi2.FACT_INVOLVEMENTS_ID                AS 'involvement_id',
-                fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE    AS 'involvement_type_code',
-                fi2.START_DTTM                          AS 'start_date', 
-                fi2.END_DTTM                            AS 'end_date', 
-                fi2.DIM_WORKER_ID                       AS 'worker_id', 
-                fi2.DIM_DEPARTMENT_ID                   AS 'department_id'
-            FROM 
-                Child_Social.FACT_INVOLVEMENTS fi2
-            WHERE 
-                fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
-            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        )) AS involvement_history
+        -- worker, alloc team, and p.advisor dets <<per involvement type>>
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.DIM_WORKER_NAME END)                      AS CurrentWorkerName,  -- c.w name for the 'CW' inv type
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)  AS AllocatedTeamName,  -- team desc for the 'CW' inv type
+        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS' THEN fi.DIM_WORKER_NAME END)                  AS PersonalAdvisorName -- p.a. for the '16PLUS' inv type
     FROM (
         SELECT *,
+            -- Assign a row number, partition by p + inv type
             ROW_NUMBER() OVER (
-                PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
+                PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE
                 ORDER BY FACT_INVOLVEMENTS_ID DESC
             ) AS rn,
+            -- Mark the involvement type ('CW' or '16PLUS')
             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
         FROM Child_Social.FACT_INVOLVEMENTS
-        WHERE 
-            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
-            -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
-            AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-            AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+        WHERE
+            -- Filter records to just 'CW' and '16PLUS' inv types
+            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS')
+                                                    -- Switched off in v1.6 [TESTING]
+            -- AND END_DTTM IS NULL                 -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
+            -- AND DIM_WORKER_ID IS NOT NULL        -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+            AND DIM_WORKER_ID <> -1                 -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+
+            -- where the inv type is 'CW' + flagged as allocated
             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
-                                                -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
+                                                    -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
     ) fi
-    WHERE fi.rn = 1
-
-    AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-        SELECT 1 FROM #ssd_person p
-        WHERE p.pers_person_id = fi.DIM_PERSON_ID
-    )
-
-    GROUP BY 
-        fi.DIM_PERSON_ID
-),
--- CTE for involvement type story
-InvolvementTypeStoryCTE AS (
-    SELECT 
-        fi.DIM_PERSON_ID,
-        STUFF((
-            -- Concat involvement type codes into string
-            -- cannot use STRING AGG as appears to not work (Needs v2017+)
-            SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
-            FROM Child_Social.FACT_INVOLVEMENTS fi3
-            WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
-
-            AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-                SELECT 1 FROM #ssd_person p
-                WHERE p.pers_person_id = fi3.DIM_PERSON_ID
-            )
-
-            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
-            FOR XML PATH('')
-        ), 1, 1, '') AS InvolvementTypeStory
-    FROM 
-        Child_Social.FACT_INVOLVEMENTS fi
-    
-    WHERE 
-        EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-            SELECT 1 FROM #ssd_person p
-            WHERE p.pers_person_id = fi.DIM_PERSON_ID
-        )
-    GROUP BY 
+ 
+    -- aggregate the result(s)
+    GROUP BY
         fi.DIM_PERSON_ID
 )
+
 -- Insert data
 INSERT INTO #ssd_care_leavers
 (
@@ -3223,11 +3176,9 @@ INSERT INTO #ssd_care_leavers
     clea_care_leaver_accom_suitable, 
     clea_care_leaver_activity, 
     clea_pathway_plan_review_date, 
-    clea_care_leaver_personal_advisor,           
-    clea_care_leaver_allocated_team,             
-    clea_care_leaver_worker_id,                  
-    clea_involvement_history,                   -- Non-SSD additional reference field [TESTING] 
-    clea_involvement_type_story_json            -- Non-SSD additional reference field [TESTING] 
+    clea_care_leaver_personal_advisor,                  
+    clea_care_leaver_worker_id, 
+    clea_care_leaver_allocated_team                    
 )
 SELECT 
     fccl.FACT_CLA_CARE_LEAVERS_ID                   AS clea_table_id, 
@@ -3238,12 +3189,14 @@ SELECT
     fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC         AS clea_care_leaver_accommodation, 
     fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC     AS clea_care_leaver_accom_suitable, 
     fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC              AS clea_care_leaver_activity, 
-    fcp.MODIF_DTTM                                  AS clea_pathway_plan_review_date, 
-    ih.CurrentWorkerID                              AS clea_care_leaver_worker_id,
-    ih.PersonalAdvisorID                            AS clea_care_leaver_personal_advisor,
-    ih.AllocatedTeam                                AS clea_care_leaver_allocated_team,
-    ih.involvement_history                          AS clea_involvement_history,                -- Non-SSD additional reference field [TESTING] 
-    CONCAT('[', its.InvolvementTypeStory, ']')      AS clea_involvement_type_story_json         -- Non-SSD additional reference field [TESTING] 
+
+    MAX(CASE WHEN fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+        AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'
+        THEN fcp.MODIF_DTTM END)                    AS clea_pathway_plan_review_date,
+
+    ih.PersonalAdvisorName                          AS clea_care_leaver_personal_advisor,
+    ih.CurrentWorkerName                            AS clea_care_leaver_worker_id,
+    ih.AllocatedTeamName                            AS clea_care_leaver_allocated_team
 FROM 
     Child_Social.FACT_CLA_CARE_LEAVERS AS fccl
 
@@ -3252,19 +3205,31 @@ LEFT JOIN Child_Social.DIM_CLA_ELIGIBILITY AS dce ON fccl.DIM_PERSON_ID = dce.DI
 LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID         -- towards clea_pathway_plan_review_date
     AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'               
 
--- from CTE(s)
-LEFT JOIN InvolvementHistoryCTE ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID
-LEFT JOIN InvolvementTypeStoryCTE its ON fccl.DIM_PERSON_ID = its.DIM_PERSON_ID
-
-WHERE 
+LEFT JOIN InvolvementHistoryCTE AS ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID                  -- connect with CTE aggr data      
+ 
+WHERE
     -- Exists-on ssd_person clause should already filter these, this only a fail-safe
-    fccl.FACT_CLA_CARE_LEAVERS_ID <> -1;
+    fccl.FACT_CLA_CARE_LEAVERS_ID <> -1
+ 
+GROUP BY
+    fccl.FACT_CLA_CARE_LEAVERS_ID,
+    fccl.DIM_PERSON_ID,
+    dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC,
+    fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE,
+    fccl.IN_TOUCH_DTTM,
+    fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC,
+    fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC,
+    fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC,
+    ih.PersonalAdvisorName,
+    ih.CurrentWorkerName,
+    ih.AllocatedTeamName          
+    ;
 
 /* End V4 */
 
 
--- Add index(es)
-CREATE INDEX IDX_clea_person_id ON #ssd_care_leavers(clea_person_id);
+-- -- Add index(es)
+-- CREATE INDEX IDX_clea_person_id ON #ssd_care_leavers(clea_person_id);
 
 
 -- -- Add constraint(s)
@@ -4138,3 +4103,128 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 
 /* ********************************************************************************************************** */
 
+
+
+
+/* Start
+
+        Non-SDD Bespoke extract mods
+        
+        Examples of how to build on the ssd with bespoke additional fields. These can be 
+        refreshed|incl. within the rebuild script and rebuilt at the same time as the SSD
+        Changes should be limited to additional, non-destructive enhancements that do not
+        alter the core structure of the SSD. 
+        */
+
+
+
+/* 
+=============================================================================
+MOD Name: involvements history, involvements type history
+Description: 
+Author: D2I
+Last Modified Date: 12/01/24
+DB Compatibility: SQL Server 2014+|...
+Version: 0.9
+Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+
+- FACT_INVOLVEMENTS
+- ssd_person
+=============================================================================
+*/
+ALTER TABLE #ssd_person
+ADD involvement_history NVARCHAR(4000),  -- Adjust data type as needed
+    involvement_type_story_json NVARCHAR(1000);  -- Adjust data type as needed
+
+
+-- CTE for involvement history incl. worker data
+WITH InvolvementHistoryCTE AS (
+    SELECT 
+        fi.DIM_PERSON_ID,
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
+        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
+
+        JSON_QUERY((
+            -- structure of the main|complete invovements history json
+            SELECT 
+                fi2.FACT_INVOLVEMENTS_ID                AS 'involvement_id',
+                fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE    AS 'involvement_type_code',
+                fi2.START_DTTM                          AS 'start_date', 
+                fi2.END_DTTM                            AS 'end_date', 
+                fi2.DIM_WORKER_ID                       AS 'worker_id', 
+                fi2.DIM_DEPARTMENT_ID                   AS 'department_id'
+            FROM 
+                Child_Social.FACT_INVOLVEMENTS fi2
+            WHERE 
+                fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
+            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        )) AS involvement_history
+    FROM (
+        SELECT *,
+            ROW_NUMBER() OVER (
+                PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
+                ORDER BY FACT_INVOLVEMENTS_ID DESC
+            ) AS rn,
+            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
+        FROM Child_Social.FACT_INVOLVEMENTS
+        WHERE 
+            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
+            -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
+            AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+            AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+            AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
+                                                -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
+    ) fi
+    WHERE fi.rn = 1
+
+    AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+        SELECT 1 FROM #ssd_person p
+        WHERE p.pers_person_id = fi.DIM_PERSON_ID
+    )
+
+    GROUP BY 
+        fi.DIM_PERSON_ID
+),
+-- CTE for involvement type story
+InvolvementTypeStoryCTE AS (
+    SELECT 
+        fi.DIM_PERSON_ID,
+        STUFF((
+            -- Concat involvement type codes into string
+            -- cannot use STRING AGG as appears to not work (Needs v2017+)
+            SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
+            FROM Child_Social.FACT_INVOLVEMENTS fi3
+            WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
+
+            AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+                SELECT 1 FROM #ssd_person p
+                WHERE p.pers_person_id = fi3.DIM_PERSON_ID
+            )
+
+            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
+            FOR XML PATH('')
+        ), 1, 1, '') AS InvolvementTypeStory
+    FROM 
+        Child_Social.FACT_INVOLVEMENTS fi
+    
+    WHERE 
+        EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+            SELECT 1 FROM #ssd_person p
+            WHERE p.pers_person_id = fi.DIM_PERSON_ID
+        )
+    GROUP BY 
+        fi.DIM_PERSON_ID
+)
+
+
+-- Update
+UPDATE p
+SET
+    p.involvement_history = ih.involvement_history,
+    p.involvement_type_story_json = CONCAT('[', its.InvolvementTypeStory, ']')
+FROM #ssd_person p
+LEFT JOIN InvolvementHistoryCTE ih ON p.per_person_id = ih.DIM_PERSON_ID
+LEFT JOIN InvolvementTypeStoryCTE its ON p.per_person_id = its.DIM_PERSON_ID;
