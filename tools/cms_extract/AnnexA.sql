@@ -1,7 +1,7 @@
 
--- ssd time-frame (YRS)
+-- ssd time-frames (YRS)
 DECLARE @ssd_timeframe_years INT = 6;
-        @ssd_sub1_range_years INT = 1;
+DECLARE @ssd_sub1_range_years INT = 1;
 
 
 /* 

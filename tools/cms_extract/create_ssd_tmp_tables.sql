@@ -693,15 +693,15 @@ Dependencies:
 =============================================================================
 */
 -- [TESTING] Create marker
-SET @TableName = N'ssd_contact';
+SET @TableName = N'ssd_contacts';
 PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..#ssd_contact') IS NOT NULL DROP TABLE #ssd_contact;
+IF OBJECT_ID('tempdb..#ssd_contacts') IS NOT NULL DROP TABLE #ssd_contacts;
 
 -- Create structure
-CREATE TABLE #ssd_contact (
+CREATE TABLE #ssd_contacts (
     cont_contact_id             NVARCHAR(48) PRIMARY KEY,
     cont_person_id              NVARCHAR(48),
     cont_contact_start          DATETIME,
@@ -710,7 +710,7 @@ CREATE TABLE #ssd_contact (
 );
 
 -- Insert data
-INSERT INTO #ssd_contact (
+INSERT INTO #ssd_contacts (
     cont_contact_id, 
     cont_person_id, 
     cont_contact_start,
@@ -748,11 +748,11 @@ WHERE EXISTS
 
 
 -- -- Create constraint(s)
--- ALTER TABLE #ssd_contact ADD CONSTRAINT FK_contact_person 
+-- ALTER TABLE #ssd_contacts ADD CONSTRAINT FK_contact_person 
 -- FOREIGN KEY (cont_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_contact_person_id ON #ssd_contact(cont_person_id);
+CREATE NONCLUSTERED INDEX IDX_contact_person_id ON #ssd_contacts(cont_person_id);
 
 
 
@@ -1876,9 +1876,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 24/12/23
+Last Modified Date: 12/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -1896,35 +1896,33 @@ PRINT 'Creating table: ' + @TableName;
 -- Check if table exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episodes;
 
-
+ 
 -- Create structure
 CREATE TABLE #ssd_cla_episodes (
-    clae_cla_episode_id             NVARCHAR(48) PRIMARY KEY,
-    clae_person_id                  NVARCHAR(48),
-    clae_cla_episode_start          DATETIME,
-    clae_cla_episode_start_reason   NVARCHAR(100),
-    clae_cla_primary_need           NVARCHAR(100),
-    clae_cla_episode_ceased         DATETIME,
-    clae_cla_episode_cease_reason   NVARCHAR(255),
-    clae_cla_team                   NVARCHAR(48),
-    clae_cla_worker_id              NVARCHAR(48),
-    clae_cla_id                     NVARCHAR(48),
-    clae_referral_id                NVARCHAR(48)
+    clae_cla_episode_id                 NVARCHAR(48) PRIMARY KEY,
+    clae_person_id                      NVARCHAR(48),
+    clae_cla_episode_start              DATETIME,
+    clae_cla_episode_start_reason       NVARCHAR(100),
+    clae_cla_primary_need               NVARCHAR(100),
+    clae_cla_episode_ceased             DATETIME,
+    clae_cla_episode_cease_reason       NVARCHAR(255),
+    clae_cla_id                         NVARCHAR(48),
+    clae_referral_id                    NVARCHAR(48),
+    clae_cla_review_last_iro_contact_date DATETIME
 );
-
--- Insert data 
+ 
+-- Insert data
 INSERT INTO #ssd_cla_episodes (
-    clae_cla_episode_id, 
-    clae_person_id, 
+    clae_cla_episode_id,
+    clae_person_id,
     clae_cla_episode_start,
     clae_cla_episode_start_reason,
     clae_cla_primary_need,
     clae_cla_episode_ceased,
     clae_cla_episode_cease_reason,
-    clae_cla_team,                       
-    clae_cla_worker_id,                  
-    clae_cla_id, 
-    clae_referral_id
+    clae_cla_id,
+    clae_referral_id,
+    clae_cla_review_last_iro_contact_date
 )
 SELECT
     fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
@@ -1934,17 +1932,44 @@ SELECT
     fce.CIN_903_CODE                        AS clae_cla_primary_need,
     fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
     fce.CARE_REASON_END_DESC                AS clae_cla_episode_cease_reason,
-    'PLACEHOLDER DATA'                      AS clae_cla_team,           -- [PLACEHOLDER] [TESTING]      
-    'PLACEHOLDER DATA'                      AS clae_cla_worker_id,      -- [PLACEHOLDER] [TESTING]
     fc.FACT_CLA_ID                          AS clae_cla_id,                    
-    fc.FACT_REFERRAL_ID                     AS clae_referral_id
+    fc.FACT_REFERRAL_ID                     AS clae_referral_id,
+        (SELECT MAX(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+        --AND cn.DIM_CREATED_BY_DEPT_ID IN (5956,727)
+        AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+        THEN cn.EVENT_DTTM END))                                                        
+                                            AS clae_cla_review_last_iro_contact_date
+ 
+ 
 FROM
     Child_Social.FACT_CARE_EPISODES AS fce
 JOIN
     Child_Social.FACT_CLA AS fc ON fce.fact_cla_id = fc.FACT_CLA_ID
+ 
+LEFT JOIN
+    Child_Social.FACT_CASENOTES cn               ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+ 
+WHERE EXISTS ( -- only ssd relevant records
+    SELECT 1
+    FROM #ssd_person p
+    WHERE p.pers_person_id = fce.DIM_PERSON_ID
+    )
+ 
+GROUP BY
+    fce.FACT_CARE_EPISODES_ID,
+    fce.DIM_PERSON_ID,
+    fce.CARE_START_DATE,
+    fce.CARE_REASON_DESC,
+    fce.CIN_903_CODE,
+    fce.CARE_END_DATE,
+    fce.CARE_REASON_END_DESC,
+    fc.FACT_CLA_ID,                    
+    fc.FACT_REFERRAL_ID,
+    cn.DIM_PERSON_ID;
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON #ssd_cla_episodes (clae_cla_worker_id);
+
+-- -- Create index(es)
+-- CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON #ssd_cla_episodes (clae_cla_worker_id);
 
 -- -- Add constraint(s)
 -- ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_to_professional 
