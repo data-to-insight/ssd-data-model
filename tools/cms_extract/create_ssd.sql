@@ -2812,14 +2812,15 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_sdq_scores V4
+Object Name: ssd_sdq_scores V6
 Description: 
 Author: D2I
-Last Modified Date: 12/01/24
+Last Modified Date: 15/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5 (V4)
+Version: 1.6
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
+Remarks:    ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
+            See ticket https://trello.com/c/2hWQH0bD for potential sdq history field
 Dependencies: 
 - ssd_person
 - FACT_FORMS
@@ -2831,53 +2832,51 @@ SET @TableName = N'ssd_sdq_scores';
 PRINT 'Creating table: ' + @TableName;
 
 
-
 -- Check if exists & drop
 IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
 
 
-
-/* Start V4 JH */
-
+/* Start V6 */
 -- Create structure
-CREATE TABLE #ssd_sdq_scores (
+CREATE TABLE ssd_sdq_scores (
     csdq_table_id               NVARCHAR(48),-- PRIMARY KEY,
     csdq_form_id                NVARCHAR(48),
     csdq_person_id              NVARCHAR(48),
     csdq_sdq_details_json       NVARCHAR(1000)          
 );
  
- 
 -- Insert data
-INSERT INTO #ssd_sdq_scores (
+INSERT INTO ssd_sdq_scores (
     csdq_table_id,
     csdq_form_id,
     csdq_person_id,
     csdq_sdq_details_json
 )
- 
 SELECT
     ff.FACT_FORM_ID         AS csdq_table_id,
     ffa.FACT_FORM_ID        AS csdq_form_id,
     ff.DIM_PERSON_ID        AS csdq_person_id,
+    
     (SELECT
+        -- This is making the assumption that SDQ only exists as 'a single and current' value
         CASE WHEN ffa.ANSWER_NO = 'FormEndDate'
-        THEN ffa.ANSWER END
-                            AS "SDQ_COMPLETED_DATE",
+        THEN ffa.ANSWER END AS "SDQ_COMPLETED_DATE",
  
         CASE WHEN ffa.ANSWER_NO = 'SDQScore'
-        THEN ffa.ANSWER END
-                            AS "SDQ_SCORE"
+        THEN 
+            CASE WHEN ISNUMERIC(ffa.ANSWER) = 1 THEN CAST(ffa.ANSWER AS INT) ELSE NULL END -- Convert SDQ_SCORE if numeric, remains so. Incl 0. 
+        END                 AS "SDQ_SCORE"
  
     FROM Child_Social.FACT_FORM_ANSWERS ffa
  
     WHERE ff.FACT_FORM_ID = ffa.FACT_FORM_ID
         AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+        -- OR  ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183) -- ID_CODE refs retained here as reference, but note that they have varied
         AND ANSWER_NO IN ('FormEndDate','SDQScore')
         AND ANSWER IS NOT NULL
  
     FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) AS csdq_sdq_details_json
+    )                       AS csdq_sdq_details_json -- JSON object with most recent SDQ completed date and score
  
 FROM
     Child_Social.FACT_FORMS ff
@@ -2887,134 +2886,8 @@ JOIN
     AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
     AND ffa.ANSWER_NO IN ('FormEndDate','SDQScore')
     AND ffa.ANSWER IS NOT NULL
-/* End V4 JH */
 
-
-/*
--- Start V3
--- Create structure
-CREATE TABLE ssd_sdq_scores (
-    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
-    csdq_person_id             NVARCHAR(48),
-    --csdq_sdq_completed_date  DATETIME,        -- combined with sdq score in _json field
-    csdq_sdq_reason            NVARCHAR(100),
-    csdq_sdq_score_json        NVARCHAR(500)    -- {'csdq_sdq_completed_date':dateVal, 'csdq_sdq_score':scoreVal }
-);
-
--- Insert data
-INSERT INTO ssd_sdq_scores (
-    csdq_table_id,
-    csdq_person_id,
-    --csdq_sdq_completed_date,
-    csdq_sdq_reason,
-    csdq_sdq_score_json
-)
-
-SELECT 
-    ffa_outer.FACT_FORM_ID                  AS csdq_table_id,
-    ff.DIM_PERSON_ID                        AS csdq_person_id,
-
-    ( -- [TESTING] Need to ensure that only single/most recent reason is required here
-        SELECT TOP 1 f903_inner.SDQ_REASON 
-        FROM Child_Social.FACT_903_DATA f903_inner 
-        WHERE f903_inner.DIM_PERSON_ID = ff.DIM_PERSON_ID
-    )                                       AS csdq_sdq_reason,
-    (
-        SELECT
-            MAX(ISNULL(CASE                                             -- isnull to ensure key:value pair structure exists regardless of data existance
-                WHEN ffa_inner.ANSWER_NO = 'FormEndDate' 
-                THEN ffa_inner.answer   
-                --THEN TRY_CONVERT(DATE, ffa_inner.answer, 106)           -- Data has format: '25-Feb-2016'. Ref use 101 for mm/dd/yyyy | 103 for dd/mm/yyyy
-            END, ''))                       AS csdq_sdq_completed_date, -- new field alias becomes key in _json field
-
-            MAX(ISNULL(CASE 
-                WHEN ffa_inner.ANSWER_NO = 'SDQScore' 
-                THEN ffa_inner.answer 
-            END, ''))                       AS csdq_sdq_score           -- new field alias becomes key in _json field
-        FROM 
-            Child_Social.FACT_FORM_ANSWERS ffa_inner
-        WHERE 
-            ffa_inner.fact_form_id = ffa_outer.fact_form_id
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )                                       AS csdq_sdq_score_json
-FROM 
-    Child_Social.FACT_FORM_ANSWERS ffa_outer
-JOIN 
-    Child_Social.FACT_FORMS ff ON ffa_outer.FACT_FORM_ID = ff.FACT_FORM_ID
-WHERE 
-    ( -- filter on both code and desc (code appears to change, string desc not so)
-        ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
-        OR ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
-    )
-    AND ffa_outer.ANSWER_NO IN ('FormEndDate', 'SDQScore')
-GROUP BY 
-    ffa_outer.FACT_FORM_ID,
-    ff.DIM_PERSON_ID;
--- End V3
-*/
-
-/* 
--- V1 On hold 
--- Create structure
-CREATE TABLE ssd_sdq_scores (
-    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
-    csdq_person_id             NVARCHAR(48),
-    csdq_sdq_completed_date    DATETIME,
-    csdq_sdq_reason            NVARCHAR(100),
-    csdq_sdq_score             NVARCHAR(100)
-);
-
--- Insert data
-INSERT INTO ssd_sdq_scores (
-    csdq_table_id,
-    csdq_person_id,
-    csdq_sdq_completed_date,
-    csdq_sdq_reason,
-    csdq_sdq_score
-)
--- Each sub-select targets a specific ANSWER_NO
--- Approach used for readability over single join and conditional aggregation
-SELECT 
-    ffa.FACT_FORM_ID AS csdq_table_id,
-    ff.DIM_PERSON_ID AS csdq_person_id,
-    (
-        SELECT ANSWER 
-        FROM Child_Social.FACT_FORM_ANSWERS
-        WHERE 
-            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
-                -- filter on both here to ensure reliability
-                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
-                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
-            )
-            AND ANSWER_NO = 'FormEndDate'
-            AND FACT_FORM_ID = ffa.FACT_FORM_ID
-    ) AS csdq_sdq_completed_date,
-
-    fd.SDQ_REASON AS csdq_sdq_reason,
-
-    (
-        SELECT ANSWER 
-        FROM Child_Social.FACT_FORM_ANSWERS
-        WHERE 
-            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
-                -- filter on both here to ensure reliability
-                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
-                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
-            )
-            AND ANSWER_NO = 'SDQScore'
-            AND FACT_FORM_ID = ffa.FACT_FORM_ID
-    ) AS csdq_sdq_score
-
-FROM 
-    Child_Social.FACT_FORM_ANSWERS ffa
-
-JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
-
-LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
-
--- End of V1
-*/
-
+/* End V6 */
 
 
 
@@ -3343,6 +3216,9 @@ GROUP BY
     ;
 
 /* End V4 */
+
+
+
 
 
 -- Add index(es)
