@@ -99,9 +99,11 @@ Author: D2I
 Last Modified Date: 12/01/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 
-Remarks: Removed non-required join to Child_Social.FACT_PERSON_RELATION
+Remarks:    
+            Note: Due to part reliance on 903 table, be aware that if 903 not populated pre-ssd run, 
+            this/subsequent queries can return v.low|unexpected row counts.
 Dependencies: 
 - Child_Social.DIM_PERSON
 - Child_Social.FACT_REFERRALS
@@ -117,6 +119,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- check exists & drop
 IF OBJECT_ID('ssd_person') IS NOT NULL DROP TABLE ssd_person;
+IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 
 -- Create structure
@@ -124,10 +127,10 @@ CREATE TABLE ssd_person (
     pers_legacy_id          NVARCHAR(48),
     pers_person_id          NVARCHAR(48) PRIMARY KEY,
     pers_sex                NVARCHAR(48),
-    pers_gender             NVARCHAR(48),                   -- [PLACEHOLDER_DATA] [TESTING]
+    pers_gender             NVARCHAR(48),                   
     pers_ethnicity          NVARCHAR(38),
     pers_dob                DATETIME,
-    pers_common_child_id    NVARCHAR(10),
+    pers_common_child_id    NVARCHAR(10),                   -- [TESTING] [Takes NHS Number]
     pers_upn_unknown        NVARCHAR(10),
     pers_send               NVARCHAR(1),
     pers_expected_dob       DATETIME,                       -- Date or NULL
@@ -144,7 +147,7 @@ INSERT INTO ssd_person (
     pers_gender,
     pers_ethnicity,
     pers_dob,
-    pers_common_child_id,
+    pers_common_child_id,                               -- [TESTING] [Takes NHS Number]
     pers_upn_unknown,
     pers_send,
     pers_expected_dob,
@@ -156,7 +159,7 @@ SELECT
     p.LEGACY_ID,
     p.DIM_PERSON_ID,
     p.GENDER_MAIN_CODE,
-    p.NHS_NUMBER,                                       -- [PLACEHOLDER_DATA] [TESTING]
+    p.NHS_NUMBER,                                       -- [TESTING] [Takes NHS Number]
     p.ETHNICITY_MAIN_CODE,
         CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
@@ -266,6 +269,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- check exists & drop
 IF OBJECT_ID('ssd_family') IS NOT NULL DROP TABLE ssd_family;
+IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
 
 -- Create structure
@@ -334,6 +338,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_address') IS NOT NULL DROP TABLE ssd_address;
+IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
 
 -- Create structure
@@ -438,6 +443,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_disability') IS NOT NULL DROP TABLE ssd_disability;
+IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 
 -- Create the structure
 CREATE TABLE ssd_disability
@@ -511,6 +517,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_status;
+IF OBJECT_ID('tempdb..#immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
 
 -- Create structure
@@ -589,6 +596,8 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_mother', 'U') IS NOT NULL DROP TABLE ssd_mother;
+IF OBJECT_ID('tempdb..#ssd_mother') IS NOT NULL DROP TABLE #ssd_mother;
+
 
 -- Create structure
 CREATE TABLE ssd_mother (
@@ -670,6 +679,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_legal_status') IS NOT NULL DROP TABLE ssd_legal_status;
+IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
 
 
 -- Create structure
@@ -752,6 +762,8 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_contacts') IS NOT NULL DROP TABLE ssd_contacts;
+IF OBJECT_ID('tempdb..#ssd_contacts') IS NOT NULL DROP TABLE #ssd_contacts;
+
 
 -- Create structure
 CREATE TABLE ssd_contacts (
@@ -1989,7 +2001,6 @@ PRINT 'Creating table: ' + @TableName;
 
 -- if exists, drop
 IF OBJECT_ID('ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE ssd_cla_convictions;
---IF OBJECT_ID('tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cla_convictions;
 
 -- create structure
 CREATE TABLE ssd_cla_convictions (
@@ -3246,9 +3257,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_permanence
 Description: 
 Author: D2I
-Last Modified Date: 04/01/23
+Last Modified Date: 16/01/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.6
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
         DEV: 181223: Assumed that only one permanence order per child. 
@@ -3277,158 +3288,34 @@ IF OBJECT_ID('ssd_permanence', 'U') IS NOT NULL DROP TABLE ssd_permanence;
 
 
 
-/* Start of V1 ssd_permanence*/
--- -- Create structure
--- CREATE TABLE ssd_permanence (
---     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
---     perm_person_id                       NVARCHAR(48),
---     perm_cla_id                          NVARCHAR(48),
---     perm_adm_decision_date               DATETIME,
---     perm_entered_care_date               DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
---     perm_ffa_cp_decision_date            DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
---     perm_placement_order_date            DATETIME,
---     perm_placed_for_adoption_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
---     perm_matched_date                    DATETIME,
---     perm_adopted_by_carer_flag           NVARCHAR(1),           -- The datatype should be datetime?? [TESTING]
---     perm_placed_ffa_cp_date              DATETIME,
---     perm_decision_reversed_date          DATETIME,
---     perm_placed_foster_carer_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
---     perm_part_of_sibling_group           NCHAR(1),
---     perm_siblings_placed_together        INT,
---     perm_siblings_placed_apart           INT,
---     perm_placement_provider_urn          NVARCHAR(48),          -- [TESTING] [PLACEHOLDER_DATA]
---     perm_decision_reversed_reason        NVARCHAR(100),
---     perm_permanence_order_date           DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
---     perm_permanence_order_type           NVARCHAR(100),         -- [TESTING] [PLACEHOLDER_DATA]
---     perm_adoption_worker                 NVARCHAR(1),           -- [TESTING] [PLACEHOLDER_DATA]
---     perm_allocated_worker                NVARCHAR(1)           -- The datatype should be datetime?? [TESTING]
--- );
-
--- -- Insert data with placeholders for linked fields
--- INSERT INTO ssd_permanence (
---     perm_table_id,
---     perm_person_id,
---     perm_cla_id,
---     perm_adm_decision_date,
---     perm_entered_care_date,
---     perm_ffa_cp_decision_date,
---     perm_placement_order_date,
---     perm_placed_for_adoption_date,
---     perm_matched_date,
---     perm_adopted_by_carer_flag,
---     perm_placed_ffa_cp_date,
---     perm_decision_reversed_date,
---     perm_placed_foster_carer_date,
---     perm_part_of_sibling_group,
---     perm_siblings_placed_together,
---     perm_siblings_placed_apart,
---     perm_placement_provider_urn,
---     perm_decision_reversed_reason,
---     perm_permanence_order_date,
---     perm_permanence_order_type,
---     perm_adoption_worker,
---     perm_allocated_worker
--- )  
--- SELECT 
---     fa.FACT_ADOPTION_ID                     AS perm_table_id,
---     fa.DIM_PERSON_ID                        AS perm_person_id,
---     fa.FACT_CLA_ID                          AS perm_cla_id,
---     fa.DECISION_DTTM                        AS perm_adm_decision_date,
---     fc.START_DTTM                           AS perm_entered_care_date,             -- Linking logic needed [TESTING] 
---     fa.DECISION_DTTM                        AS perm_ffa_cp_decision_date,          -- Linking logic needed [TESTING]
---     fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
---     fcp.START_DTTM                          AS perm_placed_for_adoption_date,      -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
---     fa.MATCHING_DTTM                        AS perm_matched_date,
---     CAST(fa.ADOPTED_BY_CARER_FLAG           AS NVARCHAR(1)) AS perm_adopted_by_carer_flag, -- Verify datatype [TESTING] [PLACEHOLDER_DATA]
---     fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
---     fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
---     fcpAdopted.START_DTTM                   AS perm_placed_foster_carer_date,      -- Linking logic needed [TESTING] in YYYYMMDD format
---     fa.SIBLING_GROUP                        AS perm_part_of_sibling_group,
---     fa.NUMBER_TOGETHER                      AS perm_siblings_placed_together,
---     fa.NUMBER_APART                         AS perm_siblings_placed_apart,
---     fce.OFSTED_URN                          AS perm_placement_provider_urn,        -- Linking logic needed [TESTING]
---     fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE   AS perm_decision_reversed_reason,
---     CASE                                                                            -- ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))
---         WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') THEN fls.START_DTTM
---         ELSE NULL -- ELSE fa.ADOPTION_DTTM [TESTING]
---     END                                     AS perm_permanence_order_date,
-
---     CASE                                                                            -- Determined from perm_permanence_order_date [TESTING] 
---         WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') 
---         THEN fls.DIM_LOOKUP_LGL_STATUS_DESC
---         ELSE NULL
---     END                                     AS perm_permanence_order_type           -- Determined from perm_permanence_order_date [TESTING] 
-
---     CAST(fa.ADOPTION_SOCIAL_WORKER_ID       AS NVARCHAR(1)) AS perm_adoption_worker,  -- Verify datatype [TESTING] 
---     CAST(fa.ALLOCATED_CASE_WORKER_ID        AS NVARCHAR(1)) AS perm_allocated_worker   -- Verify datatype [TESTING]
--- FROM 
---     FACT_ADOPTION AS fa
-
--- LEFT JOIN FACT_CLA AS fc                        -- towards perm_adm_decision_date
---     ON fa.FACT_CLA_ID = fc.FACT_CLA_ID
-
--- LEFT JOIN FACT_CLA_PLACEMENT AS fcp             -- towards perm_ffa_cp_decision_date
---     ON fa.FACT_CLA_ID = fcp.FACT_CLA_ID
-
--- LEFT JOIN FACT_CLA_PLACEMENT AS fcp             -- towards perm_placed_for_adoption_date
---     ON fa.FACT_CLA_ID = fcp.FACT_CLA_ID
---     AND fcp.DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'
-
--- LEFT JOIN FACT_CLA_PLACEMENT AS fcpAdopted      -- towards perm_placed_foster_carer_date
---     ON fa.FACT_CLA_ID = fcpAdopted.FACT_CLA_ID
---     AND fcpAdopted.ADOPTED_BY_CARER_FLAG = 'Y'
-
--- LEFT JOIN FACT_CARE_EPISODES AS fce             -- towards perm_placement_provider_urn
---     ON fa.FACT_CLA_ID = fce.FACT_CLA_ID
-
--- LEFT JOIN FACT_LEGAL_STATUS AS fls              -- towards perm_permanence_order_type
---     ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
---     AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512'); -- ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))
---     AND fa.ADOPTION_DTTM IS NOT NULL            -- so only if there is a permanence order
-
-
--- WHERE EXISTS 
---     ( -- only ssd relevant records
---     SELECT 1 
---     FROM ssd_person p
---     WHERE p.pers_person_id = fa.DIM_PERSON_ID
---     );
-
-/* End of V1 ssd_permanence*/
-
-
-
-/* Start of V2 ssd_permanence*/
-
-
 -- Create structure
 CREATE TABLE ssd_permanence (
     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
     perm_person_id                       NVARCHAR(48),
     perm_cla_id                          NVARCHAR(48),
     perm_adm_decision_date               DATETIME,
-    perm_entered_care_date               DATETIME,              -- [TESTING] 
-    perm_ffa_cp_decision_date            DATETIME,              -- [TESTING] 
+    perm_entered_care_date               DATETIME,              
+    perm_ffa_cp_decision_date            DATETIME,              
     perm_placement_order_date            DATETIME,
-    perm_placed_for_adoption_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+    perm_placed_for_adoption_date        DATETIME,              
     perm_matched_date                    DATETIME,
     perm_adopted_by_carer_flag           NCHAR(1),              -- [TESTING] (datatype changed)
     perm_placed_ffa_cp_date              DATETIME,
     perm_decision_reversed_date          DATETIME,
-    perm_placed_foster_carer_date        DATETIME,              -- [TESTING] 
+    perm_placed_foster_carer_date        DATETIME,              
     perm_part_of_sibling_group           NCHAR(1),
     perm_siblings_placed_together        INT,
     perm_siblings_placed_apart           INT,
-    perm_placement_provider_urn          NVARCHAR(48),          -- [TESTING]
+    perm_placement_provider_urn          NVARCHAR(48),          
     perm_decision_reversed_reason        NVARCHAR(100),
-    perm_permanence_order_date           DATETIME,              -- [TESTING] 
-    perm_permanence_order_type           NVARCHAR(100),         -- [TESTING]
-    perm_adoption_worker                 INT,                   -- [TESTING] (datatype changed)
+    perm_permanence_order_date           DATETIME,              
+    perm_permanence_order_type           NVARCHAR(100),        
+    perm_adoption_worker                 INT,                   --  [TESTING] (datatype changed)
     perm_allocated_worker                INT                    --  [TESTING] (datatype changed)
 );
-
-
--- Insert data 
+ 
+ 
+-- Insert data
 INSERT INTO ssd_permanence (
     perm_table_id,
     perm_person_id,
@@ -3453,17 +3340,22 @@ INSERT INTO ssd_permanence (
     perm_adoption_worker,
     perm_allocated_worker
 )  
-SELECT 
-    fa.FACT_ADOPTION_ID                     AS perm_table_id,
-    fa.DIM_PERSON_ID                        AS perm_person_id,
-    fa.FACT_CLA_ID                          AS perm_cla_id,
+SELECT
+    fce.FACT_CARE_EPISODES_ID               AS perm_table_id,
+    fce.DIM_PERSON_ID                       AS perm_person_id,
+    fce.FACT_CLA_ID                         AS perm_cla_id,
     fa.DECISION_DTTM                        AS perm_adm_decision_date,
-    fc.START_DTTM                           AS perm_entered_care_date,             
-    fa.DECISION_DTTM                        AS perm_ffa_cp_decision_date,          
+    fc.START_DTTM                           AS perm_entered_care_date,            
+    fcpl.FFA_IS_PLAN_DATE                   AS perm_ffa_cp_decision_date,          
     fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
-    fcpl.START_DTTM                         AS perm_placed_for_adoption_date,      
+ 
+    CASE                                                                            
+        WHEN fce.CARE_REASON_END_CODE IN ('E1','E12','E11') THEN fcpl.START_DTTM
+        ELSE NULL
+    END                                     AS perm_placed_for_adoption_date,      
+ 
     fa.MATCHING_DTTM                        AS perm_matched_date,
-    fa.ADOPTED_BY_CARER_FLAG                AS perm_adopted_by_carer_flag, 
+    fa.ADOPTED_BY_CARER_FLAG                AS perm_adopted_by_carer_flag,
     fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
     fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
     fcpl.START_DTTM                         AS perm_placed_foster_carer_date,      
@@ -3472,50 +3364,36 @@ SELECT
     fa.NUMBER_APART                         AS perm_siblings_placed_apart,
     fce.OFSTED_URN                          AS perm_placement_provider_urn,        
     fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE   AS perm_decision_reversed_reason,
-
-    CASE  -- ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))                                
-        WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') THEN fls.START_DTTM
-        ELSE NULL
-    END                                     AS perm_permanence_order_date,
-
+    fce.PLACEND                             AS perm_permanence_order_date,
+ 
     CASE                                                                            
-        WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') 
-        THEN fls.DIM_LOOKUP_LGL_STATUS_DESC
+        WHEN fce.CARE_REASON_END_CODE IN ('E1','E12','E11') THEN 'Adoption'
+        WHEN fce.CARE_REASON_END_CODE IN ('E48','E44','E43','45','E45','E47','E46') THEN 'Special Guardianship Order'
+        WHEN fce.CARE_REASON_END_CODE IN ('45','E41') THEN 'Child Arrangements/ Residence Order'
         ELSE NULL
     END                                     AS perm_permanence_order_type,      
-
+ 
     fa.ADOPTION_SOCIAL_WORKER_ID            AS perm_adoption_worker,            -- Note that duplicate -1 seen in raw data
     fa.ALLOCATED_CASE_WORKER_ID             AS perm_allocated_worker            -- Note that duplicate -1 seen in raw data
-FROM 
-    Child_Social.FACT_ADOPTION AS fa
-    
-LEFT JOIN Child_Social.FACT_CLA AS fc                                           -- towards perm_adm_decision_date                             
-    ON fa.FACT_CLA_ID = fc.FACT_CLA_ID                              
-                
+ 
+   
+FROM Child_Social.FACT_CARE_EPISODES fce
+ 
+ 
+LEFT JOIN Child_Social.FACT_ADOPTION AS fa
+    ON fa.DIM_PERSON_ID = fce.DIM_PERSON_ID
+    AND fce.CARE_REASON_END_CODE IN ('E1','E12','E11')
+   
+LEFT JOIN Child_Social.FACT_CLA AS fc                                
+    ON fc.FACT_CLA_ID = fce.FACT_CLA_ID                                          -- towards perm_adm_decision_date
+ 
 LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl            
-    ON fa.FACT_CLA_ID = fcpl .FACT_CLA_ID                                       -- towards perm_ffa_cp_decision_date
-    AND fcpl .DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'       -- towards perm_placed_for_adoption_date
-    -- AND fa   .ADOPTED_BY_CARER_FLAG = 'Y'             
-                           -- towards perm_placed_foster_carer_date
-LEFT JOIN Child_Social.FACT_CARE_EPISODES AS fce                                             
-    ON fa.FACT_CLA_ID = fce.FACT_CLA_ID                                         -- towards perm_placement_provider_urn
+    ON fcpl.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
+ 
+WHERE fce.PLACEND IS NOT NULL
+AND CARE_REASON_END_CODE IN ('E48','E1','E44','E12','E11','E43','45','E41','E45','E47','E46')
 
-LEFT JOIN Child_Social.FACT_LEGAL_STATUS AS fls
-    ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
-    AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512')       -- towards perm_permanence_order_type
-    AND fa.ADOPTION_DTTM IS NOT NULL                                           -- and only if there is a permanence order
 
-WHERE 
-    fa.FACT_ADOPTION_ID <> -1 -- Filter out -1 values
-AND fa .ADOPTED_BY_CARER_FLAG = 'Y'     
-
-AND EXISTS 
-    (   -- only ssd relevant records
-        -- This also negates the need to apply DIM_PERSON_ID <> '-1';  
-    SELECT 1 
-    FROM ssd_person p
-    WHERE p.pers_person_id = fa.DIM_PERSON_ID
-    );
 
 
 -- Add constraint(s)
@@ -3524,14 +3402,12 @@ FOREIGN KEY (perm_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
 
 
-
-
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
-/* End of V2 ssd_permanence*/
+
 
 /* 
 =============================================================================
