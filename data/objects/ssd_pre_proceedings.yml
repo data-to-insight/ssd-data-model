@@ -73,8 +73,8 @@ nodes:
       as a group of children linked by parents all starting and ceasing pre or care
       proceedings at the same time
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-508
+      release: In review|pending
+      change_id: SSD-0001
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -100,8 +100,8 @@ nodes:
       The date should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a
       four digit number.
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-509
+      release: In review|pending
+      change_id: SSD-0002
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -127,8 +127,8 @@ nodes:
       / panel that agreed to commence pre-proceedings. The date should be recorded
       in a DD/MM/YYYY format, i.e. day/month/year as a four digit number.
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-510
+      release: In review|pending
+      change_id: SSD-0003
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -158,8 +158,8 @@ nodes:
 
       If still in pre-proceedings, please leave blank.'
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-511
+      release: In review|pending
+      change_id: SSD-0004
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -185,8 +185,8 @@ nodes:
       to either step down or issue care proceedings. The date should be recorded in
       a DD/MM/YYYY format, i.e. day/month/year as a four digit number.
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-512
+      release: In review|pending
+      change_id: SSD-0005
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -213,8 +213,8 @@ nodes:
       has been the subject of a Child Protection Plan during this referral period.
       If none, please put 0.
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-513
+      release: In review|pending
+      change_id: SSD-0006
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -240,8 +240,8 @@ nodes:
       \ plan\nB \u2013 Start pre-proceedings\nC \u2013 Issue care proceedings\nD \u2013\
       \ Unknown"
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-514
+      release: In review|pending
+      change_id: SSD-0007
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -267,8 +267,8 @@ nodes:
     guidance: Please provide a numeric value. If there have not been any previous
       periods, please put 0.
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-515
+      release: In review|pending
+      change_id: SSD-0008
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -294,8 +294,8 @@ nodes:
     guidance: Please provide a numeric value. If there have not been any previous
       periods, please put 0.
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-516
+      release: In review|pending
+      change_id: SSD-0009
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -324,8 +324,8 @@ nodes:
 
       Please use the UK date format: DD/MM/YYYY'
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-517
+      release: In review|pending
+      change_id: SSD-0010
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -354,8 +354,8 @@ nodes:
 
       Please use the UK date format DD/MM/YYYY'
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-518
+      release: In review|pending
+      change_id: SSD-0011
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -381,8 +381,8 @@ nodes:
     guidance: Please give a numeric value for the number of meetings that took place
       with parents, excluding the initial meeting.
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-519
+      release: In review|pending
+      change_id: SSD-0012
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -406,8 +406,8 @@ nodes:
     - mosaic:ssd_pre_proceedings
     guidance: Please select Yes / No / Unknown
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-520
+      release: In review|pending
+      change_id: SSD-0013
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -431,8 +431,8 @@ nodes:
     - mosaic:ssd_pre_proceedings
     guidance: Please select Yes / No / Unknown / Not in care proceedings
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-521
+      release: In review|pending
+      change_id: SSD-0014
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -458,8 +458,8 @@ nodes:
       proceedings are issued. This may be stored on the case management system or
       held in legal files. If the case is not in care proceedings, please leave blank.
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-522
+      release: In review|pending
+      change_id: SSD-0015
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -484,8 +484,8 @@ nodes:
     guidance: This includes the initial IRH and final hearing. Please give a numeric
       value. If case is not in care proceedings, please leave blank.
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-523
+      release: In review|pending
+      change_id: SSD-0016
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -511,8 +511,8 @@ nodes:
       \ notice application is an urgent application for the court to hear the case\
       \ within the next 2 \u2013 5 days."
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-524
+      release: In review|pending
+      change_id: SSD-0017
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -543,8 +543,8 @@ nodes:
       \ notice application is an urgent application for the court to hear the case\
       \ within the next 2 \u2013 5 days."
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-525
+      release: In review|pending
+      change_id: SSD-0018
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -568,8 +568,8 @@ nodes:
     - mosaic:ssd_pre_proceedings
     guidance: Please select Yes / No / Unknown
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-526
+      release: In review|pending
+      change_id: SSD-0019
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -601,8 +601,8 @@ nodes:
       \ but that the child remained in their parent\u2019s care, rather than in another\
       \ placement."
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-527
+      release: In review|pending
+      change_id: SSD-0020
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -626,8 +626,8 @@ nodes:
     - mosaic:ssd_pre_proceedings
     guidance: Please select Yes / No / Unknown
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-528
+      release: In review|pending
+      change_id: SSD-0021
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null
@@ -658,8 +658,8 @@ nodes:
       \ - still in care proceedings'. This will indicate that the case is still active\
       \ in care proceedings."
     metadata:
-      release: 04/08/2023 10:00
-      change_id: SSD-529
+      release: In review|pending
+      change_id: SSD-0022
       change_source: 1bSpecified
       versions_count: 1
       impact_title: null

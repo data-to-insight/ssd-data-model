@@ -86,13 +86,6 @@ nodes:
     - liquid_logic:ssd_cla_reviews
     - mosaic:ssd_cla_reviews
     guidance: Date the CLA review was due
-    metadata:
-      release: In review|pending
-      change_id: SSD-559
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature
   - name: clar_cla_review_date
     description: CLA Review Date
     item_ref: CLAR004A

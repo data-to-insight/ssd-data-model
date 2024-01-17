@@ -127,13 +127,6 @@ nodes:
       1 - Yes
 
       0 - No'
-    metadata:
-      release: In review|pending
-      change_id: SSD-551
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature
   - name: icpc_icpc_target_date
     description: Target ICPC date
     item_ref: ICPC004A
@@ -212,13 +205,6 @@ nodes:
       - Child/ young person to be subject of a Child Protection Plan
 
       - Do not start Child Protection Plan'
-    metadata:
-      release: In review|pending
-      change_id: SSD-562
-      change_source: D2I
-      versions_count: 1
-      impact_title: null
-      type: New Feature
   - name: icpc_icpc_team
     description: ICPC Allocated Team
     item_ref: ICPC007A

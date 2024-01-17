@@ -139,13 +139,6 @@ nodes:
     - liquid_logic:ssd_legal_status
     - mosaic:ssd_legal_status
     guidance: Start Date of Legal Status
-    metadata:
-      release: In review|pending
-      change_id: SSD-544
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature
   - name: lega_legal_status_end_date
     description: Legal Status End Date
     item_ref: LEGA005A
@@ -166,10 +159,3 @@ nodes:
     - liquid_logic:ssd_legal_status
     - mosaic:ssd_legal_status
     guidance: End Date of Legal Status
-    metadata:
-      release: In review|pending
-      change_id: SSD-545
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature

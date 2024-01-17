@@ -69,13 +69,6 @@ nodes:
     - liquid_logic:ssd_cin_visits
     - mosaic:ssd_cin_visits
     guidance: Date of Visit
-    metadata:
-      release: In review|pending
-      change_id: SSD-547
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature
   - name: cinv_cin_visit_seen
     description: Child Seen
     item_ref: CINV004A
@@ -116,13 +109,6 @@ nodes:
     - liquid_logic:ssd_cin_visits
     - mosaic:ssd_cin_visits
     guidance: Was the child seen alone during this visit? Yes/ No
-    metadata:
-      release: In review|pending
-      change_id: SSD-548
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature
   - name: cinv_cin_visit_bedroom
     description: Child Bedroom Seen
     item_ref: CINV006A
@@ -143,10 +129,3 @@ nodes:
     - liquid_logic:ssd_cin_visits
     - mosaic:ssd_cin_visits
     guidance: Was the child's bedroom seen during this visit? Yes/ No
-    metadata:
-      release: In review|pending
-      change_id: SSD-549
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature

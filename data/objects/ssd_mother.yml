@@ -57,13 +57,6 @@ nodes:
     - liquid_logic:ssd_mother
     - mosaic:ssd_mother
     guidance: See PERS001A
-    metadata:
-      release: In review|pending
-      change_id: SSD-543
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature
   - name: moth_childs_dob
     description: Date of birth of mother's child
     item_ref: MOTH003A

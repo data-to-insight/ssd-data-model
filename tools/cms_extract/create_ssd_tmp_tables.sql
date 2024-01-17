@@ -56,11 +56,12 @@ Description: person/child details
 Author: D2I
 Last Modified Date: 12/01/24 RH
 DB Compatibility: SQL Server 2014+|...
-
 Version: 1.5
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 
-Remarks: Need to confirm FACT_903_DATA as source of mother related data
+Remarks:    
+            Note: Due to part reliance on 903 table, be aware that if 903 not populated pre-ssd run, 
+            this/subsequent queries can return v.low|unexpected row counts.
 Dependencies: 
 - Child_Social.DIM_PERSON
 - Child_Social.FACT_REFERRALS
@@ -148,7 +149,7 @@ FROM
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
     AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
-    -- [TESTING] AND f903.YEAR_TO_DATE = 'Y'                    -- 903 table includes children looked after in previous year and year to date,
+    -- Removed only to allow [TESTING] AND f903.YEAR_TO_DATE = 'Y'                    -- 903 table includes children looked after in previous year and year to date,
                                                                 -- this filters for those current in the current year to date to avoid duplicates
    
 AND (                                                       -- Filter irrelevant rows by timeframe
@@ -2781,12 +2782,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_sdq_scores V4
+Object Name: ssd_sdq_scores V6
 Description: 
 Author: D2I
-Last Modified Date: 12/01/24
+Last Modified Date: 15/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5 (V4)
+Version: 1.6
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
 Dependencies: 
@@ -2806,7 +2807,9 @@ IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_sco
 
 
 
-/* Start V4 JH */
+
+/* Start V6 */
+-- See ticket https://trello.com/c/2hWQH0bD for potential sdq history field
 
 -- Create structure
 CREATE TABLE #ssd_sdq_scores (
@@ -2816,7 +2819,6 @@ CREATE TABLE #ssd_sdq_scores (
     csdq_sdq_details_json       NVARCHAR(1000)          
 );
  
- 
 -- Insert data
 INSERT INTO #ssd_sdq_scores (
     csdq_table_id,
@@ -2824,29 +2826,31 @@ INSERT INTO #ssd_sdq_scores (
     csdq_person_id,
     csdq_sdq_details_json
 )
- 
 SELECT
     ff.FACT_FORM_ID         AS csdq_table_id,
     ffa.FACT_FORM_ID        AS csdq_form_id,
     ff.DIM_PERSON_ID        AS csdq_person_id,
+    
     (SELECT
+        -- This is making the assumption that SDQ only exists as 'a single and current' value
         CASE WHEN ffa.ANSWER_NO = 'FormEndDate'
-        THEN ffa.ANSWER END
-                            AS "SDQ_COMPLETED_DATE",
+        THEN ffa.ANSWER END AS "SDQ_COMPLETED_DATE",
  
         CASE WHEN ffa.ANSWER_NO = 'SDQScore'
-        THEN ffa.ANSWER END
-                            AS "SDQ_SCORE"
+        THEN 
+            CASE WHEN ISNUMERIC(ffa.ANSWER) = 1 THEN CAST(ffa.ANSWER AS INT) ELSE NULL END -- Convert SDQ_SCORE if numeric, remains so. Incl 0. 
+        END                 AS "SDQ_SCORE"
  
     FROM Child_Social.FACT_FORM_ANSWERS ffa
  
     WHERE ff.FACT_FORM_ID = ffa.FACT_FORM_ID
         AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+        -- OR  ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183) -- ID_CODE refs retained here as reference, but note that they have varied
         AND ANSWER_NO IN ('FormEndDate','SDQScore')
         AND ANSWER IS NOT NULL
  
     FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) AS csdq_sdq_details_json
+    )                       AS csdq_sdq_details_json -- JSON object with most recent SDQ completed date and score
  
 FROM
     Child_Social.FACT_FORMS ff
@@ -2856,133 +2860,291 @@ JOIN
     AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
     AND ffa.ANSWER_NO IN ('FormEndDate','SDQScore')
     AND ffa.ANSWER IS NOT NULL
-/* End V4 JH */
+
+/* End V6 */
 
 
-/*
--- Start V3
--- Create structure
-CREATE TABLE ssd_sdq_scores (
-    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
-    csdq_person_id             NVARCHAR(48),
-    --csdq_sdq_completed_date  DATETIME,        -- combined with sdq score in _json field
-    csdq_sdq_reason            NVARCHAR(100),
-    csdq_sdq_score_json        NVARCHAR(500)    -- {'csdq_sdq_completed_date':dateVal, 'csdq_sdq_score':scoreVal }
-);
 
--- Insert data
-INSERT INTO ssd_sdq_scores (
-    csdq_table_id,
-    csdq_person_id,
-    --csdq_sdq_completed_date,
-    csdq_sdq_reason,
-    csdq_sdq_score_json
-)
 
-SELECT 
-    ffa_outer.FACT_FORM_ID                  AS csdq_table_id,
-    ff.DIM_PERSON_ID                        AS csdq_person_id,
+-- /* Start V5 JH */
+-- -- Create structure
+-- CREATE TABLE #ssd_sdq_scores (
+--     csdq_table_id               NVARCHAR(48),-- PRIMARY KEY,
+--     csdq_form_id                NVARCHAR(48),
+--     csdq_person_id              NVARCHAR(48),
+--     csdq_sdq_details_json       NVARCHAR(1000)          
+-- );
+ 
+ 
+-- -- Insert data
+-- INSERT INTO #ssd_sdq_scores (
+--     csdq_table_id,
+--     csdq_form_id,
+--     csdq_person_id,
+--     csdq_sdq_details_json
+-- )
+ 
+-- SELECT
+--     ff.FACT_FORM_ID         AS csdq_table_id,
+--     ffa.FACT_FORM_ID        AS csdq_form_id,
+--     ff.DIM_PERSON_ID        AS csdq_person_id,
+--     (SELECT
+--         CASE WHEN ffa.ANSWER_NO = 'FormEndDate'
+--         THEN ffa.ANSWER END
+--                             AS "SDQ_COMPLETED_DATE",
+ 
+--         CASE WHEN ffa.ANSWER_NO = 'SDQScore'
+--         THEN ffa.ANSWER END
+--                             AS "SDQ_SCORE"
+ 
+--     FROM Child_Social.FACT_FORM_ANSWERS ffa
+ 
+--     WHERE ff.FACT_FORM_ID = ffa.FACT_FORM_ID
+--         AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+--         AND ANSWER_NO IN ('FormEndDate','SDQScore')
+--         AND ANSWER IS NOT NULL
+ 
+--     FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--     ) AS csdq_sdq_details_json
+ 
+-- FROM
+--     Child_Social.FACT_FORMS ff
+ 
+-- JOIN
+--     Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
+--     AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+--     AND ffa.ANSWER_NO IN ('FormEndDate','SDQScore')
+--     AND ffa.ANSWER IS NOT NULL
+-- /* End V5 JH */
 
-    ( -- [TESTING] Need to ensure that only single/most recent reason is required here
-        SELECT TOP 1 f903_inner.SDQ_REASON 
-        FROM Child_Social.FACT_903_DATA f903_inner 
-        WHERE f903_inner.DIM_PERSON_ID = ff.DIM_PERSON_ID
-    )                                       AS csdq_sdq_reason,
-    (
-        SELECT
-            MAX(ISNULL(CASE                                             -- isnull to ensure key:value pair structure exists regardless of data existance
-                WHEN ffa_inner.ANSWER_NO = 'FormEndDate' 
-                THEN ffa_inner.answer   
-                --THEN TRY_CONVERT(DATE, ffa_inner.answer, 106)           -- Data has format: '25-Feb-2016'. Ref use 101 for mm/dd/yyyy | 103 for dd/mm/yyyy
-            END, ''))                       AS csdq_sdq_completed_date, -- new field alias becomes key in _json field
 
-            MAX(ISNULL(CASE 
-                WHEN ffa_inner.ANSWER_NO = 'SDQScore' 
-                THEN ffa_inner.answer 
-            END, ''))                       AS csdq_sdq_score           -- new field alias becomes key in _json field
-        FROM 
-            Child_Social.FACT_FORM_ANSWERS ffa_inner
-        WHERE 
-            ffa_inner.fact_form_id = ffa_outer.fact_form_id
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )                                       AS csdq_sdq_score_json
-FROM 
-    Child_Social.FACT_FORM_ANSWERS ffa_outer
-JOIN 
-    Child_Social.FACT_FORMS ff ON ffa_outer.FACT_FORM_ID = ff.FACT_FORM_ID
-WHERE 
-    ( -- filter on both code and desc (code appears to change, string desc not so)
-        ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
-        OR ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
-    )
-    AND ffa_outer.ANSWER_NO IN ('FormEndDate', 'SDQScore')
-GROUP BY 
-    ffa_outer.FACT_FORM_ID,
-    ff.DIM_PERSON_ID;
--- End V3
-*/
+-- /* V4 */
+-- -- CTE for involvement history incl. worker data
+-- -- aggregate/extract current worker infos, allocated team, and p.advisor ID
+-- WITH InvolvementHistoryCTE AS (
+--     SELECT
+--         fi.DIM_PERSON_ID,
+--         -- worker, alloc team, and p.advisor dets <<per involvement type>>
+--         MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.DIM_WORKER_NAME END)                      AS CurrentWorkerName,  -- c.w name for the 'CW' inv type
+--         MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)  AS AllocatedTeamName,  -- team desc for the 'CW' inv type
+--         MAX(CASE WHEN fi.RecentInvolvement = '16PLUS' THEN fi.DIM_WORKER_NAME END)                  AS PersonalAdvisorName -- p.a. for the '16PLUS' inv type
+--     FROM (
+--         SELECT *,
+--             -- Assign a row number, partition by p + inv type
+--             ROW_NUMBER() OVER (
+--                 PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE
+--                 ORDER BY FACT_INVOLVEMENTS_ID DESC
+--             ) AS rn,
+--             -- Mark the involvement type ('CW' or '16PLUS')
+--             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
 
-/* 
--- V1 On hold 
--- Create structure
-CREATE TABLE ssd_sdq_scores (
-    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
-    csdq_person_id             NVARCHAR(48),
-    csdq_sdq_completed_date    DATETIME,
-    csdq_sdq_reason            NVARCHAR(100),
-    csdq_sdq_score             NVARCHAR(100)
-);
+--         FROM Child_Social.FACT_INVOLVEMENTS
+--         WHERE
+--             -- Filter records to just 'CW' and '16PLUS' inv types
+--             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS')
+--                                                     -- Switched off in v1.6 [TESTING]
+--             -- AND END_DTTM IS NULL                 -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
+--             -- AND DIM_WORKER_ID IS NOT NULL        -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+--             AND DIM_WORKER_ID <> -1                 -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
 
--- Insert data
-INSERT INTO ssd_sdq_scores (
-    csdq_table_id,
-    csdq_person_id,
-    csdq_sdq_completed_date,
-    csdq_sdq_reason,
-    csdq_sdq_score
-)
--- Each sub-select targets a specific ANSWER_NO
--- Approach used for readability over single join and conditional aggregation
-SELECT 
-    ffa.FACT_FORM_ID AS csdq_table_id,
-    ff.DIM_PERSON_ID AS csdq_person_id,
-    (
-        SELECT ANSWER 
-        FROM Child_Social.FACT_FORM_ANSWERS
-        WHERE 
-            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
-                -- filter on both here to ensure reliability
-                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
-                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
-            )
-            AND ANSWER_NO = 'FormEndDate'
-            AND FACT_FORM_ID = ffa.FACT_FORM_ID
-    ) AS csdq_sdq_completed_date,
+--             -- where the inv type is 'CW' + flagged as allocated
+--             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
+--                                                     -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
+--     ) fi
+ 
+--     -- aggregate the result(s)
+--     GROUP BY
+--         fi.DIM_PERSON_ID
+-- )
 
-    fd.SDQ_REASON AS csdq_sdq_reason,
+-- -- Insert data
+-- INSERT INTO ssd_care_leavers
+-- (
+--     clea_table_id, 
+--     clea_person_id, 
+--     clea_care_leaver_eligibility, 
+--     clea_care_leaver_in_touch, 
+--     clea_care_leaver_latest_contact, 
+--     clea_care_leaver_accommodation, 
+--     clea_care_leaver_accom_suitable, 
+--     clea_care_leaver_activity, 
+--     clea_pathway_plan_review_date, 
+--     clea_care_leaver_personal_advisor,                  
+--     clea_care_leaver_worker_id, 
+--     clea_care_leaver_allocated_team                    
+-- )
+-- SELECT 
+--     fccl.FACT_CLA_CARE_LEAVERS_ID                   AS clea_table_id, 
+--     fccl.DIM_PERSON_ID                              AS clea_person_id, 
+--     dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC          AS clea_care_leaver_eligibility, 
+--     fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE              AS clea_care_leaver_in_touch, 
+--     fccl.IN_TOUCH_DTTM                              AS clea_care_leaver_latest_contact, 
+--     fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC         AS clea_care_leaver_accommodation, 
+--     fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC     AS clea_care_leaver_accom_suitable, 
+--     fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC              AS clea_care_leaver_activity, 
 
-    (
-        SELECT ANSWER 
-        FROM Child_Social.FACT_FORM_ANSWERS
-        WHERE 
-            (   -- Codes appear to have changed, string descriptions in this case more consistent but 
-                -- filter on both here to ensure reliability
-                DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
-                OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
-            )
-            AND ANSWER_NO = 'SDQScore'
-            AND FACT_FORM_ID = ffa.FACT_FORM_ID
-    ) AS csdq_sdq_score
+--     MAX(CASE WHEN fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--         AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'
+--         THEN fcp.MODIF_DTTM END)                    AS clea_pathway_plan_review_date,
 
-FROM 
-    Child_Social.FACT_FORM_ANSWERS ffa
+--     ih.PersonalAdvisorName                          AS clea_care_leaver_personal_advisor,
+--     ih.CurrentWorkerName                            AS clea_care_leaver_worker_id,
+--     ih.AllocatedTeamName                            AS clea_care_leaver_allocated_team
+-- FROM 
+--     Child_Social.FACT_CLA_CARE_LEAVERS AS fccl
 
-JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
+-- LEFT JOIN Child_Social.DIM_CLA_ELIGIBILITY AS dce ON fccl.DIM_PERSON_ID = dce.DIM_PERSON_ID     -- towards clea_care_leaver_eligibility
 
-LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
+-- LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID         -- towards clea_pathway_plan_review_date
+--     AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'               
 
--- End of V1
-*/
+-- LEFT JOIN InvolvementHistoryCTE AS ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID                  -- connect with CTE aggr data      
+ 
+-- WHERE
+--     -- Exists-on ssd_person clause should already filter these, this only a fail-safe
+--     fccl.FACT_CLA_CARE_LEAVERS_ID <> -1
+ 
+-- GROUP BY
+--     fccl.FACT_CLA_CARE_LEAVERS_ID,
+--     fccl.DIM_PERSON_ID,
+--     dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC,
+--     fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE,
+--     fccl.IN_TOUCH_DTTM,
+--     fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC,
+--     fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC,
+--     fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC,
+--     ih.PersonalAdvisorName,
+--     ih.CurrentWorkerName,
+--     ih.AllocatedTeamName          
+--     ;
+-- /* End V4 */
+
+
+
+-- /* Start V3 */
+-- -- Create structure
+-- CREATE TABLE ssd_sdq_scores (
+--     csdq_table_id              NVARCHAR(48) PRIMARY KEY,
+--     csdq_person_id             NVARCHAR(48),
+--     --csdq_sdq_completed_date  DATETIME,        -- combined with sdq score in _json field
+--     csdq_sdq_reason            NVARCHAR(100),
+--     csdq_sdq_score_json        NVARCHAR(500)    -- {'csdq_sdq_completed_date':dateVal, 'csdq_sdq_score':scoreVal }
+-- );
+
+-- -- Insert data
+-- INSERT INTO ssd_sdq_scores (
+--     csdq_table_id,
+--     csdq_person_id,
+--     --csdq_sdq_completed_date,
+--     csdq_sdq_reason,
+--     csdq_sdq_score_json
+-- )
+
+-- SELECT 
+--     ffa_outer.FACT_FORM_ID                  AS csdq_table_id,
+--     ff.DIM_PERSON_ID                        AS csdq_person_id,
+
+--     ( -- [TESTING] Need to ensure that only single/most recent reason is required here
+--         SELECT TOP 1 f903_inner.SDQ_REASON 
+--         FROM Child_Social.FACT_903_DATA f903_inner 
+--         WHERE f903_inner.DIM_PERSON_ID = ff.DIM_PERSON_ID
+--     )                                       AS csdq_sdq_reason,
+--     (
+--         SELECT
+--             MAX(ISNULL(CASE                                             -- isnull to ensure key:value pair structure exists regardless of data existance
+--                 WHEN ffa_inner.ANSWER_NO = 'FormEndDate' 
+--                 THEN ffa_inner.answer   
+--                 --THEN TRY_CONVERT(DATE, ffa_inner.answer, 106)           -- Data has format: '25-Feb-2016'. Ref use 101 for mm/dd/yyyy | 103 for dd/mm/yyyy
+--             END, ''))                       AS csdq_sdq_completed_date, -- new field alias becomes key in _json field
+
+--             MAX(ISNULL(CASE 
+--                 WHEN ffa_inner.ANSWER_NO = 'SDQScore' 
+--                 THEN ffa_inner.answer 
+--             END, ''))                       AS csdq_sdq_score           -- new field alias becomes key in _json field
+--         FROM 
+--             Child_Social.FACT_FORM_ANSWERS ffa_inner
+--         WHERE 
+--             ffa_inner.fact_form_id = ffa_outer.fact_form_id
+--         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--     )                                       AS csdq_sdq_score_json
+-- FROM 
+--     Child_Social.FACT_FORM_ANSWERS ffa_outer
+-- JOIN 
+--     Child_Social.FACT_FORMS ff ON ffa_outer.FACT_FORM_ID = ff.FACT_FORM_ID
+-- WHERE 
+--     ( -- filter on both code and desc (code appears to change, string desc not so)
+--         ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
+--         OR ffa_outer.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
+--     )
+--     AND ffa_outer.ANSWER_NO IN ('FormEndDate', 'SDQScore')
+-- GROUP BY 
+--     ffa_outer.FACT_FORM_ID,
+--     ff.DIM_PERSON_ID;
+-- -- 
+-- /* End V3 */
+
+
+
+-- /* V1 */
+-- -- Create structure
+-- CREATE TABLE ssd_sdq_scores (
+--     csdq_table_id              NVARCHAR(48) PRIMARY KEY,
+--     csdq_person_id             NVARCHAR(48),
+--     csdq_sdq_completed_date    DATETIME,
+--     csdq_sdq_reason            NVARCHAR(100),
+--     csdq_sdq_score             NVARCHAR(100)
+-- );
+
+-- -- Insert data
+-- INSERT INTO ssd_sdq_scores (
+--     csdq_table_id,
+--     csdq_person_id,
+--     csdq_sdq_completed_date,
+--     csdq_sdq_reason,
+--     csdq_sdq_score
+-- )
+-- -- Each sub-select targets a specific ANSWER_NO
+-- -- Approach used for readability over single join and conditional aggregation
+-- SELECT 
+--     ffa.FACT_FORM_ID AS csdq_table_id,
+--     ff.DIM_PERSON_ID AS csdq_person_id,
+--     (
+--         SELECT ANSWER 
+--         FROM Child_Social.FACT_FORM_ANSWERS
+--         WHERE 
+--             (   -- Codes appear to have changed, string descriptions in this case more consistent but 
+--                 -- filter on both here to ensure reliability
+--                 DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
+--                 OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
+--             )
+--             AND ANSWER_NO = 'FormEndDate'
+--             AND FACT_FORM_ID = ffa.FACT_FORM_ID
+--     ) AS csdq_sdq_completed_date,
+
+--     fd.SDQ_REASON AS csdq_sdq_reason,
+
+--     (
+--         SELECT ANSWER 
+--         FROM Child_Social.FACT_FORM_ANSWERS
+--         WHERE 
+--             (   -- Codes appear to have changed, string descriptions in this case more consistent but 
+--                 -- filter on both here to ensure reliability
+--                 DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183)
+--                 OR DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)')
+--             )
+--             AND ANSWER_NO = 'SDQScore'
+--             AND FACT_FORM_ID = ffa.FACT_FORM_ID
+--     ) AS csdq_sdq_score
+
+-- FROM 
+--     Child_Social.FACT_FORM_ANSWERS ffa
+
+-- JOIN Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
+
+-- LEFT JOIN Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID;
+
+-- -- End of V1
+-- */
 
 
 
@@ -3252,9 +3414,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_permanence
 Description: 
 Author: D2I
-Last Modified Date: 04/01/23
+Last Modified Date: 16/01/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.6
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
         DEV: 181223: Assumed that only one permanence order per child. 
@@ -3271,6 +3433,7 @@ Dependencies:
 - FACT_CLA
 =============================================================================
 */
+
 -- [TESTING] Create marker
 SET @TableName = N'ssd_permanence';
 PRINT 'Creating table: ' + @TableName;
@@ -3278,8 +3441,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
-
-
+ 
 
 -- Create structure
 CREATE TABLE #ssd_permanence (
@@ -3287,28 +3449,28 @@ CREATE TABLE #ssd_permanence (
     perm_person_id                       NVARCHAR(48),
     perm_cla_id                          NVARCHAR(48),
     perm_adm_decision_date               DATETIME,
-    perm_entered_care_date               DATETIME,              -- [TESTING] 
-    perm_ffa_cp_decision_date            DATETIME,              -- [TESTING] 
+    perm_entered_care_date               DATETIME,              
+    perm_ffa_cp_decision_date            DATETIME,              
     perm_placement_order_date            DATETIME,
-    perm_placed_for_adoption_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+    perm_placed_for_adoption_date        DATETIME,              
     perm_matched_date                    DATETIME,
     perm_adopted_by_carer_flag           NCHAR(1),              -- [TESTING] (datatype changed)
     perm_placed_ffa_cp_date              DATETIME,
     perm_decision_reversed_date          DATETIME,
-    perm_placed_foster_carer_date        DATETIME,              -- [TESTING] 
+    perm_placed_foster_carer_date        DATETIME,              
     perm_part_of_sibling_group           NCHAR(1),
     perm_siblings_placed_together        INT,
     perm_siblings_placed_apart           INT,
-    perm_placement_provider_urn          NVARCHAR(48),          -- [TESTING]
+    perm_placement_provider_urn          NVARCHAR(48),          
     perm_decision_reversed_reason        NVARCHAR(100),
-    perm_permanence_order_date           DATETIME,              -- [TESTING] 
-    perm_permanence_order_type           NVARCHAR(100),         -- [TESTING]
+    perm_permanence_order_date           DATETIME,              
+    perm_permanence_order_type           NVARCHAR(100),        
     perm_adoption_worker                 INT,                   -- [TESTING] (datatype changed)
     perm_allocated_worker                INT                    --  [TESTING] (datatype changed)
 );
-
-
--- Insert data 
+ 
+ 
+-- Insert data
 INSERT INTO #ssd_permanence (
     perm_table_id,
     perm_person_id,
@@ -3333,17 +3495,22 @@ INSERT INTO #ssd_permanence (
     perm_adoption_worker,
     perm_allocated_worker
 )  
-SELECT 
-    fa.FACT_ADOPTION_ID                     AS perm_table_id,
-    fa.DIM_PERSON_ID                        AS perm_person_id,
-    fa.FACT_CLA_ID                          AS perm_cla_id,
+SELECT
+    fce.FACT_CARE_EPISODES_ID               AS perm_table_id,
+    fce.DIM_PERSON_ID                       AS perm_person_id,
+    fce.FACT_CLA_ID                         AS perm_cla_id,
     fa.DECISION_DTTM                        AS perm_adm_decision_date,
-    fc.START_DTTM                           AS perm_entered_care_date,             
-    fa.DECISION_DTTM                        AS perm_ffa_cp_decision_date,          
+    fc.START_DTTM                           AS perm_entered_care_date,            
+    fcpl.FFA_IS_PLAN_DATE                   AS perm_ffa_cp_decision_date,          
     fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
-    fcpl.START_DTTM                         AS perm_placed_for_adoption_date,      
+ 
+    CASE                                                                            
+        WHEN fce.CARE_REASON_END_CODE IN ('E1','E12','E11') THEN fcpl.START_DTTM
+        ELSE NULL
+    END                                     AS perm_placed_for_adoption_date,      
+ 
     fa.MATCHING_DTTM                        AS perm_matched_date,
-    fa.ADOPTED_BY_CARER_FLAG                AS perm_adopted_by_carer_flag, 
+    fa.ADOPTED_BY_CARER_FLAG                AS perm_adopted_by_carer_flag,
     fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
     fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
     fcpl.START_DTTM                         AS perm_placed_foster_carer_date,      
@@ -3352,54 +3519,280 @@ SELECT
     fa.NUMBER_APART                         AS perm_siblings_placed_apart,
     fce.OFSTED_URN                          AS perm_placement_provider_urn,        
     fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE   AS perm_decision_reversed_reason,
-
-    CASE  -- ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))                                
-        WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') THEN fls.START_DTTM
-        ELSE NULL
-    END                                     AS perm_permanence_order_date,
-
+    fce.PLACEND                             AS perm_permanence_order_date,
+ 
     CASE                                                                            
-        WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') 
-        THEN fls.DIM_LOOKUP_LGL_STATUS_DESC
+        WHEN fce.CARE_REASON_END_CODE IN ('E1','E12','E11') THEN 'Adoption'
+        WHEN fce.CARE_REASON_END_CODE IN ('E48','E44','E43','45','E45','E47','E46') THEN 'Special Guardianship Order'
+        WHEN fce.CARE_REASON_END_CODE IN ('45','E41') THEN 'Child Arrangements/ Residence Order'
         ELSE NULL
     END                                     AS perm_permanence_order_type,      
-
+ 
     fa.ADOPTION_SOCIAL_WORKER_ID            AS perm_adoption_worker,            -- Note that duplicate -1 seen in raw data
     fa.ALLOCATED_CASE_WORKER_ID             AS perm_allocated_worker            -- Note that duplicate -1 seen in raw data
-FROM 
-    Child_Social.FACT_ADOPTION AS fa
-    
+ 
+   
+FROM Child_Social.FACT_CARE_EPISODES fce
+ 
+ 
+LEFT JOIN Child_Social.FACT_ADOPTION AS fa
+    ON fa.DIM_PERSON_ID = fce.DIM_PERSON_ID
+    AND fce.CARE_REASON_END_CODE IN ('E1','E12','E11')
+   
 LEFT JOIN Child_Social.FACT_CLA AS fc                                
-    ON fa.FACT_CLA_ID = fc.FACT_CLA_ID                                          -- towards perm_adm_decision_date
-LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl             
-    ON fa.FACT_CLA_ID = fcpl.FACT_CLA_ID                                        -- towards perm_ffa_cp_decision_date
-    AND fcpl.DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'        -- towards perm_placed_for_adoption_date
-    -- AND fa.ADOPTED_BY_CARER_FLAG = 'Y'                                          -- towards perm_placed_foster_carer_date [TESTING... should this be on fa. ?]
-LEFT JOIN Child_Social.FACT_CARE_EPISODES AS fce                                             
-    ON fa.FACT_CLA_ID = fce.FACT_CLA_ID                                         -- towards perm_placement_provider_urn
-LEFT JOIN Child_Social.FACT_LEGAL_STATUS AS fls
-    ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
-    AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512')       -- towards perm_permanence_order_type
-    AND fa.ADOPTION_DTTM IS NOT NULL                                            -- and only if there is a permanence order
+    ON fc.FACT_CLA_ID = fce.FACT_CLA_ID                                          -- towards perm_adm_decision_date
+ 
+LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl            
+    ON fcpl.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
+ 
+WHERE fce.PLACEND IS NOT NULL
+AND CARE_REASON_END_CODE IN ('E48','E1','E44','E12','E11','E43','45','E41','E45','E47','E46')
 
-WHERE 
-fa.FACT_ADOPTION_ID <> -1 -- Filter out -1 values
-AND fa.ADOPTED_BY_CARER_FLAG = 'Y'
 
-AND EXISTS 
-    (   -- only ssd relevant records
-    SELECT 1 
-    FROM #ssd_person p
-    WHERE p.pers_person_id = fa.DIM_PERSON_ID
-    );
+-- /* Start of V2 ssd_permanence*/
+-- -- Create structure
+-- CREATE TABLE ssd_permanence (
+--     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
+--     perm_person_id                       NVARCHAR(48),
+--     perm_cla_id                          NVARCHAR(48),
+--     perm_adm_decision_date               DATETIME,
+--     perm_entered_care_date               DATETIME,              -- [TESTING] 
+--     perm_ffa_cp_decision_date            DATETIME,              -- [TESTING] 
+--     perm_placement_order_date            DATETIME,
+--     perm_placed_for_adoption_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+--     perm_matched_date                    DATETIME,
+--     perm_adopted_by_carer_flag           NCHAR(1),              -- [TESTING] (datatype changed)
+--     perm_placed_ffa_cp_date              DATETIME,
+--     perm_decision_reversed_date          DATETIME,
+--     perm_placed_foster_carer_date        DATETIME,              -- [TESTING] 
+--     perm_part_of_sibling_group           NCHAR(1),
+--     perm_siblings_placed_together        INT,
+--     perm_siblings_placed_apart           INT,
+--     perm_placement_provider_urn          NVARCHAR(48),          -- [TESTING]
+--     perm_decision_reversed_reason        NVARCHAR(100),
+--     perm_permanence_order_date           DATETIME,              -- [TESTING] 
+--     perm_permanence_order_type           NVARCHAR(100),         -- [TESTING]
+--     perm_adoption_worker                 INT,                   -- [TESTING] (datatype changed)
+--     perm_allocated_worker                INT                    --  [TESTING] (datatype changed)
+-- );
+
+
+-- -- Insert data 
+-- INSERT INTO ssd_permanence (
+--     perm_table_id,
+--     perm_person_id,
+--     perm_cla_id,
+--     perm_adm_decision_date,
+--     perm_entered_care_date,
+--     perm_ffa_cp_decision_date,
+--     perm_placement_order_date,
+--     perm_placed_for_adoption_date,
+--     perm_matched_date,
+--     perm_adopted_by_carer_flag,
+--     perm_placed_ffa_cp_date,
+--     perm_decision_reversed_date,
+--     perm_placed_foster_carer_date,
+--     perm_part_of_sibling_group,
+--     perm_siblings_placed_together,
+--     perm_siblings_placed_apart,
+--     perm_placement_provider_urn,
+--     perm_decision_reversed_reason,
+--     perm_permanence_order_date,
+--     perm_permanence_order_type,
+--     perm_adoption_worker,
+--     perm_allocated_worker
+-- )  
+-- SELECT 
+--     fa.FACT_ADOPTION_ID                     AS perm_table_id,
+--     fa.DIM_PERSON_ID                        AS perm_person_id,
+--     fa.FACT_CLA_ID                          AS perm_cla_id,
+--     fa.DECISION_DTTM                        AS perm_adm_decision_date,
+--     fc.START_DTTM                           AS perm_entered_care_date,             
+--     fa.DECISION_DTTM                        AS perm_ffa_cp_decision_date,          
+--     fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
+--     fcpl.START_DTTM                         AS perm_placed_for_adoption_date,      
+--     fa.MATCHING_DTTM                        AS perm_matched_date,
+--     fa.ADOPTED_BY_CARER_FLAG                AS perm_adopted_by_carer_flag, 
+--     fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
+--     fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
+--     fcpl.START_DTTM                         AS perm_placed_foster_carer_date,      
+--     fa.SIBLING_GROUP                        AS perm_part_of_sibling_group,
+--     fa.NUMBER_TOGETHER                      AS perm_siblings_placed_together,
+--     fa.NUMBER_APART                         AS perm_siblings_placed_apart,
+--     fce.OFSTED_URN                          AS perm_placement_provider_urn,        
+--     fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE   AS perm_decision_reversed_reason,
+
+--     CASE  -- ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))                                
+--         WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') THEN fls.START_DTTM
+--         ELSE NULL
+--     END                                     AS perm_permanence_order_date,
+
+--     CASE                                                                            
+--         WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') 
+--         THEN fls.DIM_LOOKUP_LGL_STATUS_DESC
+--         ELSE NULL
+--     END                                     AS perm_permanence_order_type,      
+
+--     fa.ADOPTION_SOCIAL_WORKER_ID            AS perm_adoption_worker,            -- Note that duplicate -1 seen in raw data
+--     fa.ALLOCATED_CASE_WORKER_ID             AS perm_allocated_worker            -- Note that duplicate -1 seen in raw data
+-- FROM 
+--     Child_Social.FACT_ADOPTION AS fa
+    
+-- LEFT JOIN Child_Social.FACT_CLA AS fc                                           -- towards perm_adm_decision_date                             
+--     ON fa.FACT_CLA_ID = fc.FACT_CLA_ID                              
+                
+-- LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl            
+--     ON fa.FACT_CLA_ID = fcpl .FACT_CLA_ID                                       -- towards perm_ffa_cp_decision_date
+--     AND fcpl .DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'       -- towards perm_placed_for_adoption_date
+--     -- AND fa   .ADOPTED_BY_CARER_FLAG = 'Y'             
+--                            -- towards perm_placed_foster_carer_date
+-- LEFT JOIN Child_Social.FACT_CARE_EPISODES AS fce                                             
+--     ON fa.FACT_CLA_ID = fce.FACT_CLA_ID                                         -- towards perm_placement_provider_urn
+
+-- LEFT JOIN Child_Social.FACT_LEGAL_STATUS AS fls
+--     ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
+--     AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512')       -- towards perm_permanence_order_type
+--     AND fa.ADOPTION_DTTM IS NOT NULL                                           -- and only if there is a permanence order
+
+-- WHERE 
+--     fa.FACT_ADOPTION_ID <> -1 -- Filter out -1 values
+-- AND fa .ADOPTED_BY_CARER_FLAG = 'Y'     
+
+-- AND EXISTS 
+--     (   -- only ssd relevant records
+--     SELECT 1 
+--     FROM ssd_person p
+--     WHERE p.pers_person_id = fa.DIM_PERSON_ID
+--     );
+
+
+
+
+/* Start of V1 ssd_permanence*/
+-- -- Create structure
+-- CREATE TABLE ssd_permanence (
+--     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
+--     perm_person_id                       NVARCHAR(48),
+--     perm_cla_id                          NVARCHAR(48),
+--     perm_adm_decision_date               DATETIME,
+--     perm_entered_care_date               DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+--     perm_ffa_cp_decision_date            DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+--     perm_placement_order_date            DATETIME,
+--     perm_placed_for_adoption_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+--     perm_matched_date                    DATETIME,
+--     perm_adopted_by_carer_flag           NVARCHAR(1),           -- The datatype should be datetime?? [TESTING]
+--     perm_placed_ffa_cp_date              DATETIME,
+--     perm_decision_reversed_date          DATETIME,
+--     perm_placed_foster_carer_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+--     perm_part_of_sibling_group           NCHAR(1),
+--     perm_siblings_placed_together        INT,
+--     perm_siblings_placed_apart           INT,
+--     perm_placement_provider_urn          NVARCHAR(48),          -- [TESTING] [PLACEHOLDER_DATA]
+--     perm_decision_reversed_reason        NVARCHAR(100),
+--     perm_permanence_order_date           DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
+--     perm_permanence_order_type           NVARCHAR(100),         -- [TESTING] [PLACEHOLDER_DATA]
+--     perm_adoption_worker                 NVARCHAR(1),           -- [TESTING] [PLACEHOLDER_DATA]
+--     perm_allocated_worker                NVARCHAR(1)           -- The datatype should be datetime?? [TESTING]
+-- );
+
+-- -- Insert data with placeholders for linked fields
+-- INSERT INTO ssd_permanence (
+--     perm_table_id,
+--     perm_person_id,
+--     perm_cla_id,
+--     perm_adm_decision_date,
+--     perm_entered_care_date,
+--     perm_ffa_cp_decision_date,
+--     perm_placement_order_date,
+--     perm_placed_for_adoption_date,
+--     perm_matched_date,
+--     perm_adopted_by_carer_flag,
+--     perm_placed_ffa_cp_date,
+--     perm_decision_reversed_date,
+--     perm_placed_foster_carer_date,
+--     perm_part_of_sibling_group,
+--     perm_siblings_placed_together,
+--     perm_siblings_placed_apart,
+--     perm_placement_provider_urn,
+--     perm_decision_reversed_reason,
+--     perm_permanence_order_date,
+--     perm_permanence_order_type,
+--     perm_adoption_worker,
+--     perm_allocated_worker
+-- )  
+-- SELECT 
+--     fa.FACT_ADOPTION_ID                     AS perm_table_id,
+--     fa.DIM_PERSON_ID                        AS perm_person_id,
+--     fa.FACT_CLA_ID                          AS perm_cla_id,
+--     fa.DECISION_DTTM                        AS perm_adm_decision_date,
+--     fc.START_DTTM                           AS perm_entered_care_date,             -- Linking logic needed [TESTING] 
+--     fa.DECISION_DTTM                        AS perm_ffa_cp_decision_date,          -- Linking logic needed [TESTING]
+--     fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
+--     fcp.START_DTTM                          AS perm_placed_for_adoption_date,      -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
+--     fa.MATCHING_DTTM                        AS perm_matched_date,
+--     CAST(fa.ADOPTED_BY_CARER_FLAG           AS NVARCHAR(1)) AS perm_adopted_by_carer_flag, -- Verify datatype [TESTING] [PLACEHOLDER_DATA]
+--     fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
+--     fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
+--     fcpAdopted.START_DTTM                   AS perm_placed_foster_carer_date,      -- Linking logic needed [TESTING] in YYYYMMDD format
+--     fa.SIBLING_GROUP                        AS perm_part_of_sibling_group,
+--     fa.NUMBER_TOGETHER                      AS perm_siblings_placed_together,
+--     fa.NUMBER_APART                         AS perm_siblings_placed_apart,
+--     fce.OFSTED_URN                          AS perm_placement_provider_urn,        -- Linking logic needed [TESTING]
+--     fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE   AS perm_decision_reversed_reason,
+--     CASE                                                                            -- ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))
+--         WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') THEN fls.START_DTTM
+--         ELSE NULL -- ELSE fa.ADOPTION_DTTM [TESTING]
+--     END                                     AS perm_permanence_order_date,
+
+--     CASE                                                                            -- Determined from perm_permanence_order_date [TESTING] 
+--         WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') 
+--         THEN fls.DIM_LOOKUP_LGL_STATUS_DESC
+--         ELSE NULL
+--     END                                     AS perm_permanence_order_type           -- Determined from perm_permanence_order_date [TESTING] 
+
+--     CAST(fa.ADOPTION_SOCIAL_WORKER_ID       AS NVARCHAR(1)) AS perm_adoption_worker,  -- Verify datatype [TESTING] 
+--     CAST(fa.ALLOCATED_CASE_WORKER_ID        AS NVARCHAR(1)) AS perm_allocated_worker   -- Verify datatype [TESTING]
+-- FROM 
+--     FACT_ADOPTION AS fa
+
+-- LEFT JOIN FACT_CLA AS fc                        -- towards perm_adm_decision_date
+--     ON fa.FACT_CLA_ID = fc.FACT_CLA_ID
+
+-- LEFT JOIN FACT_CLA_PLACEMENT AS fcp             -- towards perm_ffa_cp_decision_date
+--     ON fa.FACT_CLA_ID = fcp.FACT_CLA_ID
+
+-- LEFT JOIN FACT_CLA_PLACEMENT AS fcp             -- towards perm_placed_for_adoption_date
+--     ON fa.FACT_CLA_ID = fcp.FACT_CLA_ID
+--     AND fcp.DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'
+
+-- LEFT JOIN FACT_CLA_PLACEMENT AS fcpAdopted      -- towards perm_placed_foster_carer_date
+--     ON fa.FACT_CLA_ID = fcpAdopted.FACT_CLA_ID
+--     AND fcpAdopted.ADOPTED_BY_CARER_FLAG = 'Y'
+
+-- LEFT JOIN FACT_CARE_EPISODES AS fce             -- towards perm_placement_provider_urn
+--     ON fa.FACT_CLA_ID = fce.FACT_CLA_ID
+
+-- LEFT JOIN FACT_LEGAL_STATUS AS fls              -- towards perm_permanence_order_type
+--     ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
+--     AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512'); -- ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))
+--     AND fa.ADOPTION_DTTM IS NOT NULL            -- so only if there is a permanence order
+
+
+-- WHERE EXISTS 
+--     ( -- only ssd relevant records
+--     SELECT 1 
+--     FROM ssd_person p
+--     WHERE p.pers_person_id = fa.DIM_PERSON_ID
+--     );
+
+/* End of V1 ssd_permanence*/
+
 
 
 
 -- -- Add constraint(s)
 -- ALTER TABLE #ssd_permanence ADD CONSTRAINT FK_perm_person_id
 -- FOREIGN KEY (perm_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
-
-
 
 
 
