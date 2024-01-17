@@ -2,6 +2,7 @@
 SSD Data Item Changes:
 The complete change history for SSD data items in reverse chronological order, with pending|expected changes showing first.Agreed data item-level changes are assigned an identifier. A sub-set of the change details for the most recent change (if any) also appears within each objects metadata block(YAML).The current change log contains only sample data until we deploy the first pilot release.Note: Object-level change tracking is not yet available/in progress; feedback/suggestions welcomed.Last updated: 17/01/2024 11:04
 
+
 | item_ref   | old_item_ref   | release_datetime   | change_id   | change_object_name   | change_impact_title   | change_status   | change_type   | change_source   | change_impact_notes           |
 |:-----------|:---------------|:-------------------|:------------|:---------------------|:----------------------|:----------------|:--------------|:----------------|:------------------------------|
 | PREP002A   | PLB002A        | In Review-Pending  | SSD-0001    | ssd_pre_proceedings  |                       | pending         | New Feature   | 1bSpecified     | 1bSpecified - Agreed new item |
