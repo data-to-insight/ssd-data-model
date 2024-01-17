@@ -73,13 +73,6 @@ nodes:
     - liquid_logic:ssd_immigration_status
     - mosaic:ssd_immigration_status
     guidance: Immigration Status e.g. Unaccompanied Asylum Seeking Child
-    metadata:
-      release: In review|pending
-      change_id: SSD-540
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature
   - name: immi_immigration_status_start_date
     description: Immigration Status Start
     item_ref: IMMI003A
@@ -101,13 +94,6 @@ nodes:
     - liquid_logic:ssd_immigration_status
     - mosaic:ssd_immigration_status
     guidance: Start Date of Immigration Status
-    metadata:
-      release: In review|pending
-      change_id: SSD-541
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature
   - name: immi_immigration_status_end_date
     description: Immigration Status End
     item_ref: IMMI004A
@@ -129,10 +115,3 @@ nodes:
     - liquid_logic:ssd_immigration_status
     - mosaic:ssd_immigration_status
     guidance: End Date of Immigration Status
-    metadata:
-      release: In review|pending
-      change_id: SSD-542
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature

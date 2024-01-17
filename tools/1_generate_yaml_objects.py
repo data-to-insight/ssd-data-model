@@ -103,8 +103,10 @@ def process_csv_file(csv_file, change_log_file, output_directory):
     # Keep only the most recent change log entry per 'item_ref'
     change_df = change_df.drop_duplicates(subset='item_ref', keep='first')
 
+    
     # Merge the change log data into main data based on 'item_ref'
     data_df = pd.merge(data_df, change_df, on='item_ref', how='left')
+    
 
     data_df = data_df.fillna('') # nan's cause str processing issues down the line
 
@@ -114,6 +116,11 @@ def process_csv_file(csv_file, change_log_file, output_directory):
     nodes = []  # Initialize nodes here
 
     for row in data:
+
+        # # TESTING
+        #print("DtoI-1606 - Row output test - object_name")
+        #print(row)
+        
 
         object_name = row['object_name']
         print(object_name)

@@ -198,13 +198,6 @@ nodes:
       allocated from birth, or when a person registers with the NHS for the first
       time (England, Isle of Man and Wales). Allocated by the PDS, the first nine
       digits are the identifier and the tenth helps the number test its own validity.'
-    metadata:
-      release: In review|pending
-      change_id: SSD-574
-      change_source: D2I
-      versions_count: 1
-      impact_title: Common Child Identifier
-      type: New Feature
   - name: pers_upn_unknown
     description: UPN Unknown
     item_ref: PERS007A

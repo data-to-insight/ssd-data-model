@@ -123,13 +123,6 @@ nodes:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
     guidance: Enter the actual date on which the S47 Enquiry is completed and authorised.
-    metadata:
-      release: In review|pending
-      change_id: SSD-550
-      change_source: Local
-      versions_count: 1
-      impact_title: null
-      type: New Feature
   - name: s47e_s47_nfa
     description: S47 NFA
     item_ref: S47E006A
