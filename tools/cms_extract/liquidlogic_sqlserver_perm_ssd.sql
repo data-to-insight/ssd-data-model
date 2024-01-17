@@ -191,11 +191,10 @@ LEFT JOIN
 
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
-    AND p.DIM_PERSON_ID >= 1                                    -- Erronous/system rows with -1 seen (filter applied here to avoid requ elsewhere)
-    AND f903.YEAR_TO_DATE = 'Y'                                 -- 903 table includes children looked after in previous year and year to date,
+    AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
+    -- [TESTING] AND f903.YEAR_TO_DATE = 'Y'                    -- 903 table includes children looked after in previous year and year to date,
                                                                 -- this filters for those current in the current year to date to avoid duplicates
    
- 
 AND (                                                       -- Filter irrelevant rows by timeframe
     EXISTS (
         -- contact in last x@yrs
@@ -207,15 +206,20 @@ AND (                                                       -- Filter irrelevant
         -- new or ongoing/active/unclosed referral in last x@yrs
         SELECT 1 FROM Child_Social.FACT_REFERRALS fr
         WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
-        AND fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+        AND (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) OR fr.REFRL_END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) OR fr.REFRL_END_DTTM IS NULL)
+    )
+    OR EXISTS (
+        -- care leaver contact in last x@yrs
+        SELECT 1 FROM Child_Social.FACT_CLA_CARE_LEAVERS fccl
+        WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
+        AND fccl.IN_TOUCH_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
     )
 );
 
-
+ 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_person_la_person_id ON ssd_person(pers_person_id);
-
-
+CREATE NONCLUSTERED INDEX IDX_ssd_person_la_person_id ON #ssd_person(pers_person_id);
+ 
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
