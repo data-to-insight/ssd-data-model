@@ -2788,10 +2788,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_sdq_scores V6
+Object Name: ssd_sdq_scores
 Description: 
 Author: D2I
-Last Modified Date: 15/01/24
+Last Modified Date: 18/01/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.6
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
@@ -2812,8 +2812,166 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
 
 
+/* V8 */
+-- Create structure
+CREATE TABLE #ssd_sdq_scores (
+    csdq_table_id               NVARCHAR(48) PRIMARY KEY,
+    csdq_form_id                NVARCHAR(48),
+    csdq_person_id              NVARCHAR(48),
+    csdq_sdq_score              NVARCHAR(48),
+    csdq_sdq_details_json       NVARCHAR(1000)          
+);
+ 
+-- Insert data
+INSERT INTO #ssd_sdq_scores (
+    csdq_table_id,
+    csdq_form_id,
+    csdq_person_id,
+    csdq_sdq_score,
+    csdq_sdq_details_json
+)
+SELECT
+    ff.FACT_FORM_ID         AS csdq_table_id,
+    ffa.FACT_FORM_ID        AS csdq_form_id,
+    ff.DIM_PERSON_ID        AS csdq_person_id,
+    (
+        SELECT TOP 1
+            CASE 
+                WHEN ISNUMERIC(ffa_inner.ANSWER) = 1 THEN CAST(ffa_inner.ANSWER AS INT) 
+                ELSE NULL 
+            END
+        FROM Child_Social.FACT_FORM_ANSWERS ffa_inner
+        WHERE ffa_inner.FACT_FORM_ID = ff.FACT_FORM_ID
+            AND ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+            AND ffa_inner.ANSWER_NO = 'SDQScore'
+            AND ffa_inner.ANSWER IS NOT NULL
+        ORDER BY ffa_inner.ANSWER DESC -- Using the date as it is
+    ) AS csdq_sdq_score,
+    (
+        SELECT
+            CASE WHEN ffa_inner.ANSWER_NO = 'FormEndDate'
+            THEN ffa_inner.ANSWER END AS "SDQ_COMPLETED_DATE",
+            CASE WHEN ffa_inner.ANSWER_NO = 'SDQScore'
+            THEN 
+                CASE WHEN ISNUMERIC(ffa_inner.ANSWER) = 1 THEN CAST(ffa_inner.ANSWER AS INT) ELSE NULL END 
+            END AS "SDQ_SCORE"
+        FROM Child_Social.FACT_FORM_ANSWERS ffa_inner
+        WHERE ff.FACT_FORM_ID = ffa_inner.FACT_FORM_ID
+            AND ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+            AND ffa_inner.ANSWER_NO IN ('FormEndDate','SDQScore')
+            AND ffa_inner.ANSWER IS NOT NULL
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS csdq_sdq_details_json
+FROM
+    Child_Social.FACT_FORMS ff
+JOIN
+    Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
+    AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+    AND ffa.ANSWER_NO IN ('FormEndDate','SDQScore')
+    AND ffa.ANSWER IS NOT NULL
+WHERE EXISTS (
+    SELECT 1
+    FROM #ssd_person sp
+    WHERE sp.pers_person_id = ff.DIM_PERSON_ID
+);
 
 
+-- Ensure the previous statement is terminated
+;WITH RankedSDQScores AS (
+    SELECT
+        *,
+        -- Assign unique row nums <within each partition> of csdq_person_id,
+        -- the most recent csdq_form_id will have a row number of 1.
+        ROW_NUMBER() OVER (PARTITION BY csdq_person_id ORDER BY csdq_form_id DESC) AS rn
+    FROM
+        #ssd_sdq_scores
+)
+
+-- delete all records from the #ssd_sdq_scores table where row number(rn) > 1
+-- i.e. keep only the most recent
+DELETE FROM RankedSDQScores
+WHERE rn > 1;
+
+-- identify and remove exact dups
+;WITH DuplicateSDQScores AS (
+    SELECT
+        *,
+        -- Assign row num to each set of dups,
+        -- partitioned by all columns that could potentially make a row unique
+        ROW_NUMBER() OVER (PARTITION BY csdq_table_id, csdq_person_id, csdq_sdq_details_json ORDER BY csdq_form_id) AS row_num
+    FROM
+        #ssd_sdq_scores
+)
+-- Delete dups
+DELETE FROM DuplicateSDQScores
+WHERE row_num > 1;
+
+
+-- [TESTING]
+select * from #ssd_sdq_scores
+order by csdq_person_id desc, csdq_form_id desc;
+
+/* end V8 */
+
+
+
+
+
+/* Start V7 */
+-- returns valid _json, but now only for those fields that DO have a score.... not the 400+ additional that dont
+/*WITH SDQDetailsCTE AS (
+    SELECT
+        ff.FACT_FORM_ID AS csdq_table_id,
+        ff.DIM_PERSON_ID AS csdq_person_id,
+        ffaDate.ANSWER AS SDQ_COMPLETED_DATE_RAW,
+        CONVERT(DATE, ffaDate.ANSWER, 106) AS SDQ_COMPLETED_DATE,
+        ffaScore.ANSWER AS SDQ_SCORE_RAW,
+        CASE 
+            WHEN ISNUMERIC(ffaScore.ANSWER) = 1 THEN CAST(ffaScore.ANSWER AS INT) 
+            ELSE NULL 
+        END AS SDQ_SCORE,
+        ROW_NUMBER() OVER (
+            PARTITION BY ff.DIM_PERSON_ID 
+            ORDER BY 
+                CONVERT(DATE, ffaDate.ANSWER, 106) DESC, -- Order by the most recent date
+                CASE 
+                    WHEN ISNUMERIC(ffaScore.ANSWER) = 1 AND ffaScore.ANSWER IS NOT NULL THEN 0 
+                    ELSE 1 
+                END -- Prioritize rows where SDQ_SCORE is available
+        ) AS RowNum
+    FROM Child_Social.FACT_FORMS ff
+    LEFT JOIN Child_Social.FACT_FORM_ANSWERS ffaDate ON ff.FACT_FORM_ID = ffaDate.FACT_FORM_ID AND ffaDate.ANSWER_NO = 'FormEndDate'
+    LEFT JOIN Child_Social.FACT_FORM_ANSWERS ffaScore ON ff.FACT_FORM_ID = ffaScore.FACT_FORM_ID AND ffaScore.ANSWER_NO = 'SDQScore'
+    WHERE 
+        (ffaDate.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%' OR
+         ffaDate.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183))
+        AND ISDATE(ffaDate.ANSWER) = 1
+        AND ffaDate.ANSWER IS NOT NULL
+        AND (ffaScore.ANSWER IS NOT NULL AND ISNUMERIC(ffaScore.ANSWER) = 1) -- Ensure we have a valid score
+)
+
+SELECT
+    csdq_table_id,
+    csdq_person_id,
+    JSON_QUERY((
+        SELECT
+            SDQ_COMPLETED_DATE,
+            SDQ_SCORE
+        FROM
+            SDQDetailsCTE innerCTE
+        WHERE
+            innerCTE.RowNum = 1
+            AND innerCTE.csdq_person_id = SDQDetailsCTE.csdq_person_id -- Correlate the subquery with the outer query
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    )) AS csdq_sdq_details_json -- JSON object with most recent SDQ completed date and score
+ 
+FROM
+    SDQDetailsCTE
+WHERE
+    RowNum = 1;
+*/
+
+/*
 /* Start V6 */
 -- See ticket https://trello.com/c/2hWQH0bD for potential sdq history field
 
@@ -2868,7 +3026,7 @@ JOIN
     AND ffa.ANSWER IS NOT NULL
 
 /* End V6 */
-
+*/
 
 
 
