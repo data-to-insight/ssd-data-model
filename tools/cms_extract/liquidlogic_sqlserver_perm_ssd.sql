@@ -2852,12 +2852,13 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
 
 
-/* Start V6 */
+/* V8 */
 -- Create structure
 CREATE TABLE ssd_sdq_scores (
-    csdq_table_id               NVARCHAR(48),-- PRIMARY KEY,
+    csdq_table_id               NVARCHAR(48) PRIMARY KEY,
     csdq_form_id                NVARCHAR(48),
     csdq_person_id              NVARCHAR(48),
+    csdq_sdq_score              NVARCHAR(48),
     csdq_sdq_details_json       NVARCHAR(1000)          
 );
  
@@ -2866,148 +2867,91 @@ INSERT INTO ssd_sdq_scores (
     csdq_table_id,
     csdq_form_id,
     csdq_person_id,
+    csdq_sdq_score,
     csdq_sdq_details_json
 )
 SELECT
     ff.FACT_FORM_ID         AS csdq_table_id,
     ffa.FACT_FORM_ID        AS csdq_form_id,
     ff.DIM_PERSON_ID        AS csdq_person_id,
-    
-    (SELECT
-        -- This is making the assumption that SDQ only exists as 'a single and current' value
-        CASE WHEN ffa.ANSWER_NO = 'FormEndDate'
-        THEN ffa.ANSWER END AS "SDQ_COMPLETED_DATE",
- 
-        CASE WHEN ffa.ANSWER_NO = 'SDQScore'
-        THEN 
-            CASE WHEN ISNUMERIC(ffa.ANSWER) = 1 THEN CAST(ffa.ANSWER AS INT) ELSE NULL END -- Convert SDQ_SCORE if numeric, remains so. Incl 0. 
-        END                 AS "SDQ_SCORE"
- 
-    FROM Child_Social.FACT_FORM_ANSWERS ffa
- 
-    WHERE ff.FACT_FORM_ID = ffa.FACT_FORM_ID
-        AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
-        -- OR  ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183) -- ID_CODE refs retained here as reference, but note that they have varied
-        AND ANSWER_NO IN ('FormEndDate','SDQScore')
-        AND ANSWER IS NOT NULL
- 
-    FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )                       AS csdq_sdq_details_json -- JSON object with most recent SDQ completed date and score
- 
+    (
+        SELECT TOP 1
+            CASE 
+                WHEN ISNUMERIC(ffa_inner.ANSWER) = 1 THEN CAST(ffa_inner.ANSWER AS INT) 
+                ELSE NULL 
+            END
+        FROM Child_Social.FACT_FORM_ANSWERS ffa_inner
+        WHERE ffa_inner.FACT_FORM_ID = ff.FACT_FORM_ID
+            AND ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+            AND ffa_inner.ANSWER_NO = 'SDQScore'
+            AND ffa_inner.ANSWER IS NOT NULL
+        ORDER BY ffa_inner.ANSWER DESC -- Using the date as it is
+    ) AS csdq_sdq_score,
+    (
+        SELECT
+            CASE WHEN ffa_inner.ANSWER_NO = 'FormEndDate'
+            THEN ffa_inner.ANSWER END AS "SDQ_COMPLETED_DATE",
+            CASE WHEN ffa_inner.ANSWER_NO = 'SDQScore'
+            THEN 
+                CASE WHEN ISNUMERIC(ffa_inner.ANSWER) = 1 THEN CAST(ffa_inner.ANSWER AS INT) ELSE NULL END 
+            END AS "SDQ_SCORE"
+        FROM Child_Social.FACT_FORM_ANSWERS ffa_inner
+        WHERE ff.FACT_FORM_ID = ffa_inner.FACT_FORM_ID
+            AND ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+            AND ffa_inner.ANSWER_NO IN ('FormEndDate','SDQScore')
+            AND ffa_inner.ANSWER IS NOT NULL
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS csdq_sdq_details_json
 FROM
     Child_Social.FACT_FORMS ff
- 
 JOIN
     Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
     AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
     AND ffa.ANSWER_NO IN ('FormEndDate','SDQScore')
     AND ffa.ANSWER IS NOT NULL
-
-/* End V6 */
-
-
-
-
-SELECT
-    csdq_sdq_details.csdq_table_id,
-    csdq_sdq_details.csdq_form_id,
-    csdq_sdq_details.csdq_person_id,
-    JSON_QUERY((
-        SELECT
-            "SDQ_COMPLETED_DATE",
-            "SDQ_SCORE"
-        FROM
-            csdq_sdq_details
-        WHERE
-            csdq_sdq_details.RowNum = 1
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )) AS csdq_sdq_details_json
-FROM
-    csdq_sdq_details
-
-
-
--- Add FK constraint for csdq_person_id
-ALTER TABLE ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
-FOREIGN KEY (csdq_person_id) REFERENCES ssd_person(pers_person_id);
-
-
-
-
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
-
-
-/* 
-=============================================================================
-Object Name: ssd_sdq_scoresV2 (Might be more efficient)
-Description: 
-Author: D2I
-Last Modified Date: 12/12/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks:    Uses a single join with conditional aggregation unlike v1
-Dependencies: 
-- ssd_person
-- FACT_FORMS
-- FACT_FORM_ANSWERS
-=============================================================================
-
--- [TESTING] Create marker
-SET @TableName = N'ssd_sdq_scoresV2';
-PRINT 'Creating table: ' + @TableName;
-
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
-
--- Create structure
-CREATE TABLE ssd_sdq_scores (
-    csdq_table_id              NVARCHAR(48) PRIMARY KEY,
-    csdq_person_id             NVARCHAR(48),
-    csdq_sdq_completed_date    DATETIME,
-    csdq_sdq_reason            NVARCHAR(100),
-    csdq_sdq_score             NVARCHAR(100)
+WHERE EXISTS (
+    SELECT 1
+    FROM ssd_person p
+    WHERE p.pers_person_id = ff.DIM_PERSON_ID
 );
 
--- Insert data
-INSERT INTO ssd_sdq_scores (
-    csdq_table_id,
-    csdq_person_id,
-    csdq_sdq_completed_date,
-    csdq_sdq_reason,
-    csdq_sdq_score
+
+-- Ensure the previous statement is terminated
+;WITH RankedSDQScores AS (
+    SELECT
+        *,
+        -- Assign unique row nums <within each partition> of csdq_person_id,
+        -- the most recent csdq_form_id will have a row number of 1.
+        ROW_NUMBER() OVER (PARTITION BY csdq_person_id ORDER BY csdq_form_id DESC) AS rn
+    FROM
+        ssd_sdq_scores
 )
 
+-- delete all records from the #ssd_sdq_scores table where row number(rn) > 1
+-- i.e. keep only the most recent
+DELETE FROM RankedSDQScores
+WHERE rn > 1;
 
-SELECT 
-    ffa.FACT_FORM_ID AS csdq_table_id,
-    ff.DIM_PERSON_ID AS csdq_person_id,
-    MAX(CASE WHEN ffa_inner.ANSWER_NO = 'FormEndDate' THEN ffa_inner.ANSWER ELSE NULL END) AS csdq_sdq_completed_date,
-    MAX(CASE WHEN ffa_inner.ANSWER_NO = 'SDQScore' THEN ffa_inner.ANSWER ELSE NULL END) AS csdq_sdq_score,
-    fd.SDQ_REASON AS csdq_sdq_reason
-FROM 
-    Child_Social.FACT_FORMS ff
-LEFT JOIN 
-    Child_Social.FACT_903_DATA fd ON ff.DIM_PERSON_ID = fd.DIM_PERSON_ID
-LEFT JOIN 
-    Child_Social.FACT_FORM_ANSWERS ffa_inner ON ff.FACT_FORM_ID = ffa_inner.FACT_FORM_ID 
-    AND ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)') 
-    AND ffa_inner.ANSWER_NO IN ('FormEndDate', 'SDQScore')
-GROUP BY
-    ffa.FACT_FORM_ID,
-    ff.DIM_PERSON_ID,
-    fd.SDQ_REASON
-WHERE 
-    ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC IN ('Strengths and Difficulties Questionnaire', 'Strengths and Difficulties Questionnaire (EHM)') 
-    OR ffa.DIM_ASSESSMENT_TEMPLATE_ID_CODE IN (1076, 1075, 114, 2171, 1020, 1094, 2184, 2183);
+-- identify and remove exact dups
+;WITH DuplicateSDQScores AS (
+    SELECT
+        *,
+        -- Assign row num to each set of dups,
+        -- partitioned by all columns that could potentially make a row unique
+        ROW_NUMBER() OVER (PARTITION BY csdq_table_id, csdq_person_id, csdq_sdq_details_json ORDER BY csdq_form_id) AS row_num
+    FROM
+        ssd_sdq_scores
+)
+-- Delete dups
+DELETE FROM DuplicateSDQScores
+WHERE row_num > 1;
 
--- Add FK constraint for csdq_person_id
-ALTER TABLE ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
-FOREIGN KEY (csdq_person_id) REFERENCES ssd_person(pers_person_id);
+-- [TESTING]
+select * from ssd_sdq_scores
+order by csdq_person_id desc, csdq_form_id desc;
+
+/* end V8 */
+
 
 
 -- [TESTING] Increment /print progress
@@ -3015,7 +2959,6 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
-*/ -- end of V2 of ssd_sdq_scoresV2
 
 
 
