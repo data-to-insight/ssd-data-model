@@ -43,9 +43,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:cont_person_id
     - mosaic:cont_person_id
@@ -65,6 +65,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - azeus
     cms_field:
     - liquid_logic:cont_contact_date
     - mosaic:cont_contact_date
@@ -72,7 +73,7 @@ nodes:
     - liquid_logic:ssd_contacts
     - mosaic:ssd_contacts
     guidance: Date Contact received into LA
-  - name: cont_contact_source
+  - name: cine_contact_source_code
     description: Contact Source
     item_ref: CONT004A
     type: nvarchar
@@ -84,9 +85,10 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - azeus
     cms_field:
-    - liquid_logic:cont_contact_source
-    - mosaic:cont_contact_source
+    - liquid_logic:cine_contact_source_code
+    - mosaic:cine_contact_source_code
     cms_table:
     - liquid_logic:ssd_contacts
     - mosaic:ssd_contacts
@@ -95,6 +97,11 @@ nodes:
       Where there is more than one contact for the same child on the same day, the
       first contact should be recorded and it is this contact source that should be
       recorded here.'
+  - name: cine_contact_source_desc
+    description: null
+    item_ref: CONT006A
+    type: nvarchar
+    guidance: null
   - name: cont_contact_outcome_json
     description: Contact Outcome
     item_ref: CONT005A

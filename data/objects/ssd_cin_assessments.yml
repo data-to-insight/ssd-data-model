@@ -80,9 +80,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:cina_person_id
     - mosaic:cina_person_id
@@ -225,7 +225,7 @@ nodes:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
     guidance: null
-  - name: cina_assessment_team
+  - name: cina_assessment_team_name
     description: Assessment Completed by Team
     item_ref: CINA007A
     type: nvarchar
@@ -239,14 +239,14 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cina_assessment_team
-    - mosaic:cina_assessment_team
+    - liquid_logic:cina_assessment_team_name
+    - mosaic:cina_assessment_team_name
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
     guidance: Allocated Team responsible for completing Assessment
-  - name: cina_assessment_worker_id
-    description: Assessment Completed by Worker ID
+  - name: cina_assessment_worker_name
+    description: Assessment Completed by Worker name
     item_ref: CINA008A
     type: nvarchar
     foreign_key: ssd_involvements.invo_professional_id
@@ -260,8 +260,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cina_assessment_worker_id
-    - mosaic:cina_assessment_worker_id
+    - liquid_logic:cina_assessment_worker_name
+    - mosaic:cina_assessment_worker_name
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments

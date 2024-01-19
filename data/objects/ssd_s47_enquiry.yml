@@ -63,9 +63,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:s47e_person_id
     - mosaic:s47e_person_id
@@ -177,7 +177,7 @@ nodes:
       - No Further Action
 
       - Other Outcome'
-  - name: s47e_s47_completed_by_worker
+  - name: s47e_s47_completed_by_worker_name
     description: S47 Enquiries completed by worker
     item_ref: S47E008A
     type: nvarchar
@@ -187,13 +187,13 @@ nodes:
     returns:
     - Local
     cms_field:
-    - liquid_logic:s47e_s47_completed_by_worker
-    - mosaic:s47e_s47_completed_by_worker
+    - liquid_logic:s47e_s47_completed_by_worker_name
+    - mosaic:s47e_s47_completed_by_worker_name
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
     guidance: null
-  - name: s47e_s47_completed_by_team
+  - name: s47e_s47_completed_by_team_name
     description: S47 Enquiries completed by team
     item_ref: S47E009A
     type: nvarchar
@@ -203,8 +203,8 @@ nodes:
     returns:
     - Local
     cms_field:
-    - liquid_logic:s47e_s47_completed_by_team
-    - mosaic:s47e_s47_completed_by_team
+    - liquid_logic:s47e_s47_completed_by_team_name
+    - mosaic:s47e_s47_completed_by_team_name
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry

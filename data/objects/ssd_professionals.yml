@@ -32,6 +32,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - azeus
     guidance: null
   - name: prof_social_worker_registration_no
     description: Social worker ID - Social Work England (SWE) registration number-
@@ -45,6 +46,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - azeus
     cms_field:
     - liquid_logic:prof_social_worker_registration_no
     - mosaic:prof_social_worker_registration_no

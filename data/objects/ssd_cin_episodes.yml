@@ -56,9 +56,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:cine_person_id
     - mosaic:cine_person_id
@@ -157,8 +157,8 @@ nodes:
       \ whose reference data is not completely entered on the system and whose need\
       \ code is yet to be determined, or the case is a referral that has been closed\
       \ following assessment."
-  - name: cine_referral_source
-    description: CIN Referral Source
+  - name: cine_referral_source_code
+    description: CIN Referral Source code
     item_ref: CINE004A
     type: nvarchar
     categories:
@@ -172,8 +172,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cine_referral_source
-    - mosaic:cine_referral_source
+    - liquid_logic:cine_referral_source_code
+    - mosaic:cine_referral_source_code
     cms_table:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
@@ -183,6 +183,11 @@ nodes:
       first referral should be recorded and it is this referral source that should
       be recorded here. The data should be returned for each year the episode remains
       open.'
+  - name: cine_referral_source_desc
+    description: CIN Referral Source description
+    item_ref: CINE012A
+    type: nvarchar
+    guidance: null
   - name: cine_referral_outcome_json
     description: CIN Referral Outcome
     item_ref: CINE005A
@@ -334,7 +339,7 @@ nodes:
       \ local authorities to separately record the date of death and final case closure\
       \ date in the census. This will allow local authorities to record the services\
       \ they provide between the death and the case closure."
-  - name: cine_referral_team
+  - name: cine_referral_team_name
     description: CIN Referral Completed by Team
     item_ref: CINE008A
     type: nvarchar
@@ -348,14 +353,14 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cine_referral_team
-    - mosaic:cine_referral_team
+    - liquid_logic:cine_referral_team_name
+    - mosaic:cine_referral_team_name
     cms_table:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
     guidance: Allocated Team responsible for completing Referral
-  - name: cine_referral_worker_id
-    description: CIN Referral Completed by Worker ID
+  - name: cine_referral_worker_name
+    description: CIN Referral Completed by Worker Name
     item_ref: CINE009A
     type: nvarchar
     foreign_key: ssd_involvements.invo_professional_id
@@ -369,8 +374,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cine_referral_worker_id
-    - mosaic:cine_referral_worker_id
+    - liquid_logic:cine_referral_worker_name
+    - mosaic:cine_referral_worker_name
     cms_table:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes

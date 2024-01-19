@@ -34,9 +34,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:clah_person_id
     - mosaic:clah_person_id
@@ -84,3 +84,23 @@ nodes:
     - liquid_logic:ssd_cla_health
     - mosaic:ssd_cla_health
     guidance: Date of Health Check
+  - name: clah_health_check_status
+    description: null
+    item_ref: CLAH005A
+    type: nvarchar
+    categories:
+    - looked_after
+    - health
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clah_health_check_status
+    - mosaic:clah_health_check_status
+    cms_table:
+    - liquid_logic:ssd_cla_health
+    - mosaic:ssd_cla_health
+    guidance: null
