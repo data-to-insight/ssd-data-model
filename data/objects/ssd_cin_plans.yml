@@ -59,9 +59,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:cinp_person_id
     - mosaic:cinp_person_id
@@ -136,7 +136,7 @@ nodes:
       \ or adoption support.\nWe are aware there will be some variation in how local\
       \ authorities record this data and part of the reason for collecting the data\
       \ item is to help the department understand these differences."
-  - name: cinp_cin_plan_team
+  - name: cinp_cin_plan_team_name
     description: CIN Allocated Team
     item_ref: CINP005A
     type: nvarchar
@@ -150,14 +150,14 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cinp_cin_plan_team
-    - mosaic:cinp_cin_plan_team
+    - liquid_logic:cinp_cin_plan_team_name
+    - mosaic:cinp_cin_plan_team_name
     cms_table:
     - liquid_logic:ssd_cin_plans
     - mosaic:ssd_cin_plans
     guidance: Allocated Team responsible for CIN Plan
-  - name: cinp_cin_plan_worker_id
-    description: CIN Allocated Worker ID
+  - name: cinp_cin_plan_worker_name
+    description: CIN Allocated Worker
     item_ref: CINP006A
     type: nvarchar
     foreign_key: ssd_involvements.invo_professional_id
@@ -171,8 +171,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:cinp_cin_plan_worker_id
-    - mosaic:cinp_cin_plan_worker_id
+    - liquid_logic:cinp_cin_plan_worker_name
+    - mosaic:cinp_cin_plan_worker_name
     cms_table:
     - liquid_logic:ssd_cin_plans
     - mosaic:ssd_cin_plans

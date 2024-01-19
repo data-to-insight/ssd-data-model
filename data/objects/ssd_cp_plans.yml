@@ -85,9 +85,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:cppl_person_id
     - mosaic:cppl_person_id
@@ -140,47 +140,6 @@ nodes:
     - mosaic:ssd_cp_plans
     guidance: Enter the end date of the plan, using the formatting covered in the
       general notes. Otherwise, leave blank.
-  - name: cppl_cp_plan_team
-    description: CP Plan Allocated Team
-    item_ref: CPPL005A
-    type: nvarchar
-    categories:
-    - child_protection
-    - cp_plan
-    returns:
-    - AnnexA
-    - RIIA
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:cppl_cp_plan_team
-    - mosaic:cppl_cp_plan_team
-    cms_table:
-    - liquid_logic:ssd_cp_plans
-    - mosaic:ssd_cp_plans
-    guidance: Allocated Team responsible for CP Plan
-  - name: cppl_cp_plan_worker_id
-    description: CP Plan Allocated Worker ID
-    item_ref: CPPL006A
-    type: nvarchar
-    foreign_key: ssd_involvements.invo_professional_id
-    categories:
-    - child_protection
-    - cp_plan
-    returns:
-    - AnnexA
-    - RIIA
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:CPPL_cp_plan_worker_id
-    - mosaic:CPPL_cp_plan_worker_id
-    cms_table:
-    - liquid_logic:ssd_cp_plans
-    - mosaic:ssd_cp_plans
-    guidance: Allocated worker responsible for CP Plan
   - name: cppl_cp_plan_initial_category
     description: CP Plan Initial Category of Abuse
     item_ref: CPPL009A

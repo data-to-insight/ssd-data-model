@@ -40,9 +40,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:clac_person_id
     - mosaic:clac_person_id

@@ -22,9 +22,9 @@ nodes:
     - liquid_logic:ssd_cla_care_plan
     - mosaic:ssd_cla_care_plan
     guidance: Care Plan record unique ID
-  - name: lacp_cla_episode_id
-    description: CLA Episode ID
-    item_ref: LACP002A
+  - name: lacp_person_id
+    description: Person ID
+    item_ref: LACP007A
     type: nvarchar
     foreign_key: ssd_cla_episodes.clae_person_id
     validators:
@@ -39,12 +39,12 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:lacp_cla_episode_id
-    - mosaic:lacp_cla_episode_id
+    - liquid_logic:lacp_person_id
+    - mosaic:lacp_person_id
     cms_table:
     - liquid_logic:ssd_cla_care_plan
     - mosaic:ssd_cla_care_plan
-    guidance: See CLA001A
+    guidance: null
   - name: lacp_cla_care_plan_start_date
     description: Care Plan start Date
     item_ref: LACP004A

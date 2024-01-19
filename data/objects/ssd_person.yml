@@ -22,9 +22,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:pers_person_id
     - mosaic:pers_person_id
@@ -58,9 +58,8 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
     cms_field:
     - liquid_logic:pers_sex
     - mosaic:pers_sex
@@ -88,6 +87,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - azeus
     cms_field:
     - liquid_logic:pers_gender
     - mosaic:pers_gender
@@ -125,6 +125,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - azeus
     cms_field:
     - liquid_logic:pers_ethnicity
     - mosaic:pers_ethnicity
@@ -156,9 +157,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:pers_dob
     - mosaic:pers_dob
@@ -198,6 +199,16 @@ nodes:
       allocated from birth, or when a person registers with the NHS for the first
       time (England, Isle of Man and Wales). Allocated by the PDS, the first nine
       digits are the identifier and the tenth helps the number test its own validity.'
+  - name: pers_legacy_id
+    description: Person System ID
+    item_ref: PERS014A
+    type: nvarchar
+    categories:
+    - identity
+    cms_field:
+    - liquid_logic:pers_legacy_id
+    - mosaic:pers_legacy_id
+    guidance: null
   - name: pers_upn_unknown
     description: UPN Unknown
     item_ref: PERS007A
@@ -210,6 +221,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - azeus
     cms_field:
     - liquid_logic:pers_upn_unknown
     - mosaic:pers_upn_unknown
@@ -258,6 +270,7 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
+    - azeus
     cms_field:
     - liquid_logic:pers_expected_dob
     - mosaic:pers_expected_dob
@@ -295,6 +308,7 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
+    - azeus
     cms_field:
     - liquid_logic:pers_death_date
     - mosaic:pers_death_date
@@ -329,6 +343,7 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
+    - azeus
     cms_field:
     - liquid_logic:pers_is_mother
     - mosaic:pers_is_mother

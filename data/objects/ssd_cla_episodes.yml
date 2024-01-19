@@ -43,9 +43,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:clae_person_id
     - mosaic:clae_person_id
@@ -354,45 +354,6 @@ nodes:
       \ If the child is accommodated in care by a voluntary agreement under Section\
       \ 20 of the Children Act 1989, then they cease to be looked-after when they\
       \ are admitted to custody."
-  - name: clae_cla_team
-    description: Allocated Team
-    item_ref: CLAE007A
-    type: nvarchar
-    categories:
-    - looked_after
-    returns:
-    - AnnexA
-    - RIIA
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:clae_cla_team
-    - mosaic:clae_cla_team
-    cms_table:
-    - liquid_logic:ssd_cla_episodes
-    - mosaic:ssd_cla_episodes
-    guidance: Allocated Team responsible for Looked After Child
-  - name: clae_cla_worker_id
-    description: Allocated Worker ID
-    item_ref: CLAE008A
-    type: nvarchar
-    foreign_key: ssd_involvements.invo_professional_id
-    categories:
-    - looked_after
-    returns:
-    - AnnexA
-    - RIIA
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:clae_cla_worker_id
-    - mosaic:clae_cla_worker_id
-    cms_table:
-    - liquid_logic:ssd_cla_episodes
-    - mosaic:ssd_cla_episodes
-    guidance: Allocated worker responsible for Looked After Child
   - name: clae_cla_id
     description: CLA ID
     item_ref: CLAE010A
@@ -429,18 +390,21 @@ nodes:
     - liquid_logic:ssd_cla_episodes
     - mosaic:ssd_cla_episodes
     guidance: null
-  - name: lacp_referral_id
-    description: Referral ID
-    item_ref: LACP006A
-    type: nvarchar
+  - name: clar_cla_last_iro_contact_date
+    description: Date of Last IRO Visit / Contact to the Child
+    item_ref: CLAE012A
+    type: datetime
     categories:
     - looked_after
-    - care_plan
+    - review
     returns:
-    - Local
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
-    - liquid_logic:lacp_referral_id
-    - mosaic:lacp_referral_id
+    - liquid_logic:clar_cla_last_iro_contact_date
+    - mosaic:clar_cla_last_iro_contact_date
     cms_table:
     - liquid_logic:ssd_cla_episodes
     - mosaic:ssd_cla_episodes

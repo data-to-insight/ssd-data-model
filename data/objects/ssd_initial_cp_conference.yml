@@ -55,9 +55,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:icpc_person_id
     - mosaic:icpc_person_id
@@ -205,7 +205,7 @@ nodes:
       - Child/ young person to be subject of a Child Protection Plan
 
       - Do not start Child Protection Plan'
-  - name: icpc_icpc_team
+  - name: icpc_icpc_team_name
     description: ICPC Allocated Team
     item_ref: ICPC007A
     type: nvarchar
@@ -219,17 +219,16 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:icpc_icpc_team
-    - mosaic:icpc_icpc_team
+    - liquid_logic:icpc_icpc_team_name
+    - mosaic:icpc_icpc_team_name
     cms_table:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
     guidance: Allocated Team responsible for S47 Enquiry/ ICPC
-  - name: icpc_icpc_worker_id
-    description: ICPC Allocated Worker ID
+  - name: icpc_icpc_worker_name
+    description: ICPC Allocated Worker
     item_ref: ICPC008A
     type: nvarchar
-    foreign_key: ssd_involvements.invo_professional_id
     categories:
     - initial_cp_conference
     - child_protection
@@ -240,8 +239,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:icpc_icpc_worker_id
-    - mosaic:icpc_icpc_worker_id
+    - liquid_logic:icpc_icpc_worker_name
+    - mosaic:icpc_icpc_worker_name
     cms_table:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference

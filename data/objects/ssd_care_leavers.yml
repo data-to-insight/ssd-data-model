@@ -44,9 +44,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:clea_person_id
     - mosaic:clea_person_id
@@ -406,7 +406,7 @@ nodes:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
     guidance: Allocated Personal Advisor for Care Leaver
-  - name: clea_care_leaver_allocated_team
+  - name: clea_care_leaver_allocated_team_name
     description: Allocated Team
     item_ref: CLEA011A
     type: nvarchar
@@ -419,13 +419,13 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:clea_care_leaver_allocated_team
-    - mosaic:clea_care_leaver_allocated_team
+    - liquid_logic:clea_care_leaver_allocated_team_name
+    - mosaic:clea_care_leaver_allocated_team_name
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
     guidance: Allocated Team responsible for Care Leaver
-  - name: clea_care_leaver_worker_id
+  - name: clea_care_leaver_worker_name
     description: Allocated Worker ID
     item_ref: CLEA012A
     type: nvarchar
@@ -439,8 +439,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:clea_care_leaver_worker_id
-    - mosaic:clea_care_leaver_worker_id
+    - liquid_logic:clea_care_leaver_worker_name
+    - mosaic:clea_care_leaver_worker_name
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers

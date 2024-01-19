@@ -227,7 +227,7 @@ nodes:
   - name: perm_adopted_by_carer_flag
     description: adopted_by_carer_flag
     item_ref: PERM021A
-    type: datetime
+    type: nchar
     categories:
     - looked_after
     - permanence
@@ -460,7 +460,7 @@ nodes:
   - name: perm_adoption_worker
     description: Adoption social worker
     item_ref: PERM023A
-    type: datetime
+    type: nvarchar
     categories:
     - looked_after
     - permanence
@@ -472,7 +472,7 @@ nodes:
   - name: perm_allocated_worker
     description: allocated case worker
     item_ref: PERM024A
-    type: datetime
+    type: nvarchar
     categories:
     - looked_after
     - permanence

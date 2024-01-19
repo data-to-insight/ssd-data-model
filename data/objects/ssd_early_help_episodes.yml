@@ -44,9 +44,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:earl_person_id
     - mosaic:earl_person_id
@@ -172,8 +172,8 @@ nodes:
     - liquid_logic:ssd_early_help_episodes
     - mosaic:ssd_early_help_episodes
     guidance: Organisation responsible for Early Help provision
-  - name: earl_episode_worker_id
-    description: EH Episode Allocated Worker ID
+  - name: earl_episode_worker_name
+    description: EH Episode Allocated Worker
     item_ref: EARL008A
     type: nvarchar
     foreign_key: ssd_involvements.invo_professional_id
@@ -186,8 +186,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:earl_episode_worker_id
-    - mosaic:earl_episode_worker_id
+    - liquid_logic:earl_episode_worker_name
+    - mosaic:earl_episode_worker_name
     cms_table:
     - liquid_logic:ssd_early_help_episodes
     - mosaic:ssd_early_help_episodes

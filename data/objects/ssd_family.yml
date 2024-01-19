@@ -2,6 +2,14 @@
 nodes:
 - name: ssd_family
   fields:
+  - name: fami_table_id
+    description: Family table row id
+    item_ref: FAMI003A
+    type: nvarchar
+    categories:
+    - identity
+    - family
+    guidance: null
   - name: fami_family_id
     description: Family identifier
     item_ref: FAMI001A
