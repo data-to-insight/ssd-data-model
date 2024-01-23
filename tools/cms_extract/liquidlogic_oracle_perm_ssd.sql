@@ -978,7 +978,7 @@ BEGIN
         fa.START_DTTM,
         fa.SEEN_FLAG,
         fa.START_DTTM, -- This needs checking !! [TESTING]
-        JSON_OBJECT(
+        JSON_OBJECT( -- DB Compatibility: Oracle 12c Rel2 (12.2)
         '1A' VALUE (SELECT ANSWER FROM Child_Social.FACT_FORM_ANSWERS WHERE FACT_FORM_ID = fa.FACT_SINGLE_ASSESSMENT_ID AND ANSWER_NO = '1A'),
         '1B' VALUE (SELECT ANSWER FROM Child_Social.FACT_FORM_ANSWERS WHERE FACT_FORM_ID = fa.FACT_SINGLE_ASSESSMENT_ID AND ANSWER_NO = '1B'),
         '1C' VALUE (SELECT ANSWER FROM Child_Social.FACT_FORM_ANSWERS WHERE FACT_FORM_ID = fa.FACT_SINGLE_ASSESSMENT_ID AND ANSWER_NO = '1C'),
@@ -1212,10 +1212,10 @@ END;
 Object Name: ssd_s47_enquiry
 Description: 
 Author: D2I
-Last Modified Date: 22/11/23
-DB Compatibility: SQL Server 2014+|...
+Last Modified Date: 22/01/24
+DB Compatibility: Oracle 12c Rel2 (12.2)
 Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1223,91 +1223,77 @@ Dependencies:
 - FACT_CP_CONFERENCE
 =============================================================================
 */
--- [TESTING] Create marker
-SET @TableName = N'ssd_s47_enquiry';
-PRINT 'Creating table: ' + @TableName;
+
+BEGIN
+    -- Check if exists & drop
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE ssd_s47_enquiry';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                RAISE;
+            END IF;
+    END;
+    
+    -- Create structure 
+    EXECUTE IMMEDIATE 'CREATE TABLE ssd_s47_enquiry (
+        s47e_s47_enquiry_id             NVARCHAR2(48) PRIMARY KEY,
+        s47e_referral_id                NVARCHAR2(48),
+        s47e_person_id                  NVARCHAR2(48),
+        s47e_s47_start_date             DATE,
+        s47e_s47_end_date               DATE,
+        s47e_s47_nfa                    CHAR(1),
+        s47e_s47_outcome_json           NVARCHAR2(2000), -- Increased size to accommodate JSON data
+        s47e_s47_completed_by_team      NVARCHAR2(100),
+        s47e_s47_completed_by_worker    NVARCHAR2(48)
+    )';
+
+    -- Insert data
+    INSERT INTO ssd_s47_enquiry(
+        s47e_s47_enquiry_id,
+        s47e_referral_id,
+        s47e_person_id,
+        s47e_s47_start_date,
+        s47e_s47_end_date,
+        s47e_s47_nfa,
+        s47e_s47_outcome_json,
+        s47e_s47_completed_by_team,
+        s47e_s47_completed_by_worker
+    )
+    SELECT 
+        s47.FACT_S47_ID,
+        s47.FACT_REFERRAL_ID,
+        s47.DIM_PERSON_ID,
+        s47.START_DTTM,
+        s47.END_DTTM,
+        s47.OUTCOME_NFA_FLAG,
+        JSON_OBJECT( -- DB Compatibility: Oracle 12c Rel2 (12.2)
+            'OUTCOME_NFA_FLAG' VALUE s47.OUTCOME_NFA_FLAG,
+            'OUTCOME_LEGAL_ACTION_FLAG' VALUE s47.OUTCOME_LEGAL_ACTION_FLAG,
+            'OUTCOME_PROV_OF_SERVICES_FLAG' VALUE s47.OUTCOME_PROV_OF_SERVICES_FLAG,
+            'OUTCOME_PROV_OF_SB_CARE_FLAG' VALUE s47.OUTCOME_PROV_OF_SB_CARE_FLAG,
+            'OUTCOME_CP_CONFERENCE_FLAG' VALUE s47.OUTCOME_CP_CONFERENCE_FLAG,
+            'OUTCOME_NFA_CONTINUE_SINGLE_FLAG' VALUE s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG,
+            'OUTCOME_MONITOR_FLAG' VALUE s47.OUTCOME_MONITOR_FLAG,
+            'OTHER_OUTCOMES_EXIST_FLAG' VALUE s47.OTHER_OUTCOMES_EXIST_FLAG,
+            'TOTAL_NO_OF_OUTCOMES' VALUE s47.TOTAL_NO_OF_OUTCOMES,
+            'OUTCOME_COMMENTS' VALUE s47.OUTCOME_COMMENTS
+        ) AS s47e_s47_outcome_json,
+        s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
+        s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker
+    FROM 
+        Child_Social.FACT_S47 s47;
+
+    -- Create index(es)
+    EXECUTE IMMEDIATE 'CREATE INDEX IDX_ssd_s47_enquiry_person_id ON ssd_s47_enquiry(s47e_person_id)';
+
+    -- Create constraint(s)
+    EXECUTE IMMEDIATE 'ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
+    FOREIGN KEY (s47e_person_id) REFERENCES ssd_person(pers_person_id)';
+END;
+/
 
 
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_s47_enquiry;
-
--- Create structure 
-CREATE TABLE ssd_s47_enquiry (
-    s47e_s47_enquiry_id             NVARCHAR(48) PRIMARY KEY,
-    s47e_referral_id                NVARCHAR(48),
-    s47e_person_id                  NVARCHAR(48),
-    s47e_s47_start_date             DATETIME,
-    s47e_s47_end_date               DATETIME,
-    s47e_s47_nfa                    NCHAR(1),
-    s47e_s47_outcome_json           NVARCHAR(1000),
-    s47e_s47_completed_by_team      NVARCHAR(100),
-    s47e_s47_completed_by_worker    NVARCHAR(48)
-);
-
--- insert data
-INSERT INTO ssd_s47_enquiry(
-    s47e_s47_enquiry_id,
-    s47e_referral_id,
-    s47e_person_id,
-    s47e_s47_start_date,
-    s47e_s47_end_date,
-    s47e_s47_nfa,
-    s47e_s47_outcome_json,
-    s47e_s47_completed_by_team,
-    s47e_s47_completed_by_worker
-)
-SELECT 
-    s47.FACT_S47_ID,
-    s47.FACT_REFERRAL_ID,
-    s47.DIM_PERSON_ID,
-    s47.START_DTTM,
-    s47.END_DTTM,
-    s47.OUTCOME_NFA_FLAG,
-    (
-        SELECT 
-            NULLIF(s47.OUTCOME_NFA_FLAG, '')                   AS "OUTCOME_NFA_FLAG",
-            NULLIF(s47.OUTCOME_LEGAL_ACTION_FLAG, '')          AS "OUTCOME_LEGAL_ACTION_FLAG",
-            NULLIF(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '')      AS "OUTCOME_PROV_OF_SERVICES_FLAG",
-            NULLIF(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '')       AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
-            NULLIF(s47.OUTCOME_CP_CONFERENCE_FLAG, '')         AS "OUTCOME_CP_CONFERENCE_FLAG",
-            NULLIF(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '')   AS "OUTCOME_NFA_CONTINUE_SINGLE_FLAG",
-            NULLIF(s47.OUTCOME_MONITOR_FLAG, '')               AS "OUTCOME_MONITOR_FLAG",
-            NULLIF(s47.OTHER_OUTCOMES_EXIST_FLAG, '')          AS "OTHER_OUTCOMES_EXIST_FLAG",
-            NULLIF(s47.TOTAL_NO_OF_OUTCOMES, '')               AS "TOTAL_NO_OF_OUTCOMES",
-            NULLIF(s47.OUTCOME_COMMENTS, '')                   AS "OUTCOME_COMMENTS"
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) AS s47e_s47_outcome_json,
-    s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
-    s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker
-FROM 
-    Child_Social.FACT_S47 AS s47;
-
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_s47_enquiry_person_id ON ssd_s47_enquiry(s47e_person_id);
-
--- Create constraint(s)
-ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
-FOREIGN KEY (s47e_person_id) REFERENCES ssd_person(pers_person_id);
-
-
-/* Removed 22/11/23
-    CASE 
-        WHEN cpc.FACT_S47_ID IS NOT NULL 
-        THEN 'CP Plan Started'
-        ELSE 'CP Plan not Required'
-    END,
-&     
-LEFT JOIN 
-    Child_Social.FACT_CP_CONFERENCE as cpc ON s47.FACT_S47_ID = cpc.FACT_S47_ID;
-
-    */
-
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 /* 
@@ -1315,10 +1301,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_initial_cp_conference
 Description: 
 Author: D2I
-Last Modified Date: 11/01/24
-DB Compatibility: SQL Server 2014+|...
+Last Modified Date: 22/01/24
+DB Compatibility: Oracle 12c Rel2 (12.2)
 Version: 1.0
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - FACT_S47
@@ -1326,89 +1312,91 @@ Dependencies:
 - FACT_MEETINGS
 =============================================================================
 */
--- [TESTING] Create marker
-SET @TableName = N'ssd_initial_cp_conference';
-PRINT 'Creating table: ' + @TableName;
+
+BEGIN
+    -- Check if exists & drop
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE ssd_initial_cp_conference';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                RAISE;
+            END IF;
+    END;
+    
+    -- Create structure
+    EXECUTE IMMEDIATE 'CREATE TABLE ssd_initial_cp_conference (
+        icpc_icpc_id                    NVARCHAR2(48) PRIMARY KEY,
+        icpc_icpc_meeting_id            NVARCHAR2(48),
+        icpc_s47_enquiry_id             NVARCHAR2(48),
+        icpc_person_id                  NVARCHAR2(48),
+        icpc_cp_plan_id                 NVARCHAR2(48),
+        icpc_referral_id                NVARCHAR2(48),
+        icpc_icpc_transfer_in           CHAR(1),
+        icpc_icpc_target_date           DATE,
+        icpc_icpc_date                  DATE,
+        icpc_icpc_outcome_cp_flag       CHAR(1),
+        icpc_icpc_outcome_json          NVARCHAR2(2000) -- Increased size to accommodate JSON data
+        --icpc_icpc_team                  NVARCHAR2(100),
+        --icpc_icpc_worker_id             NVARCHAR2(48)
+    )';
  
--- Check if exists & drop
-IF OBJECT_ID('ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_initial_cp_conference;
- 
--- Create structure
-CREATE TABLE ssd_initial_cp_conference (
-    icpc_icpc_id                    NVARCHAR(48) PRIMARY KEY,
-    icpc_icpc_meeting_id            NVARCHAR(48),
-    icpc_s47_enquiry_id             NVARCHAR(48),
-    icpc_person_id                  NVARCHAR(48),
-    icpc_cp_plan_id                 NVARCHAR(48),
-    icpc_referral_id                NVARCHAR(48),
-    icpc_icpc_transfer_in           NCHAR(1),
-    icpc_icpc_target_date           DATETIME,
-    icpc_icpc_date                  DATETIME,
-    icpc_icpc_outcome_cp_flag       NCHAR(1),
-    icpc_icpc_outcome_json          NVARCHAR(1000)
-    --icpc_icpc_team                  NVARCHAR(100),
-    --icpc_icpc_worker_id             NVARCHAR(48)
-);
- 
--- insert data
-INSERT INTO ssd_initial_cp_conference(
-    icpc_icpc_id,
-    icpc_icpc_meeting_id,
-    icpc_s47_enquiry_id,
-    icpc_person_id,
-    icpc_cp_plan_id,
-    icpc_referral_id,
-    icpc_icpc_transfer_in,
-    icpc_icpc_target_date,
-    icpc_icpc_date,
-    icpc_icpc_outcome_cp_flag,
-    icpc_icpc_outcome_json
-    --icpc_icpc_team,
-    --icpc_icpc_worker_id
-)
- 
-SELECT
-    fcpc.FACT_CP_CONFERENCE_ID,
-    fcpc.FACT_MEETING_ID,
-    fcpc.FACT_S47_ID,
-    fcpc.DIM_PERSON_ID,
-    fcpc.FACT_CP_PLAN_ID,
-    fcpc.FACT_REFERRAL_ID,
-    fcpc.TRANSFER_IN_FLAG,
-    fcpc.DUE_DTTM,
-    fm.ACTUAL_DTTM,
-    fcpc.OUTCOME_CP_FLAG,
-    (
-        SELECT
-            NULLIF(fcpc.OUTCOME_NFA_FLAG, '')                       AS "OUTCOME_NFA_FLAG",
-            NULLIF(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS "OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG",
-            NULLIF(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS "OUTCOME_PROV_OF_SERVICES_FLAG",
-            NULLIF(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
-            NULLIF(fcpc.OUTCOME_CP_FLAG, '')                        AS "OUTCOME_CP_CONFERENCE_FLAG",
-            NULLIF(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')              AS "OTHER_OUTCOMES_EXIST_FLAG",
-            NULLIF(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS "TOTAL_NO_OF_OUTCOMES",
-            NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "OUTCOME_COMMENTS"
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )                                                               AS icpc_icpc_outcome_json
-    --fm.DIM_DEPARTMENT_ID_DESC                                      AS icpc_icpc_team,
-    --fm.DIM_WORKER_ID_DESC                                          AS icpc_icpc_worker_id
- 
-FROM
-    Child_Social.FACT_CP_CONFERENCE AS fcpc
-JOIN
-    Child_Social.FACT_MEETINGS AS fm ON fcpc.FACT_MEETING_ID = fm.FACT_MEETING_ID
- 
-WHERE
-    fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
- 
--- Create index(es)
-CREATE INDEX IDX_ssd_initial_cp_conference_ ON ssd_initial_cp_conference(icpc_person_id);
+    -- Insert data
+    INSERT INTO ssd_initial_cp_conference(
+        icpc_icpc_id,
+        icpc_icpc_meeting_id,
+        icpc_s47_enquiry_id,
+        icpc_person_id,
+        icpc_cp_plan_id,
+        icpc_referral_id,
+        icpc_icpc_transfer_in,
+        icpc_icpc_target_date,
+        icpc_icpc_date,
+        icpc_icpc_outcome_cp_flag,
+        icpc_icpc_outcome_json
+        --icpc_icpc_team,
+        --icpc_icpc_worker_id
+    )
+    SELECT
+        fcpc.FACT_CP_CONFERENCE_ID,
+        fcpc.FACT_MEETING_ID,
+        fcpc.FACT_S47_ID,
+        fcpc.DIM_PERSON_ID,
+        fcpc.FACT_CP_PLAN_ID,
+        fcpc.FACT_REFERRAL_ID,
+        fcpc.TRANSFER_IN_FLAG,
+        fcpc.DUE_DTTM,
+        fm.ACTUAL_DTTM,
+        fcpc.OUTCOME_CP_FLAG,
+        JSON_OBJECT(
+            'OUTCOME_NFA_FLAG' VALUE fcpc.OUTCOME_NFA_FLAG,
+            'OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG' VALUE fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG,
+            'OUTCOME_SINGLE_ASSESSMENT_FLAG' VALUE fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG,
+            'OUTCOME_PROV_OF_SERVICES_FLAG' VALUE fcpc.OUTCOME_PROV_OF_SERVICES_FLAG,
+            'OUTCOME_CP_FLAG' VALUE fcpc.OUTCOME_CP_FLAG,
+            'OTHER_OUTCOMES_EXIST_FLAG' VALUE fcpc.OTHER_OUTCOMES_EXIST_FLAG,
+            'TOTAL_NO_OF_OUTCOMES' VALUE fcpc.TOTAL_NO_OF_OUTCOMES,
+            'OUTCOME_COMMENTS' VALUE fcpc.OUTCOME_COMMENTS
+        ) AS icpc_icpc_outcome_json
+        --fm.DIM_DEPARTMENT_ID_DESC AS icpc_icpc_team,
+        --fm.DIM_WORKER_ID_DESC AS icpc_icpc_worker_id
+    FROM
+        Child_Social.FACT_CP_CONFERENCE fcpc
+    JOIN
+        Child_Social.FACT_MEETINGS fm ON fcpc.FACT_MEETING_ID = fm.FACT_MEETING_ID
+    WHERE
+        fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference';
+
+    -- Create index(es)
+    EXECUTE IMMEDIATE 'CREATE INDEX IDX_ssd_initial_cp_conference_ ON ssd_initial_cp_conference(icpc_person_id)';
+
+    Create constraint(s)
+    EXECUTE IMMEDIATE 'ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_s47_person
+    FOREIGN KEY (icpc_person_id) REFERENCES ssd_person(pers_person_id)';
+END;
+/
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
@@ -1417,26 +1405,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cp_plans
 Description: 
 Author: D2I
-Last Modified Date: 24/11/23
-DB Compatibility: SQL Server 2014+|...
+Last Modified Date: 22/01/24
+DB Compatibility: Oracle 8i+
 Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: Still need to add: 
-cppl_cp_plan_team		y		"Link to [Child_Social].[FACT_INVOLVEMENTS.FACT_REFERRAL_ID] using [FACT_CP_PLAN.FACT_REFERRAL_ID]
-WHERE [FACT_INVOLVEMENTS].[DIM_LOOKUP_INVOLVEMENT_TYPE_CODE] = 'CW'
-
-will need to use [FACT_INVOLVEMENTS].[START_DTTM] and  [FACT_INVOLVEMENTS].[END_DTTM] to ascertain the correct worker for the date at which the report is run etc.
-
-[FACT_INVOLVEMENTS].[FACT_WORKER_HISTORY_ID] and [FACT_INVOLVEMENTS].[FACT_WORKER_HISTORY_DEPARTMENT_DESC] will return the worker id and worker team name for the relevant Involvement
-"
-cppl_cp_plan_worker_id	ssd_involvements.invo_professional_id	y		"Link to [Child_Social].[FACT_INVOLVEMENTS.FACT_REFERRAL_ID] using [FACT_CP_PLAN.FACT_REFERRAL_ID]
-WHERE [FACT_INVOLVEMENTS].[DIM_LOOKUP_INVOLVEMENT_TYPE_CODE] = 'CW'
-
-will need to use [FACT_INVOLVEMENTS].[START_DTTM] and  [FACT_INVOLVEMENTS].[END_DTTM] to ascertain the correct worker for the date at which the report is run etc.
-
-[FACT_INVOLVEMENTS].[FACT_WORKER_HISTORY_ID] and [FACT_INVOLVEMENTS].[FACT_WORKER_HISTORY_DEPARTMENT_DESC] will return the worker id and worker team name for the relevant Involvement
-"
-
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
 
 Dependencies: 
 - ssd_person
@@ -1444,77 +1417,67 @@ Dependencies:
 - FACT_CP_PLAN
 =============================================================================
 */
--- [TESTING] Create marker
-SET @TableName = N'ssd_cp_plans';
-PRINT 'Creating table: ' + @TableName;
 
+BEGIN
+    -- Check if exists & drop 
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE ssd_cp_plans';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                RAISE;
+            END IF;
+    END;
+    
+    -- Create structure
+    EXECUTE IMMEDIATE 'CREATE TABLE ssd_cp_plans (
+        cppl_cp_plan_id                   NVARCHAR2(48) PRIMARY KEY,
+        cppl_referral_id                  NVARCHAR2(48),
+        cppl_initial_cp_conference_id     NVARCHAR2(48),
+        cppl_person_id                    NVARCHAR2(48),
+        cppl_cp_plan_start_date           DATE,
+        cppl_cp_plan_end_date             DATE,
+        cppl_cp_plan_team                 NVARCHAR2(48), -- [PLACEHOLDER_DATA] [TESTING]
+        cppl_cp_plan_worker_id            NVARCHAR2(48), -- [PLACEHOLDER_DATA] [TESTING]
+        cppl_cp_plan_initial_category     NVARCHAR2(100),
+        cppl_cp_plan_latest_category      NVARCHAR2(100)
+    )';
 
--- Check if exists & drop 
-IF OBJECT_ID('ssd_cp_plans') IS NOT NULL DROP TABLE ssd_cp_plans;
+    -- Insert data
+    INSERT INTO ssd_cp_plans (
+        cppl_cp_plan_id, 
+        cppl_referral_id, 
+        cppl_initial_cp_conference_id, 
+        cppl_person_id, 
+        cppl_cp_plan_start_date, 
+        cppl_cp_plan_end_date, 
+        cppl_cp_plan_team, 
+        cppl_cp_plan_worker_id, 
+        cppl_cp_plan_initial_category, 
+        cppl_cp_plan_latest_category
+    )
+    SELECT 
+        FACT_CP_PLAN_ID AS cppl_cp_plan_id,
+        FACT_REFERRAL_ID AS cppl_referral_id,
+        FACT_INITIAL_CP_CONFERENCE_ID AS cppl_initial_cp_conference_id,
+        DIM_PERSON_ID AS cppl_person_id,
+        START_DTTM AS cppl_cp_plan_start_date,
+        END_DTTM AS cppl_cp_plan_end_date,
+        'PLACEHOLDER_DATA' AS cppl_cp_plan_team,                -- [PLACEHOLDER_DATA] [TESTING]
+        'PLACEHOLDER_DATA' AS cppl_cp_plan_worker_id,           -- [PLACEHOLDER_DATA] [TESTING]
+        INIT_CATEGORY_DESC AS cppl_cp_plan_initial_category,
+        CP_CATEGORY_DESC AS cppl_cp_plan_latest_category
+    FROM 
+        Child_Social.FACT_CP_PLAN;
 
--- Create structure
-CREATE TABLE ssd_cp_plans (
-    cppl_cp_plan_id                   NVARCHAR(48) PRIMARY KEY,
-    cppl_referral_id                  NVARCHAR(48),
-    cppl_initial_cp_conference_id     NVARCHAR(48),
-    cppl_person_id                    NVARCHAR(48),
-    cppl_cp_plan_start_date           DATETIME,
-    cppl_cp_plan_end_date             DATETIME,
-    cppl_cp_plan_team                 NVARCHAR(48), -- [PLACEHOLDER_DATA'] [TESTING]
-    cppl_cp_plan_worker_id            NVARCHAR(48), -- [PLACEHOLDER_DATA'] [TESTING]
-    cppl_cp_plan_initial_category     NVARCHAR(100),
-    cppl_cp_plan_latest_category      NVARCHAR(100)
-);
+    -- Create constraint(s)
+    EXECUTE IMMEDIATE 'ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_cppl_person_id
+    FOREIGN KEY (cppl_person_id) REFERENCES ssd_person(pers_person_id)';
 
-
--- Insert data
-INSERT INTO ssd_cp_plans (
-    cppl_cp_plan_id, 
-    cppl_referral_id, 
-    cppl_initial_cp_conference_id, 
-    cppl_person_id, 
-    cppl_cp_plan_start_date, 
-    cppl_cp_plan_end_date, 
-    cppl_cp_plan_team, 
-    cppl_cp_plan_worker_id, 
-    cppl_cp_plan_initial_category, 
-    cppl_cp_plan_latest_category
-)
-SELECT 
-    FACT_CP_PLAN_ID AS cppl_cp_plan_id,
-    FACT_REFERRAL_ID AS cppl_referral_id,
-    FACT_INITIAL_CP_CONFERENCE_ID AS cppl_initial_cp_conference_id,
-    DIM_PERSON_ID AS cppl_person_id,
-    START_DTTM AS cppl_cp_plan_start_date,
-    END_DTTM AS cppl_cp_plan_end_date,
-    'PLACEHOLDER_DATA' AS cppl_cp_plan_team,                -- [PLACEHOLDER_DATA] [TESTING]
-    'PLACEHOLDER_DATA' AS cppl_cp_plan_worker_id,           -- [PLACEHOLDER_DATA] [TESTING]
-    INIT_CATEGORY_DESC AS cppl_cp_plan_initial_category,
-    CP_CATEGORY_DESC AS cppl_cp_plan_latest_category
-FROM 
-    Child_Social.FACT_CP_PLAN;
-
-
-
--- Create index(es)
-
-
--- Create constraint(s)
-ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_cppl_person_id
-FOREIGN KEY (cppl_person_id) REFERENCES ssd_person(pers_person_id);
-
-ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_cppl_initial_cp_conference_id
-FOREIGN KEY (cppl_initial_cp_conference_id) REFERENCES ssd_initial_cp_conference(icpc_icpc_id);
-
-
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
-
-
-
-
+    EXECUTE IMMEDIATE 'ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_cppl_initial_cp_conference_id
+    FOREIGN KEY (cppl_initial_cp_conference_id) REFERENCES ssd_initial_cp_conference(icpc_icpc_id)';
+END;
+/
 
 
 
@@ -1524,72 +1487,71 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cp_visits
 Description: 
 Author: D2I
-Last Modified Date: 08/12/23
-DB Compatibility: SQL Server 2014+|...
+Last Modified Date: 22/01/24
+DB Compatibility: Oracle 8i+
 Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: This has issues, where/what is the fk back to cp_plans? 
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
 Dependencies: 
 - FACT_CASENOTES
 =============================================================================
 */
--- [TESTING] Create marker
-SET @TableName = N'ssd_cp_visits';
-PRINT 'Creating table: ' + @TableName;
 
 
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_cp_visits') IS NOT NULL DROP TABLE ssd_cp_visits;
-
-
--- Create structure
-CREATE TABLE ssd_cp_visits (
-    cppv_cp_visit_id        INT PRIMARY KEY,        -- [TESTING]  INT vs VARCHAR here? 
-    cppv_casenote_id        INT,                    -- [TESTING]  INT vs VARCHAR here? 
-    cppv_cp_plan_id         NVARCHAR(48),
-    cppv_cp_visit_date      DATETIME,
-    cppv_cp_visit_seen      NCHAR(1),
-    cppv_cp_visit_seen_alone NCHAR(1),
-    cppv_cp_visit_bedroom   NCHAR(1)
-);
+BEGIN
+    -- Check if exists & drop
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE ssd_cp_visits';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                RAISE;
+            END IF;
+    END;
+    
+    -- Create structure
+    EXECUTE IMMEDIATE 'CREATE TABLE ssd_cp_visits (
+        cppv_cp_visit_id        NUMBER PRIMARY KEY,      -- Changed from INT to NUMBER
+        cppv_casenote_id        NUMBER,                  -- Changed from INT to NUMBER
+        cppv_cp_plan_id         NVARCHAR2(48),
+        cppv_cp_visit_date      DATE,
+        cppv_cp_visit_seen      CHAR(1),
+        cppv_cp_visit_seen_alone CHAR(1),
+        cppv_cp_visit_bedroom   CHAR(1)
+    )';
  
--- Insert data
-INSERT INTO ssd_cp_visits
-(
-    cppv_cp_visit_id,
-    cppv_casenote_id,        
-    cppv_cp_plan_id,          
-    cppv_cp_visit_date,      
-    cppv_cp_visit_seen,      
-    cppv_cp_visit_seen_alone,
-    cppv_cp_visit_bedroom  
-)
- 
-SELECT
-    cpv.FACT_CP_VISIT_ID    AS cppv_cp_visit_id,                
-    cn.FACT_CASENOTE_ID     AS cppv_casenote_id,
-    cpv.FACT_CP_PLAN_ID     AS cppv_cp_plan_id,  
-    cn.EVENT_DTTM           AS cppv_cp_visit_date,
-    cn.SEEN_FLAG            AS cppv_cp_visit_seen,
-    cn.SEEN_ALONE_FLAG      AS cppv_cp_visit_seen_alone,
-    cn.SEEN_BEDROOM_FLAG    AS cppv_cp_visit_bedroom
- 
-FROM
-    Child_Social.FACT_CP_VISIT AS cpv
-JOIN
-    Child_Social.FACT_CASENOTES AS cn ON cpv.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID
- 
-WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID');
+    -- Insert data
+    INSERT INTO ssd_cp_visits
+    (
+        cppv_cp_visit_id,
+        cppv_casenote_id,        
+        cppv_cp_plan_id,          
+        cppv_cp_visit_date,      
+        cppv_cp_visit_seen,      
+        cppv_cp_visit_seen_alone,
+        cppv_cp_visit_bedroom  
+    )
+    SELECT
+        cpv.FACT_CP_VISIT_ID    AS cppv_cp_visit_id,                
+        cn.FACT_CASENOTE_ID     AS cppv_casenote_id,
+        cpv.FACT_CP_PLAN_ID     AS cppv_cp_plan_id,  
+        cn.EVENT_DTTM           AS cppv_cp_visit_date,
+        cn.SEEN_FLAG            AS cppv_cp_visit_seen,
+        cn.SEEN_ALONE_FLAG      AS cppv_cp_visit_seen_alone,
+        cn.SEEN_BEDROOM_FLAG    AS cppv_cp_visit_bedroom
+    FROM
+        Child_Social.FACT_CP_VISIT cpv
+    JOIN
+        Child_Social.FACT_CASENOTES cn ON cpv.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID
+    WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC','STVCPCOVID');
 
--- Create constraint(s)
+    -- Note: Add constraints as necessary, e.g., 
+    -- EXECUTE IMMEDIATE 'ALTER TABLE ssd_cp_visits ADD CONSTRAINT FK_cppv_cp_plan_id
+    -- FOREIGN KEY (cppv_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id)';
+END;
+/
 
 
-
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 /* 
@@ -1597,8 +1559,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cp_reviews
 Description: 
 Author: D2I
-Last Modified Date: 11/01/23
-DB Compatibility: SQL Server 2014+|...
+Last Modified Date: 22/01/24
+DB Compatibility: Oracle 8i+
 Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks:    Some fields - ON HOLD/Not included in SSD Ver/Iteration 1
@@ -1612,96 +1574,83 @@ Dependencies:
 - FACT_FORM_ANSWERS [Quoracy and Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
 =============================================================================
 */
--- [TESTING] Create marker
-SET @TableName = N'ssd_cp_reviews';
-PRINT 'Creating table: ' + @TableName;
 
+BEGIN
+    -- Check if table exists, & drop
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE ssd_cp_reviews';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                RAISE;
+            END IF;
+    END;
+    
+    -- Create structure
+    EXECUTE IMMEDIATE 'CREATE TABLE ssd_cp_reviews
+    (
+        cppr_cp_review_id                   NVARCHAR2(48) PRIMARY KEY,
+        cppr_cp_plan_id                     NVARCHAR2(48),
+        cppr_cp_review_due                  DATE,
+        cppr_cp_review_date                 DATE,
+        cppr_cp_review_cancelled            NVARCHAR2(1),
+        cppr_cp_review_outcome_continue_cp  CHAR(1),
+        cppr_cp_review_quorate              NVARCHAR2(18),      
+        cppr_cp_review_participation        NVARCHAR2(18)        -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
+    )';
+ 
+    -- Insert data
+    INSERT INTO ssd_cp_reviews
+    (
+        cppr_cp_review_id,
+        cppr_cp_plan_id,
+        cppr_cp_review_due,
+        cppr_cp_review_date,
+        cppr_cp_review_cancelled,
+        cppr_cp_review_outcome_continue_cp,
+        cppr_cp_review_quorate,
+        cppr_cp_review_participation
+    )
+    SELECT
+        cpr.FACT_CP_REVIEW_ID                       AS cppr_cp_review_id ,
+        cpr.FACT_CP_PLAN_ID                         AS cppr_cp_plan_id,
+        cpr.DUE_DTTM                                AS cppr_cp_review_due,
+        cpr.MEETING_DTTM                            AS cppr_cp_review_date,
+        fm.CANCELLED                                AS cppr_cp_review_cancelled,
+        cpr.OUTCOME_CONTINUE_CP_FLAG                AS cppr_cp_review_outcome_continue_cp,
+        MAX(CASE WHEN ffa.ANSWER_NO = 'WasConf'
+            AND fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
+            THEN ffa.ANSWER END)                    AS cppr_cp_review_quorate,    
+        'PLACEHOLDER DATA'                          AS cppr_cp_review_participation
+    FROM
+        Child_Social.FACT_CP_REVIEW cpr
+    LEFT JOIN
+        Child_Social.FACT_MEETINGS fm               ON cpr.FACT_MEETING_ID = fm.FACT_MEETING_ID
+    LEFT JOIN
+        Child_Social.FACT_MEETING_SUBJECTS fms      ON cpr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
+        AND cpr.DIM_PERSON_ID = fms.DIM_PERSON_ID
+    LEFT JOIN    
+        Child_Social.FACT_FORM_ANSWERS ffa          ON fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
+        AND ffa.ANSWER_NO = 'WasConf'
+        AND fms.FACT_OUTCM_FORM_ID IS NOT NULL
+        AND fms.FACT_OUTCM_FORM_ID <> '-1'
+    WHERE EXISTS ( -- only ssd relevant records
+        SELECT 1 
+        FROM ssd_person p
+        WHERE p.pers_person_id = cpr.DIM_PERSON_ID
+    )
+    GROUP BY cpr.FACT_CP_REVIEW_ID,
+        cpr.FACT_CP_PLAN_ID,
+        cpr.DUE_DTTM,
+        cpr.MEETING_DTTM,
+        fm.CANCELLED,
+        cpr.OUTCOME_CONTINUE_CP_FLAG;
 
--- Check if table exists, & drop
-IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_cp_reviews;
- 
- 
--- Create structure
-CREATE TABLE ssd_cp_reviews
-(
-    cppr_cp_review_id                   NVARCHAR(48) PRIMARY KEY,
-    cppr_cp_plan_id                     NVARCHAR(48),
-    cppr_cp_review_due                  DATETIME NULL,
-    cppr_cp_review_date                 DATETIME NULL,
-    cppr_cp_review_cancelled            NVARCHAR(1),
-    cppr_cp_review_outcome_continue_cp  NCHAR(1),
-    cppr_cp_review_quorate              NVARCHAR(18),      
-    cppr_cp_review_participation        NVARCHAR(18)        -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
-);
- 
--- Insert data
-INSERT INTO ssd_cp_reviews
-(
-    cppr_cp_review_id,
-    cppr_cp_plan_id,
-    cppr_cp_review_due,
-    cppr_cp_review_date,
-    cppr_cp_review_cancelled,
-    cppr_cp_review_outcome_continue_cp,
-    cppr_cp_review_quorate,
-    cppr_cp_review_participation
-)
-SELECT
-    cpr.FACT_CP_REVIEW_ID                       AS cppr_cp_review_id ,
-    cpr.FACT_CP_PLAN_ID                         AS cppr_cp_plan_id,
-    cpr.DUE_DTTM                                AS cppr_cp_review_due,
-    cpr.MEETING_DTTM                            AS cppr_cp_review_date,
-    fm.CANCELLED                                AS cppr_cp_review_cancelled,
-    cpr.OUTCOME_CONTINUE_CP_FLAG                AS cppr_cp_review_outcome_continue_cp,
-    (CASE WHEN ffa.ANSWER_NO = 'WasConf'
-        AND fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
-        THEN ffa.ANSWER END)                    AS cppr_cp_review_quorate,    
-    'PLACEHOLDER DATA'                          AS cppr_cp_review_participation
- 
-FROM
-    Child_Social.FACT_CP_REVIEW as cpr
- 
-LEFT JOIN
-    Child_Social.FACT_MEETINGS fm               ON cpr.FACT_MEETING_ID = fm.FACT_MEETING_ID
- 
-LEFT JOIN
-    Child_Social.FACT_MEETING_SUBJECTS fms      ON cpr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
-    AND cpr.DIM_PERSON_ID = fms.DIM_PERSON_ID
- 
-LEFT JOIN    
-    Child_Social.FACT_FORM_ANSWERS ffa          ON fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
-    AND ffa.ANSWER_NO = 'WasConf'
-    AND fms.FACT_OUTCM_FORM_ID IS NOT NULL
-    AND fms.FACT_OUTCM_FORM_ID <> '-1'
- 
-GROUP BY cpr.FACT_CP_REVIEW_ID,
-    cpr.FACT_CP_PLAN_ID,
-    cpr.DUE_DTTM,
-    cpr.MEETING_DTTM,
-    fm.CANCELLED,
-    cpr.OUTCOME_CONTINUE_CP_FLAG,
-    fms.FACT_OUTCM_FORM_ID,
-    ffa.ANSWER_NO,
-    ffa.FACT_FORM_ID,
-    ffa.ANSWER
-
--- WHERE EXISTS ( -- only ssd relevant records
---     SELECT 1 
---     FROM ssd_person p
---     WHERE p.pers_person_id = cpr.DIM_PERSON_ID
---     )
-    ;
-
-
--- Add constraint(s)
-ALTER TABLE ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
-FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
-
-
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+    -- Add constraint(s)
+    EXECUTE IMMEDIATE 'ALTER TABLE ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
+    FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id)';
+END;
+/
 
 
 
@@ -1711,10 +1660,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 12/01/24
-DB Compatibility: SQL Server 2014+|...
+Last Modified Date: 22/01/24
+DB Compatibility: Oracle 8i+
 Version: 1.5
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_involvements
@@ -1725,98 +1674,94 @@ Dependencies:
 - FACT_CASENOTES
 =============================================================================
 */
--- [TESTING] Create marker
-SET @TableName = N'ssd_cla_episodes';
-PRINT 'Creating table: ' + @TableName;
 
-
--- Check if table exists, & drop
-IF OBJECT_ID('ssd_cla_episodes') IS NOT NULL DROP TABLE ssd_cla_episodes;
-
+BEGIN
+    -- Check if table exists, & drop
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE ssd_cla_episodes';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                RAISE;
+            END IF;
+    END;
+    
+    -- Create structure
+    EXECUTE IMMEDIATE 'CREATE TABLE ssd_cla_episodes (
+        clae_cla_episode_id                 NVARCHAR2(48) PRIMARY KEY,
+        clae_person_id                      NVARCHAR2(48),
+        clae_cla_episode_start              DATE,
+        clae_cla_episode_start_reason       NVARCHAR2(100),
+        clae_cla_primary_need               NVARCHAR2(100),
+        clae_cla_episode_ceased             DATE,
+        clae_cla_episode_cease_reason       NVARCHAR2(255),
+        clae_cla_id                         NVARCHAR2(48),
+        clae_referral_id                    NVARCHAR2(48),
+        clae_cla_review_last_iro_contact_date DATE
+    )';
  
--- Create structure
-CREATE TABLE ssd_cla_episodes (
-    clae_cla_episode_id                 NVARCHAR(48) PRIMARY KEY,
-    clae_person_id                      NVARCHAR(48),
-    clae_cla_episode_start              DATETIME,
-    clae_cla_episode_start_reason       NVARCHAR(100),
-    clae_cla_primary_need               NVARCHAR(100),
-    clae_cla_episode_ceased             DATETIME,
-    clae_cla_episode_cease_reason       NVARCHAR(255),
-    clae_cla_id                         NVARCHAR(48),
-    clae_referral_id                    NVARCHAR(48),
-    clae_cla_review_last_iro_contact_date DATETIME
-);
- 
--- Insert data
-INSERT INTO ssd_cla_episodes (
-    clae_cla_episode_id,
-    clae_person_id,
-    clae_cla_episode_start,
-    clae_cla_episode_start_reason,
-    clae_cla_primary_need,
-    clae_cla_episode_ceased,
-    clae_cla_episode_cease_reason,
-    clae_cla_id,
-    clae_referral_id,
-    clae_cla_review_last_iro_contact_date
-)
-SELECT
-    fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
-    fce.DIM_PERSON_ID                       AS clae_person_id,
-    fce.CARE_START_DATE                     AS clae_cla_episode_start,
-    fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
-    fce.CIN_903_CODE                        AS clae_cla_primary_need,
-    fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
-    fce.CARE_REASON_END_DESC                AS clae_cla_episode_cease_reason,
-    fc.FACT_CLA_ID                          AS clae_cla_id,                    
-    fc.FACT_REFERRAL_ID                     AS clae_referral_id,
-        (SELECT MAX(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
-        --AND cn.DIM_CREATED_BY_DEPT_ID IN (5956,727)
-        AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
-        THEN cn.EVENT_DTTM END))                                                        
-                                            AS clae_cla_review_last_iro_contact_date
- 
- 
-FROM
-    Child_Social.FACT_CARE_EPISODES AS fce
-JOIN
-    Child_Social.FACT_CLA AS fc ON fce.fact_cla_id = fc.FACT_CLA_ID
- 
-LEFT JOIN
-    Child_Social.FACT_CASENOTES cn               ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
- 
-WHERE EXISTS ( -- only ssd relevant records
-    SELECT 1
-    FROM ssd_person p
-    WHERE p.pers_person_id = fce.DIM_PERSON_ID
+    -- Insert data
+    INSERT INTO ssd_cla_episodes (
+        clae_cla_episode_id,
+        clae_person_id,
+        clae_cla_episode_start,
+        clae_cla_episode_start_reason,
+        clae_cla_primary_need,
+        clae_cla_episode_ceased,
+        clae_cla_episode_cease_reason,
+        clae_cla_id,
+        clae_referral_id,
+        clae_cla_review_last_iro_contact_date
     )
- 
-GROUP BY
-    fce.FACT_CARE_EPISODES_ID,
-    fce.DIM_PERSON_ID,
-    fce.CARE_START_DATE,
-    fce.CARE_REASON_DESC,
-    fce.CIN_903_CODE,
-    fce.CARE_END_DATE,
-    fce.CARE_REASON_END_DESC,
-    fc.FACT_CLA_ID,                    
-    fc.FACT_REFERRAL_ID,
-    cn.DIM_PERSON_ID;
+    SELECT
+        fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
+        fce.DIM_PERSON_ID                       AS clae_person_id,
+        fce.CARE_START_DATE                     AS clae_cla_episode_start,
+        fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
+        fce.CIN_903_CODE                        AS clae_cla_primary_need,
+        fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
+        fce.CARE_REASON_END_DESC                AS clae_cla_episode_cease_reason,
+        fc.FACT_CLA_ID                          AS clae_cla_id,                    
+        fc.FACT_REFERRAL_ID                     AS clae_referral_id,
+            (SELECT MAX(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+            --AND cn.DIM_CREATED_BY_DEPT_ID IN (5956,727)
+            AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+            THEN cn.EVENT_DTTM END))                                                        
+                                                AS clae_cla_review_last_iro_contact_date
+    FROM
+        Child_Social.FACT_CARE_EPISODES fce
+    JOIN
+        Child_Social.FACT_CLA fc ON fce.fact_cla_id = fc.FACT_CLA_ID
+    LEFT JOIN
+        Child_Social.FACT_CASENOTES cn               ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+
+    WHERE EXISTS ( -- only ssd relevant records
+        SELECT 1
+        FROM ssd_person p
+        WHERE p.pers_person_id = fce.DIM_PERSON_ID
+        )
+    GROUP BY
+        fce.FACT_CARE_EPISODES_ID,
+        fce.DIM_PERSON_ID,
+        fce.CARE_START_DATE,
+        fce.CARE_REASON_DESC,
+        fce.CIN_903_CODE,
+        fce.CARE_END_DATE,
+        fce.CARE_REASON_END_DESC,
+        fc.FACT_CLA_ID,                    
+        fc.FACT_REFERRAL_ID,
+        cn.DIM_PERSON_ID;
+
+    -- Create index(es)
+    EXECUTE IMMEDIATE 'CREATE INDEX idx_clae_cla_worker_id ON ssd_cla_episodes (clae_cla_worker_id)';
+    
+    -- Add constraint(s)
+    EXECUTE IMMEDIATE 'ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_professional 
+    FOREIGN KEY (clae_cla_worker_id) REFERENCES ssd_involvements (invo_professional_id)';
+END;
+/
 
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON ssd_cla_episodes (clae_cla_worker_id);
-
--- Add constraint(s)
-ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_professional 
-FOREIGN KEY (clae_cla_worker_id) REFERENCES ssd_involvements (invo_professional_id);
-
-
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 /* 
@@ -1824,8 +1769,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_convictions
 Description: 
 Author: D2I
-Last Modified Date: 16/11/23
-DB Compatibility: SQL Server 2014+|...
+Last Modified Date: 22/01/24
+DB Compatibility: Oracle 8i+
 Version: 1.1
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
@@ -1834,62 +1779,66 @@ Dependencies:
 - FACT_OFFENCE
 =============================================================================
 */
--- [TESTING] Create marker
-SET @TableName = N'ssd_cla_convictions';
-PRINT 'Creating table: ' + @TableName;
+BEGIN
+    -- if exists, drop
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE ssd_cla_convictions';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                RAISE;
+            END IF;
+    END;
+    
+    -- create structure
+    EXECUTE IMMEDIATE 'CREATE TABLE ssd_cla_convictions (
+        clac_cla_conviction_id      NVARCHAR2(48) PRIMARY KEY,
+        clac_person_id              NVARCHAR2(48),
+        clac_cla_conviction_date    DATE,
+        clac_cla_conviction_offence NVARCHAR2(1000)
+    )';
 
-
--- if exists, drop
-IF OBJECT_ID('ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE ssd_cla_convictions;
-
--- create structure
-CREATE TABLE ssd_cla_convictions (
-    clac_cla_conviction_id      NVARCHAR(48) PRIMARY KEY,
-    clac_person_id              NVARCHAR(48),
-    clac_cla_conviction_date    DATETIME,
-    clac_cla_conviction_offence NVARCHAR(1000)
-);
-
--- insert data
-INSERT INTO ssd_cla_convictions (
-    clac_cla_conviction_id, 
-    clac_person_id, 
-    clac_cla_conviction_date, 
-    clac_cla_conviction_offence
+    -- insert data
+    INSERT INTO ssd_cla_convictions (
+        clac_cla_conviction_id, 
+        clac_person_id, 
+        clac_cla_conviction_date, 
+        clac_cla_conviction_offence
     )
-SELECT 
-    fo.FACT_OFFENCE_ID,
-    fo.DIM_PERSON_ID,
-    fo.OFFENCE_DTTM,
-    fo.DESCRIPTION
-FROM 
-    Child_Social.FACT_OFFENCE as fo
+    SELECT 
+        fo.FACT_OFFENCE_ID,
+        fo.DIM_PERSON_ID,
+        fo.OFFENCE_DTTM,
+        fo.DESCRIPTION
+    FROM 
+        Child_Social.FACT_OFFENCE fo
+    WHERE EXISTS 
+        (   -- only ssd relevant records
+        SELECT 1 
+        FROM ssd_person p
+        WHERE p.pers_person_id = fo.DIM_PERSON_ID
+        );
 
-WHERE EXISTS 
-    (   -- only ssd relevant records
-    SELECT 1 
-    FROM ssd_person p
-    WHERE p.pers_person_id = fo.DIM_PERSON_ID
-    );
+   
+    -- Add constraint(s)
+    EXECUTE IMMEDIATE 'ALTER TABLE ssd_cla_convictions ADD CONSTRAINT FK_clac_to_clae 
+    FOREIGN KEY (clac_person_id) REFERENCES ssd_cla_episodes(clae_person_id)';
+END;
+/
 
--- add constraint(s)
-ALTER TABLE ssd_cla_convictions ADD CONSTRAINT FK_clac_to_clae 
-FOREIGN KEY (clac_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
 
 /* 
 =============================================================================
 Object Name: ssd_cla_health
 Description: 
 Author: D2I
-Last Modified Date: 12/12/23
-DB Compatibility: SQL Server 2014+|...
+Last Modified Date: 22/01/24
+DB Compatibility: Oracle 8i+
 Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1897,64 +1846,65 @@ Dependencies:
 - ssd_cla_episodes (FK)
 =============================================================================
 */
--- [TESTING] Create marker
-SET @TableName = N'ssd_cla_health';
-PRINT 'Creating table: ' + @TableName;
 
-
--- if exists, drop
-IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_cla_health;
-
--- create structure
-CREATE TABLE ssd_cla_health (
-    clah_health_check_id             NVARCHAR(48) PRIMARY KEY,
-    clah_person_id                   NVARCHAR(48),
-    clah_health_check_type           NVARCHAR(500),
-    clah_health_check_date           DATETIME,
-    clah_health_check_status         NVARCHAR(48)
-);
+BEGIN
+    -- if exists, drop
+    BEGIN
+        EXECUTE IMMEDIATE 'DROP TABLE ssd_cla_health';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE != -942 THEN
+                RAISE;
+            END IF;
+    END;
+    
+    -- create structure
+    EXECUTE IMMEDIATE 'CREATE TABLE ssd_cla_health (
+        clah_health_check_id             NVARCHAR2(48) PRIMARY KEY,
+        clah_person_id                   NVARCHAR2(48),
+        clah_health_check_type           NVARCHAR2(500),
+        clah_health_check_date           DATE,
+        clah_health_check_status         NVARCHAR2(48)
+    )';
  
--- insert data
-INSERT INTO ssd_cla_health (
-    clah_health_check_id,
-    clah_person_id,
-    clah_health_check_type,
-    clah_health_check_date,
-    clah_health_check_status
+    -- insert data
+    INSERT INTO ssd_cla_health (
+        clah_health_check_id,
+        clah_person_id,
+        clah_health_check_type,
+        clah_health_check_date,
+        clah_health_check_status
     )
+    SELECT
+        fhc.FACT_HEALTH_CHECK_ID,
+        fhc.DIM_PERSON_ID,
+        fhc.DIM_LOOKUP_HC_TYPE_DESC,
+        fhc.START_DTTM,
+        fhc.DIM_LOOKUP_EXAM_STATUS_CODE
+    FROM
+        Child_Social.FACT_HEALTH_CHECK fhc
+    WHERE EXISTS 
+        (   -- only ssd relevant records
+        SELECT 1 
+        FROM ssd_person p
+        WHERE p.pers_person_id = fhc.DIM_PERSON_ID
+        );
 
-SELECT
-    fhc.FACT_HEALTH_CHECK_ID,
-    fhc.DIM_PERSON_ID,
-    fhc.DIM_LOOKUP_HC_TYPE_DESC,
-    fhc.START_DTTM,
-    fhc.DIM_LOOKUP_EXAM_STATUS_CODE
-FROM
-    Child_Social.FACT_HEALTH_CHECK as fhc
- 
--- INNER JOIN
---     #ssd_person AS p ON fhc.DIM_PERSON_ID = p.pers_person_id;
 
-WHERE EXISTS 
-    (   -- only ssd relevant records
-    SELECT 1 
-    FROM ssd_person p
-    WHERE p.pers_person_id = fhc.DIM_PERSON_ID
-    );
+    -- add constraint(s)
+    EXECUTE IMMEDIATE 'ALTER TABLE ssd_cla_health ADD CONSTRAINT FK_clah_to_clae 
+    FOREIGN KEY (clah_person_id) REFERENCES ssd_cla_episodes(clae_person_id)';
 
--- add constraint(s)
-ALTER TABLE ssd_cla_health ADD CONSTRAINT FK_clah_to_clae 
-FOREIGN KEY (clah_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clah_person_id ON ssd_cla_health (clah_person_id);
+    -- Create index(es)
+    EXECUTE IMMEDIATE 'CREATE INDEX idx_clah_person_id ON ssd_cla_health (clah_person_id)';
+END;
+/
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
 
 
 
