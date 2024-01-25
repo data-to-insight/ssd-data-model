@@ -4767,13 +4767,20 @@ WITH InvolvementHistoryCTE AS (
             WHERE 
                 fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+            -- Comment/replace this block(1 of 3)replace the above line with: FOR JSON PATH to enable FULL contact history in _json (involvement_history_json)
+            -- FOR JSON PATH
+            -- end of comment block 1
         )) AS involvement_history
     FROM (
+
+        -- Comment this block(2 of 3) to enable FULL contact history in _json (involvement_history_json)
         SELECT *,
             ROW_NUMBER() OVER (
                 PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
                 ORDER BY FACT_INVOLVEMENTS_ID DESC
             ) AS rn,
+            -- end of comment block 2
+
             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
         FROM Child_Social.FACT_INVOLVEMENTS
         WHERE 
@@ -4784,7 +4791,10 @@ WITH InvolvementHistoryCTE AS (
             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
                                                 -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
     ) fi
+
+    -- Comment this block(3 of 3) to enable FULL contact history in _json (involvement_history_json)
     WHERE fi.rn = 1
+    -- end of comment block 3
 
     AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
         SELECT 1 FROM #ssd_person p
@@ -4832,5 +4842,5 @@ SET
     p.involvement_history = ih.involvement_history,
     p.involvement_type_story_json = CONCAT('[', its.InvolvementTypeStory, ']')
 FROM #ssd_person p
-LEFT JOIN InvolvementHistoryCTE ih ON p.per_person_id = ih.DIM_PERSON_ID
-LEFT JOIN InvolvementTypeStoryCTE its ON p.per_person_id = its.DIM_PERSON_ID;
+LEFT JOIN InvolvementHistoryCTE ih ON p.pers_person_id = ih.DIM_PERSON_ID
+LEFT JOIN InvolvementTypeStoryCTE its ON p.pers_person_id = its.DIM_PERSON_ID;
