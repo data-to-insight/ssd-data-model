@@ -2826,18 +2826,20 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/* 
+/*
 =============================================================================
-Object Name: ssd_sdq_scores V6
-Description: 
+Object Name: ssd_sdq_scores
+Description:
 Author: D2I
-Last Modified Date: 15/01/24
+Last Modified Date: 18/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks:    ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
-            See ticket https://trello.com/c/2hWQH0bD for potential sdq history field
-Dependencies: 
+Version: 1.7
+Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
+        Removed csdq_form_id as the form id is also being used as csdq_table_id
+        Added placeholder for csdq_sdq_reason
+        Removed PRIMARY KEY stipulation for csdq_table_id
+Dependencies:
 - ssd_person
 - FACT_FORMS
 - FACT_FORM_ANSWERS
@@ -2846,39 +2848,39 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_sdq_scores';
 PRINT 'Creating table: ' + @TableName;
-
-
+ 
+ 
+ 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
-
-
-/* V8 */
+IF OBJECT_ID('tempdb..ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
+ 
+ 
+/* V8.1 */
 -- Create structure
 CREATE TABLE ssd_sdq_scores (
-    csdq_table_id               NVARCHAR(48) PRIMARY KEY,
-    csdq_form_id                NVARCHAR(48),
+    csdq_table_id               NVARCHAR(48), -- PRIMARY KEY,
     csdq_person_id              NVARCHAR(48),
     csdq_sdq_score              NVARCHAR(48),
-    csdq_sdq_details_json       NVARCHAR(1000)          
+    csdq_sdq_details_json       NVARCHAR(1000),
+    csdq_sdq_reason             NVARCHAR(48)
 );
  
 -- Insert data
 INSERT INTO ssd_sdq_scores (
     csdq_table_id,
-    csdq_form_id,
     csdq_person_id,
     csdq_sdq_score,
-    csdq_sdq_details_json
+    csdq_sdq_details_json,
+    csdq_sdq_reason
 )
 SELECT
     ff.FACT_FORM_ID         AS csdq_table_id,
-    ffa.FACT_FORM_ID        AS csdq_form_id,
     ff.DIM_PERSON_ID        AS csdq_person_id,
     (
         SELECT TOP 1
-            CASE 
-                WHEN ISNUMERIC(ffa_inner.ANSWER) = 1 THEN CAST(ffa_inner.ANSWER AS INT) 
-                ELSE NULL 
+            CASE
+                WHEN ISNUMERIC(ffa_inner.ANSWER) = 1 THEN CAST(ffa_inner.ANSWER AS INT)
+                ELSE NULL
             END
         FROM Child_Social.FACT_FORM_ANSWERS ffa_inner
         WHERE ffa_inner.FACT_FORM_ID = ff.FACT_FORM_ID
@@ -2892,8 +2894,8 @@ SELECT
             CASE WHEN ffa_inner.ANSWER_NO = 'FormEndDate'
             THEN ffa_inner.ANSWER END AS "SDQ_COMPLETED_DATE",
             CASE WHEN ffa_inner.ANSWER_NO = 'SDQScore'
-            THEN 
-                CASE WHEN ISNUMERIC(ffa_inner.ANSWER) = 1 THEN CAST(ffa_inner.ANSWER AS INT) ELSE NULL END 
+            THEN
+                CASE WHEN ISNUMERIC(ffa_inner.ANSWER) = 1 THEN CAST(ffa_inner.ANSWER AS INT) ELSE NULL END
             END AS "SDQ_SCORE"
         FROM Child_Social.FACT_FORM_ANSWERS ffa_inner
         WHERE ff.FACT_FORM_ID = ffa_inner.FACT_FORM_ID
@@ -2901,7 +2903,9 @@ SELECT
             AND ffa_inner.ANSWER_NO IN ('FormEndDate','SDQScore')
             AND ffa_inner.ANSWER IS NOT NULL
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) AS csdq_sdq_details_json
+    ) AS csdq_sdq_details_json,
+    'PLACEHOLDER DATA'      AS csdq_sdq_reason
+   
 FROM
     Child_Social.FACT_FORMS ff
 JOIN
@@ -2914,47 +2918,48 @@ WHERE EXISTS (
     FROM ssd_person p
     WHERE p.pers_person_id = ff.DIM_PERSON_ID
 );
-
-
+ 
+ 
 -- Ensure the previous statement is terminated
 ;WITH RankedSDQScores AS (
     SELECT
         *,
         -- Assign unique row nums <within each partition> of csdq_person_id,
         -- the most recent csdq_form_id will have a row number of 1.
-        ROW_NUMBER() OVER (PARTITION BY csdq_person_id ORDER BY csdq_form_id DESC) AS rn
+        ROW_NUMBER() OVER (PARTITION BY csdq_person_id ORDER BY csdq_table_id DESC) AS rn
     FROM
         ssd_sdq_scores
 )
-
+ 
 -- delete all records from the #ssd_sdq_scores table where row number(rn) > 1
 -- i.e. keep only the most recent
 DELETE FROM RankedSDQScores
 WHERE rn > 1;
-
+ 
 -- identify and remove exact dups
 ;WITH DuplicateSDQScores AS (
     SELECT
         *,
         -- Assign row num to each set of dups,
         -- partitioned by all columns that could potentially make a row unique
-        ROW_NUMBER() OVER (PARTITION BY csdq_table_id, csdq_person_id, csdq_sdq_details_json ORDER BY csdq_form_id) AS row_num
+        ROW_NUMBER() OVER (PARTITION BY csdq_table_id, csdq_person_id, csdq_sdq_details_json ORDER BY csdq_table_id) AS row_num
     FROM
         ssd_sdq_scores
 )
 -- Delete dups
 DELETE FROM DuplicateSDQScores
 WHERE row_num > 1;
-
+ 
+ 
 -- [TESTING]
 select * from ssd_sdq_scores
-order by csdq_person_id desc, csdq_form_id desc;
-
--- -- non-spec column clean-up 
+order by csdq_person_id desc, csdq_table_id desc;
+ 
+-- -- non-spec column clean-up
 -- ALTER TABLE ssd_sdq_scores DROP COLUMN csdq_sdq_score;
-
-
-/* end V8 */
+ 
+ 
+/* end V8.1 */
 
 
 
