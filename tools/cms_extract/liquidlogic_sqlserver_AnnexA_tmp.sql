@@ -1,8 +1,7 @@
-USE HDM_Local;
+USE HDM;
 GO
 
--- var naming needs re-think for stat returns reporting, 
--- this atm carried over from... ssd time-frames (YRS)
+-- this var naming atm carried over from ssd (YRS)
 DECLARE @ssd_timeframe_years INT = 1;
 
 
@@ -10,16 +9,11 @@ DECLARE @ssd_timeframe_years INT = 1;
 -- Obtain reports/csv files use built in export as or
 -- bcp "QUERY_HERE" queryout "C:\path\to\myfile.csv" -c -t, -S SERVER_NAME -d DATABASE_NAME -U USERNAME -P PASSWORD
 
--- -- Date field handling/formatting
--- FORMAT(p.person_dob, 'dd/MM/yyyy') AS formatted_person_dob,
--- On date filter use:     -- DATEADD(YEAR, -6, GETDATE()) *** in place of *** DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH)
-
-
 
 /*
-**************************
-SSD AnnexA Returns Queries
-**************************
+****************************************
+SSD AnnexA Returns Queries || SQL Server
+****************************************
 */
 
 
@@ -203,14 +197,11 @@ Dependencies:
 - ssd_person
 =============================================================================
 */
-
-
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#AA_3_referrals') IS NOT NULL DROP TABLE #AA_3_referrals;
 
 SELECT
     /* Common AA fields */
-
     p.pers_legacy_id                            AS CHILD_ID,
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
@@ -240,7 +231,6 @@ SELECT
     END                                         AS AGE,
     
     /* List additional AA fields */
-
     ce.cine_referral_id                         AS REFERRAL_ID,
     FORMAT(ce.cine_referral_date, 'dd/MM/yyyy') AS REFERRAL_DATE,
     ce.cine_referral_source_desc                AS REFERRAL_SOURCE,
@@ -275,6 +265,101 @@ LEFT JOIN
     ) sub ON ce.cine_person_id = sub.cine_person_id
 WHERE
     ce.cine_referral_date >= DATEADD(MONTH, -6, GETDATE());
+
+
+
+
+
+
+
+
+/* 
+=============================================================================
+Report Name: Ofsted List 4 - Assessments YYYY
+Description: 
+            List 4: 
+            Referral	"..."
+Author: D2I
+Last Modified Date: 23/01/24 RH
+DB Compatibility: SQL Server 2014+|...
+Version: 1.0
+            0.3: Removed old obj/item naming. 
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- ssd_person
+- ssd_disability
+- ssd_assessment_factors
+=============================================================================
+*/
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#AA_4_assessments') IS NOT NULL DROP TABLE #AA_4_assessments;
+
+
+SELECT
+    /* Common AA fields */
+    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_sex                                  AS GENDER,
+    p.pers_ethnicity                            AS ETHNICITY,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
+    
+    CASE
+        -- If DoB is in the future, set age as -1 (unborn)
+        WHEN p.pers_dob > GETDATE() THEN -1
+
+        -- Special case for leap year babies (born Feb 29)
+        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            -- Check if current year is not a leap year
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
+
+        ELSE 
+            -- Calc age normally
+            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+            CASE 
+                -- Subtract extra year if current date is before birthday this year
+                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
+                THEN 1 
+                ELSE 0
+            END
+    END                                         AS AGE,
+    
+    /* List additional AA fields */
+    a.assessment_id,
+    FORMAT(a.asmt_start_date, 'dd/MM/yyyy') as asmt_start_date,
+    -- FACT_SINGLE_ASSESSMENT.SEEN_FLAG  a.asmt_child_seen,
+    FORMAT(a.asmt_auth_date, 'dd/MM/yyyy') as asmt_auth_date,
+ 
+ 
+    a.asmt_outcome, -- TO CHECK
+    -- OUTCOME_STRATEGY_DISCUSSION_FLAG
+OUTCOME_CLA_REQUEST_FLAG
+OUTCOME_PRIVATE_FOSTERING_FLAG
+OUTCOME_LEGAL_ACTION_FLAG
+OUTCOME_PROV_OF_SERVICES_FLAG
+OUTCOME_PROV_OF_SB_CARE_FLAG
+OUTCOME_SPECIALIST_ASSESSMENT_FLAG
+
+
+    a.asmt_team,
+    a.asmt_worker_id,
+
+    /* Disability field */
+    d.person_disability -- Disability field - Is this returned or generated??  Yes/No/Unknown 
+
+INTO #AA_4_assessments
+
+FROM
+    --- FACT_INITIAL_ASSESSMENT  assessments a
+INNER JOIN
+    ssd_person p ON a.XXXX_person_id = p.pers_person_id
+LEFT JOIN   -- ensure we get all records even if there's no matching disability
+    ssd_disability d ON p.pers_person_id = d.disa_person_id
+WHERE
+    a.asmt_start_date >= DATEADD(MONTH, -12, GETDATE());
+
 
 
 
