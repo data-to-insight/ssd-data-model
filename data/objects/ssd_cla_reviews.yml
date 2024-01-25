@@ -31,6 +31,7 @@ nodes:
     description: CLA_ID
     item_ref: CLAR011A
     type: nvarchar
+    foreign_key: ssd_cla_episodes.clae_cla_id
     categories:
     - looked_after
     - review

@@ -211,6 +211,16 @@ relationships:
   child_key: clap_cla_id
   relation: 1:M
 - parent_object: ssd_cla_episodes
+  parent_key: clae_cla_id
+  child_object: ssd_cla_reviews
+  child_key: clar_cla_id
+  relation: 1:M
+- parent_object: ssd_cla_episodes
+  parent_key: clae_person_id
+  child_object: ssd_cla_visits
+  child_key: clav_person_id
+  relation: 1:M
+- parent_object: ssd_cla_episodes
   parent_key: clae_person_id
   child_object: ssd_cla_previous_permanence
   child_key: lapp_person_id

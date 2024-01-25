@@ -223,7 +223,6 @@ nodes:
     - Local
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:clap_cla_placement_distance
     - mosaic:clap_cla_placement_distance

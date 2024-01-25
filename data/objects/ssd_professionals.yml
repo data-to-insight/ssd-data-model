@@ -13,7 +13,6 @@ nodes:
     - Local
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:prof_table_id
     - mosaic:prof_table_id

@@ -19,6 +19,7 @@ nodes:
     description: Person ID
     item_ref: CLAV008A
     type: nvarchar
+    foreign_key: ssd_cla_episodes.clae_person_id
     categories:
     - looked_after
     - review
