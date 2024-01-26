@@ -718,8 +718,8 @@ CREATE TABLE #ssd_contacts (
     cont_contact_id             NVARCHAR(48) PRIMARY KEY,
     cont_person_id              NVARCHAR(48),
     cont_contact_start          DATETIME,
-    cont_contact_source         NVARCHAR(48),   -- 
-    cont_contact_source_desc    NVARCHAR(200),  -- 
+    cont_contact_source_code    NVARCHAR(48),   -- 
+    cont_contact_source_desc    NVARCHAR(255),  -- 
     cont_contact_outcome_json   NVARCHAR(500) 
 );
 

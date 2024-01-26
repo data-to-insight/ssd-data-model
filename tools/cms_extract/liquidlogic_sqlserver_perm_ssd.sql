@@ -693,12 +693,13 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_contacts
 Description: 
 Author: D2I
-Last Modified Date: 12/01/24
+Last Modified Date: 26/01/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-           1.4 cont_contact_source_desc added
+Version: 1.6
+            1.5 cont_contact_source (_code) field name edit RH
+            1.4 cont_contact_source_desc added RH
 
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks:Inclusion in contacts might differ between LAs. 
         Baseline definition:
         Contains safeguarding and referral to early help data.
@@ -725,8 +726,8 @@ CREATE TABLE ssd_contacts (
     cont_contact_id             NVARCHAR(48) PRIMARY KEY,
     cont_person_id              NVARCHAR(48),
     cont_contact_start          DATETIME,
-    cont_contact_source         NVARCHAR(48), -- 
-    cont_contact_source_desc    NVARCHAR(255), -- 
+    cont_contact_source_code    NVARCHAR(48),   -- 
+    cont_contact_source_desc    NVARCHAR(255),  -- 
     cont_contact_outcome_json   NVARCHAR(500) 
 );
 
@@ -745,7 +746,7 @@ SELECT
     fc.CONTACT_DTTM,
     fc.DIM_LOOKUP_CONT_SORC_ID,
     fc.DIM_LOOKUP_CONT_SORC_ID_DESC,
-    (                                                           -- Create JSON string for the address
+    (   -- Create JSON string for the address
         SELECT 
             NULLIF(fc.OUTCOME_NEW_REFERRAL_FLAG, '')           AS "OUTCOME_NEW_REFERRAL_FLAG",
             NULLIF(fc.OUTCOME_EXISTING_REFERRAL_FLAG, '')      AS "OUTCOME_EXISTING_REFERRAL_FLAG",
