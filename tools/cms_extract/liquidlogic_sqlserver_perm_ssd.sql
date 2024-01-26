@@ -2990,18 +2990,18 @@ IF OBJECT_ID('ssd_care_leavers', 'U') IS NOT NULL DROP TABLE ssd_care_leavers;
 -- Create structure
 CREATE TABLE ssd_care_leavers
 (
-    clea_table_id                       NVARCHAR(48),
-    clea_person_id                      NVARCHAR(48),
-    clea_care_leaver_eligibility        NVARCHAR(100),
-    clea_care_leaver_in_touch           NVARCHAR(100),
-    clea_care_leaver_latest_contact     DATETIME,
-    clea_care_leaver_accommodation      NVARCHAR(100),
-    clea_care_leaver_accom_suitable     NVARCHAR(100),
-    clea_care_leaver_activity           NVARCHAR(100),
-    clea_pathway_plan_review_date       DATETIME,
-    clea_care_leaver_personal_advisor   NVARCHAR(100),
-    clea_care_leaver_allocated_team     NVARCHAR(48),
-    clea_care_leaver_worker_id          NVARCHAR(48)        -- [TESTING] Should this field retain the _id suffix post v1.5 changes? 
+    clea_table_id                           NVARCHAR(48),
+    clea_person_id                          NVARCHAR(48),
+    clea_care_leaver_eligibility            NVARCHAR(100),
+    clea_care_leaver_in_touch               NVARCHAR(100),
+    clea_care_leaver_latest_contact         DATETIME,
+    clea_care_leaver_accommodation          NVARCHAR(100),
+    clea_care_leaver_accom_suitable         NVARCHAR(100),
+    clea_care_leaver_activity               NVARCHAR(100),
+    clea_pathway_plan_review_date           DATETIME,
+    clea_care_leaver_personal_advisor       NVARCHAR(100),
+    clea_care_leaver_allocated_team_name    NVARCHAR(48),
+    clea_care_leaver_worker_name            NVARCHAR(48)        
 );
 
 
@@ -3057,8 +3057,8 @@ INSERT INTO ssd_care_leavers
     clea_care_leaver_activity, 
     clea_pathway_plan_review_date, 
     clea_care_leaver_personal_advisor,                  
-    clea_care_leaver_worker_id, 
-    clea_care_leaver_allocated_team                    
+    clea_care_leaver_allocated_team_name,
+    clea_care_leaver_worker_name                   
 )
 SELECT 
     fccl.FACT_CLA_CARE_LEAVERS_ID                   AS clea_table_id, 
@@ -3075,8 +3075,9 @@ SELECT
         THEN fcp.MODIF_DTTM END)                    AS clea_pathway_plan_review_date,
 
     ih.PersonalAdvisorName                          AS clea_care_leaver_personal_advisor,
-    ih.CurrentWorkerName                            AS clea_care_leaver_worker_id,
-    ih.AllocatedTeamName                            AS clea_care_leaver_allocated_team
+    ih.AllocatedTeamName                            AS clea_care_leaver_allocated_team_name,
+    ih.CurrentWorkerName                            AS clea_care_leaver_worker_name
+    
 FROM 
     Child_Social.FACT_CLA_CARE_LEAVERS AS fccl
 
