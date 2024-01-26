@@ -3008,9 +3008,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_care_leavers
 Description: 
 Author: D2I
-Last Modified Date: 10/01/24
+Last Modified Date: 26/01/24 
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.7
+            1.6: switch field _worker)nm and _team_nm around as in wrong order RH
+            1.5: worker/p.a id field changed to descriptive name towards AA reporting JH
+
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions. 
             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)

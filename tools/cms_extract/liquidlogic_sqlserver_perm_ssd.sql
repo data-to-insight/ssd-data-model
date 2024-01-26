@@ -2960,10 +2960,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_care_leavers
 Description: 
 Author: D2I
-Last Modified Date: 12/01/24 JH
+Last Modified Date: 26/01/24 
 DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5: worker/p.a id field changed to descriptive name towards AA reporting
+Version: 1.7
+            1.6: switch field _worker)nm and _team_nm around as in wrong order RH
+            1.5: worker/p.a id field changed to descriptive name towards AA reporting JH
 
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions. 
@@ -3077,7 +3078,7 @@ SELECT
     ih.PersonalAdvisorName                          AS clea_care_leaver_personal_advisor,
     ih.AllocatedTeamName                            AS clea_care_leaver_allocated_team_name,
     ih.CurrentWorkerName                            AS clea_care_leaver_worker_name
-    
+
 FROM 
     Child_Social.FACT_CLA_CARE_LEAVERS AS fccl
 
