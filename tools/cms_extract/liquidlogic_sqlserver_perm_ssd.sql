@@ -1642,8 +1642,8 @@ IF OBJECT_ID('ssd_cp_visits') IS NOT NULL DROP TABLE ssd_cp_visits;
 
 -- Create structure
 CREATE TABLE ssd_cp_visits (
-    cppv_cp_visit_id        INT PRIMARY KEY,        -- [TESTING]  INT vs VARCHAR here? 
-    cppv_casenote_id        INT,                    -- [TESTING]  INT vs VARCHAR here? 
+    cppv_cp_visit_id        NVARCHAR(48) PRIMARY KEY,        
+    cppv_casenote_id        NVARCHAR(48),                    
     cppv_cp_plan_id         NVARCHAR(48),
     cppv_cp_visit_date      DATETIME,
     cppv_cp_visit_seen      NCHAR(1),
@@ -3804,15 +3804,16 @@ INSERT INTO ssd_pre_proceedings (
 )
 VALUES
     (
-    '10001', 'DIM_PERSON1.PERSON_ID', 'PLO_FAMILY1', '1900-01-01', '1900-01-01', 'Outcome1', 
+    '10001', 'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900-01-01', '1900-01-01', 'Outcome1', 
     '1900-01-01', 3, 'Approved', 2, 1, '1900-01-01', '1900-01-01', 2, 'Y', 
-    'NA', 'COURT_REF_1', 1, 'N', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
+    'NA', 'COURT_REF_1', 1, 'Y', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
     ),
     (
-    '10002', 'DIM_PERSON2.PERSON_ID', 'PLO_FAMILY2', '1900-01-01', '1900-01-01', 'Outcome2',
-    '1900-01-01', 4, 'Denied', 1, 2, '1900-01-01', '1900-01-01', 3, 'N',
-    'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'N', 'Initial Plan 2', 'N', 'Final Plan 2'
+    '10002', 'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900-01-01', '1900-01-01', 'Outcome2',
+    '1900-01-01', 4, 'Denied', 1, 2, '1900-01-01', '1900-01-01', 3, 'Y',
+    'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'Y', 'Initial Plan 2', 'Y', 'Final Plan 2'
     );
+
 
 -- To switch on once source data defined.
 -- WHERE EXISTS 

@@ -1718,8 +1718,8 @@ IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
 
 -- Create structure
 CREATE TABLE #ssd_cp_visits (
-    cppv_cp_visit_id        INT PRIMARY KEY,        -- [TESTING]  INT vs VARCHAR here? 
-    cppv_casenote_id        INT,                    -- [TESTING]  INT vs VARCHAR here? 
+    cppv_cp_visit_id        NVARCHAR(48) PRIMARY KEY,        
+    cppv_casenote_id        NVARCHAR(48),     
     cppv_cp_plan_id         NVARCHAR(48),
     cppv_cp_visit_date      DATETIME,
     cppv_cp_visit_seen      NCHAR(1),
