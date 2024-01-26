@@ -692,14 +692,17 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_contacts
 Description: 
 Author: D2I
-Last Modified Date: 06/11/23
+Last Modified Date: 26/01/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: Inclusion in contacts might differ between LAs. 
+Version: 1.6
+            1.5 cont_contact_source (_code) field name edit RH
+            1.4 cont_contact_source_desc added RH
+
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks:Inclusion in contacts might differ between LAs. 
         Baseline definition:
         Contains safeguarding and referral to early help data.
-        
+   
 Dependencies: 
 - ssd_person
 - FACT_CONTACTS
@@ -2146,10 +2149,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_immunisations
 Description: 
 Author: D2I
-Last Modified Date: 06/12/23
+Last Modified Date: 26/12/23 
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.5
+            1.4 clai_immunisations_status_date removed RH
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -2169,7 +2173,6 @@ IF OBJECT_ID('tempdb..#ssd_cla_immunisations') IS NOT NULL DROP TABLE #ssd_cla_i
 CREATE TABLE #ssd_cla_immunisations (
     clai_immunisations_id          NVARCHAR(48) PRIMARY KEY,
     clai_person_id                 NVARCHAR(48),
-    clai_immunisations_status_date DATETIME,
     clai_immunisations_status      NCHAR(1)
 );
 
