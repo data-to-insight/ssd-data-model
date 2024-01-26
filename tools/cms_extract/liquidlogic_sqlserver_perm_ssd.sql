@@ -638,12 +638,11 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('ssd_legal_status') IS NOT NULL DROP TABLE ssd_legal_status;
 IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
 
-
 -- Create structure
 CREATE TABLE ssd_legal_status (
     lega_legal_status_id        NVARCHAR(48) PRIMARY KEY,
     lega_person_id              NVARCHAR(48),
-    lega_legal_status           NVARCHAR(256),
+    lega_legal_status           NVARCHAR(100),
     lega_legal_status_start     DATETIME,
     lega_legal_status_end       DATETIME
 );
@@ -665,14 +664,13 @@ SELECT
     fls.END_DTTM
 FROM
     Child_Social.FACT_LEGAL_STATUS AS fls
-
 WHERE EXISTS
-    (   -- only ssd relevant records
+    ( -- only ssd relevant records
     SELECT 1
     FROM ssd_person p
     WHERE p.pers_person_id = fls.DIM_PERSON_ID
     );
-
+ 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX IDX_ssd_legal_status_lega_person_id ON ssd_legal_status(lega_person_id);
 
@@ -3553,12 +3551,12 @@ IF OBJECT_ID('ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_linked_id
 
 -- Create structure
 CREATE TABLE ssd_linked_identifiers (
-    link_link_id NVARCHAR(48) PRIMARY KEY, 
-    link_person_id NVARCHAR(48), 
-    link_identifier_type NVARCHAR(100),
-    link_identifier_value NVARCHAR(100),
-    link_valid_from_date DATETIME,
-    link_valid_to_date DATETIME
+    link_link_id            NVARCHAR(48) PRIMARY KEY, 
+    link_person_id          NVARCHAR(48), 
+    link_identifier_type    NVARCHAR(100),
+    link_identifier_value   NVARCHAR(100),
+    link_valid_from_date    DATETIME,
+    link_valid_to_date      DATETIME
 );
 
 -- Insert placeholder data [TESTING]
