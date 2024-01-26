@@ -2326,7 +2326,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_cla_review
+Object Name: ssd_cla_reviews
 Description: 
 Author: D2I
 Last Modified Date: 12/01/24
@@ -2344,16 +2344,16 @@ Dependencies:
 =============================================================================
 */
 -- [TESTING] Create marker
-SET @TableName = N'ssd_cla_review';
+SET @TableName = N'ssd_cla_reviews';
 PRINT 'Creating table: ' + @TableName;
 
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_review', 'U') IS NOT NULL DROP TABLE ssd_cla_review;
+IF OBJECT_ID('ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE ssd_cla_reviews;
  
 -- Create structure
-CREATE TABLE ssd_cla_review (
+CREATE TABLE ssd_cla_reviews (
     clar_cla_review_id                      NVARCHAR(48) PRIMARY KEY,
     clar_cla_id                             NVARCHAR(48),
     clar_cla_review_due_date                DATETIME,
@@ -2363,7 +2363,7 @@ CREATE TABLE ssd_cla_review (
     );
  
 -- Insert data
-INSERT INTO ssd_cla_review (
+INSERT INTO ssd_cla_reviews (
     clar_cla_review_id,
     clar_cla_id,
     clar_cla_review_due_date,
@@ -2406,12 +2406,12 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
 
 
 -- Add constraint(s)
-ALTER TABLE ssd_cla_review ADD CONSTRAINT FK_clar_to_clae 
+ALTER TABLE ssd_cla_reviews ADD CONSTRAINT FK_clar_to_clae 
 FOREIGN KEY (clar_cla_episode_id) REFERENCES ssd_cla_episodes(clae_cla_episode_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clar_cla_episode_id ON ssd_cla_review (clar_cla_episode_id);
-CREATE NONCLUSTERED INDEX idx_clar_review_last_iro_contact_date ON ssd_cla_review (clar_cla_review_last_iro_contact_date);
+CREATE NONCLUSTERED INDEX idx_clar_cla_episode_id ON ssd_cla_reviews (clar_cla_episode_id);
+CREATE NONCLUSTERED INDEX idx_clar_review_last_iro_contact_date ON ssd_cla_reviews (clar_cla_review_last_iro_contact_date);
 
 
 
@@ -3208,7 +3208,7 @@ CREATE TABLE ssd_permanence (
     perm_decision_reversed_reason        NVARCHAR(100),
     perm_permanence_order_date           DATETIME,              
     perm_permanence_order_type           NVARCHAR(100),        
-    perm_adoption_worker                 NVARCHAR(100),                   -- [TESTING] (datatype changed)
+    perm_adoption_worker                 NVARCHAR(100),          -- [TESTING] (datatype changed)
 );
  
  
@@ -3576,7 +3576,7 @@ INSERT INTO ssd_linked_identifiers (
     link_valid_to_date
 )
 VALUES
-    ('PLACEHOLDER_DATA', 'DIM_PERSON.PERSON_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', NULL, NULL);
+    ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01');
 
 -- To switch on once source data defined.
 -- WHERE EXISTS 
@@ -3753,13 +3753,12 @@ Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - Yet to be defined
+- ssd_person
 =============================================================================
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_pre_proceedings';
 PRINT 'Creating table: ' + @TableName;
-
-
 
 
 -- Check if exists, & drop
@@ -3774,7 +3773,7 @@ CREATE TABLE ssd_pre_proceedings (
     prep_initial_pre_pro_meeting_date   DATETIME,
     prep_pre_pro_outcome                NVARCHAR(100),
     prep_agree_stepdown_issue_date      DATETIME,
-    prep_cp_plans_referral_period       INT, -- SHOULD THIS BE A DATE?
+    prep_cp_plans_referral_period       INT, -- count cp plans the child has been subject within referral period (cin episode)
     prep_legal_gateway_outcome          NVARCHAR(100),
     prep_prev_pre_proc_child            INT,
     prep_prev_care_proc_child           INT,
@@ -3822,13 +3821,13 @@ INSERT INTO ssd_pre_proceedings (
 )
 VALUES
     (
-    '10001', 'DIM_PERSON1.PERSON_ID', 'PLO_FAMILY1', '2023-01-01', '2023-01-02', 'Outcome1', 
-    '2023-01-03', 3, 'Approved', 2, 1, '2023-01-04', '2023-01-05', 2, 'Y', 
+    '10001', 'DIM_PERSON1.PERSON_ID', 'PLO_FAMILY1', '1900-01-01', '1900-01-01', 'Outcome1', 
+    '1900-01-01', 3, 'Approved', 2, 1, '1900-01-01', '1900-01-01', 2, 'Y', 
     'NA', 'COURT_REF_1', 1, 'N', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
     ),
     (
-    '10002', 'DIM_PERSON2.PERSON_ID', 'PLO_FAMILY2', '2023-02-01', '2023-02-02', 'Outcome2',
-    '2023-02-03', 4, 'Denied', 1, 2, '2023-02-04', '2023-02-05', 3, 'N',
+    '10002', 'DIM_PERSON2.PERSON_ID', 'PLO_FAMILY2', '1900-01-01', '1900-01-01', 'Outcome2',
+    '1900-01-01', 4, 'Denied', 1, 2, '1900-01-01', '1900-01-01', 3, 'N',
     'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'N', 'Initial Plan 2', 'N', 'Final Plan 2'
     );
 
