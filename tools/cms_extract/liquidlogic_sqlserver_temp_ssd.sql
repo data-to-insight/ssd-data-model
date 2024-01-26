@@ -3356,15 +3356,15 @@ SET @TableName = N'ssd_missing';
 PRINT 'Creating table: ' + @TableName;
 
 
-
-
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL DROP TABLE #ssd_missing;
+
+
 
 -- Create structure
 CREATE TABLE #ssd_missing (
     miss_table_id               NVARCHAR(48) PRIMARY KEY,
-    miss_la_person_id           NVARCHAR(48),
+    miss_person_id           NVARCHAR(48),
     miss_mis_epi_start          DATETIME,
     miss_mis_epi_type           NVARCHAR(100),
     miss_mis_epi_end            DATETIME,
@@ -3375,7 +3375,7 @@ CREATE TABLE #ssd_missing (
 -- Insert data 
 INSERT INTO #ssd_missing (
     miss_table_id,
-    miss_la_person_id,
+    miss_person_id,
     miss_mis_epi_start,
     miss_mis_epi_type,
     miss_mis_epi_end,
@@ -3384,7 +3384,7 @@ INSERT INTO #ssd_missing (
 )
 SELECT 
     fmp.FACT_MISSING_PERSON_ID          AS miss_table_id,
-    fmp.DIM_PERSON_ID                   AS miss_la_person_id,
+    fmp.DIM_PERSON_ID                   AS miss_person_id,
     fmp.START_DTTM                      AS miss_mis_epi_start,
     fmp.MISSING_STATUS                  AS miss_mis_epi_type,
     fmp.END_DTTM                        AS miss_mis_epi_end,
@@ -3399,9 +3399,11 @@ WHERE EXISTS ( -- only ssd relevant records
     WHERE p.pers_person_id = fmp.DIM_PERSON_ID
     );
 
+
+    
 -- -- Add constraint(s)
 -- ALTER TABLE #ssd_missing ADD CONSTRAINT FK_missing_to_person
--- FOREIGN KEY (miss_la_person_id) REFERENCES #ssd_person(pers_person_id);
+-- FOREIGN KEY (miss_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 
