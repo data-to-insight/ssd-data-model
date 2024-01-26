@@ -2913,12 +2913,20 @@ IF OBJECT_ID('ssd_missing', 'U') IS NOT NULL DROP TABLE ssd_missing;
 CREATE TABLE ssd_missing (
     miss_table_id               NVARCHAR(48) PRIMARY KEY,
     miss_person_id              NVARCHAR(48),
-    miss_mis_epi_start          DATETIME,
-    miss_mis_epi_type           NVARCHAR(100),
-    miss_mis_epi_end            DATETIME,
-    miss_mis_epi_rhi_offered    NVARCHAR(10),                   -- Confirm source data/why >7 required
-    miss_mis_epi_rhi_accepted   NVARCHAR(10)                    -- Confirm source data/why >7 required
+    miss_missing_episode_start  DATETIME,
+    miss_missing_episode_type   NVARCHAR(100),
+    miss_missing_episode_end    DATETIME,
+    miss_missing_rhi_offered    NVARCHAR(10),                   -- [TESTING] Confirm source data/why >7 required
+    miss_missing_rhi_accepted   NVARCHAR(10)                    -- [TESTING] Confirm source data/why >7 required
 );
+
+
+MISS002A	miss_person_id
+MISS003A	miss_missing_episode_start
+MISS004A	miss_missing_episode_type
+MISS005A	miss_missing_episode_end
+MISS006A	miss_missing_rhi_offered
+MISS007A	miss_missing_rhi_accepted
 
 -- Insert data 
 INSERT INTO ssd_missing (
