@@ -1531,26 +1531,13 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cp_plans
 Description: 
 Author: D2I
-Last Modified Date: 24/11/23
+Last Modified Date: 26/01/24 
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
+            1.4 removed depreciated team_id and worker id fields RH
+
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: Still need to add: 
-cppl_cp_plan_team		y		"Link to [Child_Social].[FACT_INVOLVEMENTS.FACT_REFERRAL_ID] using [FACT_CP_PLAN.FACT_REFERRAL_ID]
-WHERE [FACT_INVOLVEMENTS].[DIM_LOOKUP_INVOLVEMENT_TYPE_CODE] = 'CW'
-
-will need to use [FACT_INVOLVEMENTS].[START_DTTM] and  [FACT_INVOLVEMENTS].[END_DTTM] to ascertain the correct worker for the date at which the report is run etc.
-
-[FACT_INVOLVEMENTS].[FACT_WORKER_HISTORY_ID] and [FACT_INVOLVEMENTS].[FACT_WORKER_HISTORY_DEPARTMENT_DESC] will return the worker id and worker team name for the relevant Involvement
-"
-cppl_cp_plan_worker_id	ssd_involvements.invo_professional_id	y		"Link to [Child_Social].[FACT_INVOLVEMENTS.FACT_REFERRAL_ID] using [FACT_CP_PLAN.FACT_REFERRAL_ID]
-WHERE [FACT_INVOLVEMENTS].[DIM_LOOKUP_INVOLVEMENT_TYPE_CODE] = 'CW'
-
-will need to use [FACT_INVOLVEMENTS].[START_DTTM] and  [FACT_INVOLVEMENTS].[END_DTTM] to ascertain the correct worker for the date at which the report is run etc.
-
-[FACT_INVOLVEMENTS].[FACT_WORKER_HISTORY_ID] and [FACT_INVOLVEMENTS].[FACT_WORKER_HISTORY_DEPARTMENT_DESC] will return the worker id and worker team name for the relevant Involvement
-"
-
+Remarks: 
 
 Dependencies: 
 - ssd_person
@@ -1558,6 +1545,7 @@ Dependencies:
 - FACT_CP_PLAN
 =============================================================================
 */
+
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cp_plans';
 PRINT 'Creating table: ' + @TableName;
@@ -1574,8 +1562,6 @@ CREATE TABLE ssd_cp_plans (
     cppl_person_id                    NVARCHAR(48),
     cppl_cp_plan_start_date           DATETIME,
     cppl_cp_plan_end_date             DATETIME,
-    cppl_cp_plan_team                 NVARCHAR(48), -- [PLACEHOLDER_DATA'] [TESTING]
-    cppl_cp_plan_worker_id            NVARCHAR(48), -- [PLACEHOLDER_DATA'] [TESTING]
     cppl_cp_plan_initial_category     NVARCHAR(100),
     cppl_cp_plan_latest_category      NVARCHAR(100)
 );
@@ -1589,8 +1575,6 @@ INSERT INTO ssd_cp_plans (
     cppl_person_id, 
     cppl_cp_plan_start_date, 
     cppl_cp_plan_end_date, 
-    cppl_cp_plan_team, 
-    cppl_cp_plan_worker_id, 
     cppl_cp_plan_initial_category, 
     cppl_cp_plan_latest_category
 )
@@ -1601,8 +1585,6 @@ SELECT
     DIM_PERSON_ID AS cppl_person_id,
     START_DTTM AS cppl_cp_plan_start_date,
     END_DTTM AS cppl_cp_plan_end_date,
-    'PLACEHOLDER_DATA' AS cppl_cp_plan_team,                -- [PLACEHOLDER_DATA] [TESTING]
-    'PLACEHOLDER_DATA' AS cppl_cp_plan_worker_id,           -- [PLACEHOLDER_DATA] [TESTING]
     INIT_CATEGORY_DESC AS cppl_cp_plan_initial_category,
     CP_CATEGORY_DESC AS cppl_cp_plan_latest_category
 FROM 
@@ -1611,6 +1593,7 @@ FROM
 
 
 -- Create index(es)
+CREATE INDEX IDX_ssd_cp_plans_ ON ssd_cp_plans(cppl_person_id);
 
 
 -- Create constraint(s)
@@ -2112,13 +2095,12 @@ CREATE TABLE #ssd_cla_immunisations (
 INSERT INTO #ssd_cla_immunisations (
     clai_immunisations_id,
     clai_person_id,
-    clai_immunisations_status_date,
+
     clai_immunisations_status
 )
 SELECT 
     f903.FACT_903_DATA_ID,
     f903.DIM_PERSON_ID,
-    '20010101', -- [PLACEHOLDER_DATA] [TESTING] in YYYYMMDD format
     f903.IMMUN_CODE
 FROM 
     Child_Social.FACT_903_DATA AS f903
@@ -3409,7 +3391,7 @@ SELECT
     dw.DIM_WORKER_ID                  AS prof_table_id,
     dw.STAFF_ID                       AS prof_professional_id,
     dw.WORKER_ID_CODE                 AS prof_social_worker_registration_no,
-    'N'                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
+    'Y'                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
     dw.JOB_TITLE                      AS prof_professional_job_title,
     ISNULL(rc.OpenCases, 0)           AS prof_professional_caseload,        -- 0 when no open cases on given date.
     dw.DEPARTMENT_NAME                AS prof_professional_department,
@@ -3631,7 +3613,6 @@ PRINT 'Creating table: ' + @TableName;
 
 
 
-
 -- Check if exists, & drop 
 IF OBJECT_ID('ssd_s251_finance', 'U') IS NOT NULL DROP TABLE ssd_s251_finance;
 
@@ -3655,7 +3636,8 @@ INSERT INTO ssd_s251_finance (
     s251_placeholder_4
 )
 VALUES
-    ('PLACEHOLDER_DATA_ID', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+    ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+
 
 -- Create constraint(s)
 ALTER TABLE ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
@@ -3716,8 +3698,9 @@ INSERT INTO ssd_voice_of_child (
     voch_tablet_help_explain
 )
 VALUES
-    ('ID001','P001', 'Y', 'Y', 'Y', 'N', 'N'),
-    ('ID002','P002', 'Y', 'Y', 'Y', 'N', 'N');
+VALUES
+    ('10001','10001', 'Y', 'Y', 'Y', 'Y', 'Y'),
+    ('10002','10002', 'Y', 'Y', 'Y', 'Y', 'Y');
 
 -- To switch on once source data defined.
 -- WHERE EXISTS 
