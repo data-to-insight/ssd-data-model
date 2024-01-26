@@ -1,59 +1,11 @@
 
-/* DEV Notes:
-- Although returns expect dd/mm/YYYY formating on dates. Extract maintains DATETIME not DATE, 
-- Full review needed of max/exagerated/default new field type sizes e.g. family_id NVARCHAR(48)  (keys cannot use MAX)
-*/
-
-
-
-
-/* 
--- Get basic table infos ref
-SELECT 
-    TABLE_SCHEMA,
-    TABLE_NAME, 
-    COLUMN_NAME 
-FROM 
-    INFORMATION_SCHEMA.COLUMNS 
-WHERE 
-    COLUMN_NAME LIKE '%FACT_......%' 
-    --AND TABLE_NAME LIKE '%%'
-    AND TABLE_SCHEMA = 'Child_Social';
-
-
---  Key/relations details
-SELECT
-    fk.name as FK_name,
-    tp.name as Parent_table,
-    cp.name as Parent_column,
-    tr.name as Ref_table,
-    cr.name as Ref_column
-FROM 
-    sys.foreign_keys fk
-INNER JOIN 
-    sys.tables tp ON fk.parent_object_id = tp.object_id
-INNER JOIN 
-    sys.tables tr ON fk.referenced_object_id = tr.object_id
-INNER JOIN 
-    sys.foreign_key_columns fkc ON fkc.constraint_object_id = fk.object_id
-INNER JOIN 
-    sys.columns cp ON fkc.parent_column_id = cp.column_id AND fkc.parent_object_id = cp.object_id
-INNER JOIN 
-    sys.columns cr ON fkc.referenced_column_id = cr.column_id AND fkc.referenced_object_id = cr.object_id
-WHERE 
-    tp.name IN ('FACT_CP_REVIEW', 'FACT_CASE_PATHWAY_STEP', 'FACT_FORMS', 'FACT_FORM_ANSWERS')
-    AND tr.name IN ('FACT_CP_REVIEW', 'FACT_CASE_PATHWAY_STEP', 'FACT_FORMS', 'FACT_FORM_ANSWERS')
-    AND tp.schema_id = SCHEMA_ID('Child_Social');
-
-*/
-
 /* ********************************************************************************************************** */
 /* Development set up */
 
 -- Note: 
--- This script is for creating PER(Persistent) tables within the temp DB name space for testing purposes. 
--- SSD extract files with the suffix ..._per.sql - for creating the persistent table versions.
--- SSD extract files with the suffix ..._tmp.sql - for creating the temporary table versions.
+-- This script is for creating PERM(Persistent) tables within the temp DB name space for testing purposes. 
+-- SSD extract files with the suffix ..._perm.sql - for creating the persistent table versions.
+-- SSD extract files with the suffix ..._temp.sql - for creating the temporary table versions.
 
 
 USE HDM;
@@ -2041,10 +1993,14 @@ WHERE EXISTS
 ALTER TABLE ssd_cla_convictions ADD CONSTRAINT FK_clac_to_clae 
 FOREIGN KEY (clac_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
+
+
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
 
 /* 
 =============================================================================
@@ -2185,6 +2141,9 @@ FOREIGN KEY (clas_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX IX_ssd_cla_immunisations_person_id ON ssd_cla_immunisations (clai_person_id);
+
+
+
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
@@ -2349,9 +2308,14 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
                                             'H4','H5','H5a','K1','K2','M2','M3','P1','P2','Q1','Q2','R1','R2','R3',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
+
+
+
 -- Add constraint(s)
 CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_placement(clap_cla_episode_id);
 
+-- Create index(es)
+CREATE NONCLUSTERED INDEX IDX_clap_placement_provider_urn ON ssd_cla_placement (clap_placement_provider_urn);
 
 
 
@@ -2550,56 +2514,6 @@ WHERE
     AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
 
 GROUP BY ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
-
-
-
-
-/* PREVIOUS VERSION 
--- Create structure
-CREATE TABLE ssd_cla_previous_permanence (
-    lapp_table_id                             NVARCHAR(48) PRIMARY KEY,
-    lapp_person_id                            NVARCHAR(48),
-    lapp_previous_permanence_order_date       NVARCHAR(100), -- Placeholder for combination data
-    lapp_previous_permanence_option           NVARCHAR(200),
-    lapp_previous_permanence_la               NVARCHAR(100)
-);
-
--- Insert data 
-INSERT INTO ssd_cla_previous_permanence (
-    lapp_table_id, 
-    lapp_person_id, 
-    lapp_previous_permanence_order_date,
-    lapp_previous_permanence_option,
-    lapp_previous_permanence_la
-)
-SELECT 
-    ffa.FACT_FORM_ID                AS lapp_table_id,
-    ff.DIM_PERSON_ID                AS lapp_person_id,
-    'PLACEHOLDER_DATA'              AS lapp_previous_permanence_order_date,              -- [TESTING] {PLACEHOLDER_DATA}
-    ffa_answer_prev.PREVADOPTORD    AS lapp_previous_permanence_option,
-    ffa_answer_ineng.INENG          AS lapp_previous_permanence_la
-FROM 
-    Child_Social.FACT_FORMS ff
-
-LEFT JOIN 
-    Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
-LEFT JOIN 
-    (
-    SELECT FACT_FORM_ID, ANSWER AS PREVADOPTORD 
-    FROM Child_Social.FACT_FORM_ANSWERS 
-    WHERE ANSWER_NO = 'PREVADOPTORD'
-    ) 
-    ffa_answer_prev ON ffa.FACT_FORM_ID = ffa_answer_prev.FACT_FORM_ID
-LEFT JOIN 
-    (
-    SELECT FACT_FORM_ID, ANSWER AS INENG 
-    FROM Child_Social.FACT_FORM_ANSWERS 
-    WHERE ANSWER_NO = 'INENG'
-    ) 
-    ffa_answer_ineng ON ffa.FACT_FORM_ID = ffa_answer_ineng.FACT_FORM_ID;
-
-
-*/
 
 
 -- create index(es)
@@ -2951,12 +2865,12 @@ DELETE FROM DuplicateSDQScores
 WHERE row_num > 1;
  
  
--- [TESTING]
-select * from ssd_sdq_scores
-order by csdq_person_id desc, csdq_table_id desc;
+-- -- [TESTING]
+-- select * from ssd_sdq_scores
+-- order by csdq_person_id desc, csdq_table_id desc;
  
--- -- non-spec column clean-up
--- ALTER TABLE ssd_sdq_scores DROP COLUMN csdq_sdq_score;
+-- non-spec column clean-up
+ALTER TABLE ssd_sdq_scores DROP COLUMN csdq_sdq_score;
  
  
 /* end V8.1 */
@@ -3039,6 +2953,9 @@ WHERE EXISTS
 -- Add constraint(s)
 ALTER TABLE ssd_missing ADD CONSTRAINT FK_missing_to_person
 FOREIGN KEY (miss_la_person_id) REFERENCES ssd_person(pers_person_id);
+
+-- Create index(es)
+CREATE NONCLUSTERED INDEX IDX_miss_mis_epi_type ON ssd_missing (miss_mis_epi_type);
 
 
 
@@ -3209,6 +3126,9 @@ GROUP BY
 
 -- Add index(es)
 CREATE INDEX IDX_clea_person_id ON ssd_care_leavers(clea_person_id);
+CREATE NONCLUSTERED INDEX IDX_clea_care_leaver_activity ON ssd_care_leavers (clea_care_leaver_activity);
+
+
 
 -- Add constraint(s)
 ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
@@ -3585,6 +3505,10 @@ FROM
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_invo_professional_id ON ssd_involvements (invo_professional_id);
 
+CREATE NONCLUSTERED INDEX IDX_invo_professional_role_id ON ssd_involvements (invo_professional_role_id);
+
+CREATE NONCLUSTERED INDEX IDX_invo_professional_team ON ssd_involvements (invo_professional_team);
+
 -- Add constraint(s)
 ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
 FOREIGN KEY (invo_professional_id) REFERENCES ssd_professionals (prof_professional_id);
@@ -3918,6 +3842,8 @@ FOREIGN KEY (prep_person_id) REFERENCES ssd_person(pers_person_id);
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_prep_person_id ON ssd_pre_proceedings (prep_person_id);
 CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date ON ssd_pre_proceedings (prep_pre_pro_decision_date);
+
+CREATE NONCLUSTERED INDEX IDX_prep_legal_gateway_outcome ON ssd_pre_proceedings (prep_legal_gateway_outcome);
 
 
 
