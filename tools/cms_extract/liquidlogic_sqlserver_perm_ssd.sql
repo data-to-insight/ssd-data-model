@@ -420,7 +420,13 @@ INSERT INTO ssd_disability (
 SELECT 
     fd.FACT_DISABILITY_ID, 
     fd.DIM_PERSON_ID, 
-    fd.DIM_LOOKUP_DISAB_CODE
+    CASE    -- Added to enforce consistency in this flag. Have seen multiple variations on the data.
+            -- Further examples can simply be added to this IN block without impact elsewhere.
+            -- Impacts such as AnnexA report/reductive view output
+        WHEN REPLACE(TRIM(UPPER(fd.DIM_LOOKUP_DISAB_CODE)), ' ', '') IN ('A)YES', 'YES', 'Y')   THEN 'Y'
+        WHEN REPLACE(TRIM(UPPER(fd.DIM_LOOKUP_DISAB_CODE)), ' ', '') IN ('B)NO', 'NO', 'N')     THEN 'N'
+        ELSE '' -- Catch all default
+    END as disa_disability_code
 FROM 
     Child_Social.FACT_DISABILITY AS fd
 
@@ -3500,10 +3506,9 @@ FROM
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_invo_professional_id ON ssd_involvements (invo_professional_id);
-
 CREATE NONCLUSTERED INDEX IDX_invo_professional_role_id ON ssd_involvements (invo_professional_role_id);
-
 CREATE NONCLUSTERED INDEX IDX_invo_professional_team ON ssd_involvements (invo_professional_team);
+
 
 -- Add constraint(s)
 ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional 

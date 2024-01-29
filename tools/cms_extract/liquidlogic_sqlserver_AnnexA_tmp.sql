@@ -26,7 +26,7 @@ Description:
             Where a contact refers to multiple children, include an entry for each child in the contact.
 
 Author: D2I
-Last Modified Date: 12/01/24 RH
+Last Modified Date: 29/01/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.4: contact_source_desc added
@@ -77,10 +77,10 @@ SELECT
     FORMAT(c.cont_contact_start, 'dd/MM/yyyy')  AS DATE_OF_CONTACT,
     c.cont_contact_source_desc                  AS CONTACT_SOURCE
 
-    -- Step type (or is that abaove source?)
+    -- Step type (or is that abaove source?) (SEE ALSO ASSESSMENTS L4)
     -- Responsible Team
     -- Assigned Worker
-    
+
 INTO #AA_1_contacts
 FROM
     #ssd_contact c
@@ -106,7 +106,7 @@ Description:
             Also, current early help interventions that are being coordinated through the local authority.""
 
 Author: D2I
-Last Modified Date: 17/01/24 RH
+Last Modified Date: 29/01/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.3: Removed old obj/item naming. 
@@ -155,9 +155,9 @@ SELECT
     
     /* List additional AA fields */
 
-    FORMAT(e.earl_episode_start_date, 'dd/MM/yyyy')     AS earl_episode_start_date, -- [TESTING] Need a col name change
-    FORMAT(e.earl_episode_end_date, 'dd/MM/yyyy')       AS earl_episode_end_date,   -- [TESTING] Need a col name change
-    e.earl_episode_organisation                                                     -- [TESTING] Need a col name change
+    FORMAT(e.earl_episode_start_date, 'dd/MM/yyyy')     AS EHA_START_DATE,          -- [TESTING] Need a col name change?
+    FORMAT(e.earl_episode_end_date, 'dd/MM/yyyy')       AS EHA_END_DATE,            -- [TESTING] Need a col name change?
+    e.earl_episode_organisation                         AS EHA_COMPLETED_BY_TEAM    -- [TESTING] Need a col name change?
 
 INTO #AA_2_early_help_assessments
 
@@ -330,28 +330,25 @@ SELECT
             END
     END                                         AS AGE,
     
+
     /* List additional AA fields */
-    a.assessment_id,
-    FORMAT(a.asmt_start_date, 'dd/MM/yyyy') as asmt_start_date,
-    -- FACT_SINGLE_ASSESSMENT.SEEN_FLAG  a.asmt_child_seen,
-    FORMAT(a.asmt_auth_date, 'dd/MM/yyyy') as asmt_auth_date,
- 
- 
-    a.asmt_outcome, -- TO CHECK
-    -- OUTCOME_STRATEGY_DISCUSSION_FLAG
-OUTCOME_CLA_REQUEST_FLAG
-OUTCOME_PRIVATE_FOSTERING_FLAG
-OUTCOME_LEGAL_ACTION_FLAG
-OUTCOME_PROV_OF_SERVICES_FLAG
-OUTCOME_PROV_OF_SB_CARE_FLAG
-OUTCOME_SPECIALIST_ASSESSMENT_FLAG
+
+    d.person_disability                                 AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
+
+    FORMAT(a.cina_assessment_start_date, 'dd/MM/yyyy')  AS ASMT_START_DATE,
+    a.cina_assessment_child_seen                        AS CONT_ASMT, -- ('Child Seen During Continuous Assessment')
+    FORMAT(a.cina_assessment_auth_date, 'dd/MM/yyyy')   AS ASMT_AUTH_DATE,
+
+    -- [TESTING][NEED TO CONFIRM THESE FIELDS]   
+    cina_assessment_outcome_json                        AS REQU_SOCIAL_CARE_SUPPORT, 
+    cina_assessment_outcome_nfa, 
 
 
-    a.asmt_team,
-    a.asmt_worker_id,
+    -- Step type (SEE ALSO CONTACTS)
+    a.cina_assessment_team                              AS ALLOCATED_TEAM,
+    a.cina_assessment_worker_id                         AS ALLOCATED_WORKER
 
-    /* Disability field */
-    d.person_disability -- Disability field - Is this returned or generated??  Yes/No/Unknown 
+
 
 INTO #AA_4_assessments
 
