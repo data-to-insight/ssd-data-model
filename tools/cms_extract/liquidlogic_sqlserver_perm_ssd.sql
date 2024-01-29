@@ -170,7 +170,7 @@ AND (                                                       -- Filter irrelevant
 
  
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_person_la_person_id ON #ssd_person(pers_person_id);
+CREATE NONCLUSTERED INDEX IDX_ssd_person_la_person_id ON ssd_person(pers_person_id);
  
 
 -- [TESTING] Increment /print progress
@@ -604,6 +604,9 @@ FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
 ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
 FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
 
+-- [TESTING]
+ALTER TABLE ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure data not contains person from being their own mother
+CHECK (moth_person_id <> moth_childs_person_id);
 
 
 
@@ -768,14 +771,13 @@ WHERE EXISTS
     WHERE p.pers_person_id = fc.DIM_PERSON_ID
     );
 
+-- Create index(es)
+CREATE NONCLUSTERED INDEX IDX_contact_person_id ON ssd_contacts(cont_person_id);
+
 
 -- Create constraint(s)
 ALTER TABLE ssd_contacts ADD CONSTRAINT FK_contact_person 
 FOREIGN KEY (cont_person_id) REFERENCES ssd_person(pers_person_id);
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_contact_person_id ON ssd_contacts(cont_person_id);
-
 
 
 -- [TESTING] Increment /print progress
@@ -1679,7 +1681,13 @@ JOIN
  
 WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID');
 
+
+-- Create index(es)
+
+
 -- Create constraint(s)
+ALTER TABLE ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
+FOREIGN KEY (cppv_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
 
 
 
@@ -3349,7 +3357,6 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_professionals';
 PRINT 'Creating table: ' + @TableName;
-
 
 
 

@@ -603,6 +603,9 @@ CREATE NONCLUSTERED INDEX IDX_ssd_mother_moth_person_id ON #ssd_mother(moth_pers
 -- ALTER TABLE #ssd_mother ADD CONSTRAINT FK_child_to_person 
 -- FOREIGN KEY (moth_childs_person_id) REFERENCES #ssd_person(pers_person_id);
 
+-- -- [TESTING]
+-- ALTER TABLE ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure data not contains person from being their own mother
+-- CHECK (moth_person_id <> moth_childs_person_id);
 
 
 
@@ -3229,7 +3232,7 @@ CREATE TABLE #ssd_permanence (
     perm_decision_reversed_reason        NVARCHAR(100),
     perm_permanence_order_date           DATETIME,              
     perm_permanence_order_type           NVARCHAR(100),        
-    perm_adoption_worker                 NVARCHAR(100),                   -- [TESTING] (datatype changed)
+    perm_adoption_worker                 NVARCHAR(100),         -- [TESTING] (datatype changed)
 );
  
  
