@@ -341,7 +341,7 @@ SELECT
 
     -- [TESTING][NEED TO CONFIRM THESE FIELDS]   
     cina_assessment_outcome_json                        AS REQU_SOCIAL_CARE_SUPPORT, 
-    cina_assessment_outcome_nfa, 
+    cina_assessment_outcome_nfa                         AS ASMT_OUTCOME_NFA, 
 
 
     -- Step type (SEE ALSO CONTACTS)
@@ -349,15 +349,14 @@ SELECT
     a.cina_assessment_worker_id                         AS ALLOCATED_WORKER
 
 
-
 INTO #AA_4_assessments
 
 FROM
     --- FACT_INITIAL_ASSESSMENT  assessments a
 INNER JOIN
-    ssd_person p ON a.XXXX_person_id = p.pers_person_id
+    #ssd_person p ON a.XXXX_person_id = p.pers_person_id
 LEFT JOIN   -- ensure we get all records even if there's no matching disability
-    ssd_disability d ON p.pers_person_id = d.disa_person_id
+    #ssd_disability d ON p.pers_person_id = d.disa_person_id
 WHERE
     a.asmt_start_date >= DATEADD(MONTH, -12, GETDATE());
 

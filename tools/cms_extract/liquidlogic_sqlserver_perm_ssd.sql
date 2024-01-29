@@ -460,7 +460,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: #ssd_immigration_status
+Object Name: ssd_immigration_status
 Description: 
 Author: D2I
 Last Modified Date: 23/11/23
@@ -908,7 +908,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: #ssd_cin_assessments
+Object Name: ssd_cin_assessments
 Description: 
 Author: D2I
 Last Modified Date: 04/12/23
@@ -945,7 +945,7 @@ CREATE TABLE ssd_cin_assessments
 );
 
 -- Insert data
-INSERT INTO #ssd_cin_assessments
+INSERT INTO ssd_cin_assessments
 (
     cina_assessment_id,
     cina_person_id,
@@ -1052,6 +1052,7 @@ SELECT
     ffa.ANSWER_NO,
     ffa.ANSWER
 INTO #ssd_TMP_PRE_assessment_factors
+
 FROM 
     Child_Social.FACT_FORM_ANSWERS ffa
 WHERE 
@@ -2048,7 +2049,7 @@ FROM
     Child_Social.FACT_HEALTH_CHECK as fhc
  
 -- INNER JOIN
---     #ssd_person AS p ON fhc.DIM_PERSON_ID = p.pers_person_id;
+--     ssd_person AS p ON fhc.DIM_PERSON_ID = p.pers_person_id;
 
 WHERE EXISTS 
     (   -- only ssd relevant records
@@ -2099,14 +2100,14 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('ssd_cla_immunisations') IS NOT NULL DROP TABLE ssd_cla_immunisations;
 
 -- Create structure 
-CREATE TABLE #ssd_cla_immunisations (
+CREATE TABLE ssd_cla_immunisations (
     clai_immunisations_id          NVARCHAR(48) PRIMARY KEY,
     clai_person_id                 NVARCHAR(48),
     clai_immunisations_status      NCHAR(1)
 );
 
 -- Insert data
-INSERT INTO #ssd_cla_immunisations (
+INSERT INTO ssd_cla_immunisations (
     clai_immunisations_id,
     clai_person_id,
 
@@ -2838,7 +2839,7 @@ WHERE EXISTS (
         ssd_sdq_scores
 )
  
--- delete all records from the #ssd_sdq_scores table where row number(rn) > 1
+-- delete all records from the ssd_sdq_scores table where row number(rn) > 1
 -- i.e. keep only the most recent
 DELETE FROM RankedSDQScores
 WHERE rn > 1;
