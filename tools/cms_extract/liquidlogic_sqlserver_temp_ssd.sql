@@ -1758,7 +1758,9 @@ JOIN
  
 WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ( 'STVC','STVCPCOVID');
 
--- Create constraint(s)
+-- -- Create constraint(s)
+-- ALTER TABLE ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
+-- FOREIGN KEY (cppv_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
 
 
 
