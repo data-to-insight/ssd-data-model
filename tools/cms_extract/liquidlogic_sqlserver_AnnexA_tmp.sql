@@ -77,6 +77,10 @@ SELECT
     FORMAT(c.cont_contact_start, 'dd/MM/yyyy')  AS DATE_OF_CONTACT,
     c.cont_contact_source_desc                  AS CONTACT_SOURCE
 
+    -- Step type (or is that abaove source?)
+    -- Responsible Team
+    -- Assigned Worker
+    
 INTO #AA_1_contacts
 FROM
     #ssd_contact c

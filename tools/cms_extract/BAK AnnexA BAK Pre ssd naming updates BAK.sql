@@ -52,6 +52,8 @@ SELECT
     FORMAT(c.cont_contact_date, 'dd/MM/yyyy') AS formatted_cont_contact_date,
     c.cont_contact_source
 
+
+
 FROM
     ssd_contacts c
 LEFT JOIN
@@ -72,7 +74,7 @@ SELECT
     p.la_person_id,
     p.person_gender,
     p.person_ethnicity,
-    FORMAT(p.person_dob, 'dd/MM/yyyy') as person_dob,
+    FORMAT(p.person_dob, 'dd/MM/yyyy') AS person_dob,
     CASE -- provide the child's age in years at their last birthday.
         WHEN p.person_dob > GETDATE() THEN -1 -- If a child is unborn, enter their age as '-1'
         -- If born on Feb 29 and the current year is not a leap year and the date is before Feb 28, adjust the age
@@ -88,12 +90,13 @@ SELECT
                 THEN 1 
                 ELSE 0 -- returned if age is < 1yr
             END
-    END as CurrentAge, -- Calculated Age (Note on List 1 is 'AGE')
+    END AS CurrentAge, -- Calculated Age (Note on List 1 is 'AGE')
     
     /* Returns fields */
-    FORMAT(e.eh_epi_start_date, 'dd/MM/yyyy') as eh_epi_start_date,
-    FORMAT(e.eh_epi_end_date, 'dd/MM/yyyy') as eh_epi_end_date,
+    FORMAT(e.eh_epi_start_date, 'dd/MM/yyyy') AS eh_epi_start_date,
+    FORMAT(e.eh_epi_end_date, 'dd/MM/yyyy') AS eh_epi_end_date,
     e.eh_epi_org
+
 FROM
     person p
 INNER JOIN

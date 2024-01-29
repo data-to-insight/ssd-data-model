@@ -737,7 +737,7 @@ INSERT INTO ssd_contacts (
     cont_contact_id, 
     cont_person_id, 
     cont_contact_start,
-    cont_contact_source,
+    cont_contact_source_code,
     cont_contact_source_desc,
     cont_contact_outcome_json
 )
