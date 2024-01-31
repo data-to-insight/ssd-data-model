@@ -391,8 +391,7 @@ Description:
 Author: D2I
 Last Modified Date: 30/01/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-            1.0
+Version: 1.0
             0.3: Removed old obj/item naming. 
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
@@ -404,9 +403,11 @@ Dependencies:
 =============================================================================
 */
 
-
 -- 
 -- ??? - StartDate	NoCPConference	CPDate	CPPlan	CountS47s12m1	CountICPCs12m	EndDate	StepOutcomeDesc	FinalOutcome1
+
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#AA_5_s47_enquiries') IS NOT NULL DROP TABLE #AA_5_s47_enquiries ;
 
 SELECT
     /* Common AA fields */
@@ -487,22 +488,297 @@ LEFT JOIN (
     SELECT
     /*initial child protection conferences the child has been the subject of 
     in the 12 months before their latest Section 47 enquiry.*/
-        icpc_person_id,
-        COUNT(icpc_s47_enquiry_id) as CountICPCs12m
+        icpc.icpc_person_id,
+        COUNT(icpc.icpc_s47_enquiry_id) as CountICPCs12m
     FROM
-        ssd_initial_cp_conference icpc -- or do i need to use/reference table ssd_s47_enquiry, 
+        ssd_initial_cp_conference icpc
+    INNER JOIN ssd_s47_enquiry s47e ON icpc.icpc_s47_enquiry_id = s47e.s47e_s47_enquiry_id
     WHERE
-        s47e_s47_start_date >= DATEADD(MONTH, -12, GETDATE())
-        AND (icpc_date IS NOT NULL AND icpc_date <> '')
+        s47e.s47_start_date >= DATEADD(MONTH, -12, GETDATE()) -- [TESTING] is this s47_start_date OR icpc_icpc_transfer_in
+        AND (icpc.icpc_date IS NOT NULL AND icpc.icpc_date <> '')
     GROUP BY
-        icpc_person_id
-) as agg_icpc ON icpc.icpc_person_id = agg_icpc.icpc_person_id
+        icpc.icpc_person_id
+) agg_icpc ON s47e.s47e_person_id = agg_icpc.icpc_person_id
+
 
 WHERE
     s47e.s47e_s47_start_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
 
 
+-- [TESTING]
+select * from #AA_5_s47_enquiries;
 
+
+
+
+
+
+/* 
+=============================================================================
+Report Name: Ofsted List 6 - Children in Need YYYY
+Description: 
+            ""
+
+Author: D2I
+Last Modified Date: 31/01/24 RH
+DB Compatibility: SQL Server 2014+|...
+Version: 1.0
+            0.3: Removed old obj/item naming. 
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- ssd_disability
+- ssd_person
+- ssd_cla_episodes
+- ssd_cin_plans
+- ssd_cp_plans
+- ssd_assessments
+=============================================================================
+*/
+
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#AA_6_children_in_need') IS NOT NULL DROP TABLE #AA_6_children_in_need;
+
+
+SELECT
+    /* Common AA fields */
+    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_sex                                  AS GENDER,
+    p.pers_ethnicity                            AS ETHNICITY,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
+    
+    CASE
+        -- If DoB is in the future, set age as -1 (unborn)
+        WHEN p.pers_dob > GETDATE() THEN -1
+
+        -- Special case for leap year babies (born Feb 29)
+        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            -- Check if current year is not a leap year
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
+
+        ELSE 
+            -- Calc age normally
+            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+            CASE 
+                -- Subtract extra year if current date is before birthday this year
+                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
+                THEN 1 
+                ELSE 0
+            END
+    END                                         AS AGE,
+    
+
+    /* List additional AA fields */
+    d.disa_disability_code                      AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
+    
+    cp.cinp_cin_plan_id,
+    cp.cinp_cin_plan_start,
+    cp.cinp_cin_plan_end,
+    cp.cinp_cin_plan_team  ,
+    cp.cinp_cin_plan_worker_id ,
+
+    /* case_status */
+    CASE 
+        WHEN ce.cla_epi_start < GETDATE() AND (ce.cla_epi_ceased IS NULL OR ce.cla_epi_ceased = '') 
+        THEN 'Looked after child'
+        WHEN cpp.cpp_start_date < GETDATE() AND cpp.cpp_end_date IS NULL
+        THEN 'Child Protection plan'
+        WHEN cp.cinp_cin_plan_start < GETDATE() AND cp.cin_plan_end IS NULL
+        THEN 'Child in need plan'
+        WHEN asm.cina_assessment_start_date < GETDATE() AND asm.asmt_auth_date IS NULL
+        THEN 'Open Assessment'
+        WHEN ce.clae_cla_episode_ceased     > DATEADD(MONTH, -@AA_ReportingPeriod , GETDATE()) OR -- chk db handling of empty strings and nulls is consistent
+             cpp.cppl_cp_plan_end_date      > DATEADD(MONTH, -@AA_ReportingPeriod , GETDATE()) OR 
+             cp.cinp_cin_plan_end           > DATEADD(MONTH, -@AA_ReportingPeriod , GETDATE()) OR
+             asm.cina_assessment_auth_date  > DATEADD(MONTH, -@AA_ReportingPeriod , GETDATE())
+        THEN 'Closed episode'
+        ELSE NULL 
+    END as case_status
+
+INTO #AA_6_children_in_need
+
+FROM
+    ssd_cin_plans cp
+
+INNER JOIN
+    ssd_person p ON cp.cinp_person_id = p.pers_person_id
+
+LEFT JOIN   -- with disability
+    ssd_disability d ON cp.cinp_person_id = d.disa_person_id
+
+LEFT JOIN   -- cla_episodes to get the most recent cla_epi_start
+    (
+        SELECT clae_person_id, MAX(clae_cla_episode_start) as clae_cla_episode_start, clae_cla_episode_ceased
+        FROM ssd_cla_episodes
+        GROUP BY clae_person_id, clae_cla_episode_ceased
+    ) AS ce ON p.pers_person_id = ce.clae_person_id
+
+LEFT JOIN   -- cp_plans to get the cpp_start_date and cpp_end_date
+    (
+        SELECT cppl_person_id , MAX(cppl_cp_plan_start_date) as cppl_cp_plan_start_date, cppl_cp_plan_end_date
+        FROM ssd_cp_plans
+        GROUP BY cppl_person_id, cppl_cp_plan_end_date
+    ) AS cpp ON p.pers_person_id = cpp.cppl_person_id 
+
+LEFT JOIN   -- joining with assessments to get the cina_assessment_start_date and cina_assessment_auth_date
+    ssd_cin_assessments asm ON p.pers_person_id = asm.cina_person_id 
+
+WHERE
+    cp.cin_plan_Start >= DATEADD(MONTH, -@AA_ReportingPeriod , GETDATE());
+
+
+-- [TESTING]
+select * from #AA_6_children_in_need;
+
+
+
+
+
+/* 
+=============================================================================
+Report Name: Ofsted List 7: Child protection
+Description: 
+            "....."
+
+Author: D2I
+Last Modified Date: 31/01/24 RH
+DB Compatibility: SQL Server 2014+|...
+Version: 1.0
+            0.3: Removed old obj/item naming. 
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+
+=============================================================================
+*/
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#AA_7_child_protection') IS NOT NULL DROP TABLE #AA_7_child_protection;
+
+-- still to include in list 7 ?!
+    -- Child Protection Plan Start Date?
+    -- Date of last review conference?
+    -- cp end date?
+    -- Number of Previous Child Protection Plans?
+
+SELECT
+    /* Common AA fields */
+    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_sex                                  AS GENDER,
+    p.pers_ethnicity                            AS ETHNICITY,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
+    
+    CASE
+        -- If DoB is in the future, set age as -1 (unborn)
+        WHEN p.pers_dob > GETDATE() THEN -1
+
+        -- Special case for leap year babies (born Feb 29)
+        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            -- Check if current year is not a leap year
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
+
+        ELSE 
+            -- Calc age normally
+            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+            CASE 
+                -- Subtract extra year if current date is before birthday this year
+                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
+                THEN 1 
+                ELSE 0
+            END
+    END                                         AS AGE,
+    
+
+    /* List additional AA fields */
+    d.disa_disability_code                      AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
+    
+    /* Returns fields */    
+    cv.cinv_cin_visit_id,
+    cv.cin_plan_id, -- [TESTING] Do we still have access to plan id on cin_visits??? 
+    cv.cinv_cin_visit_date,
+    cv.cinv_cin_visit_seen,
+    cv.cinv_cin_visit_seen_alone,
+
+    /* Check if Emergency Protection Order exists within last 6 months */
+    CASE WHEN ls.legal_status_id IS NOT NULL THEN 'Y' ELSE 'N' END AS emergency_protection_order,
+
+    /* Which is it??? */
+    cp.cin_team,
+    cp.cin_worker_id,
+    ce.cin_ref_team,
+    ce.cin_ref_worker_id as cin_ref_worker,
+    
+    /* New fields for category of abuse */
+    MIN(CASE WHEN cpp.cpp_start_date = coa_early.cpp_earliest_date THEN coa_early.cpp_category END) AS "Initial cat of abuse",
+    MIN(CASE WHEN cpp.cpp_start_date = coa_latest.cpp_latest_date THEN coa_latest.cpp_category END) AS "latest cat of abuse"
+
+INTO #AA_7_child_protection
+
+FROM
+    ssd_cin_visits cv
+
+INNER JOIN
+    ssd_person p ON cv.cinv_person_id = p.pers_person_id
+
+LEFT JOIN   -- with disability
+    ssd_disability d ON cv.cinv_person_id = d.disa_person_id
+
+INNER JOIN
+    cin_episodes ce ON cv.la_person_id = ce.la_person_id
+LEFT JOIN
+    legal_status ls ON cv.la_person_id = ls.la_person_id 
+        AND ls.legal_status_start >= DATE_ADD(CURRENT_DATE, INTERVAL -6 MONTH)
+LEFT JOIN
+    cp_plans cpp ON cv.la_person_id = cpp.la_person_id
+LEFT JOIN
+    category_of_abuse coa_early ON cpp.cp_plan_id = coa_early.cp_plan_id
+    AND coa_early.cpp_start_date = (
+        SELECT MIN(cpp_start_date) FROM cp_plans WHERE la_person_id = cv.la_person_id
+    )
+LEFT JOIN
+    category_of_abuse coa_latest ON cpp.cp_plan_id = coa_latest.cp_plan_id
+    AND coa_latest.cpp_start_date = (
+        SELECT MAX(cpp_start_date) FROM cp_plans WHERE la_person_id = cv.la_person_id
+    )
+
+WHERE
+    cv.cin_visit_date >= DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH) -- [TESTING] check time period, 12mths or 6? 
+
+GROUP BY
+    p.la_person_id,
+    p.person_sex,
+    p.person_gender,
+    p.person_ethnicity,
+    p.person_dob,
+    d.person_disability,
+    cv.cin_visit_id,
+    cv.cin_plan_id,
+    cv.cin_visit_date,
+    cv.cin_visit_seen,
+    cv.cin_visit_seen_alone,
+    cp.cin_team,
+    cp.cin_worker_id,
+    ce.cin_ref_team,
+    ce.cin_ref_worker_id,
+    ls.legal_status_id;
+
+
+
+
+-- Are these needed? Not in list 7
+--     /* New fields from cin_episodes table */
+--     ce.cin_primary_need, -- available in more than one place
+--     ce.cin_ref_outcome, -- is this case status? 
+--     ce.cin_close_reason,
+--     ce.cin_ref_team,
+--     ce.cin_ref_worker_id as cin_ref_worker  -- Renamed for clarity
+-- INNER JOIN  -- with cin_episodes
+--     cin_episodes ce ON cp.la_person_id = ce.la_person_id
 
 
 
@@ -512,11 +788,10 @@ WHERE
 =============================================================================
 Report Name: Ofsted List 8 - Children in Care YYYY
 Description: 
-            List 8: 
-            Children in Care	"....."
+            "....."
 
 Author: D2I
-Last Modified Date: 17/01/24 RH
+Last Modified Date: 31/01/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.3: Removed old obj/item naming. 
@@ -563,10 +838,10 @@ SELECT
             END
     END                                         AS AGE, 
 
-    d.disa_disability_code,     -- Disability field - Is this returned or generated??  Yes/No/Unknown */    
-    i.immi_immigration_status,  -- Immigration Status field 
-
     /* List additional AA fields */
+
+    d.disa_disability_code,     
+    i.immi_immigration_status,  
 
     cp.cppl_cp_plan_start_date,
     cp.cppl_cp_plan_end_date,
@@ -577,9 +852,16 @@ INTO #AA_8_children_in_care
 
 FROM
     ssd_cp_plans cp
+
 INNER JOIN
     ssd_person p ON cp.cppl_person_id = p.pers_person_id
+
 LEFT JOIN   -- disability table
     ssd_disability d ON cp.cppl_person_id = d.disa_person_id
+
 LEFT JOIN   -- immigration_status table (UASC)
     ssd_immigration_status i ON cp.cppl_person_id = i.immi_person_id
+
+
+-- [TESTING]
+select * from #AA_8_children_in_care;
