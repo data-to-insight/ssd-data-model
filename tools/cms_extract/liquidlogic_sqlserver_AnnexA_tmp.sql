@@ -1,13 +1,19 @@
 USE HDM;
 GO
 
--- this var naming atm carried over from ssd (YRS)
-DECLARE @ssd_timeframe_years INT = 1;
+
+-- Set reporting period in Mths
+DECLARE @AA_ReportingPeriod INT;
+SET @AA_ReportingPeriod = 6; -- Mths
 
 
--- /**** SQL Server ****/
--- Obtain reports/csv files use built in export as or
+-- 
+-- /**** Obtain extract/csv files ****/
+-- Use built in <export as> from console output or
 -- bcp "QUERY_HERE" queryout "C:\path\to\myfile.csv" -c -t, -S SERVER_NAME -d DATABASE_NAME -U USERNAME -P PASSWORD
+
+
+
 
 
 /*
@@ -21,9 +27,9 @@ SSD AnnexA Returns Queries || SQL Server
 =============================================================================
 Report Name: Ofsted List 1 - Contacts YYYY
 Description: 
-            List 1: 
-            Contacts "All contacts received in the six months before the date of inspection. 
-            Where a contact refers to multiple children, include an entry for each child in the contact.
+            "All contacts received in the six months before the date of inspection. 
+            Where a contact refers to multiple children, include an entry for 
+            each child in the contact.""
 
 Author: D2I
 Last Modified Date: 29/01/24 RH
@@ -34,7 +40,6 @@ Version: 1.0
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- @ssd_timeframe_years
 - ssd_contacts
 - ssd_person
 =============================================================================
@@ -82,13 +87,15 @@ SELECT
     -- Assigned Worker
 
 INTO #AA_1_contacts
+
 FROM
     #ssd_contact c
 
 LEFT JOIN
     #ssd_person p ON c.cont_person_id = p.pers_person_id
+
 WHERE
-    c.cont_contact_start >= DATEADD(MONTH, -@ssd_timeframe_years * 12, GETDATE());
+    c.cont_contact_start >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
 
 
 -- [TESTING]
@@ -101,9 +108,9 @@ select * from #AA_1_contacts;
 =============================================================================
 Report Name: Ofsted List 2 - Early Help Assessments YYYY
 Description: 
-            List 2: Early Help 
-            "All early help assessments in the six months before the date of inspection. 
-            Also, current early help interventions that are being coordinated through the local authority.""
+            "All early help assessments in the six months before the date of 
+            inspection. Also, current early help interventions that are being 
+            coordinated through the local authority."
 
 Author: D2I
 Last Modified Date: 29/01/24 RH
@@ -113,7 +120,6 @@ Version: 1.0
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- @ssd_timeframe_years
 - ssd_cin_episodes
 - ssd_person
 =============================================================================
@@ -172,7 +178,7 @@ WHERE
         or eh_epi_end_date is null, or eh_epi_end_date is an empty string*/
         e.earl_episode_start_date >= DATEADD(MONTH, -6, GETDATE())
     OR
-        (e.earl_episode_end_date >= DATEADD(MONTH, -6, GETDATE()) OR e.earl_episode_end_date IS NULL OR e.earl_episode_end_date = '')
+        (e.earl_episode_end_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE()) OR e.earl_episode_end_date IS NULL OR e.earl_episode_end_date = '')
     );
 
 
@@ -183,10 +189,10 @@ WHERE
 /* 
 =============================================================================
 Report Name: Ofsted List 3 - Referrals YYYY
-Description: 
-            List 3: 
-            Referral	"All referrals received in the six months before the inspection.
-            Children may appear multiple times on this list if they have received multiple referrals."
+Description:  
+            "All referrals received in the six months before the inspection.
+            Children may appear multiple times on this list if they have received 
+            multiple referrals."
 
 Author: D2I
 Last Modified Date: 12/01/24 RH
@@ -196,7 +202,6 @@ Version: 1.0
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-- @ssd_timeframe_years
 - ssd_cin_episodes
 - ssd_person
 =============================================================================
@@ -268,9 +273,7 @@ LEFT JOIN
             cine_person_id
     ) sub ON ce.cine_person_id = sub.cine_person_id
 WHERE
-    ce.cine_referral_date >= DATEADD(MONTH, -6, GETDATE());
-
-
+    ce.cine_referral_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
 
 
 
@@ -281,19 +284,19 @@ WHERE
 =============================================================================
 Report Name: Ofsted List 4 - Assessments YYYY
 Description: 
-            List 4: 
-            Referral	"..."
+            "Young people and children with assessments in previous six months"
 Author: D2I
-Last Modified Date: 23/01/24 RH
+Last Modified Date: 29/01/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
+Version: 1.1 
+            1.0 Further edits of source obj referencing, Fixed to working state
             0.3: Removed old obj/item naming. 
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
 - ssd_disability
-- ssd_assessment_factors
+- ssd_cin_assessments
 =============================================================================
 */
 -- Check if exists & drop
@@ -333,7 +336,7 @@ SELECT
 
     /* List additional AA fields */
 
-    d.person_disability                                 AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
+    d.disa_disability_code                                 AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
 
     FORMAT(a.cina_assessment_start_date, 'dd/MM/yyyy')  AS ASMT_START_DATE,
     a.cina_assessment_child_seen                        AS CONT_ASMT, -- ('Child Seen During Continuous Assessment')
@@ -352,13 +355,152 @@ SELECT
 INTO #AA_4_assessments
 
 FROM
-    --- FACT_INITIAL_ASSESSMENT  assessments a
+    #ssd_cin_assessments a
+
 INNER JOIN
-    #ssd_person p ON a.XXXX_person_id = p.pers_person_id
+    #ssd_person p ON a.cina_person_id = p.pers_person_id
+
 LEFT JOIN   -- ensure we get all records even if there's no matching disability
     #ssd_disability d ON p.pers_person_id = d.disa_person_id
+
 WHERE
-    a.asmt_start_date >= DATEADD(MONTH, -12, GETDATE());
+    a.cina_assessment_start_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
+
+
+-- [TESTING]
+select * from #AA_4_assessments;
+
+
+
+
+
+
+
+
+
+
+/* 
+=============================================================================
+Report Name: Ofsted List 5 - Section 47 Enquiries and ICPC OC
+Description: 
+            "All section 47 enquiries in the six months before the inspection.
+            This includes open S47 enquiries yet to reach a decision where possible.
+            Where a child has been the subject of multiple section 47 enquiries within 
+            the period, please provide one row for each enquiry."
+
+Author: D2I
+Last Modified Date: 30/01/24 RH
+DB Compatibility: SQL Server 2014+|...
+Version: 1.1
+            1.0
+            0.3: Removed old obj/item naming. 
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- ssd_cp_plans
+- ssd_disability
+- ssd_immigration_status
+- ssd_person
+=============================================================================
+*/
+
+
+-- 
+-- ??? - StartDate	NoCPConference	CPDate	CPPlan	CountS47s12m1	CountICPCs12m	EndDate	StepOutcomeDesc	FinalOutcome1
+
+SELECT
+    /* Common AA fields */
+    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_sex                                  AS GENDER,
+    p.pers_ethnicity                            AS ETHNICITY,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
+    
+    CASE
+        -- If DoB is in the future, set age as -1 (unborn)
+        WHEN p.pers_dob > GETDATE() THEN -1
+
+        -- Special case for leap year babies (born Feb 29)
+        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            -- Check if current year is not a leap year
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
+
+        ELSE 
+            -- Calc age normally
+            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+            CASE 
+                -- Subtract extra year if current date is before birthday this year
+                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
+                THEN 1 
+                ELSE 0
+            END
+    END                                         AS AGE,
+    
+
+    /* List additional AA fields */
+
+    d.disa_disability_code                          AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
+    
+    /* Returns fields */
+    s47e.s47e_s47_enquiry_id                        AS ENQUIRY_ID,
+    FORMAT(se.s47_start_date, 'dd/MM/yyyy')         AS S47_ENQUIRY_START_DATE,  -- Strategy discussion initiating Section 47 Enquiry Start Date
+
+    s47e.s47outcome                                 AS CP_CONF_NEEDED           -- Was an Initial Child Protection Conference deemed unnecessary?,
+    FORMAT(se.s47_authorised_date, 'dd/MM/yyyy')    AS CP_CONF_DATE,            -- Date of Initial Child Protection Conference
+
+-- [TESTING] THESE FIELDS NEED CONFIRMNING
+    s47e.icpc_transfer_in                           AS CP_REQUIRED,             -- Did the Initial Child Protection Conference Result in a Child Protection Plan
+    -- CP_CONF FORMAT(s47e.icpc_date, 'dd/MM/yyyy') AS formatted_icpc_date,     -- Applied date formatting
+    CP_CONF s47e.icpc_outcome                       AS CP_REQUIRED,
+
+    /* Aggregate fields */
+    agg.CountS47s12m,               -- Sum of Number of Section 47 Enquiries in the last 12 months (NOT INCL. CURRENT)
+    agg_icpc.CountICPCs12m          -- Sum of Number of ICPCs in the last 12 months  (NOT INCL. CURRENT)
+
+    s47e.icpc_team                                  AS ALLOCATED_TEAM,
+    s47e.icpc_worker_id                             AS ALLOCATED_WORKER,
+
+INTO #AA_5_s47_enquiries 
+
+FROM
+    ssd_s47_enquiry s47e
+
+INNER JOIN
+    ssd_person p ON s47e.s47e_person_id = p.pers_person_id
+LEFT JOIN (
+    SELECT
+    /* section 47 enquiries the child has been the subject of within 
+    the 12 months PRIOR(hence the -1) to their latest section 47 enquiry*/
+        s47e_person_id,
+        COUNT(s47e_s47_enquiry_id) - 1 as CountS47s12m
+    FROM
+        ssd_s47_enquiry 
+    WHERE
+        s47e_s47_start_date >= DATEADD(MONTH, -12, GETDATE())
+    GROUP BY
+        s47e_person_id
+) as agg ON s47e.s47e_person_id = agg.s47e_person_id
+
+LEFT JOIN (
+    SELECT
+    /*initial child protection conferences the child has been the subject of 
+    in the 12 months before their latest Section 47 enquiry.*/
+        icpc_person_id,
+        COUNT(icpc_s47_enquiry_id) as CountICPCs12m
+    FROM
+        ssd_initial_cp_conference icpc -- or do i need to use/reference table ssd_s47_enquiry, 
+    WHERE
+        s47e_s47_start_date >= DATEADD(MONTH, -12, GETDATE())
+        AND (icpc_date IS NOT NULL AND icpc_date <> '')
+    GROUP BY
+        icpc_person_id
+) as agg_icpc ON icpc.icpc_person_id = agg_icpc.icpc_person_id
+
+WHERE
+    s47e.s47e_s47_start_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
+
 
 
 

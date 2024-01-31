@@ -1527,6 +1527,17 @@ WHERE
 -- Create index(es)
 CREATE INDEX IDX_ssd_initial_cp_conference_ ON ssd_initial_cp_conference(icpc_person_id);
 
+-- Create constraint(s)
+ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_s47_enquiry_id
+FOREIGN KEY (icpc_s47_enquiry_id) REFERENCES ssd_s47_enquiry(s47e_s47_enquiry_id);
+
+ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_person_id
+FOREIGN KEY (icpc_person_id) REFERENCES ssd_person(pers_person_id);
+
+ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_referral_id
+FOREIGN KEY (icpc_referral_id) REFERENCES ssd_cin_episodes(cine_referral_id);
+
+
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
