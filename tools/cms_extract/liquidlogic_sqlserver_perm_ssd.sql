@@ -1403,6 +1403,7 @@ SELECT
     ) AS s47e_s47_outcome_json,
     s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
     s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker
+
 FROM 
     Child_Social.FACT_S47 AS s47;
 
@@ -1438,9 +1439,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_initial_cp_conference
 Description: 
 Author: D2I
-Last Modified Date: 11/01/24
+Last Modified Date: 01/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
+Version: 1.1 
+            1.0 RH Re-instated the worker details
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -1469,8 +1471,8 @@ CREATE TABLE ssd_initial_cp_conference (
     icpc_icpc_date                  DATETIME,
     icpc_icpc_outcome_cp_flag       NCHAR(1),
     icpc_icpc_outcome_json          NVARCHAR(1000)
-    --icpc_icpc_team                  NVARCHAR(100),
-    --icpc_icpc_worker_id             NVARCHAR(48)
+    icpc_icpc_team                  NVARCHAR(100),
+    icpc_icpc_worker_id             NVARCHAR(48)
 );
  
 -- insert data
@@ -1486,8 +1488,8 @@ INSERT INTO ssd_initial_cp_conference(
     icpc_icpc_date,
     icpc_icpc_outcome_cp_flag,
     icpc_icpc_outcome_json
-    --icpc_icpc_team,
-    --icpc_icpc_worker_id
+    icpc_icpc_team,
+    icpc_icpc_worker_id
 )
  
 SELECT
@@ -1513,17 +1515,26 @@ SELECT
             NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "OUTCOME_COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     )                                                               AS icpc_icpc_outcome_json
+
     --fm.DIM_DEPARTMENT_ID_DESC                                      AS icpc_icpc_team,
     --fm.DIM_WORKER_ID_DESC                                          AS icpc_icpc_worker_id
+    -- OR is it.... [TESTING]
+    fccm.DIM_UPDATED_BY_DEPT_ID                                     AS icpc_icpc_team,
+    fccm.DIM_UPDATED_BY_ID                                          AS icpc_icpc_worker_id
+
  
 FROM
     Child_Social.FACT_CP_CONFERENCE AS fcpc
 JOIN
     Child_Social.FACT_MEETINGS AS fm ON fcpc.FACT_MEETING_ID = fm.FACT_MEETING_ID
+
+JOIN -- towards meeting worker details
+    Child_Social.FACT_CP_CONFERENCE_MEETING AS fccm ON fcpc.FACT_MEETING_ID = fccm.FACT_MEETING_ID
  
 WHERE
     fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
  
+
 -- Create index(es)
 CREATE INDEX IDX_ssd_initial_cp_conference_ ON ssd_initial_cp_conference(icpc_person_id);
 

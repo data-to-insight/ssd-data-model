@@ -346,7 +346,6 @@ SELECT
     cina_assessment_outcome_json                        AS REQU_SOCIAL_CARE_SUPPORT, 
     cina_assessment_outcome_nfa                         AS ASMT_OUTCOME_NFA, 
 
-
     -- Step type (SEE ALSO CONTACTS)
     a.cina_assessment_team                              AS ALLOCATED_TEAM,
     a.cina_assessment_worker_id                         AS ALLOCATED_WORKER
@@ -451,17 +450,27 @@ SELECT
     s47e.s47outcome                                 AS CP_CONF_NEEDED           -- Was an Initial Child Protection Conference deemed unnecessary?,
     FORMAT(se.s47_authorised_date, 'dd/MM/yyyy')    AS CP_CONF_DATE,            -- Date of Initial Child Protection Conference
 
--- [TESTING] THESE FIELDS NEED CONFIRMNING
-    s47e.icpc_transfer_in                           AS CP_REQUIRED,             -- Did the Initial Child Protection Conference Result in a Child Protection Plan
-    -- CP_CONF FORMAT(s47e.icpc_date, 'dd/MM/yyyy') AS formatted_icpc_date,     -- Applied date formatting
-    CP_CONF s47e.icpc_outcome                       AS CP_REQUIRED,
+    -- [TESTING] 
+    -- THESE FIELDS NEED CONFIRMNING
+    -- CP_CONF FORMAT(s47e.icpc_date, 'dd/MM/yyyy') AS formatted_icpc_date,     -- 
+    icpc.icpc_icpc_outcome_cp_flag                  AS CP_CONF_OUTCOME_CP,      -- Did the Initial Child Protection Conference Result in a Child Protection Plan
 
     /* Aggregate fields */
     agg.CountS47s12m,               -- Sum of Number of Section 47 Enquiries in the last 12 months (NOT INCL. CURRENT)
     agg_icpc.CountICPCs12m          -- Sum of Number of ICPCs in the last 12 months  (NOT INCL. CURRENT)
 
-    s47e.icpc_team                                  AS ALLOCATED_TEAM,
-    s47e.icpc_worker_id                             AS ALLOCATED_WORKER,
+
+    -- [TESTING]
+    -- check/update icpc table extract, 
+    -- if have icpc then take that data, else s47 dets.
+    s47e.s47e_s47_completed_by_team                 AS ALLOCATED_TEAM,
+    s47e.s47e_s47_completed_by_worker               AS ALLOCATED_WORKER
+    
+    -- -- or is it... 
+    -- -- [TESTING]
+    -- icpc.icpc_icpc_team                             AS ALLOCATED_TEAM,        
+    -- icpc.icpc_icpc_worker_id                        AS ALLOCATED_WORKER
+ 
 
 INTO #AA_5_s47_enquiries 
 
@@ -470,6 +479,12 @@ FROM
 
 INNER JOIN
     ssd_person p ON s47e.s47e_person_id = p.pers_person_id
+
+-- [TESTING]
+-- towards icpc.icpc_icpc_outcome_cp_flag 
+LEFT JOIN ssd_initial_cp_conference icpc ON s47e.s47e_s47_enquiry_id = icpc.icpc_s47_enquiry_id
+
+
 LEFT JOIN (
     SELECT
     /* section 47 enquiries the child has been the subject of within 
@@ -480,6 +495,7 @@ LEFT JOIN (
         ssd_s47_enquiry 
     WHERE
         s47e_s47_start_date >= DATEADD(MONTH, -12, GETDATE())
+        
     GROUP BY
         s47e_person_id
 ) as agg ON s47e.s47e_person_id = agg.s47e_person_id
@@ -492,6 +508,7 @@ LEFT JOIN (
         COUNT(icpc.icpc_s47_enquiry_id) as CountICPCs12m
     FROM
         ssd_initial_cp_conference icpc
+
     INNER JOIN ssd_s47_enquiry s47e ON icpc.icpc_s47_enquiry_id = s47e.s47e_s47_enquiry_id
     WHERE
         s47e.s47_start_date >= DATEADD(MONTH, -12, GETDATE()) -- [TESTING] is this s47_start_date OR icpc_icpc_transfer_in
@@ -768,7 +785,21 @@ GROUP BY
     ls.legal_status_id;
 
 
+/* headings
+Does the Child have a Disability
+Child Protection Plan Start Date
+Initial Category of Abuse
+Latest Category of Abuse
+Date of the Last Statutory Visit
+Was the Child Seen Alone?
+Date of latest review conference
+Child Protection Plan End Date
+Subject to Emergency Protection Order or Protected Under Police Powers in Last Six Months (Y/N)
+Sum of Number of Previous Child Protection Plans
+Allocated Team
+Allocated Worker
 
+*/
 
 -- Are these needed? Not in list 7
 --     /* New fields from cin_episodes table */
