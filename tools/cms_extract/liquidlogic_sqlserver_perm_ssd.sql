@@ -794,6 +794,88 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
+
+/* 
+=============================================================================
+Object Name: ssd_early_help_episodes
+Description: 
+Author: D2I
+Last Modified Date: 22/11/23
+DB Compatibility: SQL Server 2014+|...
+Version: 0.9
+Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- ssd_person
+- FACT_CAF_EPISODE
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_early_help_episodes';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists & drop
+IF OBJECT_ID('ssd_early_help_episodes') IS NOT NULL DROP TABLE ssd_early_help_episodes;
+
+-- Create structure
+CREATE TABLE ssd_early_help_episodes (
+    earl_episode_id         NVARCHAR(48) PRIMARY KEY,
+    earl_person_id          NVARCHAR(48),
+    earl_episode_start_date DATETIME,
+    earl_episode_end_date   DATETIME,
+    earl_episode_reason     NVARCHAR(MAX),
+    earl_episode_end_reason NVARCHAR(MAX),
+    earl_episode_organisation NVARCHAR(MAX),
+    earl_episode_worker_id  NVARCHAR(48)
+);
+
+-- Insert data 
+INSERT INTO ssd_early_help_episodes (
+    earl_episode_id,
+    earl_person_id,
+    earl_episode_start_date,
+    earl_episode_end_date,
+    earl_episode_reason,
+    earl_episode_end_reason,
+    earl_episode_organisation,
+    earl_episode_worker_id
+)
+SELECT
+    cafe.FACT_CAF_EPISODE_ID,
+    cafe.DIM_PERSON_ID,
+    cafe.EPISODE_START_DTTM,
+    cafe.EPISODE_END_DTTM,
+    cafe.START_REASON,
+    cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE,
+    cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
+    'PLACEHOLDER_DATA'                              -- [PLACEHOLDER_DATA] [TESTING]
+FROM 
+    Child_Social.FACT_CAF_EPISODE AS cafe
+
+WHERE EXISTS 
+    ( -- only ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = cafe.DIM_PERSON_ID
+    );
+
+-- Create index(es)
+CREATE NONCLUSTERED INDEX IDX_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
+
+-- Create constraint(s)
+ALTER TABLE ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
+FOREIGN KEY (earl_person_id) REFERENCES ssd_person(pers_person_id);
+
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
 /* 
 =============================================================================
 Object Name: ssd_cin_episodes
@@ -1470,7 +1552,7 @@ CREATE TABLE ssd_initial_cp_conference (
     icpc_icpc_target_date           DATETIME,
     icpc_icpc_date                  DATETIME,
     icpc_icpc_outcome_cp_flag       NCHAR(1),
-    icpc_icpc_outcome_json          NVARCHAR(1000)
+    icpc_icpc_outcome_json          NVARCHAR(1000),
     icpc_icpc_team                  NVARCHAR(100),
     icpc_icpc_worker_id             NVARCHAR(48)
 );
@@ -1487,7 +1569,7 @@ INSERT INTO ssd_initial_cp_conference(
     icpc_icpc_target_date,
     icpc_icpc_date,
     icpc_icpc_outcome_cp_flag,
-    icpc_icpc_outcome_json
+    icpc_icpc_outcome_json,
     icpc_icpc_team,
     icpc_icpc_worker_id
 )
@@ -1514,7 +1596,7 @@ SELECT
             NULLIF(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS "TOTAL_NO_OF_OUTCOMES",
             NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "OUTCOME_COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )                                                               AS icpc_icpc_outcome_json
+    )                                                               AS icpc_icpc_outcome_json,
 
     --fm.DIM_DEPARTMENT_ID_DESC                                      AS icpc_icpc_team,
     --fm.DIM_WORKER_ID_DESC                                          AS icpc_icpc_worker_id
@@ -2922,8 +3004,6 @@ SET @TableName = N'ssd_missing';
 PRINT 'Creating table: ' + @TableName;
 
 
-
-
 -- Check if exists & drop
 IF OBJECT_ID('ssd_missing', 'U') IS NOT NULL DROP TABLE ssd_missing;
 
@@ -3902,156 +3982,6 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_early_help_episodes
-Description: 
-Author: D2I
-Last Modified Date: 22/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- ssd_person
-- FACT_CAF_EPISODE
-=============================================================================
-*/
--- [TESTING] Create marker
-SET @TableName = N'ssd_early_help_episodes';
-PRINT 'Creating table: ' + @TableName;
-
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_early_help_episodes') IS NOT NULL DROP TABLE ssd_early_help_episodes;
-
--- Create structure
-CREATE TABLE ssd_early_help_episodes (
-    earl_episode_id         NVARCHAR(48) PRIMARY KEY,
-    earl_person_id          NVARCHAR(48),
-    earl_episode_start_date DATETIME,
-    earl_episode_end_date   DATETIME,
-    earl_episode_reason     NVARCHAR(MAX),
-    earl_episode_end_reason NVARCHAR(MAX),
-    earl_episode_organisation NVARCHAR(MAX),
-    earl_episode_worker_id  NVARCHAR(48)
-);
-
--- Insert data 
-INSERT INTO ssd_early_help_episodes (
-    earl_episode_id,
-    earl_person_id,
-    earl_episode_start_date,
-    earl_episode_end_date,
-    earl_episode_reason,
-    earl_episode_end_reason,
-    earl_episode_organisation,
-    earl_episode_worker_id
-)
-SELECT
-    cafe.FACT_CAF_EPISODE_ID,
-    cafe.DIM_PERSON_ID,
-    cafe.EPISODE_START_DTTM,
-    cafe.EPISODE_END_DTTM,
-    cafe.START_REASON,
-    cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE,
-    cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
-    'PLACEHOLDER_DATA'                              -- [PLACEHOLDER_DATA] [TESTING]
-FROM 
-    Child_Social.FACT_CAF_EPISODE AS cafe
-
-WHERE EXISTS 
-    ( -- only ssd relevant records
-    SELECT 1 
-    FROM ssd_person p
-    WHERE p.pers_person_id = cafe.DIM_PERSON_ID
-    );
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
-
--- Create constraint(s)
-ALTER TABLE ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
-FOREIGN KEY (earl_person_id) REFERENCES ssd_person(pers_person_id);
-
-
-
-
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_ehcp_assessment
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_ehcp_named_plan
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
-/* 
-=============================================================================
-Object Name: ssd_ehcp_active_plans
-Description: 
-Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_send_need
-Description: 
-Author: D2I
-Last Modified Date:
-DB Compatibility: SQL Server 2014+|... 
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
-- 
-=============================================================================
-*/
-
-
-
-/* 
-=============================================================================
 Object Name: ssd_send
 Description: 
 Author: D2I
@@ -4112,7 +4042,7 @@ LEFT JOIN
 ALTER TABLE ssd_send ADD CONSTRAINT FK_send_to_person 
 FOREIGN KEY (send_person_id) REFERENCES ssd_person(pers_person_id);
 
-/* ?? Should this actually be pulling from Child_Social.FACT_SENRECORD.DIM_PERSON_ID | Child_Social.FACT_SEN.DIM_PERSON_ID
+/* [TESTING] Should this actually be pulling from Child_Social.FACT_SENRECORD.DIM_PERSON_ID | Child_Social.FACT_SEN.DIM_PERSON_ID
 */
 
 
@@ -4121,6 +4051,214 @@ FOREIGN KEY (send_person_id) REFERENCES ssd_person(pers_person_id);
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_ehcp_requests 
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+- ssd_person
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_ehcp_requests ';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE ssd_ehcp_requests ;
+
+
+-- Create structure
+CREATE TABLE ssd_ehcp_requests (
+    ehcr_ehcp_request_id NVARCHAR(48),
+    ehcr_send_table_id NVARCHAR(48),
+    ehcr_ehcp_req_date DATETIME,
+    ehcr_ehcp_req_outcome_date DATETIME,
+    ehcr_ehcp_req_outcome NVARCHAR(100)
+);
+
+-- Insert placeholder data
+INSERT INTO ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
+VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
+
+
+-- Create constraint(s)
+ALTER TABLE ssd_ehcp_requests
+ADD CONSTRAINT FK_ehcp_requests_send
+FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_send(send_table_id);
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_ehcp_assessment
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+- ssd_person
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_ehcp_assessment';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE ssd_ehcp_assessment ;
+
+
+
+-- Create ssd_ehcp_assessment table
+CREATE TABLE ssd_ehcp_assessment (
+    ehca_ehcp_assessment_id NVARCHAR(48),
+    ehca_ehcp_request_id NVARCHAR(48),
+    ehca_ehcp_assessment_outcome_date DATETIME,
+    ehca_ehcp_assessment_outcome NVARCHAR(100),
+    ehca_ehcp_assessment_exceptions NVARCHAR(100)
+);
+
+-- Insert placeholder data
+INSERT INTO ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
+VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+
+
+
+-- Create constraint(s)
+ALTER TABLE ssd_ehcp_assessment
+ADD CONSTRAINT FK_ehcp_assessment_requests
+FOREIGN KEY (ehca_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_ehcp_named_plan 
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+- ssd_person
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_ehcp_named_plan ';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_ehcp_named_plan ', 'U') IS NOT NULL DROP TABLE ssd_ehcp_named_plan  ;
+
+
+-- Create structure
+CREATE TABLE ssd_ehcp_named_plan (
+    ehcn_named_plan_id NVARCHAR(48),
+    ehcn_ehcp_asmt_id NVARCHAR(48),
+    ehcn_named_plan_start_date DATETIME,
+    ehcn_named_plan_cease_date DATETIME,
+    ehcn_named_plan_cease_reason NVARCHAR(100)
+);
+
+-- Insert placeholder data
+INSERT INTO ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_cease_date, ehcn_named_plan_cease_reason)
+VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
+
+
+-- Create constraint(s)
+ALTER TABLE ssd_ehcp_named_plan
+ADD CONSTRAINT FK_ehcp_named_plan_assessment
+FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES ssd_ehcp_assessment(ehca_ehcp_assment_id);
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_ehcp_active_plans
+Description: Currently only with placeholder structure as source data not yet conformed
+Author: D2I
+Last Modified Date: 
+DB Compatibility: SQL Server 2014+|...
+Version: 0.1
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+- Yet to be defined
+- ssd_person
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_ehcp_active_plans';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE ssd_ehcp_active_plans  ;
+
+
+-- Create structure
+CREATE TABLE ssd_ehcp_active_plans (
+    ehcp_active_ehcp_id NVARCHAR(48),
+    ehcp_ehcp_request_id NVARCHAR(48),
+    ehcp_active_ehcp_last_review_date DATETIME
+);
+
+-- Insert placeholder data
+INSERT INTO ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
+VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01');
+
+
+-- Create constraint(s)
+ALTER TABLE ssd_ehcp_active_plans
+ADD CONSTRAINT FK_ehcp_active_plans_requests
+FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+
+
 
 
 /* End
