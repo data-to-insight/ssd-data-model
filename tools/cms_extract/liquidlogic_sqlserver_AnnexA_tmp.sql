@@ -534,7 +534,10 @@ select * from #AA_5_s47_enquiries;
 =============================================================================
 Report Name: Ofsted List 6 - Children in Need YYYY
 Description: 
-            ""
+            "All those in receipt of services as a child in need at the point 
+            of inspection or in the six months before the inspection.
+            This list does not include care leavers or children who are only 
+            the subject of a referral."
 
 Author: D2I
 Last Modified Date: 31/01/24 RH
@@ -658,7 +661,9 @@ select * from #AA_6_children_in_need;
 =============================================================================
 Report Name: Ofsted List 7: Child protection
 Description: 
-            "....."
+            "All those who are the subject of a child protection plan at the 
+            point of inspection. Include those who ceased to be the subject of 
+            a child protection plan in the six months before the inspection."
 
 Author: D2I
 Last Modified Date: 31/01/24 RH
@@ -819,7 +824,9 @@ Allocated Worker
 =============================================================================
 Report Name: Ofsted List 8 - Children in Care YYYY
 Description: 
-            "....."
+            "All children in care at the point of inspection. Include all 
+            those children who ceased to be looked after in the six months 
+            before the inspection."
 
 Author: D2I
 Last Modified Date: 31/01/24 RH
@@ -896,3 +903,235 @@ LEFT JOIN   -- immigration_status table (UASC)
 
 -- [TESTING]
 select * from #AA_8_children_in_care;
+
+
+
+
+/* 
+=============================================================================
+Report Name: Ofsted List 9 -  Leaving Care Services YYYY
+Description: 
+            "All those who have reached the threshold for receiving leaving 
+            care services at the point of inspection (entitled children).Includes:
+            Relevant children, Former relevant children, Qualifying care leaver
+            Eligible children"
+
+Author: D2I
+Last Modified Date: 31/01/24 RH
+DB Compatibility: SQL Server 2014+|...
+Version: 1.0
+            0.3: Removed old obj/item naming. 
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+-
+=============================================================================
+*/
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#AA_9_care_leavers') IS NOT NULL DROP TABLE #AA_9_care_leavers;
+
+SELECT
+    /* Common AA fields */
+
+    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_sex                                  AS GENDER,
+    p.pers_ethnicity                            AS ETHNICITY,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
+    
+    CASE
+        -- If DoB is in the future, set age as -1 (unborn)
+        WHEN p.pers_dob > GETDATE() THEN -1
+
+        -- Special case for leap year babies (born Feb 29)
+        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            -- Check if current year is not a leap year
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
+
+        ELSE 
+            -- Calc age normally
+            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+            CASE 
+                -- Subtract extra year if current date is before birthday this year
+                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
+                THEN 1 
+                ELSE 0
+            END
+    END                                         AS AGE, 
+
+    /* List additional AA fields */
+
+    d.disa_disability_code,     
+
+
+
+
+INTO #AA_9_care_leavers
+
+FROM
+-- 
+
+INNER JOIN
+    ssd_person p ON xx.xxxx_person_id = p.pers_person_id
+
+LEFT JOIN   -- disability table
+    ssd_disability d ON xx.xxxx_person_id = d.disa_person_id
+
+/* 
+=============================================================================
+Report Name: Ofsted List 10 - Adoption YYYY
+Description: 
+            "All those children who, in the 12 months before the inspection, 
+            have: been adopted, had the decision that they should be placed 
+            for adoption but they have not yet been adopted, had an adoption 
+            decision reversed during the 12 months."
+
+Author: D2I
+Last Modified Date: 31/01/24 RH
+DB Compatibility: SQL Server 2014+|...
+Version: 1.0
+            0.3: Removed old obj/item naming. 
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
+Dependencies: 
+-
+=============================================================================
+*/
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#AA_10_adoption') IS NOT NULL DROP TABLE #AA_10_adoption;
+
+SELECT
+    /* Common AA fields */
+
+    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_sex                                  AS GENDER,
+    p.pers_ethnicity                            AS ETHNICITY,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
+    
+    CASE
+        -- If DoB is in the future, set age as -1 (unborn)
+        WHEN p.pers_dob > GETDATE() THEN -1
+
+        -- Special case for leap year babies (born Feb 29)
+        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            -- Check if current year is not a leap year
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
+
+        ELSE 
+            -- Calc age normally
+            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+            CASE 
+                -- Subtract extra year if current date is before birthday this year
+                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
+                THEN 1 
+                ELSE 0
+            END
+    END                                         AS AGE, 
+
+    /* List additional AA fields */
+
+    d.disa_disability_code,     
+
+INTO #AA_10_adoption
+
+FROM
+-- 
+
+INNER JOIN
+    ssd_person p ON xx.xxxx_person_id = p.pers_person_id
+
+LEFT JOIN   -- disability table
+    ssd_disability d ON xx.xxxx_person_id = d.disa_person_id
+
+
+
+/* 
+=============================================================================
+Report Name: Ofsted List 11 - Adopters YYYY
+Description: 
+            "All those individuals who in the 12 months before the inspection 
+            have had contact with the local authority adoption agency"
+
+Author: D2I
+Last Modified Date: 31/01/24 RH
+DB Compatibility: SQL Server 2014+|...
+Version: 1.0
+            0.3: Removed old obj/item naming. 
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: Incomplete as required data not held within the ssd and beyond 
+            project scope. 
+Dependencies: 
+- ssd_person
+- ssd_permanence
+- ssd_disability
+=============================================================================
+*/
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#AA_11_adopters') IS NOT NULL DROP TABLE #AA_11_adopters;
+
+SELECT
+    /* Common AA fields */
+
+    p.pers_legacy_id                            AS ADOPTER_ID,      -- Individual adopter identifier
+    --  fam.fami_person_id            -- IS this coming from fc.DIM_PERSON_ID AS fami_person_id, as doesnt seem valid context
+    p.pers_sex                                  AS GENDER,
+    p.pers_ethnicity                            AS ETHNICITY,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
+    
+    CASE
+        -- If DoB is in the future, set age as -1 (unborn)
+        WHEN p.pers_dob > GETDATE() THEN -1
+
+        -- Special case for leap year babies (born Feb 29)
+        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
+            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
+            -- Check if current year is not a leap year
+            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
+        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
+
+        ELSE 
+            -- Calc age normally
+            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+            CASE 
+                -- Subtract extra year if current date is before birthday this year
+                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
+                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
+                THEN 1 
+                ELSE 0
+            END
+    END                                         AS AGE, 
+
+    /* List additional AA fields */
+
+    d.disa_disability_code,     
+
+    perm.perm_adopted_by_carer_flag      AS ADOPTED_BY_CARER, -- Is the (prospective) adopter fostering for adoption?
+    -- Date enquiry received
+    -- Date Stage 1 started
+    -- Date Stage 1 ended
+    -- Date Stage 2 started
+    -- Date Stage 2 ended
+    -- Date application submitted
+    -- Date application approved
+    perm.perm_matched_date               AS MATCHED_DATE, -- Date adopter matched with child(ren)
+    perm.perm_placed_for_adoption_date   AS PLACED_DATE, -- Date child/children placed with adopter(s)
+    perm.perm_siblings_placed_together   AS NUM_SIBLINGS_PLACED, -- No. of children placed
+    perm.perm_permanence_order_date      AS ADOPTION_ORDER_DATE, -- Date of Adoption Order
+    perm.perm_decision_reversed_date     AS ADOPTION_LEAVE_DATE, -- Date of leaving adoption process
+    perm.perm_decision_reversed_reason   AS ADOPTION_LEAVE_REASON-- Reason for leaving adoption process
+
+INTO #AA_11_adopters
+
+FROM
+    ssd_permanence perm
+
+INNER JOIN
+    ssd_person p ON perm.perm_person_id = p.pers_person_id
+
+LEFT JOIN   -- disability table
+    ssd_disability d ON perm.perm_person_id = d.disa_person_id
