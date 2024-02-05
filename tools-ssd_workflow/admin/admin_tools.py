@@ -81,7 +81,8 @@ def get_paths():
     paths = {
         'assets': 'assets/',
         'docs': 'docs/',
-        'tools': 'tools/',
+        'ssd_tools': 'tools-ssd_workflow/',
+        'cms_tools': 'tools-cms/',
         'erd_publish': 'docs/imgs/',
         'erd_returns_publish': 'doc/img/erd_returns_maps',
         'erd_objects_publish': 'docs/imgs/erd_data_objects/',

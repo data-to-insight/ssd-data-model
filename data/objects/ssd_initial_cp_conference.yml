@@ -172,6 +172,9 @@ nodes:
     description: ICPC Outcome CP Flag
     item_ref: ICPC013A
     type: nchar
+    categories:
+    - initial_cp_conference
+    - child_protection
     returns:
     - Local
     cms_field:
