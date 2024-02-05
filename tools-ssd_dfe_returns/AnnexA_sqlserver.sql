@@ -331,12 +331,12 @@ SELECT
                 THEN 1 
                 ELSE 0
             END
-    END                                         AS AGE,
+    END                                                 AS AGE,
     
 
     /* List additional AA fields */
 
-    d.disa_disability_code                                 AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
+    d.disa_disability_code                              AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
 
     FORMAT(a.cina_assessment_start_date, 'dd/MM/yyyy')  AS ASMT_START_DATE,
     a.cina_assessment_child_seen                        AS CONT_ASMT, -- ('Child Seen During Continuous Assessment')
@@ -436,7 +436,7 @@ SELECT
                 THEN 1 
                 ELSE 0
             END
-    END                                         AS AGE,
+    END                                             AS AGE,
     
 
     /* List additional AA fields */
@@ -457,7 +457,7 @@ SELECT
 
     /* Aggregate fields */
     agg.CountS47s12m,               -- Sum of Number of Section 47 Enquiries in the last 12 months (NOT INCL. CURRENT)
-    agg_icpc.CountICPCs12m          -- Sum of Number of ICPCs in the last 12 months  (NOT INCL. CURRENT)
+    agg_icpc.CountICPCs12m,         -- Sum of Number of ICPCs in the last 12 months  (NOT INCL. CURRENT)
 
 
     -- [TESTING]
@@ -754,7 +754,7 @@ INNER JOIN
     cin_episodes ce ON cv.la_person_id = ce.la_person_id
 LEFT JOIN
     legal_status ls ON cv.la_person_id = ls.la_person_id 
-        AND ls.legal_status_start >= DATE_ADD(CURRENT_DATE, INTERVAL -6 MONTH)
+        AND ls.legal_status_start >= DATEADD(MONTH, -6, GETDATE())	/*PW - amended from '>= DATE_ADD(CURRENT_DATE, INTERVAL -6 MONTH)'*/
 LEFT JOIN
     cp_plans cpp ON cv.la_person_id = cpp.la_person_id
 LEFT JOIN
@@ -769,7 +769,7 @@ LEFT JOIN
     )
 
 WHERE
-    cv.cin_visit_date >= DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH) -- [TESTING] check time period, 12mths or 6? 
+    cv.cin_visit_date >= DATEADD(MONTH, -12, GETDATE()) -- [TESTING] check time period, 12mths or 6?	/*PW - Amended from 'DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH)'*/
 
 GROUP BY
     p.la_person_id,
@@ -874,11 +874,11 @@ SELECT
                 THEN 1 
                 ELSE 0
             END
-    END                                         AS AGE, 
+    END                                     AS AGE, 
 
     /* List additional AA fields */
 
-    d.disa_disability_code,     
+    d.disa_disability_code                  AS DISABILITY,     
     i.immi_immigration_status,  
 
     cp.cppl_cp_plan_start_date,
@@ -963,7 +963,7 @@ SELECT
 
     /* List additional AA fields */
 
-    d.disa_disability_code,     
+    d.disa_disability_code                      AS DISABILITY     
 
 
 
@@ -1037,7 +1037,7 @@ SELECT
 
     /* List additional AA fields */
 
-    d.disa_disability_code,     
+    d.disa_disability_code                      AS DISABILITY 
 
 
 
@@ -1111,9 +1111,9 @@ SELECT
     END                                         AS AGE, 
 
     /* List additional AA fields */
-    d.disa_disability_code,     
+    d.disa_disability_code                      AS DISABILITY,     
 
-    perm.perm_adopted_by_carer_flag      AS ADOPTED_BY_CARER, -- Is the (prospective) adopter fostering for adoption?
+    perm.perm_adopted_by_carer_flag             AS ADOPTED_BY_CARER, -- Is the (prospective) adopter fostering for adoption?
     -- Date enquiry received
     -- Date Stage 1 started
     -- Date Stage 1 ended
@@ -1121,12 +1121,12 @@ SELECT
     -- Date Stage 2 ended
     -- Date application submitted
     -- Date application approved
-    perm.perm_matched_date               AS MATCHED_DATE, -- Date adopter matched with child(ren)
-    perm.perm_placed_for_adoption_date   AS PLACED_DATE, -- Date child/children placed with adopter(s)
-    perm.perm_siblings_placed_together   AS NUM_SIBLINGS_PLACED, -- No. of children placed
-    perm.perm_permanence_order_date      AS ADOPTION_ORDER_DATE, -- Date of Adoption Order
-    perm.perm_decision_reversed_date     AS ADOPTION_LEAVE_DATE, -- Date of leaving adoption process
-    perm.perm_decision_reversed_reason   AS ADOPTION_LEAVE_REASON-- Reason for leaving adoption process
+    perm.perm_matched_date                      AS MATCHED_DATE, -- Date adopter matched with child(ren)
+    perm.perm_placed_for_adoption_date          AS PLACED_DATE, -- Date child/children placed with adopter(s)
+    perm.perm_siblings_placed_together          AS NUM_SIBLINGS_PLACED, -- No. of children placed
+    perm.perm_permanence_order_date             AS ADOPTION_ORDER_DATE, -- Date of Adoption Order
+    perm.perm_decision_reversed_date            AS ADOPTION_LEAVE_DATE, -- Date of leaving adoption process
+    perm.perm_decision_reversed_reason          AS ADOPTION_LEAVE_REASON-- Reason for leaving adoption process
 
 INTO #AA_11_adopters
 
