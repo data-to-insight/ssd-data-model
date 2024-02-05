@@ -1616,7 +1616,7 @@ JOIN -- towards meeting worker details
 WHERE
     fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
  
-
+ 
 -- Create index(es)
 CREATE INDEX IDX_ssd_initial_cp_conference_ ON ssd_initial_cp_conference(icpc_person_id);
 
@@ -2788,7 +2788,8 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_visits', 'U') IS NOT NULL DROP TABLE ssd_cla_visits;
- 
+IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_visits;
+
 -- Create structure
 CREATE TABLE ssd_cla_visits (
     clav_cla_visit_id          NVARCHAR(48) PRIMARY KEY,
@@ -2864,9 +2865,10 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
+IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
+ IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
  
- 
+
 /* V8.1 */
 -- Create structure
 CREATE TABLE ssd_sdq_scores (
@@ -3006,6 +3008,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_missing', 'U') IS NOT NULL DROP TABLE ssd_missing;
+IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL DROP TABLE #ssd_missing;
 
 -- Create structure
 CREATE TABLE ssd_missing (
@@ -3019,31 +3022,24 @@ CREATE TABLE ssd_missing (
 );
 
 
-MISS002A	miss_person_id
-MISS003A	miss_missing_episode_start
-MISS004A	miss_missing_episode_type
-MISS005A	miss_missing_episode_end
-MISS006A	miss_missing_rhi_offered
-MISS007A	miss_missing_rhi_accepted
-
 -- Insert data 
 INSERT INTO ssd_missing (
     miss_table_id,
     miss_person_id,
-    miss_mis_epi_start,
-    miss_mis_epi_type,
-    miss_mis_epi_end,
-    miss_mis_epi_rhi_offered,
-    miss_mis_epi_rhi_accepted
+    miss_missing_episode_start,
+    miss_missing_episode_type,
+    miss_missing_episode_end,
+    miss_missing_rhi_offered,                   
+    miss_missing_rhi_accepted    
 )
 SELECT 
     fmp.FACT_MISSING_PERSON_ID          AS miss_table_id,
     fmp.DIM_PERSON_ID                   AS miss_person_id,
-    fmp.START_DTTM                      AS miss_mis_epi_start,
-    fmp.MISSING_STATUS                  AS miss_mis_epi_type,
-    fmp.END_DTTM                        AS miss_mis_epi_end,
-    fmp.RETURN_INTERVIEW_OFFERED        AS miss_mis_epi_rhi_offered,
-    fmp.RETURN_INTERVIEW_ACCEPTED       AS miss_mis_epi_rhi_accepted 
+    fmp.START_DTTM                      AS miss_missing_episode_start,
+    fmp.MISSING_STATUS                  AS miss_missing_episode_type,
+    fmp.END_DTTM                        AS miss_missing_episode_end,
+    fmp.RETURN_INTERVIEW_OFFERED        AS miss_missing_rhi_offered,   
+    fmp.RETURN_INTERVIEW_ACCEPTED       AS miss_missing_rhi_accepted 
 FROM 
     Child_Social.FACT_MISSING_PERSON AS fmp
 
@@ -3102,7 +3098,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_care_leavers', 'U') IS NOT NULL DROP TABLE ssd_care_leavers;
-
+IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
 
 
 -- Create structure
@@ -3285,7 +3281,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_permanence', 'U') IS NOT NULL DROP TABLE ssd_permanence;
-
+IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
 
 -- Create structure
 CREATE TABLE ssd_permanence (
@@ -3471,6 +3467,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_professionals', 'U') IS NOT NULL DROP TABLE ssd_professionals;
+IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL DROP TABLE #ssd_professionals;
 
 -- Determine/Define date on which CASELOAD count required (Currently: September 30th)
 SET @LastSept30th = CASE 
@@ -3571,6 +3568,8 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_involvements', 'U') IS NOT NULL DROP TABLE ssd_involvements;
+IF OBJECT_ID('tempdb..#ssd_involvements', 'U') IS NOT NULL DROP TABLE #ssd_involvements;
+
 
 -- Create structure
 CREATE TABLE ssd_involvements (
@@ -3654,6 +3653,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop 
 IF OBJECT_ID('ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_linked_identifiers;
+IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
 
 -- Create structure
 CREATE TABLE ssd_linked_identifiers (
@@ -3704,7 +3704,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* Start 
 
-        SSDF Other projects elements extracts 
+         SSDF Other DfE projects (e.g. 1b, 2(a,b) elements extracts 
         
         */
 
@@ -3732,6 +3732,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop 
 IF OBJECT_ID('ssd_s251_finance', 'U') IS NOT NULL DROP TABLE ssd_s251_finance;
+IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_finance;
 
 -- Create structure
 CREATE TABLE ssd_s251_finance (
@@ -3792,6 +3793,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop 
 IF OBJECT_ID('ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE ssd_voice_of_child;
+IF OBJECT_ID('tempdb..#ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voice_of_child;
 
 -- Create structure
 CREATE TABLE ssd_voice_of_child (
@@ -3863,6 +3865,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE ssd_pre_proceedings;
+IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pre_proceedings;
 
 -- Create structure
 CREATE TABLE ssd_pre_proceedings (
@@ -4004,7 +4007,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_send') IS NOT NULL DROP TABLE ssd_send;
-
+IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL DROP TABLE #ssd_send;
 
 -- Create structure 
 CREATE TABLE ssd_send (
@@ -4076,6 +4079,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE ssd_ehcp_requests ;
+IF OBJECT_ID('tempdb..#ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_requests ;
 
 
 -- Create structure
@@ -4129,7 +4133,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE ssd_ehcp_assessment ;
-
+IF OBJECT_ID('tempdb..#ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_assessment ;
 
 
 -- Create ssd_ehcp_assessment table
@@ -4186,7 +4190,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_ehcp_named_plan ', 'U') IS NOT NULL DROP TABLE ssd_ehcp_named_plan  ;
-
+IF OBJECT_ID('tempdb..#ssd_ehcp_named_plan ', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_named_plan  ;
 
 -- Create structure
 CREATE TABLE ssd_ehcp_named_plan (
@@ -4239,7 +4243,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE ssd_ehcp_active_plans  ;
-
+IF OBJECT_ID('tempdb..#ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_active_plans  ;
 
 -- Create structure
 CREATE TABLE ssd_ehcp_active_plans (

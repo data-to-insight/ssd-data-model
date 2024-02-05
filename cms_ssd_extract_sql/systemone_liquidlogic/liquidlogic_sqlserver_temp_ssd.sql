@@ -1521,9 +1521,9 @@ CREATE TABLE #ssd_initial_cp_conference (
     icpc_icpc_target_date           DATETIME,
     icpc_icpc_date                  DATETIME,
     icpc_icpc_outcome_cp_flag       NCHAR(1),
-    icpc_icpc_outcome_json          NVARCHAR(1000),
-    icpc_icpc_team                  NVARCHAR(100),
-    icpc_icpc_worker_id             NVARCHAR(48)
+    icpc_icpc_outcome_json          NVARCHAR(1000)
+    -- icpc_icpc_team                  NVARCHAR(100),
+    -- icpc_icpc_worker_id             NVARCHAR(48)
 );
  
 -- insert data
@@ -1538,9 +1538,9 @@ INSERT INTO #ssd_initial_cp_conference(
     icpc_icpc_target_date,
     icpc_icpc_date,
     icpc_icpc_outcome_cp_flag,
-    icpc_icpc_outcome_json,
-    icpc_icpc_team,
-    icpc_icpc_worker_id
+    icpc_icpc_outcome_json
+    -- icpc_icpc_team,
+    -- icpc_icpc_worker_id
 )
  
 SELECT
@@ -1565,12 +1565,12 @@ SELECT
             NULLIF(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS "TOTAL_NO_OF_OUTCOMES",
             NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "OUTCOME_COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )                                                               AS icpc_icpc_outcome_json,
+    )                                                               AS icpc_icpc_outcome_json
     --fm.DIM_DEPARTMENT_ID_DESC                                      AS icpc_icpc_team,
     --fm.DIM_WORKER_ID_DESC                                          AS icpc_icpc_worker_id
     -- OR is it.... [TESTING]
-    fccm.DIM_UPDATED_BY_DEPT_ID                                     AS icpc_icpc_team,
-    fccm.DIM_UPDATED_BY_ID                                          AS icpc_icpc_worker_id
+    -- fccm.DIM_UPDATED_BY_DEPT_ID                                     AS icpc_icpc_team,
+    -- fccm.DIM_UPDATED_BY_ID                                          AS icpc_icpc_worker_id
 
  
 FROM
@@ -1578,8 +1578,8 @@ FROM
 JOIN
     Child_Social.FACT_MEETINGS AS fm ON fcpc.FACT_MEETING_ID = fm.FACT_MEETING_ID
 
-JOIN -- towards meeting worker details
-    Child_Social.FACT_CP_CONFERENCE_MEETING AS fccm ON fcpc.FACT_MEETING_ID = fccm.FACT_MEETING_ID
+-- JOIN -- towards meeting worker details
+--     Child_Social.FACT_CP_CONFERENCE_MEETING AS fccm ON fcpc.FACT_MEETING_ID = fccm.FACT_MEETING_ID
  
 WHERE
     fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
@@ -2979,23 +2979,23 @@ CREATE TABLE #ssd_missing (
 
 
 -- Insert data 
-INSERT INTO #ssd_missing (
+INSERT INTO ssd_missing (
     miss_table_id,
     miss_person_id,
-    miss_mis_epi_start,
-    miss_mis_epi_type,
-    miss_mis_epi_end,
-    miss_mis_epi_rhi_offered,
-    miss_mis_epi_rhi_accepted
+    miss_missing_episode_start,
+    miss_missing_episode_type,
+    miss_missing_episode_end,
+    miss_missing_rhi_offered,                   
+    miss_missing_rhi_accepted    
 )
 SELECT 
     fmp.FACT_MISSING_PERSON_ID          AS miss_table_id,
     fmp.DIM_PERSON_ID                   AS miss_person_id,
-    fmp.START_DTTM                      AS miss_mis_epi_start,
-    fmp.MISSING_STATUS                  AS miss_mis_epi_type,
-    fmp.END_DTTM                        AS miss_mis_epi_end,
-    fmp.RETURN_INTERVIEW_OFFERED        AS miss_mis_epi_rhi_offered,
-    fmp.RETURN_INTERVIEW_ACCEPTED       AS miss_mis_epi_rhi_accepted 
+    fmp.START_DTTM                      AS miss_missing_episode_start,
+    fmp.MISSING_STATUS                  AS miss_missing_episode_type,
+    fmp.END_DTTM                        AS miss_missing_episode_end,
+    fmp.RETURN_INTERVIEW_OFFERED        AS miss_missing_rhi_offered,   
+    fmp.RETURN_INTERVIEW_ACCEPTED       AS miss_missing_rhi_accepted 
 FROM 
     Child_Social.FACT_MISSING_PERSON AS fmp
 
@@ -3372,245 +3372,6 @@ WHERE fce.PLACEND IS NOT NULL
 AND CARE_REASON_END_CODE IN ('E48','E1','E44','E12','E11','E43','45','E41','E45','E47','E46');
 
 
--- /* Start of V2 ssd_permanence*/
--- -- Create structure
--- CREATE TABLE ssd_permanence (
---     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
---     perm_person_id                       NVARCHAR(48),
---     perm_cla_id                          NVARCHAR(48),
---     perm_adm_decision_date               DATETIME,
---     perm_entered_care_date               DATETIME,              -- [TESTING] 
---     perm_ffa_cp_decision_date            DATETIME,              -- [TESTING] 
---     perm_placement_order_date            DATETIME,
---     perm_placed_for_adoption_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
---     perm_matched_date                    DATETIME,
---     perm_adopted_by_carer_flag           NCHAR(1),              -- [TESTING] (datatype changed)
---     perm_placed_ffa_cp_date              DATETIME,
---     perm_decision_reversed_date          DATETIME,
---     perm_placed_foster_carer_date        DATETIME,              -- [TESTING] 
---     perm_part_of_sibling_group           NCHAR(1),
---     perm_siblings_placed_together        INT,
---     perm_siblings_placed_apart           INT,
---     perm_placement_provider_urn          NVARCHAR(48),          -- [TESTING]
---     perm_decision_reversed_reason        NVARCHAR(100),
---     perm_permanence_order_date           DATETIME,              -- [TESTING] 
---     perm_permanence_order_type           NVARCHAR(100),         -- [TESTING]
---     perm_adoption_worker                 INT,                   -- [TESTING] (datatype changed)
---     perm_allocated_worker                INT                    --  [TESTING] (datatype changed)
--- );
-
-
--- -- Insert data 
--- INSERT INTO ssd_permanence (
---     perm_table_id,
---     perm_person_id,
---     perm_cla_id,
---     perm_adm_decision_date,
---     perm_entered_care_date,
---     perm_ffa_cp_decision_date,
---     perm_placement_order_date,
---     perm_placed_for_adoption_date,
---     perm_matched_date,
---     perm_adopted_by_carer_flag,
---     perm_placed_ffa_cp_date,
---     perm_decision_reversed_date,
---     perm_placed_foster_carer_date,
---     perm_part_of_sibling_group,
---     perm_siblings_placed_together,
---     perm_siblings_placed_apart,
---     perm_placement_provider_urn,
---     perm_decision_reversed_reason,
---     perm_permanence_order_date,
---     perm_permanence_order_type,
---     perm_adoption_worker,
---     perm_allocated_worker
--- )  
--- SELECT 
---     fa.FACT_ADOPTION_ID                     AS perm_table_id,
---     fa.DIM_PERSON_ID                        AS perm_person_id,
---     fa.FACT_CLA_ID                          AS perm_cla_id,
---     fa.DECISION_DTTM                        AS perm_adm_decision_date,
---     fc.START_DTTM                           AS perm_entered_care_date,             
---     fa.DECISION_DTTM                        AS perm_ffa_cp_decision_date,          
---     fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
---     fcpl.START_DTTM                         AS perm_placed_for_adoption_date,      
---     fa.MATCHING_DTTM                        AS perm_matched_date,
---     fa.ADOPTED_BY_CARER_FLAG                AS perm_adopted_by_carer_flag, 
---     fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
---     fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
---     fcpl.START_DTTM                         AS perm_placed_foster_carer_date,      
---     fa.SIBLING_GROUP                        AS perm_part_of_sibling_group,
---     fa.NUMBER_TOGETHER                      AS perm_siblings_placed_together,
---     fa.NUMBER_APART                         AS perm_siblings_placed_apart,
---     fce.OFSTED_URN                          AS perm_placement_provider_urn,        
---     fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE   AS perm_decision_reversed_reason,
-
---     CASE  -- ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))                                
---         WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') THEN fls.START_DTTM
---         ELSE NULL
---     END                                     AS perm_permanence_order_date,
-
---     CASE                                                                            
---         WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') 
---         THEN fls.DIM_LOOKUP_LGL_STATUS_DESC
---         ELSE NULL
---     END                                     AS perm_permanence_order_type,      
-
---     fa.ADOPTION_SOCIAL_WORKER_ID            AS perm_adoption_worker,            -- Note that duplicate -1 seen in raw data
---     fa.ALLOCATED_CASE_WORKER_ID             AS perm_allocated_worker            -- Note that duplicate -1 seen in raw data
--- FROM 
---     Child_Social.FACT_ADOPTION AS fa
-    
--- LEFT JOIN Child_Social.FACT_CLA AS fc                                           -- towards perm_adm_decision_date                             
---     ON fa.FACT_CLA_ID = fc.FACT_CLA_ID                              
-                
--- LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl            
---     ON fa.FACT_CLA_ID = fcpl .FACT_CLA_ID                                       -- towards perm_ffa_cp_decision_date
---     AND fcpl .DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'       -- towards perm_placed_for_adoption_date
---     -- AND fa   .ADOPTED_BY_CARER_FLAG = 'Y'             
---                            -- towards perm_placed_foster_carer_date
--- LEFT JOIN Child_Social.FACT_CARE_EPISODES AS fce                                             
---     ON fa.FACT_CLA_ID = fce.FACT_CLA_ID                                         -- towards perm_placement_provider_urn
-
--- LEFT JOIN Child_Social.FACT_LEGAL_STATUS AS fls
---     ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
---     AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512')       -- towards perm_permanence_order_type
---     AND fa.ADOPTION_DTTM IS NOT NULL                                           -- and only if there is a permanence order
-
--- WHERE 
---     fa.FACT_ADOPTION_ID <> -1 -- Filter out -1 values
--- AND fa .ADOPTED_BY_CARER_FLAG = 'Y'     
-
--- AND EXISTS 
---     (   -- only ssd relevant records
---     SELECT 1 
---     FROM ssd_person p
---     WHERE p.pers_person_id = fa.DIM_PERSON_ID
---     );
-
-
-
-
-/* Start of V1 ssd_permanence*/
--- -- Create structure
--- CREATE TABLE ssd_permanence (
---     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
---     perm_person_id                       NVARCHAR(48),
---     perm_cla_id                          NVARCHAR(48),
---     perm_adm_decision_date               DATETIME,
---     perm_entered_care_date               DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
---     perm_ffa_cp_decision_date            DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
---     perm_placement_order_date            DATETIME,
---     perm_placed_for_adoption_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
---     perm_matched_date                    DATETIME,
---     perm_adopted_by_carer_flag           NVARCHAR(1),           -- The datatype should be datetime?? [TESTING]
---     perm_placed_ffa_cp_date              DATETIME,
---     perm_decision_reversed_date          DATETIME,
---     perm_placed_foster_carer_date        DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
---     perm_part_of_sibling_group           NCHAR(1),
---     perm_siblings_placed_together        INT,
---     perm_siblings_placed_apart           INT,
---     perm_placement_provider_urn          NVARCHAR(48),          -- [TESTING] [PLACEHOLDER_DATA]
---     perm_decision_reversed_reason        NVARCHAR(100),
---     perm_permanence_order_date           DATETIME,              -- [TESTING] [PLACEHOLDER_DATA]
---     perm_permanence_order_type           NVARCHAR(100),         -- [TESTING] [PLACEHOLDER_DATA]
---     perm_adoption_worker                 NVARCHAR(1),           -- [TESTING] [PLACEHOLDER_DATA]
---     perm_allocated_worker                NVARCHAR(1)           -- The datatype should be datetime?? [TESTING]
--- );
-
--- -- Insert data with placeholders for linked fields
--- INSERT INTO ssd_permanence (
---     perm_table_id,
---     perm_person_id,
---     perm_cla_id,
---     perm_adm_decision_date,
---     perm_entered_care_date,
---     perm_ffa_cp_decision_date,
---     perm_placement_order_date,
---     perm_placed_for_adoption_date,
---     perm_matched_date,
---     perm_adopted_by_carer_flag,
---     perm_placed_ffa_cp_date,
---     perm_decision_reversed_date,
---     perm_placed_foster_carer_date,
---     perm_part_of_sibling_group,
---     perm_siblings_placed_together,
---     perm_siblings_placed_apart,
---     perm_placement_provider_urn,
---     perm_decision_reversed_reason,
---     perm_permanence_order_date,
---     perm_permanence_order_type,
---     perm_adoption_worker,
---     perm_allocated_worker
--- )  
--- SELECT 
---     fa.FACT_ADOPTION_ID                     AS perm_table_id,
---     fa.DIM_PERSON_ID                        AS perm_person_id,
---     fa.FACT_CLA_ID                          AS perm_cla_id,
---     fa.DECISION_DTTM                        AS perm_adm_decision_date,
---     fc.START_DTTM                           AS perm_entered_care_date,             -- Linking logic needed [TESTING] 
---     fa.DECISION_DTTM                        AS perm_ffa_cp_decision_date,          -- Linking logic needed [TESTING]
---     fa.PLACEMENT_ORDER_DTTM                 AS perm_placement_order_date,
---     fcp.START_DTTM                          AS perm_placed_for_adoption_date,      -- Linking logic needed [TESTING] [PLACEHOLDER_DATA]
---     fa.MATCHING_DTTM                        AS perm_matched_date,
---     CAST(fa.ADOPTED_BY_CARER_FLAG           AS NVARCHAR(1)) AS perm_adopted_by_carer_flag, -- Verify datatype [TESTING] [PLACEHOLDER_DATA]
---     fa.FOSTER_TO_ADOPT_DTTM                 AS perm_placed_ffa_cp_date,
---     fa.NO_LONGER_PLACED_DTTM                AS perm_decision_reversed_date,
---     fcpAdopted.START_DTTM                   AS perm_placed_foster_carer_date,      -- Linking logic needed [TESTING] in YYYYMMDD format
---     fa.SIBLING_GROUP                        AS perm_part_of_sibling_group,
---     fa.NUMBER_TOGETHER                      AS perm_siblings_placed_together,
---     fa.NUMBER_APART                         AS perm_siblings_placed_apart,
---     fce.OFSTED_URN                          AS perm_placement_provider_urn,        -- Linking logic needed [TESTING]
---     fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE   AS perm_decision_reversed_reason,
---     CASE                                                                            -- ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))
---         WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') THEN fls.START_DTTM
---         ELSE NULL -- ELSE fa.ADOPTION_DTTM [TESTING]
---     END                                     AS perm_permanence_order_date,
-
---     CASE                                                                            -- Determined from perm_permanence_order_date [TESTING] 
---         WHEN fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512') 
---         THEN fls.DIM_LOOKUP_LGL_STATUS_DESC
---         ELSE NULL
---     END                                     AS perm_permanence_order_type           -- Determined from perm_permanence_order_date [TESTING] 
-
---     CAST(fa.ADOPTION_SOCIAL_WORKER_ID       AS NVARCHAR(1)) AS perm_adoption_worker,  -- Verify datatype [TESTING] 
---     CAST(fa.ALLOCATED_CASE_WORKER_ID        AS NVARCHAR(1)) AS perm_allocated_worker   -- Verify datatype [TESTING]
--- FROM 
---     FACT_ADOPTION AS fa
-
--- LEFT JOIN FACT_CLA AS fc                        -- towards perm_adm_decision_date
---     ON fa.FACT_CLA_ID = fc.FACT_CLA_ID
-
--- LEFT JOIN FACT_CLA_PLACEMENT AS fcp             -- towards perm_ffa_cp_decision_date
---     ON fa.FACT_CLA_ID = fcp.FACT_CLA_ID
-
--- LEFT JOIN FACT_CLA_PLACEMENT AS fcp             -- towards perm_placed_for_adoption_date
---     ON fa.FACT_CLA_ID = fcp.FACT_CLA_ID
---     AND fcp.DIM_LOOKUP_PLACEMENT_TYPE_DESC LIKE '%placed for adoption%'
-
--- LEFT JOIN FACT_CLA_PLACEMENT AS fcpAdopted      -- towards perm_placed_foster_carer_date
---     ON fa.FACT_CLA_ID = fcpAdopted.FACT_CLA_ID
---     AND fcpAdopted.ADOPTED_BY_CARER_FLAG = 'Y'
-
--- LEFT JOIN FACT_CARE_EPISODES AS fce             -- towards perm_placement_provider_urn
---     ON fa.FACT_CLA_ID = fce.FACT_CLA_ID
-
--- LEFT JOIN FACT_LEGAL_STATUS AS fls              -- towards perm_permanence_order_type
---     ON fa.FACT_CLA_ID = fls.FACT_CLA_ID
---     AND fls.DIM_LOOKUP_LGL_STATUS_CODE IN ('0154', '0156', 'SGO', '0512'); -- ('0154', '0156': Child Arrangement/ Residence Order) ('SGO', '0512':  (Special Guardianship Orders))
---     AND fa.ADOPTION_DTTM IS NOT NULL            -- so only if there is a permanence order
-
-
--- WHERE EXISTS 
---     ( -- only ssd relevant records
---     SELECT 1 
---     FROM ssd_person p
---     WHERE p.pers_person_id = fa.DIM_PERSON_ID
---     );
-
-/* End of V1 ssd_permanence*/
-
-
 
 
 -- -- Add constraint(s)
@@ -3882,7 +3643,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* Start 
 
-        SSDF Other projects elements extracts 
+        SSDF Other DfE projects (e.g. 1b, 2(a,b) elements extracts 
         
         */
 
@@ -4257,11 +4018,11 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE ssd_ehcp_requests ;
+IF OBJECT_ID('tempdb..#ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_requests ;
 
 
 -- Create structure
-CREATE TABLE ssd_ehcp_requests (
+CREATE TABLE #ssd_ehcp_requests (
     ehcr_ehcp_request_id NVARCHAR(48),
     ehcr_send_table_id NVARCHAR(48),
     ehcr_ehcp_req_date DATETIME,
@@ -4270,14 +4031,14 @@ CREATE TABLE ssd_ehcp_requests (
 );
 
 -- Insert placeholder data
-INSERT INTO ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
+INSERT INTO #ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
 VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
 
 
--- Create constraint(s)
-ALTER TABLE ssd_ehcp_requests
-ADD CONSTRAINT FK_ehcp_requests_send
-FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_send(send_table_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_ehcp_requests
+-- ADD CONSTRAINT FK_ehcp_requests_send
+-- FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_send(send_table_id);
 
 
 
@@ -4310,12 +4071,12 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE ssd_ehcp_assessment ;
+IF OBJECT_ID('tempdb..#ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_assessment ;
 
 
 
 -- Create ssd_ehcp_assessment table
-CREATE TABLE ssd_ehcp_assessment (
+CREATE TABLE #ssd_ehcp_assessment (
     ehca_ehcp_assessment_id NVARCHAR(48),
     ehca_ehcp_request_id NVARCHAR(48),
     ehca_ehcp_assessment_outcome_date DATETIME,
@@ -4324,15 +4085,15 @@ CREATE TABLE ssd_ehcp_assessment (
 );
 
 -- Insert placeholder data
-INSERT INTO ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
+INSERT INTO #ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
 VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
 
 
 
--- Create constraint(s)
-ALTER TABLE ssd_ehcp_assessment
-ADD CONSTRAINT FK_ehcp_assessment_requests
-FOREIGN KEY (ehca_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_ehcp_assessment
+-- ADD CONSTRAINT FK_ehcp_assessment_requests
+-- FOREIGN KEY (ehca_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
 
 
 
@@ -4367,11 +4128,11 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_named_plan ', 'U') IS NOT NULL DROP TABLE ssd_ehcp_named_plan  ;
+IF OBJECT_ID('tempdb..#ssd_ehcp_named_plan ', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_named_plan  ;
 
 
 -- Create structure
-CREATE TABLE ssd_ehcp_named_plan (
+CREATE TABLE #ssd_ehcp_named_plan (
     ehcn_named_plan_id NVARCHAR(48),
     ehcn_ehcp_asmt_id NVARCHAR(48),
     ehcn_named_plan_start_date DATETIME,
@@ -4380,14 +4141,14 @@ CREATE TABLE ssd_ehcp_named_plan (
 );
 
 -- Insert placeholder data
-INSERT INTO ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_cease_date, ehcn_named_plan_cease_reason)
+INSERT INTO #ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_cease_date, ehcn_named_plan_cease_reason)
 VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
 
 
--- Create constraint(s)
-ALTER TABLE ssd_ehcp_named_plan
-ADD CONSTRAINT FK_ehcp_named_plan_assessment
-FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES ssd_ehcp_assessment(ehca_ehcp_assment_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_ehcp_named_plan
+-- ADD CONSTRAINT FK_ehcp_named_plan_assessment
+-- FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES #ssd_ehcp_assessment(ehca_ehcp_assment_id);
 
 
 
@@ -4420,25 +4181,25 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE ssd_ehcp_active_plans  ;
+IF OBJECT_ID('tempdb..#ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_active_plans  ;
 
 
 -- Create structure
-CREATE TABLE ssd_ehcp_active_plans (
+CREATE TABLE #ssd_ehcp_active_plans (
     ehcp_active_ehcp_id NVARCHAR(48),
     ehcp_ehcp_request_id NVARCHAR(48),
     ehcp_active_ehcp_last_review_date DATETIME
 );
 
 -- Insert placeholder data
-INSERT INTO ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
+INSERT INTO #ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
 VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01');
 
 
--- Create constraint(s)
-ALTER TABLE ssd_ehcp_active_plans
-ADD CONSTRAINT FK_ehcp_active_plans_requests
-FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_ehcp_active_plans
+-- ADD CONSTRAINT FK_ehcp_active_plans_requests
+-- FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
 
 
 
