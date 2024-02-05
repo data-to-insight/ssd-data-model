@@ -3675,12 +3675,12 @@ IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_
 
 -- Create structure
 CREATE TABLE #ssd_s251_finance (
-    s251_id NVARCHAR(48) PRIMARY KEY, 
-    s251_cla_placement_id NVARCHAR(48), 
-    s251_placeholder_1 NVARCHAR(48),
-    s251_placeholder_2 NVARCHAR(48),
-    s251_placeholder_3 NVARCHAR(48),
-    s251_placeholder_4 NVARCHAR(48)
+    s251_id                 NVARCHAR(48) PRIMARY KEY, 
+    s251_cla_placement_id   NVARCHAR(48), 
+    s251_placeholder_1      NVARCHAR(48),
+    s251_placeholder_2      NVARCHAR(48),
+    s251_placeholder_3      NVARCHAR(48),
+    s251_placeholder_4      NVARCHAR(48)
 );
 
 -- Insert placeholder data [TESTING]
@@ -4023,11 +4023,11 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE #ssd_ehcp
 
 -- Create structure
 CREATE TABLE #ssd_ehcp_requests (
-    ehcr_ehcp_request_id NVARCHAR(48),
-    ehcr_send_table_id NVARCHAR(48),
-    ehcr_ehcp_req_date DATETIME,
-    ehcr_ehcp_req_outcome_date DATETIME,
-    ehcr_ehcp_req_outcome NVARCHAR(100)
+    ehcr_ehcp_request_id            NVARCHAR(48),
+    ehcr_send_table_id              NVARCHAR(48),
+    ehcr_ehcp_req_date              DATETIME,
+    ehcr_ehcp_req_outcome_date      DATETIME,
+    ehcr_ehcp_req_outcome           NVARCHAR(100)
 );
 
 -- Insert placeholder data
@@ -4077,11 +4077,11 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE #ssd_eh
 
 -- Create ssd_ehcp_assessment table
 CREATE TABLE #ssd_ehcp_assessment (
-    ehca_ehcp_assessment_id NVARCHAR(48),
-    ehca_ehcp_request_id NVARCHAR(48),
-    ehca_ehcp_assessment_outcome_date DATETIME,
-    ehca_ehcp_assessment_outcome NVARCHAR(100),
-    ehca_ehcp_assessment_exceptions NVARCHAR(100)
+    ehca_ehcp_assessment_id             NVARCHAR(48),
+    ehca_ehcp_request_id                NVARCHAR(48),
+    ehca_ehcp_assessment_outcome_date   DATETIME,
+    ehca_ehcp_assessment_outcome        NVARCHAR(100),
+    ehca_ehcp_assessment_exceptions     NVARCHAR(100)
 );
 
 -- Insert placeholder data
@@ -4133,11 +4133,11 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_named_plan ', 'U') IS NOT NULL DROP TABLE #ssd_e
 
 -- Create structure
 CREATE TABLE #ssd_ehcp_named_plan (
-    ehcn_named_plan_id NVARCHAR(48),
-    ehcn_ehcp_asmt_id NVARCHAR(48),
-    ehcn_named_plan_start_date DATETIME,
-    ehcn_named_plan_cease_date DATETIME,
-    ehcn_named_plan_cease_reason NVARCHAR(100)
+    ehcn_named_plan_id              NVARCHAR(48),
+    ehcn_ehcp_asmt_id               NVARCHAR(48),
+    ehcn_named_plan_start_date      DATETIME,
+    ehcn_named_plan_cease_date      DATETIME,
+    ehcn_named_plan_cease_reason    NVARCHAR(100)
 );
 
 -- Insert placeholder data
@@ -4186,9 +4186,9 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE #ssd_
 
 -- Create structure
 CREATE TABLE #ssd_ehcp_active_plans (
-    ehcp_active_ehcp_id NVARCHAR(48),
-    ehcp_ehcp_request_id NVARCHAR(48),
-    ehcp_active_ehcp_last_review_date DATETIME
+    ehcp_active_ehcp_id                 NVARCHAR(48),
+    ehcp_ehcp_request_id                NVARCHAR(48),
+    ehcp_active_ehcp_last_review_date   DATETIME
 );
 
 -- Insert placeholder data
