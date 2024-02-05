@@ -790,7 +790,7 @@ GROUP BY
     ls.legal_status_id;
 
 
-/* headings
+/* AA headings from sample
 Does the Child have a Disability
 Child Protection Plan Start Date
 Initial Category of Abuse
@@ -979,6 +979,8 @@ INNER JOIN
 LEFT JOIN   -- disability table
     ssd_disability d ON xx.xxxx_person_id = d.disa_person_id
 
+
+
 /* 
 =============================================================================
 Report Name: Ofsted List 10 - Adoption YYYY
@@ -1037,6 +1039,9 @@ SELECT
 
     d.disa_disability_code,     
 
+
+
+
 INTO #AA_10_adoption
 
 FROM
@@ -1076,7 +1081,6 @@ IF OBJECT_ID('tempdb..#AA_11_adopters') IS NOT NULL DROP TABLE #AA_11_adopters;
 
 SELECT
     /* Common AA fields */
-
     p.pers_legacy_id                            AS ADOPTER_ID,      -- Individual adopter identifier
     --  fam.fami_person_id            -- IS this coming from fc.DIM_PERSON_ID AS fami_person_id, as doesnt seem valid context
     p.pers_sex                                  AS GENDER,
@@ -1107,7 +1111,6 @@ SELECT
     END                                         AS AGE, 
 
     /* List additional AA fields */
-
     d.disa_disability_code,     
 
     perm.perm_adopted_by_carer_flag      AS ADOPTED_BY_CARER, -- Is the (prospective) adopter fostering for adoption?
@@ -1135,3 +1138,9 @@ INNER JOIN
 
 LEFT JOIN   -- disability table
     ssd_disability d ON perm.perm_person_id = d.disa_person_id
+
+LEFT JOIN
+    ssd_contacts c ON perm.perm_person_id = c.cont_person_id 
+
+WHERE
+    c.cont_contact_start >= DATEADD(MONTH, -12, GETDATE()) -- Filter on last 12 months

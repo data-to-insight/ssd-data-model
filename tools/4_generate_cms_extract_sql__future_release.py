@@ -34,7 +34,7 @@ def get_la_config(la_code):
     """
 
     # Construct the file path based on the provided la_code
-    file_path = f'la_config_files/{la_code}.yml'
+    file_path = f'la_config_files/{la_code}.yml' # 050224 folder renamed/labelled for __future_release 
     
     # Check if file exists
     if not os.path.exists(file_path):
@@ -238,15 +238,17 @@ def write_sql_to_file(la_config, sql_query):
         la_config (dict): LA configuration dictionary containing 'la_name', 'cms_db', and 'la_code'.
         sql_query (str): SQL query to be written to the file.
 
-    Creates a directory named 'sql' if it does not exist. Constructs a filename using 'la_code', sanitised 'la_name' and 'cms_db' from the LA configuration. Writes the SQL query to the created file and prints the name of the file.
+    Creates dir named 'sql' if it does not exist. 
+    Builds a filename using 'la_code', sanitised 'la_name' and 'cms_db' from the LA configuration. 
+    Writes the SQL query to the created file and prints the name of the file.
 
     No explicit returns. Raises IOError if the file cannot be written.
     """
     # Format the SQL query for better readability
     formatted_sql = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
 
-    # Create the directory if it does not exist
-    os.makedirs('sql', exist_ok=True)
+    # Create the dir if not existing
+    os.makedirs('generated_cms_extract_sql', exist_ok=True) # 050224 folder renamed/labelled for __future_release
 
     # Sanitise the la_name and cms_db to be suitable for a filename
     safe_la_name = "".join(x for x in la_config['la_name'] if x.isalnum())
@@ -254,7 +256,7 @@ def write_sql_to_file(la_config, sql_query):
     safe_cms = "".join(x for x in la_config['cms'] if x.isalnum())
 
     # Create the filename
-    filename = f"sql/{la_config['la_code']}_{safe_la_name}_{safe_cms}_{safe_cms_db}.sql"
+    filename = f"generated_cms_extract_sql/{la_config['la_code']}_{safe_la_name}_{safe_cms}_{safe_cms_db}.sql" # 050224 folder renamed/labelled for __future_release
 
     # Write the formatted SQL query to the file
     with open(filename, 'w') as f:
