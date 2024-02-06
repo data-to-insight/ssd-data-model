@@ -24,7 +24,7 @@ jobs:
         pip install pandas tabulate
 
     - name: Update CHANGELOG
-      run: python python tools-ssd_workflow/admin/update_changelog.py
+      run: python tools-ssd_workflow/admin/update_changelog.py
 
     - name: Commit and push if it changed
       run: | 
