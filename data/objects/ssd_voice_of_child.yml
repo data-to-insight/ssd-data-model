@@ -1,0 +1,173 @@
+---
+nodes:
+- name: ssd_voice_of_child
+  fields:
+  - name: voch_table_id
+    description: Voice of the Child table row ID
+    item_ref: VOCH007A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - voice_of_child
+    returns:
+    - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
+    guidance: null
+  - name: voch_person_id
+    description: Person Unique ID
+    item_ref: VOCH001A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - voice_of_child
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:la_person_id
+    - mosaic:la_person_id
+    cms_table:
+    - liquid_logic:ssd_voice_of_child
+    - mosaic:ssd_voice_of_child
+    guidance: See PERS001A
+  - name: voch_explained_worries
+    description: Has someone explained to you why people are worried for your family
+      in a way that you can understand?
+    item_ref: VOCH002A
+    type: nchar
+    categories:
+    - voice_of_child
+    returns:
+    - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:voch_explained_worries
+    - mosaic:voch_explained_worries
+    cms_table:
+    - liquid_logic:ssd_voice_of_child
+    - mosaic:ssd_voice_of_child
+    guidance: Child answer from questionnaire.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0023
+      change_source: 1bDraft
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: voch_story_help_understand
+    description: Does your story with words and pictures help you to understand what
+      has happened in your family?
+    item_ref: VOCH003A
+    type: nchar
+    categories:
+    - voice_of_child
+    returns:
+    - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:voch_story_help_understand
+    - mosaic:voch_story_help_understand
+    cms_table:
+    - liquid_logic:ssd_voice_of_child
+    - mosaic:ssd_voice_of_child
+    guidance: Child answer from questionnaire.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0024
+      change_source: 1bDraft
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: voch_agree_worker
+    description: Do you agree with what your worker says needs to happen to keep you
+      safe?
+    item_ref: VOCH004A
+    type: nchar
+    categories:
+    - voice_of_child
+    returns:
+    - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:voch_agree_worker
+    - mosaic:voch_agree_worker
+    cms_table:
+    - liquid_logic:ssd_voice_of_child
+    - mosaic:ssd_voice_of_child
+    guidance: Child answer from questionnaire.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0025
+      change_source: 1bDraft
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: voch_plan_safe
+    description: Do you think the plan tells everyone what they need to do to keep
+      you safe?
+    item_ref: VOCH005A
+    type: nchar
+    categories:
+    - voice_of_child
+    returns:
+    - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:voch_plan_safe
+    - mosaic:voch_plan_safe
+    cms_table:
+    - liquid_logic:ssd_voice_of_child
+    - mosaic:ssd_voice_of_child
+    guidance: Child answer from questionnaire.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0026
+      change_source: 1bDraft
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: voch_tablet_help_explain
+    description: Did writing/ drawing on the tablet help you to explain what you were
+      thinking and what you wanted to happen?
+    item_ref: VOCH006A
+    type: nchar
+    categories:
+    - voice_of_child
+    returns:
+    - 1bDraft
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:voch_tablet_help_explain
+    - mosaic:voch_tablet_help_explain
+    cms_table:
+    - liquid_logic:ssd_voice_of_child
+    - mosaic:ssd_voice_of_child
+    guidance: Child answer from questionnaire.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0027
+      change_source: 1bDraft
+      versions_count: 1
+      impact_title: null
+      type: New Feature

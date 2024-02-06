@@ -1,0 +1,89 @@
+#
+# This file describes the validators / constraints used for this data specification. Each validator has an
+# ID that is referenced in the field specification, e.g.
+#
+# validators:
+#   required: true
+#
+# means that the validator with ID 'required' and configuration 'true' applies to the field.
+
+required:
+  args:
+    - name: enabled
+      type: boolean
+      help: true/false value indicating if the current field is required
+  description: |
+    A field with 'required: true' must be present in the data record, and must have a non-blank value. It is short-hand
+    for 'notnull: true' and 'notblank: true'.
+
+unique:
+  args:
+    - name: enabled
+      type: boolean
+      help: true/false value indicating if the current field is required
+  description: |
+    A field with 'unique: true' should be unique within the dataset for this provider.
+
+notnull:
+  args:
+    - name: enabled
+      type: boolean
+      help: true/false value indicating if the current field is notnull
+  description: |
+    A field with 'notnull: true' must be present in the data record.
+
+notblank:
+  args:
+    - name: enabled
+      type: boolean
+      help: true/false value indicating if the current field is notblank
+  description: |
+    A field with 'notblank: true' must have a value that's not blank (i.e. an empty string or a string
+    consisting entirely of whitespace).
+
+dimension:
+  args:
+    - name: category_id
+      type: string
+      help: The ID of the category that this list has to be a member of.
+  description: |
+    Only used for fields of type categorical, this validator ensures that the provided value is part of category
+    list identified.
+
+date_after:
+  args:
+    - name: field_id
+      type: array
+      items:
+        type: string
+      help: The ID of the field that this date has to be after
+  description: |
+    Only used for fields of type date, this validator ensures that the provided value is after the date indicated. When
+    multiple
+
+
+character_limit:
+  args:
+    - name: characters
+      type: integer
+      help: The number of characters
+  description: |
+    Maximum number of unicode characters in string.
+
+count_min:
+  args:
+    - name: number
+      type: integer
+      help: The number of entries
+  description: |
+    Minimum numbers of entries in a list
+
+conditional:
+  args:
+    - name: expression
+      type: string
+      help: The evaluation expression
+    - name: validation
+      type: validation
+      help: The validation that should be applied
+  description: Allows for conditional application of validators

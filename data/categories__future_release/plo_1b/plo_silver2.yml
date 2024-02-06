@@ -1,0 +1,9 @@
+# item ref: PLOSilver2
+- value: 'A'
+  description: 'Continue with current plan'
+- value: 'B'
+  description: 'Start pre-proceedings'
+- value: 'C'
+  description: 'Issue care proceedings'
+- value: 'D'
+  description: 'Unknown'

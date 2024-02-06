@@ -1,0 +1,118 @@
+---
+nodes:
+- name: ssd_cla_care_plan
+  fields:
+  - name: lacp_table_id
+    description: Care Plan Table ID
+    item_ref: LACP001A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - looked_after
+    - care_plan
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:lacp_table_id
+    - mosaic:lacp_table_id
+    cms_table:
+    - liquid_logic:ssd_cla_care_plan
+    - mosaic:ssd_cla_care_plan
+    guidance: Care Plan record unique ID
+  - name: lacp_cla_episode_id
+    description: CLA Episode ID
+    item_ref: LACP002A
+    type: nvarchar
+    foreign_key: ssd_cla_episodes.clae_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - looked_after
+    - care_plan
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:lacp_cla_episode_id
+    - mosaic:lacp_cla_episode_id
+    cms_table:
+    - liquid_logic:ssd_cla_care_plan
+    - mosaic:ssd_cla_care_plan
+    guidance: See CLA001A
+  - name: lacp_cla_care_plan_start_date
+    description: Care Plan start Date
+    item_ref: LACP004A
+    type: datetime
+    categories:
+    - looked_after
+    - care_plan
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:lacp_cla_care_plan_start_date
+    - mosaic:lacp_cla_care_plan_start_date
+    cms_table:
+    - liquid_logic:ssd_cla_care_plan
+    - mosaic:ssd_cla_care_plan
+    guidance: null
+  - name: lacp_cla_care_plan_end_date
+    description: Care Plan end date
+    item_ref: LACP005A
+    type: datetime
+    categories:
+    - looked_after
+    - care_plan
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_table:
+    - liquid_logic:ssd_cla_care_plan
+    - mosaic:ssd_cla_care_plan
+    guidance: null
+  - name: lacp_cla_care_plan
+    description: What is the chosen/ permanence plan for this child/ young person?
+    item_ref: LACP003A
+    type: nvarchar
+    categories:
+    - looked_after
+    - care_plan
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:lacp_cla_care_plan
+    - mosaic:lacp_cla_care_plan
+    cms_table:
+    - liquid_logic:ssd_cla_care_plan
+    - mosaic:ssd_cla_care_plan
+    guidance: 'Please indicate what the current primary permanence plan is for the
+      child. Please use codes;
+
+      a) Return to family
+
+      b) Adoption
+
+      c) SGO/CAO
+
+      d) Supported living in the community
+
+      e) Long-term residential placement
+
+      f) Long-term fostering
+
+      g) other Where the child does not have a permanence plan agreed (such as recently
+      entered care) please leave blank.More than one box might be ticked if parallel
+      planning is being pursued'

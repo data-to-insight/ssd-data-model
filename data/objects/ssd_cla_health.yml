@@ -1,0 +1,86 @@
+---
+nodes:
+- name: ssd_cla_health
+  fields:
+  - name: clah_health_check_id
+    description: Health Check ID
+    item_ref: CLAH001A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - looked_after
+    - health
+    returns:
+    - Local
+    cms_table:
+    - liquid_logic:ssd_cla_health
+    - mosaic:ssd_cla_health
+    guidance: Health check record unique ID from system or auto-generated as part
+      of export.
+  - name: clah_person_id
+    description: Person Unique ID
+    item_ref: CLAH002A
+    type: nvarchar
+    foreign_key: ssd_cla_episodes.clae_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - looked_after
+    - health
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:clah_person_id
+    - mosaic:clah_person_id
+    cms_table:
+    - liquid_logic:ssd_cla_health
+    - mosaic:ssd_cla_health
+    guidance: See PERS001A
+  - name: clah_health_check_type
+    description: Health surveillance checks/ Health Assessment/ Dental Check
+    item_ref: CLAH003A
+    type: nvarchar
+    categories:
+    - looked_after
+    - health
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clah_health_check_type
+    - mosaic:clah_health_check_type
+    cms_table:
+    - liquid_logic:ssd_cla_health
+    - mosaic:ssd_cla_health
+    guidance: Health surveillance checks/ Health Assessment/ Dental Check
+  - name: clah_health_check_date
+    description: Date of Last Health Assessment
+    item_ref: CLAH004A
+    type: datetime
+    categories:
+    - looked_after
+    - health
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clah_health_check_date
+    - mosaic:clah_health_check_date
+    cms_table:
+    - liquid_logic:ssd_cla_health
+    - mosaic:ssd_cla_health
+    guidance: Date of Health Check

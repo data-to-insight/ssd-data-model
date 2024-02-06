@@ -1,0 +1,211 @@
+---
+nodes:
+- name: ssd_s47_enquiry
+  fields:
+  - name: s47e_s47_enquiry_id
+    description: S47 Enquiry ID
+    item_ref: S47E001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - s47_enquiry
+    - child_protection
+    returns:
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:s47e_s47_enquiry_id
+    - mosaic:s47e_s47_enquiry_id
+    cms_table:
+    - liquid_logic:ssd_s47_enquiry
+    - mosaic:ssd_s47_enquiry
+    guidance: Section 57 Enquiry unique ID from system or auto-generated as part of
+      export.
+  - name: s47e_referral_id
+    description: Referral ID
+    item_ref: S47E010A
+    type: nvarchar
+    foreign_key: ssd_cin_episodes.cine_referral_id
+    categories:
+    - s47_enquiry
+    - child_protection
+    returns:
+    - Local
+    cms_field:
+    - liquid_logic:s47e_referral_id
+    - mosaic:s47e_referral_id
+    cms_table:
+    - liquid_logic:ssd_s47_enquiry
+    - mosaic:ssd_s47_enquiry
+    guidance: null
+  - name: s47e_person_id
+    description: Person Unique ID
+    item_ref: S47E002A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - s47_enquiry
+    - child_protection
+    returns:
+    - SSDA903
+    - CINcensus
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:s47e_person_id
+    - mosaic:s47e_person_id
+    cms_table:
+    - liquid_logic:ssd_s47_enquiry
+    - mosaic:ssd_s47_enquiry
+    guidance: See PERS001A
+  - name: s47e_s47_start_date
+    description: S47 Start Date
+    item_ref: S47E004A
+    type: datetime
+    categories:
+    - s47_enquiry
+    - child_protection
+    returns:
+    - CINcensus
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:s47e_s47_start_date
+    - mosaic:s47e_s47_start_date
+    cms_table:
+    - liquid_logic:ssd_s47_enquiry
+    - mosaic:ssd_s47_enquiry
+    guidance: 'This item refers to enquiries conducted under the provisions of section
+      47 of the Children Act 1989. The objective of such enquiries is to determine
+      whether action is needed to promote and safeguard the welfare of the child or
+      children who are the subject of the enquiries. An assessment should also be
+      recorded on each occasion a child is subject to a section 47 enquiry.
+
+      We are aware that in some local authorities a section 47 enquiry is automatically
+      triggered alongside the assessment. In these cases, where both resulted in no
+      further action, a section 47 should not be recorded. Enter the date of the strategy
+      discussion at which the section 47 enquiries were initiated, using the formatting
+      covered in the general notes. This can be a non-working day.'
+  - name: s47e_s47_end_date
+    description: S47 End Date
+    item_ref: S47E005A
+    type: datetime
+    categories:
+    - s47_enquiry
+    - child_protection
+    returns:
+    - Local
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:s47e_s47_end_date
+    - mosaic:s47e_s47_end_date
+    cms_table:
+    - liquid_logic:ssd_s47_enquiry
+    - mosaic:ssd_s47_enquiry
+    guidance: Enter the actual date on which the S47 Enquiry is completed and authorised.
+  - name: s47e_s47_nfa
+    description: S47 NFA
+    item_ref: S47E006A
+    type: nchar
+    categories:
+    - s47_enquiry
+    - child_protection
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:s47e_s47_nfa
+    - mosaic:s47e_s47_nfa
+    cms_table:
+    - liquid_logic:ssd_s47_enquiry
+    - mosaic:ssd_s47_enquiry
+    guidance: null
+  - name: s47e_s47_outcome_json
+    description: S47 Outcome
+    item_ref: S47E007A
+    type: nvarchar
+    categories:
+    - s47_enquiry
+    - child_protection
+    returns:
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:s47e_s47_outcome_json
+    - mosaic:s47e_s47_outcome_json
+    cms_table:
+    - liquid_logic:ssd_s47_enquiry
+    - mosaic:ssd_s47_enquiry
+    guidance: 'Enter the outcome of the Section 47 Enquiry:
+
+      - Initial CP Conference
+
+      - Other Agency to Monitor Child''s Welfare
+
+      - NFA - Continue With Family Assessment
+
+      - Initiate Legal Action
+
+      - Provision of Services (s17)
+
+      - Provision of Short Break Care (s17)
+
+      - No Further Action
+
+      - Other Outcome'
+  - name: s47e_s47_completed_by_worker
+    description: S47 Enquiries completed by worker
+    item_ref: S47E008A
+    type: nvarchar
+    categories:
+    - s47_enquiry
+    - child_protection
+    returns:
+    - Local
+    cms_field:
+    - liquid_logic:s47e_s47_completed_by_worker
+    - mosaic:s47e_s47_completed_by_worker
+    cms_table:
+    - liquid_logic:ssd_s47_enquiry
+    - mosaic:ssd_s47_enquiry
+    guidance: null
+  - name: s47e_s47_completed_by_team
+    description: S47 Enquiries completed by team
+    item_ref: S47E009A
+    type: nvarchar
+    categories:
+    - s47_enquiry
+    - child_protection
+    returns:
+    - Local
+    cms_field:
+    - liquid_logic:s47e_s47_completed_by_team
+    - mosaic:s47e_s47_completed_by_team
+    cms_table:
+    - liquid_logic:ssd_s47_enquiry
+    - mosaic:ssd_s47_enquiry
+    guidance: null

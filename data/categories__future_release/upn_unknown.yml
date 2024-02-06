@@ -1,0 +1,11 @@
+# item ref: ssd007
+- value: UN1
+  description: 'Child looked-after is not of school age and has not yet been assigned a unique pupil number (UPN)'
+- value: UN2
+  description: 'Child looked-after has never attended a maintained school in England (for example, some unaccompanied asylum-seeking children (UASC))'
+- value: UN3
+  description: 'Child looked-after is educated outside England'
+- value: UN4
+  description: 'Child is newly looked-after (from one week before end of collection period) and the unique pupil number (UPN) was not yet known at the time of the CLA data collection return'
+- value: UN5
+  description: 'Sources collating unique pupil numbers (UPNs) reflect discrepancy(ies) for the child's name and/or surname and/or date of birth therefore preventing reliable matching (for example, duplicated unique pupil numbers (UPNs))'
