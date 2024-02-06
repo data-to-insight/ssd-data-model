@@ -2913,9 +2913,11 @@ DELETE FROM DuplicateSDQScores
 WHERE row_num > 1;
  
  
--- [TESTING]
-select * from #ssd_sdq_scores
-order by csdq_person_id desc, csdq_table_id desc;
+-- -- [TESTING]
+-- select * from #ssd_sdq_scores
+-- order by csdq_person_id desc, csdq_table_id desc;
+ 
+
  
 -- -- non-spec column clean-up
 -- ALTER TABLE #ssd_sdq_scores DROP COLUMN csdq_sdq_score;

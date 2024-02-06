@@ -98,8 +98,8 @@ WHERE
     c.cont_contact_start >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
 
 
--- [TESTING]
-select * from #AA_1_contacts;
+-- -- [TESTING]
+-- select * from #AA_1_contacts;
 
 
 
@@ -168,10 +168,11 @@ SELECT
 INTO #AA_2_early_help_assessments
 
 FROM
-    ssd_person p
+    #ssd_person p
 
 INNER JOIN
-    ssd_early_help_episodes e ON p.pers_person_id = e.earl_person_id
+    #ssd_early_help_episodes e ON p.pers_person_id = e.earl_person_id
+
 WHERE
     (
         /* eh_epi_start_date is within the last 6 months, or earl_episode_end_date is within the last 6 months, 
@@ -183,7 +184,8 @@ WHERE
 
 
 
-
+-- -- [TESTING]
+-- select * from #AA_2_early_help_assessments;
 
 
 /* 
@@ -276,7 +278,8 @@ WHERE
     ce.cine_referral_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
 
 
-
+-- -- [TESTING]
+-- select * from #AA_3_referrals;
 
 
 
@@ -366,8 +369,8 @@ WHERE
     a.cina_assessment_start_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
 
 
--- [TESTING]
-select * from #AA_4_assessments;
+-- -- [TESTING]
+-- select * from #AA_4_assessments;
 
 
 
@@ -413,7 +416,7 @@ SELECT
     p.pers_legacy_id                            AS CHILD_ID,
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
+    CONVERT(VARCHAR, p.pers_dob, 103)           AS DATE_OF_BIRTH,
     
     CASE
         -- If DoB is in the future, set age as -1 (unborn)
@@ -441,14 +444,14 @@ SELECT
 
     /* List additional AA fields */
 
-    d.disa_disability_code                          AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
+    d.disa_disability_code                                                  AS DISABILITY,        -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
     
     /* Returns fields */
-    s47e.s47e_s47_enquiry_id                        AS ENQUIRY_ID,
-    FORMAT(se.s47_start_date, 'dd/MM/yyyy')         AS S47_ENQUIRY_START_DATE,  -- Strategy discussion initiating Section 47 Enquiry Start Date
+    s47e.s47e_s47_enquiry_id                                                AS ENQUIRY_ID,
+    CONVERT(VARCHAR, s47e.s47e_s47_start_date, 103)                         AS S47_ENQUIRY_START_DATE,  -- Strategy discussion initiating Section 47 Enquiry Start Date
 
-    s47e.s47outcome                                 AS CP_CONF_NEEDED           -- Was an Initial Child Protection Conference deemed unnecessary?,
-    FORMAT(se.s47_authorised_date, 'dd/MM/yyyy')    AS CP_CONF_DATE,            -- Date of Initial Child Protection Conference
+    JSON_VALUE(s47e.s47e_s47_outcome_json, '$.OUTCOME_CP_CONFERENCE_FLAG')  AS CP_CONF_NEEDED,   -- Was an Initial Child Protection Conference deemed unnecessary?,
+    CONVERT(VARCHAR, icpc.icpc_icpc_date, 103)                              AS CP_CONF_DATE,     -- Date of Initial Child Protection Conference
 
     -- [TESTING] 
     -- THESE FIELDS NEED CONFIRMNING
@@ -475,15 +478,17 @@ SELECT
 INTO #AA_5_s47_enquiries 
 
 FROM
-    ssd_s47_enquiry s47e
+    #ssd_s47_enquiry s47e
 
 INNER JOIN
-    ssd_person p ON s47e.s47e_person_id = p.pers_person_id
+    #ssd_person p ON s47e.s47e_person_id = p.pers_person_id
 
 -- [TESTING]
 -- towards icpc.icpc_icpc_outcome_cp_flag 
-LEFT JOIN ssd_initial_cp_conference icpc ON s47e.s47e_s47_enquiry_id = icpc.icpc_s47_enquiry_id
+LEFT JOIN #ssd_initial_cp_conference icpc ON s47e.s47e_s47_enquiry_id = icpc.icpc_s47_enquiry_id
 
+LEFT JOIN   -- ensure we get all records even if there's no matching disability
+    #ssd_disability d ON p.pers_person_id = d.disa_person_id
 
 LEFT JOIN (
     SELECT
@@ -492,7 +497,7 @@ LEFT JOIN (
         s47e_person_id,
         COUNT(s47e_s47_enquiry_id) - 1 as CountS47s12m
     FROM
-        ssd_s47_enquiry 
+        #ssd_s47_enquiry 
     WHERE
         s47e_s47_start_date >= DATEADD(MONTH, -12, GETDATE())
         
@@ -507,12 +512,12 @@ LEFT JOIN (
         icpc.icpc_person_id,
         COUNT(icpc.icpc_s47_enquiry_id) as CountICPCs12m
     FROM
-        ssd_initial_cp_conference icpc
+        #ssd_initial_cp_conference icpc
 
-    INNER JOIN ssd_s47_enquiry s47e ON icpc.icpc_s47_enquiry_id = s47e.s47e_s47_enquiry_id
+    INNER JOIN #ssd_s47_enquiry s47e ON icpc.icpc_s47_enquiry_id = s47e.s47e_s47_enquiry_id
     WHERE
-        s47e.s47_start_date >= DATEADD(MONTH, -12, GETDATE()) -- [TESTING] is this s47_start_date OR icpc_icpc_transfer_in
-        AND (icpc.icpc_date IS NOT NULL AND icpc.icpc_date <> '')
+        s47e.s47e_s47_start_date >= DATEADD(MONTH, -12, GETDATE()) -- [TESTING] is this s47_start_date OR icpc_icpc_transfer_in
+        AND (icpc.icpc_icpc_date IS NOT NULL AND icpc.icpc_icpc_date <> '')
     GROUP BY
         icpc.icpc_person_id
 ) agg_icpc ON s47e.s47e_person_id = agg_icpc.icpc_person_id
