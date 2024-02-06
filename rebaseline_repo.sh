@@ -1,8 +1,9 @@
+# Ensure permissions set on this script : chmod +x rebaseline_repo.sh
+
+
 
 #Backup the Current Repository
 git clone --mirror https://github.com/data-to-insight/ssd-data-model https://github.com/data-to-insight/ssd-data-model-backup.git
-
-
 
 #Clone the Repository Locally
 git clone https://github.com/data-to-insight/ssd-data-model
@@ -11,6 +12,11 @@ cd ssd-data-model
 
 #Create a Temporary Branch Pointing to the Current HEAD
 git checkout --orphan temp_branch
+
+# Force branch overwrite of main
+# git checkout feat/Extract_SQL
+# git push origin +feat/Extract_SQL:main
+
 
 #Add and Commit All Current Files as the new "initial commit" 
 git add -A
