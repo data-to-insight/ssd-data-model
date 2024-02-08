@@ -391,9 +391,10 @@ Description:
             the period, please provide one row for each enquiry."
 
 Author: D2I
-Last Modified Date: 30/01/24 RH
+Last Modified Date: 06/02/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
+Version: 1.1
+            1.0: syntax/fieldname fixes JH
             0.3: Removed old obj/item naming. 
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
@@ -527,8 +528,8 @@ WHERE
     s47e.s47e_s47_start_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
 
 
--- [TESTING]
-select * from #AA_5_s47_enquiries;
+-- -- [TESTING]
+-- select * from #AA_5_s47_enquiries;
 
 
 
@@ -545,13 +546,15 @@ Description:
             the subject of a referral."
 
 Author: D2I
-Last Modified Date: 31/01/24 RH
+Last Modified Date: 06/02/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
-            0.3: Removed old obj/item naming. 
+Version: 1.1
+            1.0 chges to use of cin episodes over cp.cinp_cin.... JH
+            0.3: Removed old obj/item naming. RH
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
+- ssd_cin_episodes
 - ssd_disability
 - ssd_person
 - ssd_cla_episodes
@@ -599,11 +602,19 @@ SELECT
     /* List additional AA fields */
     d.disa_disability_code                      AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
     
-    cp.cinp_cin_plan_id,
-    cp.cinp_cin_plan_start,
-    cp.cinp_cin_plan_end,
-    cp.cinp_cin_plan_team  ,
-    cp.cinp_cin_plan_worker_id ,
+    -- Removed 060224 
+    -- cp.cinp_cin_plan_id,
+    -- cp.cinp_cin_plan_start,
+    -- cp.cinp_cin_plan_end,
+
+    -- Replace with
+    ce.cine_referral_id             AS REFERRAL_ID,
+    ce.cine_referral_date           AS CIN_START_DATE,
+    ce.cine_close_date,             AS CIN_CLOSE_DATE,
+    ce.cine_close_reason            AS CIN_CLOSE_REASON,
+
+    cp.cinp_cin_plan_team           AS ALLOCATED_TEAM,  -- most recent case worker|team. List incl. children with various types of plan, not just CIN plans
+    cp.cinp_cin_plan_worker_id      AS ALLOCATED_WORKER,
 
     /* case_status */
     CASE 
@@ -621,42 +632,42 @@ SELECT
              asm.cina_assessment_auth_date  > DATEADD(MONTH, -@AA_ReportingPeriod , GETDATE())
         THEN 'Closed episode'
         ELSE NULL 
-    END as case_status
+    END                               AS CASE_STATUS
 
 INTO #AA_6_children_in_need
 
 FROM
-    ssd_cin_plans cp
+    #ssd_cin_plans cp
 
 INNER JOIN
-    ssd_person p ON cp.cinp_person_id = p.pers_person_id
+    #ssd_person p ON cp.cinp_person_id = p.pers_person_id
 
 LEFT JOIN   -- with disability
-    ssd_disability d ON cp.cinp_person_id = d.disa_person_id
+    #ssd_disability d ON cp.cinp_person_id = d.disa_person_id
 
 LEFT JOIN   -- cla_episodes to get the most recent cla_epi_start
     (
         SELECT clae_person_id, MAX(clae_cla_episode_start) as clae_cla_episode_start, clae_cla_episode_ceased
-        FROM ssd_cla_episodes
+        FROM #ssd_cla_episodes
         GROUP BY clae_person_id, clae_cla_episode_ceased
     ) AS ce ON p.pers_person_id = ce.clae_person_id
 
 LEFT JOIN   -- cp_plans to get the cpp_start_date and cpp_end_date
     (
         SELECT cppl_person_id , MAX(cppl_cp_plan_start_date) as cppl_cp_plan_start_date, cppl_cp_plan_end_date
-        FROM ssd_cp_plans
+        FROM #ssd_cp_plans
         GROUP BY cppl_person_id, cppl_cp_plan_end_date
     ) AS cpp ON p.pers_person_id = cpp.cppl_person_id 
 
 LEFT JOIN   -- joining with assessments to get the cina_assessment_start_date and cina_assessment_auth_date
-    ssd_cin_assessments asm ON p.pers_person_id = asm.cina_person_id 
+    #ssd_cin_assessments asm ON p.pers_person_id = asm.cina_person_id 
 
 WHERE
-    cp.cin_plan_Start >= DATEADD(MONTH, -@AA_ReportingPeriod , GETDATE());
+    ce.cine_referral_date >= DATEADD(MONTH, -@AA_ReportingPeriod , GETDATE());
 
 
--- [TESTING]
-select * from #AA_6_children_in_need;
+-- -- [TESTING]
+-- select * from #AA_6_children_in_need;
 
 
 
@@ -724,57 +735,71 @@ SELECT
     /* List additional AA fields */
     d.disa_disability_code                      AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
     
-    /* Returns fields */    
-    cv.cinv_cin_visit_id,
-    cv.cin_plan_id, -- [TESTING] Do we still have access to plan id on cin_visits??? 
-    cv.cinv_cin_visit_date,
-    cv.cinv_cin_visit_seen,
-    cv.cinv_cin_visit_seen_alone,
+    /* Returns fields */   
+
+    -- Removed 060224 JH
+    -- cv.cinv_cin_visit_id,
+    -- cv.cin_plan_id, 
+    -- cv.cinv_cin_visit_date,
+    -- cv.cinv_cin_visit_seen,
+    -- cv.cinv_cin_visit_seen_alone,
+
+    -- Replaced 060224 JH
+    cpp.cppl_cp_plan_start_date	        AS	CP_START_DATE		--Child Protection Plan Start Date
+    cpp.cppv_cp_visit_date	            AS	CP_VISIT_DATE		--Date of the Last Statutory Visit
+    cpp.cppv_cp_visit_seen_alone	    AS	CP_SEEN_ALONE		--Was the Child Seen Alone?
+    cpp.cppr_cp_review_date	            AS	CP_REVIEW_DATE		--Date of latest review conference
+    cpp.cppl_cp_plan_end_date	        AS	CP_PLAN_END_DATE	--Child Protection Plan End Date
+
 
     /* Check if Emergency Protection Order exists within last 6 months */
     CASE WHEN ls.legal_status_id IS NOT NULL THEN 'Y' ELSE 'N' END AS emergency_protection_order,
 
-    /* Which is it??? */
-    cp.cin_team,
-    cp.cin_worker_id,
-    ce.cin_ref_team,
-    ce.cin_ref_worker_id as cin_ref_worker,
-    
     /* New fields for category of abuse */
-    MIN(CASE WHEN cpp.cpp_start_date = coa_early.cpp_earliest_date THEN coa_early.cpp_category END) AS "Initial cat of abuse",
-    MIN(CASE WHEN cpp.cpp_start_date = coa_latest.cpp_latest_date THEN coa_latest.cpp_category END) AS "latest cat of abuse"
+    MIN(CASE WHEN cpp.cpp_start_date = coa_early.cpp_earliest_date THEN coa_early.cpp_category END) AS INIT_ABUSE_CAT,
+    MIN(CASE WHEN cpp.cpp_start_date = coa_latest.cpp_latest_date THEN coa_latest.cpp_category END) AS LATEST_ABUSE_CAT
+    -- OR is it
+    -- cpp.cppl_cp_plan_initial_category	AS	INIT_ABUSE_CAT		--Initial Category of Abuse
+    -- cpp.cppl_cp_plan_latest_category	    AS	LATEST_ABUSE_CAT	--Latest Category of Abuse
+
+    -- allocated team -- Use Involvements table for latest allocated team
+    -- allocated worker -- Use Involvements table for latest allocated case worker
+    
+
 
 INTO #AA_7_child_protection
 
 FROM
-    ssd_cin_visits cv
+    #ssd_cin_visits cv
 
 INNER JOIN
-    ssd_person p ON cv.cinv_person_id = p.pers_person_id
+    #ssd_person p ON cv.cinv_person_id = p.pers_person_id
 
 LEFT JOIN   -- with disability
-    ssd_disability d ON cv.cinv_person_id = d.disa_person_id
+    #ssd_disability d ON cv.cinv_person_id = d.disa_person_id
 
 INNER JOIN
-    cin_episodes ce ON cv.la_person_id = ce.la_person_id
+    #ssd_cin_episodes ce ON cv.cinv_person_id = ce.la_person_id
 LEFT JOIN
-    legal_status ls ON cv.la_person_id = ls.la_person_id 
+    #ssd_legal_status ls ON cv.cinv_person_id = ls.pers_person_id 
         AND ls.legal_status_start >= DATEADD(MONTH, -6, GETDATE())	/*PW - amended from '>= DATE_ADD(CURRENT_DATE, INTERVAL -6 MONTH)'*/
 LEFT JOIN
-    cp_plans cpp ON cv.la_person_id = cpp.la_person_id
+    #ssd_cp_plans cpp ON cv.cinv_person_id = cpp.la_person_id
 LEFT JOIN
-    category_of_abuse coa_early ON cpp.cp_plan_id = coa_early.cp_plan_id
+    #category_of_abuse coa_early ON cpp.cp_plan_id = coa_early.cp_plan_id
+
     AND coa_early.cpp_start_date = (
-        SELECT MIN(cpp_start_date) FROM cp_plans WHERE la_person_id = cv.la_person_id
+        SELECT MIN(cpp_start_date) FROM cp_plans WHERE la_person_id = cv.cinv_person_id
     )
 LEFT JOIN
-    category_of_abuse coa_latest ON cpp.cp_plan_id = coa_latest.cp_plan_id
+    #category_of_abuse coa_latest ON cpp.cp_plan_id = coa_latest.cp_plan_id
+
     AND coa_latest.cpp_start_date = (
         SELECT MAX(cpp_start_date) FROM cp_plans WHERE la_person_id = cv.la_person_id
     )
 
 WHERE
-    cv.cin_visit_date >= DATEADD(MONTH, -12, GETDATE()) -- [TESTING] check time period, 12mths or 6?	/*PW - Amended from 'DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH)'*/
+    cv.cinv_cin_visit_date >= DATEADD(MONTH, -12, GETDATE()) -- [TESTING] check time period, 12mths or 6?	/*PW - Amended from 'DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH)'*/
 
 GROUP BY
     p.la_person_id,
