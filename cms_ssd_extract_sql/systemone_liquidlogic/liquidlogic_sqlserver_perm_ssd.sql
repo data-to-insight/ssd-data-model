@@ -1250,24 +1250,27 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cin_plans
 Description: 
 Author: D2I
-Last Modified Date: 08/12/23
+Last Modified Date: 07/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: [TESTING] - not sent to knowsley
+Version: 1.5
+            1.4: JH Updates to avoid bringing through a separate row for each revision of the plan
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: 
 Dependencies: 
 - ssd_person
 - FACT_CARE_PLANS
+- FACT_CARE_PLAN_SUMMARY
 =============================================================================
 */
-
-
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cin_plans';
 PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cin_plans', 'U') IS NOT NULL DROP TABLE ssd_cin_plans;
+IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plans;
+
+
 
 -- Create structure
 CREATE TABLE ssd_cin_plans (
@@ -1291,26 +1294,45 @@ INSERT INTO ssd_cin_plans (
     cinp_cin_plan_worker_id
 )
 SELECT
-    fp.FACT_CARE_PLAN_ID               AS cinp_cin_plan_id, 
-    fp.FACT_REFERRAL_ID                AS cinp_referral_id,
-    fp.DIM_PERSON_ID                   AS cinp_person_id,
-    fp.START_DTTM                      AS cinp_cin_plan_start,
-    fp.END_DTTM                        AS cinp_cin_plan_end,
-    fp.DIM_PLAN_COORD_DEPT_ID_DESC     AS cinp_cin_plan_team,
-    fp.DIM_PLAN_COORD_ID_DESC          AS cinp_cin_plan_worker_id
-
-FROM Child_Social.FACT_CARE_PLANS AS fp
-
-JOIN Child_Social.FACT_CARE_PLAN_SUMMARY AS cps ON fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID
+    cps.FACT_CARE_PLAN_SUMMARY_ID      AS cinp_cin_plan_id,
+    cps.FACT_REFERRAL_ID               AS cinp_referral_id,
+    cps.DIM_PERSON_ID                  AS cinp_person_id,
+    cps.START_DTTM                     AS cinp_cin_plan_start,
+    cps.END_DTTM                       AS cinp_cin_plan_end,
+ 
+    (SELECT
+        MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
+                 THEN fp.DIM_PLAN_COORD_DEPT_ID_DESC END))
+ 
+                                       AS cinp_cin_plan_team,
+ 
+    (SELECT
+        MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
+                 THEN fp.DIM_PLAN_COORD_ID_DESC END))
+                 
+                                       AS cinp_cin_plan_worker_id
+ 
+FROM Child_Social.FACT_CARE_PLAN_SUMMARY cps  
+ 
+LEFT JOIN Child_Social.FACT_CARE_PLANS fp ON fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID
  
 WHERE DIM_LOOKUP_PLAN_TYPE_CODE = 'FP' AND cps.DIM_LOOKUP_PLAN_STATUS_ID_CODE <> 'z'
-AND EXISTS 
+ 
+AND EXISTS
 (
-    (   -- only ssd relevant records
-    SELECT 1 
+    -- only ssd relevant records
+    SELECT 1
     FROM ssd_person p
-    WHERE p.pers_person_id = fp.DIM_PERSON_ID
-);
+    WHERE p.pers_person_id = cps.DIM_PERSON_ID
+)
+ 
+GROUP BY
+    cps.FACT_CARE_PLAN_SUMMARY_ID,
+    cps.FACT_REFERRAL_ID,
+    cps.DIM_PERSON_ID,
+    cps.START_DTTM,
+    cps.END_DTTM
+    ;
 
 
 -- Create index(es)
