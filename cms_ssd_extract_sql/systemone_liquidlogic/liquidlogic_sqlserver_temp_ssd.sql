@@ -717,7 +717,7 @@ IF OBJECT_ID('tempdb..#ssd_contacts') IS NOT NULL DROP TABLE #ssd_contacts;
 CREATE TABLE #ssd_contacts (
     cont_contact_id             NVARCHAR(48) PRIMARY KEY,
     cont_person_id              NVARCHAR(48),
-    cont_contact_start          DATETIME,
+    cont_contact_date           DATETIME,
     cont_contact_source_code    NVARCHAR(48),   -- 
     cont_contact_source_desc    NVARCHAR(255),  -- 
     cont_contact_outcome_json   NVARCHAR(500) 
@@ -727,7 +727,7 @@ CREATE TABLE #ssd_contacts (
 INSERT INTO #ssd_contacts (
     cont_contact_id, 
     cont_person_id, 
-    cont_contact_start,
+    cont_contact_date,
     cont_contact_source_code,
     cont_contact_source_desc,
     cont_contact_outcome_json
