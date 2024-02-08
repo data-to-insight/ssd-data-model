@@ -51,10 +51,38 @@ IF OBJECT_ID('tempdb..#AA_1_contacts') IS NOT NULL DROP TABLE #AA_1_contacts;
 
 SELECT
     /* Common AA fields */
-    p.pers_legacy_id                        AS CHILD_ID,
-    p.pers_sex                              AS GENDER,
-    p.pers_ethnicity                        AS ETHNICITY,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')        AS DATE_OF_BIRTH,
+    p.pers_legacy_id                            AS ChildUniqueID,	/*PW - Field Name changed from p.pers_legacy_id as that doesn't match SSDS Spec*/
+    p.pers_person_id							AS ChildUniqueID,	/*PW - Field Name changed from p.pers_legacy_id as that doesn't match SSDS Spec*/
+    CASE
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
     CASE
         -- If DoB is in the future, set age as -1 (unborn)
         WHEN p.pers_dob > GETDATE() THEN -1
@@ -76,11 +104,43 @@ SELECT
                 THEN 1 
                 ELSE 0
             END
-    END                                         AS AGE,
+    END                                         AS Age,
+
+	/*PW - Blackpool Age Function*/
+	DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
+			CASE 
+				WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
+				THEN 1
+				ELSE 0
+			END									AS AgeBlpFn,
 
     /* List additional AA fields */
-    FORMAT(c.cont_contact_start, 'dd/MM/yyyy')  AS DATE_OF_CONTACT,
-    c.cont_contact_source_desc                  AS CONTACT_SOURCE
+    FORMAT(c.cont_contact_date, 'dd/MM/yyyy')  AS DateOfContact,	
+	CASE
+		WHEN c.cont_contact_source_code = '1A' THEN 'a) 1A: Individual'
+		WHEN c.cont_contact_source_code = '1B' THEN 'b) 1B: Individual'
+		WHEN c.cont_contact_source_code = '1C' THEN 'c) 1C: Individual'
+		WHEN c.cont_contact_source_code = '1D' THEN 'd) 1D: Individual'
+		WHEN c.cont_contact_source_code = '2A' THEN 'e) 2A: Schools'
+		WHEN c.cont_contact_source_code = '2B' THEN 'f) 2B: Education services'
+		WHEN c.cont_contact_source_code = '3A' THEN 'g) 3A: Health services'
+		WHEN c.cont_contact_source_code = '3B' THEN 'h) 3B: Health services'
+		WHEN c.cont_contact_source_code = '3C' THEN 'i) 3C: Health services'
+		WHEN c.cont_contact_source_code = '3D' THEN 'j) 3D: Health services'
+		WHEN c.cont_contact_source_code = '3E' THEN 'k) 3E: Health services'
+		WHEN c.cont_contact_source_code = '3F' THEN 'l) 3F: Health services'
+		WHEN c.cont_contact_source_code = '4'  THEN 'm) 4: Housing'
+		WHEN c.cont_contact_source_code = '5A' THEN 'n) 5A: LA services'
+		WHEN c.cont_contact_source_code = '5B' THEN 'o) 5B: LA services'
+		WHEN c.cont_contact_source_code = '5C' THEN 'p) 5C: LA services'
+		WHEN c.cont_contact_source_code = '5D' THEN 'p1) 5D: LA services'
+		WHEN c.cont_contact_source_code = '6'  THEN 'q) 6: Police'
+		WHEN c.cont_contact_source_code = '7'  THEN 'r) 7: Other legal agency'
+		WHEN c.cont_contact_source_code = '8'  THEN 's) 8: Other'
+		WHEN c.cont_contact_source_code = '9'  THEN 't) 9: Anonymous'
+		WHEN c.cont_contact_source_code = '10' THEN 'u) 10: Unknown'
+		--ELSE 'u) 10: Unknown' /*PW - 'Catch All' for any other Contact/Referral Sources not in above list - probably not required*/
+	END											AS ContactSource
 
     -- Step type (or is that abaove source?) (SEE ALSO ASSESSMENTS L4)
     -- Responsible Team
@@ -95,7 +155,8 @@ LEFT JOIN
     #ssd_person p ON c.cont_person_id = p.pers_person_id
 
 WHERE
-    c.cont_contact_start >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
+    c.cont_contact_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());	
+
 
 
 -- -- [TESTING]
