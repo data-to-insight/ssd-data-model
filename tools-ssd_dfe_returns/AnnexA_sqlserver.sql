@@ -32,9 +32,10 @@ Description:
             each child in the contact.""
 
 Author: D2I
-Last Modified Date: 29/01/24 RH
+Last Modified Date: 12/02/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
+Version: 1.1
+            1.0: PW/Blackpool updates
             0.4: contact_source_desc added
             0.3: apply revised obj/item naming. 
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
@@ -51,8 +52,8 @@ IF OBJECT_ID('tempdb..#AA_1_contacts') IS NOT NULL DROP TABLE #AA_1_contacts;
 
 SELECT
     /* Common AA fields */
-    p.pers_legacy_id                            AS ChildUniqueID,	
-    p.pers_person_id						    AS ChildUniqueID2,	
+    p.pers_legacy_id                            AS ChildUniqueID,	-- temp solution [TESTING] This liquid logic specific
+    p.pers_person_id						    AS ChildUniqueID2,	-- temp solution [TESTING] This for compatiblility in non-ll systems
     CASE
 		WHEN p.pers_sex = 'M' THEN 'Male'
 		WHEN p.pers_sex = 'F' THEN 'Female'
@@ -62,7 +63,8 @@ SELECT
 	p.pers_ethnicity                            AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')		    AS DateOfBirth,
     CASE 
-        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? future dob? assign default val
+        -- if a dob is available and not in the future
         ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
             CASE 
                 WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
@@ -76,9 +78,6 @@ SELECT
     FORMAT(c.cont_contact_date, 'dd/MM/yyyy')   AS DateOfContact,	
 	c.cont_contact_source_desc			        AS ContactSource
 
-    -- Step type (or is that abaove source?) (SEE ALSO ASSESSMENTS L4)
-    -- Responsible Team
-    -- Assigned Worker
 
 INTO #AA_1_contacts
 
