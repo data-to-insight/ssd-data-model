@@ -63,16 +63,17 @@ SELECT
 	p.pers_ethnicity                            AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')		    AS DateOfBirth,
     CASE 
-        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? future dob? assign default val
-        -- if a dob is available and not in the future
-        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
                 WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
                 THEN 1
                 ELSE 0
             END
     END                                         AS Age
-
 
     /* List additional AA fields */
     FORMAT(c.cont_contact_date, 'dd/MM/yyyy')   AS DateOfContact,	
@@ -125,33 +126,22 @@ IF OBJECT_ID('tempdb..#AA_2_early_help_assessments') IS NOT NULL DROP TABLE #AA_
 
 SELECT
     /* Common AA fields */
-
     p.pers_legacy_id                        AS ChildUniqueID,
     p.pers_sex                              AS GENDER,
     p.pers_ethnicity                        AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')        AS DATE_OF_BIRTH,
-    CASE
-        -- If DoB is in the future, set age as -1 (unborn)
-        WHEN p.pers_dob > GETDATE() THEN -1
-
-        -- Special case for leap year babies (born Feb 29)
-        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
-            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
-            -- Check if current year is not a leap year
-            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
-        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
-
-        ELSE 
-            -- Calc age normally
-            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
-                -- Subtract extra year if current date is before birthday this year
-                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
-                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
-                THEN 1 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
                 ELSE 0
             END
-    END                                         AS AGE,
+    END                                         AS Age
     
     /* List additional AA fields */
 
@@ -211,29 +201,18 @@ SELECT
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
-    
-    CASE
-        -- If DoB is in the future, set age as -1 (unborn)
-        WHEN p.pers_dob > GETDATE() THEN -1
-
-        -- Special case for leap year babies (born Feb 29)
-        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
-            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
-            -- Check if current year is not a leap year
-            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
-        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
-
-        ELSE 
-            -- Calc age normally
-            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
-                -- Subtract extra year if current date is before birthday this year
-                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
-                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
-                THEN 1 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
                 ELSE 0
             END
-    END                                         AS AGE,
+    END                                         AS Age
     
     /* List additional AA fields */
     ce.cine_referral_id                         AS REFERRAL_ID,
@@ -306,29 +285,18 @@ SELECT
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
-    
-    CASE
-        -- If DoB is in the future, set age as -1 (unborn)
-        WHEN p.pers_dob > GETDATE() THEN -1
-
-        -- Special case for leap year babies (born Feb 29)
-        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
-            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
-            -- Check if current year is not a leap year
-            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
-        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
-
-        ELSE 
-            -- Calc age normally
-            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
-                -- Subtract extra year if current date is before birthday this year
-                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
-                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
-                THEN 1 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
                 ELSE 0
             END
-    END                                                 AS AGE,
+    END                                         AS Age
     
 
     /* List additional AA fields */
@@ -412,29 +380,18 @@ SELECT
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     CONVERT(VARCHAR, p.pers_dob, 103)           AS DATE_OF_BIRTH,
-    
-    CASE
-        -- If DoB is in the future, set age as -1 (unborn)
-        WHEN p.pers_dob > GETDATE() THEN -1
-
-        -- Special case for leap year babies (born Feb 29)
-        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
-            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
-            -- Check if current year is not a leap year
-            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
-        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
-
-        ELSE 
-            -- Calc age normally
-            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
-                -- Subtract extra year if current date is before birthday this year
-                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
-                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
-                THEN 1 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
                 ELSE 0
             END
-    END                                             AS AGE,
+    END                                         AS Age
     
 
     /* List additional AA fields */
@@ -572,29 +529,18 @@ SELECT
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
-    
-    CASE
-        -- If DoB is in the future, set age as -1 (unborn)
-        WHEN p.pers_dob > GETDATE() THEN -1
-
-        -- Special case for leap year babies (born Feb 29)
-        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
-            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
-            -- Check if current year is not a leap year
-            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
-        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
-
-        ELSE 
-            -- Calc age normally
-            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
-                -- Subtract extra year if current date is before birthday this year
-                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
-                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
-                THEN 1 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
                 ELSE 0
             END
-    END                                         AS AGE,
+    END                                         AS Age
     
 
     /* List additional AA fields */
@@ -705,29 +651,18 @@ SELECT
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
-    
-    CASE
-        -- If DoB is in the future, set age as -1 (unborn)
-        WHEN p.pers_dob > GETDATE() THEN -1
-
-        -- Special case for leap year babies (born Feb 29)
-        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
-            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
-            -- Check if current year is not a leap year
-            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
-        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
-
-        ELSE 
-            -- Calc age normally
-            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
-                -- Subtract extra year if current date is before birthday this year
-                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
-                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
-                THEN 1 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
                 ELSE 0
             END
-    END                                         AS AGE,
+    END                                         AS Age
     
 
     /* List additional AA fields */
@@ -880,29 +815,18 @@ SELECT
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
-    
-    CASE
-        -- If DoB is in the future, set age as -1 (unborn)
-        WHEN p.pers_dob > GETDATE() THEN -1
-
-        -- Special case for leap year babies (born Feb 29)
-        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
-            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
-            -- Check if current year is not a leap year
-            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
-        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
-
-        ELSE 
-            -- Calc age normally
-            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
-                -- Subtract extra year if current date is before birthday this year
-                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
-                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
-                THEN 1 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
                 ELSE 0
             END
-    END                                     AS AGE, 
+    END                                         AS Age
 
     /* List additional AA fields */
 
@@ -965,29 +889,18 @@ SELECT
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
-    
-    CASE
-        -- If DoB is in the future, set age as -1 (unborn)
-        WHEN p.pers_dob > GETDATE() THEN -1
-
-        -- Special case for leap year babies (born Feb 29)
-        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
-            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
-            -- Check if current year is not a leap year
-            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
-        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
-
-        ELSE 
-            -- Calc age normally
-            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
-                -- Subtract extra year if current date is before birthday this year
-                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
-                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
-                THEN 1 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
                 ELSE 0
             END
-    END                                         AS AGE, 
+    END                                         AS Age
 
     /* List additional AA fields */
 
@@ -1039,29 +952,18 @@ SELECT
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
-    
-    CASE
-        -- If DoB is in the future, set age as -1 (unborn)
-        WHEN p.pers_dob > GETDATE() THEN -1
-
-        -- Special case for leap year babies (born Feb 29)
-        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
-            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
-            -- Check if current year is not a leap year
-            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
-        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
-
-        ELSE 
-            -- Calc age normally
-            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
-                -- Subtract extra year if current date is before birthday this year
-                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
-                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
-                THEN 1 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
                 ELSE 0
             END
-    END                                         AS AGE, 
+    END                                         AS Age
 
     /* List additional AA fields */
 
@@ -1114,29 +1016,18 @@ SELECT
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
-    
-    CASE
-        -- If DoB is in the future, set age as -1 (unborn)
-        WHEN p.pers_dob > GETDATE() THEN -1
-
-        -- Special case for leap year babies (born Feb 29)
-        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
-            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
-            -- Check if current year is not a leap year
-            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
-        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
-
-        ELSE 
-            -- Calc age normally
-            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
-                -- Subtract extra year if current date is before birthday this year
-                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
-                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
-                THEN 1 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
                 ELSE 0
             END
-    END                                         AS AGE, 
+    END                                         AS Age
 
     /* List additional AA fields */
     d.disa_disability_code                      AS DISABILITY,     
