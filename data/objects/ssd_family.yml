@@ -1,0 +1,59 @@
+---
+nodes:
+- name: ssd_family
+  fields:
+  - name: fami_family_id
+    description: Family identifier
+    item_ref: FAMI001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - identity
+    - family
+    returns:
+    - ASGLB
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:fami_family_id
+    - mosaic:fami_family_id
+    cms_table:
+    - liquid_logic:ssd_family
+    - mosaic:ssd_family
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]For linking to adoptive family
+      or Family-level interventions e.g. Early Help'
+  - name: fami_person_id
+    description: Person Unique ID
+    item_ref: FAMI002A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    categories:
+    - identity
+    - family
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:fami_person_id
+    - mosaic:fami_person_id
+    cms_table:
+    - liquid_logic:ssd_family
+    - mosaic:ssd_family
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]See PERS001A'

@@ -1,0 +1,45 @@
+# item ref: SSD050
+- value: 1A
+  description: 'INDIVIDUAL - family member, relative or carer.'
+- value: 1B
+  description: 'INDIVIDUAL - acquaintance (including neighbours and child minders).'
+- value: 1C
+  description: 'INDIVIDUAL - self.'
+- value: 1D
+  description: 'INDIVIDUAL - other (including strangers or Members of Parliament (MPs)).'
+- value: 2A
+  description: 'SCHOOLS.'
+- value: 2B
+  description: 'EDUCATION SERVICES.'
+- value: 3A
+  description: 'HEALTH SERVICES - general practitioner (GP).'
+- value: 3B
+  description: 'HEALTH SERVICES - health visitor.'
+- value: 3C
+  description: 'HEALTH SERVICES - school nurse.'
+- value: 3D
+  description: 'HEALTH SERVICES - other primary health services.'
+- value: 3E
+  description: 'HEALTH SERVICES - A&E (accident and emergency department).'
+- value: 3F
+  description: 'HEALTH SERVICES - other (for example hospice).'
+- value: 4
+  description: 'HOUSING - local authority housing or housing association.'
+- value: 5A
+  description: 'LA SERVICES - social care, for example adults social care services.'
+- value: 5B
+  description: 'LA SERVICES - other internal services, not including social care or early help.'
+- value: 5C
+  description: 'LA SERVICES - external, from another local authority’s services, for example social care or early help.'
+- value: 5D
+  description: 'LA SERVICES - early help.'
+- value: 6
+  description: 'POLICE.'
+- value: 7
+  description: 'OTHER LEGAL AGENCY - including courts, probation, immigration, CAFCASS (Children and Family Court Advisory and Support Service) or prison.'
+- value: 8
+  description: 'OTHER - including children’s centres, independent agency providers or voluntary organisations.'
+- value: 9
+  description: 'ANONYMOUS.'
+- value: 10
+  description: 'UNKNOWN.'

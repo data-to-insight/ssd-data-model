@@ -1,0 +1,167 @@
+
+    <html>
+    <head>
+        <style>
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            th, td {
+                border: 1px solid black;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            pre {
+                background-color: #f5f5f5;
+                padding: 10px;
+                border-radius: 3px;
+                overflow-x: auto;
+            }
+            code {
+                font-family: monospace;
+            }
+        </style>
+    </head>
+    <body>
+    <h1>Children's Services Standard Safeguarding Dataset (SSD)</h1>
+<p>This is the (in progress)source repository for the Standard CSC Dataset for LAs and associated toolset (Project 1a SSDF). A broader, more granular, standardised dataset for Children's Social Care (CSC) in safeguarding authorities. Enabling increased scope for bespoke local analysis, using sector-driven national level data, that extends the existing DfE returns <em>(Ref: Project Stage 1)</em> combined with a suite of methods/tools that all local authorities can adopt at near-zero running cost to independently produce the standardised dataset <em>(Ref: Project Stage 2)</em>. Current variation in local data caputure and storage limits data collaboration between LAs to standard ‘core’ datasets – most notably the Children in Need (CIN) Census and SSDA903, for children in need and looked after children respectively – and Ofsted’s “Annex A” specification of child-level data. These datasets often lack the depth and granularity that some individual LAs incorporate in bespoke local analysis, including to understand quality of practice and improved outcomes for vunerable children. 
+Current phase : <a href="#current-phase">prototype</a>. </p>
+<h2>Initial core of the SSD</h2>
+<p>The dataset in-part aims to standardise existing local variation in how collected data is stored, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journeys. A six-year historical data scope is proposed across the range of safeguarding activities performed by councils. Project oversight and governance is via the SSD Steering Group, DfE and volunteer LA's as part of an initial pilot group. </p>
+<p><a href="https://forms.office.com/e/UysrcGApJ1">Subscribe</a> or <a href="mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset-Subscribe">volunteer for pilot involvement</a>. - Please be aware that in order to make it available to GitPages/Public, if being viewed outside of the Git Repo, this page has been generated from the repo README.md page and some inconsistent formating might be evident as a result. </p>
+<h4>Current statutory returns</h4>
+<ul>
+<li>SSDA903</li>
+<li>Annex A</li>
+<li>CIN Census</li>
+<li>Regional Improvement and Innovation Alliance (RIIA)</li>
+</ul>
+<h4>Iterative revisions based on developments in other (project)areas</h4>
+<ul>
+<li>SEN2</li>
+<li>ADCS Safeguarding</li>
+<li>School Census</li>
+<li>EH Benchmarking</li>
+<li>Kinship Care (1b(i))</li>
+<li>Pre-Proceedings (1b(ii))</li>
+<li>Section 251 Finance (1b(iii))</li>
+<li>Voice of Child &amp; Family (1b(iv))</li>
+<li>Social worker CMS input data (2a)</li>
+<li>CSC National Framework</li>
+<li>EET Activity</li>
+<li>Linking data items to strategic goals</li>
+<li>Additional ongoing user research input</li>
+</ul>
+<h2>Specification components</h2>
+<h3>Data objects Conceptual Model</h3>
+<p>Defining the scope of objects/data points capturing LA Childrens Services data during the different stages of an individual's progress through the CSC system(s). Published for iterative review.</p>
+<ul>
+<li><a href="https://github.com/data-to-insight/ssd-data-model/blob/main/docs/index.html">data object/conceptual model</a></li>
+<li><a href="https://github.com/data-to-insight/ssd-data-model/blob/main/docs/guidance.html">data object/item-guidance model</a></li>
+<li><a href="https://github.com/data-to-insight/ssd-data-model/blob/main/docs/existingreturnsmap.html">existing data returns map</a></li>
+</ul>
+<p>The project will use <a href="https://git-scm.com/">GIT</a> to track and approve proposed changes to the safeguarding data standard.</p>
+<h3>Specification</h3>
+<p>The object specification input file[csv] can be found in the <a href="./docs/admin">admin</a> subfolder, and there is further ongoing work to provide further 'human readable' reporting methods beyond the aforementioned <a href="https://data-to-insight.github.io/ssd-data-model/">data object conceptual model</a>. We are aiming to publish our full data-landscape overview that resulted in the specification. </p>
+<h3>Change log</h3>
+<p>Agreed data item-level changes are assigned an identifier, and will be traceable within the <a href="./CHANGELOG.md">changelog.md</a>. A sub-set of the change details for the most recent change (if any) also appear within each objects metadata block within the YAML file(s). The current change log contains sample data until we deploy the first pilot release. Note: Object-level change tracking is not yet available/in progress; feedback/suggestions welcomed. </p>
+<pre><code class="language-yaml">- name: &lt;data object name&gt;
+  fields:
+  - [...]
+    metadata:
+      release_datetime: 
+      change_id: 
+      item_changes_count: 
+      change_reason: 
+      change_type: &lt;bug|new feature|change|...tbc&gt;
+</code></pre>
+<h3>Data objects</h3>
+<p>The data model is described using [YAML][yaml], which is designed to be a "human friendly" data format, offering a more readable structure than such as XML/JSON, a reduced storage/processing footprint and in combination with Git provides an audit trail of changes that can be tracked.</p>
+<p>The <a href="./data/objects">objects</a> folder contains definition for the specification, data objects as well as details
+of synthetic data parameters and validation rules that apply to each field within the object. At the moment, the validation definitions do not reference back to the stat-returns validation process. </p>
+<p>An example data object contains a description and a set of fields for that record. The fields have an ID (the key), a name,
+type, description, which cms systems the data item/field is available on and any comments,</p>
+<pre><code class="language-yaml">
+- name: &lt;data object name&gt;
+  fields:
+  - name: &lt;item Name&gt;
+    type: &lt;string|int|categorical|list&gt;
+    description: 
+    item_ref: &lt;data item ref code&gt;
+    primary_key: &lt;true&gt;
+    validators:
+      &lt;validator&gt;:  
+    categories:
+    returns:
+    cms:
+    cms_field:
+    - liquid_logic:&lt;ll_field_name&gt;
+    - mosaic: &lt;mosaic_field_name&gt;
+    cms_table:
+    - liquid_logic:&lt;ll_tbl_name&gt;
+    - mosaic: &lt;mosaic_tbl_name&gt;
+    guidance: &lt;DfE of similar guidance txt&gt;
+    metadata:
+      release_datetime: 
+      change_id: 
+      item_changes_count: 
+      change_reason: 
+      change_type: &lt;bug|new feature|change|...tbc&gt;
+    [...]
+</code></pre>
+<h3>Categories</h3>
+<p>The <a href="./data/categories">categories</a> folder holds the dimensions as referenced by <code>Categorical</code> and <code>List</code> datatypes.
+A Dimension object has a value and description, where the value is what would normally be expected to be transferred
+in an interchange format. The description is optional, and is not provided where the value is descriptive enough.</p>
+<p>The YAML category files can either hold a list of string values, e.g.</p>
+<pre><code class="language-yaml">- Value 1
+- Value 2
+</code></pre>
+<p>or a list of objects:</p>
+<pre><code class="language-yaml">- value: Value 1
+  description: A description of value 1
+- value: Value 2
+  description: A description of value 2
+</code></pre>
+<h3>Output</h3>
+<p>Since the specification is intended to be easy to maintain, and most case management and data management systems aren't YAML aware, the project is working towards providing an open source set of <a href="./tools/">tools</a> to perform the needed processing, incl. extract the required data items from current/known CMS systems and provide methods to allow the YAML object definitions to be easily updated from specification improvement updates or required revisions. Stakeholders and others are also invited to fork the repository and/or suggest changes to all elements of the project including definitions structure and code-base. </p>
+<p>Currently the YAML data objects, associated diagrams, documentation and website can be (re-)generated using the <a href="./tools/">tools</a>. The SQL[sql] tools are in development at the moment, but are aimed towards extracting the relevant data directly from different CMS systems in a CMS-agnostic approach; enabling the inclusion of both new data objects, new items in existing objects and revisions to both. SQL for each CMS type can be generated using the provided tools(Pilot includes only Liquid Logic and MOSAIC compatibility), and the resultant SQL scripts are output in the <a href="./sql/">SQL</a> folder. </p>
+<h3><a href="#current-phase">Current phase</a></h3>
+<p>The project is following a transparent and iterative development cycle, within the following deployment stages. Further stakeholder <a href="https://forms.office.com/e/UysrcGApJ1">feedback</a> and involvement is welcomed at any phase. LA's that wish to take part in the pilot deployment are further invited to <a href="mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset">get in touch</a>. </p>
+<table><tbody>
+<tr><td>Stage</td><td>Phase</td><td>Description</td></tr>
+<tr><td>1</td><td>User research</td><td>Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities.</td></tr>
+<tr><td>1</td><td><strong>Prototype [Current Phase]</strong></td><td>Detailed survey of current data item usage, link data items to strategic goals, prototype specification(peer feedback), initial workflow toolset</td></tr>
+<tr><td>2</td><td>Deploy (pilot)</td><td>Deploy with support to pilot councils by developing reproducible implementations.</td></tr>
+<tr><td>2</td><td>Feedback</td><td>Product delivered to the DfE and offer supported adoption for LA's and iterative further development.</td></tr>
+<tr><td>2</td><td>Continuous Deployment</td><td>Maintenance roadmap and framework agreement towards iterative improvement-driven approach.</td></tr>
+</tbody></table>
+<h3>Local Authorities guiding development</h3>
+<p><strong>Hertfordshire CC</strong> : Bid Lead | <strong>Knowsley CC</strong> : Steering Group | <strong>Data2Insight</strong> : Project Lead | <strong>East Sussex CC</strong> : Host Authority | Essex CC : Project Management and Mosaic Pilot Development | <strong>ADCS North West</strong> (hosted by <strong>Stockport Council</strong>) | <strong>Blackpool CC</strong> : Mosaic Pilot Development | <strong>East Riding CC</strong> : Azeus Pilot Development  </p>
+<p>Repo forks, and direct involvement with the project are welcomed and you can find more information about Data2Insight on our website <a href="https://www.datatoinsight.org/">https://www.datatoinsight.org/</a></p>
+<h2>Repo workflow</h2>
+<p>In brief, folders <a href="./data/">data</a>, <a href="./docs/">docs</a> &amp; <a href="./sql/">sql</a> are output folders. Python scripts within the tools folder generate those files with the exception of <a href="./docs/admin">docs/admin</a> which contains the import csv definitions of all data objects &amp; relationships. <a href="./tools/">tools/*.py</a> are numbered to dictate their required run order when updating the specification. This workflow enables the entire project and all outputs to be instantly updated enabling full development transparency and ease of later updates both minor modifications and new modules/objects. It is anticipated that most LA's will only need to access the generated extract <a href="./sql/">SQL files</a> for their particular CMS. </p>
+<h3>Repo running notes</h3>
+<p>The Python based toolset will run within a <a href="https://github.com/codespaces/new?hide_repo_select=true&amp;ref=main&amp;repo=645832800">Git Codespace</a>. Use this link, then run the setup file, by typing the below command on the command-line. <br />
+Set up the working environment (will prompt Y/N part-way through, type 'y'to continue):</p>
+<pre><code class="language-bash">./setup.sh
+</code></pre>
+<p>For ref: The above bash script contains and runs <all> the following required commands so there is no further setup required. In some rare occasions, where 
+  errors in running anything to do with Pygraphviz subsequently occur, running this setup.sh script twice usually fixes the issue(s): </p>
+<pre><code class="language-python">[$] pip install -r requirements.txt
+[$] sudo apt-get update
+[$] sudo apt-get install graphviz libgraphviz-dev pkg-config
+[$] pip install pygraphviz
+
+[$] pip install poetry
+</code></pre>
+<p>The python tools(.py) are in <a href="./tools/">tools</a> folder. To run them, right click on the file and select 'run in terminal' or type filename on the commandline. This will only work if the setup.sh file has been already run to install the needed dependencies. </p>
+<h2>Other relevant links</h2>
+<p>[yaml] : https://yaml.org/</p>
+<p>[sql] : https://en.wikipedia.org/wiki/SQL/</p>
+    </body>
+    </html>
+    

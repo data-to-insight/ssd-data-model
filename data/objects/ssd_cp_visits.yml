@@ -1,0 +1,143 @@
+---
+nodes:
+- name: ssd_cp_visits
+  fields:
+  - name: cppv_casenote_id
+    description: Casenote ID (Visit record)
+    item_ref: CPPV007A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - Local
+    guidance: null
+  - name: cppv_cp_plan_id
+    description: CP Plan ID
+    item_ref: CPPV001A
+    type: nvarchar
+    foreign_key: ssd_cp_plans.cppl_cp_plan_id
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cppv_cp_plan_id
+    - mosaic:cppv_cp_plan_id
+    cms_table:
+    - liquid_logic:ssd_cp_visits
+    - mosaic:ssd_cp_visits
+    guidance: See CPP001A
+  - name: cppv_cp_visit_id
+    description: CP Visit ID
+    item_ref: CPPV002A
+    type: nvarchar
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cppv_cp_visit_id
+    - mosaic:cppv_cp_visit_id
+    cms_table:
+    - liquid_logic:ssd_cp_visits
+    - mosaic:ssd_cp_visits
+    guidance: CIN Visit record unique ID from system or auto-generated as part of
+      export.
+  - name: cppv_cp_visit_date
+    description: Date of Visit
+    item_ref: CPPV003A
+    type: datetime
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cppv_cp_visit_date
+    - mosaic:cppv_cp_visit_date
+    cms_table:
+    - liquid_logic:ssd_cp_visits
+    - mosaic:ssd_cp_visits
+    guidance: Actual date of Visit
+  - name: cppv_cp_visit_seen
+    description: Child Seen
+    item_ref: CPPV004A
+    type: nchar
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cppv_cp_visit_seen
+    - mosaic:cppv_cp_visit_seen
+    cms_table:
+    - liquid_logic:ssd_cp_visits
+    - mosaic:ssd_cp_visits
+    guidance: Was the child seen during this visit? Yes/ No
+  - name: cppv_cp_visit_seen_alone
+    description: Child Seen Alone
+    item_ref: CPPV005A
+    type: nchar
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cppv_cp_visit_seen_alone
+    - mosaic:cppv_cp_visit_seen_alone
+    cms_table:
+    - liquid_logic:ssd_cp_visits
+    - mosaic:ssd_cp_visits
+    guidance: Was the child seen alone during this visit? Yes/ No
+  - name: cppv_cp_visit_bedroom
+    description: Child Bedroom Seen
+    item_ref: CPPV006A
+    type: nchar
+    categories:
+    - child_protection
+    - cp_plan
+    - visit
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:cppv_cp_visit_bedroom
+    - mosaic:cppv_cp_visit_bedroom
+    cms_table:
+    - liquid_logic:ssd_cp_visits
+    - mosaic:ssd_cp_visits
+    guidance: Was the child's bedroom seen during this visit? Yes/ No

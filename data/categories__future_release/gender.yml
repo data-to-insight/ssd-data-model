@@ -1,0 +1,9 @@
+# item ref: ssd003
+- value: 0
+  description: Not yet born (even if known)
+- value: 1
+  description: Male
+- value: 2
+  description: Female
+- value: 9
+  description: Indeterminate / Unable to be classed as male / female

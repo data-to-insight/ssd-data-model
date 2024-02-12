@@ -1,0 +1,135 @@
+---
+nodes:
+- name: ssd_ehcp_requests
+  fields:
+  - name: ehcr_ehcp_request_id
+    description: Request ID
+    item_ref: EHCR001A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - send
+    - ehcp_request
+    returns:
+    - RIIA
+    cms:
+    - liquid_logic
+    cms_field:
+    - liquid_logic:ehcr_ehcp_request_id
+    - mosaic:ehcr_ehcp_request_id
+    cms_table:
+    - liquid_logic:ssd_ehcp_requests
+    - mosaic:ssd_ehcp_requests
+    guidance: "EHCP request record unique ID from system or auto-generated as part\
+      \ of export. The following information should be recorded for each initial request\
+      \ for assessment made to the local authority. The information collected will\
+      \ allow the department to continue to report on the timeliness of the assessment\
+      \ process. Requests that have yet to be completed should also be recorded.\n\
+      If a child or young person transfers into the local authority\u2019s area at\
+      \ any stage of the request and assessment process before an EHC plan has been\
+      \ issued, there is no right of transfer of decisions made by the originating\
+      \ local authority. Under good practice local authorities may decide to share\
+      \ information but the importing local authority must make its own decisions\
+      \ on whether to assess and whether to issue a plan.\nWhere a person with an\
+      \ existing EHC plan transfers into the local authority\u2019s area (item 5.1)\
+      \ the request and assessment should be recorded by the importing local authority\
+      \ as historical even if the EHC plan start date is within the collection year."
+  - name: ehcr_send_table_id
+    description: send_table_id
+    item_ref: EHCR002A
+    type: nvarchar
+    foreign_key: ssd_send.send_table_id
+    categories:
+    - identity
+    - send
+    - ehcp_request
+    returns:
+    - RIIA
+    cms:
+    - liquid_logic
+    cms_field:
+    - liquid_logic:ehcr_send_table_id
+    - mosaic:ehcr_send_table_id
+    cms_table:
+    - liquid_logic:ssd_ehcp_requests
+    - mosaic:ssd_ehcp_requests
+    guidance: See SEN001A
+  - name: ehcr_ehcp_req_date
+    description: Received Date
+    item_ref: EHCR003A
+    type: datetime
+    categories:
+    - send
+    - ehcp_request
+    returns:
+    - SEN2
+    - RIIA
+    cms:
+    - liquid_logic
+    cms_field:
+    - liquid_logic:ehcr_ehcp_req_date
+    - mosaic:ehcr_ehcp_req_date
+    cms_table:
+    - liquid_logic:ssd_ehcp_requests
+    - mosaic:ssd_ehcp_requests
+    guidance: The date the request for an EHC assessment was received. This will be
+      the date used as the start of the 20-week period.
+  - name: ehcr_ehcp_req_outcome_date
+    description: Request Outcome Date
+    item_ref: EHCR004A
+    type: datetime
+    categories:
+    - send
+    - ehcp_request
+    returns:
+    - SEN2
+    - RIIA
+    cms:
+    - liquid_logic
+    cms_field:
+    - liquid_logic:ehcr_ehcp_req_outcome_date
+    - mosaic:ehcr_ehcp_req_outcome_date
+    cms_table:
+    - liquid_logic:ssd_ehcp_requests
+    - mosaic:ssd_ehcp_requests
+    guidance: 'Please enter the date the requestor(s) was informed of the decision
+      about whether the local authority agrees to the request for an assessment.
+
+      If the request was withdrawn or ceased before decision (W), if the decision
+      is yet to be made (A) or is historical (H) then no date is required.'
+  - name: ehcr_ehcp_req_outcome
+    description: Request Outcome
+    item_ref: EHCR005A
+    type: nvarchar
+    categories:
+    - send
+    - ehcp_request
+    returns:
+    - SEN2
+    - RIIA
+    cms:
+    - liquid_logic
+    cms_field:
+    - liquid_logic:ehcr_ehcp_req_outcome
+    - mosaic:ehcr_ehcp_req_outcome
+    cms_table:
+    - liquid_logic:ssd_ehcp_requests
+    - mosaic:ssd_ehcp_requests
+    guidance: "This item records whether or not the initial request proceeded to the\
+      \ assessment stage:\nY - LA proceeded with an assessment\nN - LA decided not\
+      \ to proceed with an assessment\nA - Decision yet to be made\nW \u2013 Request\
+      \ withdrawn or ceased before decision to assess was made\nH \u2013 Historical\
+      \ \u2013 Decision to assess was made before the latest collection period\nIf\
+      \ a local authority decides not to proceed with an assessment and this decision\
+      \ is subsequently changed for any reason the original request outcome and request\
+      \ outcome date should not be changed. If the change follows from mediation or\
+      \ tribunal the appropriate mediation and tribunal indicators (items 2.5 and\
+      \ 2.6) should be selected for the request.\nW may include where the person moves\
+      \ out of the local authority area, leaves education or training, or if the child\
+      \ or young person dies.\nWhen A, W or H is selected, no further information\
+      \ is required in this module."

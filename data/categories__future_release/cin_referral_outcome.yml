@@ -1,0 +1,13 @@
+# item ref: SSD051
+- value: 'No Further Action'
+  description: 'No Further Action'
+- value: 'Advice and Information or signpost to other services'
+  description: 'Advice and Information or signpost to other services'
+- value: 'Step-down to Early Help'
+  description: 'Step-down to Early Help'
+- value: 'Assessment required'
+  description: 'Assessment required'
+- value: 'Strategy discussion and/or Section 47 enquiry'
+  description: 'Strategy discussion and/or Section 47 enquiry'
+- value: 'Other'
+  description: 'Other'

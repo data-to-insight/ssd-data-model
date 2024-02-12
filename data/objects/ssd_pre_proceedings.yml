@@ -1,0 +1,666 @@
+---
+nodes:
+- name: ssd_pre_proceedings
+  fields:
+  - name: prep_table_id
+    description: Pre-proceedings table row ID
+    item_ref: PREP024A
+    type: nvarchar
+    primary_key: true
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_table_id
+    - mosaic:prep_table_id
+    guidance: null
+  - name: prep_person_id
+    description: Person Unique ID
+    item_ref: PREP001A
+    type: nvarchar
+    foreign_key: ssd_person.pers_person_id
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - pre_proceedings
+    returns:
+    - SSDA903
+    - CINcensus
+    cms:
+    - liquid_logic
+    - mosaic
+    - Eclipse
+    - CareDirector
+    - Azeus
+    cms_field:
+    - liquid_logic:prep_person_id
+    - mosaic:prep_person_id
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: See PERS001A
+  - name: prep_plo_family_id
+    description: PLO Family ID
+    item_ref: PREP002A
+    type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_plo_family_id
+    - mosaic:prep_plo_family_id
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: Unique Identifier number for each family group - a family group is described
+      as a group of children linked by parents all starting and ceasing pre or care
+      proceedings at the same time
+    metadata:
+      release: In review|pending
+      change_id: SSD-0001
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_pre_pro_decision_date
+    description: Date decision made to enter Pre Proceedings
+    item_ref: PREP003A
+    type: datetime
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_pre_pro_decision_date
+    - mosaic:prep_pre_pro_decision_date
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: This is the date of legal meeting / panel that agreed to commence pre-proceedings.
+      The date should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a
+      four digit number.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0002
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_initial_pre_pro_meeting_date
+    description: Date of Initial Pre Proceedings Meeting
+    item_ref: PREP004A
+    type: datetime
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_initial_pre_pro_meeting_date
+    - mosaic:prep_initial_pre_pro_meeting_date
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: This is the first pre-proceedings meeting following the legal meeting
+      / panel that agreed to commence pre-proceedings. The date should be recorded
+      in a DD/MM/YYYY format, i.e. day/month/year as a four digit number.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0003
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_pre_pro_outcome
+    description: What is the Outcome of Pre-Proceedings
+    item_ref: PREP005A
+    type: nvarchar
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_pre_pro_outcome
+    - mosaic:prep_pre_pro_outcome
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: 'Please select:
+
+      Decision to Issue Care Proceedings /
+
+      Decision to step down
+
+      If still in pre-proceedings, please leave blank.'
+    metadata:
+      release: In review|pending
+      change_id: SSD-0004
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_agree_stepdown_issue_date
+    description: Date Agreed to Step down/issue
+    item_ref: PREP006A
+    type: datetime
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_agree_stepdown_issue_date
+    - mosaic:prep_agree_stepdown_issue_date
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: This is the date of legal meeting / panel that agreed to end pre-proceedings
+      to either step down or issue care proceedings. The date should be recorded in
+      a DD/MM/YYYY format, i.e. day/month/year as a four digit number.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0005
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_cp_plans_referral_period
+    description: How many times has the child been subject to a Child Protection Plan
+      during this referral period?
+    item_ref: PREP007A
+    type: int
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_cp_plans_referral_period
+    - mosaic:prep_cp_plans_referral_period
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: Please provide a numeric value for the number of the times the child
+      has been the subject of a Child Protection Plan during this referral period.
+      If none, please put 0.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0006
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_legal_gateway_outcome
+    description: What was the outcome of legal gateway / panel / meeting after panel?
+    item_ref: PREP008A
+    type: nvarchar
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_legal_gateway_outcome
+    - mosaic:prep_legal_gateway_outcome
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: "Please select one of these options:\nA \u2013 Continue with current\
+      \ plan\nB \u2013 Start pre-proceedings\nC \u2013 Issue care proceedings\nD \u2013\
+      \ Unknown"
+    metadata:
+      release: In review|pending
+      change_id: SSD-0007
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_prev_pre_proc_child
+    description: "How many previous periods of pre-proceedings have there been in\
+      \ the child\u2019s lifetime?"
+    item_ref: PREP009A
+    type: int
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_prev_pre_proc_child
+    - mosaic:prep_prev_pre_proc_child
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: Please provide a numeric value. If there have not been any previous
+      periods, please put 0.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0008
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_prev_care_proc_child
+    description: "How many previous periods of care proceedings have there been in\
+      \ the child\u2019s lifetime?"
+    item_ref: PREP010A
+    type: int
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_prev_care_proc_child
+    - mosaic:prep_prev_care_proc_child
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: Please provide a numeric value. If there have not been any previous
+      periods, please put 0.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0009
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_pre_pro_letter_date
+    description: What is the date that the pre-proceedings letter and plan was sent
+      to parents?
+    item_ref: PREP011A
+    type: datetime
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_pre_pro_letter_date
+    - mosaic:prep_pre_pro_letter_date
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: 'If the case has not been in pre-proceedings, please
+
+      leave blank.
+
+      Please use the UK date format: DD/MM/YYYY'
+    metadata:
+      release: In review|pending
+      change_id: SSD-0010
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_care_pro_letter_date
+    description: What is the date that the letter to issue care proceedings was sent
+      to parents?
+    item_ref: PREP012A
+    type: datetime
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_care_pro_letter_date
+    - mosaic:prep_care_pro_letter_date
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: 'If care proceedings have not been issued, please leave
+
+      blank.
+
+      Please use the UK date format DD/MM/YYYY'
+    metadata:
+      release: In review|pending
+      change_id: SSD-0011
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_pre_pro_meetings_num
+    description: How many review pre-proceeding meetings have been held with parents
+      following the initial meeting?
+    item_ref: PREP013A
+    type: int
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_pre_pro_meetings_num
+    - mosaic:prep_pre_pro_meetings_num
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: Please give a numeric value for the number of meetings that took place
+      with parents, excluding the initial meeting.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0012
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_pre_pro_parents_legal_rep
+    description: Did parents have legal representation during pre-proceedings?
+    item_ref: PREP014A
+    type: nchar
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_pre_pro_parents_legal_rep
+    - mosaic:prep_pre_pro_parents_legal_rep
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: Please select Yes / No / Unknown
+    metadata:
+      release: In review|pending
+      change_id: SSD-0013
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_parents_legal_rep_point_of_issue
+    description: Did parents have legal representation at the point of issue?
+    item_ref: PREP015A
+    type: nchar
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_parents_legal_rep_point_of_issue
+    - mosaic:prep_parents_legal_rep_point_of_issue
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: Please select Yes / No / Unknown / Not in care proceedings
+    metadata:
+      release: In review|pending
+      change_id: SSD-0014
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_court_reference
+    description: If in Care Proceedings, what is the Court reference number?
+    item_ref: PREP016A
+    type: nvarchar
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_court_reference
+    - mosaic:prep_court_reference
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: This is the Court number which is given to a family group when care
+      proceedings are issued. This may be stored on the case management system or
+      held in legal files. If the case is not in care proceedings, please leave blank.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0015
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_care_proc_court_hearings
+    description: How many Court hearings have taken place whilst in care proceedings?
+    item_ref: PREP017A
+    type: int
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_care_proc_court_hearings
+    - mosaic:prep_care_proc_court_hearings
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: This includes the initial IRH and final hearing. Please give a numeric
+      value. If case is not in care proceedings, please leave blank.
+    metadata:
+      release: In review|pending
+      change_id: SSD-0016
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_care_proc_short_notice
+    description: Were Care Proceedings issued on a short notice application?
+    item_ref: PREP018A
+    type: nchar
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_care_proc_short_notice
+    - mosaic:prep_care_proc_short_notice
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: "Please select Yes / No / Unknown / Not in care proceedings. A short\
+      \ notice application is an urgent application for the court to hear the case\
+      \ within the next 2 \u2013 5 days."
+    metadata:
+      release: In review|pending
+      change_id: SSD-0017
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_proc_short_notice_reason
+    description: What was the reason for any short notice applications?
+    item_ref: PREP019A
+    type: nvarchar
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_proc_short_notice_reason
+    - mosaic:prep_proc_short_notice_reason
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: "Please choose the main reason from this list:\n(A)\nApplications under\
+      \ the Children Act 1989 where without such an order a child\u2019s immediate\
+      \ safety would be compromised, including where there is an immediate threat\
+      \ of child abduction.\n(B)\nApplications for Emergency Protection Orders where\
+      \ the criteria for such or order is met. (c) Other If a short notice application\
+      \ has not taken place, please select 'No short notice applications'. A short\
+      \ notice application is an urgent application for the court to hear the case\
+      \ within the next 2 \u2013 5 days."
+    metadata:
+      release: In review|pending
+      change_id: SSD-0018
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_la_inital _plan_approved
+    description: "Was the LA\u2019s initial plan approved at the initial hearing?"
+    item_ref: PREP020A
+    type: nchar
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_la_inital_plan_approved
+    - mosaic:prep_la_inital_plan_approved
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: Please select Yes / No / Unknown
+    metadata:
+      release: In review|pending
+      change_id: SSD-0019
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_la_initial_care_plan
+    description: "What was the LA\u2019s initial care plan for the child at the initial\
+      \ hearing?"
+    item_ref: PREP021A
+    type: nvarchar
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_la_initial_care_plan
+    - mosaic:prep_la_initial_care_plan
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: "Please choose one option from this list: A \u2013 Interim / Care Order\n\
+      B \u2013 Interim / Care Order \u2013 Placement with parents\nC \u2013 Adoption\n\
+      D \u2013 Interim / Supervision Order\nE \u2013 Special Guardianship Order\n\
+      F \u2013 Private Law Order\nG \u2013 Other If case is not in care proceedings,\
+      \ please select 'Not in care proceedings' Please note \u2018Care order \u2013\
+      \ placement with parents\u2019 means that the public care order was granted\
+      \ but that the child remained in their parent\u2019s care, rather than in another\
+      \ placement."
+    metadata:
+      release: In review|pending
+      change_id: SSD-0020
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_la_final_plan_approved
+    description: "Was the LA\u2019s final plan approved at the final hearing?"
+    item_ref: PREP022A
+    type: nchar
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_la_final_plan_approved
+    - mosaic:prep_la_final_plan_approved
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: Please select Yes / No / Unknown
+    metadata:
+      release: In review|pending
+      change_id: SSD-0021
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
+  - name: prep_la_final_care_plan
+    description: "What was the LA\u2019s final care plan for the child at the final\
+      \ hearing?"
+    item_ref: PREP023A
+    type: nvarchar
+    categories:
+    - pre_proceedings
+    returns:
+    - 1bSpecified
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prep_la_final_care_plan
+    - mosaic:prep_la_final_care_plan
+    cms_table:
+    - liquid_logic:ssd_pre_proceedings
+    - mosaic:ssd_pre_proceedings
+    guidance: "Please choose one option from this list: A \u2013 Care Order\nB \u2013\
+      \ Care Order \u2013 Placement with parents\nC \u2013 Adoption\nD \u2013 Supervision\
+      \ Order\nE \u2013 Special Guardianship Order\nF \u2013 Private Law Order\nG\
+      \ \u2013 Other\nH \u2013 Not yet at final hearing - still in care proceedings\
+      \ If not yet at the final hearing, please select \"Not yet at final hearing\
+      \ - still in care proceedings'. This will indicate that the case is still active\
+      \ in care proceedings."
+    metadata:
+      release: In review|pending
+      change_id: SSD-0022
+      change_source: 1bSpecified
+      versions_count: 1
+      impact_title: null
+      type: New Feature
