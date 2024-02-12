@@ -426,7 +426,6 @@ SELECT
     -- icpc.icpc_icpc_team                             AS ALLOCATED_TEAM,        
     -- icpc.icpc_icpc_worker_id                        AS ALLOCATED_WORKER
  
-
 INTO #AA_5_s47_enquiries 
 
 FROM
@@ -542,7 +541,6 @@ SELECT
             END
     END                                         AS Age
     
-
     /* List additional AA fields */
     d.disa_disability_code                      AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
     
@@ -639,11 +637,22 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#AA_7_child_protection') IS NOT NULL DROP TABLE #AA_7_child_protection;
 
--- still to include in list 7 ?!
-    -- Child Protection Plan Start Date?
-    -- Date of last review conference?
-    -- cp end date?
-    -- Number of Previous Child Protection Plans?
+/* AA headings from sample
+Does the Child have a Disability
+Child Protection Plan Start Date
+Initial Category of Abuse
+Latest Category of Abuse
+Date of the Last Statutory Visit
+Was the Child Seen Alone?
+Date of latest review conference
+Child Protection Plan End Date
+Subject to Emergency Protection Order or Protected Under Police Powers in Last Six Months (Y/N)
+Sum of Number of Previous Child Protection Plans
+Allocated Team
+Allocated Worker
+
+*/
+
 
 SELECT
     /* Common AA fields */
@@ -669,31 +678,23 @@ SELECT
     d.disa_disability_code                      AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
     
     /* Returns fields */   
-
-    -- Removed 060224 JH
-    -- cv.cinv_cin_visit_id,
-    -- cv.cin_plan_id, 
-    -- cv.cinv_cin_visit_date,
-    -- cv.cinv_cin_visit_seen,
-    -- cv.cinv_cin_visit_seen_alone,
-
     -- Replaced 060224 JH
-    cpp.cppl_cp_plan_start_date	        AS	CP_START_DATE		--Child Protection Plan Start Date
-    cpp.cppv_cp_visit_date	            AS	CP_VISIT_DATE		--Date of the Last Statutory Visit
-    cpp.cppv_cp_visit_seen_alone	    AS	CP_SEEN_ALONE		--Was the Child Seen Alone?
-    cpp.cppr_cp_review_date	            AS	CP_REVIEW_DATE		--Date of latest review conference
-    cpp.cppl_cp_plan_end_date	        AS	CP_PLAN_END_DATE	--Child Protection Plan End Date
+    cpp.cppl_cp_plan_start_date	        AS	CP_START_DATE,		--Child Protection Plan Start Date
+    cpp.cppv_cp_visit_date	            AS	CP_VISIT_DATE,		--Date of the Last Statutory Visit
+    cpp.cppv_cp_visit_seen_alone	    AS	CP_SEEN_ALONE,		--Was the Child Seen Alone?
+    cpp.cppr_cp_review_date	            AS	CP_REVIEW_DATE,		--Date of latest review conference
+    cpp.cppl_cp_plan_end_date	        AS	CP_PLAN_END_DATE,	--Child Protection Plan End Date
 
 
     /* Check if Emergency Protection Order exists within last 6 months */
     CASE WHEN ls.legal_status_id IS NOT NULL THEN 'Y' ELSE 'N' END AS emergency_protection_order,
 
     /* New fields for category of abuse */
-    MIN(CASE WHEN cpp.cpp_start_date = coa_early.cpp_earliest_date THEN coa_early.cpp_category END) AS INIT_ABUSE_CAT,
-    MIN(CASE WHEN cpp.cpp_start_date = coa_latest.cpp_latest_date THEN coa_latest.cpp_category END) AS LATEST_ABUSE_CAT
+    -- MIN(CASE WHEN cpp.cpp_start_date = coa_early.cpp_earliest_date THEN coa_early.cpp_category END) AS INIT_ABUSE_CAT,
+    -- MIN(CASE WHEN cpp.cpp_start_date = coa_latest.cpp_latest_date THEN coa_latest.cpp_category END) AS LATEST_ABUSE_CAT
     -- OR is it
-    -- cpp.cppl_cp_plan_initial_category	AS	INIT_ABUSE_CAT		--Initial Category of Abuse
-    -- cpp.cppl_cp_plan_latest_category	    AS	LATEST_ABUSE_CAT	--Latest Category of Abuse
+    cpp.cppl_cp_plan_initial_category	AS	INIT_ABUSE_CAT		--Initial Category of Abuse
+    cpp.cppl_cp_plan_latest_category	    AS	LATEST_ABUSE_CAT	--Latest Category of Abuse
 
     -- allocated team -- Use Involvements table for latest allocated team
     -- allocated worker -- Use Involvements table for latest allocated case worker
@@ -712,40 +713,43 @@ LEFT JOIN   -- with disability
     #ssd_disability d ON cv.cinv_person_id = d.disa_person_id
 
 INNER JOIN
-    #ssd_cin_episodes ce ON cv.cinv_person_id = ce.la_person_id
+    #ssd_cin_episodes ce ON cv.cinv_person_id = ce.cine_person_id
+
 LEFT JOIN
     #ssd_legal_status ls ON cv.cinv_person_id = ls.pers_person_id 
         AND ls.legal_status_start >= DATEADD(MONTH, -6, GETDATE())	/*PW - amended from '>= DATE_ADD(CURRENT_DATE, INTERVAL -6 MONTH)'*/
+
 LEFT JOIN
-    #ssd_cp_plans cpp ON cv.cinv_person_id = cpp.la_person_id
+    #ssd_cp_plans cpp ON cv.cinv_person_id = cpp.cppl_person_id
+
 LEFT JOIN
     #category_of_abuse coa_early ON cpp.cp_plan_id = coa_early.cp_plan_id
 
     AND coa_early.cpp_start_date = (
-        SELECT MIN(cpp_start_date) FROM cp_plans WHERE la_person_id = cv.cinv_person_id
+        SELECT MIN(cpp_start_date) FROM cp_plans WHERE cppl_person_id = cv.cinv_person_id
     )
 LEFT JOIN
     #category_of_abuse coa_latest ON cpp.cp_plan_id = coa_latest.cp_plan_id
 
     AND coa_latest.cpp_start_date = (
-        SELECT MAX(cpp_start_date) FROM cp_plans WHERE la_person_id = cv.la_person_id
+        SELECT MAX(cpp_start_date) FROM cp_plans WHERE cppl_person_id = cv.la_person_id
     )
 
 WHERE
-    cv.cinv_cin_visit_date >= DATEADD(MONTH, -12, GETDATE()) -- [TESTING] check time period, 12mths or 6?	/*PW - Amended from 'DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH)'*/
+    cv.cinv_cin_visit_date >= DATEADD(MONTH, -12, GETDATE()) -- /*PW - Amended from 'DATE_ADD(CURRENT_DATE, INTERVAL -12 MONTH)'*/
 
 GROUP BY
-    p.la_person_id,
-    p.person_sex,
-    p.person_gender,
+    p.pers_person_id,
+    p.pers_sex,
+    p.pers_gender,
     p.person_ethnicity,
     p.person_dob,
     d.person_disability,
-    cv.cin_visit_id,
-    cv.cin_plan_id,
-    cv.cin_visit_date,
-    cv.cin_visit_seen,
-    cv.cin_visit_seen_alone,
+    cv.cinv_cin_visit_id,
+    cv.cinv_cin_plan_id,
+    cv.cinv_cin_visit_date,
+    cv.cinv_cin_visit_seen,
+    cv.cinv_cin_visit_seen_alone,
     cp.cin_team,
     cp.cin_worker_id,
     ce.cin_ref_team,
@@ -753,31 +757,6 @@ GROUP BY
     ls.legal_status_id;
 
 
-/* AA headings from sample
-Does the Child have a Disability
-Child Protection Plan Start Date
-Initial Category of Abuse
-Latest Category of Abuse
-Date of the Last Statutory Visit
-Was the Child Seen Alone?
-Date of latest review conference
-Child Protection Plan End Date
-Subject to Emergency Protection Order or Protected Under Police Powers in Last Six Months (Y/N)
-Sum of Number of Previous Child Protection Plans
-Allocated Team
-Allocated Worker
-
-*/
-
--- Are these needed? Not in list 7
---     /* New fields from cin_episodes table */
---     ce.cin_primary_need, -- available in more than one place
---     ce.cin_ref_outcome, -- is this case status? 
---     ce.cin_close_reason,
---     ce.cin_ref_team,
---     ce.cin_ref_worker_id as cin_ref_worker  -- Renamed for clarity
--- INNER JOIN  -- with cin_episodes
---     cin_episodes ce ON cp.la_person_id = ce.la_person_id
 
 
 
