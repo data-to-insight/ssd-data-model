@@ -170,7 +170,7 @@ AND (                                                       -- Filter irrelevant
 
  
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_person_la_person_id ON ssd_person(pers_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_person_la_person_id ON ssd_person(pers_person_id);
  
 
 -- [TESTING] Increment /print progress
@@ -259,7 +259,7 @@ WHERE EXISTS
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_family_person_id ON ssd_family(fami_person_id);
+CREATE NONCLUSTERED INDEX idx_family_person_id ON ssd_family(fami_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_family ADD CONSTRAINT FK_family_person
@@ -363,9 +363,9 @@ FOREIGN KEY (addr_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_address_person ON ssd_address(addr_person_id);
-CREATE NONCLUSTERED INDEX IDX_address_start ON ssd_address(addr_address_start);
-CREATE NONCLUSTERED INDEX IDX_address_end ON ssd_address(addr_address_end);
+CREATE NONCLUSTERED INDEX idx_address_person ON ssd_address(addr_person_id);
+CREATE NONCLUSTERED INDEX idx_address_start ON ssd_address(addr_address_start);
+CREATE NONCLUSTERED INDEX idx_address_end ON ssd_address(addr_address_end);
 
 
 
@@ -444,7 +444,7 @@ ALTER TABLE ssd_disability ADD CONSTRAINT FK_disability_person
 FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_disability_person_id ON ssd_disability(disa_person_id);
+CREATE NONCLUSTERED INDEX idx_disability_person_id ON ssd_disability(disa_person_id);
 
 
 
@@ -460,7 +460,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_immigration_status
+Object Name: ssd_immigration_status (UASC)
 Description: 
 Author: D2I
 Last Modified Date: 23/11/23
@@ -499,7 +499,7 @@ INSERT INTO ssd_immigration_status (
     immi_person_id, 
     immi_immigration_status_start,
     immi_immigration_status_end,
-    immi_immigration_status
+    immi_immigration_status -- uasc
 )
 SELECT 
     ims.FACT_IMMIGRATION_STATUS_ID,
@@ -524,9 +524,9 @@ ALTER TABLE ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
 FOREIGN KEY (immi_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_immigration_status_immi_person_id ON ssd_immigration_status(immi_person_id);
-CREATE NONCLUSTERED INDEX IDX_immigration_status_start ON ssd_immigration_status(immi_immigration_status_start);
-CREATE NONCLUSTERED INDEX IDX_immigration_status_end ON ssd_immigration_status(immi_immigration_status_end);
+CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON ssd_immigration_status(immi_person_id);
+CREATE NONCLUSTERED INDEX idx_immigration_status_start ON ssd_immigration_status(immi_immigration_status_start);
+CREATE NONCLUSTERED INDEX idx_immigration_status_end ON ssd_immigration_status(immi_immigration_status_end);
 
 
 
@@ -601,7 +601,7 @@ AND EXISTS
  
  
 -- Create index(es)
-CREATE INDEX IDX_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
+CREATE INDEX idx_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
 
 -- Add constraint(s)
 ALTER TABLE ssd_mother ADD CONSTRAINT FK_moth_to_person 
@@ -681,7 +681,7 @@ WHERE EXISTS
     );
  
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_legal_status_lega_person_id ON ssd_legal_status(lega_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id ON ssd_legal_status(lega_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_legal_status ADD CONSTRAINT FK_legal_status_person
@@ -778,7 +778,7 @@ WHERE EXISTS
     );
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_contact_person_id ON ssd_contacts(cont_person_id);
+CREATE NONCLUSTERED INDEX idx_contact_person_id ON ssd_contacts(cont_person_id);
 
 
 -- Create constraint(s)
@@ -861,7 +861,7 @@ WHERE EXISTS
     );
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
@@ -971,7 +971,7 @@ AND
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_cin_episodes_person_id ON ssd_cin_episodes(cine_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id ON ssd_cin_episodes(cine_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
@@ -1080,7 +1080,7 @@ WHERE EXISTS
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_cin_assessments_person_id ON ssd_cin_assessments(cina_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cin_assessments_person_id ON ssd_cin_assessments(cina_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
@@ -1336,7 +1336,7 @@ GROUP BY
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_cin_plans_person_id ON ssd_cin_plans(cinp_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cin_plans_person_id ON ssd_cin_plans(cinp_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
@@ -1513,7 +1513,7 @@ FROM
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_s47_enquiry_person_id ON ssd_s47_enquiry(s47e_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_person_id ON ssd_s47_enquiry(s47e_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
@@ -1640,7 +1640,7 @@ WHERE
  
  
 -- Create index(es)
-CREATE INDEX IDX_ssd_initial_cp_conference_ ON ssd_initial_cp_conference(icpc_person_id);
+CREATE INDEX idx_ssd_initial_cp_conference_ ON ssd_initial_cp_conference(icpc_person_id);
 
 -- Create constraint(s)
 ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_s47_enquiry_id
@@ -1661,20 +1661,22 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/* 
+/*
 =============================================================================
 Object Name: ssd_cp_plans
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 26/01/24 
+Last Modified Date: 09/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.6
             1.4 removed depreciated team_id and worker id fields RH
-
+            1.6 added IS_OLA field to identify OLA temporary plans
+            which need to be excluded from statutory returns JCH
+ 
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: 
-
-Dependencies: 
+Remarks:
+ 
+Dependencies:
 - ssd_person
 - ssd_initial_cp_conference
 - FACT_CP_PLAN
@@ -1697,38 +1699,49 @@ CREATE TABLE ssd_cp_plans (
     cppl_person_id                    NVARCHAR(48),
     cppl_cp_plan_start_date           DATETIME,
     cppl_cp_plan_end_date             DATETIME,
+    cppl_cp_plan_ola                  NVARCHAR(1),        
     cppl_cp_plan_initial_category     NVARCHAR(100),
     cppl_cp_plan_latest_category      NVARCHAR(100)
 );
-
-
+ 
+ 
 -- Insert data
 INSERT INTO ssd_cp_plans (
-    cppl_cp_plan_id, 
-    cppl_referral_id, 
-    cppl_initial_cp_conference_id, 
-    cppl_person_id, 
-    cppl_cp_plan_start_date, 
-    cppl_cp_plan_end_date, 
-    cppl_cp_plan_initial_category, 
+    cppl_cp_plan_id,
+    cppl_referral_id,
+    cppl_initial_cp_conference_id,
+    cppl_person_id,
+    cppl_cp_plan_start_date,
+    cppl_cp_plan_end_date,
+    cppl_cp_plan_ola,
+    cppl_cp_plan_initial_category,
     cppl_cp_plan_latest_category
 )
-SELECT 
-    FACT_CP_PLAN_ID AS cppl_cp_plan_id,
-    FACT_REFERRAL_ID AS cppl_referral_id,
-    FACT_INITIAL_CP_CONFERENCE_ID AS cppl_initial_cp_conference_id,
-    DIM_PERSON_ID AS cppl_person_id,
-    START_DTTM AS cppl_cp_plan_start_date,
-    END_DTTM AS cppl_cp_plan_end_date,
-    INIT_CATEGORY_DESC AS cppl_cp_plan_initial_category,
-    CP_CATEGORY_DESC AS cppl_cp_plan_latest_category
-FROM 
-    Child_Social.FACT_CP_PLAN;
+SELECT
+    cpp.FACT_CP_PLAN_ID                 AS cppl_cp_plan_id,
+    cpp.FACT_REFERRAL_ID                AS cppl_referral_id,
+    cpp.FACT_INITIAL_CP_CONFERENCE_ID   AS cppl_initial_cp_conference_id,
+    cpp.DIM_PERSON_ID                   AS cppl_person_id,
+    cpp.START_DTTM                      AS cppl_cp_plan_start_date,
+    cpp.END_DTTM                        AS cppl_cp_plan_end_date,
+    cpp.IS_OLA                          AS cppl_cp_plan_ola,
+    cpp.INIT_CATEGORY_DESC              AS cppl_cp_plan_initial_category,
+    cpp.CP_CATEGORY_DESC                AS cppl_cp_plan_latest_category
+ 
+FROM
+    Child_Social.FACT_CP_PLAN cpp
+ 
+ 
+WHERE EXISTS ( -- only ssd relevant records
+    SELECT 1
+    FROM ssd_person p
+    WHERE p.pers_person_id = cpp.DIM_PERSON_ID
+    );
 
 
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_cp_plans_ ON ssd_cp_plans(cppl_person_id);
+CREATE INDEX idx_ssd_cp_plans_ ON ssd_cp_plans(cppl_person_id);
 
 
 -- Create constraint(s)
@@ -2429,13 +2442,15 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
 
-
-
 -- Add constraint(s)
-CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_placement(clap_cla_episode_id);
+ALTER TABLE ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
+FOREIGN KEY (clap_cla_id) REFERENCES ssd_cla_episodes(clae_cla_id);
+
+
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_clap_placement_provider_urn ON ssd_cla_placement (clap_placement_provider_urn);
+CREATE NONCLUSTERED INDEX idx_clap_placement_provider_urn ON ssd_cla_placement (clap_placement_provider_urn);
+CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_placement(clap_cla_episode_id);
 
 
 
@@ -3077,7 +3092,7 @@ ALTER TABLE ssd_missing ADD CONSTRAINT FK_missing_to_person
 FOREIGN KEY (miss_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_miss_mis_epi_type ON ssd_missing (miss_mis_epi_type);
+CREATE NONCLUSTERED INDEX idx_miss_mis_epi_type ON ssd_missing (miss_mis_epi_type);
 
 
 
@@ -3249,8 +3264,8 @@ GROUP BY
 
 
 -- Add index(es)
-CREATE INDEX IDX_clea_person_id ON ssd_care_leavers(clea_person_id);
-CREATE NONCLUSTERED INDEX IDX_clea_care_leaver_activity ON ssd_care_leavers (clea_care_leaver_activity);
+CREATE INDEX idx_clea_person_id ON ssd_care_leavers(clea_person_id);
+CREATE NONCLUSTERED INDEX idx_clea_care_leaver_activity ON ssd_care_leavers (clea_care_leaver_activity);
 
 
 
@@ -3276,9 +3291,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_permanence
 Description: 
 Author: D2I
-Last Modified Date: 18/01/23 JH
+Last Modified Date: 09/02/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.7
+Version: 1.8
+        1.7: perm_adopter_sex, perm_adopter_legal_status added RH
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
         DEV: 181223: Assumed that only one permanence order per child. 
@@ -3328,6 +3344,8 @@ CREATE TABLE ssd_permanence (
     perm_permanence_order_date           DATETIME,              
     perm_permanence_order_type           NVARCHAR(100),        
     perm_adoption_worker                 NVARCHAR(100),          -- [TESTING] (datatype changed)
+    perm_adopter_sex                     NVARCHAR(48),
+    perm_adopter_legal_status            NVARCHAR(100),
 );
  
  
@@ -3353,7 +3371,9 @@ INSERT INTO ssd_permanence (
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker
+    perm_adoption_worker,
+    perm_adopter_sex,
+    perm_adopter_legal_status 
 )  
 SELECT
     fce.FACT_CARE_EPISODES_ID               AS perm_table_id,
@@ -3432,10 +3452,13 @@ SELECT
         WHEN fce.CARE_REASON_END_CODE IN ('E48','E44','E43','45','E45','E47','E46') THEN 'Special Guardianship Order'
         WHEN fce.CARE_REASON_END_CODE IN ('45','E41') THEN 'Child Arrangements/ Residence Order'
         ELSE NULL
-    END                                     AS perm_permanence_order_type,      
+    END                                         AS perm_permanence_order_type,      
  
-    fa.ADOPTION_SOCIAL_WORKER_NAME            AS perm_adoption_worker            -- Note that duplicate -1 seen in raw data
+    fa.ADOPTION_SOCIAL_WORKER_NAME              AS perm_adoption_worker            -- Note that duplicate -1 seen in raw data
  
+    fa.DIM_LOOKUP_ADOPTER_GENDER_CODE              AS perm_adopter_sex, 
+    fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE        AS perm_adopter_legal_status 
+
 FROM Child_Social.FACT_CARE_EPISODES fce
  
 LEFT JOIN Child_Social.FACT_ADOPTION AS fa
@@ -3630,8 +3653,8 @@ FROM
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_invo_professional_id ON ssd_involvements (invo_professional_id);
-CREATE NONCLUSTERED INDEX IDX_invo_professional_role_id ON ssd_involvements (invo_professional_role_id);
-CREATE NONCLUSTERED INDEX IDX_invo_professional_team ON ssd_involvements (invo_professional_team);
+CREATE NONCLUSTERED INDEX idx_invo_professional_role_id ON ssd_involvements (invo_professional_role_id);
+CREATE NONCLUSTERED INDEX idx_invo_professional_team ON ssd_involvements (invo_professional_team);
 
 
 -- Add constraint(s)
@@ -3679,7 +3702,7 @@ IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd
 
 -- Create structure
 CREATE TABLE ssd_linked_identifiers (
-    link_link_id            NVARCHAR(48) PRIMARY KEY, 
+    link_link_id            NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
     link_person_id          NVARCHAR(48), 
     link_identifier_type    NVARCHAR(100),
     link_identifier_value   NVARCHAR(100),
@@ -3689,7 +3712,7 @@ CREATE TABLE ssd_linked_identifiers (
 
 -- Insert placeholder data [TESTING]
 INSERT INTO ssd_linked_identifiers (
-    link_link_id,
+    -- row id ommitted as ID generated (link_link_id,)
     link_person_id,
     link_identifier_type,
     link_identifier_value,
@@ -3697,7 +3720,8 @@ INSERT INTO ssd_linked_identifiers (
     link_valid_to_date
 )
 VALUES
-    ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01');
+    ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01');
+
 
 -- To switch on once source data defined.
 -- WHERE EXISTS 
@@ -3758,7 +3782,7 @@ IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_
 
 -- Create structure
 CREATE TABLE ssd_s251_finance (
-    s251_id                 NVARCHAR(48) PRIMARY KEY, 
+    s251_id                 NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
     s251_cla_placement_id   NVARCHAR(48), 
     s251_placeholder_1      NVARCHAR(48),
     s251_placeholder_2      NVARCHAR(48),
@@ -3768,7 +3792,7 @@ CREATE TABLE ssd_s251_finance (
 
 -- Insert placeholder data [TESTING]
 INSERT INTO ssd_s251_finance (
-    s251_id,
+    -- row id ommitted as ID generated (s251_id,)
     s251_cla_placement_id,
     s251_placeholder_1,
     s251_placeholder_2,
@@ -3776,7 +3800,7 @@ INSERT INTO ssd_s251_finance (
     s251_placeholder_4
 )
 VALUES
-    ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+    ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
 
 
 -- Create constraint(s)
@@ -3819,7 +3843,7 @@ IF OBJECT_ID('tempdb..#ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voi
 
 -- Create structure
 CREATE TABLE ssd_voice_of_child (
-    voch_table_id               NVARCHAR(48) PRIMARY KEY, 
+    voch_table_id               NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
     voch_person_id              NVARCHAR(48), 
     voch_explained_worries      NCHAR(1), 
     voch_story_help_understand  NCHAR(1), 
@@ -3830,7 +3854,7 @@ CREATE TABLE ssd_voice_of_child (
 
 -- Insert placeholder data [TESTING]
 INSERT INTO ssd_voice_of_child (
-    voch_table_id,
+    -- row id ommitted as ID generated (voch_table_id,)
     voch_person_id,
     voch_explained_worries,
     voch_story_help_understand,
@@ -3840,8 +3864,8 @@ INSERT INTO ssd_voice_of_child (
 )
 VALUES
 VALUES
-    ('10001','10001', 'Y', 'Y', 'Y', 'Y', 'Y'),
-    ('10002','10002', 'Y', 'Y', 'Y', 'Y', 'Y');
+    ('10001', 'Y', 'Y', 'Y', 'Y', 'Y'),
+    ('10002', 'Y', 'Y', 'Y', 'Y', 'Y');
 
 -- To switch on once source data defined.
 -- WHERE EXISTS 
@@ -3891,7 +3915,7 @@ IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pr
 
 -- Create structure
 CREATE TABLE ssd_pre_proceedings (
-    prep_table_id                       NVARCHAR(48) PRIMARY KEY,
+    prep_table_id                       NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
     prep_person_id                      NVARCHAR(48),
     prep_plo_family_id                  NVARCHAR(48),
     prep_pre_pro_decision_date          DATETIME,
@@ -3919,7 +3943,7 @@ CREATE TABLE ssd_pre_proceedings (
 
 -- Insert placeholder data
 INSERT INTO ssd_pre_proceedings (
-    prep_table_id,
+    -- row id ommitted as ID generated (prep_table_id,)
     prep_person_id,
     prep_plo_family_id,
     prep_pre_pro_decision_date,
@@ -3946,12 +3970,12 @@ INSERT INTO ssd_pre_proceedings (
 )
 VALUES
     (
-    '10001', 'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900-01-01', '1900-01-01', 'Outcome1', 
+    'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900-01-01', '1900-01-01', 'Outcome1', 
     '1900-01-01', 3, 'Approved', 2, 1, '1900-01-01', '1900-01-01', 2, 'Y', 
     'NA', 'COURT_REF_1', 1, 'Y', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
     ),
     (
-    '10002', 'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900-01-01', '1900-01-01', 'Outcome2',
+    'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900-01-01', '1900-01-01', 'Outcome2',
     '1900-01-01', 4, 'Denied', 1, 2, '1900-01-01', '1900-01-01', 3, 'Y',
     'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'Y', 'Initial Plan 2', 'Y', 'Final Plan 2'
     );
@@ -3973,7 +3997,7 @@ FOREIGN KEY (prep_person_id) REFERENCES ssd_person(pers_person_id);
 CREATE NONCLUSTERED INDEX idx_prep_person_id ON ssd_pre_proceedings (prep_person_id);
 CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date ON ssd_pre_proceedings (prep_pre_pro_decision_date);
 
-CREATE NONCLUSTERED INDEX IDX_prep_legal_gateway_outcome ON ssd_pre_proceedings (prep_legal_gateway_outcome);
+CREATE NONCLUSTERED INDEX idx_prep_legal_gateway_outcome ON ssd_pre_proceedings (prep_legal_gateway_outcome);
 
 
 

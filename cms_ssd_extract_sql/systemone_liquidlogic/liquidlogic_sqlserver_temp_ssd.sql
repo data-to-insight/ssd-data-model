@@ -1636,20 +1636,22 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/* 
+/*
 =============================================================================
 Object Name: ssd_cp_plans
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 26/01/24 
+Last Modified Date: 09/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.6
             1.4 removed depreciated team_id and worker id fields RH
-
+            1.6 added IS_OLA field to identify OLA temporary plans
+            which need to be excluded from statutory returns JCH
+ 
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: 
-
-Dependencies: 
+Remarks:
+ 
+Dependencies:
 - ssd_person
 - ssd_initial_cp_conference
 - FACT_CP_PLAN
@@ -1658,8 +1660,6 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cp_plans';
 PRINT 'Creating table: ' + @TableName;
-
-
 
 
 -- Check if exists & drop 
@@ -1673,33 +1673,44 @@ CREATE TABLE #ssd_cp_plans (
     cppl_person_id                    NVARCHAR(48),
     cppl_cp_plan_start_date           DATETIME,
     cppl_cp_plan_end_date             DATETIME,
+    cppl_cp_plan_ola                  NVARCHAR(1),        
     cppl_cp_plan_initial_category     NVARCHAR(100),
     cppl_cp_plan_latest_category      NVARCHAR(100)
 );
-
-
+ 
+ 
 -- Insert data
 INSERT INTO #ssd_cp_plans (
-    cppl_cp_plan_id, 
-    cppl_referral_id, 
-    cppl_initial_cp_conference_id, 
-    cppl_person_id, 
-    cppl_cp_plan_start_date, 
-    cppl_cp_plan_end_date, 
-    cppl_cp_plan_initial_category, 
+    cppl_cp_plan_id,
+    cppl_referral_id,
+    cppl_initial_cp_conference_id,
+    cppl_person_id,
+    cppl_cp_plan_start_date,
+    cppl_cp_plan_end_date,
+    cppl_cp_plan_ola,
+    cppl_cp_plan_initial_category,
     cppl_cp_plan_latest_category
 )
-SELECT 
-    FACT_CP_PLAN_ID AS cppl_cp_plan_id,
-    FACT_REFERRAL_ID AS cppl_referral_id,
-    FACT_INITIAL_CP_CONFERENCE_ID AS cppl_initial_cp_conference_id,
-    DIM_PERSON_ID AS cppl_person_id,
-    START_DTTM AS cppl_cp_plan_start_date,
-    END_DTTM AS cppl_cp_plan_end_date,
-    INIT_CATEGORY_DESC AS cppl_cp_plan_initial_category,
-    CP_CATEGORY_DESC AS cppl_cp_plan_latest_category
-FROM 
-    Child_Social.FACT_CP_PLAN;
+SELECT
+    cpp.FACT_CP_PLAN_ID                 AS cppl_cp_plan_id,
+    cpp.FACT_REFERRAL_ID                AS cppl_referral_id,
+    cpp.FACT_INITIAL_CP_CONFERENCE_ID   AS cppl_initial_cp_conference_id,
+    cpp.DIM_PERSON_ID                   AS cppl_person_id,
+    cpp.START_DTTM                      AS cppl_cp_plan_start_date,
+    cpp.END_DTTM                        AS cppl_cp_plan_end_date,
+    cpp.IS_OLA                          AS cppl_cp_plan_ola,
+    cpp.INIT_CATEGORY_DESC              AS cppl_cp_plan_initial_category,
+    cpp.CP_CATEGORY_DESC                AS cppl_cp_plan_latest_category
+ 
+FROM
+    Child_Social.FACT_CP_PLAN cpp
+ 
+ 
+WHERE EXISTS ( -- only ssd relevant records
+    SELECT 1
+    FROM #ssd_person p
+    WHERE p.pers_person_id = cpp.DIM_PERSON_ID
+    );
 
 
 
@@ -2383,7 +2394,13 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
 -- -- Add constraint(s)
--- CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON #ssd_cla_placement(clap_cla_episode_id);
+-- ALTER TABLE ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
+-- FOREIGN KEY (clap_cla_id) REFERENCES ssd_cla_episodes(clae_cla_id);
+
+
+-- -- Create index(es)
+-- CREATE NONCLUSTERED INDEX idx_clap_placement_provider_urn ON ssd_cla_placement (clap_placement_provider_urn);
+-- CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_placement(clap_cla_episode_id);
 
 
 
@@ -3210,15 +3227,15 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
-
 /* 
 =============================================================================
 Object Name: ssd_permanence
 Description: 
 Author: D2I
-Last Modified Date: 18/01/23 JH
+Last Modified Date: 09/02/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.7
+Version: 1.8
+        1.7: perm_adopter_sex, perm_adopter_legal_status added RH
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
         DEV: 181223: Assumed that only one permanence order per child. 
@@ -3244,7 +3261,6 @@ PRINT 'Creating table: ' + @TableName;
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
  
- 
 -- Create structure
 CREATE TABLE #ssd_permanence (
     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
@@ -3267,7 +3283,9 @@ CREATE TABLE #ssd_permanence (
     perm_decision_reversed_reason        NVARCHAR(100),
     perm_permanence_order_date           DATETIME,              
     perm_permanence_order_type           NVARCHAR(100),        
-    perm_adoption_worker                 NVARCHAR(100),         -- [TESTING] (datatype changed)
+    perm_adoption_worker                 NVARCHAR(100),          -- [TESTING] (datatype changed)
+    perm_adopter_sex                     NVARCHAR(48),
+    perm_adopter_legal_status            NVARCHAR(100),
 );
  
  
@@ -3293,7 +3311,9 @@ INSERT INTO #ssd_permanence (
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker
+    perm_adoption_worker,
+    perm_adopter_sex,
+    perm_adopter_legal_status 
 )  
 SELECT
     fce.FACT_CARE_EPISODES_ID               AS perm_table_id,
@@ -3372,10 +3392,13 @@ SELECT
         WHEN fce.CARE_REASON_END_CODE IN ('E48','E44','E43','45','E45','E47','E46') THEN 'Special Guardianship Order'
         WHEN fce.CARE_REASON_END_CODE IN ('45','E41') THEN 'Child Arrangements/ Residence Order'
         ELSE NULL
-    END                                     AS perm_permanence_order_type,      
+    END                                         AS perm_permanence_order_type,      
  
-    fa.ADOPTION_SOCIAL_WORKER_NAME            AS perm_adoption_worker            -- Note that duplicate -1 seen in raw data
+    fa.ADOPTION_SOCIAL_WORKER_NAME              AS perm_adoption_worker            -- Note that duplicate -1 seen in raw data
  
+    fa.DIM_LOOKUP_ADOPTER_GENDER_CODE              AS perm_adopter_sex, 
+    fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE        AS perm_adopter_legal_status 
+
 FROM Child_Social.FACT_CARE_EPISODES fce
  
 LEFT JOIN Child_Social.FACT_ADOPTION AS fa

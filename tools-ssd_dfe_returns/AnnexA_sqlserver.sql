@@ -51,8 +51,8 @@ IF OBJECT_ID('tempdb..#AA_1_contacts') IS NOT NULL DROP TABLE #AA_1_contacts;
 
 SELECT
     /* Common AA fields */
-    p.pers_legacy_id                            AS ChildUniqueID,	/*PW - Field Name changed from p.pers_legacy_id as that doesn't match SSDS Spec*/
-    p.pers_person_id							AS ChildUniqueID,	/*PW - Field Name changed from p.pers_legacy_id as that doesn't match SSDS Spec*/
+    p.pers_legacy_id                            AS ChildUniqueID,	
+    p.pers_person_id							AS ChildUniqueID2,	
     CASE
 		WHEN p.pers_sex = 'M' THEN 'a) Male'
 		WHEN p.pers_sex = 'F' THEN 'b) Female'
@@ -193,7 +193,7 @@ IF OBJECT_ID('tempdb..#AA_2_early_help_assessments') IS NOT NULL DROP TABLE #AA_
 SELECT
     /* Common AA fields */
 
-    p.pers_legacy_id                        AS CHILD_ID,
+    p.pers_legacy_id                        AS ChildUniqueID,
     p.pers_sex                              AS GENDER,
     p.pers_ethnicity                        AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')        AS DATE_OF_BIRTH,
@@ -274,7 +274,7 @@ IF OBJECT_ID('tempdb..#AA_3_referrals') IS NOT NULL DROP TABLE #AA_3_referrals;
 
 SELECT
     /* Common AA fields */
-    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_legacy_id                            AS ChildUniqueID,
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
@@ -369,7 +369,7 @@ IF OBJECT_ID('tempdb..#AA_4_assessments') IS NOT NULL DROP TABLE #AA_4_assessmen
 
 SELECT
     /* Common AA fields */
-    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_legacy_id                            AS ChildUniqueID,
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
@@ -475,7 +475,7 @@ IF OBJECT_ID('tempdb..#AA_5_s47_enquiries') IS NOT NULL DROP TABLE #AA_5_s47_enq
 
 SELECT
     /* Common AA fields */
-    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_legacy_id                            AS ChildUniqueID,
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     CONVERT(VARCHAR, p.pers_dob, 103)           AS DATE_OF_BIRTH,
@@ -582,11 +582,15 @@ LEFT JOIN (
         AND (icpc.icpc_icpc_date IS NOT NULL AND icpc.icpc_icpc_date <> '')
     GROUP BY
         icpc.icpc_person_id
+        
 ) agg_icpc ON s47e.s47e_person_id = agg_icpc.icpc_person_id
 
 
 WHERE
     s47e.s47e_s47_start_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
+
+
+-- join the ssd S47 and ICPC tables using Referral_ID you will get the ICPC information related to each S47 Enquiry 
 
 
 -- -- [TESTING]
@@ -631,7 +635,7 @@ IF OBJECT_ID('tempdb..#AA_6_children_in_need') IS NOT NULL DROP TABLE #AA_6_chil
 
 SELECT
     /* Common AA fields */
-    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_legacy_id                            AS ChildUniqueID,
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
@@ -764,7 +768,7 @@ IF OBJECT_ID('tempdb..#AA_7_child_protection') IS NOT NULL DROP TABLE #AA_7_chil
 
 SELECT
     /* Common AA fields */
-    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_legacy_id                            AS ChildUniqueID,
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
@@ -939,7 +943,7 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
 SELECT
     /* Common AA fields */
 
-    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_legacy_id                            AS ChildUniqueID,
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
@@ -1024,7 +1028,7 @@ IF OBJECT_ID('tempdb..#AA_9_care_leavers') IS NOT NULL DROP TABLE #AA_9_care_lea
 SELECT
     /* Common AA fields */
 
-    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_legacy_id                            AS ChildUniqueID,
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
@@ -1098,7 +1102,7 @@ IF OBJECT_ID('tempdb..#AA_10_adoption') IS NOT NULL DROP TABLE #AA_10_adoption;
 SELECT
     /* Common AA fields */
 
-    p.pers_legacy_id                            AS CHILD_ID,
+    p.pers_legacy_id                            AS ChildUniqueID,
     p.pers_sex                                  AS GENDER,
     p.pers_ethnicity                            AS ETHNICITY,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
@@ -1204,17 +1208,17 @@ SELECT
     /* List additional AA fields */
     d.disa_disability_code                      AS DISABILITY,     
 
-    perm.perm_adopted_by_carer_flag             AS ADOPTED_BY_CARER, -- Is the (prospective) adopter fostering for adoption?
-    -- Date enquiry received
-    -- Date Stage 1 started
-    -- Date Stage 1 ended
-    -- Date Stage 2 started
-    -- Date Stage 2 ended
-    -- Date application submitted
-    -- Date application approved
-    perm.perm_matched_date                      AS MATCHED_DATE, -- Date adopter matched with child(ren)
-    perm.perm_placed_for_adoption_date          AS PLACED_DATE, -- Date child/children placed with adopter(s)
-    perm.perm_siblings_placed_together          AS NUM_SIBLINGS_PLACED, -- No. of children placed
+    perm.perm_adopted_by_carer_flag             AS ADOPTED_BY_CARER,    -- Is the (prospective) adopter fostering for adoption?
+    '1900-01-01'                                AS ENQUIRY_DATE,        -- Date enquiry received
+    '1900-01-01'                                AS STAGE1_START_DATE,   -- Date Stage 1 started
+    '1900-01-01'                                AS STAGE1_END_DATE,     -- Date Stage 1 ended
+    '1900-01-01'                                AS STAGE2_START_DATE,   -- Date Stage 2 started
+    '1900-01-01'                                AS STAGE2_END_DATE,     -- Date Stage 2 ended
+    '1900-01-01'                                AS APPLICATION_DATE,    -- Date application submitted
+    '1900-01-01'                                AS APPLICATION_APPR_DATE,-- Date application approved
+    perm.perm_matched_date                      AS MATCHED_DATE,        -- Date adopter matched with child(ren)
+    perm.perm_placed_for_adoption_date          AS PLACED_DATE,         -- Date child/children placed with adopter(s)
+    'PLACEHOLDER_DATA'                          AS NUM_SIBLINGS_PLACED, -- No. of children placed
     perm.perm_permanence_order_date             AS ADOPTION_ORDER_DATE, -- Date of Adoption Order
     perm.perm_decision_reversed_date            AS ADOPTION_LEAVE_DATE, -- Date of leaving adoption process
     perm.perm_decision_reversed_reason          AS ADOPTION_LEAVE_REASON-- Reason for leaving adoption process
