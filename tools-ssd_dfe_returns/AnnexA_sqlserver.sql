@@ -178,7 +178,7 @@ SELECT
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
 	END											AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')        AS DATE_OF_BIRTH,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')        AS DateOfBirth,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                             
@@ -276,7 +276,7 @@ SELECT
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
 	END											AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                             
@@ -387,7 +387,7 @@ SELECT
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
 	END											AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                             
@@ -509,7 +509,7 @@ SELECT
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
 	END											AS Ethnicity,
-    CONVERT(VARCHAR, p.pers_dob, 103)           AS DATE_OF_BIRTH,
+    CONVERT(VARCHAR, p.pers_dob, 103)           AS DateOfBirth,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                             
@@ -684,7 +684,7 @@ SELECT
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
 	END											AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                             
@@ -843,7 +843,7 @@ SELECT
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
 	END											AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                             
@@ -1009,7 +1009,7 @@ SELECT
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
 	END											AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth, --  note: returns string representation of the date
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                             
@@ -1026,7 +1026,7 @@ SELECT
     /* List additional AA fields */
 
     d.disa_disability_code                  AS DISABILITY,          -- Disability1
-    i.immi_immigration_status               AS UASC,                -- UASC12mth (if had imm.status 'Unaccompanied Asylum Seeking Child' active in prev 12 months)
+    i.immi_immigration_status               AS UASC12mth ,          -- UASC12mth (if had imm.status 'Unaccompanied Asylum Seeking Child' active in prev 12 months)
 
 -- in progress (comment headings direct from AA guidance)
 clae.clae.clae_cla_episode_start            AS StartDateRecentCareEpisode,   -- StartDateRecentCareEpisode??
@@ -1141,45 +1141,25 @@ Description:
             Eligible children"
 
 Author: D2I
-Last Modified Date: 31/01/24 RH
+Last Modified Date: 13/02/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.3: Removed old obj/item naming. 
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
--
+- ssd_person
+- ssd_disability
+- ssd_immigration_status
 =============================================================================
 */
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#AA_9_care_leavers') IS NOT NULL DROP TABLE #AA_9_care_leavers;
 
-
--- notes
--- AA headings
--- Child Unique ID
--- Gender
--- Ethnicity
--- Date of Birth
--- Age of Child (Years)
--- Unaccompanied Asylum Seeking Child (UASC), or formerly UASC if 18 or over (Y/N)
--- Does the Child have a Disability
--- Allocated Team
--- Allocated Worker
--- Allocated Personal Advisor
--- Eligibility Category
--- LA In Touch 
--- Latest Pathway Plan Review Date
--- Latest Date of Contact
--- Type of Accommodation
--- Suitability of Accommodation
--- Activity Status
-
-
 SELECT
     /* Common AA fields */
-
-    p.pers_legacy_id                            AS ChildUniqueID,
+    p.pers_legacy_id                            AS ChildUniqueID,	-- temp solution [TESTING] This liquid logic specific
+    p.pers_person_id						    AS ChildUniqueID2,	-- temp solution [TESTING] This for compatiblility in non-ll systems
     CASE
 		WHEN p.pers_sex = 'M' THEN 'a) Male'
 		WHEN p.pers_sex = 'F' THEN 'b) Female'
@@ -1209,7 +1189,7 @@ SELECT
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
 	END											AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth, --  note: returns string representation of the date
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                             
@@ -1225,21 +1205,48 @@ SELECT
 
     /* List additional AA fields */
 
-    d.disa_disability_code                      AS DISABILITY     
+    d.disa_disability_code                      AS DISABILITY           -- Does the Child have a Disability
+    CASE         
+        -- Unaccompanied Asylum Seeking Child (UASC), or formerly UASC if 18 or over (Y/N)                                               
+        WHEN latest_status.immi_immigration_status = 'Unaccompanied Asylum Seeking Child (UASC)' THEN 'Y'
+        ELSE 'N'
+    END                                         AS LegalStatus,         
 
-
+    clea.clea_care_leaver_allocated_team_name   AS AllocatedTeam,       -- Allocated Team
+    clea.clea_care_leaver_worker_name           AS AllocatedWorker,     -- Allocated Worker
+    clea.clea_care_leaver_personal_advisor      AS AllocatedPA,         -- Allocated Personal Advisor
+    clea.clea_care_leaver_eligibility           AS EligibilityCategory, -- Eligibility Category
+    clea.clea_care_leaver_in_touch              AS InTouch,             -- LA In Touch 
+    clea.clea_pathway_plan_review_date          AS ReviewDate,          -- Latest Pathway Plan Review Date
+    clea.clea_care_leaver_latest_contact        AS LatestContactDate,   -- Latest Date of Contact
+    clea.clea_care_leaver_accommodation         AS AccomodationType,    -- Type of Accommodation
+    clea.clea_care_leaver_accom_suitable        AS AccommodationSuitability, -- Suitability of Accommodation
+    clea.clea_care_leaver_activity              AS ActivityStatus       -- Activity Status
 
 
 INTO #AA_9_care_leavers
 
 FROM
--- 
+    #ssd_care_leavers clea
 
-INNER JOIN
-    ssd_person p ON xx.xxxx_person_id = p.pers_person_id
+LEFT JOIN   -- person table for core dets
+    ssd_person p ON clea.clea_person_id = p.pers_person_id
 
 LEFT JOIN   -- disability table
-    ssd_disability d ON xx.xxxx_person_id = d.disa_person_id
+    ssd_disability d ON clea.clea_person_id = d.disa_person_id
+
+LEFT JOIN   -- join but with subquery as need most recent immigration status
+    (
+        SELECT 
+            immi_person_id,
+            immi_immigration_status,
+            -- partitioning by immi_person_id (group by each person) 
+            ROW_NUMBER() OVER (PARTITION BY immi_person_id -- assign unique row num (most recent rn ===1)
+            -- get latest status based on end date, (using start date as a secondary order in case of ties or NULL end dates)
+            ORDER BY immi_immigration_status_end DESC, immi_immigration_status_start DESC) AS rn
+        FROM 
+            ssd_immigration_status
+    ) latest_status ON clea.clea_person_id = latest_status.immi_person_id AND latest_status.rn = 1;
 
 
 
@@ -1299,7 +1306,7 @@ SELECT
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
 	END											AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth, --  note: returns string representation of the date
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                             
@@ -1390,7 +1397,7 @@ SELECT
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
 	END											AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth, --  note: returns string representation of the date
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                             
