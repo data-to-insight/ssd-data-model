@@ -706,6 +706,9 @@ INTO #AA_7_child_protection
 FROM
     #ssd_cin_visits cv
 
+
+-- Some/all of these joins need redoing since the release 2 changes/ object renaming (ssd_ xxx )
+-- some of these joins potentially no longer required
 INNER JOIN
     #ssd_person p ON cv.cinv_person_id = p.pers_person_id
 
@@ -742,8 +745,10 @@ GROUP BY
     p.pers_person_id,
     p.pers_sex,
     p.pers_gender,
-    p.person_ethnicity,
-    p.person_dob,
+
+    -- to do
+    p.pers_ethnicity,
+    p.pers_dob,
     d.person_disability,
     cv.cinv_cin_visit_id,
     cv.cinv_cin_plan_id,
@@ -782,6 +787,7 @@ Dependencies:
 - ssd_disability
 - ssd_immigration_status
 - ssd_person
+- cla_episode
 =============================================================================
 */
 -- Check if exists & drop
@@ -816,6 +822,10 @@ SELECT
     cp.cppl_cp_plan_end_date,
     cp.cppl_cp_plan_worker_id,
     cp.cppl_cp_plan_team
+
+
+    -- open cla_episiode, or episode ceased in last 6mths
+    -- overall lac episode, ... ? 
 
 INTO #AA_8_children_in_care
 
