@@ -1260,14 +1260,18 @@ Description:
             decision reversed during the 12 months."
 
 Author: D2I
-Last Modified Date: 31/01/24 RH
+Last Modified Date: 13/02/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.3: Removed old obj/item naming. 
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
--
+- ssd_person
+- ssd_disability
+- ssd_immigration_status
+- ssd_permanence 
+- ssd_family
 =============================================================================
 */
 -- Check if exists & drop
@@ -1296,10 +1300,9 @@ IF OBJECT_ID('tempdb..#AA_10_adoption') IS NOT NULL DROP TABLE #AA_10_adoption;
 SELECT
     /* Common AA fields */
 
-    p.pers_legacy_id                            AS ChildUniqueID,	-- temp solution [TESTING] This liquid logic specific
-    p.pers_person_id						    AS ChildUniqueID2,	-- temp solution [TESTING] This for compatiblility in non-ll systems
-
-    -- Family identifier
+    p.pers_legacy_id                            AS ChildUniqueID,	    -- temp solution [TESTING] This liquid logic specific
+    p.pers_person_id						    AS ChildUniqueID2,	    -- temp solution [TESTING] This for compatiblility in non-ll systems
+    fam.fami_family_id                          AS FamilyIdentifier,    -- Family identifier        
     CASE
 		WHEN p.pers_sex = 'M' THEN 'a) Male'
 		WHEN p.pers_sex = 'F' THEN 'b) Female'
@@ -1355,7 +1358,8 @@ SELECT
     perm.perm_decision_reversed_date         AS DecisionReversedDate,   -- Date of Decision that Child Should No Longer be Placed for Adoption
     perm.perm_placed_foster_carer_date       AS PlacedWithFosterCarer,  -- Date of Adoption Order ?  
     perm.perm_decision_reversed_reason       AS DecisionReversedReason, -- Reason Why Child No Longer Placed for Adoption
-    perm.perm_permanence_order_date          AS PlacementOrderDate,     -- Date of Placement Order?
+    perm.perm_permanence_order_date          AS PlacementOrderDate     -- Date of Placement Order?
+
 
 INTO #AA_10_adoption
 
@@ -1363,10 +1367,20 @@ FROM
     #ssd_permanence perm
 
 LEFT JOIN   -- person table for core dets
-    ssd_person p ON clea.clea_person_id = p.pers_person_id
+    #ssd_person p ON perm.perm_person_id = p.pers_person_id
 
-LEFT JOIN   -- Disability table
-    ssd_disability d ON clea.clea_person_id = d.disa_person_id
+LEFT JOIN   -- disability table
+    #ssd_disability d ON perm.perm_person_id = d.disa_person_id
+
+LEFT JOIN   -- family table
+    #ssd_family fam ON perm.perm_person_id = fam.fami_person_id
+
+WHERE
+    -- Filter on last 12 months
+    perm.perm_placement_order_date          >= DATEADD(MONTH, -12, GETDATE())
+    OR perm.perm_placed_for_adoption_date   >= DATEADD(MONTH, -12, GETDATE())
+    OR perm.perm_decision_reversed_date     >= DATEADD(MONTH, -12, GETDATE());
+
 
     -- not required in return? Other available fields for ref:
     -- perm.perm_table_id
@@ -1404,8 +1418,9 @@ Remarks: Incomplete as required data not held within the SSD. Placeholders used
          in place of data points considered beyond project scope. 
 Dependencies: 
 - ssd_person
-- ssd_permanence
 - ssd_disability
+- ssd_permanence 
+- ssd_family
 =============================================================================
 */
 -- Check if exists & drop
@@ -1413,8 +1428,8 @@ IF OBJECT_ID('tempdb..#AA_11_adopters') IS NOT NULL DROP TABLE #AA_11_adopters;
 
 SELECT
     /* Common AA fields */
-    p.pers_legacy_id                            AS ADOPTER_ID,      -- Individual adopter identifier
-    --  fam.fami_person_id            -- Is this coming from fc.DIM_PERSON_ID AS fami_person_id, as doesnt seem valid context
+    'PLACEHOLDER_DATA'                          AS AdopterIdentifier,          -- Individual adopter identifier (Unavailable in SSD V1)
+    fam.fami_family_id                          AS FamilyIdentifier,    -- Family identifier        
     CASE
 		WHEN p.pers_sex = 'M' THEN 'a) Male'
 		WHEN p.pers_sex = 'F' THEN 'b) Female'
@@ -1461,34 +1476,37 @@ SELECT
     /* List additional AA fields */
     d.disa_disability_code                      AS Disability,     
 
-    perm.perm_adopted_by_carer_flag             AS ADOPTED_BY_CARER,    -- Is the (prospective) adopter fostering for adoption?
-    '1900-01-01'                                AS ENQUIRY_DATE,        -- Date enquiry received
-    '1900-01-01'                                AS STAGE1_START_DATE,   -- Date Stage 1 started
-    '1900-01-01'                                AS STAGE1_END_DATE,     -- Date Stage 1 ended
-    '1900-01-01'                                AS STAGE2_START_DATE,   -- Date Stage 2 started
-    '1900-01-01'                                AS STAGE2_END_DATE,     -- Date Stage 2 ended
-    '1900-01-01'                                AS APPLICATION_DATE,    -- Date application submitted
-    '1900-01-01'                                AS APPLICATION_APPR_DATE,-- Date application approved
-    perm.perm_matched_date                      AS MATCHED_DATE,        -- Date adopter matched with child(ren)
-    perm.perm_placed_for_adoption_date          AS PLACED_DATE,         -- Date child/children placed with adopter(s)
-    'PLACEHOLDER_DATA'                          AS NUM_SIBLINGS_PLACED, -- No. of children placed
-    perm.perm_permanence_order_date             AS ADOPTION_ORDER_DATE, -- Date of Adoption Order
-    perm.perm_decision_reversed_date            AS ADOPTION_LEAVE_DATE, -- Date of leaving adoption process
-    perm.perm_decision_reversed_reason          AS ADOPTION_LEAVE_REASON-- Reason for leaving adoption process
+    perm.perm_adopted_by_carer_flag             AS AdoptedByCarer,      -- Is the (prospective) adopter fostering for adoption?
+    '1900-01-01'                                AS EnquiryDate,         -- Date enquiry received
+    '1900-01-01'                                AS Stage1StartDate,     -- Date Stage 1 started
+    '1900-01-01'                                AS Stage1EndDate,       -- Date Stage 1 ended
+    '1900-01-01'                                AS Stage2StartDate,     -- Date Stage 2 started
+    '1900-01-01'                                AS Stage2EndDate,       -- Date Stage 2 ended
+    '1900-01-01'                                AS ApplicationDate,     -- Date application submitted
+    '1900-01-01'                                AS ApplicationApprDate, -- Date application approved
+    perm.perm_matched_date                      AS MatchedDate,         -- Date adopter matched with child(ren)
+    perm.perm_placed_for_adoption_date          AS PlacedDate,          -- Date child/children placed with adopter(s)
+    'PLACEHOLDER_DATA'                          AS NumSiblingsPlaced,   -- No. of children placed
+    perm.perm_permanence_order_date             AS AdoptionOrderDate,   -- Date of Adoption Order
+    perm.perm_decision_reversed_date            AS AdoptionLeaveDate,   -- Date of leaving adoption process
+    perm.perm_decision_reversed_reason          AS AdoptingLeaveReason  -- Reason for leaving adoption process
 
 INTO #AA_11_adopters
 
 FROM
-    ssd_permanence perm
+    #ssd_permanence perm
 
 INNER JOIN
-    ssd_person p ON perm.perm_person_id = p.pers_person_id
+    #ssd_person p ON perm.perm_person_id = p.pers_person_id
 
 LEFT JOIN   -- Disability table
-    ssd_disability d ON perm.perm_person_id = d.disa_person_id
+    #ssd_disability d ON perm.perm_person_id = d.disa_person_id
 
 LEFT JOIN
-    ssd_contacts c ON perm.perm_person_id = c.cont_person_id 
+    #ssd_contacts c ON perm.perm_person_id = c.cont_person_id 
+
+LEFT JOIN   -- family table
+    #ssd_family fam ON perm.perm_person_id = fam.fami_person_id
 
 WHERE
     c.cont_contact_start >= DATEADD(MONTH, -12, GETDATE()) -- Filter on last 12 months
