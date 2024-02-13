@@ -404,7 +404,7 @@ SELECT
 
     /* List additional AA fields */
 
-    d.disa_disability_code                              AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
+    d.disa_disability_code                              AS Disability, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
 
     FORMAT(a.cina_assessment_start_date, 'dd/MM/yyyy')  AS ASMT_START_DATE,
     a.cina_assessment_child_seen                        AS CONT_ASMT, -- ('Child Seen During Continuous Assessment')
@@ -427,7 +427,7 @@ FROM
 INNER JOIN
     #ssd_person p ON a.cina_person_id = p.pers_person_id
 
-LEFT JOIN   -- ensure we get all records even if there's no matching disability
+LEFT JOIN   -- ensure we get all records even if there's no matching Disability
     #ssd_disability d ON p.pers_person_id = d.disa_person_id
 
 WHERE
@@ -526,7 +526,7 @@ SELECT
 
     /* List additional AA fields */
 
-    d.disa_disability_code                                                  AS DISABILITY,        -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
+    d.disa_disability_code                                                  AS Disability,        -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
     
     /* Returns fields */
     s47e.s47e_s47_enquiry_id                                                AS ENQUIRY_ID,
@@ -568,7 +568,7 @@ INNER JOIN
 -- towards icpc.icpc_icpc_outcome_cp_flag 
 LEFT JOIN #ssd_initial_cp_conference icpc ON s47e.s47e_s47_enquiry_id = icpc.icpc_s47_enquiry_id
 
-LEFT JOIN   -- ensure we get all records even if there's no matching disability
+LEFT JOIN   -- ensure we get all records even if there's no matching Disability
     #ssd_disability d ON p.pers_person_id = d.disa_person_id
 
 LEFT JOIN (
@@ -699,7 +699,7 @@ SELECT
     END                                         AS Age
     
     /* List additional AA fields */
-    d.disa_disability_code                      AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
+    d.disa_disability_code                      AS Disability, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
     
     -- Removed 060224 
     -- cp.cinp_cin_plan_id,
@@ -741,7 +741,7 @@ FROM
 INNER JOIN
     #ssd_person p ON cp.cinp_person_id = p.pers_person_id
 
-LEFT JOIN   -- with disability
+LEFT JOIN   -- with Disability
     #ssd_disability d ON cp.cinp_person_id = d.disa_person_id
 
 LEFT JOIN   -- cla_episodes to get the most recent cla_epi_start
@@ -859,7 +859,7 @@ SELECT
     
 
     /* List additional AA fields */
-    d.disa_disability_code                      AS DISABILITY, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
+    d.disa_disability_code                      AS Disability, -- (Have seen data such as : a)Yes/b)No but also Y/N (*should we chk&clean this to just Y/N*)
     
     /* Returns fields */   
     -- Replaced 060224 JH
@@ -897,7 +897,7 @@ FROM
 INNER JOIN
     #ssd_person p ON cv.cinv_person_id = p.pers_person_id
 
-LEFT JOIN   -- with disability
+LEFT JOIN   -- with Disability
     #ssd_disability d ON cv.cinv_person_id = d.disa_person_id
 
 INNER JOIN
@@ -1025,7 +1025,7 @@ SELECT
 
     /* List additional AA fields */
 
-    d.disa_disability_code                  AS DISABILITY,          -- Disability1
+    d.disa_disability_code                  AS Disability,          -- Disability1
     i.immi_immigration_status               AS UASC12mth ,          -- UASC12mth (if had imm.status 'Unaccompanied Asylum Seeking Child' active in prev 12 months)
 
 -- in progress (comment headings direct from AA guidance)
@@ -1118,7 +1118,7 @@ FROM
 INNER JOIN
     ssd_person p ON clae.clae_person_id = p.pers_person_id
 
-LEFT JOIN   -- disability table
+LEFT JOIN   -- Disability table
     ssd_disability d ON clae.clae_person_id = d.disa_person_id
 
 LEFT JOIN   -- immigration_status table (UASC)
@@ -1205,7 +1205,7 @@ SELECT
 
     /* List additional AA fields */
 
-    d.disa_disability_code                      AS DISABILITY           -- Does the Child have a Disability
+    d.disa_disability_code                      AS Disability           -- Does the Child have a Disability
     CASE         
         -- Unaccompanied Asylum Seeking Child (UASC), or formerly UASC if 18 or over (Y/N)                                               
         WHEN latest_status.immi_immigration_status = 'Unaccompanied Asylum Seeking Child (UASC)' THEN 'Y'
@@ -1232,7 +1232,7 @@ FROM
 LEFT JOIN   -- person table for core dets
     ssd_person p ON clea.clea_person_id = p.pers_person_id
 
-LEFT JOIN   -- disability table
+LEFT JOIN   -- Disability table
     ssd_disability d ON clea.clea_person_id = d.disa_person_id
 
 LEFT JOIN   -- join but with subquery as need most recent immigration status
@@ -1273,10 +1273,33 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#AA_10_adoption') IS NOT NULL DROP TABLE #AA_10_adoption;
 
+
+-- -- AA headers guidance notes:
+-- Child Unique ID
+-- Family identifier
+-- Gender
+-- Ethnicity
+-- Date of Birth
+-- Age of Child (Years)
+-- Does the Child have a Disability
+-- Date the Child Entered Care
+-- Date of Decision that Child Should be Placed for Adoption
+-- Date of Placement Order
+-- Date of Matching Child and Prospective Adopters
+-- Date Placed for Adoption
+-- Date of Adoption Order 
+-- Date of Decision that Child Should No Longer be Placed for Adoption
+-- Reason Why Child No Longer Placed for Adoption
+-- Date the child was placed for fostering in FostingForAdoption or concurrent planning placement
+
+
 SELECT
     /* Common AA fields */
 
-    p.pers_legacy_id                            AS ChildUniqueID,
+    p.pers_legacy_id                            AS ChildUniqueID,	-- temp solution [TESTING] This liquid logic specific
+    p.pers_person_id						    AS ChildUniqueID2,	-- temp solution [TESTING] This for compatiblility in non-ll systems
+
+    -- Family identifier
     CASE
 		WHEN p.pers_sex = 'M' THEN 'a) Male'
 		WHEN p.pers_sex = 'F' THEN 'b) Female'
@@ -1322,21 +1345,45 @@ SELECT
 
     /* List additional AA fields */
 
-    d.disa_disability_code                      AS DISABILITY 
+    d.disa_disability_code                      AS Disability 
 
-
-
+    perm.perm_entered_care_date              AS EnteredCareDate,        -- Date the Child Entered Care
+    perm.perm_ffa_cp_decision_date           AS FfaDecisionDate,        -- Date the child was placed for fostering in FostingForAdoption or concurrent planning placement 
+    perm.perm_placement_order_date           AS PlacementDecisionDate,  -- Date of Decision that Child Should be Placed for Adoption
+    perm.perm_placed_for_adoption_date       AS PlacedForAdoptionDate,  -- Date Placed for Adoption
+    perm.perm_matched_date                   AS MatchedForAdoptionDate, -- Date of Matching Child and Prospective Adopters
+    perm.perm_decision_reversed_date         AS DecisionReversedDate,   -- Date of Decision that Child Should No Longer be Placed for Adoption
+    perm.perm_placed_foster_carer_date       AS PlacedWithFosterCarer,  -- Date of Adoption Order ?  
+    perm.perm_decision_reversed_reason       AS DecisionReversedReason, -- Reason Why Child No Longer Placed for Adoption
+    perm.perm_permanence_order_date          AS PlacementOrderDate,     -- Date of Placement Order?
 
 INTO #AA_10_adoption
 
 FROM
--- 
+    #ssd_permanence perm
 
-INNER JOIN
-    ssd_person p ON xx.xxxx_person_id = p.pers_person_id
+LEFT JOIN   -- person table for core dets
+    ssd_person p ON clea.clea_person_id = p.pers_person_id
 
-LEFT JOIN   -- disability table
-    ssd_disability d ON xx.xxxx_person_id = d.disa_person_id
+LEFT JOIN   -- Disability table
+    ssd_disability d ON clea.clea_person_id = d.disa_person_id
+
+    -- not required in return? Other available fields for ref:
+    -- perm.perm_table_id
+    -- perm.perm_person_id
+    -- perm.perm_cla_id
+    -- perm.perm_adm_decision_date         AS ,
+    -- perm.perm_permanence_order_type     AS ,
+    -- perm.perm_adoption_worker           AS ,
+    -- perm.perm_adopter_sex               AS ,
+    -- perm.perm_adopter_legal_status      AS ,
+    -- perm.perm_part_of_sibling_group     AS ,
+    -- perm.perm_siblings_placed_together  AS ,
+    -- perm.perm_siblings_placed_apart     AS ,
+    -- perm.perm_placement_provider_urn    AS ,
+    -- perm.perm_adopted_by_carer_flag     AS ,
+    -- perm.perm_placed_ffa_cp_date        AS ,
+
 
 
 
@@ -1353,8 +1400,8 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.3: Removed old obj/item naming. 
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: Incomplete as required data not held within the ssd and beyond 
-            project scope. Some placeholder data used. 
+Remarks: Incomplete as required data not held within the SSD. Placeholders used
+         in place of data points considered beyond project scope. 
 Dependencies: 
 - ssd_person
 - ssd_permanence
@@ -1412,7 +1459,7 @@ SELECT
     END                                         AS Age
 
     /* List additional AA fields */
-    d.disa_disability_code                      AS DISABILITY,     
+    d.disa_disability_code                      AS Disability,     
 
     perm.perm_adopted_by_carer_flag             AS ADOPTED_BY_CARER,    -- Is the (prospective) adopter fostering for adoption?
     '1900-01-01'                                AS ENQUIRY_DATE,        -- Date enquiry received
@@ -1437,7 +1484,7 @@ FROM
 INNER JOIN
     ssd_person p ON perm.perm_person_id = p.pers_person_id
 
-LEFT JOIN   -- disability table
+LEFT JOIN   -- Disability table
     ssd_disability d ON perm.perm_person_id = d.disa_person_id
 
 LEFT JOIN
