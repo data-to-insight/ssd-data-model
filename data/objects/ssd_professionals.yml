@@ -13,7 +13,6 @@ nodes:
     - Local
     cms:
     - liquid_logic
-    - mosaic
     cms_field:
     - liquid_logic:prof_table_id
     - mosaic:prof_table_id
@@ -32,6 +31,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - azeus
     guidance: null
   - name: prof_social_worker_registration_no
     description: Social worker ID - Social Work England (SWE) registration number-
@@ -45,36 +45,39 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
+    - azeus
     cms_field:
     - liquid_logic:prof_social_worker_registration_no
     - mosaic:prof_social_worker_registration_no
     cms_table:
     - liquid_logic:ssd_professionals
     - mosaic:ssd_professionals
-    guidance: "A social worker ID code will allow identification of episodes with\
-      \ the same social worker and will allow us to link social workers across episodes.\
-      \ This data item should be in the format \u2018AAnnnnnn\u2019 and is up to 12\
-      \ digits.\nWhere a child\u2019s primary social worker/caseworker is a qualified\
-      \ social worker, for each episode record the child and family social worker\
-      \ Social Work England (SWE) number (formerly HCPC code). For social workers\
-      \ this will start \u2018SW\u2019. This will allow us to link to the Children\u2019\
-      s Social Work Workforce Census, for example to pick up information on social\
-      \ worker characteristics.\nWhere this primary social worker is not a qualified\
-      \ social worker (or does not have an SWE number for another reason \u2013 such\
-      \ as being qualified in Scotland) please provide an alternative unique identifier\
-      \ for the worker. This can be any alphanumeric code though should start with\
-      \ \u2018XX\u2019 to prevent inadvertent matching with the Social Primary social\
-      \ worker The \u2018primary social worker\u2019 is the primary member of local\
-      \ authority staff responsible for managing the child\u2019s case. This may be\
-      \ known across authorities as \u2018allocated case worker\u2019, \u2018key worker\u2019\
-      \ or \u2018lead practitioner\u2019. Please note: for episodes where a child\
-      \ is not in care this may also include non-qualified social workers/caseworkers\
-      \ without a Social Work England (SWE) number.\nIt should also be consistent\
-      \ across the social worker\u2019s episodes in the data. Likewise, this should\
-      \ be done if a primary social worker is a qualified worker but it is not possible\
-      \ to provide their SWE number.\nWhere a worker has qualified in year or their\
-      \ SWE number has changed during the year, please use their latest SWE number\
-      \ for all episodes."
+    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
+      \ not be entirely applicable to this data item within the SSD. A review of item/field\
+      \ guidance notes towards the SSD is in progress.]A social worker ID code will\
+      \ allow identification of episodes with the same social worker and will allow\
+      \ us to link social workers across episodes. This data item should be in the\
+      \ format \u2018AAnnnnnn\u2019 and is up to 12 digits.\nWhere a child\u2019s\
+      \ primary social worker/caseworker is a qualified social worker, for each episode\
+      \ record the child and family social worker Social Work England (SWE) number\
+      \ (formerly HCPC code). For social workers this will start \u2018SW\u2019. This\
+      \ will allow us to link to the Children\u2019s Social Work Workforce Census,\
+      \ for example to pick up information on social worker characteristics.\nWhere\
+      \ this primary social worker is not a qualified social worker (or does not have\
+      \ an SWE number for another reason \u2013 such as being qualified in Scotland)\
+      \ please provide an alternative unique identifier for the worker. This can be\
+      \ any alphanumeric code though should start with \u2018XX\u2019 to prevent inadvertent\
+      \ matching with the Social Primary social worker The \u2018primary social worker\u2019\
+      \ is the primary member of local authority staff responsible for managing the\
+      \ child\u2019s case. This may be known across authorities as \u2018allocated\
+      \ case worker\u2019, \u2018key worker\u2019 or \u2018lead practitioner\u2019\
+      . Please note: for episodes where a child is not in care this may also include\
+      \ non-qualified social workers/caseworkers without a Social Work England (SWE)\
+      \ number.\nIt should also be consistent across the social worker\u2019s episodes\
+      \ in the data. Likewise, this should be done if a primary social worker is a\
+      \ qualified worker but it is not possible to provide their SWE number.\nWhere\
+      \ a worker has qualified in year or their SWE number has changed during the\
+      \ year, please use their latest SWE number for all episodes."
   - name: prof_professional_job_title
     description: Worker job title e.g. Social Worker
     item_ref: PROF007A
@@ -93,10 +96,13 @@ nodes:
     cms_table:
     - liquid_logic:ssd_professionals
     - mosaic:ssd_professionals
-    guidance: "Record the role the social worker has within the organisation as one\
-      \ of the following six categories:\n\u2022 1 for Senior Manager\n\u2022 2 for\
-      \ Middle Manager\n\u2022 3 for First Line Manager\n\u2022 4 for Senior Practitioner\n\
-      \u2022 5 for Case Holder\n\u2022 6 for Qualified without cases"
+    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
+      \ not be entirely applicable to this data item within the SSD. A review of item/field\
+      \ guidance notes towards the SSD is in progress.]Record the role the social\
+      \ worker has within the organisation as one of the following six categories:\n\
+      \u2022 1 for Senior Manager\n\u2022 2 for Middle Manager\n\u2022 3 for First\
+      \ Line Manager\n\u2022 4 for Senior Practitioner\n\u2022 5 for Case Holder\n\
+      \u2022 6 for Qualified without cases"
   - name: prof_professional_caseload
     description: Number of cases held on previous 30th Sept
     item_ref: PROF008A
@@ -115,16 +121,18 @@ nodes:
     cms_table:
     - liquid_logic:ssd_professionals
     - mosaic:ssd_professionals
-    guidance: "Record the number of cases held by the child and family social worker.\n\
-      For the purposes of this collection, a case is defined as: Any case allocated\
-      \ to a named social worker, where the work\ninvolves child and family social\
-      \ work.\nThis may include:\n\u2022 an individual child allocated to a social\
-      \ worker (for example a family of three siblings would be three individual cases)\n\
-      including those on a child protection plan, children in need, fostering and\
-      \ adoption cases and care leavers\n\u2022 a carer or carers (where they are\
-      \ allocated as a single case) allocated to a social worker for the purposes\
-      \ of fostering or\nadoption.\n\u2022 an adult(s) allocated to a social worker\
-      \ for the purpose of children and families work."
+    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
+      \ not be entirely applicable to this data item within the SSD. A review of item/field\
+      \ guidance notes towards the SSD is in progress.]Record the number of cases\
+      \ held by the child and family social worker.\nFor the purposes of this collection,\
+      \ a case is defined as: Any case allocated to a named social worker, where the\
+      \ work\ninvolves child and family social work.\nThis may include:\n\u2022 an\
+      \ individual child allocated to a social worker (for example a family of three\
+      \ siblings would be three individual cases)\nincluding those on a child protection\
+      \ plan, children in need, fostering and adoption cases and care leavers\n\u2022\
+      \ a carer or carers (where they are allocated as a single case) allocated to\
+      \ a social worker for the purposes of fostering or\nadoption.\n\u2022 an adult(s)\
+      \ allocated to a social worker for the purpose of children and families work."
   - name: prof_professional_department
     description: Worker Department e.g. 'Youth Support Team West'
     item_ref: PROF012A

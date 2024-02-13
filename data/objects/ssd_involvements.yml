@@ -65,6 +65,7 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
+    - azeus
     cms_field:
     - liquid_logic:invo_involvement_start_date
     - mosaic:invo_involvement_start_date
@@ -83,6 +84,7 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
+    - azeus
     cms_field:
     - liquid_logic:invo_involvement_end_date
     - mosaic:invo_involvement_end_date
@@ -101,6 +103,7 @@ nodes:
     - RIIA
     cms:
     - liquid_logic
+    - azeus
     cms_field:
     - liquid_logic:invo_worker_change_reason
     - mosaic:invo_worker_change_reason

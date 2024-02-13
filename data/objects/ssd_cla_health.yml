@@ -15,8 +15,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_health
     - mosaic:ssd_cla_health
-    guidance: Health check record unique ID from system or auto-generated as part
-      of export.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Health check record unique ID
+      from system or auto-generated as part of export.'
   - name: clah_person_id
     description: Person Unique ID
     item_ref: CLAH002A
@@ -34,9 +36,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:clah_person_id
     - mosaic:clah_person_id
@@ -63,7 +65,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_health
     - mosaic:ssd_cla_health
-    guidance: Health surveillance checks/ Health Assessment/ Dental Check
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Health surveillance checks/ Health
+      Assessment/ Dental Check'
   - name: clah_health_check_date
     description: Date of Last Health Assessment
     item_ref: CLAH004A
@@ -83,4 +88,26 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_health
     - mosaic:ssd_cla_health
-    guidance: Date of Health Check
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Date of Health Check'
+  - name: clah_health_check_status
+    description: null
+    item_ref: CLAH005A
+    type: nvarchar
+    categories:
+    - looked_after
+    - health
+    returns:
+    - SSDA903
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clah_health_check_status
+    - mosaic:clah_health_check_status
+    cms_table:
+    - liquid_logic:ssd_cla_health
+    - mosaic:ssd_cla_health
+    guidance: null

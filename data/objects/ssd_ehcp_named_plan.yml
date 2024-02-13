@@ -26,9 +26,12 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_named_plan
     - mosaic:ssd_ehcp_named_plan
-    guidance: 'EHCP named plan unique ID from system or auto-generated as part of
-      export. This module collects information on the content of the EHC plan, i.e.
-      what is in Section I. It should be completed for all existing active EHC plans.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]EHCP named plan unique ID from
+      system or auto-generated as part of export. This module collects information
+      on the content of the EHC plan, i.e. what is in Section I. It should be completed
+      for all existing active EHC plans.
 
       It is possible that multiple plans may be recorded for a single person. For
       example, if an EHC plan has previously ceased and a further plan has later been
@@ -74,7 +77,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_named_plan
     - mosaic:ssd_ehcp_named_plan
-    guidance: Date of current EHC plan.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Date of current EHC plan.'
   - name: ehcn_named_plan_cease_date
     description: Cease Date
     item_ref: EHCN004A
@@ -94,11 +99,13 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_named_plan
     - mosaic:ssd_ehcp_named_plan
-    guidance: Please provide the date the EHC plan ended or the date the EHC plan
-      was transferred to another local authority. Do not record the date of the decision
-      to cease. Local authorities must continue to maintain the EHC plan until the
-      time has passed for bringing an appeal or, when an appeal has been registered,
-      until it has been concluded.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Please provide the date the EHC
+      plan ended or the date the EHC plan was transferred to another local authority.
+      Do not record the date of the decision to cease. Local authorities must continue
+      to maintain the EHC plan until the time has passed for bringing an appeal or,
+      when an appeal has been registered, until it has been concluded.'
   - name: ehcn_named_plan_cease_reason
     description: Cease Reason
     item_ref: EHCN005A
@@ -118,11 +125,14 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_named_plan
     - mosaic:ssd_ehcp_named_plan
-    guidance: "Please provide the reason the EHC plan ended from the list below\n\
-      1 \u2013 Reached maximum age (this is the end of the academic year during which\
-      \ the young person turned 25)\n2 \u2013 Ongoing educational or training needs\
-      \ being met without an EHC plan\n3 \u2013 Moved on to higher education\n4 \u2013\
-      \ Moved on to paid employment, excluding apprenticeships\n5 \u2013 Transferred\
-      \ to another LA\n6 \u2013 Young person no longer wishes to engage in education\
-      \ or training\n7 \u2013 Child or young person has moved outside England\n8 \u2013\
-      \ Child or young person deceased\n9 \u2013 Other"
+    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
+      \ not be entirely applicable to this data item within the SSD. A review of item/field\
+      \ guidance notes towards the SSD is in progress.]Please provide the reason the\
+      \ EHC plan ended from the list below\n1 \u2013 Reached maximum age (this is\
+      \ the end of the academic year during which the young person turned 25)\n2 \u2013\
+      \ Ongoing educational or training needs being met without an EHC plan\n3 \u2013\
+      \ Moved on to higher education\n4 \u2013 Moved on to paid employment, excluding\
+      \ apprenticeships\n5 \u2013 Transferred to another LA\n6 \u2013 Young person\
+      \ no longer wishes to engage in education or training\n7 \u2013 Child or young\
+      \ person has moved outside England\n8 \u2013 Child or young person deceased\n\
+      9 \u2013 Other"

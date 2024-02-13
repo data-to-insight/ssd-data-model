@@ -2,6 +2,14 @@
 nodes:
 - name: ssd_family
   fields:
+  - name: fami_table_id
+    description: Family table row id
+    item_ref: FAMI003A
+    type: nvarchar
+    categories:
+    - identity
+    - family
+    guidance: null
   - name: fami_family_id
     description: Family identifier
     item_ref: FAMI001A
@@ -54,6 +62,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_family
     - mosaic:ssd_family
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]See PERS001A'
+    guidance: See PERS001A
