@@ -63,7 +63,7 @@ SET @TableName = N'ssd_person';
 PRINT 'Creating table: ' + @TableName;
 
 
--- check exists & drop
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 
@@ -219,7 +219,7 @@ SET @TableName = N'ssd_family';
 PRINT 'Creating table: ' + @TableName;
 
 
--- check exists & drop
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
 
@@ -2085,9 +2085,9 @@ SET @TableName = N'ssd_cla_convictions';
 PRINT 'Creating table: ' + @TableName;
 
 
--- if exists, drop
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cla_convictions;
---IF OBJECT_ID('tempdb..#tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cla_convictions;
+
 
 -- create structure
 CREATE TABLE #ssd_cla_convictions (
@@ -2147,7 +2147,7 @@ SET @TableName = N'ssd_cla_health';
 PRINT 'Creating table: ' + @TableName;
 
 
--- if exists, drop
+-- Check if exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cla_health', 'U') IS NOT NULL DROP TABLE #ssd_cla_health;
 
 -- create structure

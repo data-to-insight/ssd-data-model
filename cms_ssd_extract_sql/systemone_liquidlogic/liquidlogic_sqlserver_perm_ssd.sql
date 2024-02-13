@@ -2113,7 +2113,7 @@ SET @TableName = N'ssd_cla_convictions';
 PRINT 'Creating table: ' + @TableName;
 
 
--- if exists, drop
+-- Check if exists, & drop
 IF OBJECT_ID('ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE ssd_cla_convictions;
 
 -- create structure
@@ -2180,7 +2180,7 @@ SET @TableName = N'ssd_cla_health';
 PRINT 'Creating table: ' + @TableName;
 
 
--- if exists, drop
+-- Check if exists, & drop
 IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_cla_health;
 
 -- create structure
