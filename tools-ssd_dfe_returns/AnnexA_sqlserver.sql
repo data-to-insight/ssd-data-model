@@ -1141,45 +1141,25 @@ Description:
             Eligible children"
 
 Author: D2I
-Last Modified Date: 31/01/24 RH
+Last Modified Date: 13/02/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.3: Removed old obj/item naming. 
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
--
+- ssd_person
+- ssd_disability
+- ssd_immigration_status
 =============================================================================
 */
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#AA_9_care_leavers') IS NOT NULL DROP TABLE #AA_9_care_leavers;
 
-
--- notes
--- AA headings
--- Child Unique ID
--- Gender
--- Ethnicity
--- Date of Birth
--- Age of Child (Years)
--- Unaccompanied Asylum Seeking Child (UASC), or formerly UASC if 18 or over (Y/N)
--- Does the Child have a Disability
--- Allocated Team
--- Allocated Worker
--- Allocated Personal Advisor
--- Eligibility Category
--- LA In Touch 
--- Latest Pathway Plan Review Date
--- Latest Date of Contact
--- Type of Accommodation
--- Suitability of Accommodation
--- Activity Status
-
-
 SELECT
     /* Common AA fields */
-    p.pers_person_id                            AS ChildUniqueID,
-    p.pers_legacy_id                            AS ChildUniqueID2,  -- 
+    p.pers_legacy_id                            AS ChildUniqueID,	-- temp solution [TESTING] This liquid logic specific
+    p.pers_person_id						    AS ChildUniqueID2,	-- temp solution [TESTING] This for compatiblility in non-ll systems
     CASE
 		WHEN p.pers_sex = 'M' THEN 'a) Male'
 		WHEN p.pers_sex = 'F' THEN 'b) Female'
@@ -1226,7 +1206,11 @@ SELECT
     /* List additional AA fields */
 
     d.disa_disability_code                      AS DISABILITY           -- Does the Child have a Disability
-    i.immi_immigration_status                   AS LegalStatus,         -- Unaccompanied Asylum Seeking Child (UASC), or formerly UASC if 18 or over (Y/N)
+    CASE         
+        -- Unaccompanied Asylum Seeking Child (UASC), or formerly UASC if 18 or over (Y/N)                                               
+        WHEN latest_status.immi_immigration_status = 'Unaccompanied Asylum Seeking Child (UASC)' THEN 'Y'
+        ELSE 'N'
+    END                                         AS LegalStatus,         
 
     clea.clea_care_leaver_allocated_team_name   AS AllocatedTeam,       -- Allocated Team
     clea.clea_care_leaver_worker_name           AS AllocatedWorker,     -- Allocated Worker
@@ -1245,15 +1229,24 @@ INTO #AA_9_care_leavers
 FROM
     #ssd_care_leavers clea
 
-LEFT JOIN
+LEFT JOIN   -- person table for core dets
     ssd_person p ON clea.clea_person_id = p.pers_person_id
 
-LEFT JOIN   -- Disability table
+LEFT JOIN   -- disability table
     ssd_disability d ON clea.clea_person_id = d.disa_person_id
 
-LEFT JOIN   -- Immigration status table
-    ssd_immigration_status i ON clea.clea_person_id = i.immi_person_id
-
+LEFT JOIN   -- join but with subquery as need most recent immigration status
+    (
+        SELECT 
+            immi_person_id,
+            immi_immigration_status,
+            -- partitioning by immi_person_id (group by each person) 
+            ROW_NUMBER() OVER (PARTITION BY immi_person_id -- assign unique row num (most recent rn ===1)
+            -- get latest status based on end date, (using start date as a secondary order in case of ties or NULL end dates)
+            ORDER BY immi_immigration_status_end DESC, immi_immigration_status_start DESC) AS rn
+        FROM 
+            ssd_immigration_status
+    ) latest_status ON clea.clea_person_id = latest_status.immi_person_id AND latest_status.rn = 1;
 
 
 
