@@ -1829,31 +1829,37 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/* 
+/*
 =============================================================================
 Object Name: ssd_cp_reviews
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 11/01/23
+Last Modified Date: 13/02/24 JH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.6
+            1.5: Resolved issue with linking to Quoracy information JH
 Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks:    Some fields - ON HOLD/Not included in SSD Ver/Iteration 1
+Remarks:    cppr_cp_review_participation - ON HOLD/Not included in SSD Ver/Iteration 1
             Tested in batch 1.3.
-            Placeholder used for cppr_cp_review_quorate- FACT_CASE_PATHWAY_STEP does not 
-            contain any data in the FACT_FORM_ID column so unable to link on this 
-Dependencies: 
+            Resolved issue with linking to Quoracy information. Added fm.FACT_MEETING_ID
+            so users can identify conferences including multiple children. Reviews held
+            pre-LCS implementation don't have a CP_PLAN_ID recorded so have added
+            cpr.DIM_PERSON_ID for linking reviews to the ssd_cp_plans object.
+            Re-named cppr_cp_review_outcome_continue_cp for clarity.
+Dependencies:
 - ssd_person
 - ssd_cp_plans
 - FACT_CP_REVIEW
-- FACT_FORM_ANSWERS [Quoracy and Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
+- FACT_MEETINGS
+- FACT_MEETING_SUBJECTS
+- FACT_FORM_ANSWERS [Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
 =============================================================================
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cp_reviews';
 PRINT 'Creating table: ' + @TableName;
-
-
+ 
+ 
 -- Check if table exists, & drop
 IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
  
@@ -1862,10 +1868,11 @@ IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
 CREATE TABLE #ssd_cp_reviews
 (
     cppr_cp_review_id                   NVARCHAR(48) PRIMARY KEY,
-    cppr_cp_plan_id                     NVARCHAR(48),
+    cppr_person_id                      NVARCHAR(48),
+    cppr_cp_plan_id                     NVARCHAR(48),    
     cppr_cp_review_due                  DATETIME NULL,
     cppr_cp_review_date                 DATETIME NULL,
-    cppr_cp_review_cancelled            NVARCHAR(1),
+    cppr_cp_review_meeting_id           NVARCHAR(48),      
     cppr_cp_review_outcome_continue_cp  NCHAR(1),
     cppr_cp_review_quorate              NVARCHAR(18),      
     cppr_cp_review_participation        NVARCHAR(18)        -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
@@ -1876,9 +1883,10 @@ INSERT INTO #ssd_cp_reviews
 (
     cppr_cp_review_id,
     cppr_cp_plan_id,
+    cppr_person_id,
     cppr_cp_review_due,
     cppr_cp_review_date,
-    cppr_cp_review_cancelled,
+    cppr_cp_review_meeting_id,
     cppr_cp_review_outcome_continue_cp,
     cppr_cp_review_quorate,
     cppr_cp_review_participation
@@ -1886,9 +1894,10 @@ INSERT INTO #ssd_cp_reviews
 SELECT
     cpr.FACT_CP_REVIEW_ID                       AS cppr_cp_review_id ,
     cpr.FACT_CP_PLAN_ID                         AS cppr_cp_plan_id,
+    cpr.DIM_PERSON_ID                           AS cppr_person_id,
     cpr.DUE_DTTM                                AS cppr_cp_review_due,
     cpr.MEETING_DTTM                            AS cppr_cp_review_date,
-    fm.CANCELLED                                AS cppr_cp_review_cancelled,
+    fm.FACT_MEETING_ID                          AS cppr_cp_review_meeting_id,
     cpr.OUTCOME_CONTINUE_CP_FLAG                AS cppr_cp_review_outcome_continue_cp,
     (CASE WHEN ffa.ANSWER_NO = 'WasConf'
         AND fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
@@ -1911,11 +1920,15 @@ LEFT JOIN
     AND fms.FACT_OUTCM_FORM_ID IS NOT NULL
     AND fms.FACT_OUTCM_FORM_ID <> '-1'
  
+LEFT JOIN
+    Child_Social.DIM_PERSON p ON cpr.DIM_PERSON_ID = p.DIM_PERSON_ID
+ 
 GROUP BY cpr.FACT_CP_REVIEW_ID,
     cpr.FACT_CP_PLAN_ID,
+    cpr.DIM_PERSON_ID,
     cpr.DUE_DTTM,
     cpr.MEETING_DTTM,
-    fm.CANCELLED,
+    fm.FACT_MEETING_ID,
     cpr.OUTCOME_CONTINUE_CP_FLAG,
     fms.FACT_OUTCM_FORM_ID,
     ffa.ANSWER_NO,
@@ -1924,7 +1937,7 @@ GROUP BY cpr.FACT_CP_REVIEW_ID,
 
 -- WHERE EXISTS ( -- only ssd relevant records
 --     SELECT 1 
---     FROM ssd_person p
+--     FROM #ssd_person p
 --     WHERE p.pers_person_id = cpr.DIM_PERSON_ID
 --     )
     ;

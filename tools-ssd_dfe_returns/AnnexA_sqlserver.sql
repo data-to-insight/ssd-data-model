@@ -890,9 +890,10 @@ INTO #AA_7_child_protection
 FROM
     #ssd_cin_visits cv
 
-
+-- dev notes:
 -- Some/all of these joins (might)need redoing since the release 2 changes/ object renaming (ssd_ xxx )
 -- some of these joins potentially no longer required
+-- ssd_cin_visits now has cinv_person_id field back in the object (prev spec had removed it)
 INNER JOIN
     #ssd_person p ON cv.cinv_person_id = p.pers_person_id
 
