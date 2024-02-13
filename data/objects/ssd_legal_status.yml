@@ -26,8 +26,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_legal_status
     - mosaic:ssd_legal_status
-    guidance: Legal Status Record unique ID from system or auto-generated as part
-      of export.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Legal Status Record unique ID
+      from system or auto-generated as part of export.'
   - name: lega_person_id
     description: Person Unique ID
     item_ref: LEGA002A
@@ -46,9 +48,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:lega_person_id
     - mosaic:lega_person_id
@@ -76,49 +78,52 @@ nodes:
     cms_table:
     - liquid_logic:ssd_legal_status
     - mosaic:ssd_legal_status
-    guidance: "The legal status code on the SSDA903 records the legal status underlying\
-      \ being \u2018looked-after\u2019. If a child is looked-after because it is accommodated,\
-      \ the legal status goes some way to describe (in legal terms at least) why the\
-      \ child is being looked after. There are many legal statuses arising from the\
-      \ Children Act, or the Youth Justice System, to which a child can be subject,\
-      \ but which have no bearing on whether a child is \u2018looked-after\u2019 or\
-      \ not. These are not recorded on the SSDA903, and no legal status codes are\
-      \ provided for them.\nThe renewal of an existing legal status does not automatically\
-      \ generate a new episode. If the legal status code does not change, a new episode\
-      \ is not required (unless there happens to be a change of placement at the same\
-      \ time).\nExample: If a child is already looked-after under an interim care\
-      \ order, a renewal of the interim care order does not change the legal status\
-      \ and no new episode is required. However, if a child looked-after under an\
-      \ interim care order becomes the subject of a full care order, then a new episode\
-      \ is required to record the start of the full care order.\nIn certain circumstances\
-      \ a child being looked-after can have more than one \u2018looked\x02after\u2019\
-      \ legal status. In general, this happens when a child who is already \u2018\
-      looked-after\u2019 under a Children Act care order comes into contact with the\
-      \ Youth Justice System, and as a result is detained in local authority accommodation\
-      \ under a second legal status. Two legal statuses cannot be shown as current\
-      \ on SSDA903. In such cases the latest legal status should be recorded and the\
-      \ episode under the previous status should be closed\nExample: A child who is\
-      \ already subject to a care order is remanded to local authority accommodation\
-      \ under Section 23 (1) of CYPA 1969. The care order episode should be closed,\
-      \ and a new episode should start under the \u201Cremanded to local authority\
-      \ accommodation\u201D legal status code. When the episode under the remand status\
-      \ ends, a further episode under the care order legal status will start, unless\
-      \ the care order has been discharged.\nWe have attempted to identify and provide\
-      \ a code for every legal status which theoretically could underpin a child being\
-      \ \u2018looked-after\u2019. If future changes in legislation lead to new \u2018\
-      looked-after\u2019 legal statuses, we will provide new legal status codes. Our\
-      \ analysis of the use of the former legal status code 98 showed that in most\
-      \ cases such children were either not looked-after, or that another existing\
-      \ legal status was appropriate.\nThe \u2018wardship\u2019 legal status code\
-      \ was a possible legal status identified by some local authorities in the consultation\
-      \ exercise on the future of the SSDA903 codes for which we did not have an existing\
-      \ legal status. However, the use of this code was restricted to just a few exceptional\
-      \ cases where the High Court has exercised its residual power to make a child\
-      \ a ward of the High Court, and has directed that the child should be accommodated\
-      \ by a local authority. In practice such cases werefound to be so extremely\
-      \ rare, it was felt that the use of a separate code could not be warranted.\
-      \ If such a case should arise, it should be coded C2, as the practical effects\
-      \ are the same."
+    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
+      \ not be entirely applicable to this data item within the SSD. A review of item/field\
+      \ guidance notes towards the SSD is in progress.]The legal status code on the\
+      \ SSDA903 records the legal status underlying being \u2018looked-after\u2019\
+      . If a child is looked-after because it is accommodated, the legal status goes\
+      \ some way to describe (in legal terms at least) why the child is being looked\
+      \ after. There are many legal statuses arising from the Children Act, or the\
+      \ Youth Justice System, to which a child can be subject, but which have no bearing\
+      \ on whether a child is \u2018looked-after\u2019 or not. These are not recorded\
+      \ on the SSDA903, and no legal status codes are provided for them.\nThe renewal\
+      \ of an existing legal status does not automatically generate a new episode.\
+      \ If the legal status code does not change, a new episode is not required (unless\
+      \ there happens to be a change of placement at the same time).\nExample: If\
+      \ a child is already looked-after under an interim care order, a renewal of\
+      \ the interim care order does not change the legal status and no new episode\
+      \ is required. However, if a child looked-after under an interim care order\
+      \ becomes the subject of a full care order, then a new episode is required to\
+      \ record the start of the full care order.\nIn certain circumstances a child\
+      \ being looked-after can have more than one \u2018looked\x02after\u2019 legal\
+      \ status. In general, this happens when a child who is already \u2018looked-after\u2019\
+      \ under a Children Act care order comes into contact with the Youth Justice\
+      \ System, and as a result is detained in local authority accommodation under\
+      \ a second legal status. Two legal statuses cannot be shown as current on SSDA903.\
+      \ In such cases the latest legal status should be recorded and the episode under\
+      \ the previous status should be closed\nExample: A child who is already subject\
+      \ to a care order is remanded to local authority accommodation under Section\
+      \ 23 (1) of CYPA 1969. The care order episode should be closed, and a new episode\
+      \ should start under the \u201Cremanded to local authority accommodation\u201D\
+      \ legal status code. When the episode under the remand status ends, a further\
+      \ episode under the care order legal status will start, unless the care order\
+      \ has been discharged.\nWe have attempted to identify and provide a code for\
+      \ every legal status which theoretically could underpin a child being \u2018\
+      looked-after\u2019. If future changes in legislation lead to new \u2018looked-after\u2019\
+      \ legal statuses, we will provide new legal status codes. Our analysis of the\
+      \ use of the former legal status code 98 showed that in most cases such children\
+      \ were either not looked-after, or that another existing legal status was appropriate.\n\
+      The \u2018wardship\u2019 legal status code was a possible legal status identified\
+      \ by some local authorities in the consultation exercise on the future of the\
+      \ SSDA903 codes for which we did not have an existing legal status. However,\
+      \ the use of this code was restricted to just a few exceptional cases where\
+      \ the High Court has exercised its residual power to make a child a ward of\
+      \ the High Court, and has directed that the child should be accommodated by\
+      \ a local authority. In practice such cases werefound to be so extremely rare,\
+      \ it was felt that the use of a separate code could not be warranted. If such\
+      \ a case should arise, it should be coded C2, as the practical effects are the\
+      \ same."
   - name: lega_legal_status_start_date
     description: Legal Status Start Date
     item_ref: LEGA004A
@@ -138,7 +143,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_legal_status
     - mosaic:ssd_legal_status
-    guidance: Start Date of Legal Status
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Start Date of Legal Status'
   - name: lega_legal_status_end_date
     description: Legal Status End Date
     item_ref: LEGA005A
@@ -158,4 +165,6 @@ nodes:
     cms_table:
     - liquid_logic:ssd_legal_status
     - mosaic:ssd_legal_status
-    guidance: End Date of Legal Status
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]End Date of Legal Status'

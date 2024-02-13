@@ -59,42 +59,45 @@ nodes:
     cms_table:
     - liquid_logic:ssd_assessment_factors
     - mosaic:ssd_assessment_factors
-    guidance: "Record the factors as understood at the end of the assessment relevant\
-      \ to:\n\u2022 the impairment of the child\u2019s health and development (\u2018\
-      Child\u2019);\n\u2022 the parent(s)/carer(s) capacity to respond to the child\u2019\
-      s needs (\u2018Parenting capacity\u2019);\n\u2022 other people in the family/household,\
-      \ for example, a sibling or lodger (\u2018Other\u2019). This applies to all\
-      \ assessments completed. The information should be recorded at the end of the\
-      \ assessment and all factors which are felt to be relevant to the child\u2019\
-      s assessment should be reported from the list below. This includes factors where\
-      \ services are put in place to mitigate the effect of the factor as well as\
-      \ factors which need to be taken into account in providing other support. Please\
-      \ only record factors which are currently an issue of concern. For example,\
-      \ if domestic violence is a current issue of concern, please record it. If domestic\
-      \ violence was an issue in a previous relationship and is not an issue of concern\
-      \ now, then do not record it. Factors such as mental health concerns do not\
-      \ need to be confined to medically defined conditions. Rather this is intended,\
-      \ for example, to record where the professional, as part of the assessment process,\
-      \ feels that mental health is of concern to the child\u2019s health and development\
-      \ or parenting capacity to respond to the child\u2019s needs. Code 21 (no factors\
-      \ identified) should only be used for cases which are closed following assessments\
-      \ which result in no further action (closure code RC8 and RC9) and should be\
-      \ the only factor listed. However, if factors are identified for cases which\
-      \ are closed following assessment, please record these selecting from the list\
-      \ above, but excluding code 21. If a section 47 enquiry has commenced on a case,\
-      \ then code 21 (no factors identified) should not be reported at the end of\
-      \ assessment even if it was found that the allegations that triggered the section\
-      \ 47 enquiry are unfounded. Instead, the relevant factors that were considered\
-      \ at the assessment that initiated the section 47 enquiry should be recorded.\
-      \ The case should then be closed using the reason for closure code: \u2018RC7\
-      \ - services ceased for any other reason, including child no longer in need\u2019\
-      , as at the point the section 47 started the child would be counted as a child\
-      \ in need even if the case closed shortly after. Code 21 should only be used\
-      \ in cases where the section 47 enquiry was automatically triggered alongside\
-      \ the assessment and both the assessment and section 47 resulted in no further\
-      \ action. More detailed descriptions and definitions of the factors are provided\
-      \ in the \u2018Additional guide on the factors identified at the end of assessment\u2019\
-      \ for more information. The additional guide is available as part of the Children\
+    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
+      \ not be entirely applicable to this data item within the SSD. A review of item/field\
+      \ guidance notes towards the SSD is in progress.]Record the factors as understood\
+      \ at the end of the assessment relevant to:\n\u2022 the impairment of the child\u2019\
+      s health and development (\u2018Child\u2019);\n\u2022 the parent(s)/carer(s)\
+      \ capacity to respond to the child\u2019s needs (\u2018Parenting capacity\u2019\
+      );\n\u2022 other people in the family/household, for example, a sibling or lodger\
+      \ (\u2018Other\u2019). This applies to all assessments completed. The information\
+      \ should be recorded at the end of the assessment and all factors which are\
+      \ felt to be relevant to the child\u2019s assessment should be reported from\
+      \ the list below. This includes factors where services are put in place to mitigate\
+      \ the effect of the factor as well as factors which need to be taken into account\
+      \ in providing other support. Please only record factors which are currently\
+      \ an issue of concern. For example, if domestic violence is a current issue\
+      \ of concern, please record it. If domestic violence was an issue in a previous\
+      \ relationship and is not an issue of concern now, then do not record it. Factors\
+      \ such as mental health concerns do not need to be confined to medically defined\
+      \ conditions. Rather this is intended, for example, to record where the professional,\
+      \ as part of the assessment process, feels that mental health is of concern\
+      \ to the child\u2019s health and development or parenting capacity to respond\
+      \ to the child\u2019s needs. Code 21 (no factors identified) should only be\
+      \ used for cases which are closed following assessments which result in no further\
+      \ action (closure code RC8 and RC9) and should be the only factor listed. However,\
+      \ if factors are identified for cases which are closed following assessment,\
+      \ please record these selecting from the list above, but excluding code 21.\
+      \ If a section 47 enquiry has commenced on a case, then code 21 (no factors\
+      \ identified) should not be reported at the end of assessment even if it was\
+      \ found that the allegations that triggered the section 47 enquiry are unfounded.\
+      \ Instead, the relevant factors that were considered at the assessment that\
+      \ initiated the section 47 enquiry should be recorded. The case should then\
+      \ be closed using the reason for closure code: \u2018RC7 - services ceased for\
+      \ any other reason, including child no longer in need\u2019, as at the point\
+      \ the section 47 started the child would be counted as a child in need even\
+      \ if the case closed shortly after. Code 21 should only be used in cases where\
+      \ the section 47 enquiry was automatically triggered alongside the assessment\
+      \ and both the assessment and section 47 resulted in no further action. More\
+      \ detailed descriptions and definitions of the factors are provided in the \u2018\
+      Additional guide on the factors identified at the end of assessment\u2019 for\
+      \ more information. The additional guide is available as part of the Children\
       \ in need census: guide to submitting data. Please report all the following\
       \ factors that apply:\n- 1A/1B/1C Alcohol misuse by the child/ parent(s) or\
       \ carer(s)/ another person living in the household.\n- 2A/2B/2C Drug misuse\

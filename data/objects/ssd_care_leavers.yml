@@ -25,8 +25,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: Care Leaver record unique ID from system or auto-generated as part of
-      export.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Care Leaver record unique ID
+      from system or auto-generated as part of export.'
   - name: clea_person_id
     description: Person Unique ID
     item_ref: CLEA002A
@@ -44,9 +46,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:clea_person_id
     - mosaic:clea_person_id
@@ -72,25 +74,27 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: "Relevant children are defined under Section 23A(2) of the Children\
-      \ Act 1989. A relevant child is:\n\u2022 a young person aged 16 or 17\n\u2022\
-      \ is no longer looked-after\n\u2022 before last ceasing to be looked-after,\
-      \ was an \u2018eligible child\u2019 (see definition below)\nOR\n\u2022 a young\
-      \ person aged 16 or 17\n\u2022 not subject to a care order\n\u2022 detained,\
-      \ or in hospital on their 16th birthday\n\u2022 immediately before being detained\
-      \ or admitted to hospital had been looked-after for at least 13 weeks which\
-      \ began after they reached age 14.\nFormer relevant children are defined under\
-      \ Section 23C (1) of the Children Act 1989. A former relevant child is one who\
-      \ is:\n\u2022 aged 18 or above,\nAND EITHER\n\u2022 has been a relevant child\
-      \ and would be one if he were under 18, OR\n\u2022 immediately before he ceased\
-      \ to be looked-after at age 18, was an eligible child.\nThe definition of eligible\
-      \ children is given below for information, because relevant and former relevant\
-      \ children will have been an eligible child in the past. Please note we are\
-      \ not collecting OC3 information for current eligible children.\nand ended after\
-      \ they reached the age of 16.\nAn eligible child is:\n\u2022 a young person\
-      \ aged 16 or 17\n\u2022 who is looked-after\n\u2022 and has been looked-after\
-      \ for at least 13 weeks which began after they reached the age of 14\nand ended\
-      \ after they reached the age of 16."
+    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
+      \ not be entirely applicable to this data item within the SSD. A review of item/field\
+      \ guidance notes towards the SSD is in progress.]Relevant children are defined\
+      \ under Section 23A(2) of the Children Act 1989. A relevant child is:\n\u2022\
+      \ a young person aged 16 or 17\n\u2022 is no longer looked-after\n\u2022 before\
+      \ last ceasing to be looked-after, was an \u2018eligible child\u2019 (see definition\
+      \ below)\nOR\n\u2022 a young person aged 16 or 17\n\u2022 not subject to a care\
+      \ order\n\u2022 detained, or in hospital on their 16th birthday\n\u2022 immediately\
+      \ before being detained or admitted to hospital had been looked-after for at\
+      \ least 13 weeks which began after they reached age 14.\nFormer relevant children\
+      \ are defined under Section 23C (1) of the Children Act 1989. A former relevant\
+      \ child is one who is:\n\u2022 aged 18 or above,\nAND EITHER\n\u2022 has been\
+      \ a relevant child and would be one if he were under 18, OR\n\u2022 immediately\
+      \ before he ceased to be looked-after at age 18, was an eligible child.\nThe\
+      \ definition of eligible children is given below for information, because relevant\
+      \ and former relevant children will have been an eligible child in the past.\
+      \ Please note we are not collecting OC3 information for current eligible children.\n\
+      and ended after they reached the age of 16.\nAn eligible child is:\n\u2022 a\
+      \ young person aged 16 or 17\n\u2022 who is looked-after\n\u2022 and has been\
+      \ looked-after for at least 13 weeks which began after they reached the age\
+      \ of 14\nand ended after they reached the age of 16."
   - name: clea_care_leaver_in_touch
     description: In Touch Category
     item_ref: CLEA004A
@@ -109,80 +113,83 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: "Select the code which most accurately answers the question \u2013 was\
-      \ the local authority in touch with this young person?\nFor young people aged\
-      \ 17 to 21 years, to be counted as \u2018in touch\u2019 for the purposes of\
-      \ this data item, there should be \u201Ccontact\u201D between your local authority\
-      \ and the young person around 3 months before and one month after the young\
-      \ person\u2019s birthday..\nFor young people aged 22 to 25 to be counted as\
-      \ \u2018in touch\u2019 for the purposes of this data item, they should have\
-      \ contacted your local authority for support at some point during the year.\n\
-      The OC3 data collection is designed to monitor the situation of young people\
-      \ when they have left care, rather than their situation immediately before they\
-      \ left care. Because the guidance says that the local authority should be in\
-      \ touch with the young person in the period three months before, to one month\
-      \ after the birthday, it is possible that the local authority will have been\
-      \ in touch with the young person while they were still in care.\nIf the birthday\
-      \ in question is the 17th birthday, then it should be recorded whether the local\
-      \ authority was in touch with the young person AFTER they had left care. Information\
-      \ should be returned if the young person left care before or on their 17th birthday,\
-      \ but not if they left care after their 17th birthday.\nIf the birthday in question\
-      \ is the 18th birthday, then we want to know whether your local authority is\
-      \ in touch with the person AFTER they left care and at some point up to 3 months\
-      \ after their 18th birthday. The accommodation and activity should reflect the\
-      \ most up to date information you have available up to the age of 18 years and\
-      \ 3 months. Information should be returned for young people who turned 18 in\
-      \ the year and left care before or on their 18th birthday.\nIf your local authority\
-      \ is in contact more than once during the relevant time period, the most up\
-      \ to date information on the last occasion of contact should be recorded for\
-      \ activity and accommodation.\nStatutory guidance is clear that the Personal\
-      \ Adviser (PA) must have regular face to face contact with every care leaver\
-      \ they support. The pathway plan must set out expectations for the PA to see\
-      \ the care leaver and, if relevant, arrangements for staying in touch in other\
-      \ ways, which could include regular exchanges of text messages, emails and phone\
-      \ conversations between the PA and the young person. Further guidance on keeping\
-      \ in touch is given in chapter 4 of the Planning Transitions to Adulthood Guidance\
-      \ for Care Leavers.\nFor care leavers aged 17- to 21-years-old, if your local\
-      \ authority has contacted a young person, and the young person has responded\
-      \ by stating that they have no desire to supply your local authority with any\
-      \ information, and do not want to be contacted by your local authority again,\
-      \ this is should be coded as REFU - \u201Cyoung person refuses contact\u201D\
-      . Similarly, if the young person has moved outside the local authority boundary\
-      \ and has chosen not to tell the local authority where they have gone, you still\
-      \ need to have been in communication with the young person to be able to count\
-      \ them as \u201Cin touch\u201D.\nWhere a young person has previously been receiving\
-      \ Leaving Care Services but has now decided that they no longer require a service,\
-      \ this should be coded as NREQ \u2013 \u201Cyoung person no longer requires\
-      \ services\u201D. NREQ should also be used for young people aged 22 years old\
-      \ and over who have not taken up the offer of Personal Adviser support.\nNote,\
-      \ if the young person died (since leaving care) following their relevant birthday\
-      \ in the collection year, the information as at their last birthday should be\
-      \ provided including whether they were in touch or not at that point. If the\
-      \ young person died before their relevant birthday in the collection year, the\
-      \ code \u201CDIED\u201D should be used. If a young person died whilst in care,\
-      \ OC3 information is not required.\nChildren who have returned to live with\
-      \ parents or someone with parental responsibility for a period of more than\
-      \ 6 months are no longer \u2018relevant children\u2019 so the \u2018in touch\u2019\
-      \ code used should be RHOM. However, if this arrangement then breaks down and\
-      \ the young person ceases to live with the person concerned, he/she once again\
-      \ becomes a \u2018relevant child\u2019 and \u2018RHOM\u2019 should not be used.\
-      \ Code set for in touch:\n- YES Yes - in touch\n- NO No \u2013 not in touch\n\
-      -DIED Died after leaving care\n-REFU Young person refuses contact\n-NREQ Young\
-      \ person no longer requires children\u2019s social care services\n-RHOM Young\
-      \ person returned to live with parents or someone with parental responsibility\
-      \ for a continuous period of 6 months or more Contact through a third party\
-      \ is acceptable if you are satisfied that this represents a genuine exchange\
-      \ of information between the care leaver and your local authority. It is your\
-      \ responsibility to judge whether such contact is sufficient to qualify for\
-      \ definition as \u2018in touch\u2019. For example, if someone mentions that\
-      \ they have met the young person in passing and the young person appeared well,\
-      \ then this is not defined as \u2018in touch\u2019. However, if a third person\
-      \ passes a note from the young person to your local authority, then this would\
-      \ be classified as being \u2018in touch\u2019.\nContact through a third party\
-      \ who is working with the care leaver in a professional capacity is classified\
-      \ as \u2018in touch\u2019; for example, a young person\u2019s advisor not directly\
-      \ employed by your local authority. It is expected that contact through a third\
-      \ person who works with care leavers in a professional capacity will be frequent."
+    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
+      \ not be entirely applicable to this data item within the SSD. A review of item/field\
+      \ guidance notes towards the SSD is in progress.]Select the code which most\
+      \ accurately answers the question \u2013 was the local authority in touch with\
+      \ this young person?\nFor young people aged 17 to 21 years, to be counted as\
+      \ \u2018in touch\u2019 for the purposes of this data item, there should be \u201C\
+      contact\u201D between your local authority and the young person around 3 months\
+      \ before and one month after the young person\u2019s birthday..\nFor young people\
+      \ aged 22 to 25 to be counted as \u2018in touch\u2019 for the purposes of this\
+      \ data item, they should have contacted your local authority for support at\
+      \ some point during the year.\nThe OC3 data collection is designed to monitor\
+      \ the situation of young people when they have left care, rather than their\
+      \ situation immediately before they left care. Because the guidance says that\
+      \ the local authority should be in touch with the young person in the period\
+      \ three months before, to one month after the birthday, it is possible that\
+      \ the local authority will have been in touch with the young person while they\
+      \ were still in care.\nIf the birthday in question is the 17th birthday, then\
+      \ it should be recorded whether the local authority was in touch with the young\
+      \ person AFTER they had left care. Information should be returned if the young\
+      \ person left care before or on their 17th birthday, but not if they left care\
+      \ after their 17th birthday.\nIf the birthday in question is the 18th birthday,\
+      \ then we want to know whether your local authority is in touch with the person\
+      \ AFTER they left care and at some point up to 3 months after their 18th birthday.\
+      \ The accommodation and activity should reflect the most up to date information\
+      \ you have available up to the age of 18 years and 3 months. Information should\
+      \ be returned for young people who turned 18 in the year and left care before\
+      \ or on their 18th birthday.\nIf your local authority is in contact more than\
+      \ once during the relevant time period, the most up to date information on the\
+      \ last occasion of contact should be recorded for activity and accommodation.\n\
+      Statutory guidance is clear that the Personal Adviser (PA) must have regular\
+      \ face to face contact with every care leaver they support. The pathway plan\
+      \ must set out expectations for the PA to see the care leaver and, if relevant,\
+      \ arrangements for staying in touch in other ways, which could include regular\
+      \ exchanges of text messages, emails and phone conversations between the PA\
+      \ and the young person. Further guidance on keeping in touch is given in chapter\
+      \ 4 of the Planning Transitions to Adulthood Guidance for Care Leavers.\nFor\
+      \ care leavers aged 17- to 21-years-old, if your local authority has contacted\
+      \ a young person, and the young person has responded by stating that they have\
+      \ no desire to supply your local authority with any information, and do not\
+      \ want to be contacted by your local authority again, this is should be coded\
+      \ as REFU - \u201Cyoung person refuses contact\u201D. Similarly, if the young\
+      \ person has moved outside the local authority boundary and has chosen not to\
+      \ tell the local authority where they have gone, you still need to have been\
+      \ in communication with the young person to be able to count them as \u201C\
+      in touch\u201D.\nWhere a young person has previously been receiving Leaving\
+      \ Care Services but has now decided that they no longer require a service, this\
+      \ should be coded as NREQ \u2013 \u201Cyoung person no longer requires services\u201D\
+      . NREQ should also be used for young people aged 22 years old and over who have\
+      \ not taken up the offer of Personal Adviser support.\nNote, if the young person\
+      \ died (since leaving care) following their relevant birthday in the collection\
+      \ year, the information as at their last birthday should be provided including\
+      \ whether they were in touch or not at that point. If the young person died\
+      \ before their relevant birthday in the collection year, the code \u201CDIED\u201D\
+      \ should be used. If a young person died whilst in care, OC3 information is\
+      \ not required.\nChildren who have returned to live with parents or someone\
+      \ with parental responsibility for a period of more than 6 months are no longer\
+      \ \u2018relevant children\u2019 so the \u2018in touch\u2019 code used should\
+      \ be RHOM. However, if this arrangement then breaks down and the young person\
+      \ ceases to live with the person concerned, he/she once again becomes a \u2018\
+      relevant child\u2019 and \u2018RHOM\u2019 should not be used. Code set for in\
+      \ touch:\n- YES Yes - in touch\n- NO No \u2013 not in touch\n-DIED Died after\
+      \ leaving care\n-REFU Young person refuses contact\n-NREQ Young person no longer\
+      \ requires children\u2019s social care services\n-RHOM Young person returned\
+      \ to live with parents or someone with parental responsibility for a continuous\
+      \ period of 6 months or more Contact through a third party is acceptable if\
+      \ you are satisfied that this represents a genuine exchange of information between\
+      \ the care leaver and your local authority. It is your responsibility to judge\
+      \ whether such contact is sufficient to qualify for definition as \u2018in touch\u2019\
+      . For example, if someone mentions that they have met the young person in passing\
+      \ and the young person appeared well, then this is not defined as \u2018in touch\u2019\
+      . However, if a third person passes a note from the young person to your local\
+      \ authority, then this would be classified as being \u2018in touch\u2019.\n\
+      Contact through a third party who is working with the care leaver in a professional\
+      \ capacity is classified as \u2018in touch\u2019; for example, a young person\u2019\
+      s advisor not directly employed by your local authority. It is expected that\
+      \ contact through a third person who works with care leavers in a professional\
+      \ capacity will be frequent."
   - name: clea_care_leaver_latest_contact
     description: Latest Date of Contact
     item_ref: CLEA005A
@@ -201,11 +208,14 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: This should be the latest date of PA contact with the young person.
-      This may differ by Local Authority as to what dates are available, so please
-      advise in the comments column as to what contact types are included. The date
-      should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a four digit
-      number. Leave blank if you are not in touch with the care leaver.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]This should be the latest date
+      of PA contact with the young person. This may differ by Local Authority as to
+      what dates are available, so please advise in the comments column as to what
+      contact types are included. The date should be recorded in a DD/MM/YYYY format,
+      i.e. day/month/year as a four digit number. Leave blank if you are not in touch
+      with the care leaver.'
   - name: clea_care_leaver_accommodation
     description: Accommodation
     item_ref: CLEA006A
@@ -224,19 +234,22 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: "The code for accommodation is a two- digit alphanumeric code (for example:\
-      \ B1).\n\u2022 The first digit is alphabetical, and represents the type of accommodation\
-      \ that the young person is living in on or around their 17th, 18th, 19th, 20th\
-      \ or 21st birthday, or the accommodation the young person is living in at the\
-      \ time of their latest contact during the year if they are aged 22-to-25-years-old.\n\
-      \u2022 The second digit is numerical, and indicates whether you judge the accommodation\
-      \ to be \u2018suitable\u2019 or \u2018unsuitable\u2019\n\u2022 If you were not\
-      \ in touch with the young person and do not know their accommodation, or the\
-      \ young person has died, or returned home to live with parents or someone with\
-      \ parental responsibility for a continuous period of 6 months or more, (in touch\
-      \ code \u2018RHOM\u2019) enter 0 (zero). Code set for type of accommodation\n\
-      -B With parent(s) or relative(s)\n-C Community home or other form of residential\
-      \ care such as an National Health Service (NHS) establishment\n-D Semi-independent,\
+    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
+      \ not be entirely applicable to this data item within the SSD. A review of item/field\
+      \ guidance notes towards the SSD is in progress.]The code for accommodation\
+      \ is a two- digit alphanumeric code (for example: B1).\n\u2022 The first digit\
+      \ is alphabetical, and represents the type of accommodation that the young person\
+      \ is living in on or around their 17th, 18th, 19th, 20th or 21st birthday, or\
+      \ the accommodation the young person is living in at the time of their latest\
+      \ contact during the year if they are aged 22-to-25-years-old.\n\u2022 The second\
+      \ digit is numerical, and indicates whether you judge the accommodation to be\
+      \ \u2018suitable\u2019 or \u2018unsuitable\u2019\n\u2022 If you were not in\
+      \ touch with the young person and do not know their accommodation, or the young\
+      \ person has died, or returned home to live with parents or someone with parental\
+      \ responsibility for a continuous period of 6 months or more, (in touch code\
+      \ \u2018RHOM\u2019) enter 0 (zero). Code set for type of accommodation\n-B With\
+      \ parent(s) or relative(s)\n-C Community home or other form of residential care\
+      \ such as an National Health Service (NHS) establishment\n-D Semi-independent,\
       \ transitional accommodation (like a supported hostel, trainer flats); self-contained\
       \ accommodation with specialist personal assistance support (for example, for\
       \ young people with disabilities, pregnant young women and single parents);\
@@ -275,17 +288,20 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: "We accept that there are no hard and fast rules on whether accommodation\
-      \ is deemed \u2018suitable\u2019; the decision will depend on the circumstances\
-      \ of the individual case and you will have to use your judgement. Code set for\
-      \ suitability of accommodation\n-1 Accommodation is considered suitable\n-2\
-      \ Accommodation is considered unsuitable\nThe following table provides a guide\
-      \ to the presumed responses for each of the accommodation types. However, there\
-      \ may be individual circumstances where these may not be the case. Accommodation\
-      \ is to be regarded as suitable if it provides safe, secure and affordable provision\
-      \ for young people. Accommodation that clearly exposes the person to risk of\
-      \ harm or social exclusion by reason of its location or other factors should\
-      \ be coded as \u2018unsuitable\u2019."
+    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
+      \ not be entirely applicable to this data item within the SSD. A review of item/field\
+      \ guidance notes towards the SSD is in progress.]We accept that there are no\
+      \ hard and fast rules on whether accommodation is deemed \u2018suitable\u2019\
+      ; the decision will depend on the circumstances of the individual case and you\
+      \ will have to use your judgement. Code set for suitability of accommodation\n\
+      -1 Accommodation is considered suitable\n-2 Accommodation is considered unsuitable\n\
+      The following table provides a guide to the presumed responses for each of the\
+      \ accommodation types. However, there may be individual circumstances where\
+      \ these may not be the case. Accommodation is to be regarded as suitable if\
+      \ it provides safe, secure and affordable provision for young people. Accommodation\
+      \ that clearly exposes the person to risk of harm or social exclusion by reason\
+      \ of its location or other factors should be coded as \u2018unsuitable\u2019\
+      ."
   - name: clea_care_leaver_activity
     description: Activity Status
     item_ref: CLEA008A
@@ -304,50 +320,52 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: "If the young person is aged 17 to 21 years, record the code that most\
-      \ accurately reflects the young person's main activity status on or around their\
-      \ birthday if you were in touch with them. If you were not in touch with the\
-      \ young person but are certain of their activity on their birthday, then please\
-      \ record this. Such examples might include where the young person was in a stable\
-      \ and ongoing activity such as posted abroad in the armed services, or where\
-      \ they have retrospectively confirmed that they had remained on an ongoing education\
-      \ course during the period. If you were not in touch with them and do not know\
-      \ their activity, or the young person has died or returned home to live with\
-      \ parents or someone with parental responsibility for a continuous period of\
-      \ 6 months or more (in touch code \u2018RHOM\u2019), enter 0 (zero).\nIf the\
-      \ young person is aged 22 to 25 years and has been in touch with your local\
-      \ authority at some point during the year, then please report their latest known\
-      \ activity.\nNormally the young person should be asked what their main activity\
-      \ is. If their response is not clear and it is known that they are involved\
-      \ in more than one of the activity categories listed on the guidance notes,\
-      \ choose the one that is highest in the list. The list is ranked so that in\
-      \ general, if the young person is involved in both education and employment,\
-      \ education will be recorded as the main activity.\nCode set for main activity:\n\
-      -F1 Young person engaged full time in higher education (for example studies\
-      \ beyond A level)\n-P1 Young person engaged part time in higher education (for\
-      \ example studies beyond A level)\n-F2 Young person engaged full time in education\
-      \ other than higher education\n-P2 Young person engaged part time in education\
-      \ other than higher education\n-F4 Young person engaged full time in an apprenticeship\n\
-      -P4 Young person engaged part time in an apprenticeship\n-F5 Young person engaged\
-      \ full time in training or employment (not apprenticeship)\n-P5 Young person\
-      \ engaged part time in training or employment (not apprenticeship)\n-G4 Young\
-      \ person not in education, employment or training because of illness or disability\n\
-      -G5 Young person not in education, employment or training: other circumstances\n\
-      -G6 Young person not in education, employment or training due to pregnancy or\
-      \ parenting Please note that if a young person in custody is engaged in a programme\
-      \ of education their activity should be recorded with an activity code that\
-      \ most accurately reflects this, for example part-time education. Before 2016\
-      \ the guidance specified that a young person in custody should have an activity\
-      \ code of G5 (not in education, employment or training).\nFull Time: The activity\
-      \ engages the young person for at least 16 hours a week.\nPart Time: The activity\
-      \ engages the young person for less than 16 hours a week.\nF1 and P1 - Young\
-      \ person engaged in higher education (meaning studies beyond A level): \u2018\
-      Higher education\u2019 means all studies at a higher academic level than A level.\
-      \ This includes degrees, diplomas in higher education, teaching and nursing\
-      \ qualifications, HNDs, ONDs, and BTEC levels 4-5. The educational course does\
-      \ not have to be residential.\nF2 and P2 - Young person engaged in education\
-      \ other than higher education: This means all other education not covered by\
-      \ code F1 and P1. The educational course does not have to be residential.\n\
+    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
+      \ not be entirely applicable to this data item within the SSD. A review of item/field\
+      \ guidance notes towards the SSD is in progress.]If the young person is aged\
+      \ 17 to 21 years, record the code that most accurately reflects the young person's\
+      \ main activity status on or around their birthday if you were in touch with\
+      \ them. If you were not in touch with the young person but are certain of their\
+      \ activity on their birthday, then please record this. Such examples might include\
+      \ where the young person was in a stable and ongoing activity such as posted\
+      \ abroad in the armed services, or where they have retrospectively confirmed\
+      \ that they had remained on an ongoing education course during the period. If\
+      \ you were not in touch with them and do not know their activity, or the young\
+      \ person has died or returned home to live with parents or someone with parental\
+      \ responsibility for a continuous period of 6 months or more (in touch code\
+      \ \u2018RHOM\u2019), enter 0 (zero).\nIf the young person is aged 22 to 25 years\
+      \ and has been in touch with your local authority at some point during the year,\
+      \ then please report their latest known activity.\nNormally the young person\
+      \ should be asked what their main activity is. If their response is not clear\
+      \ and it is known that they are involved in more than one of the activity categories\
+      \ listed on the guidance notes, choose the one that is highest in the list.\
+      \ The list is ranked so that in general, if the young person is involved in\
+      \ both education and employment, education will be recorded as the main activity.\n\
+      Code set for main activity:\n-F1 Young person engaged full time in higher education\
+      \ (for example studies beyond A level)\n-P1 Young person engaged part time in\
+      \ higher education (for example studies beyond A level)\n-F2 Young person engaged\
+      \ full time in education other than higher education\n-P2 Young person engaged\
+      \ part time in education other than higher education\n-F4 Young person engaged\
+      \ full time in an apprenticeship\n-P4 Young person engaged part time in an apprenticeship\n\
+      -F5 Young person engaged full time in training or employment (not apprenticeship)\n\
+      -P5 Young person engaged part time in training or employment (not apprenticeship)\n\
+      -G4 Young person not in education, employment or training because of illness\
+      \ or disability\n-G5 Young person not in education, employment or training:\
+      \ other circumstances\n-G6 Young person not in education, employment or training\
+      \ due to pregnancy or parenting Please note that if a young person in custody\
+      \ is engaged in a programme of education their activity should be recorded with\
+      \ an activity code that most accurately reflects this, for example part-time\
+      \ education. Before 2016 the guidance specified that a young person in custody\
+      \ should have an activity code of G5 (not in education, employment or training).\n\
+      Full Time: The activity engages the young person for at least 16 hours a week.\n\
+      Part Time: The activity engages the young person for less than 16 hours a week.\n\
+      F1 and P1 - Young person engaged in higher education (meaning studies beyond\
+      \ A level): \u2018Higher education\u2019 means all studies at a higher academic\
+      \ level than A level. This includes degrees, diplomas in higher education, teaching\
+      \ and nursing qualifications, HNDs, ONDs, and BTEC levels 4-5. The educational\
+      \ course does not have to be residential.\nF2 and P2 - Young person engaged\
+      \ in education other than higher education: This means all other education not\
+      \ covered by code F1 and P1. The educational course does not have to be residential.\n\
       F4 and P4 - Young person engaged in an apprenticeship: Includes apprenticeships\
       \ only.\nF5 and P5 - Young person engaged in training or employment: \u2018\
       Training\u2019 includes government-supported training (other than Apprenticeships),\
@@ -383,10 +401,13 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: This should be either the date the Pathway plan started, or the latest
-      date the pathway plan was reviewed (if applicable); whichever is the most recent.
-      The date should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a
-      four digit number. Leave blank if you are not in touch with the care leaver.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]This should be either the date
+      the Pathway plan started, or the latest date the pathway plan was reviewed (if
+      applicable); whichever is the most recent. The date should be recorded in a
+      DD/MM/YYYY format, i.e. day/month/year as a four digit number. Leave blank if
+      you are not in touch with the care leaver.'
   - name: clea_care_leaver_personal_advisor
     description: Allocated Personal Advisor
     item_ref: CLEA010A
@@ -405,8 +426,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: Allocated Personal Advisor for Care Leaver
-  - name: clea_care_leaver_allocated_team
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Allocated Personal Advisor for
+      Care Leaver'
+  - name: clea_care_leaver_allocated_team_name
     description: Allocated Team
     item_ref: CLEA011A
     type: nvarchar
@@ -419,13 +443,16 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:clea_care_leaver_allocated_team
-    - mosaic:clea_care_leaver_allocated_team
+    - liquid_logic:clea_care_leaver_allocated_team_name
+    - mosaic:clea_care_leaver_allocated_team_name
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: Allocated Team responsible for Care Leaver
-  - name: clea_care_leaver_worker_id
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Allocated Team responsible for
+      Care Leaver'
+  - name: clea_care_leaver_worker_name
     description: Allocated Worker ID
     item_ref: CLEA012A
     type: nvarchar
@@ -439,9 +466,12 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:clea_care_leaver_worker_id
-    - mosaic:clea_care_leaver_worker_id
+    - liquid_logic:clea_care_leaver_worker_name
+    - mosaic:clea_care_leaver_worker_name
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: Allocated worker responsible for Care Leaver
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Allocated worker responsible
+      for Care Leaver'

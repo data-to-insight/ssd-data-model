@@ -15,6 +15,15 @@ nodes:
     item_ref: CLAV007A
     type: nvarchar
     guidance: null
+  - name: clav_person_id
+    description: Person ID
+    item_ref: CLAV008A
+    type: nvarchar
+    foreign_key: ssd_cla_episodes.clae_person_id
+    categories:
+    - looked_after
+    - review
+    guidance: null
   - name: clav_cla_visit_id
     description: Visit ID
     item_ref: CLAV001A
@@ -34,28 +43,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_visits
     - mosaic:ssd_cla_visits
-    guidance: CLA Visit record unique ID from system or auto-generated as part of
-      export.
-  - name: clav_cla_episode_id
-    description: Episode ID
-    item_ref: CLAV002A
-    type: nvarchar
-    foreign_key: ssd_cla_episodes.clae_cla_episode_id
-    categories:
-    - looked_after
-    - visit
-    returns:
-    - Local
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:clav_cla_episode_id
-    - mosaic:clav_cla_episode_id
-    cms_table:
-    - liquid_logic:ssd_cla_visits
-    - mosaic:ssd_cla_visits
-    guidance: See CLA001A
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]CLA Visit record unique ID from
+      system or auto-generated as part of export.'
   - name: clav_cla_visit_date
     description: Date of Visit
     item_ref: CLAV003A
@@ -74,7 +65,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_visits
     - mosaic:ssd_cla_visits
-    guidance: Actual date of Visit
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Actual date of Visit'
   - name: clav_cla_visit_seen
     description: Child Seen
     item_ref: CLAV004A
@@ -93,7 +86,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_visits
     - mosaic:ssd_cla_visits
-    guidance: Was the child seen during this visit? Yes/ No
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Was the child seen during this
+      visit? Yes/ No'
   - name: clav_cla_visit_seen_alone
     description: Child Seen Alone
     item_ref: CLAV005A
@@ -112,4 +108,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_visits
     - mosaic:ssd_cla_visits
-    guidance: Was the child seen alone during this visit? Yes/ No
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Was the child seen alone during
+      this visit? Yes/ No'

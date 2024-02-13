@@ -45,16 +45,18 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:addr_address_json
     - mosaic:addr_address_json
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: Address detail
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Address detail'
   - name: addr_person_id
     description: Person Unique ID
     item_ref: ADDR002A
@@ -69,9 +71,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:addr_person_id
     - mosaic:addr_person_id
@@ -97,7 +99,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: Home/ Placement/ Primary/ Secondary
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Home/ Placement/ Primary/ Secondary'
   - name: addr_address_start_date
     description: Address Start Date/ From
     item_ref: ADDR004A
@@ -116,7 +120,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: Date person started living at the address
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Date person started living at
+      the address'
   - name: addr_address_end_date
     description: Address End Date/ To
     item_ref: ADDR005A
@@ -135,7 +142,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: Date person left the address
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Date person left the address'
   - name: addr_postcode
     description: Address Postcode
     item_ref: ADDR006A
@@ -148,15 +157,18 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:addr_postcode
     - mosaic:addr_postcode
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: You should provide a current post code for most persons and every effort
-      should be made to obtain valid details. If it is not possible to get the post
-      code, you should leave this field blank and provide an explanatory note.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]You should provide a current
+      post code for most persons and every effort should be made to obtain valid details.
+      If it is not possible to get the post code, you should leave this field blank
+      and provide an explanatory note.'

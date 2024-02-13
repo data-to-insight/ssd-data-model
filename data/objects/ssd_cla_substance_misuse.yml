@@ -19,8 +19,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_substance_misuse
     - mosaic:ssd_cla_substance_misuse
-    guidance: Substance misuse record unique ID from system or auto-generated as part
-      of export.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Substance misuse record unique
+      ID from system or auto-generated as part of export.'
   - name: clas_person_id
     description: Person Unique ID
     item_ref: CLAS002A
@@ -39,9 +41,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:clas_person_id
     - mosaic:clas_person_id
@@ -65,7 +67,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_substance_misuse
     - mosaic:ssd_cla_substance_misuse
-    guidance: Date of substance misuse
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Date of substance misuse'
   - name: clas_substance_misused
     description: Substance misused
     item_ref: CLAS004A
@@ -85,7 +89,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_substance_misuse
     - mosaic:ssd_cla_substance_misuse
-    guidance: Substance that was being misused
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Substance that was being misused'
   - name: clas_intervention_received
     description: Child received intervention for substance misuse problem
     item_ref: CLAS005A
@@ -105,4 +111,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_substance_misuse
     - mosaic:ssd_cla_substance_misuse
-    guidance: Did child receive intervention for substance misuse problem?
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Did child receive intervention
+      for substance misuse problem?'

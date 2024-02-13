@@ -20,16 +20,19 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:moth_person_id
     - mosaic:moth_person_id
     cms_table:
     - liquid_logic:ssd_mother
     - mosaic:ssd_mother
-    guidance: The unique identifier of the mother's child
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]The unique identifier of the
+      mother''s child'
   - name: moth_childs_person_id
     description: Mother's Child's Unique ID
     item_ref: MOTH001A
@@ -76,4 +79,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_mother
     - mosaic:ssd_mother
-    guidance: Currently collected for CLA only, only first child dob collected
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Currently collected for CLA only,
+      only first child dob collected'

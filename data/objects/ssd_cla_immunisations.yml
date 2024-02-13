@@ -16,8 +16,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_immunisations
     - mosaic:ssd_cla_immunisations
-    guidance: Immunisations record unique ID from system or auto-generated as part
-      of export.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Immunisations record unique ID
+      from system or auto-generated as part of export.'
   - name: clai_person_id
     description: Person Unique ID
     item_ref: CLAI002A
@@ -36,9 +38,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:clai_person_id
     - mosaic:clai_person_id
@@ -65,4 +67,6 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_immunisations
     - mosaic:ssd_cla_immunisations
-    guidance: Immunisations up to date?
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Immunisations up to date?'

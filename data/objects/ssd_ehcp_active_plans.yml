@@ -26,8 +26,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_active_plans
     - mosaic:ssd_ehcp_active_plans
-    guidance: EHCP active plan unique ID from system or auto-generated as part of
-      export.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]EHCP active plan unique ID from
+      system or auto-generated as part of export.'
   - name: ehcp_ehcp_request_id
     description: Request ID
     item_ref: EHCP002A
@@ -67,7 +69,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_active_plans
     - mosaic:ssd_ehcp_active_plans
-    guidance: Please enter the date when the local authority wrote to the parent or
-      young person with the notification of the decision as to whether to retain,
-      cease or amend the plan following the annual review meeting. Note that this
-      date will not be the same as the date of the review meeting.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Please enter the date when the
+      local authority wrote to the parent or young person with the notification of
+      the decision as to whether to retain, cease or amend the plan following the
+      annual review meeting. Note that this date will not be the same as the date
+      of the review meeting.'

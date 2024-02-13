@@ -26,34 +26,15 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_reviews
     - mosaic:ssd_cla_reviews
-    guidance: CLA Review unique ID from system or auto-generated as part of export.
-  - name: clar_cla_episode_id
-    description: Episode ID
-    item_ref: CLAR002A
-    type: nvarchar
-    foreign_key: ssd_cla_episodes.clae_cla_episode_id
-    validators:
-    - required:
-        enabled: true
-    categories:
-    - looked_after
-    - review
-    returns:
-    - Local
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:clar_cla_episode_id
-    - mosaic:clar_cla_episode_id
-    cms_table:
-    - liquid_logic:ssd_cla_reviews
-    - mosaic:ssd_cla_reviews
-    guidance: See CLA001A
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]CLA Review unique ID from system
+      or auto-generated as part of export.'
   - name: clar_cla_id
     description: CLA_ID
     item_ref: CLAR011A
     type: nvarchar
+    foreign_key: ssd_cla_episodes.clae_cla_id
     categories:
     - looked_after
     - review
@@ -85,7 +66,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_reviews
     - mosaic:ssd_cla_reviews
-    guidance: Date the CLA review was due
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Date the CLA review was due'
   - name: clar_cla_review_date
     description: CLA Review Date
     item_ref: CLAR004A
@@ -105,7 +88,14 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_reviews
     - mosaic:ssd_cla_reviews
-    guidance: Actual date of Review conference
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Actual date of Review conference'
+  - name: clar_cla_review_cancelled
+    description: null
+    item_ref: CLAR012A
+    type: nvarchar
+    guidance: null
   - name: clar_cla_review_participation
     description: Participation code
     item_ref: CLAR007A
@@ -124,8 +114,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_reviews
     - mosaic:ssd_cla_reviews
-    guidance: 'Record the method of participation in each review using the codes below:
-      -PN0 Child aged under 4 at the time of the review
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Record the method of participation
+      in each review using the codes below: -PN0 Child aged under 4 at the time of
+      the review
 
       -PN1 Child physically attends and speaks for him or herself (Attendance).
 
@@ -148,24 +141,3 @@ nodes:
       viewpoint)
 
       -PN7 Child does not attend nor are his or her views conveyed to the review'
-  - name: clar_cla_review_last_iro_contact_date
-    description: Date of Last IRO Visit / Contact to the Child
-    item_ref: CLAR010A
-    type: datetime
-    categories:
-    - looked_after
-    - review
-    returns:
-    - AnnexA
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:clar_cla_review_last_iro_contact_date
-    - mosaic:clar_cla_review_last_iro_contact_date
-    cms_table:
-    - liquid_logic:ssd_cla_reviews
-    - mosaic:ssd_cla_reviews
-    guidance: Confirm the date of the last visit or contact by the LAs Independent
-      Reviewing Officer (IRO). This may in some instances be the same date as the
-      date of the last statutory review and if so please repeat the date here.

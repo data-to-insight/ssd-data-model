@@ -55,9 +55,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    - Eclipse
-    - CareDirector
-    - Azeus
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:icpc_person_id
     - mosaic:icpc_person_id
@@ -122,7 +122,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
-    guidance: 'In this is a transfer in ICPC:
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]In this is a transfer in ICPC:
 
       1 - Yes
 
@@ -165,16 +167,16 @@ nodes:
     cms_table:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
-    guidance: Enter the date on which the initial child protection conference takes
-      place, using the formatting covered in the general notes. If the initial child
-      protection conference has not yet taken place, please leave blank.
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Enter the date on which the initial
+      child protection conference takes place, using the formatting covered in the
+      general notes. If the initial child protection conference has not yet taken
+      place, please leave blank.'
   - name: icpc_icpc_outcome_cp_flag
     description: ICPC Outcome CP Flag
     item_ref: ICPC013A
     type: nchar
-    categories:
-    - initial_cp_conference
-    - child_protection
     returns:
     - Local
     cms_field:
@@ -203,12 +205,15 @@ nodes:
     cms_table:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
-    guidance: 'Enter the outcome of the Initial CP Conference:
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Enter the outcome of the Initial
+      CP Conference:
 
       - Child/ young person to be subject of a Child Protection Plan
 
       - Do not start Child Protection Plan'
-  - name: icpc_icpc_team
+  - name: icpc_icpc_team_name
     description: ICPC Allocated Team
     item_ref: ICPC007A
     type: nvarchar
@@ -222,17 +227,19 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:icpc_icpc_team
-    - mosaic:icpc_icpc_team
+    - liquid_logic:icpc_icpc_team_name
+    - mosaic:icpc_icpc_team_name
     cms_table:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
-    guidance: Allocated Team responsible for S47 Enquiry/ ICPC
-  - name: icpc_icpc_worker_id
-    description: ICPC Allocated Worker ID
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Allocated Team responsible for
+      S47 Enquiry/ ICPC'
+  - name: icpc_icpc_worker_name
+    description: ICPC Allocated Worker
     item_ref: ICPC008A
     type: nvarchar
-    foreign_key: ssd_involvements.invo_professional_id
     categories:
     - initial_cp_conference
     - child_protection
@@ -243,9 +250,12 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:icpc_icpc_worker_id
-    - mosaic:icpc_icpc_worker_id
+    - liquid_logic:icpc_icpc_worker_name
+    - mosaic:icpc_icpc_worker_name
     cms_table:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
-    guidance: Allocated worker responsible for S47 Enquiry/ ICPC
+    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
+      not be entirely applicable to this data item within the SSD. A review of item/field
+      guidance notes towards the SSD is in progress.]Allocated worker responsible
+      for S47 Enquiry/ ICPC'
