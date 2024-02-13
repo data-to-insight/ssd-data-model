@@ -55,12 +55,34 @@ SELECT
     p.pers_legacy_id                            AS ChildUniqueID,	-- temp solution [TESTING] This liquid logic specific
     p.pers_person_id						    AS ChildUniqueID2,	-- temp solution [TESTING] This for compatiblility in non-ll systems
     CASE
-		WHEN p.pers_sex = 'M' THEN 'Male'
-		WHEN p.pers_sex = 'F' THEN 'Female'
-		WHEN p.pers_sex = 'U' THEN 'Not stated/recorded'
-		WHEN p.pers_sex = 'I' THEN 'Neither'
-	END										    AS Gender,
-	p.pers_ethnicity                            AS Ethnicity,
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')		    AS DateOfBirth,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
@@ -127,8 +149,35 @@ IF OBJECT_ID('tempdb..#AA_2_early_help_assessments') IS NOT NULL DROP TABLE #AA_
 SELECT
     /* Common AA fields */
     p.pers_legacy_id                        AS ChildUniqueID,
-    p.pers_sex                              AS GENDER,
-    p.pers_ethnicity                        AS ETHNICITY,
+    CASE
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')        AS DATE_OF_BIRTH,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
@@ -198,8 +247,35 @@ IF OBJECT_ID('tempdb..#AA_3_referrals') IS NOT NULL DROP TABLE #AA_3_referrals;
 SELECT
     /* Common AA fields */
     p.pers_legacy_id                            AS ChildUniqueID,
-    p.pers_sex                                  AS GENDER,
-    p.pers_ethnicity                            AS ETHNICITY,
+    CASE
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
@@ -282,8 +358,35 @@ IF OBJECT_ID('tempdb..#AA_4_assessments') IS NOT NULL DROP TABLE #AA_4_assessmen
 SELECT
     /* Common AA fields */
     p.pers_legacy_id                            AS ChildUniqueID,
-    p.pers_sex                                  AS GENDER,
-    p.pers_ethnicity                            AS ETHNICITY,
+    CASE
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
@@ -377,8 +480,35 @@ IF OBJECT_ID('tempdb..#AA_5_s47_enquiries') IS NOT NULL DROP TABLE #AA_5_s47_enq
 SELECT
     /* Common AA fields */
     p.pers_legacy_id                            AS ChildUniqueID,
-    p.pers_sex                                  AS GENDER,
-    p.pers_ethnicity                            AS ETHNICITY,
+    CASE
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
     CONVERT(VARCHAR, p.pers_dob, 103)           AS DATE_OF_BIRTH,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
@@ -525,8 +655,35 @@ IF OBJECT_ID('tempdb..#AA_6_children_in_need') IS NOT NULL DROP TABLE #AA_6_chil
 SELECT
     /* Common AA fields */
     p.pers_legacy_id                            AS ChildUniqueID,
-    p.pers_sex                                  AS GENDER,
-    p.pers_ethnicity                            AS ETHNICITY,
+    CASE
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
@@ -637,7 +794,7 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#AA_7_child_protection') IS NOT NULL DROP TABLE #AA_7_child_protection;
 
-/* AA headings from sample
+/* AA headings from sample for dev ref only
 Does the Child have a Disability
 Child Protection Plan Start Date
 Initial Category of Abuse
@@ -657,8 +814,35 @@ Allocated Worker
 SELECT
     /* Common AA fields */
     p.pers_legacy_id                            AS ChildUniqueID,
-    p.pers_sex                                  AS GENDER,
-    p.pers_ethnicity                            AS ETHNICITY,
+    CASE
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
@@ -696,8 +880,8 @@ SELECT
     cpp.cppl_cp_plan_initial_category	AS	INIT_ABUSE_CAT		--Initial Category of Abuse
     cpp.cppl_cp_plan_latest_category	    AS	LATEST_ABUSE_CAT	--Latest Category of Abuse
 
-    -- allocated team -- Use Involvements table for latest allocated team
-    -- allocated worker -- Use Involvements table for latest allocated case worker
+    -- allocated team -- Use ssd_Involvements table for latest allocated team
+    -- allocated worker -- Use ssd_Involvements table for latest allocated case worker
     
 
 
@@ -707,7 +891,7 @@ FROM
     #ssd_cin_visits cv
 
 
--- Some/all of these joins need redoing since the release 2 changes/ object renaming (ssd_ xxx )
+-- Some/all of these joins (might)need redoing since the release 2 changes/ object renaming (ssd_ xxx )
 -- some of these joins potentially no longer required
 INNER JOIN
     #ssd_person p ON cv.cinv_person_id = p.pers_person_id
@@ -764,9 +948,6 @@ GROUP BY
 
 
 
-
-
-
 /* 
 =============================================================================
 Report Name: Ofsted List 8 - Children in Care YYYY
@@ -793,12 +974,40 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_children_in_care;
 
+
 SELECT
     /* Common AA fields */
 
     p.pers_legacy_id                            AS ChildUniqueID,
-    p.pers_sex                                  AS GENDER,
-    p.pers_ethnicity                            AS ETHNICITY,
+    CASE
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
@@ -815,31 +1024,104 @@ SELECT
 
     /* List additional AA fields */
 
-    d.disa_disability_code                  AS DISABILITY,     
-    i.immi_immigration_status,  
+    d.disa_disability_code                  AS DISABILITY,          -- Disability1
+    i.immi_immigration_status               AS UASC,                -- UASC12mth (if had imm.status 'Unaccompanied Asylum Seeking Child' active in prev 12 months)
 
-    cp.cppl_cp_plan_start_date,
-    cp.cppl_cp_plan_end_date,
-    cp.cppl_cp_plan_worker_id,
-    cp.cppl_cp_plan_team
+-- in progress (comment headings direct from AA guidance)
+clae.clae.clae_cla_episode_start            AS StartDateRecentCareEpisode,   -- StartDateRecentCareEpisode??
+clae.clae_cla_primary_need                  AS CategoryOfNeed,               -- CategoryOfNeed
+-- SecondOrSubsequentEpisodeStart
+i.immi_immigration_status_start_date        AS LegalStatusStart             -- LegalStatusStart
+i.immi_immigration_status                   AS LegalStatus                  -- LegalStatus
+-- DateOfLastReview
+-- DateOfLastVisit
+-- PermanencePlan
+
+clae.clae_cla_review_last_iro_contact_date  AS DateOfLastVisit,             -- DateOfLastIROVisit
+clah.clah_health_check_date                 AS LastHealthAssessment,        -- LastHealthAssessment (most recent date regardless of type)
+clah.clah_health_check_date                 AS LastDentalAssessment,        -- LastDentalAssessment (most recent where clah_health_check_type==dentist)
+clap_cla_placement_start_date               AS NumberOfPlacements12Mths,    -- NumberOfPlacements12Mths (assumed that return to same provider still==placementCount+1)
+clae.clae_cla_episode_cease_reason          AS DateCeasedLAC,               -- DateCeasedLAC
+clae.clae_cla_episode_ceased                AS ReasonCeasedLAC,             -- ReasonCeasedLAC
+clap.clap_cla_placement_start_date          AS LatestPlacementStartDate,    -- LatestPlacementStartDate
+clap.clap_cla_placement_type                AS PlacementType,               -- PlacementType
+clap.clap_cla_placement_provider            AS PlacementProvider,           -- PlacementProvider
+clap.clap_cla_placement_postcode            AS PlacementPostcode,           -- PlacementPostcode
+clap.clap_cla_placement_urn                 AS URN,                         -- OfstedURN
+                                            -- AS PlacementLocation,-- PlacementLocation
+lapp.lapp_previous_permanence_la            AS LocalAuthorityOfPlacement,   -- LocalAuthorityOfPlacement
+                                            -- AS NumberOfMissingEpisodes12M, -- NumberOfMissingEpisodes12M
+                                            -- AS NumberOfAbsentEpisodes12M -- NumberOfAbsentEpisodes12M
+miss.miss_missing_rhi_offered               AS ReturnInterviewOffered,      -- ReturnInterviewOffered
+miss.miss_missing_rhi_accepted              AS ReturnInterviewCompleted,    -- ReturnInterviewCompleted
+-- AllocatedTeam
+-- AllocatedWorker
 
 
+ -- dev notes
     -- open cla_episiode, or episode ceased in last 6mths
     -- overall lac episode, ... ? 
+
+-- -- Ref. additional fields available on ssd_cla_episodes
+--     clae_cla_episode_id                 NVARCHAR(48) PRIMARY KEY,
+--     clae_person_id                      NVARCHAR(48),
+--     clae_cla_id                         NVARCHAR(48),
+--     clae_referral_id                    NVARCHAR(48),
+
+-- -- Ref. additional fields available on ssd_cla_placement
+    -- -- do we also need to consider cp in this list? 
+-- clap_cla_placement_id
+-- clap_cla_episode_id
+-- clap_cla_placement_start_date
+-- clap_cla_placement_type
+-- clap_cla_placement_urn
+-- clap_cla_placement_distance
+-- clap_cla_id (fk to ssd_cla_episodes.clae_cla_id)
+-- clap_cla_placement_provider
+-- clap_cla_placement_postcode
+-- clap_cla_placement_end_date
+-- clap_cla_placement_change_reason
+
+-- -- Ref. additional fields available on ssd_cla_health
+-- clah_person_id (fk to ssd_cla_episodes.clae_person_id)
+-- clah_health_check_type
+-- clah_health_check_date
+-- clah_health_check_status
+
+-- -- Ref. additional fields available on ssd_cla_previous_permanence
+-- lapp_person_id (fk to ssd_cla_episodes.clae_person_id)
+-- lapp_previous_permanence_order_date
+-- lapp_previous_permanence_option
+-- lapp_previous_permanence_la
+
+-- -- Ref. additional fields available on ssd_missing
+-- miss_missing_rhi_offered
+-- miss_missing_rhi_accepted
+
+-- -- Ref. additional fields available on ssd_immigration_status
+-- immi_person_id (fk to ssd_person.pers_person_id)
+-- immi_Immigration_status_id
+-- immi_immigration_status
+-- immi_immigration_status_start_date
+-- immi_immigration_status_end_date
+
 
 INTO #AA_8_children_in_care
 
 FROM
-    ssd_cp_plans cp
+    #ssd_cla_episodes   clae
+    #ssd_cla_health     clah
+    #ssd_cla_placement  clap
+    #ssd_cla_previous_permanence    lapp
 
 INNER JOIN
-    ssd_person p ON cp.cppl_person_id = p.pers_person_id
+    ssd_person p ON clae.clae_person_id = p.pers_person_id
 
 LEFT JOIN   -- disability table
-    ssd_disability d ON cp.cppl_person_id = d.disa_person_id
+    ssd_disability d ON clae.clae_person_id = d.disa_person_id
 
 LEFT JOIN   -- immigration_status table (UASC)
-    ssd_immigration_status i ON cp.cppl_person_id = i.immi_person_id
+    ssd_immigration_status i ON clae.clae_person_id = i.immi_person_id
 
 
 -- [TESTING]
@@ -871,12 +1153,61 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#AA_9_care_leavers') IS NOT NULL DROP TABLE #AA_9_care_leavers;
 
+
+-- notes
+-- AA headings
+-- Child Unique ID
+-- Gender
+-- Ethnicity
+-- Date of Birth
+-- Age of Child (Years)
+-- Unaccompanied Asylum Seeking Child (UASC), or formerly UASC if 18 or over (Y/N)
+-- Does the Child have a Disability
+-- Allocated Team
+-- Allocated Worker
+-- Allocated Personal Advisor
+-- Eligibility Category
+-- LA In Touch 
+-- Latest Pathway Plan Review Date
+-- Latest Date of Contact
+-- Type of Accommodation
+-- Suitability of Accommodation
+-- Activity Status
+
+
 SELECT
     /* Common AA fields */
 
     p.pers_legacy_id                            AS ChildUniqueID,
-    p.pers_sex                                  AS GENDER,
-    p.pers_ethnicity                            AS ETHNICITY,
+    CASE
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
@@ -938,8 +1269,35 @@ SELECT
     /* Common AA fields */
 
     p.pers_legacy_id                            AS ChildUniqueID,
-    p.pers_sex                                  AS GENDER,
-    p.pers_ethnicity                            AS ETHNICITY,
+    CASE
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
@@ -988,7 +1346,7 @@ Version: 1.0
             0.3: Removed old obj/item naming. 
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: Incomplete as required data not held within the ssd and beyond 
-            project scope. 
+            project scope. Some placeholder data used. 
 Dependencies: 
 - ssd_person
 - ssd_permanence
@@ -1001,9 +1359,36 @@ IF OBJECT_ID('tempdb..#AA_11_adopters') IS NOT NULL DROP TABLE #AA_11_adopters;
 SELECT
     /* Common AA fields */
     p.pers_legacy_id                            AS ADOPTER_ID,      -- Individual adopter identifier
-    --  fam.fami_person_id            -- IS this coming from fc.DIM_PERSON_ID AS fami_person_id, as doesnt seem valid context
-    p.pers_sex                                  AS GENDER,
-    p.pers_ethnicity                            AS ETHNICITY,
+    --  fam.fami_person_id            -- Is this coming from fc.DIM_PERSON_ID AS fami_person_id, as doesnt seem valid context
+    CASE
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
+    CASE
+		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+	END											AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DATE_OF_BIRTH, --  note: returns string representation of the date
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
