@@ -1358,7 +1358,7 @@ SELECT
     perm.perm_decision_reversed_date         AS DecisionReversedDate,   -- Date of Decision that Child Should No Longer be Placed for Adoption
     perm.perm_placed_foster_carer_date       AS PlacedWithFosterCarer,  -- Date of Adoption Order ?  
     perm.perm_decision_reversed_reason       AS DecisionReversedReason, -- Reason Why Child No Longer Placed for Adoption
-    perm.perm_permanence_order_date          AS PlacementOrderDate     -- Date of Placement Order?
+    perm.perm_permanence_order_date          AS PlacementOrderDate      -- Date of Placement Order?
 
 
 INTO #AA_10_adoption
