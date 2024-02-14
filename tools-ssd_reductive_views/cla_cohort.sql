@@ -28,11 +28,11 @@ Dependencies:
 
 SELECT
 -- from ssd_cla_episodes
-    e.clae_cla_episode_id,
-    e.clae_person_id,
-    e.clae_cla_episode_start,
-    e.clae_cla_episode_start_reason,
-    e.clae_cla_primary_need,
+    e.clae_cla_episode_id                   AS episode_id,
+    e.clae_person_id                        AS child_id,
+    e.clae_cla_episode_start                AS episode_start,
+    e.clae_cla_episode_start_reason         AS episode_start_reason,
+    e.clae_cla_primary_need                 AS primary_need,
     e.clae_cla_episode_ceased,
     e.clae_cla_episode_cease_reason,
     e.clae_cla_id,
@@ -58,6 +58,12 @@ SELECT
     ls.lega_legal_status,
     ls.lega_legal_status_start,
     ls.lega_legal_status_end,
+    -- most recent immigration status (flag) (need to check actual string value to match on...not yet checked)
+    CASE         
+        -- Is UASC?                                            
+        WHEN latest_status.immi_immigration_status = 'Unaccompanied Asylum Seeking Child (UASC)' THEN 'Y'
+        ELSE 'N'
+    END                                     AS uasc_status,
     -- most recent review dets
     r.clar_cla_review_id,
     r.clar_cla_review_due_date,
@@ -72,7 +78,7 @@ SELECT
     clav.clav_cla_visit_seen_alone 
 
 FROM
-    ssd_cla_episodes e
+    #ssd_cla_episodes e
 
 LEFT JOIN ssd_cla_placement p ON e.clae_cla_id = p.clap_cla_id
 LEFT JOIN ssd_cla_health h ON e.clae_person_id = h.clah_person_id
@@ -83,10 +89,11 @@ LEFT JOIN (
         lega_legal_status,
         lega_legal_status_start,
         lega_legal_status_end,
-        -- assign rank (rn) to each legal_status_start within partition (rn==1 most recent, on desc order)
-        ROW_NUMBER() OVER (PARTITION BY lega_person_id ORDER BY lega_legal_status_start DESC) AS rn
+        
+        ROW_NUMBER() OVER (PARTITION BY lega_person_id -- assign unique row num (most recent rn ===1)
+        ORDER BY lega_legal_status_start DESC) AS rn
     FROM 
-        ssd_legal_status
+        #ssd_legal_status
 ) ls ON e.clae_person_id = ls.lega_person_id AND ls.rn = 1
 LEFT JOIN (
     SELECT
@@ -97,10 +104,11 @@ LEFT JOIN (
         clar_cla_review_date,
         clar_cla_review_cancelled,
         clar_cla_review_participation,
-        -- assign rank (rn) to each review within partition (rn==1 most recent, on desc order)
-        ROW_NUMBER() OVER (PARTITION BY clar_cla_id ORDER BY clar_cla_review_date DESC) AS rn
+        
+        ROW_NUMBER() OVER (PARTITION BY clar_cla_id -- assign unique row num (most recent rn ===1)
+        ORDER BY clar_cla_review_date DESC) AS rn
     FROM 
-        ssd_cla_reviews
+        #ssd_cla_reviews
 ) r ON e.clae_cla_id = r.clar_cla_id AND r.rn = 1;
 LEFT JOIN (
     SELECT
@@ -112,8 +120,21 @@ LEFT JOIN (
         clav_cla_visit_date,
         clav_cla_visit_seen,
         clav_cla_visit_seen_alone
-        -- assign rank (rn) to each visit within partition (rn==1 most recent, on desc order)
-        ROW_NUMBER() OVER (PARTITION BY clav_cla_id ORDER BY clav_cla_visit_date DESC) AS rn
+
+        ROW_NUMBER() OVER (PARTITION BY clav_cla_id -- assign unique row num (most recent rn ===1)
+        ORDER BY clav_cla_visit_date DESC) AS rn
     FROM 
-        ssd_cla_visits
-) v ON e.clae_cla_id = v.clav_cla_id AND v.rn = 1;
+        #ssd_cla_visits
+) v ON e.clae_cla_id = v.clav_cla_id AND v.rn = 1
+LEFT JOIN  
+    (    -- most recent immigration status
+        SELECT 
+            -- partitioning by immi_person_id (group by each person) 
+            immi_person_id,
+            immi_immigration_status,
+            ROW_NUMBER() OVER (PARTITION BY immi_person_id -- assign unique row num (most recent rn ===1)
+            -- get latest status based on end date, (using start date as a secondary order in case of ties or NULL end dates)
+            ORDER BY immi_immigration_status_start DESC, immi_immigration_status_end DESC) AS rn
+        FROM 
+            #ssd_immigration_status
+    ) latest_status ON clae.clae_person_id = latest_status.immi_person_id AND latest_status.rn = 1;
