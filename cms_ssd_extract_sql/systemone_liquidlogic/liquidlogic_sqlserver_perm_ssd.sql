@@ -2563,7 +2563,7 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
     fcr.DUE_DTTM,                                    
     fcr.MEETING_DTTM,                              
     fm.CANCELLED,
-    fms.FACT_MEETINGS_ID
+    fms.FACT_MEETINGS_ID;
 
 
 -- Add constraint(s)
