@@ -3479,7 +3479,7 @@ SELECT
         ELSE NULL
     END                                     AS perm_permanence_order_type,      
  
-    fa.ADOPTION_SOCIAL_WORKER_NAME          AS perm_adoption_worker            -- Note that duplicate -1 seen in raw data
+    fa.ADOPTION_SOCIAL_WORKER_NAME          AS perm_adoption_worker,            -- Note that duplicate -1 seen in raw data
  
     fa.DIM_LOOKUP_ADOPTER_GENDER_CODE       AS perm_adopter_sex, 
     fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE AS perm_adopter_legal_status, 
