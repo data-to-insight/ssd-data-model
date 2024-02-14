@@ -40,6 +40,9 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#SSDA903_header') IS NOT NULL DROP TABLE #SSDA903_header;
 
+-- Ref default file headers from guidance
+-- CHILD,SEX,DOB,ETHNIC,UPN,MOTHER,MC_DOB
+
 
 SELECT
     p.pers_legacy_id                            AS CHILD,
@@ -96,7 +99,7 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#SSDA903_adoption') IS NOT NULL DROP TABLE #SSDA903_adoption;
 
--- Ref default file headers from example file
+-- Ref default file headers from guidance
 -- CHILD,DOB,DATE_INT,DATE_MATCH,FOSTER_CARE,NB_ADOPTR,SEX_ADOPTR,LS_ADOPTR
 
 SELECT
@@ -105,7 +108,7 @@ SELECT
     perm.perm_placement_order_date      AS DATE_INT,    -- Date of decision child should be placed for adoption
     perm.perm_matched_date              AS DATE_MATCH,
     perm.perm_placed_foster_carer_date  AS FOSTER_CARE, -- (perm_placed_ffa_cp_date?)
-    'PLACEHOLDER_DATA'                  AS NB_ADOPTR,   -- Number of adopters
+    perm.perm_number_of_adopters        AS NB_ADOPTR,   -- Number of adopters
     perm.perm_adopter_sex               AS SEX_ADOPTR,
     perm.perm_adopter_legal_status      AS LS_ADOPTR
 
@@ -150,7 +153,7 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#SSDA903_children_ceased_care_during_year') IS NOT NULL DROP TABLE #SSDA903_children_ceased_care_during_year;
 
--- Ref default file headers from example file
+-- Ref default file headers from guidance
 -- CHILD_LA_CODE	SEX	ETHNIC_CODE	DOB	LEGAL_STATUS	DATE_PERIOD_OF_CARE_CEASED	PLACEMENT_TYPE
 
 
