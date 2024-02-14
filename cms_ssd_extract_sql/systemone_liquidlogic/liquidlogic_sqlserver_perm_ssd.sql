@@ -3369,6 +3369,7 @@ CREATE TABLE ssd_permanence (
     perm_adoption_worker                 NVARCHAR(100),          -- [TESTING] (datatype changed)
     perm_adopter_sex                     NVARCHAR(48),
     perm_adopter_legal_status            NVARCHAR(100),
+    perm_number_of_adopters              NVARCHAR(3)
 );
  
  
@@ -3396,7 +3397,8 @@ INSERT INTO ssd_permanence (
     perm_permanence_order_type,
     perm_adoption_worker,
     perm_adopter_sex,
-    perm_adopter_legal_status 
+    perm_adopter_legal_status, 
+    perm_number_of_adopters 
 )  
 SELECT
     fce.FACT_CARE_EPISODES_ID               AS perm_table_id,
@@ -3475,12 +3477,13 @@ SELECT
         WHEN fce.CARE_REASON_END_CODE IN ('E48','E44','E43','45','E45','E47','E46') THEN 'Special Guardianship Order'
         WHEN fce.CARE_REASON_END_CODE IN ('45','E41') THEN 'Child Arrangements/ Residence Order'
         ELSE NULL
-    END                                         AS perm_permanence_order_type,      
+    END                                     AS perm_permanence_order_type,      
  
-    fa.ADOPTION_SOCIAL_WORKER_NAME              AS perm_adoption_worker            -- Note that duplicate -1 seen in raw data
+    fa.ADOPTION_SOCIAL_WORKER_NAME          AS perm_adoption_worker            -- Note that duplicate -1 seen in raw data
  
-    fa.DIM_LOOKUP_ADOPTER_GENDER_CODE              AS perm_adopter_sex, 
-    fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE        AS perm_adopter_legal_status 
+    fa.DIM_LOOKUP_ADOPTER_GENDER_CODE       AS perm_adopter_sex, 
+    fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE AS perm_adopter_legal_status, 
+    fa.NO_OF_ADOPTERS                       AS perm_number_of_adopters 
 
 FROM Child_Social.FACT_CARE_EPISODES fce
  
