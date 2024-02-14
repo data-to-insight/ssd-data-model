@@ -23,6 +23,7 @@ Dependencies:
 - ssd_cla_placement
 - ssd_legal_status
 - ssd_cla_reviews
+- ssd_immigration_status
 =============================================================================
 */
 
@@ -33,31 +34,31 @@ SELECT
     e.clae_cla_episode_start                AS episode_start,
     e.clae_cla_episode_start_reason         AS episode_start_reason,
     e.clae_cla_primary_need                 AS primary_need,
-    e.clae_cla_episode_ceased,
-    e.clae_cla_episode_cease_reason,
-    e.clae_cla_id,
-    e.clae_referral_id,
-    e.clae_cla_review_last_iro_contact_date,
+    e.clae_cla_episode_ceased               AS episode_ceased,
+    e.clae_cla_episode_cease_reason         AS episode_cease_reason,
+    e.clae_cla_id                           AS cla_id,          -- Not requ? 
+    e.clae_referral_id                      AS referral_id,
+    e.clae_cla_review_last_iro_contact_date AS review_last_iro_contact_date,
     -- from ssd_cla_placement
-    p.clap_cla_placement_id,
-    p.clap_cla_placement_start_date,
-    p.clap_cla_placement_type,
-    p.clap_cla_placement_urn,
-    p.clap_cla_placement_distance,
-    p.clap_cla_placement_la,
-    p.clap_cla_placement_provider,
-    p.clap_cla_placement_postcode,
-    p.clap_cla_placement_end_date,
-    p.clap_cla_placement_change_reason,
+    p.clap_cla_placement_id                 AS placement_id,    -- Not requ? 
+    p.clap_cla_placement_start_date         AS placement_start_date,
+    p.clap_cla_placement_type               AS placement_type,
+    p.clap_cla_placement_urn                AS placement_urn,
+    p.clap_cla_placement_distance           AS placement_distance,
+    p.clap_cla_placement_la                 AS placement_la,
+    p.clap_cla_placement_provider           AS placement_provider,
+    p.clap_cla_placement_postcode           AS placement_postcode,
+    p.clap_cla_placement_end_date           AS placement_end_date,
+    p.clap_cla_placement_change_reason      AS placement_change_reason,
     -- from ssd_cla_health 
-    h.clah_health_check_id,
-    h.clah_health_check_type,
-    h.clah_health_check_date,
-    h.clah_health_check_status,
+    h.clah_health_check_id                  AS health_check_id,  -- Not requ? 
+    h.clah_health_check_type                AS health_check_type,
+    h.clah_health_check_date                AS health_check_date,
+    h.clah_health_check_status              AS health_check_status,
     -- most recent legal status
-    ls.lega_legal_status,
-    ls.lega_legal_status_start,
-    ls.lega_legal_status_end,
+    ls.lega_legal_status                    AS legal_status,
+    ls.lega_legal_status_start              AS legal_status_start,
+    ls.lega_legal_status_end                AS legal_status_end,
     -- most recent immigration status (flag) (need to check actual string value to match on...not yet checked)
     CASE         
         -- Is UASC?                                            
@@ -65,17 +66,17 @@ SELECT
         ELSE 'N'
     END                                     AS uasc_status,
     -- most recent review dets
-    r.clar_cla_review_id,
-    r.clar_cla_review_due_date,
-    r.clar_cla_review_date,
-    r.clar_cla_review_cancelled,
-    r.clar_cla_review_participation,
+    r.clar_cla_review_id                    AS cla_review_id,
+    r.clar_cla_review_due_date              AS cla_review_due_date,
+    r.clar_cla_review_date                  AS cla_review_date,
+    r.clar_cla_review_cancelled             AS cla_review_cancelled,
+    r.clar_cla_review_participation         AS cla_review_participation,
     -- most recent visit dets
-    clav.clav_casenote_id,     
-    clav.clav_cla_id,              
-    clav.clav_cla_visit_date,        
-    clav.clav_cla_visit_seen,        
-    clav.clav_cla_visit_seen_alone 
+    clav.clav_casenote_id                   AS casenote_id,     -- Not requ? 
+    clav.clav_cla_id                        AS cla_id ,         -- Not requ?         
+    clav.clav_cla_visit_date                AS cla_visit_date,      
+    clav.clav_cla_visit_seen                AS cla_visit_seen,        
+    clav.clav_cla_visit_seen_alone          AS cla_visit_seen_alone
 
 FROM
     #ssd_cla_episodes e
