@@ -3343,7 +3343,7 @@ INSERT INTO #ssd_permanence (
     perm_permanence_order_type,
     perm_adoption_worker,
     perm_adopter_sex,
-    perm_adopter_legal_status
+    perm_adopter_legal_status,
     perm_number_of_adopters
 )  
 SELECT
@@ -3425,7 +3425,7 @@ SELECT
         ELSE NULL
     END                                     AS perm_permanence_order_type,      
  
-    fa.ADOPTION_SOCIAL_WORKER_NAME          AS perm_adoption_worker            -- Note that duplicate -1 seen in raw data
+    fa.ADOPTION_SOCIAL_WORKER_NAME          AS perm_adoption_worker,            -- Note that duplicate -1 seen in raw data
  
     fa.DIM_LOOKUP_ADOPTER_GENDER_CODE       AS perm_adopter_sex, 
     fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE AS perm_adopter_legal_status, 

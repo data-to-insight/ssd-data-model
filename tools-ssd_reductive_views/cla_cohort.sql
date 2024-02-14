@@ -1,3 +1,5 @@
+use HDM;
+
 
 /*
 ****************************************
@@ -8,7 +10,7 @@ CLA Cohort Reductive View || SQL Server
 
 /* 
 =============================================================================
-Report Name: CLA Cohort
+Report Name: CLA Cohort Reductive View
 Description: 
             ""
 Author: D2I
