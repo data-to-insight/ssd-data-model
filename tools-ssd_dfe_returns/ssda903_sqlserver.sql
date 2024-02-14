@@ -16,6 +16,8 @@ SSD 903 Returns Queries || SQL Server
 ****************************************
 */
 
+-- The extract has been based on the specification available at:
+-- https://assets.publishing.service.gov.uk/media/644a929bfaf4aa000ce12fd9/CLA_SSDA903_2023-24_Technical_specification_Version_1.1.pdf
 
 /* 
 =============================================================================
@@ -38,6 +40,9 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#SSDA903_header') IS NOT NULL DROP TABLE #SSDA903_header;
 
+-- Ref default file headers from guidance
+-- CHILD,SEX,DOB,ETHNIC,UPN,MOTHER,MC_DOB
+
 
 SELECT
     p.pers_legacy_id                            AS CHILD,
@@ -53,9 +58,11 @@ INTO #SSDA903_header
 FROM
     #ssd_person p
 
-LEFT JOIN #ssd_send sen ON p.pers_person_id = sen.send_person_id 
+LEFT JOIN 
+    #ssd_send sen ON p.pers_person_id = sen.send_person_id 
 
-LEFT JOIN #ssd_mother moth ON p.pers_person_id = moth.moth_person_id;
+LEFT JOIN 
+    #ssd_mother moth ON p.pers_person_id = moth.moth_person_id;
 
 
 -- -- [TESTING]
@@ -68,32 +75,42 @@ LEFT JOIN #ssd_mother moth ON p.pers_person_id = moth.moth_person_id;
 
 /* 
 =============================================================================
-Report Name: 903 - adoption
+Report Name: 903 - adoption AD1
 Description: 
-            ""
+            "Children adopted from care during the year only.
+            This comprises of the ‘AD1’ file. To be completed in respect of 
+            children for whom the decision is made, either during the current 
+            year, or in a previous year where the decision is still valid, 
+            that the child should be placed for adoption or for whom the 
+            decision is made during the year that the child should no longer 
+            be placed for adoption"
 
 Author: D2I
-Last Modified Date: 09/02/24 RH
+Last Modified Date: 14/02/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
-
+- ssd_permanance
+- ssd_person
 =============================================================================
 */
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#SSDA903_adoption') IS NOT NULL DROP TABLE #SSDA903_adoption;
 
+-- Ref default file headers from guidance
+-- CHILD,DOB,DATE_INT,DATE_MATCH,FOSTER_CARE,NB_ADOPTR,SEX_ADOPTR,LS_ADOPTR
+
 SELECT
-    perm.perm_person_id         AS CHILD,
-    p.pers_dob                  AS DOB
-                                AS DATE_INT, (perm_entered_care_date?)
-    perm.perm_matched_date      AS DATE_MATCH,
-    perm.perm_placed_foster_carer_date AS FOSTER_CARE, (perm_placed_ffa_cp_date?)
-                                AS NB_ADOPTR,
-    perm_adopter_sex            AS SEX_ADOPTR,
-    perm_adopter_legal_status   AS LS_ADOPTR,
+    perm.perm_person_id                 AS CHILD,
+    p.pers_dob                          AS DOB,
+    perm.perm_placement_order_date      AS DATE_INT,    -- Date of decision child should be placed for adoption
+    perm.perm_matched_date              AS DATE_MATCH,
+    perm.perm_placed_foster_carer_date  AS FOSTER_CARE, -- (perm_placed_ffa_cp_date?)
+    perm.perm_number_of_adopters        AS NB_ADOPTR,   -- Number of adopters
+    perm.perm_adopter_sex               AS SEX_ADOPTR,
+    perm.perm_adopter_legal_status      AS LS_ADOPTR
 
 INTO #SSDA903_adoption
 
@@ -101,15 +118,17 @@ FROM
     #ssd_permanence perm
 
 
-LEFT JOIN #ssd_person p ON perm.perm_person_id = p.pers_person_id 
+LEFT JOIN   -- person table for core dets
+    #ssd_person p ON perm.perm_person_id = p.pers_person_id
+
+WHERE
+    -- Filter on last 12 months
+    perm.perm_placement_order_date          >= DATEADD(MONTH, -12, GETDATE())
+    OR perm.perm_placed_for_adoption_date   >= DATEADD(MONTH, -12, GETDATE())
+    OR perm.perm_decision_reversed_date     >= DATEADD(MONTH, -12, GETDATE());
 
 -- -- [TESTING]
 -- select * from #SSDA903_adoption;
-
-
-
-
-
 
 
 
@@ -134,7 +153,7 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#SSDA903_children_ceased_care_during_year') IS NOT NULL DROP TABLE #SSDA903_children_ceased_care_during_year;
 
--- Ref default file headers from example file
+-- Ref default file headers from guidance
 -- CHILD_LA_CODE	SEX	ETHNIC_CODE	DOB	LEGAL_STATUS	DATE_PERIOD_OF_CARE_CEASED	PLACEMENT_TYPE
 
 
@@ -302,6 +321,7 @@ IF OBJECT_ID('tempdb..#SSDA903_episodes') IS NOT NULL DROP TABLE #SSDA903_episod
 
 -- Ref default file headers from example file
 -- CHILD	DECOM	RNE	LS	CIN	PLACE	PLACE_PROVIDER	DEC	REC	REASON_PLACE_CHANGE	HOME_POST	PL_POST	URN
+
 
 
 
