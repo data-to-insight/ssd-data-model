@@ -95,11 +95,35 @@ SELECT
                 THEN 1
                 ELSE 0
             END
-    END                                         AS Age
+    END                                         AS Age,
 
     /* List additional AA fields */
     FORMAT(c.cont_contact_date, 'dd/MM/yyyy')   AS DateOfContact,	
-	c.cont_contact_source_desc			        AS ContactSource
+	CASE
+		WHEN c.cont_contact_source_code = '1A' THEN 'a) 1A: Individual'
+		WHEN c.cont_contact_source_code = '1B' THEN 'b) 1B: Individual'
+		WHEN c.cont_contact_source_code = '1C' THEN 'c) 1C: Individual'
+		WHEN c.cont_contact_source_code = '1D' THEN 'd) 1D: Individual'
+		WHEN c.cont_contact_source_code = '2A' THEN 'e) 2A: Schools'
+		WHEN c.cont_contact_source_code = '2B' THEN 'f) 2B: Education services'
+		WHEN c.cont_contact_source_code = '3A' THEN 'g) 3A: Health services'
+		WHEN c.cont_contact_source_code = '3B' THEN 'h) 3B: Health services'
+		WHEN c.cont_contact_source_code = '3C' THEN 'i) 3C: Health services'
+		WHEN c.cont_contact_source_code = '3D' THEN 'j) 3D: Health services'
+		WHEN c.cont_contact_source_code = '3E' THEN 'k) 3E: Health services'
+		WHEN c.cont_contact_source_code = '3F' THEN 'l) 3F: Health services'
+		WHEN c.cont_contact_source_code = '4' THEN 'm) 4: Housing'
+		WHEN c.cont_contact_source_code = '5A' THEN 'n) 5A: LA services'
+		WHEN c.cont_contact_source_code = '5B' THEN 'o) 5B: LA services'
+		WHEN c.cont_contact_source_code = '5C' THEN 'p) 5C: LA services'
+		WHEN c.cont_contact_source_code = '5D' THEN 'p1) 5D: LA services'
+		WHEN c.cont_contact_source_code = '6' THEN 'q) 6: Police'
+		WHEN c.cont_contact_source_code = '7' THEN 'r) 7: Other legal agency'
+		WHEN c.cont_contact_source_code = '8' THEN 's) 8: Other'
+		WHEN c.cont_contact_source_code = '9' THEN 't) 9: Anonymous'
+		WHEN c.cont_contact_source_code = '10' THEN 'u) 10: Unknown'
+		ELSE 'u) 10: Unknown' /*PW - 'Catch All' for any other Contact/Referral Sources not in above list - probably not required*/
+	END											AS ContactSource
 
 
 INTO #AA_1_contacts
@@ -117,8 +141,6 @@ WHERE
 
 -- -- [TESTING]
 -- select * from #AA_1_contacts;
-
-
 
 
 /* 
@@ -178,7 +200,7 @@ SELECT
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
 	END											AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')        AS DateOfBirth,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth,
     CASE 
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                             
