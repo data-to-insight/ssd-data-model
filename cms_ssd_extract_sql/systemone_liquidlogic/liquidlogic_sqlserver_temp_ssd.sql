@@ -3045,7 +3045,7 @@ CREATE TABLE #ssd_missing (
 
 
 -- Insert data 
-INSERT INTO ssd_missing (
+INSERT INTO #ssd_missing (
     miss_table_id,
     miss_person_id,
     miss_missing_episode_start,

@@ -83,8 +83,8 @@ SELECT
 FROM
     #ssd_cla_episodes e
 
-LEFT JOIN ssd_cla_placement p ON e.clae_cla_id = p.clap_cla_id
-LEFT JOIN ssd_cla_health h ON e.clae_person_id = h.clah_person_id
+LEFT JOIN #ssd_cla_placement p ON e.clae_cla_id = p.clap_cla_id
+LEFT JOIN #ssd_cla_health h ON e.clae_person_id = h.clah_person_id
 LEFT JOIN (
     SELECT
         -- partitioning by lega_person_id
@@ -112,7 +112,7 @@ LEFT JOIN (
         ORDER BY clar_cla_review_date DESC) AS rn
     FROM 
         #ssd_cla_reviews
-) r ON e.clae_cla_id = r.clar_cla_id AND r.rn = 1;
+) r ON e.clae_cla_id = r.clar_cla_id AND r.rn = 1
 LEFT JOIN (
     SELECT
         -- partitioning by clav_cla_id (or should this be clav_person_id??)
@@ -122,7 +122,7 @@ LEFT JOIN (
         clav_cla_id,
         clav_cla_visit_date,
         clav_cla_visit_seen,
-        clav_cla_visit_seen_alone
+        clav_cla_visit_seen_alone,
 
         ROW_NUMBER() OVER (PARTITION BY clav_cla_id -- assign unique row num (most recent rn ===1)
         ORDER BY clav_cla_visit_date DESC) AS rn
@@ -140,4 +140,18 @@ LEFT JOIN
             ORDER BY immi_immigration_status_start DESC, immi_immigration_status_end DESC) AS rn
         FROM 
             #ssd_immigration_status
-    ) latest_status ON clae.clae_person_id = latest_status.immi_person_id AND latest_status.rn = 1;
+    ) latest_status ON clae.clae_person_id = latest_status.immi_person_id AND latest_status.rn = 1; -- [TESTING] The multi-part identifier "clae.clae_person_id" could not be bound.
+
+
+-- Msg 4104, Level 16, State 1, Line 4585
+-- The multi-part identifier "clae.clae_person_id" could not be bound.
+-- Msg 4104, Level 16, State 1, Line 4519
+-- The multi-part identifier "clav.clav_casenote_id" could not be bound.
+-- Msg 4104, Level 16, State 1, Line 4520
+-- The multi-part identifier "clav.clav_cla_id" could not be bound.
+-- Msg 4104, Level 16, State 1, Line 4521
+-- The multi-part identifier "clav.clav_cla_visit_date" could not be bound.
+-- Msg 4104, Level 16, State 1, Line 4522
+-- The multi-part identifier "clav.clav_cla_visit_seen" could not be bound.
+-- Msg 4104, Level 16, State 1, Line 4523
+-- The multi-part identifier "clav.clav_cla_visit_seen_alone" could not be bound.
