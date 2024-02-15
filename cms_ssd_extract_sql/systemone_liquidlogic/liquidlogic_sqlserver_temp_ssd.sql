@@ -2779,37 +2779,41 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/* 
+/*
 =============================================================================
 Object Name: ssd_cla_visits
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 11/01/24
+Last Modified Date: 15/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5 pers_id and cla_id added
+Version: 1.7
+            1.6 FK updated to person_id. change from clav.VISIT_DTTM  JH
+            1.5 pers_id and cla_id added JH
 
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
+Remarks:
+Dependencies:
 - FACT_CARE_EPISODES
 - FACT_CASENOTES
 - FACT_CLA_VISIT
 =============================================================================
 */
+ 
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_visits';
 PRINT 'Creating table: ' + @TableName;
-
--- Check if exists & drop
-IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_visits;
  
+-- Check if exists & drop
+IF OBJECT_ID('ssd_cla_visits', 'U') IS NOT NULL DROP TABLE ssd_cla_visits;
+IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_visits;
+
+
 -- Create structure
 CREATE TABLE #ssd_cla_visits (
     clav_cla_visit_id          NVARCHAR(48) PRIMARY KEY,
-    clav_casenote_id           NVARCHAR(48),
-    clav_person_id             NVARCHAR(48),
     clav_cla_id                NVARCHAR(48),
+    clav_person_id             NVARCHAR(48),
+    clav_casenote_id           NVARCHAR(48),
     clav_cla_visit_date        DATETIME,
     clav_cla_visit_seen        NCHAR(1),
     clav_cla_visit_seen_alone  NCHAR(1)
@@ -2819,8 +2823,8 @@ CREATE TABLE #ssd_cla_visits (
 INSERT INTO #ssd_cla_visits (
     clav_cla_visit_id,
     clav_casenote_id,
-    clav_person_id,
     clav_cla_id,
+    clav_person_id,
     clav_cla_visit_date,
     clav_cla_visit_seen,
     clav_cla_visit_seen_alone
@@ -2828,23 +2832,36 @@ INSERT INTO #ssd_cla_visits (
  
 SELECT
     clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
-    clav.FACT_CASENOTE_ID       AS clav_casenote_id,
-    clav.DIM_PERSON_ID          AS clav_person_id,
+    cn.FACT_CASENOTE_ID         AS clav_casenote_id,
     clav.FACT_CLA_ID            AS clav_cla_id,
-    clav.VISIT_DTTM             AS clav_cla_visit_date,
+    clav.DIM_PERSON_ID          AS clav_person_id,
+    cn.EVENT_DTTM               AS clav_cla_visit_date,
     cn.SEEN_FLAG                AS clav_cla_visit_seen,
     cn.SEEN_ALONE_FLAG          AS clav_cla_visit_seen_alone
+ 
 FROM
     Child_Social.FACT_CLA_VISIT AS clav
  
 LEFT JOIN
-    Child_Social.FACT_CASENOTES AS cn ON clav.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID;
+    Child_Social.FACT_CASENOTES AS cn ON  clav.FACT_CASENOTE_ID = cn.FACT_CASENOTE_ID
+    AND clav.DIM_PERSON_ID = cn.DIM_PERSON_ID
+ 
+LEFT JOIN
+    Child_Social.DIM_PERSON p ON   clav.DIM_PERSON_ID = p.DIM_PERSON_ID
+ 
+WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVL')
+ 
+AND EXISTS ( -- only ssd relevant records
+    SELECT 1
+    FROM #ssd_person p
+    WHERE p.pers_person_id = clav.DIM_PERSON_ID
+    )
+;
 
 
 -- -- Add constraint(s)
--- ALTER TABLE #ssd_cla_visits ADD CONSTRAINT FK_clav_cla_episode_id 
--- FOREIGN KEY (clav_cla_episode_id) REFERENCES #ssd_cla_episodes(clae_cla_episode_id);
-
+-- ALTER TABLE ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
+-- FOREIGN KEY (clav_person_id) REFERENCES ssd_cla_episodes(clae_cla_person_id);
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
