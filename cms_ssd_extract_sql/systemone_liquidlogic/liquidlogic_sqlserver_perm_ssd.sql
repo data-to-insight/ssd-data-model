@@ -2080,11 +2080,11 @@ GROUP BY
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON ssd_cla_episodes (clae_cla_worker_id);
+
 
 -- Add constraint(s)
-ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_professional 
-FOREIGN KEY (clae_cla_worker_id) REFERENCES ssd_involvements (invo_professional_id);
+ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_person 
+FOREIGN KEY (clae_person_id) REFERENCES ssd_person (pers_person_id);
 
 
 -- [TESTING] Increment /print progress
@@ -2292,11 +2292,10 @@ WHERE EXISTS
 -- add constraint(s)
 ALTER TABLE ssd_cla_immunisations
 ADD CONSTRAINT FK_ssd_cla_immunisations_person
-FOREIGN KEY (clas_person_id) REFERENCES ssd_person(pers_person_id);
+FOREIGN KEY (clai_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IX_ssd_cla_immunisations_person_id ON ssd_cla_immunisations (clai_person_id);
 
 
 
@@ -2472,8 +2471,7 @@ FOREIGN KEY (clap_cla_id) REFERENCES ssd_cla_episodes(clae_cla_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clap_placement_provider_urn ON ssd_cla_placement (clap_placement_provider_urn);
-CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_placement(clap_cla_episode_id);
+CREATE NONCLUSTERED INDEX idx_clap_cla_placement_urn ON ssd_cla_placement (clap_cla_placement_urn);
 
 
 
@@ -2585,11 +2583,9 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
 
 -- Add constraint(s)
 ALTER TABLE ssd_cla_reviews ADD CONSTRAINT FK_clar_to_clae 
-FOREIGN KEY (clar_cla_episode_id) REFERENCES ssd_cla_episodes(clae_cla_episode_id);
+FOREIGN KEY (clar_cla_id) REFERENCES ssd_cla_episodes(clae_cla_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clar_cla_episode_id ON ssd_cla_reviews (clar_cla_episode_id);
-CREATE NONCLUSTERED INDEX idx_clar_review_last_iro_contact_date ON ssd_cla_reviews (clar_cla_review_last_iro_contact_date);
 
 
 
@@ -2831,8 +2827,8 @@ WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A';
 
 
 -- Add constraint(s)
-ALTER TABLE ssd_cla_care_plan ADD CONSTRAINT FK_lacp_cla_episode_id
-FOREIGN KEY (lacp_cla_episode_id) REFERENCES ssd_cla_episodes(clae_person_id);
+ALTER TABLE ssd_cla_care_plan ADD CONSTRAINT FK_lacp_person_id
+FOREIGN KEY (lacp_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
 
 -- [TESTING] Increment /print progress
@@ -2923,7 +2919,9 @@ AND EXISTS ( -- only ssd relevant records
 
 -- Add constraint(s)
 ALTER TABLE ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
-FOREIGN KEY (clav_person_id) REFERENCES ssd_cla_episodes(clae_cla_person_id);
+FOREIGN KEY (clav_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
+
+
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
@@ -3148,7 +3146,6 @@ ALTER TABLE ssd_missing ADD CONSTRAINT FK_missing_to_person
 FOREIGN KEY (miss_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_miss_mis_epi_type ON ssd_missing (miss_mis_epi_type);
 
 
 
@@ -3317,8 +3314,6 @@ GROUP BY
 
 
 
-
-
 -- Add index(es)
 CREATE INDEX idx_clea_person_id ON ssd_care_leavers(clea_person_id);
 CREATE NONCLUSTERED INDEX idx_clea_care_leaver_activity ON ssd_care_leavers (clea_care_leaver_activity);
@@ -3329,8 +3324,9 @@ CREATE NONCLUSTERED INDEX idx_clea_care_leaver_activity ON ssd_care_leavers (cle
 ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
 FOREIGN KEY (clea_person_id) REFERENCES ssd_person(pers_person_id);
 
-ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leaver_worker
-FOREIGN KEY (clea_care_leaver_worker_id) REFERENCES ssd_involvements(invo_professional_id);
+-- Removed as worker details directly pulled through
+-- ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leaver_worker
+-- FOREIGN KEY (clea_care_leaver_worker_id) REFERENCES ssd_involvements(invo_professional_id);
 
 
 
@@ -4299,11 +4295,11 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_named_plan ', 'U') IS NOT NULL DROP TABLE #ssd_e
 
 -- Create structure
 CREATE TABLE ssd_ehcp_named_plan (
-    ehcn_named_plan_id NVARCHAR(48),
-    ehcn_ehcp_asmt_id NVARCHAR(48),
-    ehcn_named_plan_start_date DATETIME,
-    ehcn_named_plan_cease_date DATETIME,
-    ehcn_named_plan_cease_reason NVARCHAR(100)
+    ehcn_named_plan_id                  NVARCHAR(48),
+    ehcn_ehcp_asmt_id                   NVARCHAR(48),
+    ehcn_named_plan_start_date          DATETIME,
+    ehcn_named_plan_cease_date          DATETIME,
+    ehcn_named_plan_cease_reason        NVARCHAR(100)
 );
 
 -- Insert placeholder data
@@ -4314,7 +4310,7 @@ VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLA
 -- Create constraint(s)
 ALTER TABLE ssd_ehcp_named_plan
 ADD CONSTRAINT FK_ehcp_named_plan_assessment
-FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES ssd_ehcp_assessment(ehca_ehcp_assment_id);
+FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES ssd_ehcp_assessment(ehca_ehcp_assessment_id);
 
 
 

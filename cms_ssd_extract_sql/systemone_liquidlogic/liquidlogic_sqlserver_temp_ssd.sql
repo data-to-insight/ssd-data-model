@@ -2429,7 +2429,6 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
 
 -- -- Create index(es)
 -- CREATE NONCLUSTERED INDEX idx_clap_placement_provider_urn ON ssd_cla_placement (clap_placement_provider_urn);
--- CREATE NONCLUSTERED INDEX idx_clap_cla_episode_id ON ssd_cla_placement(clap_cla_episode_id);
 
 
 
