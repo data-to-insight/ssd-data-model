@@ -64,6 +64,7 @@ LEFT JOIN
 LEFT JOIN 
     #ssd_mother moth ON p.pers_person_id = moth.moth_person_id;
 
+-- Dev notes: How/on what date field are we filtering this back to 31st march? 
 
 -- -- [TESTING]
 -- select * from #SSDA903_header;
