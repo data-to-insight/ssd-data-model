@@ -2650,7 +2650,8 @@ Description:
 Author: D2I
 Last Modified Date: 19/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.6
+            1.5: Altered _json keys and groupby towards > clarity JH
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks:    Added short codes to plan type questions to improve readability.
             Removed form type filter, only filtering ffa. on ANSWER_NO.
@@ -2731,7 +2732,7 @@ INSERT INTO #ssd_cla_care_plan (
 )
 SELECT
     fcp.FACT_CARE_PLAN_ID          AS lacp_table_id,
-    p.LEGACY_ID                    AS lacp_person_id,
+    fcp.DIM_PERSON_ID                   AS lacp_person_id,
     fcp.START_DTTM                 AS lacp_cla_care_plan_start_date,
     fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
     (
@@ -2761,8 +2762,6 @@ SELECT
 FROM
     Child_Social.FACT_CARE_PLANS AS fcp
  
-LEFT JOIN
-    Child_Social.DIM_PERSON p ON fcp.DIM_PERSON_ID = p.DIM_PERSON_ID
  
 WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A';
  
