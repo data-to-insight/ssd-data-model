@@ -767,6 +767,7 @@ FOREIGN KEY (perm_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 CREATE TABLE ssd_professionals (
     prof_table_id                         NVARCHAR(48) PRIMARY KEY,
     prof_professional_id                  NVARCHAR(48),
+    prof_professional_name                NVARCHAR(300),
     prof_social_worker_registration_no    NVARCHAR(48),
     prof_agency_worker_flag               NCHAR(1),
     prof_professional_job_title           NVARCHAR(500),
@@ -774,7 +775,6 @@ CREATE TABLE ssd_professionals (
     prof_professional_department          NVARCHAR(100),
     prof_full_time_equivalency            FLOAT
 );
-
 
 
 
