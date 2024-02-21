@@ -2231,20 +2231,21 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/* 
+/*
 =============================================================================
 Object Name: ssd_cla_health
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 12/12/23
+Last Modified Date: 12/12/23 JH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
+Remarks: 1.5 JH updated source for clah_health_check_type to resolve blanks.
+            Updated to use DIM_LOOKUP_EXAM_STATUS_DESC as opposed to _CODE
+            to inprove readability.
+Dependencies:
 - ssd_person
-- FACT_HEALTH_CHECK 
-- ssd_cla_episodes (FK)
+- FACT_HEALTH_CHECK
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2254,6 +2255,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_cla_health;
+IF OBJECT_ID('tempdb..#ssd_cla_health', 'U') IS NOT NULL DROP TABLE #ssd_cla_health;
 
 -- create structure
 CREATE TABLE ssd_cla_health (
@@ -2272,22 +2274,19 @@ INSERT INTO ssd_cla_health (
     clah_health_check_date,
     clah_health_check_status
     )
-
+ 
 SELECT
     fhc.FACT_HEALTH_CHECK_ID,
     fhc.DIM_PERSON_ID,
-    fhc.DIM_LOOKUP_HC_TYPE_DESC,
+    fhc.DIM_LOOKUP_EVENT_TYPE_DESC,
     fhc.START_DTTM,
-    fhc.DIM_LOOKUP_EXAM_STATUS_CODE
+    fhc.DIM_LOOKUP_EXAM_STATUS_DESC
 FROM
     Child_Social.FACT_HEALTH_CHECK as fhc
  
--- INNER JOIN
---     ssd_person AS p ON fhc.DIM_PERSON_ID = p.pers_person_id;
-
-WHERE EXISTS 
-    (   -- only ssd relevant records
-    SELECT 1 
+ 
+WHERE EXISTS ( -- only ssd relevant records
+    SELECT 1
     FROM ssd_person p
     WHERE p.pers_person_id = fhc.DIM_PERSON_ID
     );
@@ -2697,7 +2696,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_previous_permanence
 Description:
 Author: D2I
-Last Modified Date: 21/02/24
+Last Modified Date: 21/02/24 JH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
