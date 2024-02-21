@@ -2231,20 +2231,21 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/* 
+/*
 =============================================================================
 Object Name: ssd_cla_health
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 12/12/23
+Last Modified Date: 12/12/23 JH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
+Remarks: 1.5 JH updated source for clah_health_check_type to resolve blanks.
+            Updated to use DIM_LOOKUP_EXAM_STATUS_DESC as opposed to _CODE
+            to inprove readability.
+Dependencies:
 - ssd_person
-- FACT_HEALTH_CHECK 
-- ssd_cla_episodes (FK)
+- FACT_HEALTH_CHECK
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2254,6 +2255,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_cla_health;
+IF OBJECT_ID('tempdb..#ssd_cla_health', 'U') IS NOT NULL DROP TABLE #ssd_cla_health;
 
 -- create structure
 CREATE TABLE ssd_cla_health (
@@ -2272,22 +2274,19 @@ INSERT INTO ssd_cla_health (
     clah_health_check_date,
     clah_health_check_status
     )
-
+ 
 SELECT
     fhc.FACT_HEALTH_CHECK_ID,
     fhc.DIM_PERSON_ID,
-    fhc.DIM_LOOKUP_HC_TYPE_DESC,
+    fhc.DIM_LOOKUP_EVENT_TYPE_DESC,
     fhc.START_DTTM,
-    fhc.DIM_LOOKUP_EXAM_STATUS_CODE
+    fhc.DIM_LOOKUP_EXAM_STATUS_DESC
 FROM
     Child_Social.FACT_HEALTH_CHECK as fhc
  
--- INNER JOIN
---     ssd_person AS p ON fhc.DIM_PERSON_ID = p.pers_person_id;
-
-WHERE EXISTS 
-    (   -- only ssd relevant records
-    SELECT 1 
+ 
+WHERE EXISTS ( -- only ssd relevant records
+    SELECT 1
     FROM ssd_person p
     WHERE p.pers_person_id = fhc.DIM_PERSON_ID
     );
@@ -2692,19 +2691,19 @@ PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
-
-/* 
+/*
 =============================================================================
 Object Name: ssd_cla_previous_permanence
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 11/12/23
+Last Modified Date: 21/02/24 JH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley. 
-
-Dependencies: 
+Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley.
+        1.5 JH tmp table was not being referenced, updated query and reduced running
+        time considerably, also filtered out rows where ANSWER IS NULL
+Dependencies:
 - ssd_person
 - FACT_903_DATA [depreciated]
 - FACT_FORMS
@@ -2714,11 +2713,10 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_previous_permanence';
 PRINT 'Creating table: ' + @TableName;
-
-
-
+ 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_previous_permanence') IS NOT NULL DROP TABLE ssd_cla_previous_permanence;
+IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_previous_permanence') IS NOT NULL DROP TABLE #ssd_TMP_PRE_previous_permanence;
  
 -- Create TMP structure with filtered answers
@@ -2727,15 +2725,17 @@ SELECT
     ffa.FACT_FORM_ANSWER_ID,
     ffa.ANSWER_NO,
     ffa.ANSWER
+ 
 INTO #ssd_TMP_PRE_previous_permanence
 FROM
     Child_Social.FACT_FORM_ANSWERS ffa
 WHERE
     ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
     AND
-    ffa.ANSWER_NO IN ('ORDERYEAR', 'ORDERMONTH', 'ORDERDATE', 'PREVADOPTORD', 'INENG');
-
-
+    ffa.ANSWER_NO IN ('ORDERYEAR', 'ORDERMONTH', 'ORDERDATE', 'PREVADOPTORD', 'INENG')
+    AND
+    ffa.ANSWER IS NOT NULL
+ 
 
 
 -- Create structure
@@ -2746,8 +2746,8 @@ CREATE TABLE ssd_cla_previous_permanence (
     lapp_previous_permanence_la                 NVARCHAR(100),
     lapp_previous_permanence_order_date_json    NVARCHAR(MAX)
 );
-
--- Insert data 
+ 
+-- Insert data
 INSERT INTO ssd_cla_previous_permanence (
                lapp_table_id,
                lapp_person_id,
@@ -2756,32 +2756,36 @@ INSERT INTO ssd_cla_previous_permanence (
                lapp_previous_permanence_order_date_json
            )
 SELECT
-    ff.FACT_FORM_ID AS lapp_table_id,
+    tmp_ffa.FACT_FORM_ID AS lapp_table_id,
     ff.DIM_PERSON_ID AS lapp_person_id,
-    MAX(CASE WHEN ffa.ANSWER_NO = 'PREVADOPTORD'    THEN ffa.ANSWER END) AS lapp_previous_permanence_option,
-    MAX(CASE WHEN ffa.ANSWER_NO = 'INENG'           THEN ffa.ANSWER END) AS lapp_previous_permanence_la,
+    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_option,
+    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG'        THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_la,
     (
-        SELECT 
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'       THEN sub.ANSWER END) as 'ORDERYEAR',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH'      THEN sub.ANSWER END) as 'ORDERMONTH',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'       THEN sub.ANSWER END) as 'ORDERDATE'
-
-        FROM 
+        SELECT
+ 
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'  THEN sub.ANSWER END) AS 'ORDERYEAR',
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH' THEN sub.ANSWER END) AS 'ORDERMONTH',
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'  THEN sub.ANSWER END) AS 'ORDERDATE'
+        FROM
             Child_Social.FACT_FORM_ANSWERS sub
-        WHERE 
+        WHERE
             sub.FACT_FORM_ID = ff.FACT_FORM_ID
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS lapp_previous_permanence_order_date_json
 FROM
-    Child_Social.FACT_FORM_ANSWERS ffa
+    #ssd_TMP_PRE_previous_permanence tmp_ffa
 JOIN
-    Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
-WHERE
-    ffa.EXTERNAL_ID <> -1 
-    AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
-
-GROUP BY ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
-
+    Child_Social.FACT_FORMS ff ON tmp_ffa.FACT_FORM_ID = ff.FACT_FORM_ID
+ 
+ 
+AND EXISTS ( -- only ssd relevant records
+    SELECT 1
+    FROM ssd_person p
+    WHERE p.pers_person_id = ff.DIM_PERSON_ID
+    )
+ 
+GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
+ 
 
 -- create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_lapp_person_id ON ssd_cla_previous_permanence(lapp_person_id);
@@ -3717,6 +3721,7 @@ SET @LastSept30th = CASE
 CREATE TABLE ssd_professionals (
     prof_table_id                         NVARCHAR(48) PRIMARY KEY,
     prof_professional_id                  NVARCHAR(48),
+    prof_professional_name                NVARCHAR(300),
     prof_social_worker_registration_no    NVARCHAR(48),
     prof_agency_worker_flag               NCHAR(1),
     prof_professional_job_title           NVARCHAR(500),
@@ -3731,6 +3736,7 @@ CREATE TABLE ssd_professionals (
 INSERT INTO ssd_professionals (
     prof_table_id, 
     prof_professional_id, 
+    prof_professional_name,
     prof_social_worker_registration_no,
     prof_agency_worker_flag,
     prof_professional_job_title,
@@ -3742,8 +3748,9 @@ INSERT INTO ssd_professionals (
 SELECT 
     dw.DIM_WORKER_ID                  AS prof_table_id,
     dw.STAFF_ID                       AS prof_professional_id,
+    CONCAT(dw.SURNAME, ' ', dw.FORENAME) AS prof_professional_name,         -- used also as Allocated Worker|Assigned Worker
     dw.WORKER_ID_CODE                 AS prof_social_worker_registration_no,
-    'Y'                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
+    'N'                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
     dw.JOB_TITLE                      AS prof_professional_job_title,
     ISNULL(rc.OpenCases, 0)           AS prof_professional_caseload,        -- 0 when no open cases on given date.
     dw.DEPARTMENT_NAME                AS prof_professional_department,
@@ -4007,6 +4014,10 @@ VALUES
     ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
 
 
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_ssd_s251_cla_placement_id ON ssd_s251_finance(s251_cla_placement_id);
+
+
 -- Create constraint(s)
 ALTER TABLE ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
 FOREIGN KEY (s251_cla_placement_id) REFERENCES ssd_cla_placement(clap_cla_placement_id);
@@ -4078,6 +4089,10 @@ VALUES
 --     FROM ssd_person p
 --     WHERE p.pers_person_id = ssd_voice_of_child.DIM_PERSON_ID
 --     );
+
+
+-- Create index(es)
+
 
 -- Create constraint(s)
 ALTER TABLE ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 

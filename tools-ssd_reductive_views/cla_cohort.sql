@@ -129,19 +129,29 @@ LEFT JOIN (
     FROM 
         #ssd_cla_visits
 ) v ON e.clae_cla_id = v.clav_cla_id AND v.rn = 1
+-- LEFT JOIN  
+--     (    -- most recent immigration status
+--         SELECT 
+--             -- partitioning by immi_person_id (group by each person) 
+--             immi_person_id,
+--             immi_immigration_status,
+--             ROW_NUMBER() OVER (PARTITION BY immi_person_id -- assign unique row num (most recent rn ===1)
+--             -- get latest status based on end date, (using start date as a secondary order in case of ties or NULL end dates)
+--             ORDER BY immi_immigration_status_start DESC, immi_immigration_status_end DESC) AS rn
+--         FROM 
+--             #ssd_immigration_status
+--     ) latest_status ON clae.clae_person_id = latest_status.immi_person_id AND latest_status.rn = 1; -- [TESTING] The multi-part identifier "clae.clae_person_id" could not be bound.
+
 LEFT JOIN  
-    (    -- most recent immigration status
+    (    
         SELECT 
-            -- partitioning by immi_person_id (group by each person) 
             immi_person_id,
             immi_immigration_status,
-            ROW_NUMBER() OVER (PARTITION BY immi_person_id -- assign unique row num (most recent rn ===1)
-            -- get latest status based on end date, (using start date as a secondary order in case of ties or NULL end dates)
+            ROW_NUMBER() OVER (PARTITION BY immi_person_id
             ORDER BY immi_immigration_status_start DESC, immi_immigration_status_end DESC) AS rn
         FROM 
             #ssd_immigration_status
-    ) latest_status ON clae.clae_person_id = latest_status.immi_person_id AND latest_status.rn = 1; -- [TESTING] The multi-part identifier "clae.clae_person_id" could not be bound.
-
+    ) latest_status ON e.clae_person_id = latest_status.immi_person_id AND latest_status.rn = 1;
 
 -- Msg 4104, Level 16, State 1, Line 4585
 -- The multi-part identifier "clae.clae_person_id" could not be bound.
