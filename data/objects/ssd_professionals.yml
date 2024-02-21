@@ -33,6 +33,20 @@ nodes:
     - mosaic
     - azeus
     guidance: null
+  - name: prof_professional_name
+    description: Staff name
+    item_ref: PROF013A
+    type: nvarchar
+    categories:
+    - workforce
+    returns:
+    - Local
+    - AnnexA
+    cms:
+    - liquid_logic
+    - mosaic
+    - azeus
+    guidance: null
   - name: prof_social_worker_registration_no
     description: Social worker ID - Social Work England (SWE) registration number-
       if available

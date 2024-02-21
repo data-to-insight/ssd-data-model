@@ -7,7 +7,8 @@ from admin.admin_tools import db_variants           # i.e. ,/admin/admin_tools.p
 
 
 # Get the LA configuration before calling generate_sql
-la_number = 208 # 208 - Lambeth(mosaic) # 340 - Knowsley(LL) # 845 - EastSussex(LL)
+la_number = 208 # E.g 208 - Lambeth(Mosaic) # 340 - Knowsley(LL) # 845 - EastSussex(LL)
+
 db_name = "PLACEHOLDER_DB_NAME"                     # Used only on some db specific processing (could also be moved into db_variants config)
 
 date_field = "entry_date"                           # which field/col used to restrict data to date threshold period

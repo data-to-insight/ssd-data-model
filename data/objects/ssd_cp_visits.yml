@@ -23,6 +23,9 @@ nodes:
     - child_protection
     - cp_plan
     - visit
+    cms:
+    - liquid_logic
+    - mosaic
     guidance: null
   - name: cppv_cp_plan_id
     description: CP Plan ID

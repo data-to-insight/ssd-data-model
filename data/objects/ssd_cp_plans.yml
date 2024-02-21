@@ -63,6 +63,9 @@ nodes:
     - cp_plan
     returns:
     - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:cppl_initial_cp_conference_id
     - mosaic:cppl_initial_cp_conference_id

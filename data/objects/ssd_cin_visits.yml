@@ -61,6 +61,9 @@ nodes:
     - child_in_need
     - cin_plan
     - visit
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:cinv_person_id
     - mosaic:cinv_person_id

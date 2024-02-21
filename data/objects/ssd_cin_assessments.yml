@@ -100,6 +100,9 @@ nodes:
     foreign_key: ssd_cin_episodes.cine_referral_id
     returns:
     - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:cina_referral_id
     - mosaic:cina_referral_id
