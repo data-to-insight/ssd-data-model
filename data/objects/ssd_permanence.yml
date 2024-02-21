@@ -531,6 +531,17 @@ nodes:
     - permanence
     - adoption
     returns:
+    - AnnexA
+    guidance: null
+  - name: perm_number_of_adopters
+    description: Number of adopters. As A(1)
+    item_ref: PERM027A
+    type: nvarchar
+    categories:
+    - looked_after
+    - permanence
+    - adoption
+    returns:
     - SSDA903
     guidance: null
   - name: perm_allocated_worker

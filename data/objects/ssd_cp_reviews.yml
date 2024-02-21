@@ -40,6 +40,9 @@ nodes:
     - child_protection
     - cp_plan
     - review
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:cppr_person_id
     - mosaic:cppr_person_id

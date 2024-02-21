@@ -33,6 +33,9 @@ nodes:
     foreign_key: ssd_s47_enquiry.s47e_s47_enquiry_id
     returns:
     - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
     cms_table:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
@@ -96,6 +99,9 @@ nodes:
     foreign_key: ssd_cin_episodes.cine_referral_id
     returns:
     - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:icpc_referral_id
     - mosaic:icpc_referral_id

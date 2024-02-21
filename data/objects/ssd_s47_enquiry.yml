@@ -40,6 +40,9 @@ nodes:
     - child_protection
     returns:
     - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:s47e_referral_id
     - mosaic:s47e_referral_id

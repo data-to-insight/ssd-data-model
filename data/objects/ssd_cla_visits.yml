@@ -23,6 +23,9 @@ nodes:
     categories:
     - looked_after
     - review
+    cms:
+    - liquid_logic
+    - mosaic
     guidance: null
   - name: clav_cla_visit_id
     description: Visit ID
