@@ -608,7 +608,7 @@ AND EXISTS
  
  
 -- Create index(es)
-CREATE INDEX idx_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON ssd_mother(moth_childs_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON ssd_mother(moth_childs_dob);
 
@@ -1552,6 +1552,8 @@ CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_start_date ON ssd_s47_enquiry(s47e
 CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_end_date ON ssd_s47_enquiry(s47e_s47_end_date);
 
 CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_referral_id ON ssd_s47_enquiry(s47e_referral_id);
+
+
 
 -- Create constraint(s)
 ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_s47_person

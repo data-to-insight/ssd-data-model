@@ -25,6 +25,19 @@ DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder';
 -- Query run time vars
 DECLARE @StartTime DATETIME, @EndTime DATETIME;
 SET @StartTime = GETDATE(); -- Record the start time
+
+
+-- For use towards checking data size of SSD structure+data
+DECLARE @Rows char(11), @ReservedSpace nvarchar(18), @DataSpace nvarchar(18), @IndexSpace nvarchar(18), @UnusedSpace nvarchar(18)
+-- Incl. temp table to store the space used data
+CREATE TABLE #SpaceUsedData (
+    TableName NVARCHAR(128),
+    Rows CHAR(11),
+    ReservedSpace NVARCHAR(18),
+    DataSpace NVARCHAR(18),
+    IndexSpace NVARCHAR(18),
+    UnusedSpace NVARCHAR(18)
+);
 /* ********************************************************************************************************** */
 
 
@@ -163,7 +176,10 @@ AND (                                                       -- Filter irrelevant
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_person_la_person_id ON #ssd_person(pers_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_person_la_person_id ON #ssd_person(pers_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob ON #ssd_person(pers_dob);
+CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id ON #ssd_person(pers_common_child_id);
+CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender ON #ssd_person(pers_ethnicity, pers_gender);
 
 
 
@@ -172,6 +188,9 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+EXEC sp_spaceused N'#ssd_person';
 
 
 /*SSD Person filter (notes): - Implemented*/
@@ -251,7 +270,8 @@ WHERE EXISTS ( -- only need address data for ssd relevant records
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_family_person_id ON #ssd_family(fami_person_id);
+CREATE NONCLUSTERED INDEX idx_family_person_id ON #ssd_family(fami_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id ON #sd_family(fami_family_id);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_family ADD CONSTRAINT FK_family_person
@@ -263,6 +283,11 @@ CREATE NONCLUSTERED INDEX IDX_family_person_id ON #ssd_family(fami_person_id);
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_family', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_family', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -355,9 +380,10 @@ WHERE EXISTS
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_address_person ON #ssd_address(addr_person_id);
-CREATE NONCLUSTERED INDEX IDX_address_start ON #ssd_address(addr_address_start);
-CREATE NONCLUSTERED INDEX IDX_address_end ON #ssd_address(addr_address_end);
+CREATE NONCLUSTERED INDEX idx_address_person ON #ssd_address(addr_person_id);
+CREATE NONCLUSTERED INDEX idx_address_start ON #ssd_address(addr_address_start);
+CREATE NONCLUSTERED INDEX idx_address_end ON #ssd_address(addr_address_end);
+CREATE NONCLUSTERED INDEX idx_ssd_address_postcode ON #ssd_address(addr_address_postcode);
 
 
 
@@ -367,6 +393,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_address', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_address', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -430,11 +460,13 @@ WHERE EXISTS
 
     
 -- -- Create constraint(s)
--- ALTER TABLE ssd_disability ADD CONSTRAINT FK_disability_person 
--- FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_disability ADD CONSTRAINT FK_disability_person 
+-- FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_disability_person_id ON #ssd_disability(disa_person_id);
+CREATE NONCLUSTERED INDEX idx_disability_person_id ON #ssd_disability(disa_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_disability_code ON #ssd_disability(disa_disability_code);
+
 
 
 
@@ -444,6 +476,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_disability', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_disability', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -513,9 +549,10 @@ WHERE
 -- FOREIGN KEY (immi_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
-CREATE NONCLUSTERED INDEX IDX_immigration_status_start ON #ssd_immigration_status(immi_immigration_status_start);
-CREATE NONCLUSTERED INDEX IDX_immigration_status_end ON #ssd_immigration_status(immi_immigration_status_end);
+CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
+CREATE NONCLUSTERED INDEX idx_immigration_status_start ON #ssd_immigration_status(immi_immigration_status_start);
+CREATE NONCLUSTERED INDEX idx_immigration_status_end ON #ssd_immigration_status(immi_immigration_status_end);
+
 
 
 
@@ -524,6 +561,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_immigration_status', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_immigration_status', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -588,7 +629,9 @@ AND EXISTS
  
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_mother_moth_person_id ON #ssd_mother(moth_person_id);
+CREATE INDEX idx_ssd_mother_moth_person_id ON #ssd_mother(moth_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON #ssd_mother(moth_childs_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON #ssd_mother(moth_childs_dob);
 
 -- -- Add constraint(s)
 -- ALTER TABLE #ssd_mother ADD CONSTRAINT FK_moth_to_person 
@@ -598,7 +641,7 @@ CREATE NONCLUSTERED INDEX IDX_ssd_mother_moth_person_id ON #ssd_mother(moth_pers
 -- FOREIGN KEY (moth_childs_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- -- [TESTING]
--- ALTER TABLE ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure data not contains person from being their own mother
+-- ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure data not contains person from being their own mother
 -- CHECK (moth_person_id <> moth_childs_person_id);
 
 
@@ -607,6 +650,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_mother_moth_person_id ON #ssd_mother(moth_pers
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_mother', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_mother', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -668,7 +716,10 @@ WHERE EXISTS
  
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_legal_status_lega_person_id ON #ssd_legal_status(lega_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id ON #ssd_legal_status(lega_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status ON #ssd_legal_status(lega_legal_status);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start ON #ssd_legal_status(lega_legal_status_start);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end ON #ssd_legal_status(lega_legal_status_end);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_legal_status ADD CONSTRAINT FK_legal_status_person
@@ -680,6 +731,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_legal_status_lega_person_id ON #ssd_legal_stat
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_legal_status', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_legal_status', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -769,7 +825,10 @@ WHERE EXISTS
 -- FOREIGN KEY (cont_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_contact_person_id ON #ssd_contacts(cont_person_id);
+CREATE NONCLUSTERED INDEX idx_contact_person_id ON #ssd_contacts(cont_person_id);
+CREATE NONCLUSTERED INDEX idx_contact_date ON #ssd_contacts(cont_contact_date);
+CREATE NONCLUSTERED INDEX idx_contact_source_code ON #ssd_contacts(cont_contact_source_code);
+
 
 
 
@@ -777,6 +836,11 @@ CREATE NONCLUSTERED INDEX IDX_contact_person_id ON #ssd_contacts(cont_person_id)
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_contacts', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_contacts', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -846,7 +910,9 @@ WHERE EXISTS
     );
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
+CREATE NONCLUSTERED INDEX idx_early_help_start_date ON #ssd_early_help_episodes(earl_episode_start_date);
+CREATE NONCLUSTERED INDEX idx_early_help_end_date ON #ssd_early_help_episodes(earl_episode_end_date);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
@@ -859,6 +925,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_early_help_episodes_person_id ON #ssd_early_he
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_early_help_episodes', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_early_help_episodes', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -957,7 +1028,9 @@ AND
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_cin_episodes_person_id ON #ssd_cin_episodes(cine_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id ON #ssd_cin_episodes(cine_person_id);
+CREATE NONCLUSTERED INDEX idx_cin_referral_date ON #ssd_cin_episodes(cine_referral_date);
+CREATE NONCLUSTERED INDEX idx_cin_close_date ON #ssd_cin_episodes(cine_close_date);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
@@ -970,6 +1043,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_cin_episodes_person_id ON #ssd_cin_episodes(ci
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cin_episodes', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cin_episodes', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -1084,6 +1162,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_cin_assessments_person_id ON #ssd_cin_assessme
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cin_assessments', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cin_assessments', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -1225,6 +1308,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_assessment_factors', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_assessment_factors', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -1327,6 +1415,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cin_plans', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cin_plans', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 /*
@@ -1409,6 +1502,11 @@ AND EXISTS ( -- only ssd relevant records
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cin_visits', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cin_visits', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -1501,6 +1599,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_s47_enquiry_person_id ON #ssd_s47_enquiry(s47e
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_s47_enquiry', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_s47_enquiry', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -1634,6 +1737,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_initial_cp_conference', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_initial_cp_conference', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 /*
@@ -1732,6 +1840,11 @@ PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cp_plans', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cp_plans', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -1814,11 +1927,11 @@ WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC'); -- Ref. ( 'STVC','STVCPCOVID
 
 
 -- -- Create index(es)
--- CREATE INDEX idx_cppv_person_id ON ssd_cp_visits(cppv_person_id);
+-- CREATE INDEX idx_cppv_person_id ON #ssd_cp_visits(cppv_person_id);
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
--- FOREIGN KEY (cppv_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
+-- ALTER TABLE #ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
+-- FOREIGN KEY (cppv_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
 
 
 
@@ -1826,6 +1939,11 @@ WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC'); -- Ref. ( 'STVC','STVCPCOVID
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cp_visits', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cp_visits', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -1953,6 +2071,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cp_reviews', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cp_reviews', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 /* 
 =============================================================================
@@ -2064,6 +2187,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cla_episodes', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cla_episodes', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 /* 
 =============================================================================
@@ -2127,6 +2255,11 @@ WHERE EXISTS ( -- only ssd relevant records
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cla_convictions', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cla_convictions', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /*
@@ -2203,6 +2336,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cla_health', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cla_health', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 /* 
@@ -2263,10 +2401,19 @@ WHERE EXISTS ( -- only ssd relevant records
 -- Create index(es)
 CREATE NONCLUSTERED INDEX IX_ssd_cla_immunisations_person_id ON #ssd_cla_immunisations (clai_person_id);
 
+
+
+
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cla_immunisations', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cla_immunisations', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 /* 
 =============================================================================
@@ -2334,6 +2481,11 @@ CREATE NONCLUSTERED INDEX idx_clas_person_id ON #ssd_cla_substance_misuse (clas_
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cla_substance_misuse', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cla_substance_misuse', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -2426,12 +2578,12 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
--- FOREIGN KEY (clap_cla_id) REFERENCES ssd_cla_episodes(clae_cla_id);
+-- ALTER TABLE #ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
+-- FOREIGN KEY (clap_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
 
 
 -- -- Create index(es)
--- CREATE NONCLUSTERED INDEX idx_clap_placement_provider_urn ON ssd_cla_placement (clap_placement_provider_urn);
+-- CREATE NONCLUSTERED INDEX idx_clap_placement_provider_urn ON #ssd_cla_placement (clap_placement_provider_urn);
 
 
 
@@ -2439,6 +2591,11 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cla_placement', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cla_placement', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -2540,6 +2697,11 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cla_reviews', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cla_reviews', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -2650,6 +2812,11 @@ GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cla_previous_permanence', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cla_previous_permanence', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /*
@@ -2784,6 +2951,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cla_care_plan', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cla_care_plan', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 /*
@@ -2867,13 +3039,20 @@ AND EXISTS ( -- only ssd relevant records
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
+-- ALTER TABLE #ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
 -- FOREIGN KEY (clav_person_id) REFERENCES ssd_cla_episodes(clae_cla_person_id);
+
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_cla_visits', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_cla_visits', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 /*
@@ -3027,6 +3206,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_sdq_scores', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_sdq_scores', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -3108,6 +3292,11 @@ WHERE EXISTS ( -- only ssd relevant records
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_missing', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_missing', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -3267,11 +3456,11 @@ GROUP BY
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
--- FOREIGN KEY (clea_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
+-- FOREIGN KEY (clea_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leaver_worker
--- FOREIGN KEY (clea_care_leaver_worker_id) REFERENCES ssd_involvements(invo_professional_id);
+-- ALTER TABLE #ssd_care_leavers ADD CONSTRAINT FK_care_leaver_worker
+-- FOREIGN KEY (clea_care_leaver_worker_id) REFERENCES #ssd_involvements(invo_professional_id);
 
 
 
@@ -3279,6 +3468,12 @@ GROUP BY
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_care_leavers', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_care_leavers', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 /* 
 =============================================================================
@@ -3484,6 +3679,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_permanence', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_permanence', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 /* 
 =============================================================================
@@ -3584,6 +3784,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_professionals', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_professionals', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -3666,6 +3871,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_involvements', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_involvements', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -3737,6 +3947,11 @@ PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_linked_identifiers', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_linked_identifiers', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -3803,6 +4018,11 @@ VALUES
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_s251_finance', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_s251_finance', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -3875,6 +4095,11 @@ VALUES
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_voice_of_child', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_voice_of_child', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -3993,6 +4218,12 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_pre_proceedings', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_pre_proceedings', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
+
 
 
 /* End
@@ -4092,6 +4323,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_send', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_send', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -4145,6 +4381,11 @@ VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLA
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_ehcp_requests', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_ehcp_requests', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -4201,6 +4442,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_ehcp_assessment', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_ehcp_assessment', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -4256,6 +4502,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_ehcp_named_plan', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_ehcp_named_plan', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -4298,7 +4549,20 @@ VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01');
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_ehcp_active_plans
 -- ADD CONSTRAINT FK_ehcp_active_plans_requests
--- FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+-- FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- [TESTING]
+EXEC tempdb..sp_spaceused '#ssd_ehcp_active_plans', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+VALUES ('#ssd_ehcp_active_plans', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
+
+
 
 
 
@@ -4460,3 +4724,11 @@ SET
 FROM #ssd_person p
 LEFT JOIN InvolvementHistoryCTE ih ON p.pers_person_id = ih.DIM_PERSON_ID
 LEFT JOIN InvolvementTypeStoryCTE its ON p.pers_person_id = its.DIM_PERSON_ID;
+
+
+
+
+-- [TESTING]
+SELECT * FROM #SpaceUsedData;
+
+
