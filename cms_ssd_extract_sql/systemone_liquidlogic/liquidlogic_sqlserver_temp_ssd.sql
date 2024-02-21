@@ -2541,19 +2541,19 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-
-/* 
+/*
 =============================================================================
 Object Name: ssd_cla_previous_permanence
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 11/12/23
+Last Modified Date: 21/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.5
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley. 
-
-Dependencies: 
+Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley.
+        1.5 JH tmp table was not being referenced, updated query and reduced running
+        time considerably, also filtered out rows where ANSWER IS NULL
+Dependencies:
 - ssd_person
 - FACT_903_DATA [depreciated]
 - FACT_FORMS
@@ -2563,7 +2563,7 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_previous_permanence';
 PRINT 'Creating table: ' + @TableName;
-
+ 
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_previous_permanence') IS NOT NULL DROP TABLE #ssd_TMP_PRE_previous_permanence;
@@ -2574,17 +2574,17 @@ SELECT
     ffa.FACT_FORM_ANSWER_ID,
     ffa.ANSWER_NO,
     ffa.ANSWER
+ 
 INTO #ssd_TMP_PRE_previous_permanence
 FROM
     Child_Social.FACT_FORM_ANSWERS ffa
 WHERE
     ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
     AND
-    ffa.ANSWER_NO IN ('ORDERYEAR', 'ORDERMONTH', 'ORDERDATE', 'PREVADOPTORD', 'INENG');
-
-
-
-
+    ffa.ANSWER_NO IN ('ORDERYEAR', 'ORDERMONTH', 'ORDERDATE', 'PREVADOPTORD', 'INENG')
+    AND
+    ffa.ANSWER IS NOT NULL
+ 
 -- Create structure
 CREATE TABLE #ssd_cla_previous_permanence (
     lapp_table_id                               NVARCHAR(48) PRIMARY KEY,
@@ -2593,8 +2593,8 @@ CREATE TABLE #ssd_cla_previous_permanence (
     lapp_previous_permanence_la                 NVARCHAR(100),
     lapp_previous_permanence_order_date_json    NVARCHAR(MAX)
 );
-
--- Insert data 
+ 
+-- Insert data
 INSERT INTO #ssd_cla_previous_permanence (
                lapp_table_id,
                lapp_person_id,
@@ -2603,31 +2603,37 @@ INSERT INTO #ssd_cla_previous_permanence (
                lapp_previous_permanence_order_date_json
            )
 SELECT
-    ff.FACT_FORM_ID AS lapp_table_id,
+    tmp_ffa.FACT_FORM_ID AS lapp_table_id,
     ff.DIM_PERSON_ID AS lapp_person_id,
-    MAX(CASE WHEN ffa.ANSWER_NO = 'PREVADOPTORD' THEN ffa.ANSWER END) AS lapp_previous_permanence_option,
-    MAX(CASE WHEN ffa.ANSWER_NO = 'INENG' THEN ffa.ANSWER END) AS lapp_previous_permanence_la,
+    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_option,
+    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG'        THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_la,
     (
-        SELECT 
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'       THEN sub.ANSWER END) as 'ORDERYEAR',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH'      THEN sub.ANSWER END) as 'ORDERMONTH',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'       THEN sub.ANSWER END) as 'ORDERDATE'
-        FROM 
+        SELECT
+ 
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'  THEN sub.ANSWER END) AS 'ORDERYEAR',
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH' THEN sub.ANSWER END) AS 'ORDERMONTH',
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'  THEN sub.ANSWER END) AS 'ORDERDATE'
+        FROM
             Child_Social.FACT_FORM_ANSWERS sub
-        WHERE 
+        WHERE
             sub.FACT_FORM_ID = ff.FACT_FORM_ID
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS lapp_previous_permanence_order_date_json
 FROM
-    Child_Social.FACT_FORM_ANSWERS ffa
+    #ssd_TMP_PRE_previous_permanence tmp_ffa
 JOIN
-    Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID
-WHERE
-    ffa.EXTERNAL_ID <> -1 
-    AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
-
-GROUP BY ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
-
+    Child_Social.FACT_FORMS ff ON tmp_ffa.FACT_FORM_ID = ff.FACT_FORM_ID
+ 
+ 
+AND EXISTS ( -- only ssd relevant records
+    SELECT 1
+    FROM #ssd_person p
+    WHERE p.pers_person_id = ff.DIM_PERSON_ID
+    )
+ 
+ 
+GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
+ 
 
 
 -- -- Add constraint(s)
