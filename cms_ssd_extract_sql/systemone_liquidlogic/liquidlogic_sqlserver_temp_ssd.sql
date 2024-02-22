@@ -27,17 +27,20 @@ DECLARE @StartTime DATETIME, @EndTime DATETIME;
 SET @StartTime = GETDATE(); -- Record the start time
 
 
--- For use towards checking data size of SSD structure+data
-DECLARE @Rows char(11), @ReservedSpace nvarchar(18), @DataSpace nvarchar(18), @IndexSpace nvarchar(18), @UnusedSpace nvarchar(18)
--- Incl. temp table to store the space used data
-CREATE TABLE #SpaceUsedData (
-    TableName NVARCHAR(128),
-    Rows CHAR(11),
-    ReservedSpace NVARCHAR(18),
-    DataSpace NVARCHAR(18),
-    IndexSpace NVARCHAR(18),
-    UnusedSpace NVARCHAR(18)
-);
+-- -- For use towards checking data size of SSD structure+data
+-- DECLARE @Rows char(11), @ReservedSpace nvarchar(18), @DataSpace nvarchar(18), @IndexSpace nvarchar(18), @UnusedSpace nvarchar(18)
+-- -- Incl. temp table to store the space used data
+
+-- -- Check if exists, & drop
+-- IF OBJECT_ID('tempdb..#SpaceUsedData') IS NOT NULL DROP TABLE #SpaceUsedData;
+-- CREATE TABLE #SpaceUsedData (
+--     TableName NVARCHAR(128),
+--     Rows CHAR(11),
+--     ReservedSpace NVARCHAR(18),
+--     DataSpace NVARCHAR(18),
+--     IndexSpace NVARCHAR(18),
+--     UnusedSpace NVARCHAR(18)
+-- );
 /* ********************************************************************************************************** */
 
 
@@ -188,9 +191,9 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-EXEC sp_spaceused N'#ssd_person';
+-- -- [TESTING]
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- EXEC sp_spaceused N'#ssd_person';
 
 
 /*SSD Person filter (notes): - Implemented*/
@@ -284,10 +287,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_family', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_family', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_family', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_family', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -393,10 +396,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_address', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_address', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_address', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_address', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -476,10 +479,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_disability', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_disability', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_disability', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_disability', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -561,10 +564,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_immigration_status', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_immigration_status', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_immigration_status', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_immigration_status', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -651,10 +654,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_mother', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_mother', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_mother', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_mother', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -732,10 +735,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_legal_status', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_legal_status', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_legal_status', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_legal_status', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -837,10 +840,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_contacts', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_contacts', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_contacts', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_contacts', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -926,10 +929,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_early_help_episodes', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_early_help_episodes', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_early_help_episodes', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_early_help_episodes', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -1044,10 +1047,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_cin_episodes', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_cin_episodes', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cin_episodes', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cin_episodes', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -1163,10 +1166,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_cin_assessments', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_cin_assessments', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cin_assessments', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cin_assessments', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -1308,10 +1311,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_assessment_factors', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_assessment_factors', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_assessment_factors', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_assessment_factors', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -1415,10 +1418,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_cin_plans', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_cin_plans', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cin_plans', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cin_plans', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -1503,10 +1506,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_cin_visits', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_cin_visits', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cin_visits', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cin_visits', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -1600,10 +1603,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
--- [TESTING]
-EXEC tempdb..sp_spaceused '#ssd_s47_enquiry', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
-INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
-VALUES ('#ssd_s47_enquiry', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_s47_enquiry', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_s47_enquiry', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
