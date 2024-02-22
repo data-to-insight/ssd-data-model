@@ -3727,6 +3727,7 @@ SET @LastSept30th = CASE
 CREATE TABLE #ssd_professionals (
     prof_table_id                         NVARCHAR(48) PRIMARY KEY,
     prof_professional_id                  NVARCHAR(48),
+    prof_professional_name                NVARCHAR(300),
     prof_social_worker_registration_no    NVARCHAR(48),
     prof_agency_worker_flag               NCHAR(1),
     prof_professional_job_title           NVARCHAR(500),
@@ -3741,6 +3742,7 @@ CREATE TABLE #ssd_professionals (
 INSERT INTO #ssd_professionals (
     prof_table_id, 
     prof_professional_id, 
+    prof_professional_name,
     prof_social_worker_registration_no,
     prof_agency_worker_flag,
     prof_professional_job_title,
@@ -3752,8 +3754,9 @@ INSERT INTO #ssd_professionals (
 SELECT 
     dw.DIM_WORKER_ID                  AS prof_table_id,
     dw.STAFF_ID                       AS prof_professional_id,
+    CONCAT(dw.SURNAME, ' ', dw.FORENAME) AS prof_professional_name,         -- used also as Allocated Worker|Assigned Worker
     dw.WORKER_ID_CODE                 AS prof_social_worker_registration_no,
-    'N'                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
+    ''                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
     dw.JOB_TITLE                      AS prof_professional_job_title,
     ISNULL(rc.OpenCases, 0)           AS prof_professional_caseload,        -- 0 when no open cases on given date.
     dw.DEPARTMENT_NAME                AS prof_professional_department,
