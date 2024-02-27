@@ -608,7 +608,7 @@ AND EXISTS
  
  
 -- Create index(es)
-CREATE INDEX idx_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON ssd_mother(moth_childs_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON ssd_mother(moth_childs_dob);
 
@@ -1553,6 +1553,8 @@ CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_end_date ON ssd_s47_enquiry(s47e_s
 
 CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_referral_id ON ssd_s47_enquiry(s47e_referral_id);
 
+
+
 -- Create constraint(s)
 ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
 FOREIGN KEY (s47e_person_id) REFERENCES ssd_person(pers_person_id);
@@ -2314,20 +2316,23 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
+
 /* 
 =============================================================================
 Object Name: ssd_cla_immunisations
 Description: 
 Author: D2I
-Last Modified Date: 26/12/23 
+Last Modified Date: 22/02/23 
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.6
+            1.5 most recent status reworked / 903 source removed JH
             1.4 clai_immunisations_status_date removed RH
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
-- FACT_903_DATA
+- FACT_CLA
+- FACT_903_DATA [Depreciated]
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2335,37 +2340,49 @@ SET @TableName = N'ssd_cla_immunisations';
 PRINT 'Creating table: ' + @TableName;
 
 
-
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_immunisations') IS NOT NULL DROP TABLE ssd_cla_immunisations;
+IF OBJECT_ID('tempdb..#ssd_cla_immunisations') IS NOT NULL DROP TABLE #ssd_cla_immunisations;
 
--- Create structure 
+-- Create structure
 CREATE TABLE ssd_cla_immunisations (
-    clai_immunisations_id          NVARCHAR(48) PRIMARY KEY,
-    clai_person_id                 NVARCHAR(48),
-    clai_immunisations_status      NCHAR(1)
+    clai_person_id                 NVARCHAR(48) PRIMARY KEY,
+    clai_immunisations_status      NCHAR(1),
+    clai_immunisations_status_date DATETIME
 );
 
--- Insert data
-INSERT INTO ssd_cla_immunisations (
-    clai_immunisations_id,
-    clai_person_id,
-
-    clai_immunisations_status
+-- CTE rank records by LAST_UPDATED_DTTM (on DIM_PERSON_ID)
+;WITH RankedImmunisations AS (
+    SELECT
+        fcla.DIM_PERSON_ID,
+        fcla.IMMU_UP_TO_DATE_FLAG,
+        fcla.LAST_UPDATED_DTTM,
+        ROW_NUMBER() OVER (
+            PARTITION BY fcla.DIM_PERSON_ID -- 
+            ORDER BY fcla.LAST_UPDATED_DTTM DESC) AS rn -- rank the order / most recent(rn==1)
+    FROM
+        Child_Social.FACT_CLA AS fcla
+    WHERE
+        EXISTS ( -- only ssd relevant records be considered for ranking
+            SELECT 1 
+            FROM ssd_person p
+            WHERE p.pers_person_id = fcla.DIM_PERSON_ID
+        )
 )
-SELECT 
-    f903.FACT_903_DATA_ID,
-    f903.DIM_PERSON_ID,
-    f903.IMMUN_CODE
-FROM 
-    Child_Social.FACT_903_DATA AS f903
-
-WHERE EXISTS 
-    (   -- only ssd relevant records
-    SELECT 1 
-    FROM ssd_person p
-    WHERE p.pers_person_id = f903.DIM_PERSON_ID
-    );
+-- Insert data (only most recent/rn==1 records)
+INSERT INTO ssd_cla_immunisations (
+    clai_person_id,
+    clai_immunisations_status,
+    clai_immunisations_status_date
+)
+SELECT
+    DIM_PERSON_ID,
+    IMMU_UP_TO_DATE_FLAG,
+    LAST_UPDATED_DTTM
+FROM
+    RankedImmunisations
+WHERE
+    rn = 1; -- pull needed record based on rank==1/most recent record for each DIM_PERSON_ID
 
 
 -- Create index(es)
@@ -3509,6 +3526,7 @@ IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permane
 -- Create structure
 CREATE TABLE ssd_permanence (
     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
+    adoption_table_id                    NVARCHAR(48),  
     perm_person_id                       NVARCHAR(48),
     perm_cla_id                          NVARCHAR(48),
     perm_entered_care_date               DATETIME,              
@@ -3519,25 +3537,92 @@ CREATE TABLE ssd_permanence (
     perm_ffa_cp_decision_date            DATETIME,              
     perm_placement_order_date            DATETIME,
     perm_matched_date                    DATETIME,
-    perm_placed_for_adoption_date        DATETIME,              
-    perm_adopted_by_carer_flag           NCHAR(1),              -- [TESTING] (datatype changed)
+    perm_placed_for_adoption_date        DATETIME,             
+    perm_adopted_by_carer_flag           NCHAR(1),
     perm_placed_ffa_cp_date              DATETIME,
-    perm_placed_foster_carer_date        DATETIME,
+      -- perm_placed_foster_carer_date        NVARCHAR(48), 
     perm_placement_provider_urn          NVARCHAR(48),  
     perm_decision_reversed_date          DATETIME,                  
     perm_decision_reversed_reason        NVARCHAR(100),
     perm_permanence_order_date           DATETIME,              
     perm_permanence_order_type           NVARCHAR(100),        
-    perm_adoption_worker                 NVARCHAR(100),          -- [TESTING] (datatype changed)
-    perm_adopter_sex                     NVARCHAR(48),
-    perm_adopter_legal_status            NVARCHAR(100),
-    perm_number_of_adopters              NVARCHAR(3)
+    perm_adoption_worker                 NVARCHAR(100)
 );
- 
- 
+
+
+WITH RankedPermanenceData AS (
+    -- CTE to rank permanence rows for each person
+    -- used to assist in dup filtering on/towards perm_table_id
+
+    SELECT
+        CASE 
+            WHEN (fa.DIM_PERSON_ID = fce.DIM_PERSON_ID)
+            THEN CONCAT(fa.FACT_ADOPTION_ID, fce.FACT_CARE_EPISODES_ID)
+            ELSE fce.FACT_CARE_EPISODES_ID 
+        END                                               AS perm_table_id,
+        fa.FACT_ADOPTION_ID                               AS adoption_table_id,
+        p.LEGACY_ID                                       AS perm_person_id,
+        fce.FACT_CLA_ID                                   AS perm_cla_id,
+        fc.START_DTTM                                     AS perm_entered_care_date,
+        fa.DECISION_DTTM                                  AS perm_adm_decision_date,              
+        fa.SIBLING_GROUP                                  AS perm_part_of_sibling_group,
+        fa.NUMBER_TOGETHER                                AS perm_siblings_placed_together,
+        fa.NUMBER_APART                                   AS perm_siblings_placed_apart,              
+        fcpl.FFA_IS_PLAN_DATE                             AS perm_ffa_cp_decision_date,
+        fa.PLACEMENT_ORDER_DTTM                           AS perm_placement_order_date,
+        fa.MATCHING_DTTM                                  AS perm_matched_date,
+        CASE 
+            WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
+            THEN fcpl.START_DTTM 
+            ELSE NULL 
+        END                                               AS perm_placed_for_adoption_date,
+        fa.ADOPTED_BY_CARER_FLAG                          AS perm_adopted_by_carer_flag,
+        fa.FOSTER_TO_ADOPT_DTTM                           AS perm_placed_ffa_cp_date,
+        CASE 
+            WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
+            THEN fce.OFSTED_URN 
+            ELSE NULL 
+        END                                               AS perm_placement_provider_urn,
+        fa.NO_LONGER_PLACED_DTTM                          AS perm_decision_reversed_date,
+        fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE             AS perm_decision_reversed_reason,
+        fce.PLACEND                                       AS perm_permanence_order_date,
+        CASE
+            WHEN fce.CARE_REASON_END_CODE IN ('E1', 'E12', 'E11') THEN 'Adoption'
+            WHEN fce.CARE_REASON_END_CODE IN ('E48', 'E44', 'E43', '45', 'E45', 'E47', 'E46') THEN 'Special Guardianship Order'
+            WHEN fce.CARE_REASON_END_CODE IN ('45', 'E41') THEN 'Child Arrangements/ Residence Order'
+            ELSE NULL
+        END                                               AS perm_permanence_order_type,
+        fa.ADOPTION_SOCIAL_WORKER_NAME                    AS perm_adoption_worker,
+        ROW_NUMBER() OVER (
+            PARTITION BY p.LEGACY_ID                     -- partition on person identifier
+            ORDER BY CAST(RIGHT(CASE 
+                                    WHEN (fa.DIM_PERSON_ID = fce.DIM_PERSON_ID)
+                                    THEN CONCAT(fa.FACT_ADOPTION_ID, fce.FACT_CARE_EPISODES_ID)
+                                    ELSE fce.FACT_CARE_EPISODES_ID 
+                                END, 5) AS INT) DESC    -- take last 5 digits, coerce to int so we can sort/order
+        )                                                 AS rn -- we only want rn==1
+    FROM Child_Social.FACT_CARE_EPISODES fce
+    LEFT JOIN Child_Social.FACT_ADOPTION AS fa ON fa.DIM_PERSON_ID = fce.DIM_PERSON_ID AND fa.START_DTTM IS NOT NULL
+    LEFT JOIN Child_Social.FACT_CLA AS fc ON fc.FACT_CLA_ID = fce.FACT_CLA_ID
+    LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl ON fcpl.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
+        AND fcpl.FACT_CLA_PLACEMENT_ID <> '-1'
+        AND (fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3', 'A4', 'A5', 'A6') OR fcpl.FFA_IS_PLAN_DATE IS NOT NULL)
+    LEFT JOIN Child_Social.DIM_PERSON p ON fce.DIM_PERSON_ID = p.DIM_PERSON_ID
+    WHERE ((fce.PLACEND IS NULL AND fa.START_DTTM IS NOT NULL)
+        OR fce.CARE_REASON_END_CODE IN ('E48', 'E1', 'E44', 'E12', 'E11', 'E43', '45', 'E41', 'E45', 'E47', 'E46'))
+        AND fce.DIM_PERSON_ID <> '-1'
+        AND EXISTS ( -- ssd records only
+            SELECT 1
+            FROM ssd_person p
+            WHERE p.pers_person_id = fce.DIM_PERSON_ID
+        )
+
+)
+
 -- Insert data
 INSERT INTO ssd_permanence (
     perm_table_id,
+    adoption_table_id,
     perm_person_id,
     perm_cla_id,
     perm_entered_care_date,
@@ -3551,116 +3636,39 @@ INSERT INTO ssd_permanence (
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
     perm_placed_ffa_cp_date,
-    perm_placed_foster_carer_date,
+   -- perm_placed_foster_carer_date,
     perm_placement_provider_urn,
     perm_decision_reversed_date,
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker,
-    perm_adopter_sex,
-    perm_adopter_legal_status, 
-    perm_number_of_adopters 
+    perm_adoption_worker
 )  
-SELECT
-    fce.FACT_CARE_EPISODES_ID               AS perm_table_id,
-    fce.DIM_PERSON_ID                       AS perm_person_id,
-    fce.FACT_CLA_ID                         AS perm_cla_id,
-    fc.START_DTTM                           AS perm_entered_care_date,
-    CASE
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.DECISION_DTTM
-    END                                     AS perm_adm_decision_date,            --Adoption only  
-        CASE
-        WHEN fa.ADOPTED_BY_CARER_FLAG = 'Y' THEN fa.SIBLING_GROUP
-        ELSE NULL
-    END                                     AS perm_part_of_sibling_group,        --Adoption only  
-    CASE
-        WHEN fa.ADOPTED_BY_CARER_FLAG = 'Y' THEN fa.NUMBER_TOGETHER  
-        ELSE NULL
-    END                                     AS perm_siblings_placed_together,     --Adoption only  
-        CASE
-        WHEN fa.ADOPTED_BY_CARER_FLAG = 'Y' THEN fa.NUMBER_APART  
-        ELSE NULL
-    END                                     AS perm_siblings_placed_apart,        --Adoption only                    
-    CASE
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fcpl.FFA_IS_PLAN_DATE
-    END                                     AS perm_ffa_cp_decision_date,        --ffa/cp cases only
-    CASE
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.PLACEMENT_ORDER_DTTM
-    END                                     AS perm_placement_order_date,        --Adoption only          
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.MATCHING_DTTM
-    END                                     AS perm_matched_date,                --Adoption only
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fcpl.START_DTTM
-    END                                     AS perm_placed_for_adoption_date,    --Adoption only  
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.ADOPTED_BY_CARER_FLAG
-    END                                     AS perm_adopted_by_carer_flag,       --Adoption only
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.FOSTER_TO_ADOPT_DTTM
-    END                                     AS perm_placed_ffa_cp_date,          --ffa/cp cases only
-    CASE
-        WHEN fa.ADOPTED_BY_CARER_FLAG = 'Y'
-        THEN fcpl.START_DTTM
-    END                                     AS perm_placed_foster_carer_date,     --ffa/cp cases only
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fce.OFSTED_URN
-    END                                     AS perm_placement_provider_urn,      --Adoption only  
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.NO_LONGER_PLACED_DTTM
-    END                                     AS perm_decision_reversed_date,      --Adoption only                                
-        CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE
-    END                                     AS perm_decision_reversed_reason,    --Adoption only    
-    fce.PLACEND                             AS perm_permanence_order_date,
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE IN ('E1','E12','E11') THEN 'Adoption'
-        WHEN fce.CARE_REASON_END_CODE IN ('E48','E44','E43','45','E45','E47','E46') THEN 'Special Guardianship Order'
-        WHEN fce.CARE_REASON_END_CODE IN ('45','E41') THEN 'Child Arrangements/ Residence Order'
-        ELSE NULL
-    END                                     AS perm_permanence_order_type,      
- 
-    fa.ADOPTION_SOCIAL_WORKER_NAME          AS perm_adoption_worker,            -- Note that duplicate -1 seen in raw data
- 
-    fa.DIM_LOOKUP_ADOPTER_GENDER_CODE       AS perm_adopter_sex, 
-    fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE AS perm_adopter_legal_status, 
-    fa.NO_OF_ADOPTERS                       AS perm_number_of_adopters 
 
-FROM Child_Social.FACT_CARE_EPISODES fce
- 
-LEFT JOIN Child_Social.FACT_ADOPTION AS fa
-    ON fa.DIM_PERSON_ID = fce.DIM_PERSON_ID
-    AND fce.CARE_REASON_END_CODE IN ('E1','E12','E11')
-   
-LEFT JOIN Child_Social.FACT_CLA AS fc                                
-    ON fc.FACT_CLA_ID = fce.FACT_CLA_ID                                          -- towards perm_adm_decision_date
- 
-LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl            
-    ON fcpl.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
- 
-WHERE fce.PLACEND IS NOT NULL
-AND CARE_REASON_END_CODE IN ('E48','E1','E44','E12','E11','E43','45','E41','E45','E47','E46');
+SELECT
+    perm_table_id,
+    adoption_table_id,
+    perm_person_id,
+    perm_cla_id,
+    perm_entered_care_date,
+    perm_adm_decision_date,
+    perm_part_of_sibling_group,
+    perm_siblings_placed_together,
+    perm_siblings_placed_apart,
+    perm_ffa_cp_decision_date,
+    perm_placement_order_date,
+    perm_matched_date,
+    perm_placed_for_adoption_date,
+    perm_adopted_by_carer_flag,
+    perm_placed_ffa_cp_date,
+    perm_placement_provider_urn,
+    perm_decision_reversed_date,
+    perm_decision_reversed_reason,
+    perm_permanence_order_date,
+    perm_permanence_order_type,
+    perm_adoption_worker
+FROM RankedPermanenceData
+WHERE rn = 1;
 
 
 -- Create index(es)
@@ -3750,7 +3758,7 @@ SELECT
     dw.STAFF_ID                       AS prof_professional_id,
     CONCAT(dw.SURNAME, ' ', dw.FORENAME) AS prof_professional_name,         -- used also as Allocated Worker|Assigned Worker
     dw.WORKER_ID_CODE                 AS prof_social_worker_registration_no,
-    'N'                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
+    ''                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
     dw.JOB_TITLE                      AS prof_professional_job_title,
     ISNULL(rc.OpenCases, 0)           AS prof_professional_caseload,        -- 0 when no open cases on given date.
     dw.DEPARTMENT_NAME                AS prof_professional_department,

@@ -25,6 +25,22 @@ DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder';
 -- Query run time vars
 DECLARE @StartTime DATETIME, @EndTime DATETIME;
 SET @StartTime = GETDATE(); -- Record the start time
+
+
+-- -- For use towards checking data size of SSD structure+data
+-- DECLARE @Rows char(11), @ReservedSpace nvarchar(18), @DataSpace nvarchar(18), @IndexSpace nvarchar(18), @UnusedSpace nvarchar(18)
+-- -- Incl. temp table to store the space used data
+
+-- -- Check if exists, & drop
+-- IF OBJECT_ID('tempdb..#SpaceUsedData') IS NOT NULL DROP TABLE #SpaceUsedData;
+-- CREATE TABLE #SpaceUsedData (
+--     TableName NVARCHAR(128),
+--     Rows CHAR(11),
+--     ReservedSpace NVARCHAR(18),
+--     DataSpace NVARCHAR(18),
+--     IndexSpace NVARCHAR(18),
+--     UnusedSpace NVARCHAR(18)
+-- );
 /* ********************************************************************************************************** */
 
 
@@ -163,7 +179,10 @@ AND (                                                       -- Filter irrelevant
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_person_la_person_id ON #ssd_person(pers_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_person_la_person_id ON #ssd_person(pers_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob ON #ssd_person(pers_dob);
+CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id ON #ssd_person(pers_common_child_id);
+CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender ON #ssd_person(pers_ethnicity, pers_gender);
 
 
 
@@ -172,6 +191,9 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- EXEC sp_spaceused N'#ssd_person';
 
 
 /*SSD Person filter (notes): - Implemented*/
@@ -251,7 +273,8 @@ WHERE EXISTS ( -- only need address data for ssd relevant records
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_family_person_id ON #ssd_family(fami_person_id);
+CREATE NONCLUSTERED INDEX idx_family_person_id ON #ssd_family(fami_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id ON #ssd_family(fami_family_id);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_family ADD CONSTRAINT FK_family_person
@@ -263,6 +286,11 @@ CREATE NONCLUSTERED INDEX IDX_family_person_id ON #ssd_family(fami_person_id);
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_family', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_family', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -355,9 +383,10 @@ WHERE EXISTS
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_address_person ON #ssd_address(addr_person_id);
-CREATE NONCLUSTERED INDEX IDX_address_start ON #ssd_address(addr_address_start);
-CREATE NONCLUSTERED INDEX IDX_address_end ON #ssd_address(addr_address_end);
+CREATE NONCLUSTERED INDEX idx_address_person ON #ssd_address(addr_person_id);
+CREATE NONCLUSTERED INDEX idx_address_start ON #ssd_address(addr_address_start);
+CREATE NONCLUSTERED INDEX idx_address_end ON #ssd_address(addr_address_end);
+CREATE NONCLUSTERED INDEX idx_ssd_address_postcode ON #ssd_address(addr_address_postcode);
 
 
 
@@ -367,6 +396,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_address', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_address', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -430,11 +463,13 @@ WHERE EXISTS
 
     
 -- -- Create constraint(s)
--- ALTER TABLE ssd_disability ADD CONSTRAINT FK_disability_person 
--- FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_disability ADD CONSTRAINT FK_disability_person 
+-- FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_disability_person_id ON #ssd_disability(disa_person_id);
+CREATE NONCLUSTERED INDEX idx_disability_person_id ON #ssd_disability(disa_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_disability_code ON #ssd_disability(disa_disability_code);
+
 
 
 
@@ -444,6 +479,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_disability', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_disability', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -513,9 +552,10 @@ WHERE
 -- FOREIGN KEY (immi_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
-CREATE NONCLUSTERED INDEX IDX_immigration_status_start ON #ssd_immigration_status(immi_immigration_status_start);
-CREATE NONCLUSTERED INDEX IDX_immigration_status_end ON #ssd_immigration_status(immi_immigration_status_end);
+CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
+CREATE NONCLUSTERED INDEX idx_immigration_status_start ON #ssd_immigration_status(immi_immigration_status_start);
+CREATE NONCLUSTERED INDEX idx_immigration_status_end ON #ssd_immigration_status(immi_immigration_status_end);
+
 
 
 
@@ -524,6 +564,10 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_immigration_status', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_immigration_status', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -588,7 +632,9 @@ AND EXISTS
  
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_mother_moth_person_id ON #ssd_mother(moth_person_id);
+CREATE INDEX idx_ssd_mother_moth_person_id ON #ssd_mother(moth_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON #ssd_mother(moth_childs_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON #ssd_mother(moth_childs_dob);
 
 -- -- Add constraint(s)
 -- ALTER TABLE #ssd_mother ADD CONSTRAINT FK_moth_to_person 
@@ -598,7 +644,7 @@ CREATE NONCLUSTERED INDEX IDX_ssd_mother_moth_person_id ON #ssd_mother(moth_pers
 -- FOREIGN KEY (moth_childs_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- -- [TESTING]
--- ALTER TABLE ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure data not contains person from being their own mother
+-- ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure data not contains person from being their own mother
 -- CHECK (moth_person_id <> moth_childs_person_id);
 
 
@@ -607,6 +653,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_mother_moth_person_id ON #ssd_mother(moth_pers
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_mother', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_mother', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -668,7 +719,10 @@ WHERE EXISTS
  
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_legal_status_lega_person_id ON #ssd_legal_status(lega_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id ON #ssd_legal_status(lega_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status ON #ssd_legal_status(lega_legal_status);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start ON #ssd_legal_status(lega_legal_status_start);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end ON #ssd_legal_status(lega_legal_status_end);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_legal_status ADD CONSTRAINT FK_legal_status_person
@@ -680,6 +734,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_legal_status_lega_person_id ON #ssd_legal_stat
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_legal_status', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_legal_status', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -769,7 +828,10 @@ WHERE EXISTS
 -- FOREIGN KEY (cont_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_contact_person_id ON #ssd_contacts(cont_person_id);
+CREATE NONCLUSTERED INDEX idx_contact_person_id ON #ssd_contacts(cont_person_id);
+CREATE NONCLUSTERED INDEX idx_contact_date ON #ssd_contacts(cont_contact_date);
+CREATE NONCLUSTERED INDEX idx_contact_source_code ON #ssd_contacts(cont_contact_source_code);
+
 
 
 
@@ -777,6 +839,11 @@ CREATE NONCLUSTERED INDEX IDX_contact_person_id ON #ssd_contacts(cont_person_id)
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_contacts', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_contacts', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -846,7 +913,9 @@ WHERE EXISTS
     );
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
+CREATE NONCLUSTERED INDEX idx_early_help_start_date ON #ssd_early_help_episodes(earl_episode_start_date);
+CREATE NONCLUSTERED INDEX idx_early_help_end_date ON #ssd_early_help_episodes(earl_episode_end_date);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
@@ -859,6 +928,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_early_help_episodes_person_id ON #ssd_early_he
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_early_help_episodes', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_early_help_episodes', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -957,7 +1031,9 @@ AND
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_cin_episodes_person_id ON #ssd_cin_episodes(cine_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id ON #ssd_cin_episodes(cine_person_id);
+CREATE NONCLUSTERED INDEX idx_cin_referral_date ON #ssd_cin_episodes(cine_referral_date);
+CREATE NONCLUSTERED INDEX idx_cin_close_date ON #ssd_cin_episodes(cine_close_date);
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
@@ -970,6 +1046,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_cin_episodes_person_id ON #ssd_cin_episodes(ci
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cin_episodes', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cin_episodes', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -1084,6 +1165,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_cin_assessments_person_id ON #ssd_cin_assessme
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cin_assessments', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cin_assessments', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -1225,6 +1311,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_assessment_factors', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_assessment_factors', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -1327,6 +1418,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cin_plans', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cin_plans', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 /*
@@ -1409,6 +1505,11 @@ AND EXISTS ( -- only ssd relevant records
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cin_visits', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cin_visits', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -1501,6 +1602,11 @@ CREATE NONCLUSTERED INDEX IDX_ssd_s47_enquiry_person_id ON #ssd_s47_enquiry(s47e
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_s47_enquiry', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_s47_enquiry', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -1634,6 +1740,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_initial_cp_conference', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_initial_cp_conference', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 /*
@@ -1732,6 +1843,11 @@ PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cp_plans', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cp_plans', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -1814,11 +1930,11 @@ WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC'); -- Ref. ( 'STVC','STVCPCOVID
 
 
 -- -- Create index(es)
--- CREATE INDEX idx_cppv_person_id ON ssd_cp_visits(cppv_person_id);
+-- CREATE INDEX idx_cppv_person_id ON #ssd_cp_visits(cppv_person_id);
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
--- FOREIGN KEY (cppv_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
+-- ALTER TABLE #ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
+-- FOREIGN KEY (cppv_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
 
 
 
@@ -1826,6 +1942,11 @@ WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC'); -- Ref. ( 'STVC','STVCPCOVID
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cp_visits', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cp_visits', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -1953,6 +2074,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cp_reviews', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cp_reviews', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 /* 
 =============================================================================
@@ -2064,6 +2190,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cla_episodes', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cla_episodes', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 /* 
 =============================================================================
@@ -2127,6 +2258,11 @@ WHERE EXISTS ( -- only ssd relevant records
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cla_convictions', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cla_convictions', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /*
@@ -2203,6 +2339,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cla_health', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cla_health', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 /* 
@@ -2210,15 +2351,17 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_immunisations
 Description: 
 Author: D2I
-Last Modified Date: 26/12/23 
+Last Modified Date: 22/02/23 
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.6
+            1.5 most recent status reworked / 903 source removed JH
             1.4 clai_immunisations_status_date removed RH
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
 - ssd_person
-- FACT_903_DATA
+- FACT_CLA
+- FACT_903_DATA [Depreciated]
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2227,46 +2370,69 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
+IF OBJECT_ID('ssd_cla_immunisations') IS NOT NULL DROP TABLE ssd_cla_immunisations;
 IF OBJECT_ID('tempdb..#ssd_cla_immunisations') IS NOT NULL DROP TABLE #ssd_cla_immunisations;
 
--- Create structure 
+-- Create structure
 CREATE TABLE #ssd_cla_immunisations (
-    clai_immunisations_id          NVARCHAR(48) PRIMARY KEY,
-    clai_person_id                 NVARCHAR(48),
-    clai_immunisations_status      NCHAR(1)
+    clai_person_id                 NVARCHAR(48) PRIMARY KEY,
+    clai_immunisations_status      NCHAR(1),
+    clai_immunisations_status_date DATETIME
 );
 
--- Insert data
-INSERT INTO #ssd_cla_immunisations (
-    clai_immunisations_id,
-    clai_person_id,
-    clai_immunisations_status
+-- CTE rank records by LAST_UPDATED_DTTM (on DIM_PERSON_ID)
+;WITH RankedImmunisations AS (
+    SELECT
+        fcla.DIM_PERSON_ID,
+        fcla.IMMU_UP_TO_DATE_FLAG,
+        fcla.LAST_UPDATED_DTTM,
+        ROW_NUMBER() OVER (
+            PARTITION BY fcla.DIM_PERSON_ID -- 
+            ORDER BY fcla.LAST_UPDATED_DTTM DESC) AS rn -- rank the order / most recent(rn==1)
+    FROM
+        Child_Social.FACT_CLA AS fcla
+    WHERE
+        EXISTS ( -- only ssd relevant records be considered for ranking
+            SELECT 1 
+            FROM #ssd_person p
+            WHERE p.pers_person_id = fcla.DIM_PERSON_ID
+        )
 )
-SELECT 
-    f903.FACT_903_DATA_ID,
-    f903.DIM_PERSON_ID,
-    f903.IMMUN_CODE
-FROM 
-    Child_Social.FACT_903_DATA AS f903
-WHERE EXISTS ( -- only ssd relevant records
-    SELECT 1 
-    FROM #ssd_person p
-    WHERE p.pers_person_id = f903.DIM_PERSON_ID
-);
-
--- -- add constraint(s)
--- ALTER TABLE #ssd_cla_immunisations
--- ADD CONSTRAINT FK_ssd_cla_immunisations_person
--- FOREIGN KEY (clas_person_id) REFERENCES #ssd_person(pers_person_id);
+-- Insert data (only most recent/rn==1 records)
+INSERT INTO #ssd_cla_immunisations (
+    clai_person_id,
+    clai_immunisations_status,
+    clai_immunisations_status_date
+)
+SELECT
+    DIM_PERSON_ID,
+    IMMU_UP_TO_DATE_FLAG,
+    LAST_UPDATED_DTTM
+FROM
+    RankedImmunisations
+WHERE
+    rn = 1; -- pull needed record based on rank==1/most recent record for each DIM_PERSON_ID
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IX_ssd_cla_immunisations_person_id ON #ssd_cla_immunisations (clai_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clai_person_id ON #ssd_cla_immunisations(clai_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clai_immunisations_status ON #ssd_cla_immunisations(clai_immunisations_status);
+
+
+-- -- add constraint(s)
+-- ALTER TABLE ssd_cla_immunisations ADD CONSTRAINT FK_ssd_cla_immunisations_person
+-- FOREIGN KEY (clai_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cla_immunisations', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cla_immunisations', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 /* 
 =============================================================================
@@ -2334,6 +2500,11 @@ CREATE NONCLUSTERED INDEX idx_clas_person_id ON #ssd_cla_substance_misuse (clas_
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cla_substance_misuse', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cla_substance_misuse', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -2426,12 +2597,12 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
--- FOREIGN KEY (clap_cla_id) REFERENCES ssd_cla_episodes(clae_cla_id);
+-- ALTER TABLE #ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
+-- FOREIGN KEY (clap_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
 
 
 -- -- Create index(es)
--- CREATE NONCLUSTERED INDEX idx_clap_placement_provider_urn ON ssd_cla_placement (clap_placement_provider_urn);
+-- CREATE NONCLUSTERED INDEX idx_clap_placement_provider_urn ON #ssd_cla_placement (clap_placement_provider_urn);
 
 
 
@@ -2439,6 +2610,11 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cla_placement', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cla_placement', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -2540,6 +2716,11 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cla_reviews', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cla_reviews', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -2650,6 +2831,11 @@ GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cla_previous_permanence', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cla_previous_permanence', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /*
@@ -2784,6 +2970,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cla_care_plan', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cla_care_plan', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 /*
@@ -2867,13 +3058,20 @@ AND EXISTS ( -- only ssd relevant records
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
+-- ALTER TABLE #ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
 -- FOREIGN KEY (clav_person_id) REFERENCES ssd_cla_episodes(clae_cla_person_id);
+
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_cla_visits', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_cla_visits', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 /*
@@ -3027,6 +3225,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_sdq_scores', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_sdq_scores', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -3108,6 +3311,11 @@ WHERE EXISTS ( -- only ssd relevant records
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_missing', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_missing', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -3267,11 +3475,11 @@ GROUP BY
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
--- FOREIGN KEY (clea_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
+-- FOREIGN KEY (clea_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leaver_worker
--- FOREIGN KEY (clea_care_leaver_worker_id) REFERENCES ssd_involvements(invo_professional_id);
+-- ALTER TABLE #ssd_care_leavers ADD CONSTRAINT FK_care_leaver_worker
+-- FOREIGN KEY (clea_care_leaver_worker_id) REFERENCES #ssd_involvements(invo_professional_id);
 
 
 
@@ -3279,6 +3487,12 @@ GROUP BY
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_care_leavers', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_care_leavers', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 /* 
 =============================================================================
@@ -3317,6 +3531,7 @@ IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permane
 -- Create structure
 CREATE TABLE #ssd_permanence (
     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
+    adoption_table_id                    NVARCHAR(48),  
     perm_person_id                       NVARCHAR(48),
     perm_cla_id                          NVARCHAR(48),
     perm_entered_care_date               DATETIME,              
@@ -3327,25 +3542,92 @@ CREATE TABLE #ssd_permanence (
     perm_ffa_cp_decision_date            DATETIME,              
     perm_placement_order_date            DATETIME,
     perm_matched_date                    DATETIME,
-    perm_placed_for_adoption_date        DATETIME,              
-    perm_adopted_by_carer_flag           NCHAR(1),              -- [TESTING] (datatype changed)
+    perm_placed_for_adoption_date        DATETIME,             
+    perm_adopted_by_carer_flag           NCHAR(1),
     perm_placed_ffa_cp_date              DATETIME,
-    perm_placed_foster_carer_date        DATETIME,
+      -- perm_placed_foster_carer_date        NVARCHAR(48), 
     perm_placement_provider_urn          NVARCHAR(48),  
     perm_decision_reversed_date          DATETIME,                  
     perm_decision_reversed_reason        NVARCHAR(100),
     perm_permanence_order_date           DATETIME,              
     perm_permanence_order_type           NVARCHAR(100),        
-    perm_adoption_worker                 NVARCHAR(100),          -- [TESTING] (datatype changed)
-    perm_adopter_sex                     NVARCHAR(48),
-    perm_adopter_legal_status            NVARCHAR(100),
-    perm_number_of_adopters              NVARCHAR(3)
+    perm_adoption_worker                 NVARCHAR(100)
 );
- 
- 
+
+
+WITH RankedPermanenceData AS (
+    -- CTE to rank permanence rows for each person
+    -- used to assist in dup filtering on/towards perm_table_id
+
+    SELECT
+        CASE 
+            WHEN (fa.DIM_PERSON_ID = fce.DIM_PERSON_ID)
+            THEN CONCAT(fa.FACT_ADOPTION_ID, fce.FACT_CARE_EPISODES_ID)
+            ELSE fce.FACT_CARE_EPISODES_ID 
+        END                                               AS perm_table_id,
+        fa.FACT_ADOPTION_ID                               AS adoption_table_id,
+        p.LEGACY_ID                                       AS perm_person_id,
+        fce.FACT_CLA_ID                                   AS perm_cla_id,
+        fc.START_DTTM                                     AS perm_entered_care_date,
+        fa.DECISION_DTTM                                  AS perm_adm_decision_date,              
+        fa.SIBLING_GROUP                                  AS perm_part_of_sibling_group,
+        fa.NUMBER_TOGETHER                                AS perm_siblings_placed_together,
+        fa.NUMBER_APART                                   AS perm_siblings_placed_apart,              
+        fcpl.FFA_IS_PLAN_DATE                             AS perm_ffa_cp_decision_date,
+        fa.PLACEMENT_ORDER_DTTM                           AS perm_placement_order_date,
+        fa.MATCHING_DTTM                                  AS perm_matched_date,
+        CASE 
+            WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
+            THEN fcpl.START_DTTM 
+            ELSE NULL 
+        END                                               AS perm_placed_for_adoption_date,
+        fa.ADOPTED_BY_CARER_FLAG                          AS perm_adopted_by_carer_flag,
+        fa.FOSTER_TO_ADOPT_DTTM                           AS perm_placed_ffa_cp_date,
+        CASE 
+            WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
+            THEN fce.OFSTED_URN 
+            ELSE NULL 
+        END                                               AS perm_placement_provider_urn,
+        fa.NO_LONGER_PLACED_DTTM                          AS perm_decision_reversed_date,
+        fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE             AS perm_decision_reversed_reason,
+        fce.PLACEND                                       AS perm_permanence_order_date,
+        CASE
+            WHEN fce.CARE_REASON_END_CODE IN ('E1', 'E12', 'E11') THEN 'Adoption'
+            WHEN fce.CARE_REASON_END_CODE IN ('E48', 'E44', 'E43', '45', 'E45', 'E47', 'E46') THEN 'Special Guardianship Order'
+            WHEN fce.CARE_REASON_END_CODE IN ('45', 'E41') THEN 'Child Arrangements/ Residence Order'
+            ELSE NULL
+        END                                               AS perm_permanence_order_type,
+        fa.ADOPTION_SOCIAL_WORKER_NAME                    AS perm_adoption_worker,
+        ROW_NUMBER() OVER (
+            PARTITION BY p.LEGACY_ID                     -- partition on person identifier
+            ORDER BY CAST(RIGHT(CASE 
+                                    WHEN (fa.DIM_PERSON_ID = fce.DIM_PERSON_ID)
+                                    THEN CONCAT(fa.FACT_ADOPTION_ID, fce.FACT_CARE_EPISODES_ID)
+                                    ELSE fce.FACT_CARE_EPISODES_ID 
+                                END, 5) AS INT) DESC    -- take last 5 digits, coerce to int so we can sort/order
+        )                                                 AS rn -- we only want rn==1
+    FROM Child_Social.FACT_CARE_EPISODES fce
+    LEFT JOIN Child_Social.FACT_ADOPTION AS fa ON fa.DIM_PERSON_ID = fce.DIM_PERSON_ID AND fa.START_DTTM IS NOT NULL
+    LEFT JOIN Child_Social.FACT_CLA AS fc ON fc.FACT_CLA_ID = fce.FACT_CLA_ID
+    LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl ON fcpl.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
+        AND fcpl.FACT_CLA_PLACEMENT_ID <> '-1'
+        AND (fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3', 'A4', 'A5', 'A6') OR fcpl.FFA_IS_PLAN_DATE IS NOT NULL)
+    LEFT JOIN Child_Social.DIM_PERSON p ON fce.DIM_PERSON_ID = p.DIM_PERSON_ID
+    WHERE ((fce.PLACEND IS NULL AND fa.START_DTTM IS NOT NULL)
+        OR fce.CARE_REASON_END_CODE IN ('E48', 'E1', 'E44', 'E12', 'E11', 'E43', '45', 'E41', 'E45', 'E47', 'E46'))
+        AND fce.DIM_PERSON_ID <> '-1'
+        -- AND EXISTS ( -- ssd records only
+        --     SELECT 1
+        --     FROM #ssd_person p
+        --     WHERE p.pers_person_id = fce.DIM_PERSON_ID
+        -- )
+
+)
+
 -- Insert data
 INSERT INTO #ssd_permanence (
     perm_table_id,
+    adoption_table_id,
     perm_person_id,
     perm_cla_id,
     perm_entered_care_date,
@@ -3359,130 +3641,65 @@ INSERT INTO #ssd_permanence (
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
     perm_placed_ffa_cp_date,
-    perm_placed_foster_carer_date,
+   -- perm_placed_foster_carer_date,
     perm_placement_provider_urn,
     perm_decision_reversed_date,
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker,
-    perm_adopter_sex,
-    perm_adopter_legal_status,
-    perm_number_of_adopters
+    perm_adoption_worker
 )  
+
 SELECT
-    fce.FACT_CARE_EPISODES_ID               AS perm_table_id,
-    fce.DIM_PERSON_ID                       AS perm_person_id,
-    fce.FACT_CLA_ID                         AS perm_cla_id,
-    fc.START_DTTM                           AS perm_entered_care_date,
-    CASE
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.DECISION_DTTM
-    END                                     AS perm_adm_decision_date,            --Adoption only  
-        CASE
-        WHEN fa.ADOPTED_BY_CARER_FLAG = 'Y' THEN fa.SIBLING_GROUP
-        ELSE NULL
-    END                                     AS perm_part_of_sibling_group,        --Adoption only  
-    CASE
-        WHEN fa.ADOPTED_BY_CARER_FLAG = 'Y' THEN fa.NUMBER_TOGETHER  
-        ELSE NULL
-    END                                     AS perm_siblings_placed_together,     --Adoption only  
-        CASE
-        WHEN fa.ADOPTED_BY_CARER_FLAG = 'Y' THEN fa.NUMBER_APART  
-        ELSE NULL
-    END                                     AS perm_siblings_placed_apart,        --Adoption only                    
-    CASE
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fcpl.FFA_IS_PLAN_DATE
-    END                                     AS perm_ffa_cp_decision_date,        --ffa/cp cases only
-    CASE
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.PLACEMENT_ORDER_DTTM
-    END                                     AS perm_placement_order_date,        --Adoption only          
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.MATCHING_DTTM
-    END                                     AS perm_matched_date,                --Adoption only
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fcpl.START_DTTM
-    END                                     AS perm_placed_for_adoption_date,    --Adoption only  
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.ADOPTED_BY_CARER_FLAG
-    END                                     AS perm_adopted_by_carer_flag,       --Adoption only
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.FOSTER_TO_ADOPT_DTTM
-    END                                     AS perm_placed_ffa_cp_date,          --ffa/cp cases only
-    CASE
-        WHEN fa.ADOPTED_BY_CARER_FLAG = 'Y'
-        THEN fcpl.START_DTTM
-    END                                     AS perm_placed_foster_carer_date,     --ffa/cp cases only
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fce.OFSTED_URN
-    END                                     AS perm_placement_provider_urn,      --Adoption only  
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.NO_LONGER_PLACED_DTTM
-    END                                     AS perm_decision_reversed_date,      --Adoption only                                
-        CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE
-            IN ('E1','E12','E11')
-        THEN fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE
-    END                                     AS perm_decision_reversed_reason,    --Adoption only    
-    fce.PLACEND                             AS perm_permanence_order_date,
-    CASE                                                                            
-        WHEN fce.CARE_REASON_END_CODE IN ('E1','E12','E11') THEN 'Adoption'
-        WHEN fce.CARE_REASON_END_CODE IN ('E48','E44','E43','45','E45','E47','E46') THEN 'Special Guardianship Order'
-        WHEN fce.CARE_REASON_END_CODE IN ('45','E41') THEN 'Child Arrangements/ Residence Order'
-        ELSE NULL
-    END                                     AS perm_permanence_order_type,      
- 
-    fa.ADOPTION_SOCIAL_WORKER_NAME          AS perm_adoption_worker,            -- Note that duplicate -1 seen in raw data
- 
-    fa.DIM_LOOKUP_ADOPTER_GENDER_CODE       AS perm_adopter_sex, 
-    fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE AS perm_adopter_legal_status, 
-    fa.NO_OF_ADOPTERS                       AS perm_number_of_adopters 
-
-FROM Child_Social.FACT_CARE_EPISODES fce
- 
-LEFT JOIN Child_Social.FACT_ADOPTION AS fa
-    ON fa.DIM_PERSON_ID = fce.DIM_PERSON_ID
-    AND fce.CARE_REASON_END_CODE IN ('E1','E12','E11')
-   
-LEFT JOIN Child_Social.FACT_CLA AS fc                                
-    ON fc.FACT_CLA_ID = fce.FACT_CLA_ID                                          -- towards perm_adm_decision_date
- 
-LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl            
-    ON fcpl.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
- 
-WHERE fce.PLACEND IS NOT NULL
-AND CARE_REASON_END_CODE IN ('E48','E1','E44','E12','E11','E43','45','E41','E45','E47','E46');
+    perm_table_id,
+    adoption_table_id,
+    perm_person_id,
+    perm_cla_id,
+    perm_entered_care_date,
+    perm_adm_decision_date,
+    perm_part_of_sibling_group,
+    perm_siblings_placed_together,
+    perm_siblings_placed_apart,
+    perm_ffa_cp_decision_date,
+    perm_placement_order_date,
+    perm_matched_date,
+    perm_placed_for_adoption_date,
+    perm_adopted_by_carer_flag,
+    perm_placed_ffa_cp_date,
+    perm_placement_provider_urn,
+    perm_decision_reversed_date,
+    perm_decision_reversed_reason,
+    perm_permanence_order_date,
+    perm_permanence_order_type,
+    perm_adoption_worker
+FROM RankedPermanenceData
+WHERE rn = 1;
 
 
+
+
+-- -- Create index(es)
+-- CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id ON ssd_permanence(perm_person_id);
+
+-- CREATE NONCLUSTERED INDEX idx_ssd_perm_entered_care_date ON ssd_permanence(perm_entered_care_date);
+-- CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date ON ssd_permanence(perm_adm_decision_date);
+-- CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date ON ssd_permanence(perm_permanence_order_date);
 
 
 -- -- Add constraint(s)
--- ALTER TABLE #ssd_permanence ADD CONSTRAINT FK_perm_person_id
--- FOREIGN KEY (perm_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
-
+-- ALTER TABLE ssd_permanence ADD CONSTRAINT FK_perm_person_id
+-- FOREIGN KEY (perm_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_permanence', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_permanence', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 /* 
@@ -3524,6 +3741,7 @@ SET @LastSept30th = CASE
 CREATE TABLE #ssd_professionals (
     prof_table_id                         NVARCHAR(48) PRIMARY KEY,
     prof_professional_id                  NVARCHAR(48),
+    prof_professional_name                NVARCHAR(300),
     prof_social_worker_registration_no    NVARCHAR(48),
     prof_agency_worker_flag               NCHAR(1),
     prof_professional_job_title           NVARCHAR(500),
@@ -3538,6 +3756,7 @@ CREATE TABLE #ssd_professionals (
 INSERT INTO #ssd_professionals (
     prof_table_id, 
     prof_professional_id, 
+    prof_professional_name,
     prof_social_worker_registration_no,
     prof_agency_worker_flag,
     prof_professional_job_title,
@@ -3549,8 +3768,9 @@ INSERT INTO #ssd_professionals (
 SELECT 
     dw.DIM_WORKER_ID                  AS prof_table_id,
     dw.STAFF_ID                       AS prof_professional_id,
+    CONCAT(dw.SURNAME, ' ', dw.FORENAME) AS prof_professional_name,         -- used also as Allocated Worker|Assigned Worker
     dw.WORKER_ID_CODE                 AS prof_social_worker_registration_no,
-    'N'                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
+    ''                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
     dw.JOB_TITLE                      AS prof_professional_job_title,
     ISNULL(rc.OpenCases, 0)           AS prof_professional_caseload,        -- 0 when no open cases on given date.
     dw.DEPARTMENT_NAME                AS prof_professional_department,
@@ -3583,6 +3803,11 @@ CREATE NONCLUSTERED INDEX idx_prof_professional_id ON #ssd_professionals (prof_p
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_professionals', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_professionals', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -3666,6 +3891,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_involvements', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_involvements', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -3737,6 +3967,11 @@ PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_linked_identifiers', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_linked_identifiers', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -3803,6 +4038,11 @@ VALUES
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_s251_finance', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_s251_finance', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -3875,6 +4115,11 @@ VALUES
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_voice_of_child', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_voice_of_child', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -3993,6 +4238,12 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_pre_proceedings', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_pre_proceedings', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
+
 
 
 /* End
@@ -4092,6 +4343,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_send', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_send', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -4145,6 +4401,11 @@ VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLA
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_ehcp_requests', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_ehcp_requests', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
 
@@ -4201,6 +4462,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_ehcp_assessment', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_ehcp_assessment', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -4256,6 +4522,11 @@ SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_ehcp_named_plan', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_ehcp_named_plan', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
 
 
 
@@ -4298,7 +4569,20 @@ VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01');
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_ehcp_active_plans
 -- ADD CONSTRAINT FK_ehcp_active_plans_requests
--- FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+-- FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+-- -- [TESTING]
+-- EXEC tempdb..sp_spaceused '#ssd_ehcp_active_plans', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
+-- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
+-- VALUES ('#ssd_ehcp_active_plans', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
+
+
+
 
 
 
@@ -4460,3 +4744,11 @@ SET
 FROM #ssd_person p
 LEFT JOIN InvolvementHistoryCTE ih ON p.pers_person_id = ih.DIM_PERSON_ID
 LEFT JOIN InvolvementTypeStoryCTE its ON p.pers_person_id = its.DIM_PERSON_ID;
+
+
+
+
+-- -- [TESTING]
+-- SELECT * FROM #SpaceUsedData;
+
+
