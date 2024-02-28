@@ -353,7 +353,7 @@ SELECT
 					However in Blackpool, all Contact/Referral WorkflowSteps are processed by the 'Front Door' (Request for Support Hub) with generic worker 'Referral Coordinator'
 					Therefore Current / Latest Worker may provide better information (as with Annex A Lists 6-8).  This is the approach used in Blackpool*/
 	ce.cine_referral_team						AS AllocatedTeam,
-    pro.prof_professional_name					AS AllocatedWorker
+    ce.cine_referral_worker_name				AS AllocatedWorker
 
 INTO #AA_3_referrals
 
@@ -379,8 +379,8 @@ LEFT JOIN
             cine_person_id
     ) AS sub ON ce.cine_person_id = sub.cine_person_id
 
-LEFT JOIN
-    #ssd_professionals pro ON ce.cine_referral_worker_id = pro.prof_professional_id
+-- LEFT JOIN -- Removed as can access worker name on cin_episodes object
+--     #ssd_professionals pro ON ce.cine_referral_worker_id = pro.prof_professional_id
 
 WHERE
     ce.cine_referral_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
@@ -480,7 +480,7 @@ SELECT
 
     -- Step type (SEE ALSO CONTACTS)
     a.cina_assessment_team								AS AllocatedTeam,
-    pro.prof_professional_name							AS AllocatedWorker
+    a.cina_assessment_worker_name						AS AllocatedWorker
 
 INTO #AA_4_assessments
 
@@ -501,8 +501,8 @@ LEFT JOIN   -- ensure we get all records even if there's no matching disability
 			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 	) AS d ON p.pers_person_id = d.disa_person_id
 
-LEFT JOIN
-    #ssd_professionals pro ON a.cina_assessment_worker_id = pro.prof_professional_id
+-- LEFT JOIN -- Removed as worker name available on ssd_cin_assessments
+--     #ssd_professionals pro ON a.cina_assessment_worker_id = pro.prof_professional_id
 
 WHERE
     --a.cina_assessment_start_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());	/*Original criteria - Assessments starting in last 6 months*/
@@ -614,17 +614,15 @@ SELECT
     agg.CountS47s12m								AS NumberS47s12m,		-- Sum of Number of Section 47 Enquiries in the last 12 months (NOT INCL. CURRENT)
     agg_icpc.CountICPCs12m							AS NumberICPCs12m,		-- Sum of Number of ICPCs in the last 12 months  (NOT INCL. CURRENT)
 	
-    -- [TESTING]
-    -- check/update icpc table extract, 
-    -- if have icpc then take that data, else s47 dets.
+   -- [TESTING]
+    -- taking from s47 object in case the child has a Section 47 enquiry that <doesn't> lead to an ICPC
     s47e.s47e_s47_completed_by_team					AS AllocatedTeam,
     s47e.s47e_s47_completed_by_worker				AS AllocatedWorker
-    
-    -- -- or is it... 
-    -- -- [TESTING]
-    -- icpc.icpc_icpc_team							AS ALLOCATED_TEAM,        
-    -- icpc.icpc_icpc_worker_id						AS ALLOCATED_WORKER
+    -- -- the alternative exists as 
+    -- icpc.icpc_icpc_team_name						AS AllocatedTeam,        
+    -- icpc.icpc_icpc_worker_name					AS AllocatedWorker
  
+
 INTO #AA_5_s47_enquiries 
 
 FROM
@@ -1960,112 +1958,101 @@ Dependencies:
 - ssd_family
 =============================================================================
 */
+
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..#AA_10_adoption') IS NOT NULL DROP TABLE #AA_10_adoption;
-
-
--- -- AA headers guidance notes:
--- Child Unique ID
--- Family identifier
--- Gender
--- Ethnicity
--- Date of Birth
--- Age of Child (Years)
--- Does the Child have a Disability
--- Date the Child Entered Care
--- Date of Decision that Child Should be Placed for Adoption
--- Date of Placement Order
--- Date of Matching Child and Prospective Adopters
--- Date Placed for Adoption
--- Date of Adoption Order 
--- Date of Decision that Child Should No Longer be Placed for Adoption
--- Reason Why Child No Longer Placed for Adoption
--- Date the child was placed for fostering in FostingForAdoption or concurrent planning placement
-
+IF OBJECT_ID('tempdb..#AA_10_adoption', 'U') IS NOT NULL DROP TABLE #AA_10_adoption;
 
 SELECT
     /* Common AA fields */
-
-    p.pers_legacy_id                            AS ChildUniqueID,	    -- temp solution [TESTING] This liquid logic specific
-    p.pers_person_id						    AS ChildUniqueID2,	    -- temp solution [TESTING] This for compatiblility in non-ll systems
+ 
+    p.pers_legacy_id                            AS ChildUniqueID,       -- temp solution [TESTING] This liquid logic specific
+    p.pers_person_id                            AS ChildUniqueID2,      -- temp solution [TESTING] This for compatiblility in non-ll systems
     fam.fami_family_id                          AS FamilyIdentifier,    -- Family identifier        
     CASE
-		WHEN p.pers_sex = 'M' THEN 'a) Male'
-		WHEN p.pers_sex = 'F' THEN 'b) Female'
-		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-		WHEN p.pers_sex = 'I' THEN 'd) Neither'
-	END											AS Gender,
+        WHEN p.pers_sex = 'M' THEN 'a) Male'
+        WHEN p.pers_sex = 'F' THEN 'b) Female'
+        WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+        WHEN p.pers_sex = 'I' THEN 'd) Neither'
+    END                                         AS Gender,
     CASE
-		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
-	END											AS Ethnicity,
+        WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+        WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+        WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+        WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+        WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+        WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+        WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+        WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+        WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+        WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+        WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+        WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+        WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+        WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+        WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+        WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+        WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+        WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+        WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+        WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+        ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+    END                                         AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth, --  note: returns string representation of the date
-    CASE 
+    CASE
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
-                                            
+                                           
         ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
-        -- if a dob is available and not in the future 
-            CASE 
+        -- if a dob is available and not in the future
+            CASE
                 WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
                 -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
                 THEN 1
                 ELSE 0
             END
-    END                                         AS Age
-
+    END                                         AS Age,
+ 
     /* List additional AA fields */
-
-    d.disa_disability_code                      AS Disability 
-
+ 
+    d.disa_disability_code                    AS Disability,
+ 
     perm.perm_entered_care_date              AS EnteredCareDate,        -- Date the Child Entered Care
-    perm.perm_ffa_cp_decision_date           AS FfaDecisionDate,        -- Date the child was placed for fostering in FostingForAdoption or concurrent planning placement 
-    perm.perm_placement_order_date           AS PlacementDecisionDate,  -- Date of Decision that Child Should be Placed for Adoption
-    perm.perm_placed_for_adoption_date       AS PlacedForAdoptionDate,  -- Date Placed for Adoption
+    perm.perm_adm_decision_date              AS PlacementDecisionDate,  -- Date of Decision that Child Should be Placed for Adoption
+    perm.perm_ffa_cp_decision_date           AS FfaDecisionDate,        -- Date of Decision that child should be placed in Fosting for Adoption/ Concurrent Planning placement
+    perm.perm_placed_ffa_cp_date             AS FfaCpPlaceDate,         -- Date the child was placed for fostering in FostingForAdoption or concurrent planning placement
     perm.perm_matched_date                   AS MatchedForAdoptionDate, -- Date of Matching Child and Prospective Adopters
+    perm.perm_placement_order_date           AS PlacementOrderDate,     -- Date that the Placement Order was granted
+    perm.perm_placed_for_adoption_date       AS PlacedForAdoptionDate,  -- Date Placed for Adoption
+    --perm.perm_placed_foster_carer_date       AS PlacedWithFosterCarer,  -- Date originally placed with Foster Carer/s (if adopted by former foster carer/s)  
     perm.perm_decision_reversed_date         AS DecisionReversedDate,   -- Date of Decision that Child Should No Longer be Placed for Adoption
-    perm.perm_placed_foster_carer_date       AS PlacedWithFosterCarer,  -- Date of Adoption Order ?  
     perm.perm_decision_reversed_reason       AS DecisionReversedReason, -- Reason Why Child No Longer Placed for Adoption
-    perm.perm_permanence_order_date          AS PlacementOrderDate      -- Date of Placement Order?
-
-
+    perm.perm_permanence_order_date          AS AdoptionOrderDate       -- Date of Adoption Order?
+ 
+ 
 INTO #AA_10_adoption
-
+ 
 FROM
     #ssd_permanence perm
-
+ 
 LEFT JOIN   -- person table for core dets
     #ssd_person p ON perm.perm_person_id = p.pers_person_id
-
+ 
 LEFT JOIN   -- disability table
     #ssd_disability d ON perm.perm_person_id = d.disa_person_id
-
+ 
 LEFT JOIN   -- family table
     #ssd_family fam ON perm.perm_person_id = fam.fami_person_id
-
+ 
 WHERE
-    -- Filter on last 12 months
-    perm.perm_placement_order_date          >= DATEADD(MONTH, -12, GETDATE())
-    OR perm.perm_placed_for_adoption_date   >= DATEADD(MONTH, -12, GETDATE())
-    OR perm.perm_decision_reversed_date     >= DATEADD(MONTH, -12, GETDATE());
+    -- Filter for cases where
+   
+    perm_permanence_order_date              >= DATEADD(MONTH, -12, GETDATE())   -- Child Adopted in last 12 Months
+    OR
+    (perm.perm_adm_decision_date IS NOT NULL                                    -- there is an ADM Decision but
+        AND perm_permanence_order_date IS NULL
+            AND perm.perm_decision_reversed_date IS NULL)                                 -- the Child has not yet been Adopted    
+ 
+    OR perm.perm_decision_reversed_date     >= DATEADD(MONTH, -12, GETDATE());   -- Adoption Decision reversed during last 12 months 
+	
 
 
     -- not required in return? Other available fields for ref:
