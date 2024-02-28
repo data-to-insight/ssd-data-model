@@ -1964,16 +1964,15 @@ IF OBJECT_ID('tempdb..#AA_10_adoption', 'U') IS NOT NULL DROP TABLE #AA_10_adopt
 
 SELECT
     /* Common AA fields */
- 
-    p.pers_legacy_id                            AS ChildUniqueID,       -- temp solution [TESTING] This liquid logic specific
-    p.pers_person_id                            AS ChildUniqueID2,      -- temp solution [TESTING] This for compatiblility in non-ll systems
-    fam.fami_family_id                          AS FamilyIdentifier,    -- Family identifier        
+    p.pers_legacy_id                        AS ChildUniqueID,       -- temp solution [TESTING] This liquid logic specific
+    p.pers_person_id                        AS ChildUniqueID2,      -- temp solution [TESTING] This for compatiblility in non-ll systems
+    fam.fami_family_id                      AS FamilyIdentifier,    -- Family identifier        
     CASE
         WHEN p.pers_sex = 'M' THEN 'a) Male'
         WHEN p.pers_sex = 'F' THEN 'b) Female'
         WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
         WHEN p.pers_sex = 'I' THEN 'd) Neither'
-    END                                         AS Gender,
+    END                                    	AS Gender,
     CASE
         WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
         WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
@@ -1996,8 +1995,8 @@ SELECT
         WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
         WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
         ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
-    END                                         AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth, --  note: returns string representation of the date
+    END                                      AS Ethnicity,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')         AS DateOfBirth, --  note: returns string representation of the date
     CASE
         WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
                                            
@@ -2009,11 +2008,11 @@ SELECT
                 THEN 1
                 ELSE 0
             END
-    END                                         AS Age,
+    END                                      AS Age,
  
     /* List additional AA fields */
  
-    d.disa_disability_code                    AS Disability,
+    d.disa_disability_code                   AS Disability,
  
     perm.perm_entered_care_date              AS EnteredCareDate,        -- Date the Child Entered Care
     perm.perm_adm_decision_date              AS PlacementDecisionDate,  -- Date of Decision that Child Should be Placed for Adoption
