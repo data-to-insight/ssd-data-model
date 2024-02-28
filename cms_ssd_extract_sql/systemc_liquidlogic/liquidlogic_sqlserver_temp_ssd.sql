@@ -622,6 +622,8 @@ WHERE
     p.GENDER_MAIN_CODE <> 'M'
     AND
     fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI' -- only interested in parent/child relations
+    AND
+    fpr.END_DTTM IS NULL
  
 AND EXISTS
     ( -- only ssd relevant records
@@ -644,7 +646,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON #ssd_mother(moth_childs_d
 -- FOREIGN KEY (moth_childs_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- -- [TESTING]
--- ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure data not contains person from being their own mother
+-- ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure person cannot be their own mother
 -- CHECK (moth_person_id <> moth_childs_person_id);
 
 
@@ -3673,7 +3675,13 @@ SELECT
     perm_permanence_order_type,
     perm_adoption_worker
 FROM RankedPermanenceData
-WHERE rn = 1;
+WHERE rn = 1
+AND EXISTS
+    ( -- only need address data for ssd relevant records
+    SELECT 1
+    FROM #ssd_person p
+    WHERE p.pers_person_id = perm_person_id
+    );
 
 
 

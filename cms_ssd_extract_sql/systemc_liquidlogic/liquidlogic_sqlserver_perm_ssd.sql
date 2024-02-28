@@ -549,9 +549,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_mother
 Description: 
 Author: D2I
-Last Modified Date: 14/12/23
+Last Modified Date: 28/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.3
+            1.2 JH updated to exclude relationships with an end date 28/02/24
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
 Dependencies: 
@@ -598,9 +599,11 @@ WHERE
     p.GENDER_MAIN_CODE <> 'M'
     AND
     fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI' -- only interested in parent/child relations
+    AND
+    fpr.END_DTTM IS NULL
  
 AND EXISTS
-    (   -- only ssd relevant records
+    ( -- only ssd relevant records
     SELECT 1
     FROM ssd_person p
     WHERE p.pers_person_id = fpr.DIM_PERSON_ID
@@ -620,7 +623,7 @@ ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person
 FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- [TESTING]
-ALTER TABLE ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure data not contains person from being their own mother
+ALTER TABLE ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure person cannot be their own mother
 CHECK (moth_person_id <> moth_childs_person_id);
 
 
@@ -3668,8 +3671,13 @@ SELECT
     perm_permanence_order_type,
     perm_adoption_worker
 FROM RankedPermanenceData
-WHERE rn = 1;
-
+WHERE rn = 1
+AND EXISTS
+    ( -- only need address data for ssd relevant records
+    SELECT 1
+    FROM ssd_person p
+    WHERE p.pers_person_id = perm_person_id
+    );
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id ON ssd_permanence(perm_person_id);
