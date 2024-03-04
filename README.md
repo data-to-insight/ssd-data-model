@@ -5,35 +5,42 @@ Current phase : [deployment](#current-phase).
 
 ## Initial core of the SSD
 
-The dataset in-part aims to standardise existing local variation in how collected data is stored, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journeys. A six-year historical data scope is proposed across the range of safeguarding activities performed by councils. Project oversight and governance is via the SSD Steering Group, DfE and volunteer LA's as part of an initial pilot group. 
+The dataset in-part aims to standardise existing local variation in how collected data is stored, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journeys. A six-year historical data scope is proposed across the range of safeguarding activities performed by councils. Project oversight and governance via a dedicated steering group, DfE project team and volunteer LA's as part of an initial pilot and extended development group. 
 
 
-## Running the SSD for/within your LA (V.brief getting started summary)
+## Running the SSD for/within your LA (Summarised getting started introduction)
 Any representative from your LA is welcome to get in touch directly with questions or requests for support to get started with, or run the SSD (see following subscribe/contact/volunteer details). Obviously we welcome questions/input regardless of your involvement decision etc!  
-The SSD is essentially a single SQL script, that creates labelled persistent tables in your database. There is no data sharing, and no changes to your existing systems required. It does require that tables and indexes for the SSD be created, and therefore in some/most cases will need either IT team support and/or agreement to create these additional tables. The script is always non-destructive, i.e. it does nothing to your existing data/tables/anything - the SSD is simply a series of SELECT statements, pulling copied data into a new standardised field and table structure on your own system for access by only you/your LA.  
-### Example Geting started workflow: 
+The SSD is essentially a single SQL script, that creates labelled persistent tables in your database. There is no data sharing, and no changes to your existing systems required. It does require that tables and indexes for the SSD be created, and therefore in some/most cases will need either your IT team support and/or agreement. The SQL script is always non-destructive, i.e. it does nothing to your existing data/tables/anything - the SSD is simply a series of SELECT statements, pulling copied data into a new standardised field and table structure on your own system for access by only you/your LA.  
+### Getting started workflow: 
+The development and deployment of the SSD is functional only within, and as a result of direct involvement with Local Authorities. So we're not expectant of a one-size-fits-all approach, and will work with your team(s) to ensure confidence in, and successfull implementation of the SSD for your LA.  
 - Contact us with your interest --> Conversations to assist running(within LA) & any basic set up needed --> Access given to the SSD script by email or via Github --> LA runs SSD --> Support available if needed --> shared access given to any available further tools e.g. stat-returns scripts etc. --> Feedback and improvements change requests as needed.
 
-[Subscribe](https://forms.office.com/e/UysrcGApJ1) or [volunteer for pilot involvement](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset-Subscribe). - Please be aware that in order to make this information page available outside the (currently private) code repositiory, this page has been generated from the (currently private) README.md page and as a result some inconsistent/unstructured text formating might be evident. 
+[Subscribe](https://forms.office.com/e/UysrcGApJ1) or [volunteer for pilot involvement](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset-Subscribe). - Please be aware that in order to make this information page available outside the (currently private)code repositiory, this page has been re-generated from the (currently private)README.md page and as a result some inconsistent/unstructured text formating might be evident. Links to folders within the (currently)private respository will of course also not work until your LA is granted access.
 
+## Specification components
 
-#### Iterative revisions based on developments in other (project)areas
-- Pre-Proceedings (1b(ii))
-- Section 251 Finance (1b(iii))
-- Voice of Child & Family (1b(iv))
-- Social worker CMS input data (2a)
-- CSC National Framework
+### Specification
+
+The SSD specification has been developed through extensive sector research, consideration of existing DfE returns, concurrent DfE projects, 130hrs+ of direct user research with Local Authorities and stakeholders. Project specification development has been made transparent at the monthly DfE Show & Tells (as part of the DDSF S&T's March'23-Feb'24) concurrent with the aforementioned oversight and governance. 
+
+The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
+The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide further 'human readable' reporting methods beyond the aforementioned [data object conceptual model](https://data-to-insight.github.io/ssd-data-model/). We are aiming to publish our full data-landscape overview that resulted in the specification. 
+
+#### SSD in conjuction with (project|sector)developments
+- CSC National Framework  
 - SEN2
 - ADCS Safeguarding
 - School Census
 - EH Benchmarking
-- Kinship Care (1b(i))
 - EET Activity
 - Linking data items to strategic goals
 - Additional ongoing user research input
+- Kinship Care (DDSF 1b(i))
+- Pre-Proceedings (DDSF 1b(ii))
+- Section 251 Finance (DDSF 1b(iii))
+- Voice of Child & Family (DDSF 1b(iv))
+- Social worker CMS input data (DDSF 2a)
 
-
-## Specification components
 
 ### Data objects Conceptual Model
 
@@ -43,12 +50,8 @@ Defining the scope of objects/data points capturing LA Childrens Services data d
 - [data object/item-guidance model](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/guidance.html)
 - [existing data returns map](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/existingreturnsmap.html)
 
-The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
 
 
-### Specification
-
-The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide further 'human readable' reporting methods beyond the aforementioned [data object conceptual model](https://data-to-insight.github.io/ssd-data-model/). We are aiming to publish our full data-landscape overview that resulted in the specification. 
 
 ### Change log
 
