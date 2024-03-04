@@ -3618,9 +3618,11 @@ WITH RankedPermanenceData AS (
     WHERE ((fce.PLACEND IS NULL AND fa.START_DTTM IS NOT NULL)
         OR fce.CARE_REASON_END_CODE IN ('E48', 'E1', 'E44', 'E12', 'E11', 'E43', '45', 'E41', 'E45', 'E47', 'E46'))
         AND fce.DIM_PERSON_ID <> '-1'
+        
+        -- -- Exclusion block commented for further [TESTING] 
         -- AND EXISTS ( -- ssd records only
         --     SELECT 1
-        --     FROM #ssd_person p
+        --     FROM ssd_person p
         --     WHERE p.pers_person_id = fce.DIM_PERSON_ID
         -- )
 

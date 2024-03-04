@@ -1,31 +1,33 @@
 # Children's Services Standard Safeguarding Dataset (SSD)
 
 This is the (in progress)source repository for the Standard CSC Dataset for LAs and associated toolset (Project 1a SSDF). A broader, more granular, standardised dataset for Children's Social Care (CSC) in safeguarding authorities. Enabling increased scope for bespoke local analysis, using sector-driven national level data, that extends the existing DfE returns _(Ref: Project Stage 1)_ combined with a suite of methods/tools that all local authorities can adopt at near-zero running cost to independently produce the standardised dataset _(Ref: Project Stage 2)_. Current variation in local data caputure and storage limits data collaboration between LAs to standard ‘core’ datasets – most notably the Children in Need (CIN) Census and SSDA903, for children in need and looked after children respectively – and Ofsted’s “Annex A” specification of child-level data. These datasets often lack the depth and granularity that some individual LAs incorporate in bespoke local analysis, including to understand quality of practice and improved outcomes for vunerable children. 
-Current phase : [prototype](#current-phase). 
+Current phase : [deployment](#current-phase). 
 
 ## Initial core of the SSD
 
 The dataset in-part aims to standardise existing local variation in how collected data is stored, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journeys. A six-year historical data scope is proposed across the range of safeguarding activities performed by councils. Project oversight and governance is via the SSD Steering Group, DfE and volunteer LA's as part of an initial pilot group. 
 
-[Subscribe](https://forms.office.com/e/UysrcGApJ1) or [volunteer for pilot involvement](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset-Subscribe). - Please be aware that in order to make it available to GitPages/Public, if being viewed outside of the Git Repo, this page has been generated from the repo README.md page and some inconsistent formating might be evident as a result. 
 
-#### Current statutory returns
-- SSDA903
-- Annex A
-- CIN Census
-- Regional Improvement and Innovation Alliance (RIIA)
+## Running the SSD for/within your LA (V.brief getting started summary)
+Any representative from your LA is welcome to get in touch directly with questions or requests for support to get started with, or run the SSD (see following subscribe/contact/volunteer details). Obviously we welcome questions/input regardless of your involvement decision etc!  
+The SSD is essentially a single SQL script, that creates labelled persistent tables in your database. There is no data sharing, and no changes to your existing systems required. It does require that tables and indexes for the SSD be created, and therefore in some/most cases will need either IT team support and/or agreement to create these additional tables. The script is always non-destructive, i.e. it does nothing to your existing data/tables/anything - the SSD is simply a series of SELECT statements, pulling copied data into a new standardised field and table structure on your own system for access by only you/your LA.  
+### Example Geting started workflow: 
+- Contact us with your interest --> Conversations to assist running(within LA) & any basic set up needed --> Access given to the SSD script by email or via Github --> LA runs SSD --> Support available if needed --> shared access given to any available further tools e.g. stat-returns scripts etc. --> Feedback and improvements change requests as needed.
+
+[Subscribe](https://forms.office.com/e/UysrcGApJ1) or [volunteer for pilot involvement](mailto:datatoinsight.enquiries@gmail.com?subject=[GitHub]%Standard%Safeguarding%Dataset-Subscribe). - Please be aware that in order to make this information page available outside the (currently private) code repositiory, this page has been generated from the (currently private) README.md page and as a result some inconsistent/unstructured text formating might be evident. 
+
 
 #### Iterative revisions based on developments in other (project)areas
-- SEN2
-- ADCS Safeguarding
-- School Census
-- EH Benchmarking
-- Kinship Care (1b(i))
 - Pre-Proceedings (1b(ii))
 - Section 251 Finance (1b(iii))
 - Voice of Child & Family (1b(iv))
 - Social worker CMS input data (2a)
 - CSC National Framework
+- SEN2
+- ADCS Safeguarding
+- School Census
+- EH Benchmarking
+- Kinship Care (1b(i))
 - EET Activity
 - Linking data items to strategic goals
 - Additional ongoing user research input
@@ -42,6 +44,7 @@ Defining the scope of objects/data points capturing LA Childrens Services data d
 - [existing data returns map](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/existingreturnsmap.html)
 
 The project will use [GIT][git] to track and approve proposed changes to the safeguarding data standard.
+
 
 ### Specification
 
@@ -141,8 +144,8 @@ The project is following a transparent and iterative development cycle, within t
 | Stage | Phase | Description |
 | --- | --- | --- |
 | 1 | User research | Approach outline and user research with LA's to look at how data works in relevant services, consider data gaps, challenges, and opportunities. |
-| 1 | **Prototype [Current Phase]** | Detailed survey of current data item usage, link data items to strategic goals, prototype specification(peer feedback), initial workflow toolset |
-| 2 | Deploy (pilot) | Deploy with support to pilot councils by developing reproducible implementations. |
+| 1 | Prototype | Detailed survey of current data item usage, link data items to strategic goals, prototype specification(peer feedback), initial workflow toolset |
+| 2 | **Deploy(pilot) [Current Phase]** | Deploy with support to pilot councils by developing reproducible implementations. |
 | 2 | Feedback | Product delivered to the DfE and offer supported adoption for LA's and iterative further development. |
 | 2 | Continuous Deployment | Maintenance roadmap and framework agreement towards iterative improvement-driven approach. |
 
