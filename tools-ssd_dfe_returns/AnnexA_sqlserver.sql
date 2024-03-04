@@ -616,8 +616,8 @@ SELECT
 	
    -- [TESTING]
     -- taking from s47 object in case the child has a Section 47 enquiry that <doesn't> lead to an ICPC
-    s47e.s47e_s47_completed_by_team					AS AllocatedTeam,
-    s47e.s47e_s47_completed_by_worker				AS AllocatedWorker
+    s47e.s47e_s47_completed_by_team_name			AS AllocatedTeam,
+    s47e.s47e_s47_completed_by_worker_name			AS AllocatedWorker
     -- -- the alternative exists as 
     -- icpc.icpc_icpc_team_name						AS AllocatedTeam,        
     -- icpc.icpc_icpc_worker_name					AS AllocatedWorker
@@ -1271,6 +1271,7 @@ FROM
 				DENSE_RANK() OVER(PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id ORDER BY vis.cppv_cp_visit_date DESC, vis.cppv_cp_visit_seen_alone DESC, vis.cppv_cp_visit_id) Rnk
 			FROM
 				#ssd_cp_plans cp
+
 			INNER JOIN
 				#ssd_cp_visits vis ON cp.cppl_person_id = vis.PersonID
 				AND cp.cppl_cp_plan_id = vis.cppv_cp_plan_id
@@ -1290,6 +1291,7 @@ FROM
 				MAX(rev.cppr_cp_review_date) ReviewDate
 			FROM
 				#ssd_cp_plans cp
+
 			INNER JOIN
 				#ssd_cp_reviews rev ON cp.cppl_person_id = rev.PersonID
 				AND cp.cppl_cp_plan_id = rev.cppr_cp_plan_id
@@ -1927,7 +1929,7 @@ LEFT JOIN   -- join but with subquery as need most recent immigration status
             -- partitioning by immi_person_id (group by each person) 
             ROW_NUMBER() OVER (PARTITION BY immi_person_id -- assign unique row num (most recent rn ===1)
             -- get latest status based on end date, (using start date as a secondary order in case of ties or NULL end dates)
-            ORDER BY immi_immigration_status_end DESC, immi_immigration_status_start DESC) AS rn
+            ORDER BY immi_immigration_status_end_date DESC, immi_immigration_status_start_date DESC) AS rn
         FROM 
             ssd_immigration_status
     ) latest_status ON clea.clea_person_id = latest_status.immi_person_id AND latest_status.rn = 1;
@@ -2100,7 +2102,7 @@ IF OBJECT_ID('tempdb..#AA_11_adopters') IS NOT NULL DROP TABLE #AA_11_adopters;
 
 SELECT
     /* Common AA fields */
-    'PLACEHOLDER_DATA'                          AS AdopterIdentifier,          -- Individual adopter identifier (Unavailable in SSD V1)
+    'PLACEHOLDER_DATA'                          AS AdopterIdentifier,   -- Individual adopter identifier (Unavailable in SSD V1)
     fam.fami_family_id                          AS FamilyIdentifier,    -- Family identifier        
     CASE
 		WHEN p.pers_sex = 'M' THEN 'a) Male'
@@ -2182,3 +2184,4 @@ LEFT JOIN   -- family table
 
 WHERE
     c.cont_contact_start >= DATEADD(MONTH, -12, GETDATE()) -- Filter on last 12 months
+	-- SHOULD THIS BE cont_contact_date??
