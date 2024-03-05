@@ -1271,6 +1271,7 @@ FROM
 				DENSE_RANK() OVER(PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id ORDER BY vis.cppv_cp_visit_date DESC, vis.cppv_cp_visit_seen_alone DESC, vis.cppv_cp_visit_id) Rnk
 			FROM
 				#ssd_cp_plans cp
+
 			INNER JOIN
 				#ssd_cp_visits vis ON cp.cppl_person_id = vis.PersonID
 				AND cp.cppl_cp_plan_id = vis.cppv_cp_plan_id
@@ -1290,6 +1291,7 @@ FROM
 				MAX(rev.cppr_cp_review_date) ReviewDate
 			FROM
 				#ssd_cp_plans cp
+
 			INNER JOIN
 				#ssd_cp_reviews rev ON cp.cppl_person_id = rev.PersonID
 				AND cp.cppl_cp_plan_id = rev.cppr_cp_plan_id
@@ -1528,26 +1530,15 @@ SELECT
 	END															AS HasDisability,
 	FORMAT(clapl.LACStart, 'dd/MM/yyyy')						AS LoookedAfterStartDate,
 	claepi.CategoryOfNeed										AS ChildCategoryOfNeed,
-	CASE
-		WHEN subs.clae_person_id is not null THEN 'a) Yes'
-		ELSE 'b) No'
-	END															AS SubsequentLACEpisodeLast12Months,
+	NULL														AS SubsequentLACEpisodeLast12Months,
 	FORMAT(clals.LSStartDate, 'dd/MM/yyyy')						AS MostRecentLegalStatusStart,
 	clals.LSCode												AS LegalStatus,
-	rev.ReviewDate												AS LatestStatutoryReviewDate,
-	vis.VisitDate												AS LastSocialWorkVisitDate,
-	CASE
-		WHEN perm.lacp_cla_care_plan = 'Return to family' THEN 'a) Return to family'
-		WHEN perm.lacp_cla_care_plan = 'Adoption' THEN 'b) Adoption'
-		WHEN perm.lacp_cla_care_plan = 'SGO/CAO' THEN 'c) SGO/CAO'
-		WHEN perm.lacp_cla_care_plan = 'Supported living in the community' THEN 'd) Supported living in the community'
-		WHEN perm.lacp_cla_care_plan = 'Long-term residential placement' THEN 'e) Long-term residential placement'
-		WHEN perm.lacp_cla_care_plan = 'Long-term fostering' THEN 'f) Long-term fostering'
-		WHEN perm.lacp_cla_care_plan = 'other' THEN 'g) other'
-	END															AS PermanencePlan,
+	NULL														AS LatestStatutoryReviewDate,
+	NULL														AS LastSocialWorkVisitDate,
+	NULL														AS PermanencePlan,
 	FORMAT(claepi.LatestIROVisit, 'dd/MM/yyyy')					AS LastIROVisitDate,
-	ha.HealthAssessmentDate										AS LastHealthAssessmentDate,
-	dc.DentalCheckDate											AS LastDentalCheckDate,
+	NULL														AS LastHealthAssessmentDate,
+	NULL														AS LastDentalCheckDate,
 	COALESCE(agglacp.CountCLAPlacements,1)						AS PlacementsLast12Months,		/*PW - COALESCE because if latest episode is change of Legal Status or change of placement with same carer, and this is the only episode in last 12 months, would otherwise return NULL*/
 	FORMAT(claepi.DateEpisodeCeased, 'dd/MM/yyyy')				AS CeasedLookedAfterDate,
 	claepi.ReasonEpisodeCeased									AS ReasonCeasedLookedAfter,
@@ -1561,20 +1552,10 @@ SELECT
 		ELSE 'b) Out'
 	END															AS PlacementLocation, /*PW - check v Annex A regarding Blank Placement LA*/
 	clapl.clap_cla_placement_la									AS PlacementLA,
-	COALESCE(mis.MissingEpi,0)									AS EpisodesChildMissingFromPlacement,
-	COALESCE(ab.AbsenceEpi,0)									AS EpisodesChildAbsentFromPlacement,	/*PW - COALESCE so 0 is reported if no Absent Episodes*/
-	CASE
-		WHEN rhi.PersonID is null then NULL
-		WHEN rhi.miss_missing_rhi_offered in ('Y','Yes') THEN 'a) Yes'
-		WHEN rhi.miss_missing_rhi_offered in ('N','No') THEN 'b) No'
-		ELSE 'c) Unknown'
-	END															AS ChildOfferedReturnInterviewAfterLastMFH,
-	CASE
-		WHEN rhi.PersonID is null then NULL
-		WHEN rhi.miss_missing_rhi_accepted in ('Y','Yes') THEN 'a) Yes'
-		WHEN rhi.miss_missing_rhi_accepted in ('N','No') THEN 'b) No'
-		ELSE 'c) Unknown'
-	END															AS ChildAcceptedReturnInterviewAfterLastMFH,
+	NULL														AS EpisodesChildMissingFromPlacement,
+	NULL														AS EpisodesChildAbsentFromPlacement,
+	NULL														AS ChildOfferedReturnInterviewAfterLastMFH,
+	NULL														AS ChildAcceptedReturnInterviewAfterLastMFH,
 	inv.Team													AS AllocatedTeam,
 	inv.WorkerName												AS AllocatedWorker
 
@@ -1724,7 +1705,7 @@ LEFT JOIN
 			--AND COALESCE(uasc.immi_immigration_status_end_date,'99991231') >= DATEADD(MONTH, -12 , GETDATE())	/*PW - Row commented out as giving error 'Arithmetic overflow error converting expression to data type datetime' (possibly because no records have end date)*/
 	) AS uasc ON p.pers_person_id = uasc.immi_person_id
 
-/*PW - Added to get CIN Category of Need, Reason Ceased Looked After and Latest IRO Visit Date*/
+/*PW - Added to get CIN Category of Need and Reason Ceased Looked After*/
 LEFT JOIN
 	(
 		SELECT
@@ -1745,31 +1726,11 @@ LEFT JOIN
 	) AS claepi on clapl.PersonID = claepi.PersonID
 		AND claepi.Rnk = 1
 
-/*PW - Added to get whether 2nd or subsequent period of LAC in previous 12 months.*/
-LEFT JOIN
-	(
-		SELECT
-			clae.clae_person_id,
-			MIN(clae.clae_cla_episode_start) FirstLACStartDate
-		FROM
-			#ssd_cla_episodes clae
-		LEFT JOIN
-			#ssd_legal_status leg on clae.clae_person_id = leg.lega_person_id
-			AND clae.clae_cla_episode_start = leg.lega_legal_status_start_date
-		WHERE
-			clae.clae_cla_episode_start_reason = 'S'
-			AND COALESCE(leg.lega_legal_status,'zzz') not in ('V1','V3','V4')	/*Exclude Short Breaks*/
-			AND clae.clae_cla_episode_start >= DATEADD(MONTH, -12, GETDATE())
-		GROUP BY
-			clae.clae_person_id
-	) AS subs ON clapl.PersonID = subs.clae_person_id
-		AND subs.FirstLACStartDate < clapl.LACStart
-
 /*PW - Added to get Latest Legal Status and Latest Legal Status Start Date*/
 LEFT JOIN
 	(
 		SELECT
-			clap.PersonID PersonID,	
+			clap.PersonID PersonID,
 			clals.lega_legal_status LSCode,
 			CAST(clals.lega_legal_status_start_date as date) LSStartDate,
 			DENSE_RANK() OVER(PARTITION BY clap.PersonID ORDER BY clap.clap_cla_placement_start_date DESC, clals.lega_legal_status_start_date DESC) Rnk
@@ -1783,94 +1744,6 @@ LEFT JOIN
 	) AS clals on clapl.PersonID = clals.PersonID
 		AND clals.Rnk = 1
 
-/*PW - Added to get latest Review*/
-LEFT JOIN
-	(	
-		SELECT
-			lacp.PersonID PersonID,
-			MAX(rev.clar_cla_review_date) ReviewDate
-		FROM
-			#ssd_cla_placement lacp
-		INNER JOIN
-			#ssd_cla_reviews rev ON lacp.PersonID = rev.clar_cla_person_id
-		WHERE
-			COALESCE(lacp.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-			AND rev.clar_cla_review_date between lacp.LACStart and COALESCE(lacp.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
-			AND rev.clar_cla_review_cancelled not in ('Y','Yes')	/*Exclude Cancelled Reviews - note if clar_cla_review_cancelled field isn't populated in #ssd_cla_placement, this line will need to be commented out*/
-		GROUP BY
-			lacp.PersonID
-	) AS rev on clapl.PersonID = rev.PersonID
-
-/*PW - Added to get latest Visit*/
-LEFT JOIN
-	(
-		SELECT
-			lacp.PersonID PersonID,
-			MAX(vis.clav_cla_visit_date) VisitDate
-		FROM
-			#ssd_cla_placement lacp
-		INNER JOIN
-			#ssd_cla_visits vis ON lacp.PersonID = vis.clav_person_id
-			AND vis.clav_cla_visit_date between lacp.LACStart and COALESCE(lacp.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
-		WHERE
-			COALESCE(lacp.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-		GROUP BY
-			lacp.PersonID
-	) AS vis on clapl.PersonID = vis.PersonID
-
-/*PW - Added to get latest Permanence Plan*/
-LEFT JOIN
-	(
-		SELECT
-			lacp.PersonID PersonID,
-			cp.lacp_cla_care_plan,
-			DENSE_RANK() OVER(PARTITION BY lacp.PersonID ORDER BY lacp.clap_cla_placement_start_date DESC, cp.lacp_cla_care_plan_start_date DESC, cp.lacp_cla_care_plan_id DESC) Rnk
-		FROM
-			#ssd_cla_placement lacp
-		INNER JOIN
-			#ssd_cla_care_plan cp ON lacp.PersonID = cp.lacp_person_id
-			AND cp.lacp_cla_care_plan_start_date between lacp.LACStart and COALESCE(lacp.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
-		WHERE
-			COALESCE(lacp.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-	) AS perm on clapl.PersonID = perm.PersonID
-		AND perm.Rnk = 1
-
-/*PW - Added to get latest Health Assessment*/
-LEFT JOIN
-	(
-		SELECT
-			lacp.PersonID PersonID,
-			MAX(h.clah_health_check_date) HealthAssessmentDate
-		FROM
-			#ssd_cla_placement lacp
-		INNER JOIN
-			#ssd_cla_health h ON lacp.PersonID = h.clah_person_id
-			AND h.clah_health_check_type in ('HEALTH', 'Health Assessment')
-			AND h.clah_health_check_date between lacp.LACStart and COALESCE(lacp.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
-		WHERE
-			COALESCE(lacp.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-		GROUP BY
-			lacp.PersonID
-	) AS ha on clapl.PersonID = ha.PersonID
-
-/*PW - Added to get latest Dental Check*/
-LEFT JOIN
-	(
-		SELECT
-			lacp.PersonID PersonID,
-			MAX(h.clah_health_check_date) DentalCheckDate
-		FROM
-			#ssd_cla_placement lacp
-		INNER JOIN
-			#ssd_cla_health h ON lacp.PersonID = h.clah_person_id
-			AND h.clah_health_check_type in ('DENTAL', 'Dental Check')
-			AND h.clah_health_check_date between lacp.LACStart and COALESCE(lacp.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
-		WHERE
-			COALESCE(lacp.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-		GROUP BY
-			lacp.PersonID
-	) AS dc on clapl.PersonID = dc.PersonID
-
 /*PW - Added to get number of LAC Placements in previous 12 months.  Note #ssd_cla_episodes used so placements with same carer can be excluded*/
 LEFT JOIN
 	(
@@ -1880,81 +1753,14 @@ LEFT JOIN
 		FROM
 			#ssd_cla_episodes clae
 		WHERE
-			COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -12, GETDATE())
+			COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -12 , GETDATE())
 			AND (clae.clae_cla_episode_start_reason in ('S','P','B')
-				OR (clae.clae_cla_episode_start <= DATEADD(MONTH, -12, GETDATE())	/*PW Additional clause to ensure initial placement from 12 months ago is counted if with same carer*/
-					AND clae.clae_cla_episode_ceased > DATEADD(MONTH, -12, GETDATE())
+				OR (clae.clae_cla_episode_start <= DATEADD(MONTH, -12 , GETDATE())	/*PW Additional clause to ensure initial placement from 12 months ago is counted if with same carer*/
+					AND clae.clae_cla_episode_ceased > DATEADD(MONTH, -12 , GETDATE())
 					AND clae.clae_cla_episode_start_reason in ('T','U')))
 		GROUP BY
 			clae.clae_person_id
 	) AS agglacp ON clapl.PersonID = agglacp.clae_person_id
-
-/*PW - Added to get number of Missing from Placement Episodes*/
-LEFT JOIN
-	(
-		SELECT
-			lacp.PersonID PersonID,
-			lacp.clap_cla_placement_start_date,
-			COUNT(m.miss_table_id) MissingEpi,
-			DENSE_RANK() OVER(PARTITION BY lacp.PersonID, lacp.clap_cla_placement_id ORDER BY lacp.clap_cla_placement_start_date DESC, lacp.clap_cla_placement_id DESC) Rnk
-		FROM
-			#ssd_cla_placement lacp
-		INNER JOIN
-			#ssd_missing m ON lacp.PersonID = m.miss_person_id
-			AND m.miss_missing_episode_type in ('M', 'Missing')
-			AND m.miss_missing_episode_start >= DATEADD(MONTH, -12, GETDATE())
-			AND m.miss_missing_episode_start between lacp.LACStart and COALESCE(lacp.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
-		WHERE
-			COALESCE(lacp.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-		GROUP BY
-			lacp.PersonID, lacp.clap_cla_placement_id, lacp.clap_cla_placement_start_date
-	) AS mis ON clapl.PersonID = mis.PersonID
-		AND clapl.clap_cla_placement_start_date = mis.clap_cla_placement_start_date
-		AND mis.Rnk = 1
-
-/*PW - Added to get number of Absence from Placement Episodes*/
-LEFT JOIN
-	(
-		SELECT
-			lacp.PersonID PersonID,
-			lacp.clap_cla_placement_start_date,
-			COUNT(m.miss_table_id) AbsenceEpi,
-			DENSE_RANK() OVER(PARTITION BY lacp.PersonID, lacp.clap_cla_placement_id ORDER BY lacp.clap_cla_placement_start_date DESC, lacp.clap_cla_placement_id DESC) Rnk
-		FROM
-			#ssd_cla_placement lacp
-		INNER JOIN
-			#ssd_missing m ON lacp.PersonID = m.miss_person_id
-			AND m.miss_missing_episode_type in ('A', 'Absent')
-			AND m.miss_missing_episode_start >= DATEADD(MONTH, -12, GETDATE())
-			AND m.miss_missing_episode_start between lacp.LACStart and COALESCE(lacp.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
-		WHERE
-			COALESCE(lacp.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-		GROUP BY
-			lacp.PersonID, lacp.clap_cla_placement_id, lacp.clap_cla_placement_start_date
-	) AS ab ON clapl.PersonID = ab.PersonID
-		AND clapl.clap_cla_placement_start_date = ab.clap_cla_placement_start_date
-		AND ab.Rnk = 1
-
-/*PW - Added to get latest Missing Episode Date and Return Interview details*/
-LEFT JOIN
-	(
-		SELECT
-			lacp.PersonID PersonID,
-			m.miss_missing_rhi_offered,
-			m.miss_missing_rhi_accepted,
-			DENSE_RANK() OVER(PARTITION BY lacp.PersonID ORDER BY CASE WHEN m.miss_missing_episode_end is not null then 1 else 2 END, /*Gives priority to Completed Missing Episodes over Ongoing Missing Episodes so Return Interview Details are available*/
-																lacp.clap_cla_placement_start_date DESC, m.miss_missing_episode_start DESC, m.miss_table_id DESC) Rnk
-		FROM
-			#ssd_cla_placement lacp
-		INNER JOIN
-			#ssd_missing m ON lacp.PersonID = m.miss_person_id
-			AND m.miss_missing_episode_type in ('M', 'Missing')
-			AND m.miss_missing_episode_start >= DATEADD(MONTH, -12, GETDATE())
-			AND m.miss_missing_episode_start between lacp.LACStart and COALESCE(lacp.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
-		WHERE
-			COALESCE(lacp.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-	) AS rhi ON clapl.PersonID = rhi.PersonID
-		AND rhi.Rnk = 1
 
 /*PW - Added to get latest allocatd Team and Worker*/
 LEFT JOIN
@@ -2033,21 +1839,20 @@ Dependencies:
 - ssd_immigration_status
 =============================================================================
 */
-
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#AA_9_care_leavers') IS NOT NULL DROP TABLE #AA_9_care_leavers;
 
-
 SELECT
-	/* Common AA fields */
-	p.pers_person_id											AS ChildUniqueID,	/*PW - Field Name changed from p.pers_legacy_id as that doesn't match SSDS Spec*/
-	CASE
+    /* Common AA fields */
+    p.pers_legacy_id                            AS ChildUniqueID,	-- temp solution [TESTING] This liquid logic specific
+    p.pers_person_id						    AS ChildUniqueID2,	-- temp solution [TESTING] This for compatiblility in non-ll systems
+    CASE
 		WHEN p.pers_sex = 'M' THEN 'a) Male'
 		WHEN p.pers_sex = 'F' THEN 'b) Female'
 		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
 		WHEN p.pers_sex = 'I' THEN 'd) Neither'
-	END															AS Gender,
-	CASE
+	END											AS Gender,
+    CASE
 		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
 		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
 		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
@@ -2069,85 +1874,31 @@ SELECT
 		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
-	END															AS Ethnicity,
-	FORMAT(p.pers_dob, 'dd/MM/yyyy')							AS DateOfBirth,
+	END											AS Ethnicity,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth, --  note: returns string representation of the date
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
+            CASE 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
+                ELSE 0
+            END
+    END                                         AS Age
 
-	/*PW - Blackpool Age Function*/
-	DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
-			CASE 
-				WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
-				THEN 1
-				ELSE 0
-			END													AS Age,
- 
     /* List additional AA fields */
-	CASE
-		WHEN uasc.immi_person_id is not null THEN 'a) Yes'
-		ELSE 'b) No'
-	END															AS UASC,
-	--d.disa_disability_code									AS DISABILITY,	/*PW - Commented out at values changed to those in Annex A Specification*/ 
-	CASE
-		WHEN d.disa_person_id is not null THEN 'a) Yes'
-		ELSE 'b) No'
-	END															AS HasDisability,
-    	clea.clea_care_leaver_allocated_team						AS AllocatedTeam,
-	pro.prof_professional_name									AS AllocatedWorker,
-	clea.clea_care_leaver_personal_advisor						AS AllocatedPersonalAdvisor,
-	CASE
-		WHEN clea.clea_care_leaver_eligibility in ('Relevant','Relevant child') then 'a) Relevant child'
-		WHEN clea.clea_care_leaver_eligibility in ('Former Relevant','Former relevant child') then 'b) Former relevant child'
-		WHEN clea.clea_care_leaver_eligibility in ('Qualifying','Qualifying care leaver') then 'c) Qualifying care leaver'
-		WHEN clea.clea_care_leaver_eligibility in ('Eligible','Eligible child') then 'd) Eligible child'
-	END															AS EligibilityCategory,
-	FORMAT(clea.clea_pathway_plan_review_date, 'dd/MM/yyyy')	AS LatestPathwayPlan,
-	CASE
-		WHEN clea.clea_care_leaver_in_touch in ('YES', 'Y') THEN 'a) Yes'
-		WHEN clea.clea_care_leaver_in_touch in ('NO', 'N') THEN 'b) No'
-		WHEN clea.clea_care_leaver_in_touch in ('DIED') THEN 'c) Died'
-		WHEN clea.clea_care_leaver_in_touch in ('REFU', 'Refused') THEN 'd) Refu'
-		WHEN clea.clea_care_leaver_in_touch in ('NREQ', 'Not Required') THEN 'e) NREQ'
-		WHEN clea.clea_care_leaver_in_touch in ('RHOM', 'Returned Home') THEN 'f) Rhom'
-	END															AS LAInTouch,
-	FORMAT(clea.clea_care_leaver_latest_contact, 'dd/MM/yyyy')	AS LatestContact,
-	CASE
-		WHEN clea.clea_care_leaver_accommodation = 'B' THEN 'B: Parents/relatives'
-		WHEN clea.clea_care_leaver_accommodation = 'C' THEN 'C: Community home / residential care'
-		WHEN clea.clea_care_leaver_accommodation = 'D' THEN 'D: Semi-independent, transitional accommodation and self-contained accommodation'
-		WHEN clea.clea_care_leaver_accommodation = 'E' THEN 'E: Supported lodgings'
-		WHEN clea.clea_care_leaver_accommodation = 'G' THEN 'G: Abroad'
-		WHEN clea.clea_care_leaver_accommodation = 'H' THEN 'H: Deported'
-		WHEN clea.clea_care_leaver_accommodation = 'K' THEN 'K: Ordinary lodgings, without formal support'
-		WHEN clea.clea_care_leaver_accommodation = 'R' THEN 'R: Residence not known'
-		WHEN clea.clea_care_leaver_accommodation = 'S' THEN 'S: No fixed abode / homeless'
-		WHEN clea.clea_care_leaver_accommodation = 'T' THEN 'T: Foyers and similar supported accommodation'
-		WHEN clea.clea_care_leaver_accommodation = 'U' THEN 'U: Independent living'
-		WHEN clea.clea_care_leaver_accommodation = 'V' THEN 'V: Emergency accommodation'
-		WHEN clea.clea_care_leaver_accommodation = 'W' THEN 'W: Bed and breakfast'
-		WHEN clea.clea_care_leaver_accommodation = 'X' THEN 'X: In custody'
-		WHEN clea.clea_care_leaver_accommodation = 'Y' THEN 'Y: Other accommodation'
-		WHEN clea.clea_care_leaver_accommodation = 'Z' THEN 'Z: With former foster carers'
-	END															AS TypeOfAccommodation,
-	CASE
-		WHEN clea.clea_care_leaver_accom_suitable in ('1', 'Yes', 'Y', 'Suitable') THEN 'a) Suitable'
-		WHEN clea.clea_care_leaver_accom_suitable in ('2', 'No', 'N', 'Not Suitable', 'Unsuitable') THEN 'b) Unsuitable'
-	END															AS SuitabilityOfAccommodation,
-	CASE
-		WHEN clea.clea_care_leaver_activity = 'F1' THEN 'F1: Full time in higher education'
-		WHEN clea.clea_care_leaver_activity = 'P1' THEN 'P1: Part time in higher education'
-		WHEN clea.clea_care_leaver_activity = 'F2' THEN 'F2: Full time in education other than higher'
-		WHEN clea.clea_care_leaver_activity = 'P2' THEN 'P2: Part time in education other than higher'
-		WHEN clea.clea_care_leaver_activity = 'F4' THEN 'F4: Young person engaged full time in an apprenticeship'
-		WHEN clea.clea_care_leaver_activity = 'P4' THEN 'P4: Young person engaged part time in an apprenticeship'
-		WHEN clea.clea_care_leaver_activity = 'F5' THEN 'F5: Young person engaged full time in training or employment (not apprenticeship)'
-		WHEN clea.clea_care_leaver_activity = 'P5' THEN 'P5: Young person engaged part time in training or employment (not apprenticeship)'
-		WHEN clea.clea_care_leaver_activity = 'G4' THEN 'G4: Not in education, employment or training - illness or disability'
-		WHEN clea.clea_care_leaver_activity = 'G5' THEN 'G5: Not in education, employment or training - other'
-		WHEN clea.clea_care_leaver_activity = 'G6' THEN 'G6: Not in education, employment or training - pregnancy or parenting'
-	END															AS ActivityStatus
 
-	/*PW - previous code commented out*/
-	/*	
-	clea.clea_care_leaver_allocated_team_name   AS AllocatedTeam,       -- Allocated Team
+    d.disa_disability_code                      AS Disability           -- Does the Child have a Disability
+    CASE         
+        -- Unaccompanied Asylum Seeking Child (UASC), or formerly UASC if 18 or over (Y/N)                                               
+        WHEN latest_status.immi_immigration_status = 'Unaccompanied Asylum Seeking Child (UASC)' THEN 'Y'
+        ELSE 'N'
+    END                                         AS LegalStatus,         
+
+    clea.clea_care_leaver_allocated_team_name   AS AllocatedTeam,       -- Allocated Team
     clea.clea_care_leaver_worker_name           AS AllocatedWorker,     -- Allocated Worker
     clea.clea_care_leaver_personal_advisor      AS AllocatedPA,         -- Allocated Personal Advisor
     clea.clea_care_leaver_eligibility           AS EligibilityCategory, -- Eligibility Category
@@ -2157,44 +1908,13 @@ SELECT
     clea.clea_care_leaver_accommodation         AS AccomodationType,    -- Type of Accommodation
     clea.clea_care_leaver_accom_suitable        AS AccommodationSuitability, -- Suitability of Accommodation
     clea.clea_care_leaver_activity              AS ActivityStatus       -- Activity Status
-	*/
+
 
 INTO #AA_9_care_leavers
 
 FROM
     #ssd_care_leavers clea
 
-INNER JOIN
-	#ssd_person p ON clea.clea_person_id = p.pers_person_id
-
-/*PW - Amended as #ssd_disability table can have multiple records for a single child*/
-LEFT JOIN   -- ensure we get all records even if there's no matching disability
-	(
-		SELECT DISTINCT
-			dis.disa_person_id 
-		FROM
-			#ssd_disability dis
-		WHERE
-			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
-	) AS d ON p.pers_person_id = d.disa_person_id
-
-/*PW - added to get UASC*/
-LEFT JOIN
-	(
-		SELECT DISTINCT
-			uasc.immi_person_id 
-		FROM
-			#ssd_immigration_status uasc
-		WHERE
-			uasc.immi_immigration_status = 'UASC'
-			--AND COALESCE(uasc.immi_immigration_status_end_date,'99991231') >= DATEADD(MONTH, -12 , GETDATE())	/*PW - Row commented out as giving error 'Arithmetic overflow error converting expression to data type datetime' (possibly because no records have end date)*/
-	) AS uasc ON p.pers_person_id = uasc.immi_person_id
-
-LEFT JOIN
-	#ssd_professionals pro on clea.clea_care_leaver_worker_id = pro.prof_professional_id
-
-/*PW - previous code commented out*/
-/*
 LEFT JOIN   -- person table for core dets
     ssd_person p ON clea.clea_person_id = p.pers_person_id
 
@@ -2209,16 +1929,10 @@ LEFT JOIN   -- join but with subquery as need most recent immigration status
             -- partitioning by immi_person_id (group by each person) 
             ROW_NUMBER() OVER (PARTITION BY immi_person_id -- assign unique row num (most recent rn ===1)
             -- get latest status based on end date, (using start date as a secondary order in case of ties or NULL end dates)
-            ORDER BY immi_immigration_status_end DESC, immi_immigration_status_start DESC) AS rn
+            ORDER BY immi_immigration_status_end_date DESC, immi_immigration_status_start_date DESC) AS rn
         FROM 
             ssd_immigration_status
     ) latest_status ON clea.clea_person_id = latest_status.immi_person_id AND latest_status.rn = 1;
-*/
-
-
--- [TESTING]
-select * from #AA_9_care_leavers;
-
 
 
 
@@ -2248,38 +1962,155 @@ Dependencies:
 */
 
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..#AA_10_adoption') IS NOT NULL DROP TABLE #AA_10_adoption;
-
-
--- -- AA headers guidance notes:
--- Child Unique ID
--- Family identifier
--- Gender
--- Ethnicity
--- Date of Birth
--- Age of Child (Years)
--- Does the Child have a Disability
--- Date the Child Entered Care
--- Date of Decision that Child Should be Placed for Adoption
--- Date of Placement Order
--- Date of Matching Child and Prospective Adopters
--- Date Placed for Adoption
--- Date of Adoption Order 
--- Date of Decision that Child Should No Longer be Placed for Adoption
--- Reason Why Child No Longer Placed for Adoption
--- Date the child was placed for fostering in FostingForAdoption or concurrent planning placement
+IF OBJECT_ID('tempdb..#AA_10_adoption', 'U') IS NOT NULL DROP TABLE #AA_10_adoption;
 
 SELECT
-	/* Common AA fields */
-	p.pers_person_id											AS ChildUniqueID,	/*PW - Field Name changed from p.pers_legacy_id as that doesn't match SSDS Spec*/
-	NULL														AS FamilyID,	/*PW - Field Added (only in List 10).  Don't think Family ID is present in SSDS (Local adoptive family identifier for the adoptive family the child is matched or placed with)*/
-	CASE
+    /* Common AA fields */
+    p.pers_legacy_id                        AS ChildUniqueID,       -- temp solution [TESTING] This liquid logic specific
+    p.pers_person_id                        AS ChildUniqueID2,      -- temp solution [TESTING] This for compatiblility in non-ll systems
+    fam.fami_family_id                      AS FamilyIdentifier,    -- Family identifier        
+    CASE
+        WHEN p.pers_sex = 'M' THEN 'a) Male'
+        WHEN p.pers_sex = 'F' THEN 'b) Female'
+        WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+        WHEN p.pers_sex = 'I' THEN 'd) Neither'
+    END                                    	AS Gender,
+    CASE
+        WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+        WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+        WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+        WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+        WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+        WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+        WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+        WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+        WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+        WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+        WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+        WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+        WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+        WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+        WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+        WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+        WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+        WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+        WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+        WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+        ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+    END                                      AS Ethnicity,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')         AS DateOfBirth, --  note: returns string representation of the date
+    CASE
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                           
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future
+            CASE
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
+                ELSE 0
+            END
+    END                                      AS Age,
+ 
+    /* List additional AA fields */
+ 
+    d.disa_disability_code                   AS Disability,
+ 
+    perm.perm_entered_care_date              AS EnteredCareDate,        -- Date the Child Entered Care
+    perm.perm_adm_decision_date              AS PlacementDecisionDate,  -- Date of Decision that Child Should be Placed for Adoption
+    perm.perm_ffa_cp_decision_date           AS FfaDecisionDate,        -- Date of Decision that child should be placed in Fosting for Adoption/ Concurrent Planning placement
+    perm.perm_placed_ffa_cp_date             AS FfaCpPlaceDate,         -- Date the child was placed for fostering in FostingForAdoption or concurrent planning placement
+    perm.perm_matched_date                   AS MatchedForAdoptionDate, -- Date of Matching Child and Prospective Adopters
+    perm.perm_placement_order_date           AS PlacementOrderDate,     -- Date that the Placement Order was granted
+    perm.perm_placed_for_adoption_date       AS PlacedForAdoptionDate,  -- Date Placed for Adoption
+    --perm.perm_placed_foster_carer_date       AS PlacedWithFosterCarer,  -- Date originally placed with Foster Carer/s (if adopted by former foster carer/s)  
+    perm.perm_decision_reversed_date         AS DecisionReversedDate,   -- Date of Decision that Child Should No Longer be Placed for Adoption
+    perm.perm_decision_reversed_reason       AS DecisionReversedReason, -- Reason Why Child No Longer Placed for Adoption
+    perm.perm_permanence_order_date          AS AdoptionOrderDate       -- Date of Adoption Order?
+ 
+ 
+INTO #AA_10_adoption
+ 
+FROM
+    #ssd_permanence perm
+ 
+LEFT JOIN   -- person table for core dets
+    #ssd_person p ON perm.perm_person_id = p.pers_person_id
+ 
+LEFT JOIN   -- disability table
+    #ssd_disability d ON perm.perm_person_id = d.disa_person_id
+ 
+LEFT JOIN   -- family table
+    #ssd_family fam ON perm.perm_person_id = fam.fami_person_id
+ 
+WHERE
+    -- Filter for cases where
+   
+    perm_permanence_order_date              >= DATEADD(MONTH, -12, GETDATE())   -- Child Adopted in last 12 Months
+    OR
+    (perm.perm_adm_decision_date IS NOT NULL                                    -- there is an ADM Decision but
+        AND perm_permanence_order_date IS NULL
+            AND perm.perm_decision_reversed_date IS NULL)                                 -- the Child has not yet been Adopted    
+ 
+    OR perm.perm_decision_reversed_date     >= DATEADD(MONTH, -12, GETDATE());   -- Adoption Decision reversed during last 12 months 
+	
+
+
+    -- not required in return? Other available fields for ref:
+    -- perm.perm_table_id
+    -- perm.perm_person_id
+    -- perm.perm_cla_id
+    -- perm.perm_adm_decision_date         AS ,
+    -- perm.perm_permanence_order_type     AS ,
+    -- perm.perm_adoption_worker           AS ,
+    -- perm.perm_adopter_sex               AS ,
+    -- perm.perm_adopter_legal_status      AS ,
+    -- perm.perm_part_of_sibling_group     AS ,
+    -- perm.perm_siblings_placed_together  AS ,
+    -- perm.perm_siblings_placed_apart     AS ,
+    -- perm.perm_placement_provider_urn    AS ,
+    -- perm.perm_adopted_by_carer_flag     AS ,
+    -- perm.perm_placed_ffa_cp_date        AS ,
+
+
+
+
+/* 
+=============================================================================
+Report Name: Ofsted List 11 - Adopters YYYY
+Description: 
+            "All those individuals who in the 12 months before the inspection 
+            have had contact with the local authority adoption agency"
+
+Author: D2I
+Last Modified Date: 31/01/24 RH
+DB Compatibility: SQL Server 2014+|...
+Version: 1.0
+            0.3: Removed old obj/item naming. 
+Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Remarks: Incomplete as required data not held within the SSD. Placeholders used
+         in place of data points considered beyond project scope. 
+Dependencies: 
+- ssd_person
+- ssd_disability
+- ssd_permanence 
+- ssd_family
+=============================================================================
+*/
+-- Check if exists & drop
+IF OBJECT_ID('tempdb..#AA_11_adopters') IS NOT NULL DROP TABLE #AA_11_adopters;
+
+SELECT
+    /* Common AA fields */
+    'PLACEHOLDER_DATA'                          AS AdopterIdentifier,   -- Individual adopter identifier (Unavailable in SSD V1)
+    fam.fami_family_id                          AS FamilyIdentifier,    -- Family identifier        
+    CASE
 		WHEN p.pers_sex = 'M' THEN 'a) Male'
 		WHEN p.pers_sex = 'F' THEN 'b) Female'
 		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
 		WHEN p.pers_sex = 'I' THEN 'd) Neither'
-	END															AS Gender,
-	CASE
+	END											AS Gender,
+    CASE
 		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
 		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
 		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
@@ -2301,164 +2132,25 @@ SELECT
 		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
 		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
 		ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
-	END															AS Ethnicity,
-	FORMAT(p.pers_dob, 'dd/MM/yyyy')							AS DateOfBirth,
-
-	/*PW - Blackpool Age Function*/
-	DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
-			CASE 
-				WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
-				THEN 1
-				ELSE 0
-			END													AS Age,
- 
-    /* List additional AA fields */
-		--d.disa_disability_code									AS DISABILITY,	/*PW - Commented out at values changed to those in Annex A Specification*/ 
-	CASE
-		WHEN d.disa_person_id is not null THEN 'a) Yes'
-		ELSE 'b) No'
-	END															AS HasDisability,
-	FORMAT(perm.perm_entered_care_date, 'dd/MM/yyyy')			AS EnteredCareDate,
-	FORMAT(perm.perm_adm_decision_date, 'dd/MM/yyyy')			AS ADMSHOBPADecisionDate,
-	FORMAT(perm.perm_placement_order_date, 'dd/MM/yyyy')		AS PlacementOrderDate,
-	FORMAT(perm.perm_matched_date, 'dd/MM/yyyy')				AS MatchedForAdoptionDate,
-	FORMAT(perm.perm_placed_for_adoption_date, 'dd/MM/yyyy')	AS PlacedForAdoptionDate,
-	FORMAT(perm.perm_permanence_order_date, 'dd/MM/yyyy')		AS AdoptionOrderDate,
-	FORMAT(perm.perm_decision_reversed_date, 'dd/MM/yyyy')		AS DecisionReversedDate,
-	CASE
-		WHEN perm.perm_decision_reversed_reason = 'RD1' THEN 'RD1 - The child’s needs changed subsequent to the decision'
-		WHEN perm.perm_decision_reversed_reason = 'RD2' THEN 'RD2 - The Court did not make a placement order'
-		WHEN perm.perm_decision_reversed_reason = 'RD3' THEN 'RD3 - Prospective adopters could not be found'
-		WHEN perm.perm_decision_reversed_reason = 'RD4' THEN 'RD4 - Any other reason'
-	END															AS DecisionReversedReason,
-	FORMAT(perm.perm_placed_ffa_cp_date, 'dd/MM/yyyy')			AS DateFFAConsurrencyPlacement
-	
-	/*PW - previous code commented out*/
-	/*
-    perm.perm_entered_care_date              AS EnteredCareDate,        -- Date the Child Entered Care
-    perm.perm_ffa_cp_decision_date           AS FfaDecisionDate,        -- Date the child was placed for fostering in FostingForAdoption or concurrent planning placement 
-    perm.perm_placement_order_date           AS PlacementDecisionDate,  -- Date of Decision that Child Should be Placed for Adoption
-    perm.perm_placed_for_adoption_date       AS PlacedForAdoptionDate,  -- Date Placed for Adoption
-    perm.perm_matched_date                   AS MatchedForAdoptionDate, -- Date of Matching Child and Prospective Adopters
-    perm.perm_decision_reversed_date         AS DecisionReversedDate,   -- Date of Decision that Child Should No Longer be Placed for Adoption
-    perm.perm_placed_foster_carer_date       AS PlacedWithFosterCarer,  -- Date of Adoption Order ?  
-    perm.perm_decision_reversed_reason       AS DecisionReversedReason, -- Reason Why Child No Longer Placed for Adoption
-    perm.perm_permanence_order_date          AS PlacementOrderDate     -- Date of Placement Order?
-	*/
-
-INTO #AA_10_adoption
-
-FROM
-	#ssd_permanence perm
-
-INNER JOIN
-	#ssd_person p ON perm.perm_person_id = p.pers_person_id
-
-/*PW - Amended as #ssd_disability table can have multiple records for a single child*/
-LEFT JOIN   -- ensure we get all records even if there's no matching disability
-	(
-		SELECT DISTINCT
-			dis.disa_person_id 
-		FROM
-			#ssd_disability dis
-		WHERE
-			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
-	) AS d ON p.pers_person_id = d.disa_person_id
-
-/*PW - Commented out as FamilyID in Ofsted List 10 isn't the same FamilyID as #ssd_family - List 10 is 'Local adoptive family identifier for the adoptive family the child is matched or placed with’ i.e. an identifier for the adopter, which allows for cross-matching with List 11*/
-/*
-LEFT JOIN   -- family table
-    #ssd_family fam ON perm.perm_person_id = fam.fami_person_id
-*/
-
-WHERE
-	perm.perm_adm_decision_date is not null		/*PW - Restricts to Adoption Cases and ignores other Legal Orders*/
-	AND 
-		(
-			/*Note - list 10 uses a 12 month period as opposed to the 6 month period used in other lists*/
-			perm.perm_permanence_order_date >= DATEADD(MONTH, -12, GETDATE()) OR	/*Adopted in previous 12 months*/
-			perm.perm_decision_reversed_date >= DATEADD(MONTH, -12, GETDATE()) OR	/*Decision Reversed in previous 12 months*/
-			(perm.perm_permanence_order_date is null and perm.perm_decision_reversed_date is null)	/*Current Adoption Cases*/
-		)
-
-/*PW - Previous selection criteria commented out*/
-/*
-
-	WHERE
-    -- Filter on last 12 months
-    perm.perm_placement_order_date          >= DATEADD(MONTH, -12, GETDATE())
-    OR perm.perm_placed_for_adoption_date   >= DATEADD(MONTH, -12, GETDATE())
-    OR perm.perm_decision_reversed_date     >= DATEADD(MONTH, -12, GETDATE());
-*/
-
-
--- [TESTING]
-select * from #AA_10_adoption;
-
-
-
-
-/* 
-=============================================================================
-Report Name: Ofsted List 11 - Adopters YYYY
-Description: 
-            "All those individuals who in the 12 months before the inspection 
-            have had contact with the local authority adoption agency"
-
-Author: D2I
-Last Modified Date: 31/01/24 RH
-DB Compatibility: SQL Server 2014+|...
-Version: 1.0
-            0.3: Removed old obj/item naming. 
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: Incomplete as required data not held within the ssd and beyond 
-            project scope. 
-Dependencies: 
-- ssd_person
-- ssd_permanence
-- ssd_disability
-=============================================================================
-*/
-
--- Check if exists & drop
-IF OBJECT_ID('tempdb..#AA_11_adopters') IS NOT NULL DROP TABLE #AA_11_adopters;
-
-
-SELECT
-    /* Common AA fields */
-    p.pers_legacy_id                            AS AdopterID,      -- Individual adopter identifier
-    --  fam.fami_person_id            -- IS this coming from fc.DIM_PERSON_ID AS fami_person_id, as doesnt seem valid context
-    p.pers_sex                                  AS Gender,
-    p.pers_ethnicity                            AS Ethnicity,
+	END											AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth, --  note: returns string representation of the date
-    
-    CASE
-        -- If DoB is in the future, set age as -1 (unborn)
-        WHEN p.pers_dob > GETDATE() THEN -1
-
-        -- Special case for leap year babies (born Feb 29)
-        WHEN MONTH(p.pers_dob) = 2 AND DAY(p.pers_dob) = 29 AND
-            MONTH(GETDATE()) <= 2 AND DAY(GETDATE()) < 28 AND
-            -- Check if current year is not a leap year
-            (YEAR(GETDATE()) % 4 != 0 OR (YEAR(GETDATE()) % 100 = 0 AND YEAR(GETDATE()) % 400 != 0))
-        THEN YEAR(GETDATE()) - YEAR(p.pers_dob) - 2
-
-        ELSE 
-            -- Calc age normally
-            YEAR(GETDATE()) - YEAR(p.pers_dob) - 
+    CASE 
+        WHEN p.pers_dob IS NULL OR p.pers_dob > GETDATE() THEN -1 -- no dob? unborn dob? assign default val
+                                            
+        ELSE DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+        -- if a dob is available and not in the future 
             CASE 
-                -- Subtract extra year if current date is before birthday this year
-                WHEN MONTH(GETDATE()) < MONTH(p.pers_dob) OR 
-                    (MONTH(GETDATE()) = MONTH(p.pers_dob) AND DAY(GETDATE()) < DAY(p.pers_dob))
-                THEN 1 
+                WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
+                -- use DATEDIFF get diff(yrs) btwn dob & curr date, adjust down by 1 if today is before this year's b-day
+                THEN 1
                 ELSE 0
             END
-    END                                         AS Age, 
+    END                                         AS Age
 
     /* List additional AA fields */
     d.disa_disability_code                      AS Disability,     
 
-    perm.perm_adopted_by_carer_flag             AS AdoptedByCarer, -- Is the (prospective) adopter fostering for adoption?
+    perm.perm_adopted_by_carer_flag             AS AdoptedByCarer,      -- Is the (prospective) adopter fostering for adoption?
     '1900-01-01'                                AS EnquiryDate,         -- Date enquiry received
     '1900-01-01'                                AS Stage1StartDate,     -- Date Stage 1 started
     '1900-01-01'                                AS Stage1EndDate,       -- Date Stage 1 ended
@@ -2466,26 +2158,30 @@ SELECT
     '1900-01-01'                                AS Stage2EndDate,       -- Date Stage 2 ended
     '1900-01-01'                                AS ApplicationDate,     -- Date application submitted
     '1900-01-01'                                AS ApplicationApprDate, -- Date application approved
-    perm.perm_matched_date                      AS MatchedDate, 		-- Date adopter matched with child(ren)
-    perm.perm_placed_for_adoption_date          AS PlacedDate, 			-- Date child/children placed with adopter(s)
-    perm.perm_siblings_placed_together          AS NumSiblingsPlaced, 	-- No. of children placed
-    perm.perm_permanence_order_date             AS AdoptionOrderDate, 	-- Date of Adoption Order
-    perm.perm_decision_reversed_date            AS AdoptionLeaveDate, 	-- Date of leaving adoption process
-    perm.perm_decision_reversed_reason          AS AdoptingLeaveReason	-- Reason for leaving adoption process
+    perm.perm_matched_date                      AS MatchedDate,         -- Date adopter matched with child(ren)
+    perm.perm_placed_for_adoption_date          AS PlacedDate,          -- Date child/children placed with adopter(s)
+    'PLACEHOLDER_DATA'                          AS NumSiblingsPlaced,   -- No. of children placed
+    perm.perm_permanence_order_date             AS AdoptionOrderDate,   -- Date of Adoption Order
+    perm.perm_decision_reversed_date            AS AdoptionLeaveDate,   -- Date of leaving adoption process
+    perm.perm_decision_reversed_reason          AS AdoptingLeaveReason  -- Reason for leaving adoption process
 
 INTO #AA_11_adopters
 
 FROM
-    ssd_permanence perm
+    #ssd_permanence perm
 
 INNER JOIN
-    ssd_person p ON perm.perm_person_id = p.pers_person_id
+    #ssd_person p ON perm.perm_person_id = p.pers_person_id
 
-LEFT JOIN   -- disability table
-    ssd_disability d ON perm.perm_person_id = d.disa_person_id
+LEFT JOIN   -- Disability table
+    #ssd_disability d ON perm.perm_person_id = d.disa_person_id
 
 LEFT JOIN
-    ssd_contacts c ON perm.perm_person_id = c.cont_person_id 
+    #ssd_contacts c ON perm.perm_person_id = c.cont_person_id 
+
+LEFT JOIN   -- family table
+    #ssd_family fam ON perm.perm_person_id = fam.fami_person_id
 
 WHERE
     c.cont_contact_start >= DATEADD(MONTH, -12, GETDATE()) -- Filter on last 12 months
+	-- SHOULD THIS BE cont_contact_date??
