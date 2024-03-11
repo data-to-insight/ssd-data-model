@@ -41,6 +41,7 @@ SET @StartTime = GETDATE(); -- Record the start time
 --     IndexSpace NVARCHAR(18),
 --     UnusedSpace NVARCHAR(18)
 -- );
+
 /* ********************************************************************************************************** */
 
 
@@ -2087,9 +2088,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 12/01/24
+Last Modified Date: 060324
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.0
+            0.9: cla_placement_id added as part of cla_placements review RH 060324
+            0.8: 120124
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -2515,9 +2518,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_placement
 Description: 
 Author: D2I
-Last Modified Date: 09/01/23
+Last Modified Date: 060324 
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.0 
+            0.9 Corrected/removal of placement_la & episode_id 090124 RH
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
 Dependencies: 
@@ -2542,7 +2546,6 @@ CREATE TABLE #ssd_cla_placement (
     clap_cla_placement_type             NVARCHAR(100),
     clap_cla_placement_urn              NVARCHAR(48),
     clap_cla_placement_distance         FLOAT, -- Float precision determined by value (or use DECIMAL(3, 2), -- Adjusted to fixed precision)
-    clap_cla_placement_la               NVARCHAR(48),
     clap_cla_placement_provider         NVARCHAR(48),
     clap_cla_placement_postcode         NVARCHAR(8),
     clap_cla_placement_end_date         DATETIME,
@@ -2557,7 +2560,6 @@ INSERT INTO #ssd_cla_placement (
     clap_cla_placement_type,
     clap_cla_placement_urn,
     clap_cla_placement_distance,
-    clap_cla_placement_la,
     clap_cla_placement_provider,
     clap_cla_placement_postcode,
     clap_cla_placement_end_date,
@@ -2578,7 +2580,6 @@ SELECT
     )                                           AS clap_cla_placement_urn,
  
     TRY_CAST(fcp.DISTANCE_FROM_HOME AS FLOAT)   AS clap_cla_placement_distance,                         -- convert to FLOAT (source col is nvarchar, also holds nulls/ints)
-    'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,                               -- [PLACEHOLDER_DATA] [TESTING]
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
  
     CASE -- removal of common/invalid placeholder data i.e ZZZ, XX
@@ -2751,6 +2752,7 @@ SET @TableName = N'ssd_cla_previous_permanence';
 PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
+IF OBJECT_ID('ssd_cla_previous_permanence') IS NOT NULL DROP TABLE ssd_cla_previous_permanence;
 IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_previous_permanence') IS NOT NULL DROP TABLE #ssd_TMP_PRE_previous_permanence;
  
@@ -2777,6 +2779,7 @@ CREATE TABLE #ssd_cla_previous_permanence (
     lapp_person_id                              NVARCHAR(48),
     lapp_previous_permanence_option             NVARCHAR(200),
     lapp_previous_permanence_la                 NVARCHAR(100),
+    lapp_previous_permanence_order_date         NVARCHAR(10),
     lapp_previous_permanence_order_date_json    NVARCHAR(MAX)
 );
  
@@ -2786,6 +2789,7 @@ INSERT INTO #ssd_cla_previous_permanence (
                lapp_person_id,
                lapp_previous_permanence_option,
                lapp_previous_permanence_la,
+               lapp_previous_permanence_order_date,
                lapp_previous_permanence_order_date_json
            )
 SELECT
@@ -2793,18 +2797,44 @@ SELECT
     ff.DIM_PERSON_ID AS lapp_person_id,
     COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_option,
     COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG'        THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_la,
+    CASE 
+        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END)) = 0 AND 
+             CAST(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END) AS INT) BETWEEN 1 AND 31 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END) 
+        ELSE 'zz' 
+    END + '/' + 
+ -- Adjusted CASE statement for ORDERMONTH to convert month names to numbers
+    CASE 
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('January', 'Jan')  THEN '01'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('February', 'Feb') THEN '02'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('March', 'Mar')    THEN '03'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('April', 'Apr')    THEN '04'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('May')             THEN '05'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('June', 'Jun')     THEN '06'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('July', 'Jul')     THEN '07'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('August', 'Aug')   THEN '08'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('September', 'Sep') THEN '09'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('October', 'Oct')  THEN '10'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('November', 'Nov') THEN '11'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('December', 'Dec') THEN '12'
+        ELSE 'zz' -- also handles 'unknown' string
+    END + '/' + 
+    CASE 
+        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END)) = 0 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END) 
+        ELSE 'zz' 
+    END
+    AS lapp_previous_permanence_order_date,
     (
         SELECT
- 
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'  THEN sub.ANSWER END) AS 'ORDERYEAR',
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'  THEN sub.ANSWER END) AS 'ORDERDATE',
             MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH' THEN sub.ANSWER END) AS 'ORDERMONTH',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'  THEN sub.ANSWER END) AS 'ORDERDATE'
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'  THEN sub.ANSWER END) AS 'ORDERYEAR'
         FROM
             Child_Social.FACT_FORM_ANSWERS sub
         WHERE
             sub.FACT_FORM_ID = ff.FACT_FORM_ID
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS lapp_previous_permanence_order_date_json
+
 FROM
     #ssd_TMP_PRE_previous_permanence tmp_ffa
 JOIN

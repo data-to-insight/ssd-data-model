@@ -2048,9 +2048,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 12/01/24
+Last Modified Date: 060324
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.0
+            0.9: cla_placement_id added as part of cla_placements review RH 060324
+            0.8: 120124
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
 Dependencies: 
@@ -2075,6 +2077,7 @@ IF OBJECT_ID('ssd_cla_episodes') IS NOT NULL DROP TABLE ssd_cla_episodes;
 CREATE TABLE ssd_cla_episodes (
     clae_cla_episode_id                 NVARCHAR(48) PRIMARY KEY,
     clae_person_id                      NVARCHAR(48),
+    clae_cla_placement_id               NVARCHAR(48), -- ADDED 
     clae_cla_episode_start              DATETIME,
     clae_cla_episode_start_reason       NVARCHAR(100),
     clae_cla_primary_need               NVARCHAR(100),
@@ -2082,13 +2085,15 @@ CREATE TABLE ssd_cla_episodes (
     clae_cla_episode_cease_reason       NVARCHAR(255),
     clae_cla_id                         NVARCHAR(48),
     clae_referral_id                    NVARCHAR(48),
-    clae_cla_review_last_iro_contact_date DATETIME
+    clae_cla_review_last_iro_contact_date DATETIME,
+    clae_entered_care_date              DATETIME      -- ADDED
 );
  
 -- Insert data
 INSERT INTO ssd_cla_episodes (
     clae_cla_episode_id,
     clae_person_id,
+    clae_cla_placement_id,
     clae_cla_episode_start,
     clae_cla_episode_start_reason,
     clae_cla_primary_need,
@@ -2096,10 +2101,12 @@ INSERT INTO ssd_cla_episodes (
     clae_cla_episode_cease_reason,
     clae_cla_id,
     clae_referral_id,
-    clae_cla_review_last_iro_contact_date
+    clae_cla_review_last_iro_contact_date,
+    clae_entered_care_date 
 )
 SELECT
     fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
+    fce.FACT_CLA_PLACEMENT_ID               AS clae_cla_placement_id,
     fce.DIM_PERSON_ID                       AS clae_person_id,
     fce.CARE_START_DATE                     AS clae_cla_episode_start,
     fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
@@ -2112,8 +2119,8 @@ SELECT
         --AND cn.DIM_CREATED_BY_DEPT_ID IN (5956,727)
         AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
         THEN cn.EVENT_DTTM END))                                                        
-                                            AS clae_cla_review_last_iro_contact_date
- 
+                                            AS clae_cla_review_last_iro_contact_date,
+    fc.START_DTTM                           AS clae_entered_care_date -- [TESTING] Added RH 060324
  
 FROM
     Child_Social.FACT_CARE_EPISODES AS fce
@@ -2122,7 +2129,10 @@ JOIN
  
 LEFT JOIN
     Child_Social.FACT_CASENOTES cn               ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
- 
+
+LEFT JOIN -- [TESTING] Added RH 060324
+    Child_Social.FACT_CLA AS fc ON fc.FACT_CLA_ID = fce.FACT_CLA_ID
+
 WHERE EXISTS ( -- only ssd relevant records
     SELECT 1
     FROM ssd_person p
@@ -2132,6 +2142,7 @@ WHERE EXISTS ( -- only ssd relevant records
 GROUP BY
     fce.FACT_CARE_EPISODES_ID,
     fce.DIM_PERSON_ID,
+    fce.FACT_CLA_PLACEMENT_ID,
     fce.CARE_START_DATE,
     fce.CARE_REASON_DESC,
     fce.CIN_903_CODE,
@@ -2152,10 +2163,15 @@ CREATE NONCLUSTERED INDEX idx_ssd_clae_referral_id ON ssd_cla_episodes(clae_refe
 
 CREATE NONCLUSTERED INDEX idx_ssd_clae_review_last_iro_contact ON ssd_cla_episodes(clae_cla_review_last_iro_contact_date);
 
+CREATE NONCLUSTERED INDEX idx_clae_cla_placement_id ON ssd_cla_episodes(clae_cla_placement_id);
+
 
 -- Add constraint(s)
 ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_person 
 FOREIGN KEY (clae_person_id) REFERENCES ssd_person (pers_person_id);
+
+ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_cla_placement_id
+FOREIGN KEY (clae_cla_placement_id) REFERENCES ssd_cla_placements (clap_cla_placement_id);
 
 
 -- [TESTING] Increment /print progress
@@ -2483,9 +2499,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_placement
 Description: 
 Author: D2I
-Last Modified Date: 09/01/23
+Last Modified Date: 060324 
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.0 
+            0.9 Corrected/removal of placement_la & episode_id 090124 RH
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
 Dependencies: 
@@ -2510,12 +2527,12 @@ CREATE TABLE ssd_cla_placement (
     clap_cla_placement_type             NVARCHAR(100),
     clap_cla_placement_urn              NVARCHAR(48),
     clap_cla_placement_distance         FLOAT, -- Float precision determined by value (or use DECIMAL(3, 2), -- Adjusted to fixed precision)
-    clap_cla_placement_la               NVARCHAR(48),
     clap_cla_placement_provider         NVARCHAR(48),
     clap_cla_placement_postcode         NVARCHAR(8),
     clap_cla_placement_end_date         DATETIME,
     clap_cla_placement_change_reason    NVARCHAR(100)
 );
+ 
  
 -- Insert data
 INSERT INTO ssd_cla_placement (
@@ -2525,7 +2542,6 @@ INSERT INTO ssd_cla_placement (
     clap_cla_placement_type,
     clap_cla_placement_urn,
     clap_cla_placement_distance,
-    clap_cla_placement_la,
     clap_cla_placement_provider,
     clap_cla_placement_postcode,
     clap_cla_placement_end_date,
@@ -2546,7 +2562,6 @@ SELECT
     )                                           AS clap_cla_placement_urn,
  
     TRY_CAST(fcp.DISTANCE_FROM_HOME AS FLOAT)   AS clap_cla_placement_distance,                         -- convert to FLOAT (source col is nvarchar, also holds nulls/ints)
-    'PLACEHOLDER_DATA'                          AS clap_cla_placement_la,                               -- [PLACEHOLDER_DATA] [TESTING]
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
  
     CASE -- removal of common/invalid placeholder data i.e ZZZ, XX
@@ -2565,6 +2580,7 @@ FROM
 WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1','F2','F3','F4','F5','F6','H1','H2','H3',
                                             'H4','H5','H5a','K1','K2','M2','M3','P1','P2','Q1','Q2','R1','R2','R3',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
+
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clap_cla_placement_urn ON ssd_cla_placement (clap_cla_placement_urn);
@@ -2764,7 +2780,8 @@ CREATE TABLE ssd_cla_previous_permanence (
     lapp_person_id                              NVARCHAR(48),
     lapp_previous_permanence_option             NVARCHAR(200),
     lapp_previous_permanence_la                 NVARCHAR(100),
-    lapp_previous_permanence_order_date_json    NVARCHAR(MAX)
+    lapp_previous_permanence_order_date         NVARCHAR(10),
+    lapp_previous_permanence_order_date_json    NVARCHAR(MAX),
 );
  
 -- Insert data
@@ -2773,6 +2790,7 @@ INSERT INTO ssd_cla_previous_permanence (
                lapp_person_id,
                lapp_previous_permanence_option,
                lapp_previous_permanence_la,
+               lapp_previous_permanence_order_date,
                lapp_previous_permanence_order_date_json
            )
 SELECT
@@ -2780,18 +2798,43 @@ SELECT
     ff.DIM_PERSON_ID AS lapp_person_id,
     COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_option,
     COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG'        THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_la,
+    CASE 
+        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END)) = 0 AND 
+             CAST(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END) AS INT) BETWEEN 1 AND 31 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END) 
+        ELSE 'zz' 
+    END + '/' + 
+ -- Adjusted CASE statement for ORDERMONTH to convert month names to numbers
+    CASE 
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('January', 'Jan')  THEN '01'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('February', 'Feb') THEN '02'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('March', 'Mar')    THEN '03'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('April', 'Apr')    THEN '04'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('May')             THEN '05'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('June', 'Jun')     THEN '06'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('July', 'Jul')     THEN '07'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('August', 'Aug')   THEN '08'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('September', 'Sep') THEN '09'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('October', 'Oct')  THEN '10'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('November', 'Nov') THEN '11'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('December', 'Dec') THEN '12'
+        ELSE 'zz' -- also handles 'unknown' string
+    END + '/' + 
+    CASE 
+        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END)) = 0 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END) 
+        ELSE 'zz' 
+    END
+    AS lapp_previous_permanence_order_date,
     (
         SELECT
- 
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'  THEN sub.ANSWER END) AS 'ORDERYEAR',
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'  THEN sub.ANSWER END) AS 'ORDERDATE',
             MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH' THEN sub.ANSWER END) AS 'ORDERMONTH',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'  THEN sub.ANSWER END) AS 'ORDERDATE'
+            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'  THEN sub.ANSWER END) AS 'ORDERYEAR'
         FROM
             Child_Social.FACT_FORM_ANSWERS sub
         WHERE
             sub.FACT_FORM_ID = ff.FACT_FORM_ID
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) AS lapp_previous_permanence_order_date_json
+    ) AS lapp_previous_permanence_order_date_json   
 FROM
     #ssd_TMP_PRE_previous_permanence tmp_ffa
 JOIN
@@ -3496,10 +3539,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_permanence
 Description: 
 Author: D2I
-Last Modified Date: 09/02/24 RH
+Last Modified Date: 060324
 DB Compatibility: SQL Server 2014+|...
-Version: 1.8
-        1.7: perm_adopter_sex, perm_adopter_legal_status added RH
+Version: 1.0
+            0.9 entered_care_date removed/moved to cla_episodes RH 060324
+            0.7: perm_adopter_sex, perm_adopter_legal_status added RH
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
 Remarks: 
         DEV: 181223: Assumed that only one permanence order per child. 
@@ -3532,7 +3576,6 @@ CREATE TABLE ssd_permanence (
     adoption_table_id                    NVARCHAR(48),  
     perm_person_id                       NVARCHAR(48),
     perm_cla_id                          NVARCHAR(48),
-    perm_entered_care_date               DATETIME,              
     perm_adm_decision_date               DATETIME,
     perm_part_of_sibling_group           NCHAR(1),
     perm_siblings_placed_together        INT,
@@ -3566,7 +3609,6 @@ WITH RankedPermanenceData AS (
         fa.FACT_ADOPTION_ID                               AS adoption_table_id,
         p.LEGACY_ID                                       AS perm_person_id,
         fce.FACT_CLA_ID                                   AS perm_cla_id,
-        fc.START_DTTM                                     AS perm_entered_care_date,
         fa.DECISION_DTTM                                  AS perm_adm_decision_date,              
         fa.SIBLING_GROUP                                  AS perm_part_of_sibling_group,
         fa.NUMBER_TOGETHER                                AS perm_siblings_placed_together,
@@ -3606,7 +3648,7 @@ WITH RankedPermanenceData AS (
         )                                                 AS rn -- we only want rn==1
     FROM Child_Social.FACT_CARE_EPISODES fce
     LEFT JOIN Child_Social.FACT_ADOPTION AS fa ON fa.DIM_PERSON_ID = fce.DIM_PERSON_ID AND fa.START_DTTM IS NOT NULL
-    LEFT JOIN Child_Social.FACT_CLA AS fc ON fc.FACT_CLA_ID = fce.FACT_CLA_ID
+    LEFT JOIN Child_Social.FACT_CLA AS fc ON fc.FACT_CLA_ID = fce.FACT_CLA_ID -- [TESTING] IS this still requ if fc.START_DTTM not in use here? 
     LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl ON fcpl.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
         AND fcpl.FACT_CLA_PLACEMENT_ID <> '-1'
         AND (fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3', 'A4', 'A5', 'A6') OR fcpl.FFA_IS_PLAN_DATE IS NOT NULL)
@@ -3630,7 +3672,6 @@ INSERT INTO ssd_permanence (
     adoption_table_id,
     perm_person_id,
     perm_cla_id,
-    perm_entered_care_date,
     perm_adm_decision_date,
     perm_part_of_sibling_group,
     perm_siblings_placed_together,
@@ -3655,7 +3696,6 @@ SELECT
     adoption_table_id,
     perm_person_id,
     perm_cla_id,
-    perm_entered_care_date,
     perm_adm_decision_date,
     perm_part_of_sibling_group,
     perm_siblings_placed_together,
@@ -3684,7 +3724,6 @@ AND EXISTS
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id ON ssd_permanence(perm_person_id);
 
-CREATE NONCLUSTERED INDEX idx_ssd_perm_entered_care_date ON ssd_permanence(perm_entered_care_date);
 CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date ON ssd_permanence(perm_adm_decision_date);
 CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date ON ssd_permanence(perm_permanence_order_date);
 
