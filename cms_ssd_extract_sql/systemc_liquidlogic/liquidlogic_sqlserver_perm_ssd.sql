@@ -51,8 +51,8 @@ Description: person/child details
 Author: D2I
 Last Modified Date: 12/01/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5 Additional inclusion criteria added to capture care leavers 120324 JH
+Version: 1.0
+            0.1 Additional inclusion criteria added to capture care leavers 120324 JH
 
 Status: [Dev, Testing, *Release, Blocked, AwaitingReview, Backlog]
 Remarks:    
@@ -224,7 +224,7 @@ Description:
 Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.0
 Status: [Dev, Testing, *Release, Blocked, AwaitingReview, Backlog]
 Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 Dependencies: 
@@ -294,7 +294,7 @@ Description:
 Author: D2I
 Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 Dependencies: 
@@ -400,7 +400,7 @@ Description:
 Author: D2I
 Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -481,7 +481,7 @@ Description:
 Author: D2I
 Last Modified Date: 23/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -560,8 +560,8 @@ Description:
 Author: D2I
 Last Modified Date: 28/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-            1.2 updated to exclude relationships with an end date 280224 JH
+Version: 1.0
+            0.2 updated to exclude relationships with an end date 280224 JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
 Dependencies: 
@@ -651,7 +651,7 @@ Description:
 Author: D2I
 Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -728,9 +728,9 @@ Description:
 Author: D2I
 Last Modified Date: 26/01/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5 cont_contact_source (_code) field name edit RH
-            1.4 cont_contact_source_desc added RH
+Version: 1.0
+            0.2 cont_contact_source (_code) field name edit RH
+            0.1 cont_contact_source_desc added RH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:Inclusion in contacts might differ between LAs. 
         Baseline definition:
@@ -826,7 +826,7 @@ Description:
 Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -909,8 +909,8 @@ Description:
 Author: D2I
 Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-            1.4: contact_source_desc added, _source now populated with ID
+Version: 1.0
+            0.1: contact_source_desc added, _source now populated with ID
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -1023,7 +1023,7 @@ Description:
 Author: D2I
 Last Modified Date: 04/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -1140,7 +1140,7 @@ Description:
 Author: D2I
 Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.4
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: This object referrences some large source tables- Instances of 45m+. 
 Dependencies: 
@@ -1287,8 +1287,8 @@ Description:
 Author: D2I
 Last Modified Date: 07/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-            1.4: Update fix returning new row for each revision of the plan JH 070224
+Version: 1.0
+            0.1: Update fix returning new row for each revision of the plan JH 070224
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -1395,7 +1395,7 @@ Description:
 Author: D2I
 Last Modified Date: 10/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:    Source table can be very large! Avoid any unfiltered queries.
             Notes: Does this need to be filtered by only visits in their current Referral episode?
@@ -1483,7 +1483,7 @@ Description:
 Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -1594,8 +1594,8 @@ Description:
 Author: D2I
 Last Modified Date: 01/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1 
-            1.0 Re-instated the worker details 010224 JH
+Version: 1.0
+            0.1 Re-instated the worker details 010224 JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -1720,10 +1720,10 @@ Description:
 Author: D2I
 Last Modified Date: 09/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5 added IS_OLA field to identify OLA temporary plans
+Version: 1.0
+            0.3: added IS_OLA field to identify OLA temporary plans
             which need to be excluded from statutory returns JCH
-            1.4 removed depreciated team_id and worker id fields RH
+            0.2: removed depreciated team_id and worker id fields RH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:
 Dependencies:
@@ -1823,8 +1823,8 @@ Description:
 Author: D2I
 Last Modified Date: 13/02/24 JH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-            1.4: cppv_person_id added, where claus removed 'STVCPCOVID' 130224 JH
+Version: 1.0
+            0.2: cppv_person_id added, where claus removed 'STVCPCOVID' 130224 JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: Not all CP Visit Casenotes have a link back to the CP Visit -
          using casenote ID as PK and linking to CP Visit where available.
@@ -1917,8 +1917,8 @@ Description:
 Author: D2I
 Last Modified Date: 13/02/24 JH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5: Resolved issue with linking to Quoracy information 130224 JH
+Version: 1.0
+            0.1: Resolved issue with linking to Quoracy information 130224 JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:    cppr_cp_review_participation - ON HOLD/Not included in SSD Ver/Iteration 1
             Resolved issue with linking to Quoracy information. Added fm.FACT_MEETING_ID
@@ -2055,7 +2055,6 @@ Last Modified Date: 060324
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.9: cla_placement_id added as part of cla_placements review RH 060324
-            0.8: 120124
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -2190,7 +2189,7 @@ Description:
 Author: D2I
 Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -2262,7 +2261,7 @@ Description:
 Author: D2I
 Last Modified Date: 12/12/23 JH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 1.5 JH updated source for clah_health_check_type to resolve blanks.
             Updated to use DIM_LOOKUP_EXAM_STATUS_DESC as opposed to _CODE
@@ -2346,9 +2345,9 @@ Description:
 Author: D2I
 Last Modified Date: 22/02/24 
 DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5 most recent status reworked / 903 source removed 220224 JH
-            1.4 clai_immunisations_status_date removed RH
+Version: 1.0
+            0.2: most recent status reworked / 903 source removed 220224 JH
+            0.1: clai_immunisations_status_date removed RH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -2430,7 +2429,7 @@ Description:
 Author: D2I
 Last Modified Date: 14/11/2023
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -2505,7 +2504,7 @@ Author: D2I
 Last Modified Date: 060324 
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0 
-            0.9 Corrected/removal of placement_la & episode_id 090124 RH
+            0.1: Corrected/removal of placement_la & episode_id 090124 RH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
 Dependencies: 
@@ -2619,8 +2618,8 @@ Description:
 Author: D2I
 Last Modified Date: 12/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5: clar_cla_id change from clar_cla_episode_id
+Version: 1.0
+            0.1: clar_cla_id change from clar_cla_episode_id
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -2736,7 +2735,7 @@ Description:
 Author: D2I
 Last Modified Date: 21/02/24 JH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley.
         1.5 JH tmp table was not being referenced, updated query and reduced running
@@ -2878,8 +2877,8 @@ Description:
 Author: D2I
 Last Modified Date: 19/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5: Altered _json keys and groupby towards > clarity JH
+Version: 1.0
+            0.1: Altered _json keys and groupby towards > clarity JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:    Added short codes to plan type questions to improve readability.
             Removed form type filter, only filtering ffa. on ANSWER_NO.
@@ -3019,9 +3018,9 @@ Description:
 Author: D2I
 Last Modified Date: 15/02/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.7
-            1.6 FK updated to person_id. change from clav.VISIT_DTTM  JH
-            1.5 pers_id and cla_id added JH
+Version: 1.0
+            0.: FK updated to person_id. change from clav.VISIT_DTTM  JH
+            0.1: pers_id and cla_id added JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:
 Dependencies:
@@ -3116,7 +3115,7 @@ Description:
 Author: D2I
 Last Modified Date: 18/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.7
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
         Removed csdq_form_id as the form id is also being used as csdq_table_id
@@ -3269,7 +3268,7 @@ Description:
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -3361,11 +3360,10 @@ Description:
 Author: D2I
 Last Modified Date: 12/03/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.8
-            1.7: change of main source to DIM_CLA_ELIGIBILITY in order to capture full care leaver cohort JH
-            1.6: switch field _worker)nm and _team_nm around as in wrong order RH
-            1.5: worker/p.a id field changed to descriptive name towards AA reporting JH
- 
+Version: 1.0
+            0.3: change of main source to DIM_CLA_ELIGIBILITY in order to capture full care leaver cohort 12/03/24 JH
+            0.2: switch field _worker)nm and _team_nm around as in wrong order RH
+            0.1: worker/p.a id field changed to descriptive name towards AA reporting JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
@@ -3552,8 +3550,8 @@ Author: D2I
 Last Modified Date: 060324
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
-            0.9 entered_care_date removed/moved to cla_episodes RH 060324
-            0.7: perm_adopter_sex, perm_adopter_legal_status added RH
+            0.2: entered_care_date removed/moved to cla_episodes RH 060324
+            0.1: perm_adopter_sex, perm_adopter_legal_status added RH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
         DEV: 181223: Assumed that only one permanence order per child. 
@@ -3758,7 +3756,7 @@ Description:
 Author: D2I
 Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -3817,7 +3815,7 @@ SELECT
     dw.STAFF_ID                       AS prof_professional_id,
     CONCAT(dw.SURNAME, ' ', dw.FORENAME) AS prof_professional_name,         -- used also as Allocated Worker|Assigned Worker
     dw.WORKER_ID_CODE                 AS prof_social_worker_registration_no,
-    ''                               AS prof_agency_worker_flag,           -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
+    ''                               AS prof_agency_worker_flag,            -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
     dw.JOB_TITLE                      AS prof_professional_job_title,
     ISNULL(rc.OpenCases, 0)           AS prof_professional_caseload,        -- 0 when no open cases on given date.
     dw.DEPARTMENT_NAME                AS prof_professional_department,
@@ -3864,7 +3862,7 @@ Description:
 Author: D2I
 Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -3954,9 +3952,20 @@ Description:
 Author: D2I
 Last Modified Date: 02/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
-Remarks: 
+Remarks: The list of allowed identifier_type codes are:
+            ['Case Number', 
+            'Unique Pupil Number', 
+            'NHS Number', 
+            'Home Office Registration', 
+            'National Insurance Number', 
+            'YOT Number', 
+            'Court Case Number', 
+            'RAA ID', 
+            'Incident ID']
+            To have any further codes agreed into the standard, issue a change request
+
 Dependencies: 
 - Yet to be defined
 =============================================================================
@@ -3964,7 +3973,6 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_linked_identifiers';
 PRINT 'Creating table: ' + @TableName;
-
 
 
 -- Check if exists, & drop 
@@ -3981,26 +3989,19 @@ CREATE TABLE ssd_linked_identifiers (
     link_valid_to_date      DATETIME
 );
 
--- Insert placeholder data [TESTING]
-INSERT INTO ssd_linked_identifiers (
-    -- row id ommitted as ID generated (link_link_id,)
-    link_person_id,
-    link_identifier_type,
-    link_identifier_value,
-    link_valid_from_date,
-    link_valid_to_date
-)
-VALUES
-    ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01');
+-- -- Insert placeholder data [TESTING]
+-- INSERT INTO ssd_linked_identifiers (
+--     -- row id ommitted as ID generated (link_link_id,)
+--     link_person_id,
+--     link_identifier_type,
+--     link_identifier_value,
+--     link_valid_from_date,
+--     link_valid_to_date
+-- )
+-- VALUES
+--     ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01');
 
 
--- To switch on once source data defined.
--- WHERE EXISTS 
---      ( -- only ssd relevant records
---     SELECT 1 
---     FROM ssd_person p
---     WHERE p.pers_person_id = ssd_linked_identifiers.DIM_PERSON_ID
---     );
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_link_person_id ON ssd_linked_identifiers(link_person_id);
@@ -4041,7 +4042,7 @@ Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Last Modified Date: 02/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.0
 Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
@@ -4106,7 +4107,7 @@ Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 1.3
+Version: 1.0
 Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -4181,7 +4182,7 @@ Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Last Modified Date: 02/11/23
 DB Compatibility: SQL Server 2014+|...
-Version: 0.1
+Version: 1.0
 Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
@@ -4322,7 +4323,7 @@ Description:
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
+Version: 1.0
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -4644,7 +4645,7 @@ Description:
 Author: D2I
 Last Modified Date: 12/01/24
 DB Compatibility: SQL Server 2014+|...
-Version: 0.9
+Version: 0.1
 Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
