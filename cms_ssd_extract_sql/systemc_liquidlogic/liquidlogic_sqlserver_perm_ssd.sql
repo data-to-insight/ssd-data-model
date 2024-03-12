@@ -51,18 +51,21 @@ Description: person/child details
 Author: D2I
 Last Modified Date: 12/01/24 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.6
+            1.5 Additional inclusion criteria added to capture care leavers 120324 JH
 
+Status: [Dev, Testing, *Release, Blocked, AwaitingReview, Backlog]
 Remarks:    
             Note: Due to part reliance on 903 table, be aware that if 903 not populated pre-ssd run, 
             this/subsequent queries can return v.low|unexpected row counts.
-Dependencies: 
+            
+Dependencies:
 - Child_Social.DIM_PERSON
 - Child_Social.FACT_REFERRALS
 - Child_Social.FACT_CONTACTS
-- Child_Social.FACT_EHCP_EPISODE
 - Child_Social.FACT_903_DATA
+- Child_Social.FACT_CLA_CARE_LEAVERS
+- Child_Social.DIM_CLA_ELIGIBILITY
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -80,11 +83,11 @@ CREATE TABLE ssd_person (
     pers_legacy_id          NVARCHAR(48),
     pers_person_id          NVARCHAR(48) PRIMARY KEY,
     pers_sex                NVARCHAR(48),
-    pers_gender             NVARCHAR(48),                   
+    pers_gender             NVARCHAR(48),                  
     pers_ethnicity          NVARCHAR(38),
     pers_dob                DATETIME,
     pers_common_child_id    NVARCHAR(10),                   -- [TESTING] [Takes NHS Number]
-    pers_upn_unknown        NVARCHAR(10),
+    -- pers_upn_unknown        NVARCHAR(10),                
     pers_send               NVARCHAR(1),
     pers_expected_dob       DATETIME,                       -- Date or NULL
     pers_death_date         DATETIME,
@@ -101,7 +104,7 @@ INSERT INTO ssd_person (
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,                               -- [TESTING] [Takes NHS Number]
-    pers_upn_unknown,
+    -- pers_upn_unknown,                                -- [TESTING]
     pers_send,
     pers_expected_dob,
     pers_death_date,
@@ -112,24 +115,24 @@ SELECT
     p.LEGACY_ID,
     p.DIM_PERSON_ID,
     p.GENDER_MAIN_CODE,
-    p.NHS_NUMBER,                                       -- [TESTING] [Takes NHS Number]
+    p.NHS_NUMBER,                                       -- [TESTING]
     p.ETHNICITY_MAIN_CODE,
         CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL END,                                  --  or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
-    f903.NO_UPN_CODE,
+    -- f903.NO_UPN_CODE,                                -- [TESTING] as 903 table refresh only in reporting period
     p.EHM_SEN_FLAG,
         CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
         ELSE NULL END,                                  --  or NULL
     p.DEATH_DTTM,
-    CASE 
+    CASE
         WHEN p.GENDER_MAIN_CODE <> 'M' AND              -- Assumption that if male is not mother
-             EXISTS (SELECT 1 FROM Child_Social.FACT_PERSON_RELATION fpr 
-                     WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND 
+             EXISTS (SELECT 1 FROM Child_Social.FACT_PERSON_RELATION fpr
+                     WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND
                            fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI')  -- check for child relation only
-        THEN 'Y' 
+        THEN 'Y'
         ELSE NULL -- No child relation found
     END,
     p.NATNL_CODE
@@ -137,10 +140,10 @@ SELECT
 FROM
     Child_Social.DIM_PERSON AS p
  
-LEFT JOIN
-    Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
+-- Removed only to allow [TESTING] as 903 table refresh only in reporting period
+-- LEFT JOIN
+--     Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
  
-
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
     AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
@@ -165,6 +168,12 @@ AND (                                                       -- Filter irrelevant
         SELECT 1 FROM Child_Social.FACT_CLA_CARE_LEAVERS fccl
         WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
         AND fccl.IN_TOUCH_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+    )
+    OR EXISTS (
+        -- care leaver eligibility exists
+        SELECT 1 FROM Child_Social.DIM_CLA_ELIGIBILITY dce
+        WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
+        AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
     )
 );
 
@@ -216,7 +225,7 @@ Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Dev, Testing, *Release, Blocked, AwaitingReview, Backlog]
 Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 Dependencies: 
 - FACT_CONTACTS
@@ -286,7 +295,7 @@ Author: D2I
 Last Modified Date: 21/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 Dependencies: 
 - ssd_person
@@ -392,7 +401,7 @@ Author: D2I
 Last Modified Date: 03/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -473,7 +482,7 @@ Author: D2I
 Last Modified Date: 23/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -552,8 +561,8 @@ Author: D2I
 Last Modified Date: 28/02/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-            1.2 JH updated to exclude relationships with an end date 28/02/24
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+            1.2 updated to exclude relationships with an end date 280224 JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
 Dependencies: 
 - ssd_person
@@ -643,7 +652,7 @@ Author: D2I
 Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -722,12 +731,10 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.6
             1.5 cont_contact_source (_code) field name edit RH
             1.4 cont_contact_source_desc added RH
-
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:Inclusion in contacts might differ between LAs. 
         Baseline definition:
         Contains safeguarding and referral to early help data.
-   
 Dependencies: 
 - ssd_person
 - FACT_CONTACTS
@@ -820,7 +827,7 @@ Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -904,8 +911,7 @@ Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
             1.4: contact_source_desc added, _source now populated with ID
-
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - @ssd_timeframe_years
@@ -1018,7 +1024,7 @@ Author: D2I
 Last Modified Date: 04/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1135,7 +1141,7 @@ Author: D2I
 Last Modified Date: 14/12/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.4
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: This object referrences some large source tables- Instances of 45m+. 
 Dependencies: 
 - ssd_cin_assessments
@@ -1282,8 +1288,8 @@ Author: D2I
 Last Modified Date: 07/02/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
-            1.4: JH Updates to avoid bringing through a separate row for each revision of the plan
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+            1.4: Update fix returning new row for each revision of the plan JH 070224
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1390,7 +1396,7 @@ Author: D2I
 Last Modified Date: 10/01/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:    Source table can be very large! Avoid any unfiltered queries.
             Notes: Does this need to be filtered by only visits in their current Referral episode?
                     however for some this ==2 weeks, others==~17 years
@@ -1478,7 +1484,7 @@ Author: D2I
 Last Modified Date: 22/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1589,8 +1595,8 @@ Author: D2I
 Last Modified Date: 01/02/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1 
-            1.0 RH Re-instated the worker details
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+            1.0 Re-instated the worker details 010224 JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - FACT_S47
@@ -1715,13 +1721,11 @@ Author: D2I
 Last Modified Date: 09/02/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.6
-            1.4 removed depreciated team_id and worker id fields RH
-            1.6 added IS_OLA field to identify OLA temporary plans
+            1.5 added IS_OLA field to identify OLA temporary plans
             which need to be excluded from statutory returns JCH
- 
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+            1.4 removed depreciated team_id and worker id fields RH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:
- 
 Dependencies:
 - ssd_person
 - ssd_initial_cp_conference
@@ -1820,8 +1824,8 @@ Author: D2I
 Last Modified Date: 13/02/24 JH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
-            1.4: cppv_person_id added, where claus removed 'STVCPCOVID' JH
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+            1.4: cppv_person_id added, where claus removed 'STVCPCOVID' 130224 JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: Not all CP Visit Casenotes have a link back to the CP Visit -
          using casenote ID as PK and linking to CP Visit where available.
          Will have to use Person ID to link object to Person table
@@ -1914,10 +1918,9 @@ Author: D2I
 Last Modified Date: 13/02/24 JH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.6
-            1.5: Resolved issue with linking to Quoracy information JH
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+            1.5: Resolved issue with linking to Quoracy information 130224 JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:    cppr_cp_review_participation - ON HOLD/Not included in SSD Ver/Iteration 1
-            Tested in batch 1.3.
             Resolved issue with linking to Quoracy information. Added fm.FACT_MEETING_ID
             so users can identify conferences including multiple children. Reviews held
             pre-LCS implementation don't have a CP_PLAN_ID recorded so have added
@@ -2053,7 +2056,7 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.9: cla_placement_id added as part of cla_placements review RH 060324
             0.8: 120124
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_involvements
@@ -2188,7 +2191,7 @@ Author: D2I
 Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -2260,7 +2263,7 @@ Author: D2I
 Last Modified Date: 12/12/23 JH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 1.5 JH updated source for clah_health_check_type to resolve blanks.
             Updated to use DIM_LOOKUP_EXAM_STATUS_DESC as opposed to _CODE
             to inprove readability.
@@ -2341,12 +2344,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_immunisations
 Description: 
 Author: D2I
-Last Modified Date: 22/02/23 
+Last Modified Date: 22/02/24 
 DB Compatibility: SQL Server 2014+|...
 Version: 1.6
-            1.5 most recent status reworked / 903 source removed JH
+            1.5 most recent status reworked / 903 source removed 220224 JH
             1.4 clai_immunisations_status_date removed RH
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -2428,7 +2431,7 @@ Author: D2I
 Last Modified Date: 14/11/2023
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -2503,7 +2506,7 @@ Last Modified Date: 060324
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0 
             0.9 Corrected/removal of placement_la & episode_id 090124 RH
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
 Dependencies: 
 - ssd_person
@@ -2618,8 +2621,7 @@ Last Modified Date: 12/01/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.6
             1.5: clar_cla_id change from clar_cla_episode_id
-
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_cla_episodes
@@ -2735,7 +2737,7 @@ Author: D2I
 Last Modified Date: 21/02/24 JH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.5
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley.
         1.5 JH tmp table was not being referenced, updated query and reduced running
         time considerably, also filtered out rows where ANSWER IS NULL
@@ -2878,7 +2880,7 @@ Last Modified Date: 19/02/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.6
             1.5: Altered _json keys and groupby towards > clarity JH
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:    Added short codes to plan type questions to improve readability.
             Removed form type filter, only filtering ffa. on ANSWER_NO.
 Dependencies:
@@ -3020,8 +3022,7 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.7
             1.6 FK updated to person_id. change from clav.VISIT_DTTM  JH
             1.5 pers_id and cla_id added JH
-
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:
 Dependencies:
 - FACT_CARE_EPISODES
@@ -3116,7 +3117,7 @@ Author: D2I
 Last Modified Date: 18/01/24
 DB Compatibility: SQL Server 2014+|...
 Version: 1.7
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
         Removed csdq_form_id as the form id is also being used as csdq_table_id
         Added placeholder for csdq_sdq_reason
@@ -3269,7 +3270,7 @@ Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -3353,21 +3354,23 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/* 
+/*
 =============================================================================
 Object Name: ssd_care_leavers
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 26/01/24 
+Last Modified Date: 12/03/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.7
+Version: 1.8
+            1.7: change of main source to DIM_CLA_ELIGIBILITY in order to capture full care leaver cohort JH
             1.6: switch field _worker)nm and _team_nm around as in wrong order RH
             1.5: worker/p.a id field changed to descriptive name towards AA reporting JH
-
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions. 
+ 
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
-Dependencies: 
+            Dev: Revised V3/4 to aid performance on large involvements table aggr
+Dependencies:
 - FACT_INVOLVEMENTS
 - FACT_CLA_CARE_LEAVERS
 - DIM_CLA_ELIGIBILITY
@@ -3378,18 +3381,19 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_care_leavers';
 PRINT 'Creating table: ' + @TableName;
-
-
-
+ 
+ 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_care_leavers', 'U') IS NOT NULL DROP TABLE ssd_care_leavers;
 IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
-
-
+ 
+ 
 -- Create structure
 CREATE TABLE ssd_care_leavers
 (
     clea_table_id                           NVARCHAR(48),
+    clea_cl_table_id                        NVARCHAR(48),
+    clea_legacy_id                          NVARCHAR(48),  
     clea_person_id                          NVARCHAR(48),
     clea_care_leaver_eligibility            NVARCHAR(100),
     clea_care_leaver_in_touch               NVARCHAR(100),
@@ -3402,8 +3406,7 @@ CREATE TABLE ssd_care_leavers
     clea_care_leaver_allocated_team_name    NVARCHAR(48),
     clea_care_leaver_worker_name            NVARCHAR(48)        
 );
-
-
+ 
 /* V4 */
 -- CTE for involvement history incl. worker data
 -- aggregate/extract current worker infos, allocated team, and p.advisor ID
@@ -3423,7 +3426,6 @@ WITH InvolvementHistoryCTE AS (
             ) AS rn,
             -- Mark the involvement type ('CW' or '16PLUS')
             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
-
         FROM Child_Social.FACT_INVOLVEMENTS
         WHERE
             -- Filter records to just 'CW' and '16PLUS' inv types
@@ -3432,7 +3434,7 @@ WITH InvolvementHistoryCTE AS (
             -- AND END_DTTM IS NULL                 -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
             -- AND DIM_WORKER_ID IS NOT NULL        -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
             AND DIM_WORKER_ID <> -1                 -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-
+ 
             -- where the inv type is 'CW' + flagged as allocated
             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
                                                     -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
@@ -3442,58 +3444,72 @@ WITH InvolvementHistoryCTE AS (
     GROUP BY
         fi.DIM_PERSON_ID
 )
-
+ 
 -- Insert data
 INSERT INTO ssd_care_leavers
 (
-    clea_table_id, 
-    clea_person_id, 
-    clea_care_leaver_eligibility, 
-    clea_care_leaver_in_touch, 
-    clea_care_leaver_latest_contact, 
-    clea_care_leaver_accommodation, 
-    clea_care_leaver_accom_suitable, 
-    clea_care_leaver_activity, 
-    clea_pathway_plan_review_date, 
+    clea_table_id,
+    clea_cl_table_id,
+    clea_legacy_id,  
+    clea_person_id,
+    clea_care_leaver_eligibility,
+    clea_care_leaver_in_touch,
+    clea_care_leaver_latest_contact,
+    clea_care_leaver_accommodation,
+    clea_care_leaver_accom_suitable,
+    clea_care_leaver_activity,
+    clea_pathway_plan_review_date,
     clea_care_leaver_personal_advisor,                  
     clea_care_leaver_allocated_team_name,
-    clea_care_leaver_worker_name                   
+    clea_care_leaver_worker_name            
 )
-SELECT 
-    fccl.FACT_CLA_CARE_LEAVERS_ID                   AS clea_table_id, 
-    fccl.DIM_PERSON_ID                              AS clea_person_id, 
-    dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC          AS clea_care_leaver_eligibility, 
-    fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE              AS clea_care_leaver_in_touch, 
-    fccl.IN_TOUCH_DTTM                              AS clea_care_leaver_latest_contact, 
-    fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC         AS clea_care_leaver_accommodation, 
-    fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC     AS clea_care_leaver_accom_suitable, 
-    fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC              AS clea_care_leaver_activity, 
-
+ 
+SELECT
+    CONCAT(dce.DIM_CLA_ELIGIBILITY_ID, fccl.FACT_CLA_CARE_LEAVERS_ID)
+              AS clea_table_id,
+    fccl.FACT_CLA_CARE_LEAVERS_ID                           AS clea_cl_table_id,
+    p.LEGACY_ID                                             AS clea_legacy_id,                      --[TESTING]
+    dce.DIM_PERSON_ID                                       AS clea_person_id,
+    CASE WHEN
+        dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NULL
+        THEN 'No Current Eligibility'
+        ELSE dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC END     AS clea_care_leaver_eligibility,
+    fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE                      AS clea_care_leaver_in_touch,
+    fccl.IN_TOUCH_DTTM                                      AS clea_care_leaver_latest_contact,
+    fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC                 AS clea_care_leaver_accommodation,
+    fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC             AS clea_care_leaver_accom_suitable,
+    fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC                      AS clea_care_leaver_activity,
+ 
     MAX(CASE WHEN fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
         AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'
-        THEN fcp.MODIF_DTTM END)                    AS clea_pathway_plan_review_date,
-
-    ih.PersonalAdvisorName                          AS clea_care_leaver_personal_advisor,
-    ih.AllocatedTeamName                            AS clea_care_leaver_allocated_team_name,
-    ih.CurrentWorkerName                            AS clea_care_leaver_worker_name
-
-FROM 
-    Child_Social.FACT_CLA_CARE_LEAVERS AS fccl
-
-LEFT JOIN Child_Social.DIM_CLA_ELIGIBILITY AS dce ON fccl.DIM_PERSON_ID = dce.DIM_PERSON_ID     -- towards clea_care_leaver_eligibility
-
-LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID         -- towards clea_pathway_plan_review_date
-    AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'               
-
-LEFT JOIN InvolvementHistoryCTE AS ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID                  -- connect with CTE aggr data      
+        THEN fcp.MODIF_DTTM END)                            AS clea_pathway_plan_review_date,
  
-WHERE
-    -- Exists-on ssd_person clause should already filter these, this only a fail-safe
-    fccl.FACT_CLA_CARE_LEAVERS_ID <> -1
+    ih.PersonalAdvisorName                                  AS clea_care_leaver_personal_advisor,
+    ih.AllocatedTeamName                                    AS clea_care_leaver_allocated_team_name,
+    ih.CurrentWorkerName                                    AS clea_care_leaver_worker_name
+ 
+FROM
+    Child_Social.DIM_CLA_ELIGIBILITY AS dce
+ 
+LEFT JOIN Child_Social.FACT_CLA_CARE_LEAVERS AS fccl ON dce.DIM_PERSON_ID = fccl.DIM_PERSON_ID    -- towards clea_care_leaver_in_touch, _latest_contact, _accommodation, _accom_suitable and _activity
+ 
+LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID           -- towards clea_pathway_plan_review_date
+               
+LEFT JOIN Child_Social.DIM_PERSON p ON dce.DIM_PERSON_ID = p.DIM_PERSON_ID                        -- towards LEGACY_ID for testing only
+ 
+LEFT JOIN InvolvementHistoryCTE AS ih ON dce.DIM_PERSON_ID = ih.DIM_PERSON_ID                     -- connect with CTE aggr data      
+ 
+WHERE EXISTS ( -- only ssd relevant records
+    SELECT 1
+    FROM ssd_person p
+    WHERE p.pers_person_id = dce.DIM_PERSON_ID
+    )
  
 GROUP BY
+    dce.DIM_CLA_ELIGIBILITY_ID,
     fccl.FACT_CLA_CARE_LEAVERS_ID,
-    fccl.DIM_PERSON_ID,
+    p.LEGACY_ID,  
+    dce.DIM_PERSON_ID,
     dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC,
     fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE,
     fccl.IN_TOUCH_DTTM,
@@ -3504,8 +3520,6 @@ GROUP BY
     ih.CurrentWorkerName,
     ih.AllocatedTeamName          
     ;
-
-/* End V4 */
 
 
 
@@ -3519,10 +3533,6 @@ CREATE NONCLUSTERED INDEX idx_ssd_clea_pathway_plan_review_date ON ssd_care_leav
 -- Add constraint(s)
 ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
 FOREIGN KEY (clea_person_id) REFERENCES ssd_person(pers_person_id);
-
--- Removed as worker details directly pulled through
--- ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leaver_worker
--- FOREIGN KEY (clea_care_leaver_worker_id) REFERENCES ssd_involvements(invo_professional_id);
 
 
 
@@ -3544,7 +3554,7 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.9 entered_care_date removed/moved to cla_episodes RH 060324
             0.7: perm_adopter_sex, perm_adopter_legal_status added RH
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
         DEV: 181223: Assumed that only one permanence order per child. 
         - In order to handle/reflect the v.rare cases where this has broken down, further work is required.
@@ -3749,7 +3759,7 @@ Author: D2I
 Last Modified Date: 24/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - @LastSept30th
@@ -3855,7 +3865,7 @@ Author: D2I
 Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_professionals
@@ -3940,12 +3950,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_linked_identifiers
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: 
 Author: D2I
 Last Modified Date: 02/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4027,12 +4037,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_s251_finance
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Last Modified Date: 02/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4058,17 +4068,17 @@ CREATE TABLE ssd_s251_finance (
     s251_placeholder_4      NVARCHAR(48)
 );
 
--- Insert placeholder data [TESTING]
-INSERT INTO ssd_s251_finance (
-    -- row id ommitted as ID generated (s251_id,)
-    s251_cla_placement_id,
-    s251_placeholder_1,
-    s251_placeholder_2,
-    s251_placeholder_3,
-    s251_placeholder_4
-)
-VALUES
-    ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+-- -- Insert placeholder data [TESTING]
+-- INSERT INTO ssd_s251_finance (
+--     -- row id ommitted as ID generated (s251_id,)
+--     s251_cla_placement_id,
+--     s251_placeholder_1,
+--     s251_placeholder_2,
+--     s251_placeholder_3,
+--     s251_placeholder_4
+-- )
+-- VALUES
+--     ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
 
 
 -- Create index(es)
@@ -4092,12 +4102,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_voice_of_child
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Last Modified Date: 16/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4106,7 +4116,6 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_voice_of_child';
 PRINT 'Creating table: ' + @TableName;
-
 
 
 -- Check if exists, & drop 
@@ -4124,22 +4133,21 @@ CREATE TABLE ssd_voice_of_child (
     voch_tablet_help_explain    NCHAR(1)
 );
 
--- Insert placeholder data [TESTING]
-INSERT INTO ssd_voice_of_child (
-    -- row id ommitted as ID generated (voch_table_id,)
-    voch_person_id,
-    voch_explained_worries,
-    voch_story_help_understand,
-    voch_agree_worker,
-    voch_plan_safe,
-    voch_tablet_help_explain
-)
-VALUES
-VALUES
-    ('10001', 'Y', 'Y', 'Y', 'Y', 'Y'),
-    ('10002', 'Y', 'Y', 'Y', 'Y', 'Y');
+-- -- Insert placeholder data [TESTING]
+-- INSERT INTO ssd_voice_of_child (
+--     -- row id ommitted as ID generated (voch_table_id,)
+--     voch_person_id,
+--     voch_explained_worries,
+--     voch_story_help_understand,
+--     voch_agree_worker,
+--     voch_plan_safe,
+--     voch_tablet_help_explain
+-- )
+-- VALUES
+--     ('10001', 'Y', 'Y', 'Y', 'Y', 'Y'),
+--     ('10002', 'Y', 'Y', 'Y', 'Y', 'Y');
 
--- To switch on once source data defined.
+-- To switch on once source data for voice defined.
 -- WHERE EXISTS 
 --  ( -- only ssd relevant records
 --     SELECT 1 
@@ -4149,6 +4157,7 @@ VALUES
 
 
 -- Create index(es)
+CREATE NONCLUSTERED INDEX idx_ssd_voice_of_child_voch_person_id ON ssd_voice_of_child(voch_person_id);
 
 
 -- Create constraint(s)
@@ -4168,12 +4177,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_pre_proceedings
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Last Modified Date: 02/11/23
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4191,70 +4200,71 @@ IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pr
 
 -- Create structure
 CREATE TABLE ssd_pre_proceedings (
-    prep_table_id                       NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
-    prep_person_id                      NVARCHAR(48),
-    prep_plo_family_id                  NVARCHAR(48),
-    prep_pre_pro_decision_date          DATETIME,
-    prep_initial_pre_pro_meeting_date   DATETIME,
-    prep_pre_pro_outcome                NVARCHAR(100),
-    prep_agree_stepdown_issue_date      DATETIME,
-    prep_cp_plans_referral_period       INT, -- count cp plans the child has been subject within referral period (cin episode)
-    prep_legal_gateway_outcome          NVARCHAR(100),
-    prep_prev_pre_proc_child            INT,
-    prep_prev_care_proc_child           INT,
-    prep_pre_pro_letter_date            DATETIME,
-    prep_care_pro_letter_date           DATETIME,
-    prep_pre_pro_meetings_num           INT,
-    prep_pre_pro_parents_legal_rep      NCHAR(1), 
-    prep_parents_legal_rep_point_of_issue NCHAR(2),
-    prep_court_reference                NVARCHAR(48),
-    prep_care_proc_court_hearings       INT,
-    prep_care_proc_short_notice         NCHAR(1), 
-    prep_proc_short_notice_reason       NVARCHAR(100),
-    prep_la_inital_plan_approved        NCHAR(1), 
-    prep_la_initial_care_plan           NVARCHAR(100),
-    prep_la_final_plan_approved         NCHAR(1), 
-    prep_la_final_care_plan             NVARCHAR(100)
+    prep_table_id                           NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
+    prep_person_id                          NVARCHAR(48),
+    prep_plo_family_id                      NVARCHAR(48),
+    prep_pre_pro_decision_date              DATETIME,
+    prep_initial_pre_pro_meeting_date       DATETIME,
+    prep_pre_pro_outcome                    NVARCHAR(100),
+    prep_agree_stepdown_issue_date          DATETIME,
+    prep_cp_plans_referral_period           INT, -- count cp plans the child has been subject within referral period (cin episode)
+    prep_legal_gateway_outcome              NVARCHAR(100),
+    prep_prev_pre_proc_child                INT,
+    prep_prev_care_proc_child               INT,
+    prep_pre_pro_letter_date                DATETIME,
+    prep_care_pro_letter_date               DATETIME,
+    prep_pre_pro_meetings_num               INT,
+    prep_pre_pro_parents_legal_rep          NCHAR(1), 
+    prep_parents_legal_rep_point_of_issue   NCHAR(2),
+    prep_court_reference                    NVARCHAR(48),
+    prep_care_proc_court_hearings           INT,
+    prep_care_proc_short_notice             NCHAR(1), 
+    prep_proc_short_notice_reason           NVARCHAR(100),
+    prep_la_inital_plan_approved            NCHAR(1), 
+    prep_la_initial_care_plan               NVARCHAR(100),
+    prep_la_final_plan_approved             NCHAR(1), 
+    prep_la_final_care_plan                 NVARCHAR(100)
 );
 
--- Insert placeholder data
-INSERT INTO ssd_pre_proceedings (
-    -- row id ommitted as ID generated (prep_table_id,)
-    prep_person_id,
-    prep_plo_family_id,
-    prep_pre_pro_decision_date,
-    prep_initial_pre_pro_meeting_date,
-    prep_pre_pro_outcome,
-    prep_agree_stepdown_issue_date,
-    prep_cp_plans_referral_period,
-    prep_legal_gateway_outcome,
-    prep_prev_pre_proc_child,
-    prep_prev_care_proc_child,
-    prep_pre_pro_letter_date,
-    prep_care_pro_letter_date,
-    prep_pre_pro_meetings_num,
-    prep_pre_pro_parents_legal_rep,
-    prep_parents_legal_rep_point_of_issue,
-    prep_court_reference,
-    prep_care_proc_court_hearings,
-    prep_care_proc_short_notice,
-    prep_proc_short_notice_reason,
-    prep_la_inital_plan_approved,
-    prep_la_initial_care_plan,
-    prep_la_final_plan_approved,
-    prep_la_final_care_plan
-)
-VALUES
-    (
-    'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900-01-01', '1900-01-01', 'Outcome1', 
-    '1900-01-01', 3, 'Approved', 2, 1, '1900-01-01', '1900-01-01', 2, 'Y', 
-    'NA', 'COURT_REF_1', 1, 'Y', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
-    ),
-    (
-    'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900-01-01', '1900-01-01', 'Outcome2',
-    '1900-01-01', 4, 'Denied', 1, 2, '1900-01-01', '1900-01-01', 3, 'Y',
-    'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'Y', 'Initial Plan 2', 'Y', 'Final Plan 2'
-    );
+-- -- Insert placeholder data
+-- INSERT INTO ssd_pre_proceedings (
+--     -- row id ommitted as ID generated (prep_table_id,)
+--     prep_person_id,
+--     prep_plo_family_id,
+--     prep_pre_pro_decision_date,
+--     prep_initial_pre_pro_meeting_date,
+--     prep_pre_pro_outcome,
+--     prep_agree_stepdown_issue_date,
+--     prep_cp_plans_referral_period,
+--     prep_legal_gateway_outcome,
+--     prep_prev_pre_proc_child,
+--     prep_prev_care_proc_child,
+--     prep_pre_pro_letter_date,
+--     prep_care_pro_letter_date,
+--     prep_pre_pro_meetings_num,
+--     prep_pre_pro_parents_legal_rep,
+--     prep_parents_legal_rep_point_of_issue,
+--     prep_court_reference,
+--     prep_care_proc_court_hearings,
+--     prep_care_proc_short_notice,
+--     prep_proc_short_notice_reason,
+--     prep_la_inital_plan_approved,
+--     prep_la_initial_care_plan,
+--     prep_la_final_plan_approved,
+--     prep_la_final_care_plan
+-- )
+-- VALUES
+--     (
+--     'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900-01-01', '1900-01-01', 'Outcome1', 
+--     '1900-01-01', 3, 'Approved', 2, 1, '1900-01-01', '1900-01-01', 2, 'Y', 
+--     'NA', 'COURT_REF_1', 1, 'Y', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
+--     ),
+--     (
+--     'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900-01-01', '1900-01-01', 'Outcome2',
+--     '1900-01-01', 4, 'Denied', 1, 2, '1900-01-01', '1900-01-01', 3, 'Y',
+--     'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'Y', 'Initial Plan 2', 'Y', 'Final Plan 2'
+--     );
+
 
 
 -- To switch on once source data defined.
@@ -4313,7 +4323,7 @@ Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - FACT_903_DATA
@@ -4333,7 +4343,7 @@ IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL DROP TABLE #ssd_send;
 
 -- Create structure 
 CREATE TABLE ssd_send (
-    send_table_id       NVARCHAR(48),
+    send_table_id       NVARCHAR(48) PRIMARY KEY,
     send_person_id      NVARCHAR(48),
     send_upn            NVARCHAR(48),
     send_uln            NVARCHAR(48),
@@ -4382,12 +4392,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_ehcp_requests 
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4406,16 +4416,16 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE #ssd_ehcp
 
 -- Create structure
 CREATE TABLE ssd_ehcp_requests (
-    ehcr_ehcp_request_id NVARCHAR(48),
-    ehcr_send_table_id NVARCHAR(48),
-    ehcr_ehcp_req_date DATETIME,
-    ehcr_ehcp_req_outcome_date DATETIME,
-    ehcr_ehcp_req_outcome NVARCHAR(100)
+    ehcr_ehcp_request_id            NVARCHAR(48) PRIMARY KEY,
+    ehcr_send_table_id              NVARCHAR(48),
+    ehcr_ehcp_req_date              DATETIME,
+    ehcr_ehcp_req_outcome_date      DATETIME,
+    ehcr_ehcp_req_outcome           NVARCHAR(100)
 );
 
--- Insert placeholder data
-INSERT INTO ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
-VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
+-- -- Insert placeholder data
+-- INSERT INTO ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
+-- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
 
 
 -- Create constraint(s)
@@ -4436,12 +4446,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_ehcp_assessment
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4460,16 +4470,17 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE #ssd_eh
 
 -- Create ssd_ehcp_assessment table
 CREATE TABLE ssd_ehcp_assessment (
-    ehca_ehcp_assessment_id NVARCHAR(48),
-    ehca_ehcp_request_id NVARCHAR(48),
-    ehca_ehcp_assessment_outcome_date DATETIME,
-    ehca_ehcp_assessment_outcome NVARCHAR(100),
-    ehca_ehcp_assessment_exceptions NVARCHAR(100)
+    ehca_ehcp_assessment_id             NVARCHAR(48) PRIMARY KEY,
+    ehca_ehcp_request_id                NVARCHAR(48),
+    ehca_ehcp_assessment_outcome_date   DATETIME,
+    ehca_ehcp_assessment_outcome        NVARCHAR(100),
+    ehca_ehcp_assessment_exceptions     NVARCHAR(100)
 );
 
--- Insert placeholder data
-INSERT INTO ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
-VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+
+-- -- Insert placeholder data
+-- INSERT INTO ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
+-- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
 
 
 
@@ -4493,12 +4504,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_ehcp_named_plan 
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4523,9 +4534,10 @@ CREATE TABLE ssd_ehcp_named_plan (
     ehcn_named_plan_cease_reason        NVARCHAR(100)
 );
 
--- Insert placeholder data
-INSERT INTO ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_cease_date, ehcn_named_plan_cease_reason)
-VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
+
+-- -- Insert placeholder data
+-- INSERT INTO ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_cease_date, ehcn_named_plan_cease_reason)
+-- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
 
 
 -- Create constraint(s)
@@ -4546,12 +4558,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_ehcp_active_plans
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Last Modified Date: 
 DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4574,9 +4586,9 @@ CREATE TABLE ssd_ehcp_active_plans (
     ehcp_active_ehcp_last_review_date DATETIME
 );
 
--- Insert placeholder data
-INSERT INTO ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
-VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01');
+-- -- Insert placeholder data
+-- INSERT INTO ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
+-- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01');
 
 
 -- Create constraint(s)
@@ -4633,7 +4645,7 @@ Author: D2I
 Last Modified Date: 12/01/24
 DB Compatibility: SQL Server 2014+|...
 Version: 0.9
-Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 
