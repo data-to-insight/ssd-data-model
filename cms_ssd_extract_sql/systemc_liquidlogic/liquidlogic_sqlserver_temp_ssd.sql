@@ -59,20 +59,23 @@ DECLARE @LastSept30th DATE; -- Most recent past September 30th date towards case
 Object Name: ssd_person
 Description: person/child details
 Author: D2I
-Last Modified Date: 12/01/24 RH
+Last Modified Date: 120324 JH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.5
+Version: 1.6
+            1.5 Additional inclusion criteria added to capture care leavers 120324 JH
+            
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
-
 Remarks:    
             Note: Due to part reliance on 903 table, be aware that if 903 not populated pre-ssd run, 
             this/subsequent queries can return v.low|unexpected row counts.
-Dependencies: 
+            
+Dependencies:
 - Child_Social.DIM_PERSON
 - Child_Social.FACT_REFERRALS
 - Child_Social.FACT_CONTACTS
-- Child_Social.FACT_EHCP_EPISODE
 - Child_Social.FACT_903_DATA
+- Child_Social.FACT_CLA_CARE_LEAVERS
+- Child_Social.DIM_CLA_ELIGIBILITY
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -80,9 +83,9 @@ SET @TableName = N'ssd_person';
 PRINT 'Creating table: ' + @TableName;
 
 
--- Check if exists, & drop
+-- check exists & drop
+IF OBJECT_ID('ssd_person') IS NOT NULL DROP TABLE ssd_person;
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
-
 
 
 -- Create structure
@@ -90,7 +93,7 @@ CREATE TABLE #ssd_person (
     pers_legacy_id          NVARCHAR(48),
     pers_person_id          NVARCHAR(48) PRIMARY KEY,
     pers_sex                NVARCHAR(48),
-    pers_gender             NVARCHAR(48),                   
+    pers_gender             NVARCHAR(48),                  
     pers_ethnicity          NVARCHAR(38),
     pers_dob                DATETIME,
     pers_common_child_id    NVARCHAR(10),                   -- [TESTING] [Takes NHS Number]
@@ -134,12 +137,12 @@ SELECT
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
         ELSE NULL END,                                  --  or NULL
     p.DEATH_DTTM,
-    CASE 
+    CASE
         WHEN p.GENDER_MAIN_CODE <> 'M' AND              -- Assumption that if male is not mother
-             EXISTS (SELECT 1 FROM Child_Social.FACT_PERSON_RELATION fpr 
-                     WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND 
+             EXISTS (SELECT 1 FROM Child_Social.FACT_PERSON_RELATION fpr
+                     WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND
                            fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI')  -- check for child relation only
-        THEN 'Y' 
+        THEN 'Y'
         ELSE NULL -- No child relation found
     END,
     p.NATNL_CODE
@@ -175,6 +178,12 @@ AND (                                                       -- Filter irrelevant
         SELECT 1 FROM Child_Social.FACT_CLA_CARE_LEAVERS fccl
         WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
         AND fccl.IN_TOUCH_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+    )
+    OR EXISTS (
+        -- care leaver eligibility exists
+        SELECT 1 FROM Child_Social.DIM_CLA_ELIGIBILITY dce
+        WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
+        AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
     )
 );
 
@@ -3350,23 +3359,23 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 -- VALUES ('#ssd_missing', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
-
-/* 
+/*
 =============================================================================
 Object Name: ssd_care_leavers
-Description: 
+Description:
 Author: D2I
-Last Modified Date: 26/01/24 
+Last Modified Date: 12/03/24
 DB Compatibility: SQL Server 2014+|...
-Version: 1.7
+Version: 1.8
+            1.7: change of main source to DIM_CLA_ELIGIBILITY in order to capture full care leaver cohort JH
             1.6: switch field _worker)nm and _team_nm around as in wrong order RH
             1.5: worker/p.a id field changed to descriptive name towards AA reporting JH
-
+            
 Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions. 
+Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
-            Depreciated V2 left intact below for ref. Revised into V3 to aid performance on large involvements table aggr
-Dependencies: 
+            Dev: Revised V3/4 to aid performance on large involvements table aggr
+Dependencies:
 - FACT_INVOLVEMENTS
 - FACT_CLA_CARE_LEAVERS
 - DIM_CLA_ELIGIBILITY
@@ -3377,16 +3386,19 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_care_leavers';
 PRINT 'Creating table: ' + @TableName;
-
-
+ 
+ 
 -- Check if exists & drop
+IF OBJECT_ID('ssd_care_leavers', 'U') IS NOT NULL DROP TABLE ssd_care_leavers;
 IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
-
-
+ 
+ 
 -- Create structure
 CREATE TABLE #ssd_care_leavers
 (
     clea_table_id                           NVARCHAR(48),
+    clea_cl_table_id                        NVARCHAR(48),
+    clea_legacy_id                          NVARCHAR(48),  
     clea_person_id                          NVARCHAR(48),
     clea_care_leaver_eligibility            NVARCHAR(100),
     clea_care_leaver_in_touch               NVARCHAR(100),
@@ -3399,7 +3411,7 @@ CREATE TABLE #ssd_care_leavers
     clea_care_leaver_allocated_team_name    NVARCHAR(48),
     clea_care_leaver_worker_name            NVARCHAR(48)        
 );
-
+ 
 /* V4 */
 -- CTE for involvement history incl. worker data
 -- aggregate/extract current worker infos, allocated team, and p.advisor ID
@@ -3427,7 +3439,7 @@ WITH InvolvementHistoryCTE AS (
             -- AND END_DTTM IS NULL                 -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
             -- AND DIM_WORKER_ID IS NOT NULL        -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
             AND DIM_WORKER_ID <> -1                 -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-
+ 
             -- where the inv type is 'CW' + flagged as allocated
             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
                                                     -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
@@ -3437,57 +3449,72 @@ WITH InvolvementHistoryCTE AS (
     GROUP BY
         fi.DIM_PERSON_ID
 )
-
+ 
 -- Insert data
 INSERT INTO #ssd_care_leavers
 (
-    clea_table_id, 
-    clea_person_id, 
-    clea_care_leaver_eligibility, 
-    clea_care_leaver_in_touch, 
-    clea_care_leaver_latest_contact, 
-    clea_care_leaver_accommodation, 
-    clea_care_leaver_accom_suitable, 
-    clea_care_leaver_activity, 
-    clea_pathway_plan_review_date, 
+    clea_table_id,
+    clea_cl_table_id,
+    clea_legacy_id,  
+    clea_person_id,
+    clea_care_leaver_eligibility,
+    clea_care_leaver_in_touch,
+    clea_care_leaver_latest_contact,
+    clea_care_leaver_accommodation,
+    clea_care_leaver_accom_suitable,
+    clea_care_leaver_activity,
+    clea_pathway_plan_review_date,
     clea_care_leaver_personal_advisor,                  
     clea_care_leaver_allocated_team_name,
-    clea_care_leaver_worker_name             
+    clea_care_leaver_worker_name            
 )
-SELECT 
-    fccl.FACT_CLA_CARE_LEAVERS_ID                   AS clea_table_id, 
-    fccl.DIM_PERSON_ID                              AS clea_person_id, 
-    dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC          AS clea_care_leaver_eligibility, 
-    fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE              AS clea_care_leaver_in_touch, 
-    fccl.IN_TOUCH_DTTM                              AS clea_care_leaver_latest_contact, 
-    fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC         AS clea_care_leaver_accommodation, 
-    fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC     AS clea_care_leaver_accom_suitable, 
-    fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC              AS clea_care_leaver_activity, 
-
+ 
+SELECT
+    CONCAT(dce.DIM_CLA_ELIGIBILITY_ID, fccl.FACT_CLA_CARE_LEAVERS_ID)
+              AS clea_table_id,
+    fccl.FACT_CLA_CARE_LEAVERS_ID                           AS clea_cl_table_id,
+    p.LEGACY_ID                                             AS clea_legacy_id,                      --[TESTING]
+    dce.DIM_PERSON_ID                                       AS clea_person_id,
+    CASE WHEN
+        dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NULL
+        THEN 'No Current Eligibility'
+        ELSE dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC END     AS clea_care_leaver_eligibility,
+    fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE                      AS clea_care_leaver_in_touch,
+    fccl.IN_TOUCH_DTTM                                      AS clea_care_leaver_latest_contact,
+    fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC                 AS clea_care_leaver_accommodation,
+    fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC             AS clea_care_leaver_accom_suitable,
+    fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC                      AS clea_care_leaver_activity,
+ 
     MAX(CASE WHEN fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
         AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'
-        THEN fcp.MODIF_DTTM END)                    AS clea_pathway_plan_review_date,
-
-    ih.PersonalAdvisorName                          AS clea_care_leaver_personal_advisor,
-    ih.AllocatedTeamName                            AS clea_care_leaver_allocated_team_name,
-    ih.CurrentWorkerName                            AS clea_care_leaver_worker_name
-FROM 
-    Child_Social.FACT_CLA_CARE_LEAVERS AS fccl
-
-LEFT JOIN Child_Social.DIM_CLA_ELIGIBILITY AS dce ON fccl.DIM_PERSON_ID = dce.DIM_PERSON_ID     -- towards clea_care_leaver_eligibility
-
-LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID         -- towards clea_pathway_plan_review_date
-    AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'               
-
-LEFT JOIN InvolvementHistoryCTE AS ih ON fccl.DIM_PERSON_ID = ih.DIM_PERSON_ID                  -- connect with CTE aggr data      
+        THEN fcp.MODIF_DTTM END)                            AS clea_pathway_plan_review_date,
  
-WHERE
-    -- Exists-on ssd_person clause should already filter these, this only a fail-safe
-    fccl.FACT_CLA_CARE_LEAVERS_ID <> -1
+    ih.PersonalAdvisorName                                  AS clea_care_leaver_personal_advisor,
+    ih.AllocatedTeamName                                    AS clea_care_leaver_allocated_team_name,
+    ih.CurrentWorkerName                                    AS clea_care_leaver_worker_name
+ 
+FROM
+    Child_Social.DIM_CLA_ELIGIBILITY AS dce
+ 
+LEFT JOIN Child_Social.FACT_CLA_CARE_LEAVERS AS fccl ON dce.DIM_PERSON_ID = fccl.DIM_PERSON_ID    -- towards clea_care_leaver_in_touch, _latest_contact, _accommodation, _accom_suitable and _activity
+ 
+LEFT JOIN Child_Social.FACT_CARE_PLANS AS fcp ON fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID           -- towards clea_pathway_plan_review_date
+               
+LEFT JOIN Child_Social.DIM_PERSON p ON dce.DIM_PERSON_ID = p.DIM_PERSON_ID                        -- towards LEGACY_ID for testing only
+ 
+LEFT JOIN InvolvementHistoryCTE AS ih ON dce.DIM_PERSON_ID = ih.DIM_PERSON_ID                     -- connect with CTE aggr data      
+ 
+WHERE EXISTS ( -- only ssd relevant records
+    SELECT 1
+    FROM #ssd_person p
+    WHERE p.pers_person_id = dce.DIM_PERSON_ID
+    )
  
 GROUP BY
+    dce.DIM_CLA_ELIGIBILITY_ID,
     fccl.FACT_CLA_CARE_LEAVERS_ID,
-    fccl.DIM_PERSON_ID,
+    p.LEGACY_ID,  
+    dce.DIM_PERSON_ID,
     dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC,
     fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE,
     fccl.IN_TOUCH_DTTM,
@@ -3498,8 +3525,6 @@ GROUP BY
     ih.CurrentWorkerName,
     ih.AllocatedTeamName          
     ;
-
-/* End V4 */
 
 
 -- -- Add index(es)
