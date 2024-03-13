@@ -379,6 +379,7 @@ Object Name: ssd_disability
 Description: Contains the Y/N flag for persons with disability
 Author: D2I
 Version: 1.0
+            0.1: Removed disability_code replace() into Y/N flag 130324 RH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -411,15 +412,9 @@ INSERT INTO ssd_disability (
     disa_disability_code
 )
 SELECT 
-    fd.FACT_DISABILITY_ID, 
-    fd.DIM_PERSON_ID, 
-    CASE    -- Added to enforce consistency in this flag. Have seen multiple variations on the data.
-            -- Further examples can simply be added to this IN block without impact elsewhere.
-            -- Impacts such as AnnexA report/reductive view output
-        WHEN REPLACE(TRIM(UPPER(fd.DIM_LOOKUP_DISAB_CODE)), ' ', '') IN ('A)YES', 'YES', 'Y')   THEN 'Y'
-        WHEN REPLACE(TRIM(UPPER(fd.DIM_LOOKUP_DISAB_CODE)), ' ', '') IN ('B)NO', 'NO', 'N')     THEN 'N'
-        ELSE '' -- Catch all default
-    END as disa_disability_code
+    fd.FACT_DISABILITY_ID       AS disa_table_id, 
+    fd.DIM_PERSON_ID            AS disa_person_id, 
+    fd.DIM_LOOKUP_DISAB_CODE    AS disa_disability_code
 FROM 
     Child_Social.FACT_DISABILITY AS fd
 
@@ -2667,6 +2662,7 @@ PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
+
 /*
 =============================================================================
 Object Name: ssd_cla_previous_permanence
@@ -2718,8 +2714,7 @@ CREATE TABLE ssd_cla_previous_permanence (
     lapp_person_id                              NVARCHAR(48),
     lapp_previous_permanence_option             NVARCHAR(200),
     lapp_previous_permanence_la                 NVARCHAR(100),
-    lapp_previous_permanence_order_date         NVARCHAR(10),
-    lapp_previous_permanence_order_date_json    NVARCHAR(MAX),
+    lapp_previous_permanence_order_date         NVARCHAR(10)
 );
  
 -- Insert data
@@ -2728,8 +2723,7 @@ INSERT INTO ssd_cla_previous_permanence (
                lapp_person_id,
                lapp_previous_permanence_option,
                lapp_previous_permanence_la,
-               lapp_previous_permanence_order_date,
-               lapp_previous_permanence_order_date_json
+               lapp_previous_permanence_order_date
            )
 SELECT
     tmp_ffa.FACT_FORM_ID AS lapp_table_id,
@@ -2759,20 +2753,9 @@ SELECT
     END + '/' + 
     CASE 
         WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END)) = 0 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END) 
-        ELSE 'zz' 
+        ELSE 'zzzz' 
     END
-    AS lapp_previous_permanence_order_date,
-    (
-        SELECT
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'  THEN sub.ANSWER END) AS 'ORDERDATE',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH' THEN sub.ANSWER END) AS 'ORDERMONTH',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'  THEN sub.ANSWER END) AS 'ORDERYEAR'
-        FROM
-            Child_Social.FACT_FORM_ANSWERS sub
-        WHERE
-            sub.FACT_FORM_ID = ff.FACT_FORM_ID
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) AS lapp_previous_permanence_order_date_json   
+    AS lapp_previous_permanence_order_date
 FROM
     #ssd_TMP_PRE_previous_permanence tmp_ffa
 JOIN
