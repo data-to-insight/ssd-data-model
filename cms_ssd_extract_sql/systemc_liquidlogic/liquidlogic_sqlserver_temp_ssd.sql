@@ -57,18 +57,14 @@ DECLARE @LastSept30th DATE; -- Most recent past September 30th date towards case
 /*
 =============================================================================
 Object Name: ssd_person
-Description: person/child details
+Description: Person/child details. This the most connected table in the SSD.
 Author: D2I
-Last Modified Date: 120324 JH
-DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5 Additional inclusion criteria added to capture care leavers 120324 JH
-            
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.1 Additional inclusion criteria added to capture care leavers 120324 JH
+Status: [Dev, Testing, *Release, Blocked, AwaitingReview, Backlog]
 Remarks:    
             Note: Due to part reliance on 903 table, be aware that if 903 not populated pre-ssd run, 
             this/subsequent queries can return v.low|unexpected row counts.
-            
 Dependencies:
 - Child_Social.DIM_PERSON
 - Child_Social.FACT_REFERRALS
@@ -234,12 +230,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_family
-Description: 
+Description: Contains the family connections for each person
 Author: D2I
-Last Modified Date: 22/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Dev, Testing, *Release, Blocked, AwaitingReview, Backlog]
 Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 Dependencies: 
 - FACT_CONTACTS
@@ -306,12 +300,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_address
-Description: 
+Description: Contains full address details for every person 
 Author: D2I
-Last Modified Date: 21/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 Dependencies: 
 - ssd_person
@@ -416,12 +408,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_disability
-Description: 
+Description: Contains the Y/N flag for persons with disability
 Author: D2I
-Last Modified Date: 03/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -499,13 +489,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: #ssd_immigration_status
+Object Name: ssd_immigration_status (UASC)
 Description: 
 Author: D2I
-Last Modified Date: 23/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -583,12 +571,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_mother
-Description: 
+Description: Contains parent-child relations between mother-child 
 Author: D2I
-Last Modified Date: 28/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.0
+            0.2: updated to exclude relationships with an end date 280224 JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
 Dependencies: 
 - ssd_person
@@ -675,13 +662,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: #ssd_legal_status
+Object Name: ssd_legal_status
 Description: 
 Author: D2I
-Last Modified Date: 22/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -760,17 +745,13 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_contacts
 Description: 
 Author: D2I
-Last Modified Date: 26/01/24 RH
-DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5 cont_contact_source (_code) field name edit RH
-            1.4 cont_contact_source_desc added RH
-
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.2 cont_contact_source (_code) field name edit 260124 RH
+            0.1 cont_contact_source_desc added RH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:Inclusion in contacts might differ between LAs. 
         Baseline definition:
         Contains safeguarding and referral to early help data.
-   
 Dependencies: 
 - ssd_person
 - FACT_CONTACTS
@@ -864,10 +845,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_early_help_episodes
 Description: 
 Author: D2I
-Last Modified Date: 22/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -953,12 +932,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cin_episodes
 Description: 
 Author: D2I
-Last Modified Date: 14/12/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-            1.4: contact_source_desc added, _source now populated with ID
-
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.1: contact_source_desc added, _source now populated with ID 141223 RH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - @ssd_timeframe_years
@@ -1067,13 +1043,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: #ssd_cin_assessments
+Object Name: ssd_cin_assessments
 Description: 
 Author: D2I
-Last Modified Date: 04/12/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1185,18 +1159,19 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
+
 /* 
 =============================================================================
 Object Name: ssd_assessment_factors
 Description: 
 Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
-Remarks: 
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Remarks: This object referrences some large source tables- Instances of 45m+. 
 Dependencies: 
-- 
+- ssd_cin_assessments
+- FACT_SINGLE_ASSESSMENT
+- FACT_FORM_ANSWERS
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -1331,16 +1306,15 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
+
 /* 
 =============================================================================
 Object Name: ssd_cin_plans
 Description: 
 Author: D2I
-Last Modified Date: 07/02/24
-DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-            1.4: JH Updates to avoid bringing through a separate row for each revision of the plan
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.1: Update fix returning new row for each revision of the plan JH 070224
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1442,15 +1416,14 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cin_visits
 Description:
 Author: D2I
-Last Modified Date: 10/01/24
-DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:    Source table can be very large! Avoid any unfiltered queries.
             Notes: Does this need to be filtered by only visits in their current Referral episode?
                     however for some this ==2 weeks, others==~17 years
                 --> when run for records in ssd_person c.64k records 29s runtime
 Dependencies:
+- ssd_person
 - FACT_CASENOTES
 =============================================================================
 */
@@ -1530,10 +1503,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_s47_enquiry
 Description: 
 Author: D2I
-Last Modified Date: 22/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1626,11 +1597,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_initial_cp_conference
 Description: 
 Author: D2I
-Last Modified Date: 01/02/24 rh
-DB Compatibility: SQL Server 2014+|...
-Version: 1.1 
-            1.0 RH Re-instated the worker details
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.1 Re-instated the worker details 010224 JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - FACT_S47
@@ -1764,16 +1733,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cp_plans
 Description:
 Author: D2I
-Last Modified Date: 09/02/24
-DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.4 removed depreciated team_id and worker id fields RH
-            1.6 added IS_OLA field to identify OLA temporary plans
-            which need to be excluded from statutory returns JCH
- 
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.3: added IS_OLA field to identify OLA temporary plans
+            which need to be excluded from statutory returns 090224 JCH
+            0.2: removed depreciated team_id and worker id fields RH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:
- 
 Dependencies:
 - ssd_person
 - ssd_initial_cp_conference
@@ -1869,11 +1834,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cp_visits
 Description:
 Author: D2I
-Last Modified Date: 13/02/24 JH
-DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-            1.4: cppv_person_id added, where claus removed 'STVCPCOVID' JH
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.2: cppv_person_id added, where claus removed 'STVCPCOVID' 130224 JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: Not all CP Visit Casenotes have a link back to the CP Visit -
          using casenote ID as PK and linking to CP Visit where available.
          Will have to use Person ID to link object to Person table
@@ -1967,13 +1930,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cp_reviews
 Description:
 Author: D2I
-Last Modified Date: 13/02/24 JH
-DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5: Resolved issue with linking to Quoracy information JH
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.0
+            0.1: Resolved issue with linking to Quoracy information 130224 JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:    cppr_cp_review_participation - ON HOLD/Not included in SSD Ver/Iteration 1
-            Tested in batch 1.3.
             Resolved issue with linking to Quoracy information. Added fm.FACT_MEETING_ID
             so users can identify conferences including multiple children. Reviews held
             pre-LCS implementation don't have a CP_PLAN_ID recorded so have added
@@ -2097,18 +2057,17 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Last Modified Date: 060324
-DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.9: cla_placement_id added as part of cla_placements review RH 060324
-            0.8: 120124
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_involvements
+- ssd_person
 - FACT_CLA
 - FACT_REFERRALS
 - FACT_CARE_EPISODES
+- FACT_CASENOTES
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2215,10 +2174,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_convictions
 Description: 
 Author: D2I
-Last Modified Date: 16/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -2284,10 +2241,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_health
 Description:
 Author: D2I
-Last Modified Date: 12/12/23 JH
-DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 1.5 JH updated source for clah_health_check_type to resolve blanks.
             Updated to use DIM_LOOKUP_EXAM_STATUS_DESC as opposed to _CODE
             to inprove readability.
@@ -2365,12 +2320,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_immunisations
 Description: 
 Author: D2I
-Last Modified Date: 22/02/23 
-DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5 most recent status reworked / 903 source removed JH
-            1.4 clai_immunisations_status_date removed RH
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.2: most recent status reworked / 903 source removed 220224 JH
+            0.1: clai_immunisations_status_date removed RH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -2448,15 +2401,16 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 -- VALUES ('#ssd_cla_immunisations', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
+
+
+
 /* 
 =============================================================================
-Object Name: ssd_substance_misuse
+Object Name: ssd_cla_substance_misuse
 Description: 
 Author: D2I
-Last Modified Date: 14/11/2023
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -2527,11 +2481,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_placement
 Description: 
 Author: D2I
-Last Modified Date: 060324 
-DB Compatibility: SQL Server 2014+|...
 Version: 1.0 
-            0.9 Corrected/removal of placement_la & episode_id 090124 RH
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+            0.2: 060324 JH
+            0.1: Corrected/removal of placement_la & episode_id 090124 RH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
 Dependencies: 
 - ssd_person
@@ -2635,12 +2588,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_reviews
 Description: 
 Author: D2I
-Last Modified Date: 12/01/24
-DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5: clar_cla_id change from clar_cla_episode_id
-
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.0
+            0.1: clar_cla_id change from clar_cla_episode_id 120124 JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_cla_episodes
@@ -2742,10 +2692,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_previous_permanence
 Description:
 Author: D2I
-Last Modified Date: 21/02/24 JH
-DB Compatibility: SQL Server 2014+|...
-Version: 1.5
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley.
         1.5 JH tmp table was not being referenced, updated query and reduced running
         time considerably, also filtered out rows where ANSWER IS NULL
@@ -2884,11 +2832,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_care_plan
 Description:
 Author: D2I
-Last Modified Date: 19/02/24
-DB Compatibility: SQL Server 2014+|...
-Version: 1.6
-            1.5: Altered _json keys and groupby towards > clarity JH
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.1: Altered _json keys and groupby towards > clarity 190224 JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:    Added short codes to plan type questions to improve readability.
             Removed form type filter, only filtering ffa. on ANSWER_NO.
 Dependencies:
@@ -3023,13 +2969,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_visits
 Description:
 Author: D2I
-Last Modified Date: 15/02/24
-DB Compatibility: SQL Server 2014+|...
-Version: 1.7
-            1.6 FK updated to person_id. change from clav.VISIT_DTTM  JH
-            1.5 pers_id and cla_id added JH
-
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.: FK updated to person_id. change from clav.VISIT_DTTM  150224 JH
+            0.1: pers_id and cla_id added JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:
 Dependencies:
 - FACT_CARE_EPISODES
@@ -3120,10 +3063,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_sdq_scores
 Description:
 Author: D2I
-Last Modified Date: 18/01/24
-DB Compatibility: SQL Server 2014+|...
-Version: 1.7
-Status: [Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
         Removed csdq_form_id as the form id is also being used as csdq_table_id
         Added placeholder for csdq_sdq_reason
@@ -3280,10 +3221,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_missing
 Description: 
 Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 1.1
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -3364,14 +3303,11 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_care_leavers
 Description:
 Author: D2I
-Last Modified Date: 12/03/24
-DB Compatibility: SQL Server 2014+|...
-Version: 1.8
-            1.7: change of main source to DIM_CLA_ELIGIBILITY in order to capture full care leaver cohort JH
-            1.6: switch field _worker)nm and _team_nm around as in wrong order RH
-            1.5: worker/p.a id field changed to descriptive name towards AA reporting JH
-            
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.3: change of main source to DIM_CLA_ELIGIBILITY in order to capture full care leaver cohort 12/03/24 JH
+            0.2: switch field _worker)nm and _team_nm around as in wrong order RH
+            0.1: worker/p.a id field changed to descriptive name towards AA reporting JH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
             Dev: Revised V3/4 to aid performance on large involvements table aggr
@@ -3556,11 +3492,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_permanence
 Description: 
 Author: D2I
-Last Modified Date: 09/02/24 RH
-DB Compatibility: SQL Server 2014+|...
-Version: 1.8
-        1.7: perm_adopter_sex, perm_adopter_legal_status added RH
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+            0.2: entered_care_date removed/moved to cla_episodes 060324 RH
+            0.1: perm_adopter_sex, perm_adopter_legal_status added RH
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
         DEV: 181223: Assumed that only one permanence order per child. 
         - In order to handle/reflect the v.rare cases where this has broken down, further work is required.
@@ -3576,6 +3511,7 @@ Dependencies:
 - FACT_CLA
 =============================================================================
 */
+
 
 -- [TESTING] Create marker
 SET @TableName = N'ssd_permanence';
@@ -3772,10 +3708,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_professionals
 Description: 
 Author: D2I
-Last Modified Date: 24/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, *Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - @LastSept30th
@@ -3883,10 +3817,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_involvements
 Description: 
 Author: D2I
-Last Modified Date: 16/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - ssd_professionals
@@ -3968,13 +3900,22 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_linked_identifiers
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: 
 Author: D2I
-Last Modified Date: 02/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: 
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Remarks: The list of allowed identifier_type codes are:
+            ['Case Number', 
+            'Unique Pupil Number', 
+            'NHS Number', 
+            'Home Office Registration', 
+            'National Insurance Number', 
+            'YOT Number', 
+            'Court Case Number', 
+            'RAA ID', 
+            'Incident ID']
+            To have any further codes agreed into the standard, issue a change request
+
 Dependencies: 
 - Yet to be defined
 =============================================================================
@@ -4051,12 +3992,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_s251_finance
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
-Last Modified Date: 02/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4082,17 +4021,17 @@ CREATE TABLE #ssd_s251_finance (
     s251_placeholder_4      NVARCHAR(48)
 );
 
--- Insert placeholder data [TESTING]
-INSERT INTO #ssd_s251_finance (
-    s251_id,
-    s251_cla_placement_id,
-    s251_placeholder_1,
-    s251_placeholder_2,
-    s251_placeholder_3,
-    s251_placeholder_4
-)
-VALUES
-    ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+-- -- Insert placeholder data [TESTING]
+-- INSERT INTO #ssd_s251_finance (
+--     s251_id,
+--     s251_cla_placement_id,
+--     s251_placeholder_1,
+--     s251_placeholder_2,
+--     s251_placeholder_3,
+--     s251_placeholder_4
+-- )
+-- VALUES
+--     ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
@@ -4116,12 +4055,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_voice_of_child
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
-Last Modified Date: 16/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 1.3
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4147,19 +4084,19 @@ CREATE TABLE #ssd_voice_of_child (
     voch_tablet_help_explain    NCHAR(1)
 );
 
--- Insert placeholder data [TESTING]
-INSERT INTO #ssd_voice_of_child (
-    voch_table_id,
-    voch_person_id,
-    voch_explained_worries,
-    voch_story_help_understand,
-    voch_agree_worker,
-    voch_plan_safe,
-    voch_tablet_help_explain
-)
-VALUES
-    ('10001','10001', 'Y', 'Y', 'Y', 'Y', 'Y'),
-    ('10002','10002', 'Y', 'Y', 'Y', 'Y', 'Y');
+-- -- Insert placeholder data [TESTING]
+-- INSERT INTO #ssd_voice_of_child (
+--     voch_table_id,
+--     voch_person_id,
+--     voch_explained_worries,
+--     voch_story_help_understand,
+--     voch_agree_worker,
+--     voch_plan_safe,
+--     voch_tablet_help_explain
+-- )
+-- VALUES
+--     ('10001','10001', 'Y', 'Y', 'Y', 'Y', 'Y'),
+--     ('10002','10002', 'Y', 'Y', 'Y', 'Y', 'Y');
 
 
 -- To switch on once source data defined.
@@ -4192,12 +4129,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_pre_proceedings
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
-Last Modified Date: 02/11/23
-DB Compatibility: SQL Server 2014+|...
-Version: 0.1
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4242,44 +4177,44 @@ CREATE TABLE #ssd_pre_proceedings (
     prep_la_final_care_plan             NVARCHAR(100)
 );
 
--- Insert placeholder data
-INSERT INTO #ssd_pre_proceedings (
-    prep_table_id,
-    prep_person_id,
-    prep_plo_family_id,
-    prep_pre_pro_decision_date,
-    prep_initial_pre_pro_meeting_date,
-    prep_pre_pro_outcome,
-    prep_agree_stepdown_issue_date,
-    prep_cp_plans_referral_period,
-    prep_legal_gateway_outcome,
-    prep_prev_pre_proc_child,
-    prep_prev_care_proc_child,
-    prep_pre_pro_letter_date,
-    prep_care_pro_letter_date,
-    prep_pre_pro_meetings_num,
-    prep_pre_pro_parents_legal_rep,
-    prep_parents_legal_rep_point_of_issue,
-    prep_court_reference,
-    prep_care_proc_court_hearings,
-    prep_care_proc_short_notice,
-    prep_proc_short_notice_reason,
-    prep_la_inital_plan_approved,
-    prep_la_initial_care_plan,
-    prep_la_final_plan_approved,
-    prep_la_final_care_plan
-)
-VALUES
-    (
-    '10001', 'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900-01-01', '1900-01-01', 'Outcome1', 
-    '1900-01-01', 3, 'Approved', 2, 1, '1900-01-01', '1900-01-01', 2, 'Y', 
-    'NA', 'COURT_REF_1', 1, 'Y', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
-    ),
-    (
-    '10002', 'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900-01-01', '1900-01-01', 'Outcome2',
-    '1900-01-01', 4, 'Denied', 1, 2, '1900-01-01', '1900-01-01', 3, 'Y',
-    'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'Y', 'Initial Plan 2', 'Y', 'Final Plan 2'
-    );
+-- -- Insert placeholder data
+-- INSERT INTO #ssd_pre_proceedings (
+--     prep_table_id,
+--     prep_person_id,
+--     prep_plo_family_id,
+--     prep_pre_pro_decision_date,
+--     prep_initial_pre_pro_meeting_date,
+--     prep_pre_pro_outcome,
+--     prep_agree_stepdown_issue_date,
+--     prep_cp_plans_referral_period,
+--     prep_legal_gateway_outcome,
+--     prep_prev_pre_proc_child,
+--     prep_prev_care_proc_child,
+--     prep_pre_pro_letter_date,
+--     prep_care_pro_letter_date,
+--     prep_pre_pro_meetings_num,
+--     prep_pre_pro_parents_legal_rep,
+--     prep_parents_legal_rep_point_of_issue,
+--     prep_court_reference,
+--     prep_care_proc_court_hearings,
+--     prep_care_proc_short_notice,
+--     prep_proc_short_notice_reason,
+--     prep_la_inital_plan_approved,
+--     prep_la_initial_care_plan,
+--     prep_la_final_plan_approved,
+--     prep_la_final_care_plan
+-- )
+-- VALUES
+--     (
+--     '10001', 'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900-01-01', '1900-01-01', 'Outcome1', 
+--     '1900-01-01', 3, 'Approved', 2, 1, '1900-01-01', '1900-01-01', 2, 'Y', 
+--     'NA', 'COURT_REF_1', 1, 'Y', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
+--     ),
+--     (
+--     '10002', 'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900-01-01', '1900-01-01', 'Outcome2',
+--     '1900-01-01', 4, 'Denied', 1, 2, '1900-01-01', '1900-01-01', 3, 'Y',
+--     'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'Y', 'Initial Plan 2', 'Y', 'Final Plan 2'
+--     );
 
 -- To switch on once source data defined.
 -- WHERE EXISTS ( -- only ssd relevant records
@@ -4341,10 +4276,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_send
 Description: 
 Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 1.0
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
 - FACT_903_DATA
@@ -4359,6 +4292,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
+IF OBJECT_ID('ssd_send') IS NOT NULL DROP TABLE ssd_send;
 IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL DROP TABLE #ssd_send;
 
 
@@ -4420,12 +4354,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_ehcp_requests 
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4478,12 +4410,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_ehcp_assessment
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4540,12 +4470,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_ehcp_named_plan 
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4598,12 +4526,10 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 /* 
 =============================================================================
 Object Name: ssd_ehcp_active_plans
-Description: Currently only with placeholder structure as source data not yet conformed
+Description: Placeholder structure as source data not common|confirmed
 Author: D2I
-Last Modified Date: 
-DB Compatibility: SQL Server 2014+|...
 Version: 0.1
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4694,13 +4620,10 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 MOD Name: involvements history, involvements type history
 Description: 
 Author: D2I
-Last Modified Date: 12/01/24
-DB Compatibility: SQL Server 2014+|...
-Version: 0.9
-Status: [*Dev, *Testing, Release, Blocked, AwaitingReview, Backlog]
+Version: 0.1
+Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
 Remarks: 
 Dependencies: 
-
 - FACT_INVOLVEMENTS
 - ssd_person
 =============================================================================
