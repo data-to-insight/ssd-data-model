@@ -2718,8 +2718,7 @@ CREATE TABLE ssd_cla_previous_permanence (
     lapp_person_id                              NVARCHAR(48),
     lapp_previous_permanence_option             NVARCHAR(200),
     lapp_previous_permanence_la                 NVARCHAR(100),
-    lapp_previous_permanence_order_date         NVARCHAR(10),
-    lapp_previous_permanence_order_date_json    NVARCHAR(MAX),
+    lapp_previous_permanence_order_date         NVARCHAR(10)
 );
  
 -- Insert data
@@ -2728,8 +2727,7 @@ INSERT INTO ssd_cla_previous_permanence (
                lapp_person_id,
                lapp_previous_permanence_option,
                lapp_previous_permanence_la,
-               lapp_previous_permanence_order_date,
-               lapp_previous_permanence_order_date_json
+               lapp_previous_permanence_order_date
            )
 SELECT
     tmp_ffa.FACT_FORM_ID AS lapp_table_id,
@@ -2759,20 +2757,9 @@ SELECT
     END + '/' + 
     CASE 
         WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END)) = 0 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END) 
-        ELSE 'zz' 
+        ELSE 'zzzz' 
     END
-    AS lapp_previous_permanence_order_date,
-    (
-        SELECT
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERDATE'  THEN sub.ANSWER END) AS 'ORDERDATE',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERMONTH' THEN sub.ANSWER END) AS 'ORDERMONTH',
-            MAX(CASE WHEN sub.ANSWER_NO = 'ORDERYEAR'  THEN sub.ANSWER END) AS 'ORDERYEAR'
-        FROM
-            Child_Social.FACT_FORM_ANSWERS sub
-        WHERE
-            sub.FACT_FORM_ID = ff.FACT_FORM_ID
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) AS lapp_previous_permanence_order_date_json   
+    AS lapp_previous_permanence_order_date
 FROM
     #ssd_TMP_PRE_previous_permanence tmp_ffa
 JOIN
