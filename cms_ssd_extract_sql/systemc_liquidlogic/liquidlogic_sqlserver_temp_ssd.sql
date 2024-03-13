@@ -411,6 +411,7 @@ Object Name: ssd_disability
 Description: Contains the Y/N flag for persons with disability
 Author: D2I
 Version: 1.0
+            0.1: Removed disability_code replace() into Y/N flag 130324 RH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
 Dependencies: 
@@ -442,15 +443,10 @@ INSERT INTO #ssd_disability (
     disa_disability_code
 )
 SELECT 
-    fd.FACT_DISABILITY_ID, 
-    fd.DIM_PERSON_ID, 
-    CASE    -- Added to enforce consistency in this flag. Have seen multiple variations on the data.
-            -- Further examples can simply be added to this IN block without impact elsewhere.
-            -- Impacts such as AnnexA report/reductive view output
-        WHEN REPLACE(TRIM(UPPER(fd.DIM_LOOKUP_DISAB_CODE)), ' ', '') IN ('A)YES', 'YES', 'Y')   THEN 'Y'
-        WHEN REPLACE(TRIM(UPPER(fd.DIM_LOOKUP_DISAB_CODE)), ' ', '') IN ('B)NO', 'NO', 'N')     THEN 'N'
-        ELSE '' -- Catch all default
-    END as disa_disability_code
+    fd.FACT_DISABILITY_ID       AS disa_table_id, 
+    fd.DIM_PERSON_ID            AS disa_person_id, 
+    fd.DIM_LOOKUP_DISAB_CODE    AS disa_disability_code
+
 FROM 
     Child_Social.FACT_DISABILITY AS fd
 WHERE EXISTS 
