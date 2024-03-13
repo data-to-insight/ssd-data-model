@@ -2667,6 +2667,7 @@ PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
+
 /*
 =============================================================================
 Object Name: ssd_cla_previous_permanence
