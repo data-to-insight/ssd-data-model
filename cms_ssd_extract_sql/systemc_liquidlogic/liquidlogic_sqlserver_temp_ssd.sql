@@ -483,15 +483,17 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/* 
+/*
 =============================================================================
 Object Name: ssd_immigration_status (UASC)
-Description: 
+Description:
 Author: D2I
 Version: 1.0
+            0.9 rem ims.DIM_LOOKUP_IMMGR_STATUS_DESC rpld with _CODE 270324 JH 
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
-Remarks: 
-Dependencies: 
+Remarks: Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
+            increased field size to 100
+Dependencies:
 - ssd_person
 - FACT_IMMIGRATION_STATUS
 =============================================================================
@@ -499,10 +501,11 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_immigration_status';
 PRINT 'Creating table: ' + @TableName;
-
-
+ 
+ 
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
+IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_status;
+IF OBJECT_ID('tempdb..#immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
 
 -- Create structure
@@ -511,44 +514,44 @@ CREATE TABLE #ssd_immigration_status (
     immi_person_id                  NVARCHAR(48),
     immi_immigration_status_start   DATETIME,
     immi_immigration_status_end     DATETIME,
-    immi_immigration_status         NVARCHAR(48)
+    immi_immigration_status         NVARCHAR(100)
 );
-
-
+ 
+ 
 -- insert data
 INSERT INTO #ssd_immigration_status (
-    immi_immigration_status_id, 
-    immi_person_id, 
+    immi_immigration_status_id,
+    immi_person_id,
     immi_immigration_status_start,
     immi_immigration_status_end,
     immi_immigration_status
 )
-SELECT 
+SELECT
     ims.FACT_IMMIGRATION_STATUS_ID,
     ims.DIM_PERSON_ID,
     ims.START_DTTM,
     ims.END_DTTM,
-    ims.DIM_LOOKUP_IMMGR_STATUS_CODE
-FROM 
+    ims.DIM_LOOKUP_IMMGR_STATUS_DESC
+FROM
     Child_Social.FACT_IMMIGRATION_STATUS AS ims
-
-WHERE 
-    EXISTS 
+ 
+WHERE
+    EXISTS
     ( -- only ssd relevant records
         SELECT 1
         FROM #ssd_person p
         WHERE p.pers_person_id = ims.DIM_PERSON_ID
     );
-
+ 
 
 -- -- Create constraint(s)
 -- ALTER TABLE #ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
 -- FOREIGN KEY (immi_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
-CREATE NONCLUSTERED INDEX idx_immigration_status_start ON #ssd_immigration_status(immi_immigration_status_start);
-CREATE NONCLUSTERED INDEX idx_immigration_status_end ON #ssd_immigration_status(immi_immigration_status_end);
+-- -- Create index(es)
+-- CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
+-- CREATE NONCLUSTERED INDEX idx_immigration_status_start ON #ssd_immigration_status(immi_immigration_status_start);
+-- CREATE NONCLUSTERED INDEX idx_immigration_status_end ON #ssd_immigration_status(immi_immigration_status_end);
 
 
 
@@ -1587,18 +1590,18 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 -- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
 -- VALUES ('#ssd_s47_enquiry', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
-
-/* 
+/*
 =============================================================================
 Object Name: ssd_initial_cp_conference
-Description: 
+Description:
 Author: D2I
 Version: 1.0
+            0.2 Updated the worker fields 020424 JH
             0.1 Re-instated the worker details 010224 JH
+
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
-Remarks: 
-Dependencies: 
-- FACT_S47
+Remarks:
+Dependencies:
 - FACT_CP_CONFERENCE
 - FACT_MEETINGS
 =============================================================================
@@ -1608,6 +1611,7 @@ SET @TableName = N'ssd_initial_cp_conference';
 PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
+IF OBJECT_ID('ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_initial_cp_conference;
 IF OBJECT_ID('tempdb..#ssd_initial_cp_conference') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
  
 -- Create structure
@@ -1622,9 +1626,9 @@ CREATE TABLE #ssd_initial_cp_conference (
     icpc_icpc_target_date           DATETIME,
     icpc_icpc_date                  DATETIME,
     icpc_icpc_outcome_cp_flag       NCHAR(1),
-    icpc_icpc_outcome_json          NVARCHAR(1000)
-    -- icpc_icpc_team                  NVARCHAR(100),
-    -- icpc_icpc_worker_id             NVARCHAR(48)
+    icpc_icpc_outcome_json          NVARCHAR(1000),
+    icpc_icpc_team                  NVARCHAR(100),
+    icpc_icpc_worker_id             NVARCHAR(48)
 );
  
 -- insert data
@@ -1639,9 +1643,9 @@ INSERT INTO #ssd_initial_cp_conference(
     icpc_icpc_target_date,
     icpc_icpc_date,
     icpc_icpc_outcome_cp_flag,
-    icpc_icpc_outcome_json
-    -- icpc_icpc_team,
-    -- icpc_icpc_worker_id
+    icpc_icpc_outcome_json,
+    icpc_icpc_team,
+    icpc_icpc_worker_id
 )
  
 SELECT
@@ -1659,36 +1663,43 @@ SELECT
         SELECT
             NULLIF(fcpc.OUTCOME_NFA_FLAG, '')                       AS "OUTCOME_NFA_FLAG",
             NULLIF(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS "OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG",
-            NULLIF(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS "OUTCOME_PROV_OF_SERVICES_FLAG",
-            NULLIF(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
-            NULLIF(fcpc.OUTCOME_CP_FLAG, '')                        AS "OUTCOME_CP_CONFERENCE_FLAG",
+            NULLIF(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS "OUTCOME_SINGLE_ASSESSMENT_FLAG",
+            NULLIF(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS "OUTCOME_PROV_OF_SERVICES_FLAG",
+            NULLIF(fcpc.OUTCOME_CP_FLAG, '')                        AS "OUTCOME_CP_FLAG",
             NULLIF(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')              AS "OTHER_OUTCOMES_EXIST_FLAG",
             NULLIF(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS "TOTAL_NO_OF_OUTCOMES",
             NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "OUTCOME_COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    )                                                               AS icpc_icpc_outcome_json
-    --fm.DIM_DEPARTMENT_ID_DESC                                      AS icpc_icpc_team,
-    --fm.DIM_WORKER_ID_DESC                                          AS icpc_icpc_worker_id
-    -- OR is it.... [TESTING]
-    -- fccm.DIM_UPDATED_BY_DEPT_ID                                     AS icpc_icpc_team,
-    -- fccm.DIM_UPDATED_BY_ID                                          AS icpc_icpc_worker_id
-
+    )                                                               AS icpc_icpc_outcome_json,
+    fcpc.ORGANISED_BY_DEPT_NAME                                     AS icpc_icpc_team,
+    fcpc.ORGANISED_BY_USER_NAME                                     AS icpc_icpc_worker_id
+ 
  
 FROM
     Child_Social.FACT_CP_CONFERENCE AS fcpc
 JOIN
     Child_Social.FACT_MEETINGS AS fm ON fcpc.FACT_MEETING_ID = fm.FACT_MEETING_ID
-
--- JOIN -- towards meeting worker details
---     Child_Social.FACT_CP_CONFERENCE_MEETING AS fccm ON fcpc.FACT_MEETING_ID = fccm.FACT_MEETING_ID
  
 WHERE
     fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
  
+ 
+ 
+-- -- Create index(es)
+-- CREATE NONCLUSTERED INDEX idx_ssd_icpc_person_id ON #ssd_initial_cp_conference(icpc_person_id);
+-- CREATE NONCLUSTERED INDEX idx_ssd_icpc_s47_enquiry_id ON #ssd_initial_cp_conference(icpc_s47_enquiry_id);
+-- CREATE NONCLUSTERED INDEX idx_ssd_icpc_referral_id ON #ssd_initial_cp_conference(icpc_referral_id);
+-- CREATE NONCLUSTERED INDEX idx_ssd_icpc_icpc_date ON #ssd_initial_cp_conference(icpc_icpc_date);
 
--- Create index(es)
-CREATE INDEX IDX_ssd_initial_cp_conference_ ON #ssd_initial_cp_conference(icpc_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_s47_enquiry_id
+-- FOREIGN KEY (icpc_s47_enquiry_id) REFERENCES ssd_s47_enquiry(s47e_s47_enquiry_id);
 
+-- ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_person_id
+-- FOREIGN KEY (icpc_person_id) REFERENCES ssd_person(pers_person_id);
+
+-- ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_referral_id
+-- FOREIGN KEY (icpc_referral_id) REFERENCES ssd_cin_episodes(cine_referral_id);
 
 
 -- [TESTING]
@@ -3471,22 +3482,22 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 -- VALUES ('#ssd_care_leavers', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
 
-/* 
+/*
 =============================================================================
 Object Name: ssd_permanence
-Description: 
+Description:
 Author: D2I
 Version: 1.0
             0.2: entered_care_date removed/moved to cla_episodes 060324 RH
             0.1: perm_adopter_sex, perm_adopter_legal_status added RH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
-Remarks: 
-        DEV: 181223: Assumed that only one permanence order per child. 
+Remarks:
+        DEV: 181223: Assumed that only one permanence order per child.
         - In order to handle/reflect the v.rare cases where this has broken down, further work is required.
-
+ 
         DEV: Some fields need spec checking for datatypes e.g. perm_adopted_by_carer_flag and others
-
-Dependencies: 
+ 
+Dependencies:
 - ssd_person
 - FACT_ADOPTION
 - FACT_CLA_PLACEMENT
@@ -3495,13 +3506,13 @@ Dependencies:
 - FACT_CLA
 =============================================================================
 */
-
-
+ 
+ 
 -- [TESTING] Create marker
 SET @TableName = N'ssd_permanence';
 PRINT 'Creating table: ' + @TableName;
-
-
+ 
+ 
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
  
@@ -3519,10 +3530,13 @@ CREATE TABLE #ssd_permanence (
     perm_ffa_cp_decision_date            DATETIME,              
     perm_placement_order_date            DATETIME,
     perm_matched_date                    DATETIME,
-    perm_placed_for_adoption_date        DATETIME,             
+    perm_adopter_sex                     NVARCHAR(48),
+    perm_adopter_legal_status            NVARCHAR(100),
+    perm_number_of_adopters              INT,
+    perm_placed_for_adoption_date        DATETIME,            
     perm_adopted_by_carer_flag           NCHAR(1),
     perm_placed_ffa_cp_date              DATETIME,
-      -- perm_placed_foster_carer_date        NVARCHAR(48), 
+      -- perm_placed_foster_carer_date        NVARCHAR(48),
     perm_placement_provider_urn          NVARCHAR(48),  
     perm_decision_reversed_date          DATETIME,                  
     perm_decision_reversed_reason        NVARCHAR(100),
@@ -3530,17 +3544,17 @@ CREATE TABLE #ssd_permanence (
     perm_permanence_order_type           NVARCHAR(100),        
     perm_adoption_worker                 NVARCHAR(100)
 );
-
-
+ 
+ 
 WITH RankedPermanenceData AS (
     -- CTE to rank permanence rows for each person
     -- used to assist in dup filtering on/towards perm_table_id
-
+ 
     SELECT
-        CASE 
+        CASE
             WHEN (fa.DIM_PERSON_ID = fce.DIM_PERSON_ID)
             THEN CONCAT(fa.FACT_ADOPTION_ID, fce.FACT_CARE_EPISODES_ID)
-            ELSE fce.FACT_CARE_EPISODES_ID 
+            ELSE fce.FACT_CARE_EPISODES_ID
         END                                               AS perm_table_id,
         fa.FACT_ADOPTION_ID                               AS adoption_table_id,
         p.LEGACY_ID                                       AS perm_person_id,
@@ -3553,17 +3567,20 @@ WITH RankedPermanenceData AS (
         fcpl.FFA_IS_PLAN_DATE                             AS perm_ffa_cp_decision_date,
         fa.PLACEMENT_ORDER_DTTM                           AS perm_placement_order_date,
         fa.MATCHING_DTTM                                  AS perm_matched_date,
-        CASE 
+        fa.DIM_LOOKUP_ADOPTER_GENDER_CODE                 AS perm_adopter_sex,
+        fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE           AS perm_adopter_legal_status,
+        fa.NO_OF_ADOPTERS                                 AS perm_number_of_adopters,
+        CASE
             WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
-            THEN fcpl.START_DTTM 
-            ELSE NULL 
+            THEN fcpl.START_DTTM
+            ELSE NULL
         END                                               AS perm_placed_for_adoption_date,
         fa.ADOPTED_BY_CARER_FLAG                          AS perm_adopted_by_carer_flag,
         fa.FOSTER_TO_ADOPT_DTTM                           AS perm_placed_ffa_cp_date,
-        CASE 
+        CASE
             WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
-            THEN fce.OFSTED_URN 
-            ELSE NULL 
+            THEN fce.OFSTED_URN
+            ELSE NULL
         END                                               AS perm_placement_provider_urn,
         fa.NO_LONGER_PLACED_DTTM                          AS perm_decision_reversed_date,
         fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE             AS perm_decision_reversed_reason,
@@ -3577,10 +3594,10 @@ WITH RankedPermanenceData AS (
         fa.ADOPTION_SOCIAL_WORKER_NAME                    AS perm_adoption_worker,
         ROW_NUMBER() OVER (
             PARTITION BY p.LEGACY_ID                     -- partition on person identifier
-            ORDER BY CAST(RIGHT(CASE 
+            ORDER BY CAST(RIGHT(CASE
                                     WHEN (fa.DIM_PERSON_ID = fce.DIM_PERSON_ID)
                                     THEN CONCAT(fa.FACT_ADOPTION_ID, fce.FACT_CARE_EPISODES_ID)
-                                    ELSE fce.FACT_CARE_EPISODES_ID 
+                                    ELSE fce.FACT_CARE_EPISODES_ID
                                 END, 5) AS INT) DESC    -- take last 5 digits, coerce to int so we can sort/order
         )                                                 AS rn -- we only want rn==1
     FROM Child_Social.FACT_CARE_EPISODES fce
@@ -3593,16 +3610,16 @@ WITH RankedPermanenceData AS (
     WHERE ((fce.PLACEND IS NULL AND fa.START_DTTM IS NOT NULL)
         OR fce.CARE_REASON_END_CODE IN ('E48', 'E1', 'E44', 'E12', 'E11', 'E43', '45', 'E41', 'E45', 'E47', 'E46'))
         AND fce.DIM_PERSON_ID <> '-1'
-        
-        -- -- Exclusion block commented for further [TESTING] 
+       
+        -- -- Exclusion block commented for further [TESTING]
         -- AND EXISTS ( -- ssd records only
         --     SELECT 1
         --     FROM ssd_person p
         --     WHERE p.pers_person_id = fce.DIM_PERSON_ID
         -- )
-
+ 
 )
-
+ 
 -- Insert data
 INSERT INTO #ssd_permanence (
     perm_table_id,
@@ -3617,6 +3634,9 @@ INSERT INTO #ssd_permanence (
     perm_ffa_cp_decision_date,
     perm_placement_order_date,
     perm_matched_date,
+    perm_adopter_sex,
+    perm_adopter_legal_status,
+    perm_number_of_adopters,
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
     perm_placed_ffa_cp_date,
@@ -3628,7 +3648,7 @@ INSERT INTO #ssd_permanence (
     perm_permanence_order_type,
     perm_adoption_worker
 )  
-
+ 
 SELECT
     perm_table_id,
     adoption_table_id,
@@ -3642,6 +3662,9 @@ SELECT
     perm_ffa_cp_decision_date,
     perm_placement_order_date,
     perm_matched_date,
+    perm_adopter_sex,
+    perm_adopter_legal_status,
+    perm_number_of_adopters,
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
     perm_placed_ffa_cp_date,
@@ -3659,28 +3682,26 @@ AND EXISTS
     FROM #ssd_person p
     WHERE p.pers_person_id = perm_person_id
     );
-
-
-
-
+ 
+ 
 -- -- Create index(es)
 -- CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id ON ssd_permanence(perm_person_id);
-
+ 
 -- CREATE NONCLUSTERED INDEX idx_ssd_perm_entered_care_date ON ssd_permanence(perm_entered_care_date);
 -- CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date ON ssd_permanence(perm_adm_decision_date);
 -- CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date ON ssd_permanence(perm_permanence_order_date);
-
-
+ 
+ 
 -- -- Add constraint(s)
 -- ALTER TABLE ssd_permanence ADD CONSTRAINT FK_perm_person_id
 -- FOREIGN KEY (perm_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
-
-
+ 
+ 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
-
+ 
 -- -- [TESTING]
 -- EXEC tempdb..sp_spaceused '#ssd_permanence', @Rows OUTPUT, @ReservedSpace OUTPUT, @DataSpace OUTPUT, @IndexSpace OUTPUT, @UnusedSpace OUTPUT
 -- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
