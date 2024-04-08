@@ -447,15 +447,17 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/* 
+/*
 =============================================================================
 Object Name: ssd_immigration_status (UASC)
-Description: 
+Description:
 Author: D2I
 Version: 1.0
+            0.9 rem ims.DIM_LOOKUP_IMMGR_STATUS_DESC rpld with _CODE 270324 JH 
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
-Remarks: 
-Dependencies: 
+Remarks: Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
+            increased field size to 100
+Dependencies:
 - ssd_person
 - FACT_IMMIGRATION_STATUS
 =============================================================================
@@ -463,8 +465,8 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_immigration_status';
 PRINT 'Creating table: ' + @TableName;
-
-
+ 
+ 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_status;
 IF OBJECT_ID('tempdb..#immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
@@ -476,30 +478,30 @@ CREATE TABLE ssd_immigration_status (
     immi_person_id                  NVARCHAR(48),
     immi_immigration_status_start   DATETIME,
     immi_immigration_status_end     DATETIME,
-    immi_immigration_status         NVARCHAR(48)
+    immi_immigration_status         NVARCHAR(100)
 );
-
-
+ 
+ 
 -- insert data
 INSERT INTO ssd_immigration_status (
-    immi_immigration_status_id, 
-    immi_person_id, 
+    immi_immigration_status_id,
+    immi_person_id,
     immi_immigration_status_start,
     immi_immigration_status_end,
-    immi_immigration_status -- uasc
+    immi_immigration_status
 )
-SELECT 
+SELECT
     ims.FACT_IMMIGRATION_STATUS_ID,
     ims.DIM_PERSON_ID,
     ims.START_DTTM,
     ims.END_DTTM,
-    ims.DIM_LOOKUP_IMMGR_STATUS_CODE
-FROM 
+    ims.DIM_LOOKUP_IMMGR_STATUS_DESC
+FROM
     Child_Social.FACT_IMMIGRATION_STATUS AS ims
-
-WHERE 
-    EXISTS 
-    (   -- only ssd relevant records
+ 
+WHERE
+    EXISTS
+    ( -- only ssd relevant records
         SELECT 1
         FROM ssd_person p
         WHERE p.pers_person_id = ims.DIM_PERSON_ID
@@ -1539,17 +1541,19 @@ PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
-/* 
+
+/*
 =============================================================================
 Object Name: ssd_initial_cp_conference
-Description: 
+Description:
 Author: D2I
 Version: 1.0
+            0.2 Updated the worker fields 020424 JH
             0.1 Re-instated the worker details 010224 JH
+
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
-Remarks: 
-Dependencies: 
-- FACT_S47
+Remarks:
+Dependencies:
 - FACT_CP_CONFERENCE
 - FACT_MEETINGS
 =============================================================================
@@ -1560,7 +1564,9 @@ PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
 IF OBJECT_ID('ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_initial_cp_conference;
+IF OBJECT_ID('tempdb..#ssd_initial_cp_conference') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
  
+
 -- Create structure
 CREATE TABLE ssd_initial_cp_conference (
     icpc_icpc_id                    NVARCHAR(48) PRIMARY KEY,
@@ -1610,29 +1616,22 @@ SELECT
         SELECT
             NULLIF(fcpc.OUTCOME_NFA_FLAG, '')                       AS "OUTCOME_NFA_FLAG",
             NULLIF(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS "OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG",
-            NULLIF(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS "OUTCOME_PROV_OF_SERVICES_FLAG",
-            NULLIF(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
-            NULLIF(fcpc.OUTCOME_CP_FLAG, '')                        AS "OUTCOME_CP_CONFERENCE_FLAG",
+            NULLIF(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS "OUTCOME_SINGLE_ASSESSMENT_FLAG",
+            NULLIF(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS "OUTCOME_PROV_OF_SERVICES_FLAG",
+            NULLIF(fcpc.OUTCOME_CP_FLAG, '')                        AS "OUTCOME_CP_FLAG",
             NULLIF(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')              AS "OTHER_OUTCOMES_EXIST_FLAG",
             NULLIF(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS "TOTAL_NO_OF_OUTCOMES",
             NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "OUTCOME_COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     )                                                               AS icpc_icpc_outcome_json,
-
-    --fm.DIM_DEPARTMENT_ID_DESC                                      AS icpc_icpc_team,
-    --fm.DIM_WORKER_ID_DESC                                          AS icpc_icpc_worker_id
-    -- OR is it.... [TESTING]
-    fccm.DIM_UPDATED_BY_DEPT_ID                                     AS icpc_icpc_team,
-    fccm.DIM_UPDATED_BY_ID                                          AS icpc_icpc_worker_id
-
+    fcpc.ORGANISED_BY_DEPT_NAME                                     AS icpc_icpc_team,
+    fcpc.ORGANISED_BY_USER_NAME                                     AS icpc_icpc_worker_id
+ 
  
 FROM
     Child_Social.FACT_CP_CONFERENCE AS fcpc
 JOIN
     Child_Social.FACT_MEETINGS AS fm ON fcpc.FACT_MEETING_ID = fm.FACT_MEETING_ID
-
-JOIN -- towards meeting worker details
-    Child_Social.FACT_CP_CONFERENCE_MEETING AS fccm ON fcpc.FACT_MEETING_ID = fccm.FACT_MEETING_ID
  
 WHERE
     fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
@@ -3603,7 +3602,34 @@ INSERT INTO ssd_permanence (
     perm_permanence_order_type,
     perm_adoption_worker
 )  
-
+-- Create structure
+CREATE TABLE #ssd_permanence (
+    perm_table_id                        NVARCHAR(48) PRIMARY KEY,
+    adoption_table_id                    NVARCHAR(48),  
+    perm_person_id                       NVARCHAR(48),
+    perm_cla_id                          NVARCHAR(48),
+    perm_entered_care_date               DATETIME,              
+    perm_adm_decision_date               DATETIME,
+    perm_part_of_sibling_group           NCHAR(1),
+    perm_siblings_placed_together        INT,
+    perm_siblings_placed_apart           INT,
+    perm_ffa_cp_decision_date            DATETIME,              
+    perm_placement_order_date            DATETIME,
+    perm_matched_date                    DATETIME,
+    perm_adopter_sex                     NVARCHAR(48),
+    perm_adopter_legal_status            NVARCHAR(100),
+    perm_number_of_adopters              INT,
+    perm_placed_for_adoption_date        DATETIME,            
+    perm_adopted_by_carer_flag           NCHAR(1),
+    perm_placed_ffa_cp_date              DATETIME,
+      -- perm_placed_foster_carer_date        NVARCHAR(48),
+    perm_placement_provider_urn          NVARCHAR(48),  
+    perm_decision_reversed_date          DATETIME,                  
+    perm_decision_reversed_reason        NVARCHAR(100),
+    perm_permanence_order_date           DATETIME,              
+    perm_permanence_order_type           NVARCHAR(100),        
+    perm_adoption_worker                 NVARCHAR(100)
+);
 SELECT
     perm_table_id,
     adoption_table_id,
