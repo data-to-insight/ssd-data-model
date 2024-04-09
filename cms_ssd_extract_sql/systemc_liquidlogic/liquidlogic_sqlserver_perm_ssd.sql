@@ -163,7 +163,7 @@ AND (                                                       -- Filter irrelevant
 
  
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_person_la_person_id ON ssd_person(pers_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_person_pers_person_id ON ssd_person(pers_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob ON ssd_person(pers_dob);
 CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id ON ssd_person(pers_common_child_id);
 CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender ON ssd_person(pers_ethnicity, pers_gender);
@@ -639,11 +639,11 @@ IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_stat
 
 -- Create structure
 CREATE TABLE ssd_legal_status (
-    lega_legal_status_id        NVARCHAR(48) PRIMARY KEY,
-    lega_person_id              NVARCHAR(48),
-    lega_legal_status           NVARCHAR(100),
-    lega_legal_status_start     DATETIME,
-    lega_legal_status_end       DATETIME
+    lega_legal_status_id            NVARCHAR(48) PRIMARY KEY,
+    lega_person_id                  NVARCHAR(48),
+    lega_legal_status               NVARCHAR(100),
+    lega_legal_status_start_date    DATETIME,
+    lega_legal_status_end_date      DATETIME
 );
  
 -- Insert data
@@ -651,8 +651,8 @@ INSERT INTO ssd_legal_status (
     lega_legal_status_id,
     lega_person_id,
     lega_legal_status,
-    lega_legal_status_start,
-    lega_legal_status_end
+    lega_legal_status_start_date,
+    lega_legal_status_end_date
  
 )
 SELECT
@@ -673,8 +673,8 @@ WHERE EXISTS
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id ON ssd_legal_status(lega_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_legal_status ON ssd_legal_status(lega_legal_status);
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start ON ssd_legal_status(lega_legal_status_start);
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end ON ssd_legal_status(lega_legal_status_end);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start ON ssd_legal_status(lega_legal_status_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end ON ssd_legal_status(lega_legal_status_end_date);
 
 -- Create constraint(s)
 ALTER TABLE ssd_legal_status ADD CONSTRAINT FK_legal_status_person
@@ -888,6 +888,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cin_episodes') IS NOT NULL DROP TABLE ssd_cin_episodes;
+IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
 -- Create structure
 CREATE TABLE ssd_cin_episodes
@@ -902,8 +903,8 @@ CREATE TABLE ssd_cin_episodes
     cine_referral_nfa           NCHAR(1),
     cine_close_reason           NVARCHAR(100),
     cine_close_date             DATETIME,
-    cine_referral_team          NVARCHAR(255),
-    cine_referral_worker_id     NVARCHAR(48)
+    cine_referral_team_name     NVARCHAR(255),
+    cine_referral_worker_name   NVARCHAR(48)
 );
  
 -- Insert data
@@ -919,8 +920,8 @@ INSERT INTO ssd_cin_episodes
     cine_referral_nfa,
     cine_close_reason,
     cine_close_date,
-    cine_referral_team,
-    cine_referral_worker_id
+    cine_referral_team_name,
+    cine_referral_worker_name
 )
 SELECT
     fr.FACT_REFERRAL_ID,
@@ -1011,8 +1012,8 @@ CREATE TABLE ssd_cin_assessments
     cina_assessment_auth_date   DATETIME,               -- This needs checking !! [TESTING]
     cina_assessment_outcome_json NVARCHAR(1000),        -- enlarged due to comments field    
     cina_assessment_outcome_nfa NCHAR(1), 
-    cina_assessment_team        NVARCHAR(255),
-    cina_assessment_worker_id   NVARCHAR(48)
+    cina_assessment_team_name   NVARCHAR(255),
+    cina_assessment_worker_name NVARCHAR(48)
 );
 
 -- Insert data
@@ -1026,8 +1027,8 @@ INSERT INTO ssd_cin_assessments
     cina_assessment_auth_date,      -- This needs checking !! [TESTING]
     cina_assessment_outcome_json,
     cina_assessment_outcome_nfa,
-    cina_assessment_team,
-    cina_assessment_worker_id
+    cina_assessment_team_name,
+    cina_assessment_worker_name
 )
 SELECT 
     fa.FACT_SINGLE_ASSESSMENT_ID,
@@ -1055,8 +1056,8 @@ SELECT
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS cina_assessment_outcome_json, 
     fa.OUTCOME_NFA_FLAG                                     AS cina_assessment_outcome_nfa,
-    fa.COMPLETED_BY_DEPT_NAME                               AS cina_assessment_team,
-    fa.COMPLETED_BY_USER_STAFF_ID                           AS cina_assessment_worker_id
+    fa.COMPLETED_BY_DEPT_NAME                               AS cina_assessment_team_name,
+    fa.COMPLETED_BY_USER_STAFF_ID                           AS cina_assessment_worker_name
 FROM 
     Child_Social.FACT_SINGLE_ASSESSMENT AS fa
 
@@ -1079,9 +1080,9 @@ ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person
 FOREIGN KEY (cina_person_id) REFERENCES ssd_person(pers_person_id);
 
 
--- #DtoI-1564 121223 RH [TESTING]
-ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_ssd_involvements
-FOREIGN KEY (cina_assessment_worker_id) REFERENCES ssd_involvements(invo_professional_id);
+-- -- #DtoI-1564 121223 RH [TESTING]
+-- ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_ssd_involvements
+-- FOREIGN KEY (cina_assessment_worker_id) REFERENCES ssd_involvements(invo_professional_id);
 
 
 
@@ -1457,15 +1458,15 @@ IF OBJECT_ID('ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_s47_enquiry;
 
 -- Create structure 
 CREATE TABLE ssd_s47_enquiry (
-    s47e_s47_enquiry_id             NVARCHAR(48) PRIMARY KEY,
-    s47e_referral_id                NVARCHAR(48),
-    s47e_person_id                  NVARCHAR(48),
-    s47e_s47_start_date             DATETIME,
-    s47e_s47_end_date               DATETIME,
-    s47e_s47_nfa                    NCHAR(1),
-    s47e_s47_outcome_json           NVARCHAR(1000),
-    s47e_s47_completed_by_team      NVARCHAR(100),
-    s47e_s47_completed_by_worker    NVARCHAR(48)
+    s47e_s47_enquiry_id                 NVARCHAR(48) PRIMARY KEY,
+    s47e_referral_id                    NVARCHAR(48),
+    s47e_person_id                      NVARCHAR(48),
+    s47e_s47_start_date                 DATETIME,
+    s47e_s47_end_date                   DATETIME,
+    s47e_s47_nfa                        NCHAR(1),
+    s47e_s47_outcome_json               NVARCHAR(1000),
+    s47e_s47_completed_by_team_name     NVARCHAR(100),
+    s47e_s47_completed_by_worker_name   NVARCHAR(48)
 );
 
 -- insert data
@@ -1477,8 +1478,8 @@ INSERT INTO ssd_s47_enquiry(
     s47e_s47_end_date,
     s47e_s47_nfa,
     s47e_s47_outcome_json,
-    s47e_s47_completed_by_team,
-    s47e_s47_completed_by_worker
+    s47e_s47_completed_by_team_name,
+    s47e_s47_completed_by_worker_name
 )
 SELECT 
     s47.FACT_S47_ID,
@@ -1501,8 +1502,8 @@ SELECT
             NULLIF(s47.OUTCOME_COMMENTS, '')                   AS "OUTCOME_COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS s47e_s47_outcome_json,
-    s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
-    s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker
+    s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team_name,
+    s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker_name
 
 FROM 
     Child_Social.FACT_S47 AS s47;
@@ -3454,7 +3455,8 @@ Object Name: ssd_permanence
 Description: 
 Author: D2I
 Version: 1.0
-            0.2: entered_care_date removed/moved to cla_episodes 060324 RH
+            0.3: entered_care_date removed/moved to cla_episodes 060324 RH
+            0.2: perm_placed_foster_carer_date (from fc.START_DTTM) removed RH
             0.1: perm_adopter_sex, perm_adopter_legal_status added RH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: 
@@ -3498,7 +3500,6 @@ CREATE TABLE ssd_permanence (
     perm_placed_for_adoption_date        DATETIME,             
     perm_adopted_by_carer_flag           NCHAR(1),
     perm_placed_ffa_cp_date              DATETIME,
-      -- perm_placed_foster_carer_date        NVARCHAR(48), 
     perm_placement_provider_urn          NVARCHAR(48),  
     perm_decision_reversed_date          DATETIME,                  
     perm_decision_reversed_reason        NVARCHAR(100),
@@ -3521,6 +3522,7 @@ WITH RankedPermanenceData AS (
         fa.FACT_ADOPTION_ID                               AS adoption_table_id,
         p.LEGACY_ID                                       AS perm_person_id,
         fce.FACT_CLA_ID                                   AS perm_cla_id,
+        -- fc.START_DTTM                                     AS perm_entered_care_date, -- rem in v0.3. Ref, towards Potential future use.
         fa.DECISION_DTTM                                  AS perm_adm_decision_date,              
         fa.SIBLING_GROUP                                  AS perm_part_of_sibling_group,
         fa.NUMBER_TOGETHER                                AS perm_siblings_placed_together,
@@ -3594,7 +3596,6 @@ INSERT INTO ssd_permanence (
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
     perm_placed_ffa_cp_date,
-   -- perm_placed_foster_carer_date,
     perm_placement_provider_urn,
     perm_decision_reversed_date,
     perm_decision_reversed_reason,
@@ -3603,12 +3604,11 @@ INSERT INTO ssd_permanence (
     perm_adoption_worker
 )  
 -- Create structure
-CREATE TABLE #ssd_permanence (
+CREATE TABLE ssd_permanence (
     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
     adoption_table_id                    NVARCHAR(48),  
     perm_person_id                       NVARCHAR(48),
-    perm_cla_id                          NVARCHAR(48),
-    perm_entered_care_date               DATETIME,              
+    perm_cla_id                          NVARCHAR(48),              
     perm_adm_decision_date               DATETIME,
     perm_part_of_sibling_group           NCHAR(1),
     perm_siblings_placed_together        INT,
@@ -3622,7 +3622,6 @@ CREATE TABLE #ssd_permanence (
     perm_placed_for_adoption_date        DATETIME,            
     perm_adopted_by_carer_flag           NCHAR(1),
     perm_placed_ffa_cp_date              DATETIME,
-      -- perm_placed_foster_carer_date        NVARCHAR(48),
     perm_placement_provider_urn          NVARCHAR(48),  
     perm_decision_reversed_date          DATETIME,                  
     perm_decision_reversed_reason        NVARCHAR(100),
@@ -3686,8 +3685,10 @@ Object Name: ssd_professionals
 Description: 
 Author: D2I
 Version: 1.0
+            0.9: prof_professional_id becomes  090424 JH
+            0.8: prof_table_id becomes prof_professional_id 090424 JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
-Remarks: 
+Remarks: prof_system_id
 Dependencies: 
 - @LastSept30th
 - DIM_WORKER
@@ -3699,10 +3700,10 @@ SET @TableName = N'ssd_professionals';
 PRINT 'Creating table: ' + @TableName;
 
 
-
 -- Check if exists & drop
 IF OBJECT_ID('ssd_professionals', 'U') IS NOT NULL DROP TABLE ssd_professionals;
 IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL DROP TABLE #ssd_professionals;
+
 
 -- Determine/Define date on which CASELOAD count required (Currently: September 30th)
 SET @LastSept30th = CASE 
@@ -3711,10 +3712,11 @@ SET @LastSept30th = CASE
                         ELSE DATEFROMPARTS(YEAR(GETDATE()) - 1, 9, 30)
                     END;
 
+
 -- Create structure
 CREATE TABLE ssd_professionals (
-    prof_table_id                         NVARCHAR(48) PRIMARY KEY,
-    prof_professional_id                  NVARCHAR(48),
+    prof_professional_id                  NVARCHAR(48) PRIMARY KEY,
+    prof_system_id                        NVARCHAR(48),
     prof_professional_name                NVARCHAR(300),
     prof_social_worker_registration_no    NVARCHAR(48),
     prof_agency_worker_flag               NCHAR(1),
@@ -3728,8 +3730,8 @@ CREATE TABLE ssd_professionals (
 
 -- Insert data
 INSERT INTO ssd_professionals (
-    prof_table_id, 
     prof_professional_id, 
+    prof_system_id, 
     prof_professional_name,
     prof_social_worker_registration_no,
     prof_agency_worker_flag,
@@ -3740,15 +3742,15 @@ INSERT INTO ssd_professionals (
 )
 
 SELECT 
-    dw.DIM_WORKER_ID                  AS prof_table_id,
-    dw.STAFF_ID                       AS prof_professional_id,
-    CONCAT(dw.SURNAME, ' ', dw.FORENAME) AS prof_professional_name,         -- used also as Allocated Worker|Assigned Worker
-    dw.WORKER_ID_CODE                 AS prof_social_worker_registration_no,
-    ''                               AS prof_agency_worker_flag,            -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
-    dw.JOB_TITLE                      AS prof_professional_job_title,
-    ISNULL(rc.OpenCases, 0)           AS prof_professional_caseload,        -- 0 when no open cases on given date.
-    dw.DEPARTMENT_NAME                AS prof_professional_department,
-    dw.FULL_TIME_EQUIVALENCY          AS prof_full_time_equivalency
+    dw.DIM_WORKER_ID                        AS prof_professional_id,
+    dw.STAFF_ID                             AS prof_system_id,
+    CONCAT(dw.SURNAME, ' ', dw.FORENAME)    AS prof_professional_name,              -- used also as Allocated Worker|Assigned Worker
+    dw.WORKER_ID_CODE                       AS prof_social_worker_registration_no,
+    ''                                      AS prof_agency_worker_flag,             -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
+    dw.JOB_TITLE                            AS prof_professional_job_title,
+    ISNULL(rc.OpenCases, 0)                 AS prof_professional_caseload,          -- 0 when no open cases on given date.
+    dw.DEPARTMENT_NAME                      AS prof_professional_department,
+    dw.FULL_TIME_EQUIVALENCY                AS prof_full_time_equivalency
 FROM 
     Child_Social.DIM_WORKER AS dw
 LEFT JOIN (
@@ -3758,7 +3760,6 @@ LEFT JOIN (
         COUNT(*) AS OpenCases
     FROM 
         Child_Social.FACT_REFERRALS
-
     WHERE 
         REFRL_START_DTTM <= @LastSept30th AND 
         (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM >= @LastSept30th)
@@ -3769,7 +3770,7 @@ LEFT JOIN (
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_prof_professional_id ON ssd_professionals (prof_professional_id);
+CREATE NONCLUSTERED INDEX idx_prof_system_id ON ssd_professionals (prof_system_id);
 CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON ssd_professionals(prof_social_worker_registration_no);
 
 
@@ -3782,17 +3783,16 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-
-
-/* 
+/*
 =============================================================================
 Object Name: ssd_involvements
-Description: 
+Description:
 Author: D2I
 Version: 1.0
+            0.9: added person_id and changed source of professional_team 090424 JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
-Remarks: 
-Dependencies: 
+Remarks:
+Dependencies:
 - ssd_professionals
 - FACT_INVOLVEMENTS
 =============================================================================
@@ -3800,48 +3800,68 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_involvements';
 PRINT 'Creating table: ' + @TableName;
-
-
-
+ 
+ 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_involvements', 'U') IS NOT NULL DROP TABLE ssd_involvements;
 IF OBJECT_ID('tempdb..#ssd_involvements', 'U') IS NOT NULL DROP TABLE #ssd_involvements;
-
-
+ 
 -- Create structure
 CREATE TABLE ssd_involvements (
     invo_involvements_id             NVARCHAR(48) PRIMARY KEY,
     invo_professional_id             NVARCHAR(48),
     invo_professional_role_id        NVARCHAR(200),
-    invo_professional_team           NVARCHAR(200),
+    invo_professional_team           NVARCHAR(1000),
+    invo_person_id                   NVARCHAR(48),
     invo_involvement_start_date      DATETIME,
     invo_involvement_end_date        DATETIME,
     invo_worker_change_reason        NVARCHAR(200),
     invo_referral_id                 NVARCHAR(48)
 );
-
+ 
 -- Insert data
 INSERT INTO ssd_involvements (
-    invo_involvements_id, 
-    invo_professional_id, 
+    invo_involvements_id,
+    invo_professional_id,
     invo_professional_role_id,
     invo_professional_team,
+    invo_person_id,
     invo_involvement_start_date,
     invo_involvement_end_date,
     invo_worker_change_reason,
     invo_referral_id
 )
-SELECT 
+SELECT
     fi.FACT_INVOLVEMENTS_ID                       AS invo_involvements_id,
     fi.DIM_WORKER_ID                              AS invo_professional_id,
     fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
-    fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC        AS invo_professional_team,
+    (CASE WHEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC IS NOT NULL
+        THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC
+        ELSE (CASE WHEN fi.DIM_DEPARTMENT_NAME IS NOT NULL
+                    THEN fi.DIM_DEPARTMENT_NAME
+                     ELSE (CASE WHEN fi.DIM_GROUP_NAME IS NOT NULL
+                            THEN fi.DIM_GROUP_NAME
+                            ELSE (CASE WHEN (fi.COMMENTS LIKE '%WORKER%' OR fi.COMMENTS LIKE '%ALLOC%')
+                                        THEN fi.COMMENTS ELSE NULL END)
+        END)END)END)                              AS invo_professional_team,
+    fi.DIM_PERSON_ID                              AS invo_person_id,
     fi.START_DTTM                                 AS invo_involvement_start_date,
     fi.END_DTTM                                   AS invo_involvement_end_date,
     fi.DIM_LOOKUP_CWREASON_CODE                   AS invo_worker_change_reason,
     fi.FACT_REFERRAL_ID                           AS invo_referral_id
-FROM 
-    Child_Social.FACT_INVOLVEMENTS AS fi;
+FROM
+    Child_Social.FACT_INVOLVEMENTS AS fi
+ 
+WHERE EXISTS
+    ( -- only need address data for ssd relevant records
+    SELECT 1
+    FROM ssd_person p
+    WHERE p.pers_person_id = fi.DIM_PERSON_ID
+    );
+
+
+
+
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_invo_professional_id ON ssd_involvements (invo_professional_id);
@@ -3906,7 +3926,7 @@ IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd
 
 -- Create structure
 CREATE TABLE ssd_linked_identifiers (
-    link_link_id            NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
+    link_table_id            NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
     link_person_id          NVARCHAR(48), 
     link_identifier_type    NVARCHAR(100),
     link_identifier_value   NVARCHAR(100),
@@ -4268,35 +4288,22 @@ CREATE TABLE ssd_send (
     upn_unknown         NVARCHAR(48)
     );
 
--- insert data
-INSERT INTO ssd_send (
-    send_table_id,
-    send_person_id, 
-    send_upn,
-    send_uln,
-    upn_unknown
+-- -- Insert placeholder data
+-- INSERT INTO ssd_send (
+--     send_table_id,
+--     send_person_id, 
+--     send_upn,
+--     send_uln,
+--     upn_unknown
 
-)
-SELECT 
-    f903.FACT_903_DATA_ID   AS send_table_id,
-    f903.DIM_PERSON_ID      AS send_person_id,      -- [TESTING]
-    f903.FACT_903_DATA_ID   AS send_upn,
-    p.ULN                   AS send_uln,
-    f903.NO_UPN_CODE        AS upn_unknown
-
-FROM 
-    Child_Social.FACT_903_DATA AS f903
-
-LEFT JOIN 
-    Education.DIM_PERSON AS p ON f903.DIM_PERSON_ID = p.DIM_PERSON_ID;
+-- )
+-- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+ 
 
 
 -- Add constraint(s)
 ALTER TABLE ssd_send ADD CONSTRAINT FK_send_to_person 
 FOREIGN KEY (send_person_id) REFERENCES ssd_person(pers_person_id);
-
-/* [TESTING] Should this actually be pulling from Child_Social.FACT_SENRECORD.DIM_PERSON_ID | Child_Social.FACT_SEN.DIM_PERSON_ID
-*/
 
 
 
