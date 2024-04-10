@@ -1271,7 +1271,6 @@ IF OBJECT_ID('ssd_cin_plans', 'U') IS NOT NULL DROP TABLE ssd_cin_plans;
 IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plans;
 
 
-
 -- Create structure
 CREATE TABLE ssd_cin_plans (
     cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,
@@ -1279,8 +1278,8 @@ CREATE TABLE ssd_cin_plans (
     cinp_person_id              NVARCHAR(48),
     cinp_cin_plan_start         DATETIME,
     cinp_cin_plan_end           DATETIME,
-    cinp_cin_plan_team          NVARCHAR(255),
-    cinp_cin_plan_worker_id     NVARCHAR(48)
+    cinp_cin_plan_team_name     NVARCHAR(255),
+    cinp_cin_plan_worker_name   NVARCHAR(48)
 );
  
 -- Insert data
@@ -1290,8 +1289,8 @@ INSERT INTO ssd_cin_plans (
     cinp_person_id,
     cinp_cin_plan_start,
     cinp_cin_plan_end,
-    cinp_cin_plan_team,
-    cinp_cin_plan_worker_id
+    cinp_cin_plan_team_name,
+    cinp_cin_plan_worker_name
 )
 SELECT
     cps.FACT_CARE_PLAN_SUMMARY_ID      AS cinp_cin_plan_id,
@@ -1304,13 +1303,13 @@ SELECT
         MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
                  THEN fp.DIM_PLAN_COORD_DEPT_ID_DESC END))
  
-                                       AS cinp_cin_plan_team,
+                                       AS cinp_cin_plan_team_name,
  
     (SELECT
         MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
                  THEN fp.DIM_PLAN_COORD_ID_DESC END))
                  
-                                       AS cinp_cin_plan_worker_id
+                                       AS cinp_cin_plan_worker_name
  
 FROM Child_Social.FACT_CARE_PLAN_SUMMARY cps  
  
@@ -3482,6 +3481,7 @@ Object Name: ssd_permanence
 Description: 
 Author: D2I
 Version: 1.0
+            0.4: worker_name field name change for consistency 100424 JH
             0.3: entered_care_date removed/moved to cla_episodes 060324 RH
             0.2: perm_placed_foster_carer_date (from fc.START_DTTM) removed RH
             0.1: perm_adopter_sex, perm_adopter_legal_status added RH
@@ -3532,7 +3532,7 @@ CREATE TABLE ssd_permanence (
     perm_decision_reversed_reason        NVARCHAR(100),
     perm_permanence_order_date           DATETIME,              
     perm_permanence_order_type           NVARCHAR(100),        
-    perm_adoption_worker                 NVARCHAR(100)
+    perm_adoption_worker_name            NVARCHAR(100)
 );
 
 
@@ -3578,7 +3578,7 @@ WITH RankedPermanenceData AS (
             WHEN fce.CARE_REASON_END_CODE IN ('45', 'E41') THEN 'Child Arrangements/ Residence Order'
             ELSE NULL
         END                                               AS perm_permanence_order_type,
-        fa.ADOPTION_SOCIAL_WORKER_NAME                    AS perm_adoption_worker,
+        fa.ADOPTION_SOCIAL_WORKER_NAME                    AS perm_adoption_worker_name,
         ROW_NUMBER() OVER (
             PARTITION BY p.LEGACY_ID                     -- partition on person identifier
             ORDER BY CAST(RIGHT(CASE 
@@ -3628,7 +3628,7 @@ INSERT INTO ssd_permanence (
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker
+    perm_adoption_worker_name
 )  
 -- Create structure
 CREATE TABLE ssd_permanence (
@@ -3654,7 +3654,7 @@ CREATE TABLE ssd_permanence (
     perm_decision_reversed_reason        NVARCHAR(100),
     perm_permanence_order_date           DATETIME,              
     perm_permanence_order_type           NVARCHAR(100),        
-    perm_adoption_worker                 NVARCHAR(100)
+    perm_adoption_worker_name            NVARCHAR(100)
 );
 SELECT
     perm_table_id,
@@ -3676,7 +3676,8 @@ SELECT
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker
+    perm_adoption_worker_name
+
 FROM RankedPermanenceData
 WHERE rn = 1
 AND EXISTS

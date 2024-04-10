@@ -3360,6 +3360,7 @@ Object Name: ssd_permanence
 Description: 
 Author: D2I
 Version: 1.0
+            0.4: worker_name field name change for consistency 100424 JH
             0.3: entered_care_date removed/moved to cla_episodes 060324 RH
             0.2: perm_placed_foster_carer_date (from fc.START_DTTM) removed RH
             0.1: perm_adopter_sex, perm_adopter_legal_status added RH
@@ -3415,7 +3416,7 @@ CREATE TABLE #ssd_permanence (
     perm_decision_reversed_reason        NVARCHAR(100),
     perm_permanence_order_date           DATETIME,              
     perm_permanence_order_type           NVARCHAR(100),        
-    perm_adoption_worker                 NVARCHAR(100)
+    perm_adoption_worker_name            NVARCHAR(100)
 );
  
  
@@ -3464,7 +3465,7 @@ WITH RankedPermanenceData AS (
             WHEN fce.CARE_REASON_END_CODE IN ('45', 'E41') THEN 'Child Arrangements/ Residence Order'
             ELSE NULL
         END                                               AS perm_permanence_order_type,
-        fa.ADOPTION_SOCIAL_WORKER_NAME                    AS perm_adoption_worker,
+        fa.ADOPTION_SOCIAL_WORKER_NAME                    AS perm_adoption_worker_name,
         ROW_NUMBER() OVER (
             PARTITION BY p.LEGACY_ID                     -- partition on person identifier
             ORDER BY CAST(RIGHT(CASE
@@ -3473,12 +3474,15 @@ WITH RankedPermanenceData AS (
                                     ELSE fce.FACT_CARE_EPISODES_ID
                                 END, 5) AS INT) DESC    -- take last 5 digits, coerce to int so we can sort/order
         )                                                 AS rn -- we only want rn==1
+
     FROM Child_Social.FACT_CARE_EPISODES fce
+
     LEFT JOIN Child_Social.FACT_ADOPTION AS fa ON fa.DIM_PERSON_ID = fce.DIM_PERSON_ID AND fa.START_DTTM IS NOT NULL
     LEFT JOIN Child_Social.FACT_CLA AS fc ON fc.FACT_CLA_ID = fce.FACT_CLA_ID
     LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl ON fcpl.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
         AND fcpl.FACT_CLA_PLACEMENT_ID <> '-1'
         AND (fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3', 'A4', 'A5', 'A6') OR fcpl.FFA_IS_PLAN_DATE IS NOT NULL)
+
     LEFT JOIN Child_Social.DIM_PERSON p ON fce.DIM_PERSON_ID = p.DIM_PERSON_ID
     WHERE ((fce.PLACEND IS NULL AND fa.START_DTTM IS NOT NULL)
         OR fce.CARE_REASON_END_CODE IN ('E48', 'E1', 'E44', 'E12', 'E11', 'E43', '45', 'E41', 'E45', 'E47', 'E46'))
@@ -3517,7 +3521,7 @@ INSERT INTO #ssd_permanence (
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker
+    perm_adoption_worker_name
 )  
  
 SELECT
@@ -3543,7 +3547,8 @@ SELECT
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker
+    perm_adoption_worker_name
+
 FROM RankedPermanenceData
 WHERE rn = 1
 AND EXISTS
