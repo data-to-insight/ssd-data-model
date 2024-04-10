@@ -26,10 +26,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Section 57 Enquiry unique ID
-      from system or auto-generated as part of export.'
+    guidance: Row identifier for the ssd_s47_enquiry table.
   - name: s47e_referral_id
     description: Referral ID
     item_ref: S47E010A
@@ -49,7 +46,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
-    guidance: null
+    guidance: ID for linking to CIN Referral Episode
   - name: s47e_person_id
     description: Person Unique ID
     item_ref: S47E002A
@@ -77,7 +74,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
-    guidance: See PERS001A
+    guidance: Person's ID generated in CMS Database
   - name: s47e_s47_start_date
     description: S47 Start Date
     item_ref: S47E004A
@@ -97,20 +94,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]This item refers to enquiries
-      conducted under the provisions of section 47 of the Children Act 1989. The objective
-      of such enquiries is to determine whether action is needed to promote and safeguard
-      the welfare of the child or children who are the subject of the enquiries. An
-      assessment should also be recorded on each occasion a child is subject to a
-      section 47 enquiry.
-
-      We are aware that in some local authorities a section 47 enquiry is automatically
-      triggered alongside the assessment. In these cases, where both resulted in no
-      further action, a section 47 should not be recorded. Enter the date of the strategy
-      discussion at which the section 47 enquiries were initiated, using the formatting
-      covered in the general notes. This can be a non-working day.'
+    guidance: Date of the strategy discussion at which the Section 47 Enquiries were
+      initiated.
   - name: s47e_s47_end_date
     description: S47 End Date
     item_ref: S47E005A
@@ -130,10 +115,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Enter the actual date on which
-      the S47 Enquiry is completed and authorised.'
+    guidance: The actual date on which the S47 Enquiry is completed and authorised.
   - name: s47e_s47_nfa
     description: S47 NFA
     item_ref: S47E006A
@@ -152,7 +134,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
-    guidance: null
+    guidance: Standalone field showing whether or not the S47 Enquiry resulted in
+      No Further Action.
   - name: s47e_s47_outcome_json
     description: S47 Outcome
     item_ref: S47E007A
@@ -171,26 +154,28 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Enter the outcome of the Section
-      47 Enquiry:
+    guidance: 'Outcome of the Section 47 Enquiry. Combined dictionary/ json type containing
+      the following, where there is a value recorded:
 
-      - Initial CP Conference
+      - OUTCOME_NFA_FLAG
 
-      - Other Agency to Monitor Child''s Welfare
+      - OUTCOME_LEGAL_ACTION_FLAG
 
-      - NFA - Continue With Family Assessment
+      - OUTCOME_PROV_OF_SERVICES_FLAG
 
-      - Initiate Legal Action
+      - OUTCOME_PROV_OF_SB_CARE_FLAG
 
-      - Provision of Services (s17)
+      - OUTCOME_CP_CONFERENCE_FLAG
 
-      - Provision of Short Break Care (s17)
+      - OUTCOME_NFA_CONTINUE_SINGLE_FLAG
 
-      - No Further Action
+      - OUTCOME_MONITOR_FLAG
 
-      - Other Outcome'
+      - OTHER_OUTCOMES_EXIST_FLAG
+
+      - TOTAL_NO_OF_OUTCOMES
+
+      - OUTCOME_COMMENTS'
   - name: s47e_s47_completed_by_worker_name
     description: S47 Enquiries completed by worker
     item_ref: S47E008A
@@ -206,7 +191,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
-    guidance: null
+    guidance: Section 47 Enquiry completed by Worker
   - name: s47e_s47_completed_by_team_name
     description: S47 Enquiries completed by team
     item_ref: S47E009A
@@ -222,4 +207,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
-    guidance: null
+    guidance: Section 47 Enquiry completed by Team

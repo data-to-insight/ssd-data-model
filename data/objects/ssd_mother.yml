@@ -2,6 +2,18 @@
 nodes:
 - name: ssd_mother
   fields:
+  - name: moth_table_id
+    description: Mother Table ID
+    item_ref: MOTH004A
+    type: nvarchar
+    categories:
+    - identity
+    - looked_after
+    - mother
+    cms_field:
+    - liquid_logic:moth_table_id
+    - mosaic:moth_table_id
+    guidance: null
   - name: moth_person_id
     description: Person Unique ID (Mother)
     item_ref: MOTH002A
@@ -29,10 +41,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_mother
     - mosaic:ssd_mother
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]The unique identifier of the
-      mother''s child'
+    guidance: Person's ID generated in CMS Database
   - name: moth_childs_person_id
     description: Mother's Child's Unique ID
     item_ref: MOTH001A
@@ -59,7 +68,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_mother
     - mosaic:ssd_mother
-    guidance: See PERS001A
+    guidance: The unique identifier of the mother's child.
   - name: moth_childs_dob
     description: Date of birth of mother's child
     item_ref: MOTH003A
@@ -79,7 +88,6 @@ nodes:
     cms_table:
     - liquid_logic:ssd_mother
     - mosaic:ssd_mother
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Currently collected for CLA only,
-      only first child dob collected'
+    guidance: The SSD will include all children for each mother. This information
+      is only currently collected in the SSDA903 (CLA) return where the DOB of the
+      mother's first child is required.

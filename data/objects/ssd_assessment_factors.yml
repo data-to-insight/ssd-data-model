@@ -15,7 +15,7 @@ nodes:
     cms_field:
     - liquid_logic:cinf_table_id
     - mosaic:cinf_table_id
-    guidance: null
+    guidance: Row identifier for the ssd_assessment_factors table.
   - name: cinf_assessment_id
     description: Assessment ID
     item_ref: CINF001A
@@ -40,7 +40,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_assessment_factors
     - mosaic:ssd_assessment_factors
-    guidance: See ASM001A
+    guidance: ID for linking to CIN Assessment record
   - name: cinf_assessment_factors_json
     description: Assessment Factors
     item_ref: CINF002A
@@ -59,84 +59,44 @@ nodes:
     cms_table:
     - liquid_logic:ssd_assessment_factors
     - mosaic:ssd_assessment_factors
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]Record the factors as understood\
-      \ at the end of the assessment relevant to:\n\u2022 the impairment of the child\u2019\
-      s health and development (\u2018Child\u2019);\n\u2022 the parent(s)/carer(s)\
-      \ capacity to respond to the child\u2019s needs (\u2018Parenting capacity\u2019\
-      );\n\u2022 other people in the family/household, for example, a sibling or lodger\
-      \ (\u2018Other\u2019). This applies to all assessments completed. The information\
-      \ should be recorded at the end of the assessment and all factors which are\
-      \ felt to be relevant to the child\u2019s assessment should be reported from\
-      \ the list below. This includes factors where services are put in place to mitigate\
-      \ the effect of the factor as well as factors which need to be taken into account\
-      \ in providing other support. Please only record factors which are currently\
-      \ an issue of concern. For example, if domestic violence is a current issue\
-      \ of concern, please record it. If domestic violence was an issue in a previous\
-      \ relationship and is not an issue of concern now, then do not record it. Factors\
-      \ such as mental health concerns do not need to be confined to medically defined\
-      \ conditions. Rather this is intended, for example, to record where the professional,\
-      \ as part of the assessment process, feels that mental health is of concern\
-      \ to the child\u2019s health and development or parenting capacity to respond\
-      \ to the child\u2019s needs. Code 21 (no factors identified) should only be\
-      \ used for cases which are closed following assessments which result in no further\
-      \ action (closure code RC8 and RC9) and should be the only factor listed. However,\
-      \ if factors are identified for cases which are closed following assessment,\
-      \ please record these selecting from the list above, but excluding code 21.\
-      \ If a section 47 enquiry has commenced on a case, then code 21 (no factors\
-      \ identified) should not be reported at the end of assessment even if it was\
-      \ found that the allegations that triggered the section 47 enquiry are unfounded.\
-      \ Instead, the relevant factors that were considered at the assessment that\
-      \ initiated the section 47 enquiry should be recorded. The case should then\
-      \ be closed using the reason for closure code: \u2018RC7 - services ceased for\
-      \ any other reason, including child no longer in need\u2019, as at the point\
-      \ the section 47 started the child would be counted as a child in need even\
-      \ if the case closed shortly after. Code 21 should only be used in cases where\
-      \ the section 47 enquiry was automatically triggered alongside the assessment\
-      \ and both the assessment and section 47 resulted in no further action. More\
-      \ detailed descriptions and definitions of the factors are provided in the \u2018\
-      Additional guide on the factors identified at the end of assessment\u2019 for\
-      \ more information. The additional guide is available as part of the Children\
-      \ in need census: guide to submitting data. Please report all the following\
-      \ factors that apply:\n- 1A/1B/1C Alcohol misuse by the child/ parent(s) or\
-      \ carer(s)/ another person living in the household.\n- 2A/2B/2C Drug misuse\
-      \ by the child/ parent(s) or carer(s)/ another person living in the household.\n\
-      - 3A/3B/3C Concerns about the child/ parent(s) or carer(s)/ another person living\
-      \ in the household being the subject of domestic violence.\n- 4A/4B/4C Concerns\
-      \ about Mental Health of the child/ parent(s) or carer(s)/ another person living\
-      \ in the household.\n- 5A/5B/5C Concerns about Learning Disability of the Child/\
-      \ parent(s) or carer(s)/ another person living in the household.\n- 6A/6B/6C\
-      \ Concerns about Physical Disability/ illness of the Child/ parent(s) or carer(s)/\
-      \ another person living in the household.\n- 7A Young carer: concerns child\u2019\
-      s health or development may be impaired due to their caring responsibilities.\n\
-      - 8B Privately fostered - overseas children who intend to return\n- 8C Privately\
-      \ fostered - overseas children who intend to stay\n- 8D Privately fostered -\
-      \ UK children in educational placements\n- 8E Privately fostered - UK children\
-      \ making alternative family arrangements\n- 8F Privately fostered - other\n\
-      - 9A UASC unaccompanied asylum-seeking child\n-10A Missing: concerns that the\
-      \ child may be at risk of harm due to going/being missing.\n-11A Child sexual\
-      \ exploitation: concerns that the child may be at risk of harm due to child\
-      \ sexual exploitation.\n-12A Trafficking: concerns that services may be required\
-      \ or the child may be at risk of harm due to trafficking.\n-13A Gangs: concerns\
-      \ that the child may be at risk of harm because of involvement in/with gangs.\n\
-      -14A Socially unacceptable behaviour: concerns the child may be at risk due\
-      \ to their socially unacceptable behaviour.\n-15A Self-harm: concerns that services\
-      \ may be required or due to suspected/actual self-harming child may be at risk\
-      \ of harm.\n-16A Abuse or neglect \u2013 \u2018NEGLECT\u2019: concerns child\
-      \ may be at risk due to neglect.\n-17A Abuse or neglect \u2013 \u2018EMOTIONAL\
-      \ ABUSE\u2019: concerns child may be at risk due to emotional abuse.\n-18B Abuse\
-      \ or neglect \u2013 \u2018PHYSICAL ABUSE\u2019 (child on child): concerns child\
-      \ may be at risk due to physical abuse by another child.\n-18C Abuse or neglect\
-      \ \u2013 \u2018PHYSICAL ABUSE\u2019 (adult on child): concerns child may be\
-      \ at risk due to physical abuse by an adult.\n-19B Abuse or neglect \u2013 \u2018\
-      SEXUAL ABUSE\u2019 (child on child): concerns child may be at risk due to sexual\
-      \ abuse by another child.\n-19C Abuse or neglect \u2013 \u2018SEXUAL ABUSE\u2019\
-      \ (adult on child): concerns child may be at risk due to sexual abuse by an\
-      \ adult.\n- 20 Other.\n- 21 No factors identified - no evidence of any of the\
-      \ factors listed above or below and no further action is being taken.F68\n-22A\
-      \ Female genital mutilation (FGM) - concerns child may be at risk due to female\
-      \ genital mutilation.\n-23A Abuse linked to faith or belief - concerns child\
-      \ may be at risk due to abuse linked to faith or belief.\n-24A Child criminal\
-      \ exploitation - concerns child may be at risk of harm due to child criminal\
-      \ exploitation."
+    guidance: "Record of the factors as understood at the end of the Assessment.\n\
+      Code set\n1A/1B/1C - Alcohol misuse by the child/ parent(s) or carer(s)/ another\
+      \ person living in the household.\n2A/2B/2C - Drug misuse by the child/ parent(s)\
+      \ or carer(s)/ another person living in the household.\n3A/3B/3C - Concerns\
+      \ about the child/ parent(s) or carer(s)/ another person living in the household\
+      \ being the subject of domestic violence.\n4A/4B/4C - Concerns about Mental\
+      \ Health of the child/ parent(s) or carer(s)/ another person living in the household.\n\
+      5A/5B/5C - Concerns about Learning Disability of the Child/ parent(s) or carer(s)/\
+      \ another person living in the household.\n6A/6B/6C - Concerns about Physical\
+      \ Disability/ illness of the Child/ parent(s) or carer(s)/ another person living\
+      \ in the household.\n7A - Young carer: concerns child\u2019s health or development\
+      \ may be impaired due to their caring responsibilities.\n8B - Privately fostered\
+      \ - overseas children who intend to return\n8C - Privately fostered - overseas\
+      \ children who intend to stay\n8D - Privately fostered - UK children in educational\
+      \ placements\n8E - Privately fostered - UK children making alternative family\
+      \ arrangements\n8F - Privately fostered - other\n9A - UASC unaccompanied asylum-seeking\
+      \ child\n10A - Missing: concerns that the child may be at risk of harm due to\
+      \ going/being missing.\n11A - Child sexual exploitation: concerns that the child\
+      \ may be at risk of harm due to child sexual exploitation.\n12A - Trafficking:\
+      \ concerns that services may be required or the child may be at risk of harm\
+      \ due to trafficking.\n13A - Gangs: concerns that the child may be at risk of\
+      \ harm because of involvement in/with gangs.\n14A - Socially unacceptable behaviour:\
+      \ concerns the child may be at risk due to their socially unacceptable behaviour.\n\
+      15A - Self-harm: concerns that services may be required or due to suspected/actual\
+      \ self-harming child may be at risk of harm.\n16A - Abuse or neglect \u2013\
+      \ \u2018NEGLECT\u2019: concerns child may be at risk due to neglect.\n17A -\
+      \ Abuse or neglect \u2013 \u2018EMOTIONAL ABUSE\u2019: concerns child may be\
+      \ at risk due to emotional abuse.\n18B - Abuse or neglect \u2013 \u2018PHYSICAL\
+      \ ABUSE\u2019 (child on child): concerns child may be at risk due to physical\
+      \ abuse by another child.\n18C - Abuse or neglect \u2013 \u2018PHYSICAL ABUSE\u2019\
+      \ (adult on child): concerns child may be at risk due to physical abuse by an\
+      \ adult.\n19B - Abuse or neglect \u2013 \u2018SEXUAL ABUSE\u2019 (child on child):\
+      \ concerns child may be at risk due to sexual abuse by another child.\n19C -\
+      \ Abuse or neglect \u2013 \u2018SEXUAL ABUSE\u2019 (adult on child): concerns\
+      \ child may be at risk due to sexual abuse by an adult.\n20 - Other.\n21 - No\
+      \ factors identified - no evidence of any of the factors listed above or below\
+      \ and no further action is being taken.F68\n22A - Female genital mutilation\
+      \ (FGM) - concerns child may be at risk due to female genital mutilation.\n\
+      23A - Abuse linked to faith or belief - concerns child may be at risk due to\
+      \ abuse linked to faith or belief.\n24A - Child criminal exploitation - concerns\
+      \ child may be at risk of harm due to child criminal exploitation."

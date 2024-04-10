@@ -26,10 +26,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sdq_scores
     - mosaic:ssd_sdq_scores
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]SDQ record unique ID from system
-      or auto-generated as part of export.'
+    guidance: Row identifier for the ssd_sdq_scores table
   - name: csdq_person_id
     description: Person Unique ID
     item_ref: CSDQ002A
@@ -56,7 +53,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sdq_scores
     - mosaic:ssd_sdq_scores
-    guidance: See PERS001A
+    guidance: Person's ID generated in CMS Database
   - name: csdq_sdq_completed_date
     description: SDQ Completed Date
     item_ref: CSDQ003A
@@ -75,10 +72,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sdq_scores
     - mosaic:ssd_sdq_scores
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date of completion of Strength
-      and Difficulties Questionnaire (SDQ)'
+    guidance: Date of completion of Strength and Difficulties Questionnaire (SDQ)
   - name: csdq_sdq_reason
     description: SDQ Reason
     item_ref: CSDQ004A
@@ -97,15 +91,14 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sdq_scores
     - mosaic:ssd_sdq_scores
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]If it is not possible to collect\
-      \ the SDQ score for a looked-after child, then please record the reason using\
-      \ the codes below. -SDQ1 No form returned as child was aged under 4 or over\
-      \ 16 at date of latest assessment\n-SDQ2 Carer(s) refused to complete and return\
-      \ questionnaire\n-SDQ3 Not possible to complete the questionnaire due to severity\
-      \ of the child\u2019s disability\n-SDQ4 Other\n-SDQ5 Child or young person refuses\
-      \ to allow a strengths and difficulties questionnaire (SDQ) to be completed"
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) If it is\
+      \ not possible to collect the SDQ score for a looked-after child, then a reason\
+      \ should be recorded using the codes below.\nCode set\nSDQ1 - No form returned\
+      \ as child was aged under 4 or over 16 at date of latest assessment\nSDQ2 -\
+      \ Carer(s) refused to complete and return questionnaire\nSDQ3 - Not possible\
+      \ to complete the questionnaire due to severity of the child\u2019s disability\n\
+      SDQ4 - Other\nSDQ5 - Child or young person refuses to allow a strengths and\
+      \ difficulties questionnaire (SDQ) to be completed"
   - name: csdq_sdq_score
     description: SDQ Score
     item_ref: CSDQ005A
@@ -124,32 +117,6 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sdq_scores
     - mosaic:ssd_sdq_scores
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]Evidence suggests that mental\
-      \ health problems are over four times more likely for children looked after\
-      \ compared to their peers. Carers continue to report that they find it difficult\
-      \ to access appropriate child and adolescent mental health services. The Government\
-      \ sees it as critical to address the issue of mental health of children looked-after\
-      \ to improve both their outcomes and life chances. This data item covers the\
-      \ emotional and behavioural health of children looked-after, as recorded by\
-      \ a main carer in the strengths and difficulties questionnaire (SDQ).\nStatutory\
-      \ guidance on promoting the health and well-being of looked-after children issued\
-      \ under Section 7 of the Local Authority Social Services Act 1970 sets out that\
-      \ all local authorities are required (paragraphs 14, 47 and Annex B) to make\
-      \ sure that a strengths and difficulties questionnaire (SDQ) is completed for\
-      \ each of their children looked after aged between 4-16 inclusive. As well as\
-      \ providing data at a national level on the emotional and behavioural health\
-      \ of children looked after, the SDQ also provides valuable information as part\
-      \ of a child\u2019s annual health assessment. So it should not be seen purely\
-      \ as a data collection exercise. Its primary purpose is to give social workers\
-      \ and health professionals information about a child\u2019s wellbeing.\nWhile\
-      \ local authorities may use other screening/diagnostic tools in addition to\
-      \ the SDQ to monitor the emotional/mental health of their children looked after,\
-      \ nevertheless they must carry out the SDQ assessment in line with the above\
-      \ guidance. Unless a carer refuses to complete an SDQ a score should be returned\
-      \ for every child looked-after.\nData submitted\nLocal authorities will collect\
-      \ data through a standard strengths and difficulties questionnaire. A single\
-      \ score (0\u201340), or a reason for the score not being returned is required\
-      \ for each child looked-after continuously for at least 12 months aged 4\u2013\
-      16 on the date of the last assessment."
+    guidance: "A single score (0\u201340), or a reason for the score not being returned\
+      \ is required for each child looked-after continuously for at least 12 months\
+      \ aged 4\u201316 on the date of the last assessment."

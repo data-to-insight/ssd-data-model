@@ -25,10 +25,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Permanence table record unique
-      ID from system or auto-generated as part of export.'
+    guidance: Row identifier for the ssd_permanence table
   - name: perm_person_id
     description: Person Unique ID
     item_ref: PERM002A
@@ -53,7 +50,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: See PERS001A
+    guidance: Person's ID generated in CMS Database
   - name: perm_cla_id
     description: CLA Table ID
     item_ref: PERM022A
@@ -68,7 +65,8 @@ nodes:
     cms_field:
     - liquid_logic:perm_cla_id
     - mosaic:perm_cla_id
-    guidance: null
+    guidance: System identifier for the whole period of care, encompassing all episodes
+      within that period of care.
   - name: perm_adm_decision_date
     description: Date of ADM Decision
     item_ref: PERM003A
@@ -90,39 +88,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Record the date of the decision
-      that the child should be placed for adoption using the following format: DD/MM/YYYY
-
+    guidance: The date of the decision that the child should be placed for adoption.
       This is the date on which the local authority formally decides that a child
       should be placed for adoption, i.e. the date the agency decision maker takes
-      the decision to endorse the proposed adoption plan for the child.'
-  - name: perm_entered_care_date
-    description: Date the entered Care
-    item_ref: PERM005A
-    type: datetime
-    categories:
-    - looked_after
-    - permanence
-    - adoption
-    returns:
-    - SSDA903
-    - AnnexA
-    - ASGLB
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:perm_entered_care_date
-    - mosaic:perm_entered_care_date
-    cms_table:
-    - liquid_logic:ssd_permanence
-    - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Record the date the child entered
-      the current period of continuous care using the following format: DD/MM/YYYY'
+      the decision to endorse the proposed adoption plan for the child.
   - name: perm_ffa_cp_decision_date
     description: Date of FFA/ CP Decision
     item_ref: PERM004A
@@ -142,10 +111,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date of the decision that the
-      child should be placed in a FFA or CP placement with a selected family'
+    guidance: Date of the decision that the child should be placed in a FFA or CP
+      placement with a selected family, if applicable
   - name: perm_placement_order_date
     description: Date of Placement/ Freeing Order
     item_ref: PERM006A
@@ -167,13 +134,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Record the date a Placement order
-      or Freeing order was granted using the following format: DD/MM/YYYY
-
-      This can be ascertained from the date when a child''s legal status has changed
-      to E1 (Placement order granted) or D1 (Freeing order granted).'
+    guidance: The date that a Placement order or Freeing order was granted. This can
+      be ascertained from the date when a child's legal status has changed to E1 (Placement
+      order granted) or D1 (Freeing order granted).
   - name: perm_placed_for_adoption_date
     description: Date Placed for Adoption
     item_ref: PERM007A
@@ -195,16 +158,12 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Record the date the child is
-      placed for adoption with particular prospective adopters using the following
-      format: DD/MM/YYYY. Or, if the child was placed with their foster carers or
-      were in a FFA/concurrent planning placement, record the date this placement
-      changed from a foster placement to an adoption placement.
-
-      This is the date that child goes to live with the prospective adopters who will
-      adopt them. It does not mean that the child has been adopted.'
+    guidance: The date that the child was placed for adoption with particular prospective
+      adopters.. Or, if the child was placed with their foster carers or were in a
+      FFA/concurrent planning placement, record the date this placement changed from
+      a foster placement to an adoption placement. This is the date that child goes
+      to live with the prospective adopters who will adopt them. It does not mean
+      that the child has been adopted.
   - name: perm_matched_date
     description: Date Matched to Prospective Adopters
     item_ref: PERM008A
@@ -226,21 +185,14 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]Record the date the child was\
-      \ matched to particular prospective adopters or with dually approved foster\
-      \ carers/adopters for FFA using the following format: DD/MM/YYYY\nThis is the\
-      \ date on which the local authority formally decides that the child should be\
-      \ placed for adoption with the particular prospective adopters. If the child\
-      \ is adopted by the foster carer or relatives with whom he/she is already placed,\
-      \ the date of decision (B2b) should be entered for this data item.\nPreviously:\
-      \ \u201CThis is the date on which the local authority formally decides that\
-      \ the child should be placed for adoption with the particular prospective adopter(s).\
-      \ This decision will be made after the adoption panel has made its recommendation\
-      \ on this matter (regulation 33(1) of the Adoption Agencies Regulations 2005).\u201D"
+    guidance: The date that the child was matched to particular prospective adopters
+      or with dually approved foster carers/adopters for FFA. This is the date on
+      which the local authority formally decides that the child should be placed for
+      adoption with the particular prospective adopters. If the child is adopted by
+      the foster carer or relatives with whom he/she is already placed, the date of
+      decision should be recorded here.
   - name: perm_adopted_by_carer_flag
-    description: adopted_by_carer_flag
+    description: Adopted by carer flag
     item_ref: PERM021A
     type: nchar
     categories:
@@ -253,7 +205,7 @@ nodes:
     cms_field:
     - liquid_logic:perm_adopted_by_carer_flag
     - mosaic:perm_adopted_by_carer_flag
-    guidance: null
+    guidance: Flag showing if the child was Adopted by their former carer. Y/N
   - name: perm_placed_ffa_cp_date
     description: Date Placed in FFA/ CP Placement
     item_ref: PERM009A
@@ -275,10 +227,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date the child was placed in
-      a FFA or CP placement.'
+    guidance: Date the child was placed in a FFA or CP placement.
   - name: perm_decision_reversed_date
     description: Date of Decision that Child Should No Longer be Placed for Adoption
     item_ref: PERM010A
@@ -299,11 +248,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Record the date that the local
-      authority formally decides that a child should no longer be placed for adoption
-      using the following format: DD/MM/YYYY'
+    guidance: The date that the local authority formally decides that a child should
+      no longer be placed for adoption
   - name: perm_placed_foster_carer_date
     description: Date originally placed with foster carer(s) (if adopted by foster
       carer/s)
@@ -326,11 +272,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date the child was originally
-      placed with their foster carer(s) (only if the child was adopted by their foster
-      carer(s))'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Date the
+      child was originally placed with their foster carer(s) (only if the child was
+      adopted by their foster carer(s))
   - name: perm_part_of_sibling_group
     description: Is the child a part of a sibling group?
     item_ref: PERM012A
@@ -350,10 +294,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Is the child a part of a sibling
-      group (0=No, 1=Yes)?'
+    guidance: 'Is the child a part of a sibling group
+
+      Code set
+
+      0 - No 1 - Yes'
   - name: perm_siblings_placed_together
     description: Number of children placed, or planned to be placed, for adoption
       together as sibling group INCLUDING this child
@@ -374,11 +319,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Number of children placed, or
-      planned to be placed, for adoption together as sibling group INCLUDING this
-      child'
+    guidance: Number of children placed, or planned to be placed, for adoption together
+      as sibling group INCLUDING this child
   - name: perm_siblings_placed_apart
     description: Number of siblings placed, or planned to be placed, for adoption
       separately from the child
@@ -399,10 +341,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Number of siblings placed, or
-      planned to be placed, for adoption separately from the child'
+    guidance: Number of siblings placed, or planned to be placed, for adoption separately
+      from the child
   - name: perm_placement_provider_urn
     description: URN of the placement provider agency
     item_ref: PERM015A
@@ -422,10 +362,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]URN of the placement provider
-      agency'
+    guidance: URN of the placement provider agency
   - name: perm_decision_reversed_reason
     description: Reason No Longer Placed for Adoption
     item_ref: PERM016A
@@ -447,12 +384,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]Record the reason why the child\
-      \ is no longer considered for adoption. Please use codes;\nRD1 - The child\u2019\
-      s needs changed subsequent to the decision\nRD2 - The Court did not make a placement\
-      \ order\nRD3 - Prospective adopters could not be found\nRD4 - Any other reason"
+    guidance: "Reason why the child is no longer considered for adoption Code set\n\
+      RD1 - The child\u2019s needs changed subsequent to the decision\nRD2 - The Court\
+      \ did not make a placement order\nRD3 - Prospective adopters could not be found\n\
+      RD4 - Any other reason"
   - name: perm_permanence_order_date
     description: Date of Order
     item_ref: PERM017A
@@ -473,9 +408,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date permanence order granted'
+    guidance: Date permanence order granted - this is the CLA Placement End Date
   - name: perm_permanence_order_type
     description: Type of Order
     item_ref: PERM018A
@@ -495,11 +428,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Type of Permanence order granted
-      (Adoption/ SGO/ CAO)'
-  - name: perm_adoption_worker
+    guidance: Type of Permanence order granted - Adoption - Special Guardianship -
+      Child Arrangements Order/ Residence Order
+  - name: perm_adoption_worker_name
     description: Adoption social worker
     item_ref: PERM023A
     type: nvarchar
@@ -510,7 +441,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: null
+    guidance: Adoption Social Worker
   - name: perm_adopter_sex
     description: Sex of Adopter
     item_ref: PERM025A
@@ -521,7 +452,14 @@ nodes:
     - adoption
     returns:
     - SSDA903
-    guidance: null
+    guidance: 'The sex of the adopter/s/ prospective adopter/s. Code set F1 - Single
+      Female FF - Female couple
+
+      M1 - Single Male
+
+      MF - Male/Female couple
+
+      MM - Male couple'
   - name: perm_adopter_legal_status
     description: Legal status of adopter
     item_ref: PERM026A
@@ -532,7 +470,19 @@ nodes:
     - adoption
     returns:
     - AnnexA
-    guidance: null
+    guidance: 'The Legal Status of the adopter/s/ prospective adopter/s. Code set
+
+      L0 - Single Adopter
+
+      L11 - Different gender married couple
+
+      L12 - Same gender married couple
+
+      L2 - Civil partnership couple
+
+      L3 - Different gender unmarried couple
+
+      L4 - Same gender couple not married or in a civil partnership'
   - name: perm_number_of_adopters
     description: Number of adopters. As A(1)
     item_ref: PERM027A
@@ -543,16 +493,4 @@ nodes:
     - adoption
     returns:
     - SSDA903
-    guidance: null
-  - name: perm_allocated_worker
-    description: allocated case worker
-    item_ref: PERM024A
-    type: nvarchar
-    categories:
-    - looked_after
-    - permanence
-    - adoption
-    cms:
-    - liquid_logic
-    - mosaic
-    guidance: null
+    guidance: Number of Adopters/ Prospective Adopters

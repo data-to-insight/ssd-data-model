@@ -25,10 +25,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_contacts
     - mosaic:ssd_contacts
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Contact Record unique ID from
-      system or auto-generated as part of export.'
+    guidance: Row identifier for the ssd_contacts table
   - name: cont_person_id
     description: Person Unique ID
     item_ref: CONT002A
@@ -55,7 +52,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_contacts
     - mosaic:ssd_contacts
-    guidance: See PERS001A
+    guidance: Person's ID generated in CMS Database
   - name: cont_contact_date
     description: Date of Contact
     item_ref: CONT003A
@@ -75,11 +72,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_contacts
     - mosaic:ssd_contacts
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date Contact received into LA'
+    guidance: Date Contact received into LA
   - name: cont_contact_source_code
-    description: Contact Source
+    description: Contact Source Code
     item_ref: CONT004A
     type: nvarchar
     categories:
@@ -97,19 +92,12 @@ nodes:
     cms_table:
     - liquid_logic:ssd_contacts
     - mosaic:ssd_contacts
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]For each new contact, record
-      the source of contact from the list.
-
-      Where there is more than one contact for the same child on the same day, the
-      first contact should be recorded and it is this contact source that should be
-      recorded here.'
+    guidance: Contact Source Code
   - name: cont_contact_source_desc
-    description: null
+    description: Contact Source Description
     item_ref: CONT006A
     type: nvarchar
-    guidance: null
+    guidance: Contact Source Description
   - name: cont_contact_outcome_json
     description: Contact Outcome
     item_ref: CONT005A
@@ -128,6 +116,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_contacts
     - mosaic:ssd_contacts
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]EH Referral/ CIN Referral'
+    guidance: Contact Outcome e.g. New Referral, No Further Action

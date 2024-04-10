@@ -2,24 +2,6 @@
 nodes:
 - name: ssd_cla_immunisations
   fields:
-  - name: clai_immunisations_id
-    description: Immunisations ID
-    item_ref: CLAI001A
-    type: nvarchar
-    primary_key: true
-    categories:
-    - looked_after
-    - health
-    - immunisations
-    returns:
-    - Local
-    cms_table:
-    - liquid_logic:ssd_cla_immunisations
-    - mosaic:ssd_cla_immunisations
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Immunisations record unique ID
-      from system or auto-generated as part of export.'
   - name: clai_person_id
     description: Person Unique ID
     item_ref: CLAI002A
@@ -47,7 +29,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_immunisations
     - mosaic:ssd_cla_immunisations
-    guidance: See PERS001A
+    guidance: Person's ID generated in CMS Database, Row identifier for the ssd_cla_immunisations
+      table
   - name: clai_immunisations_status
     description: Immunisations up to Date
     item_ref: CLAI004A
@@ -67,6 +50,14 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_immunisations
     - mosaic:ssd_cla_immunisations
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Immunisations up to date?'
+    guidance: Immunisations up to date? Y/N
+  - name: clai_immunisations_status_date
+    description: Immunisations Last Updated Date
+    item_ref: CLAI005A
+    cms_field:
+    - liquid_logic:clai_immunisations_status_date
+    - mosaic:clai_immunisations_status_date
+    cms_table:
+    - liquid_logic:ssd_cla_immunisations
+    - mosaic:ssd_cla_immunisations
+    guidance: Immunisations status last updated

@@ -27,31 +27,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_visits
     - mosaic:ssd_cin_visits
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]CIN Visit unique ID from system
-      or auto-generated as part of export.'
-  - name: cinv_cin_plan_id
-    description: CIN Plan ID
-    item_ref: CINV002A
-    type: nvarchar
-    foreign_key: ssd_cin_plans.cinp_cin_plan_id
-    categories:
-    - child_in_need
-    - cin_plan
-    - visit
-    returns:
-    - Local
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:cinv_cin_plan_id
-    - mosaic:cinv_cin_plan_id
-    cms_table:
-    - liquid_logic:ssd_cin_visits
-    - mosaic:ssd_cin_visits
-    guidance: See CNP001A
+    guidance: Row identifier for the ssd_cin_visits table.
   - name: cinv_person_id
     description: Person Unique ID
     item_ref: CINV007A
@@ -67,7 +43,7 @@ nodes:
     cms_field:
     - liquid_logic:cinv_person_id
     - mosaic:cinv_person_id
-    guidance: null
+    guidance: Person's ID generated in CMS Database
   - name: cinv_cin_visit_date
     description: CIN Visit Date
     item_ref: CINV003A
@@ -87,9 +63,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_visits
     - mosaic:ssd_cin_visits
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date of Visit'
+    guidance: Date of Visit
   - name: cinv_cin_visit_seen
     description: Child Seen
     item_ref: CINV004A
@@ -109,10 +83,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_visits
     - mosaic:ssd_cin_visits
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Was the child seen during this
-      visit? Yes/ No'
+    guidance: Was the child seen during this visit? Y/N
   - name: cinv_cin_visit_seen_alone
     description: Child Seen Alone
     item_ref: CINV005A
@@ -132,10 +103,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_visits
     - mosaic:ssd_cin_visits
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Was the child seen alone during
-      this visit? Yes/ No'
+    guidance: Was the child seen alone during this visit? Y/N
   - name: cinv_cin_visit_bedroom
     description: Child Bedroom Seen
     item_ref: CINV006A
@@ -155,7 +123,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_visits
     - mosaic:ssd_cin_visits
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Was the child''s bedroom seen
-      during this visit? Yes/ No'
+    guidance: Was the child's bedroom seen during this visit? Y/N

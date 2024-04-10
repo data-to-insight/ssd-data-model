@@ -21,9 +21,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_care_plan
     - mosaic:ssd_cla_care_plan
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Care Plan record unique ID'
+    guidance: Row identifier for the ssd_cla_care_plan table
   - name: lacp_person_id
     description: Person ID
     item_ref: LACP007A
@@ -46,7 +44,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_care_plan
     - mosaic:ssd_cla_care_plan
-    guidance: null
+    guidance: Person's ID generated in CMS Database
   - name: lacp_cla_care_plan_start_date
     description: Care Plan start Date
     item_ref: LACP004A
@@ -65,7 +63,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_care_plan
     - mosaic:ssd_cla_care_plan
-    guidance: null
+    guidance: Date the care plan was effective from
   - name: lacp_cla_care_plan_end_date
     description: Care Plan end date
     item_ref: LACP005A
@@ -81,8 +79,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_care_plan
     - mosaic:ssd_cla_care_plan
-    guidance: null
-  - name: lacp_cla_care_plan
+    guidance: Date the care plan was effective to
+  - name: lacp_cla_care_plan_json
     description: What is the chosen/ permanence plan for this child/ young person?
     item_ref: LACP003A
     type: nvarchar
@@ -95,28 +93,36 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:lacp_cla_care_plan
-    - mosaic:lacp_cla_care_plan
+    - liquid_logic:lacp_cla_care_plan_json
+    - mosaic:lacp_cla_care_plan_json
     cms_table:
     - liquid_logic:ssd_cla_care_plan
     - mosaic:ssd_cla_care_plan
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Please indicate what the current
-      primary permanence plan is for the child. Please use codes;
+    guidance: 'The current permanence plan for the child. Combined dictionary/ json
+      type containing one or more of the following, where there is value recorded:
 
-      a) Return to family
+      REMAINSUP - Remaining with birth family supported by shared care/short term
+      breaks
 
-      b) Adoption
+      RETURN1M - Return to birth family within one month
 
-      c) SGO/CAO
+      RETURN6M - Return to birth family within six months
 
-      d) Supported living in the community
+      RETURNEV - Eventual return to birth family (record number of months below)
 
-      e) Long-term residential placement
+      LTRELFR - Long term placement with relatives/friends
 
-      f) Long-term fostering
+      LTFOST18 - Long term placement with foster carers (intended to last until 18,
+      no return home envisaged)
 
-      g) other Where the child does not have a permanence plan agreed (such as recently
-      entered care) please leave blank.More than one box might be ticked if parallel
-      planning is being pursued'
+      RESPLMT - Residential placement until independence
+
+      SUPPLIV - Supported living in the community (with a view to independence)
+
+      ADOPTION - Adoption
+
+      OTHERPLN - Other Plan
+
+      Where the child does not have a permanence plan agreed (such as recently entered
+      care) please leave blank. More than one box might be ticked if parallel planning
+      is being pursued'

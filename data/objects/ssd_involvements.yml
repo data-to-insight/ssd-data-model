@@ -16,7 +16,7 @@ nodes:
     cms_field:
     - liquid_logic:invo_involvements_id
     - mosaic:invo_involvements_id
-    guidance: null
+    guidance: Row identifier for the ssd_involvements table
   - name: invo_professional_id
     description: Worker ID
     item_ref: INVO006A
@@ -29,7 +29,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: null
+    guidance: ID for linking to ssd_professionals table
   - name: invo_professional_role_id
     description: Worker role e.g. Allocated Case Worker
     item_ref: INVO007A
@@ -41,7 +41,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: null
+    guidance: Role of the professional/ team working with the child/ young person
   - name: invo_professional_team
     description: Worker Team
     item_ref: INVO009A
@@ -53,7 +53,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: null
+    guidance: Name of the Team working with the child/ young person
   - name: invo_involvement_start_date
     description: Social worker episode start date
     item_ref: INVO002A
@@ -72,7 +72,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_involvements
     - mosaic:ssd_involvements
-    guidance: null
+    guidance: Start Date for team/ worker involvement
   - name: invo_involvement_end_date
     description: Social worker episode end date
     item_ref: INVO003A
@@ -91,7 +91,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_involvements
     - mosaic:ssd_involvements
-    guidance: null
+    guidance: End Date for team/ worker involvement
   - name: invo_worker_change_reason
     description: Reason for worker change
     item_ref: INVO004A
@@ -110,6 +110,19 @@ nodes:
     cms_table:
     - liquid_logic:ssd_involvements
     - mosaic:ssd_involvements
+    guidance: Reason for change of Social Worker Code set MANAGE - Managing Caseloads
+      FCONTA - First contact or re-referral LEFTRL - Previous social worker left role
+      ORGRST - New social worker assigned following organisational restructure TSPROC
+      - New social worker assigned following child transfer due to standard process
+      ABSENC - Absence cover or return from absence CHCHAN - Child requested change
+      from previous social worker PCCHAN - Parent/carer requested change from previous
+      social worker SWDIED - Previous Social Worker died OTHERS - Other reason
+  - name: invo_person_id
+    description: Person Unique ID
+    item_ref: INVO011A
+    type: nvarchar
+    categories:
+    - workforce
     guidance: null
   - name: invo_referral_id
     description: Referral ID
@@ -122,4 +135,4 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: null
+    guidance: ID for linking to CIN Referral Episode

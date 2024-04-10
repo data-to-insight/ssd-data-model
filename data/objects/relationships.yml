@@ -165,11 +165,6 @@ relationships:
   child_object: ssd_assessment_factors
   child_key: cinf_assessment_id
   relation: 1:M
-- parent_object: ssd_cin_plans
-  parent_key: cinp_cin_plan_id
-  child_object: ssd_cin_visits
-  child_key: cinv_cin_plan_id
-  relation: 1:M
 - parent_object: ssd_s47_enquiry
   parent_key: s47e_s47_enquiry_id
   child_object: ssd_initial_cp_conference
@@ -178,7 +173,7 @@ relationships:
 - parent_object: ssd_initial_cp_conference
   parent_key: icpc_icpc_id
   child_object: ssd_cp_plans
-  child_key: cppl_initial_cp_conference_id
+  child_key: cppl_icpc_id
   relation: 1:M
 - parent_object: ssd_cp_plans
   parent_key: cppl_person_id
@@ -194,6 +189,11 @@ relationships:
   parent_key: cppl_cp_plan_id
   child_object: ssd_cp_reviews
   child_key: cppr_cp_plan_id
+  relation: 1:M
+- parent_object: ssd_cla_placements
+  parent_key: clap_placement_id
+  child_object: ssd_cla_episodes
+  child_key: clae_cla_placement_id
   relation: 1:M
 - parent_object: ssd_cla_episodes
   parent_key: clae_person_id

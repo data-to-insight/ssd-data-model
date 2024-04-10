@@ -13,7 +13,7 @@ nodes:
     - visit
     returns:
     - Local
-    guidance: null
+    guidance: Row identifier for the ssd_cp_visits table
   - name: cppv_person_id
     description: Person Unique ID
     item_ref: CPPV008A
@@ -26,7 +26,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: null
+    guidance: Person's ID generated in CMS Database
   - name: cppv_cp_plan_id
     description: CP Plan ID
     item_ref: CPPV001A
@@ -51,30 +51,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_visits
     - mosaic:ssd_cp_visits
-    guidance: See CPP001A
-  - name: cppv_cp_visit_id
-    description: CP Visit ID
-    item_ref: CPPV002A
-    type: nvarchar
-    categories:
-    - child_protection
-    - cp_plan
-    - visit
-    returns:
-    - Local
-    cms:
-    - liquid_logic
-    - mosaic
-    cms_field:
-    - liquid_logic:cppv_cp_visit_id
-    - mosaic:cppv_cp_visit_id
-    cms_table:
-    - liquid_logic:ssd_cp_visits
-    - mosaic:ssd_cp_visits
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]CIN Visit record unique ID from
-      system or auto-generated as part of export.'
+    guidance: ID for linking to the CP Plan
   - name: cppv_cp_visit_date
     description: Date of Visit
     item_ref: CPPV003A
@@ -94,9 +71,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_visits
     - mosaic:ssd_cp_visits
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Actual date of Visit'
+    guidance: Actual date of Visit
   - name: cppv_cp_visit_seen
     description: Child Seen
     item_ref: CPPV004A
@@ -116,10 +91,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_visits
     - mosaic:ssd_cp_visits
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Was the child seen during this
-      visit? Yes/ No'
+    guidance: Was the child seen during this visit? Y/N
   - name: cppv_cp_visit_seen_alone
     description: Child Seen Alone
     item_ref: CPPV005A
@@ -139,10 +111,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_visits
     - mosaic:ssd_cp_visits
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Was the child seen alone during
-      this visit? Yes/ No'
+    guidance: Was the child seen alone during this visit? Y/N
   - name: cppv_cp_visit_bedroom
     description: Child Bedroom Seen
     item_ref: CPPV006A
@@ -162,7 +131,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_visits
     - mosaic:ssd_cp_visits
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Was the child''s bedroom seen
-      during this visit? Yes/ No'
+    guidance: Was the child's bedroom seen during this visit? Y/N
