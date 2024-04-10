@@ -2038,7 +2038,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episod
 CREATE TABLE ssd_cla_episodes (
     clae_cla_episode_id                 NVARCHAR(48) PRIMARY KEY,
     clae_person_id                      NVARCHAR(48),
-    clae_cla_placement_id               NVARCHAR(48), -- ADDED 
+    clae_cla_placement_id               NVARCHAR(48), 
     clae_cla_episode_start              DATETIME,
     clae_cla_episode_start_reason       NVARCHAR(100),
     clae_cla_primary_need               NVARCHAR(100),
@@ -2047,7 +2047,7 @@ CREATE TABLE ssd_cla_episodes (
     clae_cla_id                         NVARCHAR(48),
     clae_referral_id                    NVARCHAR(48),
     clae_cla_review_last_iro_contact_date DATETIME,
-    clae_entered_care_date              DATETIME      -- ADDED
+    clae_entered_care_date              DATETIME      
 );
  
 -- Insert data
@@ -4341,6 +4341,53 @@ FOREIGN KEY (send_person_id) REFERENCES ssd_person(pers_person_id);
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
+/*
+=============================================================================
+Object Name: ssd_sen_need
+Description: Placeholder structure as source data not common|confirmed
+Author: D2I
+Version: 0.1
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Remarks:
+Dependencies:
+- Yet to be defined
+- ssd_person
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_sen_need';
+PRINT 'Creating table: ' + @TableName;
+ 
+ 
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_sen_need', 'U') IS NOT NULL DROP TABLE ssd_sen_need  ;
+IF OBJECT_ID('tempdb..#ssd_sen_need', 'U') IS NOT NULL DROP TABLE #ssd_sen_need  ;
+ 
+ 
+-- Create structure
+CREATE TABLE #ssd_sen_need (
+    senn_table_id                       NVARCHAR(48),
+    senn_active_ehcp_id                 NVARCHAR(48),
+    senn_active_ehcp_need_type          NVARCHAR(100),
+    senn_active_ehcp_need_rank          NVARCHAR(1)
+);
+ 
+ 
+-- -- Insert placeholder data
+-- INSERT INTO #ssd_sen_need (senn_table_id, senn_active_ehcp_id, senn_active_ehcp_need_type, senn_active_ehcp_need_rank)
+-- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '0');
+ 
+ 
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+ 
 
 
 

@@ -4190,15 +4190,59 @@ CREATE TABLE #ssd_send (
 -- ALTER TABLE #ssd_send ADD CONSTRAINT FK_send_to_person 
 -- FOREIGN KEY (send_person_id) REFERENCES #ssd_person(pers_person_id);
 
-
- 
-
  
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+
+/*
+=============================================================================
+Object Name: ssd_sen_need
+Description: Placeholder structure as source data not common|confirmed
+Author: D2I
+Version: 0.1
+Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Remarks:
+Dependencies:
+- Yet to be defined
+- ssd_person
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_sen_need';
+PRINT 'Creating table: ' + @TableName;
+ 
+ 
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_sen_need', 'U') IS NOT NULL DROP TABLE ssd_sen_need  ;
+IF OBJECT_ID('tempdb..#ssd_sen_need', 'U') IS NOT NULL DROP TABLE #ssd_sen_need  ;
+ 
+ 
+-- Create structure
+CREATE TABLE #ssd_sen_need (
+    senn_table_id                       NVARCHAR(48),
+    senn_active_ehcp_id                 NVARCHAR(48),
+    senn_active_ehcp_need_type          NVARCHAR(100),
+    senn_active_ehcp_need_rank          NVARCHAR(1)
+);
+ 
+ 
+-- -- Insert placeholder data
+-- INSERT INTO #ssd_sen_need (senn_table_id, senn_active_ehcp_id, senn_active_ehcp_need_type, senn_active_ehcp_need_rank)
+-- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '0');
+ 
+ 
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+ 
 
 
 
