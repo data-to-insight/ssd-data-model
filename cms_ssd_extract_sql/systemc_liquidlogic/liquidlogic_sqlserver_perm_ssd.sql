@@ -469,7 +469,7 @@ PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
 IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_status;
-IF OBJECT_ID('tempdb..#immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
+IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
 
 -- Create structure
@@ -806,20 +806,23 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_early_help_episodes') IS NOT NULL DROP TABLE ssd_early_help_episodes;
+IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL DROP TABLE #ssd_early_help_episodes;
+
 
 -- Create structure
 CREATE TABLE ssd_early_help_episodes (
-    earl_episode_id         NVARCHAR(48) PRIMARY KEY,
-    earl_person_id          NVARCHAR(48),
-    earl_episode_start_date DATETIME,
-    earl_episode_end_date   DATETIME,
-    earl_episode_reason     NVARCHAR(MAX),
-    earl_episode_end_reason NVARCHAR(MAX),
-    earl_episode_organisation NVARCHAR(MAX),
-    earl_episode_worker_id  NVARCHAR(48)
+    earl_episode_id             NVARCHAR(48) PRIMARY KEY,
+    earl_person_id              NVARCHAR(48),
+    earl_episode_start_date     DATETIME,
+    earl_episode_end_date       DATETIME,
+    earl_episode_reason         NVARCHAR(MAX),
+    earl_episode_end_reason     NVARCHAR(MAX),
+    earl_episode_organisation   NVARCHAR(MAX),
+    earl_episode_worker_name    NVARCHAR(48)    -- consider for removal [TESTING]
 );
-
--- Insert data 
+ 
+ 
+-- Insert data
 INSERT INTO ssd_early_help_episodes (
     earl_episode_id,
     earl_person_id,
@@ -828,8 +831,9 @@ INSERT INTO ssd_early_help_episodes (
     earl_episode_reason,
     earl_episode_end_reason,
     earl_episode_organisation,
-    earl_episode_worker_id
+    earl_episode_worker_name                    -- consider for removal [TESTING]
 )
+ 
 SELECT
     cafe.FACT_CAF_EPISODE_ID,
     cafe.DIM_PERSON_ID,
@@ -839,20 +843,21 @@ SELECT
     cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE,
     cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
     'PLACEHOLDER_DATA'                              -- [PLACEHOLDER_DATA] [TESTING]
-FROM 
+FROM
     Child_Social.FACT_CAF_EPISODE AS cafe
-
-WHERE EXISTS 
+ 
+WHERE EXISTS
     ( -- only ssd relevant records
-    SELECT 1 
+    SELECT 1
     FROM ssd_person p
     WHERE p.pers_person_id = cafe.DIM_PERSON_ID
     );
-
+ 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
-CREATE NONCLUSTERED INDEX idx_early_help_start_date ON ssd_early_help_episodes(earl_episode_start_date);
-CREATE NONCLUSTERED INDEX idx_early_help_end_date ON ssd_early_help_episodes(earl_episode_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
+CREATE NONCLUSTERED INDEX idx_early_help_start_date ON #ssd_early_help_episodes(earl_episode_start_date);
+CREATE NONCLUSTERED INDEX idx_early_help_end_date ON #ssd_early_help_episodes(earl_episode_end_date);
+
 
 -- Create constraint(s)
 ALTER TABLE ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
@@ -1116,6 +1121,8 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_assessment_factors') IS NOT NULL DROP TABLE ssd_assessment_factors;
+IF OBJECT_ID('tempdb..#ssd_assessment_factors') IS NOT NULL DROP TABLE #ssd_assessment_factors;
+
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE ssd_TMP_PRE_assessment_factors;
 
 
@@ -1369,6 +1376,7 @@ PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_cin_visits') IS NOT NULL DROP TABLE ssd_cin_visits;
+IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
  
 -- Create structure
 CREATE TABLE ssd_cin_visits
@@ -1455,6 +1463,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_s47_enquiry;
+IF OBJECT_ID('tempdb..#ssd_s47_enquiry') IS NOT NULL DROP TABLE #ssd_s47_enquiry;
 
 -- Create structure 
 CREATE TABLE ssd_s47_enquiry (
@@ -1569,7 +1578,7 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_initial_cp_conference;
 IF OBJECT_ID('tempdb..#ssd_initial_cp_conference') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
  
- 
+
 -- Create structure
 CREATE TABLE ssd_initial_cp_conference (
     icpc_icpc_id                    NVARCHAR(48) PRIMARY KEY,
@@ -1693,6 +1702,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop 
 IF OBJECT_ID('ssd_cp_plans') IS NOT NULL DROP TABLE ssd_cp_plans;
+IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
 
 -- Create structure
 CREATE TABLE ssd_cp_plans (
@@ -1793,8 +1803,9 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..ssd_cp_visits') IS NOT NULL DROP TABLE ssd_cp_visits;
- 
+IF OBJECT_ID('ssd_cp_visits') IS NOT NULL DROP TABLE ssd_cp_visits;
+IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
+  
  
 -- Create structure
 CREATE TABLE ssd_cp_visits (
@@ -1891,7 +1902,8 @@ PRINT 'Creating table: ' + @TableName;
  
 -- Check if table exists, & drop
 IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_cp_reviews;
- 
+IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
+  
  
 -- Create structure
 CREATE TABLE ssd_cp_reviews
@@ -2020,6 +2032,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if table exists, & drop
 IF OBJECT_ID('ssd_cla_episodes') IS NOT NULL DROP TABLE ssd_cla_episodes;
+IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episodes;
 
  
 -- Create structure
@@ -2149,6 +2162,8 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop
 IF OBJECT_ID('ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE ssd_cla_convictions;
+IF OBJECT_ID('tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cla_convictions;
+
 
 -- create structure
 CREATE TABLE ssd_cla_convictions (
@@ -2386,6 +2401,7 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_substance_misuse') IS NOT NULL DROP TABLE ssd_cla_substance_misuse;
+IF OBJECT_ID('tempdb..#ssd_cla_substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_substance_misuse;
 
 -- Create structure 
 CREATE TABLE ssd_cla_substance_misuse (
@@ -2461,7 +2477,8 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_placement', 'U') IS NOT NULL DROP TABLE ssd_cla_placement;
- 
+IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_placement;
+  
 -- Create structure
 CREATE TABLE ssd_cla_placement (
     clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,
@@ -2576,7 +2593,8 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE ssd_cla_reviews;
- 
+IF OBJECT_ID('tempdb..#ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE #ssd_cla_reviews;
+  
 -- Create structure
 CREATE TABLE ssd_cla_reviews (
     clar_cla_review_id                      NVARCHAR(48) PRIMARY KEY,
@@ -2692,6 +2710,7 @@ PRINT 'Creating table: ' + @TableName;
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_previous_permanence') IS NOT NULL DROP TABLE ssd_cla_previous_permanence;
 IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
+
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_previous_permanence') IS NOT NULL DROP TABLE #ssd_TMP_PRE_previous_permanence;
  
 -- Create TMP structure with filtered answers
@@ -2818,6 +2837,8 @@ PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
 IF OBJECT_ID('ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_cla_care_plan;
+IF OBJECT_ID('tempdb..#ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_cla_care_plan;
+
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_cla_care_plan') IS NOT NULL DROP TABLE #ssd_TMP_PRE_cla_care_plan;
  
  
@@ -3055,7 +3076,7 @@ PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
 IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
- IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
+IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
  
 
 /* V8.1 */
@@ -4515,8 +4536,7 @@ CREATE TABLE ssd_ehcp_active_plans (
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_ehcp_active_plans
-ADD CONSTRAINT FK_ehcp_active_plans_requests
+ALTER TABLE ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
 FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
 
 
