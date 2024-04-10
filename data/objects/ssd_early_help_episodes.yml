@@ -25,10 +25,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_early_help_episodes
     - mosaic:ssd_early_help_episodes
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Early Help Episode unique ID
-      from system or auto-generated as part of export.'
+    guidance: Row identifier for the ssd_early_help_episodes table
   - name: earl_person_id
     description: Person Unique ID
     item_ref: EARL002A
@@ -55,7 +52,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_early_help_episodes
     - mosaic:ssd_early_help_episodes
-    guidance: See PERS001A
+    guidance: Person's ID generated in CMS Database
   - name: earl_episode_start_date
     description: EH Episode Start Date
     item_ref: EARL003A
@@ -74,9 +71,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_early_help_episodes
     - mosaic:ssd_early_help_episodes
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date Early Help Episode Started'
+    guidance: Date Episode Started
   - name: earl_episode_end_date
     description: EH Episode End Date
     item_ref: EARL004A
@@ -95,9 +90,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_early_help_episodes
     - mosaic:ssd_early_help_episodes
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date Early Help Episode Ended'
+    guidance: Date Episode Ended
   - name: earl_episode_reason
     description: EH Episode Reason for Involvement
     item_ref: EARL005A
@@ -116,32 +109,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_early_help_episodes
     - mosaic:ssd_early_help_episodes
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Broad categorisation of Reason
-      for Involvement. Potential categories could be:
-
-      -Alcohol/ Substance Misuse (Parent or Child)
-
-      -Mental Health (Parent or Child)
-
-      -Parenting and Family Dynamics
-
-      -Physical and Learning Disabilities/Illness (Parent or Child)
-
-      -Domestic Violence/ Abuse
-
-      -Child Abuse/ Neglect
-
-      -Special Circumstances/ Vulnerabilities
-
-      -Socio-economic Challenges
-
-      -Child Well-being and Development
-
-      -Information and Support Service
-
-      -Other'
+    guidance: Broad categorisation of Reason for Early Help Involvement.
   - name: earl_episode_end_reason
     description: EH Episode End Reason
     item_ref: EARL006A
@@ -160,9 +128,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_early_help_episodes
     - mosaic:ssd_early_help_episodes
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Outcomes met/ Step-up/ NFA'
+    guidance: Reason Episode endeed e.g. Outcomes met/ Step-up/ NFA
   - name: earl_episode_organisation
     description: EH Episode Allocated Organisation
     item_ref: EARL007A
@@ -181,10 +147,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_early_help_episodes
     - mosaic:ssd_early_help_episodes
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Organisation responsible for
-      Early Help provision'
+    guidance: Organisation responsible for Early Help provision
   - name: earl_episode_worker_name
     description: EH Episode Allocated Worker
     item_ref: EARL008A
@@ -204,7 +167,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_early_help_episodes
     - mosaic:ssd_early_help_episodes
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Allocated worker responsible
-      for Early Help provision'
+    guidance: Allocated worker responsible for Early Help provision

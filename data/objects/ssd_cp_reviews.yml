@@ -27,10 +27,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_reviews
     - mosaic:ssd_cp_reviews
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]CP Plan Review unique ID from
-      system or auto-generated as part of export.'
+    guidance: Row identifier for the ssd_cp_reviews table
   - name: cppr_person_id
     description: Person Unique ID
     item_ref: CPPR008A
@@ -46,7 +43,7 @@ nodes:
     cms_field:
     - liquid_logic:cppr_person_id
     - mosaic:cppr_person_id
-    guidance: null
+    guidance: Person's ID generated in CMS Database
   - name: cppr_cp_plan_id
     description: CP Plan ID
     item_ref: CPPR002A
@@ -67,7 +64,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_reviews
     - mosaic:ssd_cp_reviews
-    guidance: See CPP001A
+    guidance: ID for linking to the CP Plan
   - name: cppr_cp_review_due
     description: Review Due Date
     item_ref: CPPR003A
@@ -87,9 +84,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_reviews
     - mosaic:ssd_cp_reviews
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]The due date of the review conference.'
+    guidance: The due date of the review conference.
   - name: cppr_cp_review_date
     description: Date of Review
     item_ref: CPPR004A
@@ -110,12 +105,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_reviews
     - mosaic:ssd_cp_reviews
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]The actual date on which the
-      Review Conference was held'
+    guidance: The actual date on which the Review Conference was held
   - name: cppr_cp_review_meeting_id
-    description: Review Meeting ID
+    description: CP Review Meeting ID
     item_ref: CPPR009A
     type: nvarchar
     categories:
@@ -127,7 +119,7 @@ nodes:
     cms_field:
     - liquid_logic:cppr_cp_review_meeting_id
     - mosaic:cppr_cp_review_meeting_id
-    guidance: null
+    guidance: Identifier for the Review CP Conference Meeting
   - name: cppr_cp_review_outcome_continue_cp
     description: CP Plan to Continue?
     item_ref: CPPR005A
@@ -147,10 +139,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_reviews
     - mosaic:ssd_cp_reviews
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Was the outcome of the conference
-      to continue the CP Plan? (Yes/ No)'
+    guidance: Was the outcome of the conference to continue the CP Plan? Y/N
   - name: cppr_cp_review_quorate
     description: Quorate?
     item_ref: CPPR006A
@@ -170,10 +159,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_reviews
     - mosaic:ssd_cp_reviews
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Was the conference quorate? The
-      primary principle for determining quoracy is that there should be sufficient
+    guidance: 'Was the conference quorate?
+
+      The primary principle for determining quoracy is that there should be sufficient
       agencies or key disciplines present to enable safe decisions to be made in the
       individual circumstances. Minimum representation is Children''s Social Care
       and at least two other agencies or key disciplines that have had direct contact
@@ -198,30 +186,29 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_reviews
     - mosaic:ssd_cp_reviews
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Record the method of participation
-      in each review using the codes below: -PN0 Child aged under 4 at the time of
-      the review
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development) The Child/
+      Young Person''s method of participation at review. Code set
 
-      -PN1 Child physically attends and speaks for him or herself (Attendance).
+      PN0 - Child aged under 4 at the time of the review
 
-      -PN2 Child physically attends and an advocate speaks on his or her behalf. (Attendance
-      views represented by advocate or Child Protection Adisor (CPA))
+      PN1 - Child physically attends and speaks for him or herself (Attendance).
 
-      -PN3 Child attends and conveys his or her view symbolically (non-verbally) (Attendance
-      symbols)
+      PN2 - Child physically attends and an advocate speaks on his or her behalf.
+      (Attendance views represented by advocate or Child Protection Adisor (CPA))
 
-      -PN4 Child physically attends but does not speak for him or herself, does not
+      PN3 - Child attends and conveys his or her view symbolically (non-verbally)
+      (Attendance symbols)
+
+      PN4 - Child physically attends but does not speak for him or herself, does not
       convey his or her view symbolically (non-verbally) and does not ask an advocate
       to speak for him or her (Attendance without contribution)
 
-      -PN5 Child does not attend physically but briefs an advocate to speak for him
+      PN5 - Child does not attend physically but briefs an advocate to speak for him
       or her (Views represented by advocate or independent reviewing officer (IRO)
       through texting, written format, phone, audio/video, viewpoint)
 
-      -PN6 Child does not attend but conveys his or her feelings to the review by
+      PN6 - Child does not attend but conveys his or her feelings to the review by
       a facilitative medium (Texting the chair, written format, phone, audio/video,
       viewpoint)
 
-      -PN7 Child does not attend nor are his or her views conveyed to the review'
+      PN7 - Child does not attend nor are his or her views conveyed to the review'

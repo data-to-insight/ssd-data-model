@@ -30,7 +30,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_immigration_status
     - mosaic:ssd_immigration_status
-    guidance: See PERS001A
+    guidance: Person's ID generated in CMS Database
   - name: immi_Immigration_status_id
     description: Immigration Status ID
     item_ref: IMMI005A
@@ -51,7 +51,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_immigration_status
     - mosaic:ssd_immigration_status
-    guidance: null
+    guidance: Row identifier for the ssd_immigration_status table
   - name: immi_immigration_status
     description: Immigration Status
     item_ref: IMMI002A
@@ -72,10 +72,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_immigration_status
     - mosaic:ssd_immigration_status
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Immigration Status e.g. Unaccompanied
-      Asylum Seeking Child'
+    guidance: Immigration Status e.g. Unaccompanied Asylum Seeking Child
   - name: immi_immigration_status_start_date
     description: Immigration Status Start
     item_ref: IMMI003A
@@ -96,9 +93,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_immigration_status
     - mosaic:ssd_immigration_status
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Start Date of Immigration Status'
+    guidance: Start Date of Immigration Status
   - name: immi_immigration_status_end_date
     description: Immigration Status End
     item_ref: IMMI004A
@@ -119,6 +114,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_immigration_status
     - mosaic:ssd_immigration_status
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]End Date of Immigration Status'
+    guidance: End Date of Immigration Status

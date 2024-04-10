@@ -27,22 +27,20 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_assessment
     - mosaic:ssd_ehcp_assessment
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]EHCP assessment record unique\
-      \ ID from system or auto-generated as part of export. This module collects information\
-      \ on the decision to issue a plan. Where a decision has been made to issue a\
-      \ plan, the detail about the placement named on the EHC plan should be recorded\
-      \ in Module 4. It is possible that multiple assessments may be recorded for\
-      \ a single person. For example, if it was decided not to issue a plan previously\
-      \ and a new assessment has been agreed following a new request.\nIf a child\
-      \ or young person transfers into the local authority\u2019s area during the\
-      \ assessment process before an EHC plan has been issued there is no right of\
-      \ transfer of decisions made by the originating local authority. Under good\
-      \ practice local authorities may decide to share information but the importing\
-      \ local authority must make its own decisions on whether to assess and whether\
-      \ to issue a plan.\nWhere a person with an existing EHC plan transfers into\
-      \ the local authority\u2019s area (item 5.1) the assessment should be recorded\
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) EHCP assessment\
+      \ record unique ID from system or auto-generated as part of export. This module\
+      \ collects information on the decision to issue a plan. Where a decision has\
+      \ been made to issue a plan, the detail about the placement named on the EHC\
+      \ plan should be recorded in Module 4. It is possible that multiple assessments\
+      \ may be recorded for a single person. For example, if it was decided not to\
+      \ issue a plan previously and a new assessment has been agreed following a new\
+      \ request.\nIf a child or young person transfers into the local authority\u2019\
+      s area during the assessment process before an EHC plan has been issued there\
+      \ is no right of transfer of decisions made by the originating local authority.\
+      \ Under good practice local authorities may decide to share information but\
+      \ the importing local authority must make its own decisions on whether to assess\
+      \ and whether to issue a plan.\nWhere a person with an existing EHC plan transfers\
+      \ into the local authority\u2019s area (item 5.1) the assessment should be recorded\
       \ as historical by the importing local authority, even if the EHC plan start\
       \ date is within the collection year."
   - name: ehca_ehcp_request_id
@@ -65,7 +63,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_assessment
     - mosaic:ssd_ehcp_assessment
-    guidance: See ERQ001A
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) EHCP request
+      record unique ID from system or auto-generated as part of export.
   - name: ehca_ehcp_assessment_outcome_date
     description: Assessment Outcome Date
     item_ref: EHCA003A
@@ -86,13 +85,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_assessment
     - mosaic:ssd_ehcp_assessment
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]The assessment outcome date\
-      \ is required where EAM004A is equal to \u2018Y\u2019 or \u2018N\u2019, either\
-      \ record:\n-Date on which EHC plan was issued, or\n-Date on which person was\
-      \ notified of decision not to issue a plan\nIf a decision to issue has been\
-      \ made but no plan has been issued, please leave blank."
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) The assessment\
+      \ outcome date is required where EAM004A is equal to \u2018Y\u2019 or \u2018\
+      N\u2019, either record: -Date on which EHC plan was issued, or -Date on which\
+      \ person was notified of decision not to issue a plan If a decision to issue\
+      \ has been made but no plan has been issued, please leave blank."
   - name: ehca_ehcp_assessment_outcome
     description: Assessment Outcome
     item_ref: EHCA004A
@@ -113,24 +110,23 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_assessment
     - mosaic:ssd_ehcp_assessment
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]Assessment outcome - decision\
-      \ to issue EHC plan:\n-Y It was decided an EHC plan would be issued\n-N It was\
-      \ decided an EHC plan would not be issued\n-A Decision has not yet been made\n\
-      -W Request withdrawn or ceased before decision whether to issue was made\n-H\
-      \ Historical \u2013 Decision to issue was made before the latest collection\
-      \ period If a local authority decides not to issue an EHC plan and this decision\
-      \ is subsequently changed by the local authority for any reason the original\
-      \ assessment outcome and assessment outcome date should not be changed. If the\
-      \ change follows from mediation or tribunal the appropriate mediation and tribunal\
-      \ indicators should be selected for the assessment.\nW may include where the\
-      \ person moves out of the local authority area, leaves education or training\
-      \ or if the child or young person dies.\nWhere A or W is selected, no further\
-      \ information is required in this or subsequent modules. The 20-week timeliness\
-      \ measure will not apply in cases where a plan has not yet been issued.\nFor\
-      \ an active plan, where the decision to issue was made before the latest collection\
-      \ period (H - Historical) information is still required on the plan itself."
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Assessment\
+      \ outcome - decision to issue EHC plan: -Y It was decided an EHC plan would\
+      \ be issued -N It was decided an EHC plan would not be issued -A Decision has\
+      \ not yet been made -W Request withdrawn or ceased before decision whether to\
+      \ issue was made -H Historical \u2013 Decision to issue was made before the\
+      \ latest collection period If a local authority decides not to issue an EHC\
+      \ plan and this decision is subsequently changed by the local authority for\
+      \ any reason the original assessment outcome and assessment outcome date should\
+      \ not be changed. If the change follows from mediation or tribunal the appropriate\
+      \ mediation and tribunal indicators should be selected for the assessment. W\
+      \ may include where the person moves out of the local authority area, leaves\
+      \ education or training or if the child or young person dies. Where A or W is\
+      \ selected, no further information is required in this or subsequent modules.\
+      \ The 20-week timeliness measure will not apply in cases where a plan has not\
+      \ yet been issued.\nFor an active plan, where the decision to issue was made\
+      \ before the latest collection period (H - Historical) information is still\
+      \ required on the plan itself."
   - name: ehca_ehcp_assessment_exceptions
     description: Assessment 20-week time limit exceptions apply
     item_ref: EHCA005A
@@ -151,7 +147,6 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_assessment
     - mosaic:ssd_ehcp_assessment
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]1 \u2013 Yes, exceptions apply\n\
-      0 \u2013 No, exceptions do not apply"
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Assessment\
+      \ 20-week time limit exceptions apply? 1 \u2013 Yes, exceptions apply 0 \u2013\
+      \ No, exceptions do not apply"

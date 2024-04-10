@@ -26,12 +26,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_reviews
     - mosaic:ssd_cla_reviews
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]CLA Review unique ID from system
-      or auto-generated as part of export.'
+    guidance: Row identifier for the ssd_cla_reviews table
   - name: clar_cla_id
-    description: CLA_ID
+    description: CLA ID
     item_ref: CLAR011A
     type: nvarchar
     foreign_key: ssd_cla_episodes.clae_cla_id
@@ -47,7 +44,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_reviews
     - mosaic:ssd_cla_reviews
-    guidance: null
+    guidance: System identifier for the whole period of care, encompassing all episodes
+      included within that period of care.
   - name: clar_cla_review_due_date
     description: CLA Review Due Date
     item_ref: CLAR003A
@@ -66,9 +64,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_reviews
     - mosaic:ssd_cla_reviews
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date the CLA review was due'
+    guidance: Date the CLA review was due
   - name: clar_cla_review_date
     description: CLA Review Date
     item_ref: CLAR004A
@@ -88,14 +84,12 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_reviews
     - mosaic:ssd_cla_reviews
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Actual date of Review conference'
+    guidance: Actual date of the Review conference
   - name: clar_cla_review_cancelled
     description: null
     item_ref: CLAR012A
     type: nvarchar
-    guidance: null
+    guidance: Flag showing if the review was Cancelled. Y/N
   - name: clar_cla_review_participation
     description: Participation code
     item_ref: CLAR007A
@@ -114,30 +108,28 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_reviews
     - mosaic:ssd_cla_reviews
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Record the method of participation
-      in each review using the codes below: -PN0 Child aged under 4 at the time of
-      the review
+    guidance: 'The Child/ Young Person''s method of participation in each review.
 
-      -PN1 Child physically attends and speaks for him or herself (Attendance).
+      PN0 - Child aged under 4 at the time of the review
 
-      -PN2 Child physically attends and an advocate speaks on his or her behalf. (Attendance
-      views represented by advocate or Independent Reviewing Officer (IRO))
+      PN1 - Child physically attends and speaks for him or herself (Attendance).
 
-      -PN3 Child attends and conveys his or her view symbolically (non-verbally) (Attendance
-      symbols)
+      PN2 - Child physically attends and an advocate speaks on his or her behalf.
+      (Attendance views represented by advocate or Independent Reviewing Officer (IRO))
 
-      -PN4 Child physically attends but does not speak for him or herself, does not
+      PN3 - Child attends and conveys his or her view symbolically (non-verbally)
+      (Attendance symbols)
+
+      PN4 - Child physically attends but does not speak for him or herself, does not
       convey his or her view symbolically (non-verbally) and does not ask an advocate
       to speak for him or her (Attendance without contribution)
 
-      -PN5 Child does not attend physically but briefs an advocate to speak for him
+      PN5 - Child does not attend physically but briefs an advocate to speak for him
       or her (Views represented by advocate or independent reviewing officer (IRO)
       through texting, written format, phone, audio/video, viewpoint)
 
-      -PN6 Child does not attend but conveys his or her feelings to the review by
+      PN6 - Child does not attend but conveys his or her feelings to the review by
       a facilitative medium (Texting the chair, written format, phone, audio/video,
       viewpoint)
 
-      -PN7 Child does not attend nor are his or her views conveyed to the review'
+      PN7 - Child does not attend nor are his or her views conveyed to the review'

@@ -26,23 +26,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_requests
     - mosaic:ssd_ehcp_requests
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]EHCP request record unique\
-      \ ID from system or auto-generated as part of export. The following information\
-      \ should be recorded for each initial request for assessment made to the local\
-      \ authority. The information collected will allow the department to continue\
-      \ to report on the timeliness of the assessment process. Requests that have\
-      \ yet to be completed should also be recorded.\nIf a child or young person transfers\
-      \ into the local authority\u2019s area at any stage of the request and assessment\
-      \ process before an EHC plan has been issued, there is no right of transfer\
-      \ of decisions made by the originating local authority. Under good practice\
-      \ local authorities may decide to share information but the importing local\
-      \ authority must make its own decisions on whether to assess and whether to\
-      \ issue a plan.\nWhere a person with an existing EHC plan transfers into the\
-      \ local authority\u2019s area (item 5.1) the request and assessment should be\
-      \ recorded by the importing local authority as historical even if the EHC plan\
-      \ start date is within the collection year."
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) EHCP request
+      record unique ID from system or auto-generated as part of export.
   - name: ehcr_send_table_id
     description: send_table_id
     item_ref: EHCR002A
@@ -63,7 +48,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_requests
     - mosaic:ssd_ehcp_requests
-    guidance: See SEN001A
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) ID for linking
+      to ssd_send table
   - name: ehcr_ehcp_req_date
     description: Received Date
     item_ref: EHCR003A
@@ -83,11 +69,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_requests
     - mosaic:ssd_ehcp_requests
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]The date the request for an EHC
-      assessment was received. This will be the date used as the start of the 20-week
-      period.'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) The date
+      the request for an EHC assessment was received. This will be the date used as
+      the start of the 20-week period.
   - name: ehcr_ehcp_req_outcome_date
     description: Request Outcome Date
     item_ref: EHCR004A
@@ -107,14 +91,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_requests
     - mosaic:ssd_ehcp_requests
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Please enter the date the requestor(s)
-      was informed of the decision about whether the local authority agrees to the
-      request for an assessment.
-
-      If the request was withdrawn or ceased before decision (W), if the decision
-      is yet to be made (A) or is historical (H) then no date is required.'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Please enter
+      the date the requestor(s) was informed of the decision about whether the local
+      authority agrees to the request for an assessment. If the request was withdrawn
+      or ceased before decision (W), if the decision is yet to be made (A) or is historical
+      (H) then no date is required.
   - name: ehcr_ehcp_req_outcome
     description: Request Outcome
     item_ref: EHCR005A
@@ -134,18 +115,16 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_requests
     - mosaic:ssd_ehcp_requests
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]This item records whether or\
-      \ not the initial request proceeded to the assessment stage:\nY - LA proceeded\
-      \ with an assessment\nN - LA decided not to proceed with an assessment\nA -\
-      \ Decision yet to be made\nW \u2013 Request withdrawn or ceased before decision\
-      \ to assess was made\nH \u2013 Historical \u2013 Decision to assess was made\
-      \ before the latest collection period\nIf a local authority decides not to proceed\
-      \ with an assessment and this decision is subsequently changed for any reason\
-      \ the original request outcome and request outcome date should not be changed.\
-      \ If the change follows from mediation or tribunal the appropriate mediation\
-      \ and tribunal indicators (items 2.5 and 2.6) should be selected for the request.\n\
-      W may include where the person moves out of the local authority area, leaves\
-      \ education or training, or if the child or young person dies.\nWhen A, W or\
-      \ H is selected, no further information is required in this module."
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) This item\
+      \ records whether or not the initial request proceeded to the assessment stage:\
+      \ Y - LA proceeded with an assessment N - LA decided not to proceed with an\
+      \ assessment A - Decision yet to be made W \u2013 Request withdrawn or ceased\
+      \ before decision to assess was made H \u2013 Historical \u2013 Decision to\
+      \ assess was made before the latest collection period If a local authority decides\
+      \ not to proceed with an assessment and this decision is subsequently changed\
+      \ for any reason the original request outcome and request outcome date should\
+      \ not be changed. If the change follows from mediation or tribunal the appropriate\
+      \ mediation and tribunal indicators (items 2.5 and 2.6) should be selected for\
+      \ the request. W may include where the person moves out of the local authority\
+      \ area, leaves education or training, or if the child or young person dies.\
+      \ When A, W or H is selected, no further information is required in this module."

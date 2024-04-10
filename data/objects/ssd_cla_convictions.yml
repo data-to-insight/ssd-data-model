@@ -21,10 +21,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_convictions
     - mosaic:ssd_cla_convictions
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Conviction record unique ID from
-      system or auto-generated as part of export.'
+    guidance: Row identifier for the ssd_cla_convictions table
   - name: clac_person_id
     description: Person Unique ID
     item_ref: CLAC002A
@@ -51,7 +48,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_convictions
     - mosaic:ssd_cla_convictions
-    guidance: See PERS001A
+    guidance: Person's ID generated in CMS Database
   - name: clac_cla_conviction_date
     description: Date of Offence
     item_ref: CLAC003A
@@ -70,9 +67,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_convictions
     - mosaic:ssd_cla_convictions
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date of Offence'
+    guidance: Date of Offence
   - name: clac_cla_conviction_offence
     description: Description
     item_ref: CLAC004A
@@ -85,6 +80,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_convictions
     - mosaic:ssd_cla_convictions
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Offence committed.'
+    guidance: Details of offence committed.

@@ -14,7 +14,8 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: null
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Row identifier
+      for the ssd_voice_of_child table
   - name: voch_person_id
     description: Person Unique ID
     item_ref: VOCH001A
@@ -40,7 +41,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: See PERS001A
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Person's
+      ID generated in CMS Database
   - name: voch_explained_worries
     description: Has someone explained to you why people are worried for your family
       in a way that you can understand?
@@ -59,9 +61,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Child answer from questionnaire.'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Child answer
+      from questionnaire
     metadata:
       release: In review|pending
       change_id: SSD-0023
@@ -87,9 +88,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Child answer from questionnaire.'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Child answer
+      from questionnaire
     metadata:
       release: In review|pending
       change_id: SSD-0024
@@ -115,9 +115,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Child answer from questionnaire.'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Child answer
+      from questionnaire
     metadata:
       release: In review|pending
       change_id: SSD-0025
@@ -143,9 +142,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Child answer from questionnaire.'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Child answer
+      from questionnaire
     metadata:
       release: In review|pending
       change_id: SSD-0026
@@ -171,9 +169,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Child answer from questionnaire.'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Child answer
+      from questionnaire
     metadata:
       release: In review|pending
       change_id: SSD-0027

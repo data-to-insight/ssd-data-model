@@ -2,7 +2,7 @@
 nodes:
 - name: ssd_s251_finance
   fields:
-  - name: s251_id
+  - name: s251_table_id
     description: s251 table row ID
     item_ref: S251001A
     type: nvarchar
@@ -15,12 +15,13 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:s251_id
-    - mosaic:s251_id
+    - liquid_logic:s251_table_id
+    - mosaic:s251_table_id
     cms_table:
     - liquid_logic:ssd_s251_finance
     - mosaic:ssd_s251_finance
-    guidance: No guidance available yet
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Row identifier
+      for the ssd_s251_finance table
   - name: s251_cla_placement_id
     description: CLA Placement ID
     item_ref: S251002A
@@ -39,7 +40,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s251_finance
     - mosaic:ssd_s251_finance
-    guidance: No guidance available yet
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) ID for linking
+      to CLA Placement
   - name: s251_placeholder_1
     description: Placeholder field
     item_ref: S251003A
@@ -57,7 +59,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s251_finance
     - mosaic:ssd_s251_finance
-    guidance: No guidance available yet
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) No guidance
+      available yet
   - name: s251_placeholder_2
     description: Placeholder field
     item_ref: S251004A
@@ -75,7 +78,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s251_finance
     - mosaic:ssd_s251_finance
-    guidance: No guidance available yet
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) No guidance
+      available yet
   - name: s251_placeholder_3
     description: Placeholder field
     item_ref: S251005A
@@ -93,7 +97,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s251_finance
     - mosaic:ssd_s251_finance
-    guidance: No guidance available yet
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) No guidance
+      available yet
   - name: s251_placeholder_4
     description: Placeholder field
     item_ref: S251006A
@@ -111,4 +116,5 @@ nodes:
     cms_table:
     - liquid_logic:ssd_s251_finance
     - mosaic:ssd_s251_finance
-    guidance: No guidance available yet
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) No guidance
+      available yet

@@ -26,10 +26,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: null
+    guidance: Row identifier for the ssd_address table
   - name: addr_address_json
-    description: 'Address (combined dictionary/json type containing: room, floor,
-      flat, building, house num, street, locality, town, county, uprn, easting, northing)'
+    description: Address
     item_ref: ADDR001A
     type: nvarchar
     validators:
@@ -54,9 +53,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Address detail'
+    guidance: 'Address (combined dictionary/json type containing: room, floor, flat,
+      building, house num, street, locality, town, county, uprn, easting, northing)'
   - name: addr_person_id
     description: Person Unique ID
     item_ref: ADDR002A
@@ -80,7 +78,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: See PERS001A
+    guidance: Person's ID generated in CMS Database
   - name: addr_address_type
     description: Address Type
     item_ref: ADDR003A
@@ -99,9 +97,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Home/ Placement/ Primary/ Secondary'
+    guidance: Type of Address, e.g. Home/ Placement/ Primary etc.
   - name: addr_address_start_date
     description: Address Start Date/ From
     item_ref: ADDR004A
@@ -120,10 +116,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date person started living at
-      the address'
+    guidance: Date person started living at the address
   - name: addr_address_end_date
     description: Address End Date/ To
     item_ref: ADDR005A
@@ -142,10 +135,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Date person left the address'
-  - name: addr_postcode
+    guidance: Date person left the address
+  - name: addr_address_postcode
     description: Address Postcode
     item_ref: ADDR006A
     type: nvarchar
@@ -161,14 +152,9 @@ nodes:
     - caredirector
     - azeus
     cms_field:
-    - liquid_logic:addr_postcode
-    - mosaic:addr_postcode
+    - liquid_logic:addr_address_postcode
+    - mosaic:addr_address_postcode
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]You should provide a current
-      post code for most persons and every effort should be made to obtain valid details.
-      If it is not possible to get the post code, you should leave this field blank
-      and provide an explanatory note.'
+    guidance: Address Postcode, auto-formatted to remove spaces for consistency

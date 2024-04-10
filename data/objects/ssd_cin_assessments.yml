@@ -26,45 +26,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Assessment unique ID from system
-      or auto-generated as part of export. Under the Children Act 1989, local authorities
-      are required to provide services for children in need for the purposes of safeguarding
-      and promoting their welfare. Local authorities undertake assessments of the
-      needs of individual children to determine what services to provide and action
-      to take.
-
-      Assessments should be recorded only at significant points such as the beginning
-      of a new episode of need. It is not necessary to log new assessments at the
-      point of closing an episode of need.
-
-      As set out in ''Working together to safeguard children'' (2018), where the outcome
-      of the assessment is continued through an agreed plan of action, the plan should
-      be reviewed regularly, the outcomes of these reviews do not need to be recorded.
-      However, if the situation changes significantly, this may result in the need
-      for the completion of a new assessment, in which case this new assessment should
-      be recorded.
-
-      Include all assessments that fall entirely or partly in the 2022 to 2023 collection
-      year, including those that had started but had not finished by 31 March 2023,
-      and those that started prior to 1 April 2022 and were completed within the 2022
-      to 2023 collection year. Please note, if a child is referred to a local authority
-      and has been classified as in need following an assessment they should be included
-      in the children in need census, regardless of whether they are receiving youth
-      offending or any other service.
-
-      Within one working day of a referral being received, a decision should be made
-      about the type of response required. The maximum timeframe from the assessment
-      to arrive at a decision on the action to be taken should be no longer than 45
-      working days from the point of referral. This should be recorded as the end
-      date of the assessment. Assessments may lead to no further action, the direct
-      provision of services, and section 47 enquiries. See ''Working together to safeguard
-      children'' for further information.
-
-      There must always be an assessment actual start date, but if the assessment
-      authorisation date falls after the end of the census year, it should be left
-      blank. The assessment internal review point date is optional.'
+    guidance: Row identifier for the ssd_cin_assessments table.
   - name: cina_person_id
     description: Person Unique ID
     item_ref: CINA002A
@@ -92,7 +54,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: See PERS001A
+    guidance: Person's ID generated in CMS Database
   - name: cina_referral_id
     description: Referral ID
     item_ref: CINA010A
@@ -109,7 +71,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: null
+    guidance: ID for linking to CIN Referral Episode
   - name: cina_assessment_start_date
     description: Assessment Start Date
     item_ref: CINA003A
@@ -129,10 +91,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Enter the date the assessment
-      actually started. This is the actual start date of the continuous assessment.'
+    guidance: This is the actual start date of the continuous assessment.
   - name: cina_assessment_child_seen
     description: Child Seen During Assessment
     item_ref: CINA004A
@@ -152,10 +111,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Was the child seen during the
-      Assessment process?'
+    guidance: Was the child seen during the Assessment process?
   - name: cina_assessment_auth_date
     description: Assessment Authorised Date
     item_ref: CINA005A
@@ -175,16 +131,12 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: "[Guidance text replicated from related stat-return field(s). Thus may\
-      \ not be entirely applicable to this data item within the SSD. A review of item/field\
-      \ guidance notes towards the SSD is in progress.]Enter the actual date on which\
-      \ an assessment is completed and authorised, according to the formatting covered\
-      \ in the general notes. This is the date the assessment is completed and authorised.\n\
-      An assessment is deemed to be completed once the social worker has informed,\
-      \ in writing, all the relevant agencies and the family of their decisions and\
-      \ if the child is a child in need, of the plan for providing support/ or once\
-      \ the assessment has been discussed with the child\u2019s family (or carers)\
-      \ and the team manager has viewed and authorised the assessment."
+    guidance: "This is the date the assessment is completed and authorised.\nAn assessment\
+      \ is deemed to be completed once the social worker has informed, in writing,\
+      \ all the relevant agencies and the family of their decisions and if the child\
+      \ is a child in need, of the plan for providing support/ or once the assessment\
+      \ has been discussed with the child\u2019s family (or carers) and the team manager\
+      \ has viewed and authorised the assessment."
   - name: cina_assessment_outcome_json
     description: Assessment Outcome
     item_ref: CINA006A
@@ -204,23 +156,34 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]The outcomes may be as follows:
-      - No further action;
+    guidance: 'Outcome of the single assessment. Combined dictionary/ json type containing
+      the following, where there is a value recorded:
 
-      - Additional support which can be provided through universal services and single
-      service provision or the Early Help assessment process;
+      - OUTCOME_NFA_FLAG
 
-      - The development of a multi-agency Child in Need plan for the provision of
-      child in need services to promote the child''s health and development;
+      - OUTCOME_NFA_S47_END_FLAG
 
-      - Specialist assessment for a more in-depth understanding of the child''s needs
-      and circumstances;
+      - OUTCOME_STRATEGY_DISCUSSION_FLAG
 
-      - Undertaking a Strategy Discussion/Meeting, a Section 47 child protection enquiry;
+      - OUTCOME_CLA_REQUEST_FLAG
 
-      - Emergency action to protect a child'
+      - OUTCOME_PRIVATE_FOSTERING_FLAG
+
+      - OUTCOME_LEGAL_ACTION_FLAG
+
+      - OUTCOME_PROV_OF_SERVICES_FLAG
+
+      - OUTCOME_PROV_OF_SB_CARE_FLAG
+
+      - OUTCOME_SPECIALIST_ASSESSMENT_FLAG
+
+      - OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG
+
+      - OUTCOME_OTHER_ACTIONS_FLAG
+
+      - OTHER_OUTCOMES_EXIST_FLAG
+
+      - TOTAL_NO_OF_OUTCOMES'
   - name: cina_assessment_outcome_nfa
     description: Assessment NFA
     item_ref: CINA009A
@@ -240,7 +203,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: null
+    guidance: Standalone field showing whether or not the Assessment resulted in No
+      Further Action.
   - name: cina_assessment_team_name
     description: Assessment Completed by Team
     item_ref: CINA007A
@@ -260,10 +224,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Allocated Team responsible for
-      completing Assessment'
+    guidance: Team responsible for completing the Assessment
   - name: cina_assessment_worker_name
     description: Assessment Completed by Worker name
     item_ref: CINA008A
@@ -284,7 +245,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: '[Guidance text replicated from related stat-return field(s). Thus may
-      not be entirely applicable to this data item within the SSD. A review of item/field
-      guidance notes towards the SSD is in progress.]Allocated worker responsible
-      for completing Assessment'
+    guidance: Worker responsible for completing the Assessment
