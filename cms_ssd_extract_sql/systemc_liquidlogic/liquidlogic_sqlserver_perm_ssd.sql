@@ -1549,14 +1549,16 @@ Object Name: ssd_initial_cp_conference
 Description:
 Author: D2I
 Version: 1.0
+            0.3 Updated source of CP_PLAN_ID 100424 JH
             0.2 Updated the worker fields 020424 JH
             0.1 Re-instated the worker details 010224 JH
-
+ 
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:
 Dependencies:
 - FACT_CP_CONFERENCE
 - FACT_MEETINGS
+- FACT_CP_PLAN
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -1567,7 +1569,7 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_initial_cp_conference;
 IF OBJECT_ID('tempdb..#ssd_initial_cp_conference') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
  
-
+ 
 -- Create structure
 CREATE TABLE ssd_initial_cp_conference (
     icpc_icpc_id                    NVARCHAR(48) PRIMARY KEY,
@@ -1581,9 +1583,10 @@ CREATE TABLE ssd_initial_cp_conference (
     icpc_icpc_date                  DATETIME,
     icpc_icpc_outcome_cp_flag       NCHAR(1),
     icpc_icpc_outcome_json          NVARCHAR(1000),
-    icpc_icpc_team                  NVARCHAR(100),
-    icpc_icpc_worker_id             NVARCHAR(48)
+    icpc_icpc_team_name             NVARCHAR(100),
+    icpc_icpc_worker_name           NVARCHAR(48)
 );
+ 
  
 -- insert data
 INSERT INTO ssd_initial_cp_conference(
@@ -1598,8 +1601,8 @@ INSERT INTO ssd_initial_cp_conference(
     icpc_icpc_date,
     icpc_icpc_outcome_cp_flag,
     icpc_icpc_outcome_json,
-    icpc_icpc_team,
-    icpc_icpc_worker_id
+    icpc_icpc_team_name,
+    icpc_icpc_worker_name
 )
  
 SELECT
@@ -1607,7 +1610,7 @@ SELECT
     fcpc.FACT_MEETING_ID,
     fcpc.FACT_S47_ID,
     fcpc.DIM_PERSON_ID,
-    fcpc.FACT_CP_PLAN_ID,
+    fcpp.FACT_CP_PLAN_ID,
     fcpc.FACT_REFERRAL_ID,
     fcpc.TRANSFER_IN_FLAG,
     fcpc.DUE_DTTM,
@@ -1625,14 +1628,16 @@ SELECT
             NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "OUTCOME_COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     )                                                               AS icpc_icpc_outcome_json,
-    fcpc.ORGANISED_BY_DEPT_NAME                                     AS icpc_icpc_team,
-    fcpc.ORGANISED_BY_USER_NAME                                     AS icpc_icpc_worker_id
+    fcpc.ORGANISED_BY_DEPT_NAME                                     AS icpc_icpc_team_name,
+    fcpc.ORGANISED_BY_USER_NAME                                     AS icpc_icpc_worker_name
  
  
 FROM
     Child_Social.FACT_CP_CONFERENCE AS fcpc
 JOIN
     Child_Social.FACT_MEETINGS AS fm ON fcpc.FACT_MEETING_ID = fm.FACT_MEETING_ID
+LEFT JOIN
+    Child_Social.FACT_CP_PLAN AS fcpp ON fcpc.FACT_CP_CONFERENCE_ID = fcpp.FACT_INITIAL_CP_CONFERENCE_ID
  
 WHERE
     fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
@@ -2934,8 +2939,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_visits
 Description:
 Author: D2I
-Version: 1.0
-            0.: FK updated to person_id. change from clav.VISIT_DTTM  150224 JH
+Version: 1.0!
+            !0.3: Prep for casenote_id to be removed... not yet actioned RH
+            0.2: FK updated to person_id. change from clav.VISIT_DTTM  150224 JH
             0.1: pers_id and cla_id added JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:
@@ -2979,7 +2985,7 @@ INSERT INTO ssd_cla_visits (
  
 SELECT
     clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
-    cn.FACT_CASENOTE_ID         AS clav_casenote_id,
+    cn.FACT_CASENOTE_ID         AS clav_casenote_id, -- [TESTING] This field no longer required | depreciated for removal
     clav.FACT_CLA_ID            AS clav_cla_id,
     clav.DIM_PERSON_ID          AS clav_person_id,
     cn.EVENT_DTTM               AS clav_cla_visit_date,

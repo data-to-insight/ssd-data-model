@@ -1599,20 +1599,23 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 -- INSERT INTO #SpaceUsedData (TableName, Rows, ReservedSpace, DataSpace, IndexSpace, UnusedSpace)
 -- VALUES ('#ssd_s47_enquiry', @Rows, @ReservedSpace, @DataSpace, @IndexSpace, @UnusedSpace)
 
+
 /*
 =============================================================================
 Object Name: ssd_initial_cp_conference
 Description:
 Author: D2I
 Version: 1.0
+            0.3 Updated source of CP_PLAN_ID 100424 JH
             0.2 Updated the worker fields 020424 JH
             0.1 Re-instated the worker details 010224 JH
-
+ 
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks:
 Dependencies:
 - FACT_CP_CONFERENCE
 - FACT_MEETINGS
+- FACT_CP_PLAN
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -1639,8 +1642,8 @@ CREATE TABLE #ssd_initial_cp_conference (
     icpc_icpc_team_name             NVARCHAR(100),
     icpc_icpc_worker_name           NVARCHAR(48)
 );
-
-
+ 
+ 
 -- insert data
 INSERT INTO #ssd_initial_cp_conference(
     icpc_icpc_id,
@@ -1663,7 +1666,7 @@ SELECT
     fcpc.FACT_MEETING_ID,
     fcpc.FACT_S47_ID,
     fcpc.DIM_PERSON_ID,
-    fcpc.FACT_CP_PLAN_ID,
+    fcpp.FACT_CP_PLAN_ID,
     fcpc.FACT_REFERRAL_ID,
     fcpc.TRANSFER_IN_FLAG,
     fcpc.DUE_DTTM,
@@ -1689,6 +1692,8 @@ FROM
     Child_Social.FACT_CP_CONFERENCE AS fcpc
 JOIN
     Child_Social.FACT_MEETINGS AS fm ON fcpc.FACT_MEETING_ID = fm.FACT_MEETING_ID
+LEFT JOIN
+    Child_Social.FACT_CP_PLAN AS fcpp ON fcpc.FACT_CP_CONFERENCE_ID = fcpp.FACT_INITIAL_CP_CONFERENCE_ID
  
 WHERE
     fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
