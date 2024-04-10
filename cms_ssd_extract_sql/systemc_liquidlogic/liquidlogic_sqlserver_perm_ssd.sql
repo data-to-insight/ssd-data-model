@@ -3862,15 +3862,17 @@ SELECT
     fi.FACT_INVOLVEMENTS_ID                       AS invo_involvements_id,
     fi.DIM_WORKER_ID                              AS invo_professional_id,
     fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
-    (CASE WHEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC IS NOT NULL
-        THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC
-        ELSE (CASE WHEN fi.DIM_DEPARTMENT_NAME IS NOT NULL
-                    THEN fi.DIM_DEPARTMENT_NAME
-                     ELSE (CASE WHEN fi.DIM_GROUP_NAME IS NOT NULL
-                            THEN fi.DIM_GROUP_NAME
-                            ELSE (CASE WHEN (fi.COMMENTS LIKE '%WORKER%' OR fi.COMMENTS LIKE '%ALLOC%')
-                                        THEN fi.COMMENTS ELSE NULL END)
-        END)END)END)                              AS invo_professional_team,
+    -- use first non-NULL value for prof team, in order of depat, grp, or relevant comment
+    COALESCE(
+        fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC,   -- prev/relevant dept name if available
+        fi.DIM_DEPARTMENT_NAME,                   -- otherwise, use existing dept name
+        fi.DIM_GROUP_NAME,                        -- then, use wider grp name if the above are NULL
+
+        CASE -- if still NULL, refer into comments data
+            WHEN fi.COMMENTS LIKE '%WORKER%' OR fi.COMMENTS LIKE '%ALLOC%' -- refer to comments for specific keywords
+            THEN fi.COMMENTS 
+        END -- if fi.COMMENTS is NULL, results in NULL
+    )                                              AS invo_professional_team,
     fi.DIM_PERSON_ID                              AS invo_person_id,
     fi.START_DTTM                                 AS invo_involvement_start_date,
     fi.END_DTTM                                   AS invo_involvement_end_date,
@@ -3878,13 +3880,13 @@ SELECT
     fi.FACT_REFERRAL_ID                           AS invo_referral_id
 FROM
     Child_Social.FACT_INVOLVEMENTS AS fi
- 
 WHERE EXISTS
-    ( -- only need address data for ssd relevant records
+    (
     SELECT 1
     FROM ssd_person p
     WHERE p.pers_person_id = fi.DIM_PERSON_ID
     );
+
 
 
 
