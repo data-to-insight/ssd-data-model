@@ -79,8 +79,8 @@ CREATE TABLE #ssd_person (
     pers_ethnicity          NVARCHAR(38),
     pers_dob                DATETIME,
     pers_common_child_id    NVARCHAR(10),                   -- [TESTING] [Takes NHS Number]
-    -- pers_upn_unknown        NVARCHAR(10),                
-    pers_send               NVARCHAR(1),
+    pers_upn_unknown        NVARCHAR(10),                
+    pers_send_flag          NVARCHAR(1),
     pers_expected_dob       DATETIME,                       -- Date or NULL
     pers_death_date         DATETIME,
     pers_is_mother          NVARCHAR(48),
@@ -96,8 +96,8 @@ INSERT INTO #ssd_person (
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,                               -- [TESTING] [Takes NHS Number]
-    -- pers_upn_unknown,                                -- [TESTING]
-    pers_send,
+    pers_upn_unknown,                                -- [TESTING]
+    pers_send_flag,
     pers_expected_dob,
     pers_death_date,
     pers_is_mother,
@@ -113,7 +113,7 @@ SELECT
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL END,                                  --  or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
-    -- f903.NO_UPN_CODE,                                -- [TESTING] as 903 table refresh only in reporting period
+    'PLACEHOLDER_DATA',                                 -- [TESTING] as f903.NO_UPN_CODE table refresh populated only in reporting period
     p.EHM_SEN_FLAG,
         CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
