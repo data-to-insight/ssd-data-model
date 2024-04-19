@@ -1,18 +1,10 @@
+-- LA specific vars
 USE HDM;
 GO
-
 
 -- Set reporting period in Mths
 DECLARE @AA_ReportingPeriod INT;
 SET @AA_ReportingPeriod = 6; -- Mths
-
-
--- 
--- /**** Obtain extract/csv files ****/
--- Use built in <export as> from console output or
--- bcp "QUERY_HERE" queryout "C:\path\to\myfile.csv" -c -t, -S SERVER_NAME -d DATABASE_NAME -U USERNAME -P PASSWORD
-
-
 
 
 
@@ -21,6 +13,9 @@ SET @AA_ReportingPeriod = 6; -- Mths
 SSD AnnexA Returns Queries || SQL Server
 ****************************************
 */
+
+-- Note: Script is currently set to point to #TMP SSD table names. Remove # prefix as 
+-- required if running from persistant table version. 
 
 
 /* 
@@ -1009,23 +1004,24 @@ select * from #AA_6_children_in_need;
 
 
 
-/* 
+/*
 =============================================================================
 Report Name: Ofsted List 7: Child protection
-Description: 
-            "All those who are the subject of a child protection plan at the 
-            point of inspection. Include those who ceased to be the subject of 
+Description:
+            "All those who are the subject of a child protection plan at the
+            point of inspection. Include those who ceased to be the subject of
             a child protection plan in the six months before the inspection."
-
+ 
 Author: D2I
 Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
-			0.9 PW/Blackpool major edits/reworked PW 030324
-            0.3: Removed old obj/item naming. 
+            0.9 JH excluded temporary OLA plans
+            0.8 PW/Blackpool major edits/reworked PW 030324
+            0.3: Removed old obj/item naming.
 Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
-Remarks: 
-Dependencies: 
+Remarks:
+Dependencies:
 - ssd_person
 - ssd_cp_plans
 - ssd_disability
@@ -1035,242 +1031,242 @@ Dependencies:
 - @AA_ReportingPeriod
 =============================================================================
 */
-
+ 
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#AA_7_child_protection') IS NOT NULL DROP TABLE #AA_7_child_protection;
-
-
+ 
 SELECT
-	d.ChildUniqueID,
-	d.Gender,
-	d.Ethnicity,
-	d.DateOfBirth,
-	d.Age,
-	d.HasDisability,
-	d.ChildProtectionPlanStartDate,
-	d.InitialCategoryOfAbuse,
-	d.LatestCategoryOfAbuse,
-	d.DateOfLastStatutoryVisit,
-	d.ChildSeenAlone,
-	d.DateOfLatestReviewConf,
-	d.ChildProtectionPlanEndDate,
-	d.ProtectionLastSixMonths,
-	d.NumberOfPreviousChildProtectionPlans,
-	d.AllocatedTeam,
-	d.AllocatedWorker
-
+    d.ChildUniqueID,
+    d.Gender,
+    d.Ethnicity,
+    d.DateOfBirth,
+    d.Age,
+    d.HasDisability,
+    d.ChildProtectionPlanStartDate,
+    d.InitialCategoryOfAbuse,
+    d.LatestCategoryOfAbuse,
+    d.DateOfLastStatutoryVisit,
+    d.ChildSeenAlone,
+    d.DateOfLatestReviewConf,
+    d.ChildProtectionPlanEndDate,
+    d.ProtectionLastSixMonths,
+    d.NumberOfPreviousChildProtectionPlans,
+    d.AllocatedTeam,
+    d.AllocatedWorker
+ 
 INTO #AA_7_child_protection
-
+ 
 FROM
 (
-	SELECT
-		/* Common AA fields */
-		p.pers_person_id									AS ChildUniqueID,	/*PW - Field Name changed from p.pers_legacy_id as that doesn't match SSDS Spec*/
-		CASE
-			WHEN p.pers_sex = 'M' THEN 'a) Male'
-			WHEN p.pers_sex = 'F' THEN 'b) Female'
-			WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-			WHEN p.pers_sex = 'I' THEN 'd) Neither'
-		END													AS Gender,
-		CASE
-			WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-			WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-			WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-			WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-			WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-			WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-			WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-			WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-			WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-			WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-			WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-			WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-			WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-			WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-			WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-			WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-			WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-			WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-			WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-			WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-			ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
-		END													AS Ethnicity,
-		FORMAT(p.pers_dob, 'dd/MM/yyyy')					AS DateOfBirth,
-
-		DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
-				CASE 
-					WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
-					THEN 1
-					ELSE 0
-				END											AS Age,
-
-		/* List additional AA fields */
-		CASE
-			WHEN d.disa_person_id is not null THEN 'a) Yes'
-			ELSE 'b) No'
-		END													AS HasDisability,
-    
-		/* Returns fields */    
-		FORMAT(cp.cppl_cp_plan_start_date, 'dd/MM/yyyy')	AS ChildProtectionPlanStartDate,
-		CASE
-			WHEN cp.cppl_cp_plan_initial_category in ('NEG','Neglect') THEN 'a) Neglect'
-			WHEN cp.cppl_cp_plan_initial_category in ('PHY','Physical abuse') THEN 'b) Physical abuse'
-			WHEN cp.cppl_cp_plan_initial_category in ('SAB','Sexual abuse') THEN 'c) Sexual abuse'
-			WHEN cp.cppl_cp_plan_initial_category in ('EMO','Emotional abuse') THEN 'd) Emotional abuse'
-			WHEN cp.cppl_cp_plan_initial_category in ('MUL','Multiple/not recommended') THEN 'e) Multiple/not recommended'
-		END													AS InitialCategoryOfAbuse,
-		CASE
-			WHEN cp.cppl_cp_plan_latest_category in ('NEG','Neglect') THEN 'a) Neglect'
-			WHEN cp.cppl_cp_plan_latest_category in ('PHY','Physical abuse') THEN 'b) Physical abuse'
-			WHEN cp.cppl_cp_plan_latest_category in ('SAB','Sexual abuse') THEN 'c) Sexual abuse'
-			WHEN cp.cppl_cp_plan_latest_category in ('EMO','Emotional abuse') THEN 'd) Emotional abuse'
-			WHEN cp.cppl_cp_plan_latest_category in ('MUL','Multiple/not recommended') THEN 'e) Multiple/not recommended'
-		END													AS LatestCategoryOfAbuse,
-		FORMAT(vis.VisitDate, 'dd/MM/yyyy')					AS DateOfLastStatutoryVisit,
-		CASE
-			WHEN vis.VisitDate IS NULL then NULL
-			WHEN vis.ChildSeenAlone in ('Yes','Y') THEN 'a) Yes'
-			WHEN vis.ChildSeenAlone in ('No','N') THEN 'b) No'
-			ELSE 'c) Unknown'
-		END													AS ChildSeenAlone,
-		FORMAT(rev.ReviewDate, 'dd/MM/yyyy')				AS DateOfLatestReviewConf,
-		FORMAT(cp.cppl_cp_plan_end_date, 'dd/MM/yyyy')		AS ChildProtectionPlanEndDate,
-		CASE
-			WHEN pr.lega_person_id is not null THEN 'a) Yes'
-			ELSE 'b) No'
-		END													AS ProtectionLastSixMonths,
-		aggcpp.CountPrevCPPlans								AS NumberOfPreviousChildProtectionPlans,
-		inv.Team											AS AllocatedTeam,
-		inv.WorkerName										AS AllocatedWorker,
-		DENSE_RANK() OVER(PARTITION BY p.pers_person_id ORDER BY cp.cppl_cp_plan_start_date DESC, COALESCE(cp.cppl_cp_plan_end_date,'99991231') DESC) Rnk
-
-		
-	FROM 
-		#ssd_cp_plans cp
-
-	INNER JOIN
-		#ssd_person p ON cp.cppl_person_id = p.pers_person_id	
-
-	LEFT JOIN 
-		(
-			SELECT DISTINCT
-				dis.disa_person_id 
-			FROM
-				#ssd_disability dis
-			WHERE
-				COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
-		) AS d ON p.pers_person_id = d.disa_person_id
-
-	-- get latest visit and whether child was seen alone
-	LEFT JOIN
-		(
-			SELECT
-				cp.cppl_person_id PersonID,
-				cp.cppl_cp_plan_id CPRegID,
-				vis.cppv_cp_visit_date VisitDate,
-				vis.cppv_cp_visit_seen_alone ChildSeenAlone,
-				DENSE_RANK() OVER(PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id ORDER BY vis.cppv_cp_visit_date DESC, vis.cppv_cp_visit_seen_alone DESC, vis.cppv_cp_visit_id) Rnk
-			FROM
-				#ssd_cp_plans cp
-			INNER JOIN
-				#ssd_cp_visits vis ON cp.cppl_person_id = vis.PersonID
-				AND cp.cppl_cp_plan_id = vis.cppv_cp_plan_id
-				AND vis.cppv_cp_visit_date between cp.cppl_cp_plan_start_date and COALESCE(cp.cppl_cp_plan_end_date, GETDATE())
-			WHERE
-				COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-		) AS vis on cp.cppl_person_id = vis.PersonID
-			AND cp.cppl_cp_plan_id = vis.CPRegID
-			AND vis.Rnk = 1
-
-	-- get latest review
-	LEFT JOIN
-		(
-			SELECT
-				cp.cppl_person_id PersonID,
-				cp.cppl_cp_plan_id CPRegID,
-				MAX(rev.cppr_cp_review_date) ReviewDate
-			FROM
-				#ssd_cp_plans cp
-			INNER JOIN
-				#ssd_cp_reviews rev ON cp.cppl_person_id = rev.PersonID
-				AND cp.cppl_cp_plan_id = rev.cppr_cp_plan_id
-				AND rev.cppr_cp_review_date between cp.cppl_cp_plan_start_date and COALESCE(cp.cppl_cp_plan_end_date, GETDATE())
-			WHERE
-				COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-			GROUP BY
-				cp.cppl_person_id,
-				cp.cppl_cp_plan_id
-		) AS rev on cp.cppl_person_id = rev.PersonID
-			AND cp.cppl_cp_plan_id = rev.CPRegID
-
-	-- get whether child subject to Emergency Protection Order or Protected Under Police Powers in Last Six Months
-	LEFT JOIN
-		(
-			SELECT DISTINCT
-				ls.lega_person_id
-			FROM
-				#ssd_legal_status ls
-			WHERE
-				ls.lega_legal_status in ('L1','L2')
-				AND COALESCE(ls.lega_legal_status_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-		) AS pr ON p.pers_person_id = pr.lega_person_id
-
-	-- get number of previous CP Plans.  NOTE - because this uses #ssd_cp_plans, only has details of CP Plans open in the last 6 years
-	LEFT JOIN 
-		(
-			SELECT
-			-- Plans a child was previously subject to
-				cp.cppl_person_id,
-				cp.cppl_cp_plan_id,
-				COUNT(cp2.cppl_cp_plan_id) as CountPrevCPPlans
-			FROM
-				#ssd_cp_plans cp
-			LEFT JOIN
-				#ssd_cp_plans cp2 ON cp.cppl_person_id = cp2.cppl_person_id
-				AND cp2.cppl_cp_plan_start_date < cp.cppl_cp_plan_start_date
-			WHERE
-				COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-			GROUP BY
-				cp.cppl_person_id,
-				cp.cppl_cp_plan_id
-		) AS aggcpp ON cp.cppl_person_id = aggcpp.cppl_person_id
-			AND cp.cppl_cp_plan_id = aggcpp.cppl_cp_plan_id
-
-	-- get latest allocatd Team and Worker
-	LEFT JOIN
-		(
-			SELECT
-				cp.cppl_person_id PersonID,
-				cp.cppl_cp_plan_id CPRegID,
-				inv.invo_professional_team Team,
-				pro.prof_professional_name WorkerName,
-				DENSE_RANK() OVER(PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id 
-									ORDER BY COALESCE(inv.invo_involvement_end_date,'99991231') DESC, inv.invo_involvement_start_date DESC, inv.invo_involvements_id DESC) Rnk
-			FROM
-				#ssd_cp_plans cp
-			INNER JOIN
-				#ssd_cin_episodes cine ON cp.cppl_person_id = cine.cine_person_id
-				AND cp.cppl_referral_id = cine.cine_referral_id
-			INNER JOIN
-				#ssd_involvements inv ON cine.cine_person_id = inv.PersonID
-				AND inv.invo_involvement_start_date <= COALESCE(cine.cine_close_date,'99991231')
-				AND COALESCE(inv.invo_involvement_end_date,'99991231') > cine.cine_referral_date
-			INNER JOIN
-				#ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
-			WHERE
-				COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-		) AS inv on cp.cppl_person_id = inv.PersonID
-			AND cp.cppl_cp_plan_id = inv.CPRegID
-			AND inv.Rnk = 1
-
-	WHERE
-		-- CP Plans open in last 6 months (includes those starting more that 6 months ago that were open in last 6 months)
-		COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())	
+    SELECT
+        /* Common AA fields */
+		p.pers_person_id											AS ChildUniqueID,	/*PW - Field Name changed from p.pers_legacy_id as that doesn't match SSDS Spec*/
+        CASE
+            WHEN p.pers_sex = 'M' THEN 'a) Male'
+            WHEN p.pers_sex = 'F' THEN 'b) Female'
+            WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+            WHEN p.pers_sex = 'I' THEN 'd) Neither'
+        END                                                 AS Gender,
+        CASE
+            WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
+            WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
+            WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
+            WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
+            WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
+            WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
+            WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
+            WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
+            WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
+            WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
+            WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
+            WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
+            WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
+            WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
+            WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
+            WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
+            WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
+            WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
+            WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
+            WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
+            ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+        END                                                 AS Ethnicity,
+        FORMAT(p.pers_dob, 'dd/MM/yyyy')                    AS DateOfBirth,
+ 
+        DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
+                CASE
+                    WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
+                    THEN 1
+                    ELSE 0
+                END                                         AS Age,
+ 
+        /* List additional AA fields */
+        CASE
+            WHEN d.disa_person_id is not null THEN 'a) Yes'
+            ELSE 'b) No'
+        END                                                 AS HasDisability,
+   
+        /* Returns fields */    
+        FORMAT(cp.cppl_cp_plan_start_date, 'dd/MM/yyyy')    AS ChildProtectionPlanStartDate,
+        CASE
+            WHEN cp.cppl_cp_plan_initial_category in ('NEG','Neglect') THEN 'a) Neglect'
+            WHEN cp.cppl_cp_plan_initial_category in ('PHY','Physical abuse') THEN 'b) Physical abuse'
+            WHEN cp.cppl_cp_plan_initial_category in ('SAB','Sexual abuse') THEN 'c) Sexual abuse'
+            WHEN cp.cppl_cp_plan_initial_category in ('EMO','Emotional abuse') THEN 'd) Emotional abuse'
+            WHEN cp.cppl_cp_plan_initial_category in ('MUL','Multiple/not recommended') THEN 'e) Multiple/not recommended'
+        END                                                 AS InitialCategoryOfAbuse,
+        CASE
+            WHEN cp.cppl_cp_plan_latest_category in ('NEG','Neglect') THEN 'a) Neglect'
+            WHEN cp.cppl_cp_plan_latest_category in ('PHY','Physical abuse') THEN 'b) Physical abuse'
+            WHEN cp.cppl_cp_plan_latest_category in ('SAB','Sexual abuse') THEN 'c) Sexual abuse'
+            WHEN cp.cppl_cp_plan_latest_category in ('EMO','Emotional abuse') THEN 'd) Emotional abuse'
+            WHEN cp.cppl_cp_plan_latest_category in ('MUL','Multiple/not recommended') THEN 'e) Multiple/not recommended'
+        END                                                 AS LatestCategoryOfAbuse,
+        FORMAT(vis.VisitDate, 'dd/MM/yyyy')                 AS DateOfLastStatutoryVisit,
+        CASE
+            WHEN vis.VisitDate IS NULL then NULL
+            WHEN vis.ChildSeenAlone in ('Yes','Y') THEN 'a) Yes'
+            WHEN vis.ChildSeenAlone in ('No','N') THEN 'b) No'
+            ELSE 'c) Unknown'
+        END                                                 AS ChildSeenAlone,
+        FORMAT(rev.ReviewDate, 'dd/MM/yyyy')                AS DateOfLatestReviewConf,
+        FORMAT(cp.cppl_cp_plan_end_date, 'dd/MM/yyyy')      AS ChildProtectionPlanEndDate,
+        CASE
+            WHEN pr.lega_person_id is not null THEN 'a) Yes'
+            ELSE 'b) No'
+        END                                                 AS ProtectionLastSixMonths,
+        aggcpp.CountPrevCPPlans                             AS NumberOfPreviousChildProtectionPlans,
+        inv.Team                                            AS AllocatedTeam,
+        inv.WorkerName                                      AS AllocatedWorker,
+        DENSE_RANK() OVER(PARTITION BY p.pers_person_id ORDER BY cp.cppl_cp_plan_start_date DESC, COALESCE(cp.cppl_cp_plan_end_date,'99991231') DESC) Rnk
+ 
+       
+    FROM
+        #ssd_cp_plans cp
+ 
+    INNER JOIN
+        #ssd_person p ON cp.cppl_person_id = p.pers_person_id  
+ 
+    LEFT JOIN
+        (
+            SELECT DISTINCT
+                dis.disa_person_id
+            FROM
+                #ssd_disability dis
+            WHERE
+                COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
+        ) AS d ON p.pers_person_id = d.disa_person_id
+ 
+    -- get latest visit and whether child was seen alone
+    LEFT JOIN
+        (
+            SELECT
+                cp.cppl_person_id PersonID,
+                cp.cppl_cp_plan_id CPRegID,
+                vis.cppv_cp_visit_date VisitDate,
+                vis.cppv_cp_visit_seen_alone ChildSeenAlone,
+                DENSE_RANK() OVER(PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id ORDER BY vis.cppv_cp_visit_date DESC, vis.cppv_cp_visit_seen_alone DESC, vis.cppv_cp_visit_id) Rnk
+            FROM
+                #ssd_cp_plans cp
+            INNER JOIN
+                #ssd_cp_visits vis ON cp.cppl_person_id = vis.cppv_person_id
+                AND cp.cppl_cp_plan_id = vis.cppv_cp_plan_id
+                AND vis.cppv_cp_visit_date between cp.cppl_cp_plan_start_date and COALESCE(cp.cppl_cp_plan_end_date, GETDATE())
+            WHERE
+                COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
+        ) AS vis on cp.cppl_person_id = vis.PersonID
+            AND cp.cppl_cp_plan_id = vis.CPRegID
+            AND vis.Rnk = 1
+ 
+    -- get latest review
+    LEFT JOIN
+        (
+            SELECT
+                cp.cppl_person_id PersonID,
+                cp.cppl_cp_plan_id CPRegID,
+                MAX(rev.cppr_cp_review_date) ReviewDate
+            FROM
+                #ssd_cp_plans cp
+            INNER JOIN
+                #ssd_cp_reviews rev ON cp.cppl_person_id = rev.cppr_person_id
+                AND cp.cppl_cp_plan_id = rev.cppr_cp_plan_id
+                AND rev.cppr_cp_review_date between cp.cppl_cp_plan_start_date and COALESCE(cp.cppl_cp_plan_end_date, GETDATE())
+            WHERE
+                COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
+            GROUP BY
+                cp.cppl_person_id,
+                cp.cppl_cp_plan_id
+        ) AS rev on cp.cppl_person_id = rev.PersonID
+            AND cp.cppl_cp_plan_id = rev.CPRegID
+ 
+    -- get whether child subject to Emergency Protection Order or Protected Under Police Powers in Last Six Months
+    LEFT JOIN
+        (
+            SELECT DISTINCT
+                ls.lega_person_id
+            FROM
+                #ssd_legal_status ls
+            WHERE
+                ls.lega_legal_status in ('L1','L2')
+                AND COALESCE(ls.lega_legal_status_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
+        ) AS pr ON p.pers_person_id = pr.lega_person_id
+ 
+    -- get number of previous CP Plans.  NOTE - because this uses #ssd_cp_plans, only has details of CP Plans open in the last 6 years
+    LEFT JOIN
+        (
+            SELECT
+            -- Plans a child was previously subject to
+                cp.cppl_person_id,
+                cp.cppl_cp_plan_id,
+                COUNT(cp2.cppl_cp_plan_id) as CountPrevCPPlans
+            FROM
+                #ssd_cp_plans cp
+            LEFT JOIN
+                #ssd_cp_plans cp2 ON cp.cppl_person_id = cp2.cppl_person_id
+                AND cp2.cppl_cp_plan_start_date < cp.cppl_cp_plan_start_date
+            WHERE
+                COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
+            GROUP BY
+                cp.cppl_person_id,
+                cp.cppl_cp_plan_id
+        ) AS aggcpp ON cp.cppl_person_id = aggcpp.cppl_person_id
+            AND cp.cppl_cp_plan_id = aggcpp.cppl_cp_plan_id
+ 
+    -- get latest allocatd Team and Worker
+    LEFT JOIN
+        (
+            SELECT
+                cp.cppl_person_id PersonID,
+                cp.cppl_cp_plan_id CPRegID,
+                inv.invo_professional_team Team,
+                pro.prof_professional_name WorkerName,
+                DENSE_RANK() OVER(PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id
+                                    ORDER BY COALESCE(inv.invo_involvement_end_date,'99991231') DESC, inv.invo_involvement_start_date DESC, inv.invo_involvements_id DESC) Rnk
+            FROM
+                #ssd_cp_plans cp
+            INNER JOIN
+                #ssd_cin_episodes cine ON cp.cppl_person_id = cine.cine_person_id
+                AND cp.cppl_referral_id = cine.cine_referral_id
+            INNER JOIN
+                #ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
+                AND inv.invo_involvement_start_date <= COALESCE(cine.cine_close_date,'99991231')
+                AND COALESCE(inv.invo_involvement_end_date,'99991231') > cine.cine_referral_date
+            INNER JOIN
+                #ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
+            WHERE
+                COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
+        ) AS inv on cp.cppl_person_id = inv.PersonID
+            AND cp.cppl_cp_plan_id = inv.CPRegID
+            AND inv.Rnk = 1
+ 
+    WHERE
+        -- CP Plans open in last 6 months (includes those starting more that 6 months ago that were open in last 6 months)
+        COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
+        AND cp.cppl_cp_plan_ola <> 'Y'
 )
 d
 where d.rnk = 1;
-
-
+ 
+ 
 -- [TESTING]
 select * from #AA_7_child_protection;
 
@@ -1771,7 +1767,6 @@ Dependencies:
 -- Check if exists & drop
 IF OBJECT_ID('tempdb..#AA_9_care_leavers') IS NOT NULL DROP TABLE #AA_9_care_leavers;
 
-
 SELECT
 	/* Common AA fields */
 	p.pers_person_id											AS ChildUniqueID,	/*PW - Field Name changed from p.pers_legacy_id as that doesn't match SSDS Spec*/
@@ -2083,7 +2078,7 @@ IF OBJECT_ID('tempdb..#AA_11_adopters') IS NOT NULL DROP TABLE #AA_11_adopters;
 
 SELECT
     /* Common AA fields */
-    p.pers_legacy_id                            AS AdopterID,      -- Individual adopter identifier
+    p.pers_person_id                            AS AdopterID,      -- Individual adopter identifier  Field Name changed from p.pers_legacy_id
     --  fam.fami_person_id            -- IS this coming from fc.DIM_PERSON_ID AS fami_person_id, as doesnt seem valid context
     p.pers_sex                                  AS Gender,
     p.pers_ethnicity                            AS Ethnicity,
