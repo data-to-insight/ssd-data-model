@@ -70,8 +70,8 @@ CREATE TABLE ssd_person (
     pers_gender             NVARCHAR(48),                  
     pers_ethnicity          NVARCHAR(38),
     pers_dob                DATETIME,
-    pers_common_child_id    NVARCHAR(10),                   -- [TESTING] [Takes NHS Number]
-    pers_upn_unknown        NVARCHAR(10),                
+    pers_common_child_id    NVARCHAR(10),                   -- [PLACEHOLDER]  [Takes NHS Number]
+    pers_upn_unknown        NVARCHAR(10),                   -- [PLACEHOLDER]               
     pers_send_flag          NVARCHAR(1),
     pers_expected_dob       DATETIME,                       -- Date or NULL
     pers_death_date         DATETIME,
@@ -87,8 +87,8 @@ INSERT INTO ssd_person (
     pers_gender,
     pers_ethnicity,
     pers_dob,
-    pers_common_child_id,                               -- [TESTING] [Takes NHS Number]
-    pers_upn_unknown,                                   -- [TESTING]
+    pers_common_child_id,                               -- [PLACEHOLDER] [Takes NHS Number]
+    pers_upn_unknown,                                   -- [PLACEHOLDER] 
     pers_send_flag,
     pers_expected_dob,
     pers_death_date,
@@ -99,13 +99,13 @@ SELECT
     p.LEGACY_ID,
     p.DIM_PERSON_ID,
     p.GENDER_MAIN_CODE,
-    p.NHS_NUMBER,                                       -- [TESTING]
+    p.NHS_NUMBER,                                       -- [PLACEHOLDER] 
     p.ETHNICITY_MAIN_CODE,
         CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL END,                                  --  or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
-    'PLACEHOLDER_DATA',                                 -- [TESTING] as f903.NO_UPN_CODE table refresh populated only in reporting period
+    'PLACEHOLDER_DATA',                                 -- [PLACEHOLDER] as f903.NO_UPN_CODE table refresh populated only in reporting period
     p.EHM_SEN_FLAG,
         CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
@@ -124,7 +124,7 @@ SELECT
 FROM
     Child_Social.DIM_PERSON AS p
  
--- Removed only to allow [TESTING] as 903 table refresh only in reporting period
+-- Removed only to allow [TESTING][PLACEHOLDER]  as 903 table refresh only in reporting period
 -- LEFT JOIN
 --     Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
  
@@ -297,8 +297,8 @@ CREATE TABLE ssd_address (
     addr_table_id           NVARCHAR(48) PRIMARY KEY,
     addr_person_id          NVARCHAR(48), 
     addr_address_type       NVARCHAR(48),
-    addr_address_start      DATETIME,
-    addr_address_end        DATETIME,
+    addr_address_start_date DATETIME,
+    addr_address_end_date   DATETIME,
     addr_address_postcode   NVARCHAR(15),
     addr_address_json       NVARCHAR(1000)
 );
@@ -309,8 +309,8 @@ INSERT INTO ssd_address (
     addr_table_id, 
     addr_person_id, 
     addr_address_type, 
-    addr_address_start, 
-    addr_address_end, 
+    addr_address_start_date, 
+    addr_address_end_date, 
     addr_address_postcode, 
     addr_address_json
 )
@@ -358,8 +358,8 @@ FOREIGN KEY (addr_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_address_person ON ssd_address(addr_person_id);
-CREATE NONCLUSTERED INDEX idx_address_start ON ssd_address(addr_address_start);
-CREATE NONCLUSTERED INDEX idx_address_end ON ssd_address(addr_address_end);
+CREATE NONCLUSTERED INDEX idx_address_start ON ssd_address(addr_address_start_date);
+CREATE NONCLUSTERED INDEX idx_address_end ON ssd_address(addr_address_end_date);
 CREATE NONCLUSTERED INDEX idx_ssd_address_postcode ON ssd_address(addr_address_postcode);
 
 
@@ -3713,7 +3713,7 @@ Object Name: ssd_professionals
 Description: 
 Author: D2I
 Version: 1.0
-            0.9: prof_professional_id becomes  090424 JH
+            0.9: prof_professional_id becomes staff_id 090424 JH
             0.8: prof_table_id becomes prof_professional_id 090424 JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
 Remarks: prof_system_id
@@ -3744,7 +3744,7 @@ SET @LastSept30th = CASE
 -- Create structure
 CREATE TABLE ssd_professionals (
     prof_professional_id                  NVARCHAR(48) PRIMARY KEY,
-    prof_system_id                        NVARCHAR(48),
+    prof_staff_id                         NVARCHAR(48),
     prof_professional_name                NVARCHAR(300),
     prof_social_worker_registration_no    NVARCHAR(48),
     prof_agency_worker_flag               NCHAR(1),
@@ -3759,7 +3759,7 @@ CREATE TABLE ssd_professionals (
 -- Insert data
 INSERT INTO ssd_professionals (
     prof_professional_id, 
-    prof_system_id, 
+    prof_staff_id, 
     prof_professional_name,
     prof_social_worker_registration_no,
     prof_agency_worker_flag,
@@ -3771,7 +3771,7 @@ INSERT INTO ssd_professionals (
 
 SELECT 
     dw.DIM_WORKER_ID                        AS prof_professional_id,
-    dw.STAFF_ID                             AS prof_system_id,
+    dw.STAFF_ID                             AS prof_staff_id,
     CONCAT(dw.SURNAME, ' ', dw.FORENAME)    AS prof_professional_name,              -- used also as Allocated Worker|Assigned Worker
     dw.WORKER_ID_CODE                       AS prof_social_worker_registration_no,
     ''                                      AS prof_agency_worker_flag,             -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
@@ -3798,7 +3798,7 @@ LEFT JOIN (
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_prof_system_id ON ssd_professionals (prof_system_id);
+CREATE NONCLUSTERED INDEX idx_prof_staff_id ON ssd_professionals (prof_staff_id);
 CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON ssd_professionals(prof_social_worker_registration_no);
 
 
@@ -4034,7 +4034,7 @@ IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_
 
 -- Create structure
 CREATE TABLE ssd_s251_finance (
-    s251_id                 NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
+    s251_table_id           NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
     s251_cla_placement_id   NVARCHAR(48), 
     s251_placeholder_1      NVARCHAR(48),
     s251_placeholder_2      NVARCHAR(48),
@@ -4044,7 +4044,7 @@ CREATE TABLE ssd_s251_finance (
 
 -- -- Insert placeholder data [TESTING]
 -- INSERT INTO ssd_s251_finance (
---     -- row id ommitted as ID generated (s251_id,)
+--     -- row id ommitted as ID generated (s251_table_id,)
 --     s251_cla_placement_id,
 --     s251_placeholder_1,
 --     s251_placeholder_2,
