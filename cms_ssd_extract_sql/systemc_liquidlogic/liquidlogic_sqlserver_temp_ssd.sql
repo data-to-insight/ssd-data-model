@@ -1287,8 +1287,8 @@ CREATE TABLE #ssd_cin_plans (
     cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,
     cinp_referral_id            NVARCHAR(48),
     cinp_person_id              NVARCHAR(48),
-    cinp_cin_plan_start         DATETIME,
-    cinp_cin_plan_end           DATETIME,
+    cinp_cin_plan_start_date    DATETIME,
+    cinp_cin_plan_end_date      DATETIME,
     cinp_cin_plan_team_name     NVARCHAR(255),
     cinp_cin_plan_worker_name   NVARCHAR(48)
 );
@@ -1298,8 +1298,8 @@ INSERT INTO #ssd_cin_plans (
     cinp_cin_plan_id,
     cinp_referral_id,
     cinp_person_id,
-    cinp_cin_plan_start,
-    cinp_cin_plan_end,
+    cinp_cin_plan_start_date,
+    cinp_cin_plan_end_date,
     cinp_cin_plan_team_name,
     cinp_cin_plan_worker_name
 )
@@ -1307,8 +1307,8 @@ SELECT
     cps.FACT_CARE_PLAN_SUMMARY_ID      AS cinp_cin_plan_id,
     cps.FACT_REFERRAL_ID               AS cinp_referral_id,
     cps.DIM_PERSON_ID                  AS cinp_person_id,
-    cps.START_DTTM                     AS cinp_cin_plan_start,
-    cps.END_DTTM                       AS cinp_cin_plan_end,
+    cps.START_DTTM                     AS cinp_cin_plan_start_date,
+    cps.END_DTTM                       AS cinp_cin_plan_end_date,
  
     (SELECT
         MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
@@ -1345,12 +1345,14 @@ GROUP BY
     ;
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX IDX_ssd_cin_plans_person_id ON #ssd_cin_plans(cinp_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cin_plans_person_id ON ssd_cin_plans(cinp_person_id);
+CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_start_date ON ssd_cin_plans(cinp_cin_plan_start_date);
+CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_end_date ON ssd_cin_plans(cinp_cin_plan_end_date);
+CREATE NONCLUSTERED INDEX idx_cinp_referral_id ON ssd_cin_plans(cinp_referral_id);
 
 -- -- Create constraint(s)
--- ALTER TABLE #ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
--- FOREIGN KEY (cinp_person_id) REFERENCES #ssd_person(pers_person_id);
-
+-- ALTER TABLE ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
+-- FOREIGN KEY (cinp_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
@@ -1690,7 +1692,7 @@ IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
 CREATE TABLE #ssd_cp_plans (
     cppl_cp_plan_id                   NVARCHAR(48) PRIMARY KEY,
     cppl_referral_id                  NVARCHAR(48),
-    cppl_initial_cp_conference_id     NVARCHAR(48),
+    cppl_icpc_id    NVARCHAR(48),
     cppl_person_id                    NVARCHAR(48),
     cppl_cp_plan_start_date           DATETIME,
     cppl_cp_plan_end_date             DATETIME,
@@ -1704,7 +1706,7 @@ CREATE TABLE #ssd_cp_plans (
 INSERT INTO #ssd_cp_plans (
     cppl_cp_plan_id,
     cppl_referral_id,
-    cppl_initial_cp_conference_id,
+    cppl_icpc_id,
     cppl_person_id,
     cppl_cp_plan_start_date,
     cppl_cp_plan_end_date,
@@ -1715,7 +1717,7 @@ INSERT INTO #ssd_cp_plans (
 SELECT
     cpp.FACT_CP_PLAN_ID                 AS cppl_cp_plan_id,
     cpp.FACT_REFERRAL_ID                AS cppl_referral_id,
-    cpp.FACT_INITIAL_CP_CONFERENCE_ID   AS cppl_initial_cp_conference_id,
+    cpp.FACT_INITIAL_CP_CONFERENCE_ID   AS cppl_icpc_id,
     cpp.DIM_PERSON_ID                   AS cppl_person_id,
     cpp.START_DTTM                      AS cppl_cp_plan_start_date,
     cpp.END_DTTM                        AS cppl_cp_plan_end_date,
@@ -1736,16 +1738,20 @@ WHERE EXISTS ( -- only ssd relevant records
 
 
 -- Create index(es)
-CREATE INDEX IDX_ssd_cp_plans_ ON #ssd_cp_plans(cppl_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_person_id ON ssd_cp_plans(cppl_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_icpc_id ON ssd_cp_plans(cppl_icpc_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_referral_id ON ssd_cp_plans(cppl_referral_id);
+
+CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_start_date ON ssd_cp_plans(cppl_cp_plan_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_end_date ON ssd_cp_plans(cppl_cp_plan_end_date);
 
 
 -- -- Create constraint(s)
--- ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_person_id
--- FOREIGN KEY (cppl_person_id) REFERENCES #ssd_person(pers_person_id);
+-- ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_cppl_person_id
+-- FOREIGN KEY (cppl_person_id) REFERENCES ssd_person(pers_person_id);
 
--- ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_initial_cp_conference_id
--- FOREIGN KEY (cppl_initial_cp_conference_id) REFERENCES #ssd_initial_cp_conference(icpc_icpc_id);
-
+-- ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_cppl_icpc_id
+-- FOREIGN KEY (cppl_icpc_id) REFERENCES ssd_initial_cp_conference(icpc_icpc_id);
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
@@ -2006,45 +2012,50 @@ IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episod
 CREATE TABLE #ssd_cla_episodes (
     clae_cla_episode_id                 NVARCHAR(48) PRIMARY KEY,
     clae_person_id                      NVARCHAR(48),
-    clae_cla_episode_start              DATETIME,
+    clae_cla_placement_id               NVARCHAR(48), 
+    clae_cla_episode_start_date         DATETIME,
     clae_cla_episode_start_reason       NVARCHAR(100),
     clae_cla_primary_need               NVARCHAR(100),
     clae_cla_episode_ceased             DATETIME,
-    clae_cla_episode_cease_reason       NVARCHAR(255),
+    clae_cla_episode_ceased_reason       NVARCHAR(255),
     clae_cla_id                         NVARCHAR(48),
     clae_referral_id                    NVARCHAR(48),
-    clae_cla_review_last_iro_contact_date DATETIME
+    clae_cla_review_last_iro_contact_date DATETIME,
+    clae_entered_care_date              DATETIME      
 );
  
 -- Insert data
 INSERT INTO #ssd_cla_episodes (
     clae_cla_episode_id,
     clae_person_id,
-    clae_cla_episode_start,
+    clae_cla_placement_id,
+    clae_cla_episode_start_date,
     clae_cla_episode_start_reason,
     clae_cla_primary_need,
     clae_cla_episode_ceased,
-    clae_cla_episode_cease_reason,
+    clae_cla_episode_ceased_reason,
     clae_cla_id,
     clae_referral_id,
-    clae_cla_review_last_iro_contact_date
+    clae_cla_review_last_iro_contact_date,
+    clae_entered_care_date 
 )
 SELECT
     fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
+    fce.FACT_CLA_PLACEMENT_ID               AS clae_cla_placement_id,
     fce.DIM_PERSON_ID                       AS clae_person_id,
-    fce.CARE_START_DATE                     AS clae_cla_episode_start,
+    fce.CARE_START_DATE                     AS clae_cla_episode_start_date,
     fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
     fce.CIN_903_CODE                        AS clae_cla_primary_need,
     fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
-    fce.CARE_REASON_END_DESC                AS clae_cla_episode_cease_reason,
+    fce.CARE_REASON_END_DESC                AS clae_cla_episode_ceased_reason,
     fc.FACT_CLA_ID                          AS clae_cla_id,                    
     fc.FACT_REFERRAL_ID                     AS clae_referral_id,
         (SELECT MAX(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
         --AND cn.DIM_CREATED_BY_DEPT_ID IN (5956,727)
         AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
         THEN cn.EVENT_DTTM END))                                                        
-                                            AS clae_cla_review_last_iro_contact_date
- 
+                                            AS clae_cla_review_last_iro_contact_date,
+    fc.START_DTTM                           AS clae_entered_care_date -- [TESTING] Added RH 060324
  
 FROM
     Child_Social.FACT_CARE_EPISODES AS fce
@@ -2053,7 +2064,10 @@ JOIN
  
 LEFT JOIN
     Child_Social.FACT_CASENOTES cn               ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
- 
+
+LEFT JOIN -- [TESTING] Added RH 060324
+    Child_Social.FACT_CLA AS fc ON fc.FACT_CLA_ID = fce.FACT_CLA_ID
+
 WHERE EXISTS ( -- only ssd relevant records
     SELECT 1
     FROM #ssd_person p
@@ -2063,6 +2077,7 @@ WHERE EXISTS ( -- only ssd relevant records
 GROUP BY
     fce.FACT_CARE_EPISODES_ID,
     fce.DIM_PERSON_ID,
+    fce.FACT_CLA_PLACEMENT_ID,
     fce.CARE_START_DATE,
     fce.CARE_REASON_DESC,
     fce.CIN_903_CODE,
@@ -2073,13 +2088,21 @@ GROUP BY
     cn.DIM_PERSON_ID;
 
 
--- -- Create index(es)
--- CREATE NONCLUSTERED INDEX idx_clae_cla_worker_id ON #ssd_cla_episodes (clae_cla_worker_id);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_ssd_clae_person_id ON ssd_cla_episodes(clae_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_start_date ON ssd_cla_episodes(clae_cla_episode_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_ceased ON ssd_cla_episodes(clae_cla_episode_ceased);
+CREATE NONCLUSTERED INDEX idx_ssd_clae_referral_id ON ssd_cla_episodes(clae_referral_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clae_review_last_iro_contact ON ssd_cla_episodes(clae_cla_review_last_iro_contact_date);
+CREATE NONCLUSTERED INDEX idx_clae_cla_placement_id ON ssd_cla_episodes(clae_cla_placement_id);
+
 
 -- -- Add constraint(s)
--- ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_to_professional 
--- FOREIGN KEY (clae_cla_worker_id) REFERENCES #ssd_involvements (invo_professional_id);
+-- ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_person 
+-- FOREIGN KEY (clae_person_id) REFERENCES ssd_person (pers_person_id);
 
+-- ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_cla_placement_id
+-- FOREIGN KEY (clae_cla_placement_id) REFERENCES ssd_cla_placements (clap_cla_placement_id);
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
