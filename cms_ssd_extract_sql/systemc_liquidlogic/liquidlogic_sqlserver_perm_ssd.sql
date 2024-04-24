@@ -3217,9 +3217,9 @@ IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL DROP TABLE #ssd_missing;
 CREATE TABLE ssd_missing (
     miss_table_id               NVARCHAR(48) PRIMARY KEY,
     miss_person_id              NVARCHAR(48),
-    miss_missing_episode_start  DATETIME,
+    miss_missing_episode_start_date  DATETIME,
     miss_missing_episode_type   NVARCHAR(100),
-    miss_missing_episode_end    DATETIME,
+    miss_missing_episode_end_date    DATETIME,
     miss_missing_rhi_offered    NVARCHAR(10),                   -- [TESTING] Confirm source data/why >7 required
     miss_missing_rhi_accepted   NVARCHAR(10)                    -- [TESTING] Confirm source data/why >7 required
 );
@@ -3229,18 +3229,18 @@ CREATE TABLE ssd_missing (
 INSERT INTO ssd_missing (
     miss_table_id,
     miss_person_id,
-    miss_missing_episode_start,
+    miss_missing_episode_start_date,
     miss_missing_episode_type,
-    miss_missing_episode_end,
+    miss_missing_episode_end_date,
     miss_missing_rhi_offered,                   
     miss_missing_rhi_accepted    
 )
 SELECT 
     fmp.FACT_MISSING_PERSON_ID          AS miss_table_id,
     fmp.DIM_PERSON_ID                   AS miss_person_id,
-    fmp.START_DTTM                      AS miss_missing_episode_start,
+    fmp.START_DTTM                      AS miss_missing_episode_start_date,
     fmp.MISSING_STATUS                  AS miss_missing_episode_type,
-    fmp.END_DTTM                        AS miss_missing_episode_end,
+    fmp.END_DTTM                        AS miss_missing_episode_end_date,
     fmp.RETURN_INTERVIEW_OFFERED        AS miss_missing_rhi_offered,   
     fmp.RETURN_INTERVIEW_ACCEPTED       AS miss_missing_rhi_accepted 
 FROM 
@@ -3254,13 +3254,11 @@ WHERE EXISTS
     );
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_miss_person_id ON ssd_missing(miss_person_id);
-
-CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_start ON ssd_missing(miss_missing_episode_start);
-CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_end ON ssd_missing(miss_missing_episode_end);
-
-CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_offered ON ssd_missing(miss_missing_rhi_offered);
-CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_accepted ON ssd_missing(miss_missing_rhi_accepted);
+CREATE NONCLUSTERED INDEX idx_ssd_miss_person_id        ON ssd_missing(miss_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_start    ON ssd_missing(miss_missing_episode_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_end      ON ssd_missing(miss_missing_episode_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_offered      ON ssd_missing(miss_missing_rhi_offered);
+CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_accepted     ON ssd_missing(miss_missing_rhi_accepted);
 
 
 
