@@ -3496,7 +3496,6 @@ IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permane
 -- Create structure
 CREATE TABLE ssd_permanence (
     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
-    adoption_table_id                    NVARCHAR(48),  
     perm_person_id                       NVARCHAR(48),
     perm_cla_id                          NVARCHAR(48),
     perm_adm_decision_date               DATETIME,
@@ -3528,7 +3527,6 @@ WITH RankedPermanenceData AS (
             THEN CONCAT(fa.FACT_ADOPTION_ID, fce.FACT_CARE_EPISODES_ID)
             ELSE fce.FACT_CARE_EPISODES_ID 
         END                                               AS perm_table_id,
-        fa.FACT_ADOPTION_ID                               AS adoption_table_id,
         p.LEGACY_ID                                       AS perm_person_id,
         fce.FACT_CLA_ID                                   AS perm_cla_id,
         -- fc.START_DTTM                                     AS perm_entered_care_date, -- rem in v0.3. Ref, towards Potential future use.
@@ -3592,7 +3590,6 @@ WITH RankedPermanenceData AS (
 -- Insert data
 INSERT INTO ssd_permanence (
     perm_table_id,
-    adoption_table_id,
     perm_person_id,
     perm_cla_id,
     perm_adm_decision_date,
@@ -3615,7 +3612,6 @@ INSERT INTO ssd_permanence (
 -- Create structure
 CREATE TABLE ssd_permanence (
     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
-    adoption_table_id                    NVARCHAR(48),  
     perm_person_id                       NVARCHAR(48),
     perm_cla_id                          NVARCHAR(48),              
     perm_adm_decision_date               DATETIME,
@@ -3640,7 +3636,6 @@ CREATE TABLE ssd_permanence (
 );
 SELECT
     perm_table_id,
-    adoption_table_id,
     perm_person_id,
     perm_cla_id,
     perm_adm_decision_date,
