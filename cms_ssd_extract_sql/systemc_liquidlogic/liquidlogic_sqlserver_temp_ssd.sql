@@ -3232,7 +3232,6 @@ IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_
 CREATE TABLE #ssd_care_leavers
 (
     clea_table_id                           NVARCHAR(48),
-    clea_cl_table_id                        NVARCHAR(48),
     clea_legacy_id                          NVARCHAR(48),  
     clea_person_id                          NVARCHAR(48),
     clea_care_leaver_eligibility            NVARCHAR(100),
@@ -3289,7 +3288,6 @@ WITH InvolvementHistoryCTE AS (
 INSERT INTO #ssd_care_leavers
 (
     clea_table_id,
-    clea_cl_table_id,
     clea_legacy_id,  
     clea_person_id,
     clea_care_leaver_eligibility,
@@ -3307,7 +3305,6 @@ INSERT INTO #ssd_care_leavers
 SELECT
     CONCAT(dce.DIM_CLA_ELIGIBILITY_ID, fccl.FACT_CLA_CARE_LEAVERS_ID)
               AS clea_table_id,
-    fccl.FACT_CLA_CARE_LEAVERS_ID                           AS clea_cl_table_id,
     p.LEGACY_ID                                             AS clea_legacy_id,                      --[TESTING]
     dce.DIM_PERSON_ID                                       AS clea_person_id,
     CASE WHEN
