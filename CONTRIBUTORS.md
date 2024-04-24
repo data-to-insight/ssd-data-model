@@ -14,6 +14,7 @@ We are particularly grateful to our steering group, made up of colleagues from:
 
 We also extend thanks to our wider circle of contributing LAs, especially those which endorsed our project bid, or later assisted with developing or testing our research and technical products: 
 
+**Knowlsey Council**
 **Blackpool Council**
 **City of Wolverhampton Council**
 **Dorset Council**
@@ -26,6 +27,7 @@ We also extend thanks to our wider circle of contributing LAs, especially those 
 **Sutton Council**
 **Trafford Council** 
 **Waltham Forest Borough Council** 
+**North Yorks Council**
 
 Further, we are grateful to the following partner organisations for key contributions to the project: 
 
@@ -39,16 +41,18 @@ Further, we are grateful to the following partner organisations for key contribu
 Finally, we are indebted to around 100 other colleagues from LAs and other organisations who contributed to our anonymous research exercises. Without this work, the project would have been immeasurably poorer. 
 
 ## Further Development Contributors 
-In alphabetical order:
+In no particular order:
 
-- **Phil Weir** - One of the project earliest devs & SQL development in Mosaic and the AA return - [phil.weir@blackpool.gov.uk](mailto:phil.weir@blackpool.gov.uk)
+- **Phil Weir** - Early project champion & SQL development in Mosaic and the AA return -
 - **Sam Fergerson** - Mosaic development work for both T-SQL and Oracle - 
 - **Keith Thomas** - Mosaic development work for both T-SQL and Oracle - 
-
+- **Lee Hallsworth** - Eclipse development work for Postgress - 
+- **Kate Jagger** - Championing involvement for Azeus users
+- **Esther Thompson** - Azeus guidance and development - 
 
 ## Special Thanks
 
-- **Knowsley County Council** - For providing the projects first testing access thus enabling rapid early development and testing
+- **Knowsley County Council** - For providing the projects first testing access thus enabling rapid early cross-LA development and testing
 
 ## How to Contribute
 
