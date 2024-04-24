@@ -2046,7 +2046,7 @@ CREATE TABLE ssd_cla_episodes (
     clae_cla_episode_ceased_reason       NVARCHAR(255),
     clae_cla_id                         NVARCHAR(48),
     clae_referral_id                    NVARCHAR(48),
-    clae_cla_review_last_iro_contact_date DATETIME,
+    clae_cla_last_iro_contact_date      DATETIME, 
     clae_entered_care_date              DATETIME      
 );
  
@@ -2062,7 +2062,7 @@ INSERT INTO ssd_cla_episodes (
     clae_cla_episode_ceased_reason,
     clae_cla_id,
     clae_referral_id,
-    clae_cla_review_last_iro_contact_date,
+    clae_cla_last_iro_contact_date,
     clae_entered_care_date 
 )
 SELECT
@@ -2080,7 +2080,7 @@ SELECT
         --AND cn.DIM_CREATED_BY_DEPT_ID IN (5956,727)
         AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
         THEN cn.EVENT_DTTM END))                                                        
-                                            AS clae_cla_review_last_iro_contact_date,
+                                            AS clae_cla_last_iro_contact_date,
     fc.START_DTTM                           AS clae_entered_care_date -- [TESTING] Added RH 060324
  
 FROM
@@ -2119,7 +2119,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_clae_person_id ON ssd_cla_episodes(clae_person
 CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_start_date ON ssd_cla_episodes(clae_cla_episode_start_date);
 CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_ceased ON ssd_cla_episodes(clae_cla_episode_ceased);
 CREATE NONCLUSTERED INDEX idx_ssd_clae_referral_id ON ssd_cla_episodes(clae_referral_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clae_review_last_iro_contact ON ssd_cla_episodes(clae_cla_review_last_iro_contact_date);
+CREATE NONCLUSTERED INDEX idx_ssd_clae_cla_last_iro_contact_date ON ssd_cla_episodes(clae_cla_last_iro_contact_date);
 CREATE NONCLUSTERED INDEX idx_clae_cla_placement_id ON ssd_cla_episodes(clae_cla_placement_id);
 
 
@@ -2662,10 +2662,8 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_clar_cla_id ON ssd_cla_reviews(clar_cla_id);
-
 CREATE NONCLUSTERED INDEX idx_ssd_clar_review_due_date ON ssd_cla_reviews(clar_cla_review_due_date);
 CREATE NONCLUSTERED INDEX idx_ssd_clar_review_date ON ssd_cla_reviews(clar_cla_review_date);
-
 
 
 -- Add constraint(s)
@@ -2982,7 +2980,6 @@ CREATE TABLE ssd_cla_visits (
     clav_cla_visit_id          NVARCHAR(48) PRIMARY KEY,
     clav_cla_id                NVARCHAR(48),
     clav_person_id             NVARCHAR(48),
-    clav_casenote_id           NVARCHAR(48),
     clav_cla_visit_date        DATETIME,
     clav_cla_visit_seen        NCHAR(1),
     clav_cla_visit_seen_alone  NCHAR(1)
@@ -2991,7 +2988,6 @@ CREATE TABLE ssd_cla_visits (
 -- Insert data
 INSERT INTO ssd_cla_visits (
     clav_cla_visit_id,
-    clav_casenote_id,
     clav_cla_id,
     clav_person_id,
     clav_cla_visit_date,
@@ -3001,7 +2997,6 @@ INSERT INTO ssd_cla_visits (
  
 SELECT
     clav.FACT_CLA_VISIT_ID      AS clav_cla_visit_id,
-    cn.FACT_CASENOTE_ID         AS clav_casenote_id, -- [TESTING] This field no longer required | depreciated for removal
     clav.FACT_CLA_ID            AS clav_cla_id,
     clav.DIM_PERSON_ID          AS clav_person_id,
     cn.EVENT_DTTM               AS clav_cla_visit_date,
@@ -3030,7 +3025,6 @@ AND EXISTS ( -- only ssd relevant records
 CREATE NONCLUSTERED INDEX idx_ssd_clav_person_id ON ssd_cla_visits(clav_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_clav_visit_date ON ssd_cla_visits(clav_cla_visit_date);
 CREATE NONCLUSTERED INDEX idx_ssd_clav_cla_id ON ssd_cla_visits(clav_cla_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clav_casenote_id ON ssd_cla_visits(clav_casenote_id);
 
 
 -- Add constraint(s)
