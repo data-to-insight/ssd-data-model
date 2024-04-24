@@ -3463,6 +3463,7 @@ Object Name: ssd_permanence
 Description: 
 Author: D2I
 Version: 1.0
+            0.5: perm_placed_foster_carer_date placeholder re-added 240424 RH
             0.4: worker_name field name change for consistency 100424 JH
             0.3: entered_care_date removed/moved to cla_episodes 060324 RH
             0.2: perm_placed_foster_carer_date (from fc.START_DTTM) removed RH
@@ -3507,6 +3508,7 @@ CREATE TABLE ssd_permanence (
     perm_matched_date                    DATETIME,
     perm_placed_for_adoption_date        DATETIME,             
     perm_adopted_by_carer_flag           NCHAR(1),
+    perm_placed_foster_carer_date        DATETIME,
     perm_placed_ffa_cp_date              DATETIME,
     perm_placement_provider_urn          NVARCHAR(48),  
     perm_decision_reversed_date          DATETIME,                  
@@ -3514,6 +3516,7 @@ CREATE TABLE ssd_permanence (
     perm_permanence_order_date           DATETIME,              
     perm_permanence_order_type           NVARCHAR(100),        
     perm_adoption_worker_name            NVARCHAR(100)
+    
 );
 
 
@@ -3542,6 +3545,7 @@ WITH RankedPermanenceData AS (
             ELSE NULL 
         END                                               AS perm_placed_for_adoption_date,
         fa.ADOPTED_BY_CARER_FLAG                          AS perm_adopted_by_carer_flag,
+        ''                                                AS perm_placed_foster_carer_date,
         fa.FOSTER_TO_ADOPT_DTTM                           AS perm_placed_ffa_cp_date,
         CASE 
             WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
@@ -3600,6 +3604,7 @@ INSERT INTO ssd_permanence (
     perm_matched_date,
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
+    perm_placed_foster_carer_date,
     perm_placed_ffa_cp_date,
     perm_placement_provider_urn,
     perm_decision_reversed_date,
@@ -3608,31 +3613,8 @@ INSERT INTO ssd_permanence (
     perm_permanence_order_type,
     perm_adoption_worker_name
 )  
--- Create structure
-CREATE TABLE ssd_permanence (
-    perm_table_id                        NVARCHAR(48) PRIMARY KEY,
-    perm_person_id                       NVARCHAR(48),
-    perm_cla_id                          NVARCHAR(48),              
-    perm_adm_decision_date               DATETIME,
-    perm_part_of_sibling_group           NCHAR(1),
-    perm_siblings_placed_together        INT,
-    perm_siblings_placed_apart           INT,
-    perm_ffa_cp_decision_date            DATETIME,              
-    perm_placement_order_date            DATETIME,
-    perm_matched_date                    DATETIME,
-    perm_adopter_sex                     NVARCHAR(48),
-    perm_adopter_legal_status            NVARCHAR(100),
-    perm_number_of_adopters              INT,
-    perm_placed_for_adoption_date        DATETIME,            
-    perm_adopted_by_carer_flag           NCHAR(1),
-    perm_placed_ffa_cp_date              DATETIME,
-    perm_placement_provider_urn          NVARCHAR(48),  
-    perm_decision_reversed_date          DATETIME,                  
-    perm_decision_reversed_reason        NVARCHAR(100),
-    perm_permanence_order_date           DATETIME,              
-    perm_permanence_order_type           NVARCHAR(100),        
-    perm_adoption_worker_name            NVARCHAR(100)
-);
+
+
 SELECT
     perm_table_id,
     perm_person_id,
@@ -3646,6 +3628,7 @@ SELECT
     perm_matched_date,
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
+    perm_placed_foster_carer_date,
     perm_placed_ffa_cp_date,
     perm_placement_provider_urn,
     perm_decision_reversed_date,
@@ -3870,7 +3853,7 @@ WHERE EXISTS
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_invo_professional_id ON ssd_involvements (invo_professional_id);
+CREATE NONCLUSTERED INDEX idx_invo_person_id ON ssd_involvements (invo_person_id);
 CREATE NONCLUSTERED INDEX idx_invo_professional_role_id ON ssd_involvements (invo_professional_role_id);
 
 CREATE NONCLUSTERED INDEX idx_ssd_invo_start_date ON ssd_involvements(invo_involvement_start_date);

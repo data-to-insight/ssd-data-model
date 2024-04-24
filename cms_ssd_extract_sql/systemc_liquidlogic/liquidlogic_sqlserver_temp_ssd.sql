@@ -3425,9 +3425,9 @@ CREATE TABLE #ssd_permanence (
     perm_ffa_cp_decision_date            DATETIME,              
     perm_placement_order_date            DATETIME,
     perm_matched_date                    DATETIME,
-    perm_adopter_sex                     NVARCHAR(48),
-    perm_adopter_legal_status            NVARCHAR(100),
-    perm_number_of_adopters              INT,
+    -- perm_adopter_sex                     NVARCHAR(48),
+    -- perm_adopter_legal_status            NVARCHAR(100),
+    -- perm_number_of_adopters              INT,
     perm_placed_for_adoption_date        DATETIME,            
     perm_adopted_by_carer_flag           NCHAR(1),
     perm_placed_ffa_cp_date              DATETIME,
@@ -3459,9 +3459,9 @@ WITH RankedPermanenceData AS (
         fcpl.FFA_IS_PLAN_DATE                             AS perm_ffa_cp_decision_date,
         fa.PLACEMENT_ORDER_DTTM                           AS perm_placement_order_date,
         fa.MATCHING_DTTM                                  AS perm_matched_date,
-        fa.DIM_LOOKUP_ADOPTER_GENDER_CODE                 AS perm_adopter_sex,
-        fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE           AS perm_adopter_legal_status,
-        fa.NO_OF_ADOPTERS                                 AS perm_number_of_adopters,
+        -- fa.DIM_LOOKUP_ADOPTER_GENDER_CODE                 AS perm_adopter_sex,
+        -- fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE           AS perm_adopter_legal_status,
+        -- fa.NO_OF_ADOPTERS                                 AS perm_number_of_adopters,
         CASE
             WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
             THEN fcpl.START_DTTM
@@ -3527,9 +3527,9 @@ INSERT INTO #ssd_permanence (
     perm_ffa_cp_decision_date,
     perm_placement_order_date,
     perm_matched_date,
-    perm_adopter_sex,
-    perm_adopter_legal_status,
-    perm_number_of_adopters,
+    -- perm_adopter_sex,
+    -- perm_adopter_legal_status,
+    -- perm_number_of_adopters,
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
     perm_placed_ffa_cp_date,
@@ -3552,9 +3552,9 @@ SELECT
     perm_ffa_cp_decision_date,
     perm_placement_order_date,
     perm_matched_date,
-    perm_adopter_sex,
-    perm_adopter_legal_status,
-    perm_number_of_adopters,
+    -- perm_adopter_sex,
+    -- perm_adopter_legal_status,
+    -- perm_number_of_adopters,
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
     perm_placed_ffa_cp_date,
@@ -3777,15 +3777,21 @@ WHERE EXISTS
     );
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_invo_professional_id ON #ssd_involvements (invo_professional_id);
+CREATE NONCLUSTERED INDEX idx_invo_person_id ON ssd_involvements (invo_person_id);
+CREATE NONCLUSTERED INDEX idx_invo_professional_role_id ON ssd_involvements (invo_professional_role_id);
+
+CREATE NONCLUSTERED INDEX idx_ssd_invo_start_date ON ssd_involvements(invo_involvement_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_invo_end_date ON ssd_involvements(invo_involvement_end_date);
+
+CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id ON ssd_involvements(invo_referral_id);
+
 
 -- -- Add constraint(s)
--- ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
--- FOREIGN KEY (invo_professional_id) REFERENCES #ssd_professionals (prof_professional_id);
+-- ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
+-- FOREIGN KEY (invo_professional_id) REFERENCES ssd_professionals (prof_professional_id);
 
--- ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional_role 
--- FOREIGN KEY (invo_professional_role_id) REFERENCES #ssd_professionals (prof_social_worker_registration_no);
-
+-- ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional_role 
+-- FOREIGN KEY (invo_professional_role_id) REFERENCES ssd_professionals (prof_social_worker_registration_no);
 
     
 
