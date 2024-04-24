@@ -4101,13 +4101,13 @@ CREATE TABLE #ssd_pre_proceedings (
 -- )
 -- VALUES
 --     (
---     '10001', 'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900-01-01', '1900-01-01', 'Outcome1', 
---     '1900-01-01', 3, 'Approved', 2, 1, '1900-01-01', '1900-01-01', 2, 'Y', 
+--     '10001', 'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900/01/01', '1900/01/01', 'Outcome1', 
+--     '1900/01/01', 3, 'Approved', 2, 1, '1900/01/01', '1900/01/01', 2, 'Y', 
 --     'NA', 'COURT_REF_1', 1, 'Y', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
 --     ),
 --     (
---     '10002', 'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900-01-01', '1900-01-01', 'Outcome2',
---     '1900-01-01', 4, 'Denied', 1, 2, '1900-01-01', '1900-01-01', 3, 'Y',
+--     '10002', 'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900/01/01', '1900/01/01', 'Outcome2',
+--     '1900/01/01', 4, 'Denied', 1, 2, '1900/01/01', '1900/01/01', 3, 'Y',
 --     'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'Y', 'Initial Plan 2', 'Y', 'Final Plan 2'
 --     );
 
@@ -4303,7 +4303,7 @@ CREATE TABLE #ssd_ehcp_requests (
 
 -- Insert placeholder data
 INSERT INTO #ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
-VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
+VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01', '1900/01/01', 'PLACEHOLDER_DATA');
 
 
 -- -- Create constraint(s)
@@ -4355,7 +4355,7 @@ CREATE TABLE #ssd_ehcp_assessment (
 
 -- Insert placeholder data
 INSERT INTO #ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
-VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
 
 
 
@@ -4411,7 +4411,7 @@ CREATE TABLE #ssd_ehcp_named_plan (
 
 -- Insert placeholder data
 INSERT INTO #ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_cease_date, ehcn_named_plan_cease_reason)
-VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
+VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01', '1900/01/01', 'PLACEHOLDER_DATA');
 
 
 -- -- Create constraint(s)
@@ -4462,7 +4462,7 @@ CREATE TABLE #ssd_ehcp_active_plans (
 
 -- Insert placeholder data
 INSERT INTO #ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
-VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01');
+VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01');
 
 
 -- -- Create constraint(s)

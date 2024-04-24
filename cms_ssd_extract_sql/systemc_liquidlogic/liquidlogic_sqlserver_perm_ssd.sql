@@ -3545,7 +3545,7 @@ WITH RankedPermanenceData AS (
             ELSE NULL 
         END                                               AS perm_placed_for_adoption_date,
         fa.ADOPTED_BY_CARER_FLAG                          AS perm_adopted_by_carer_flag,
-        ''                                                AS perm_placed_foster_carer_date,
+        ''                                                AS perm_placed_foster_carer_date,         -- [PLACEHOLDER_DATA] or ['1900/01/01']
         fa.FOSTER_TO_ADOPT_DTTM                           AS perm_placed_ffa_cp_date,
         CASE 
             WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
@@ -3933,7 +3933,7 @@ CREATE TABLE ssd_linked_identifiers (
 --     link_valid_to_date
 -- )
 -- VALUES
---     ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01');
+--     ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01', '1900/01/01');
 
 
 
@@ -4184,13 +4184,13 @@ CREATE TABLE ssd_pre_proceedings (
 -- )
 -- VALUES
 --     (
---     'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900-01-01', '1900-01-01', 'Outcome1', 
---     '1900-01-01', 3, 'Approved', 2, 1, '1900-01-01', '1900-01-01', 2, 'Y', 
+--     'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900/01/01', '1900/01/01', 'Outcome1', 
+--     '1900/01/01', 3, 'Approved', 2, 1, '1900/01/01', '1900/01/01', 2, 'Y', 
 --     'NA', 'COURT_REF_1', 1, 'Y', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
 --     ),
 --     (
---     'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900-01-01', '1900-01-01', 'Outcome2',
---     '1900-01-01', 4, 'Denied', 1, 2, '1900-01-01', '1900-01-01', 3, 'Y',
+--     'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900/01/01', '1900/01/01', 'Outcome2',
+--     '1900/01/01', 4, 'Denied', 1, 2, '1900/01/01', '1900/01/01', 3, 'Y',
 --     'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'Y', 'Initial Plan 2', 'Y', 'Final Plan 2'
 --     );
 
@@ -4328,7 +4328,7 @@ IF OBJECT_ID('tempdb..#ssd_sen_need', 'U') IS NOT NULL DROP TABLE #ssd_sen_need 
  
  
 -- Create structure
-CREATE TABLE #ssd_sen_need (
+CREATE TABLE ssd_sen_need (
     senn_table_id                       NVARCHAR(48),
     senn_active_ehcp_id                 NVARCHAR(48),
     senn_active_ehcp_need_type          NVARCHAR(100),
@@ -4337,7 +4337,7 @@ CREATE TABLE #ssd_sen_need (
  
  
 -- -- Insert placeholder data
--- INSERT INTO #ssd_sen_need (senn_table_id, senn_active_ehcp_id, senn_active_ehcp_need_type, senn_active_ehcp_need_rank)
+-- INSERT INTO ssd_sen_need (senn_table_id, senn_active_ehcp_id, senn_active_ehcp_need_type, senn_active_ehcp_need_rank)
 -- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '0');
  
  
@@ -4384,7 +4384,7 @@ CREATE TABLE ssd_ehcp_requests (
 
 -- -- Insert placeholder data
 -- INSERT INTO ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
--- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
+-- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01', '1900/01/01', 'PLACEHOLDER_DATA');
 
 
 -- Create constraint(s)
@@ -4437,7 +4437,7 @@ CREATE TABLE ssd_ehcp_assessment (
 
 -- -- Insert placeholder data
 -- INSERT INTO ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
--- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+-- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
 
 
 
@@ -4492,7 +4492,7 @@ CREATE TABLE ssd_ehcp_named_plan (
 
 -- -- Insert placeholder data
 -- INSERT INTO ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_cease_date, ehcn_named_plan_cease_reason)
--- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01', '1900-01-01', 'PLACEHOLDER_DATA');
+-- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01', '1900/01/01', 'PLACEHOLDER_DATA');
 
 
 -- Create constraint(s)
@@ -4541,7 +4541,7 @@ CREATE TABLE ssd_ehcp_active_plans (
 
 -- -- Insert placeholder data
 -- INSERT INTO ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
--- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900-01-01');
+-- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01');
 
 
 -- Create constraint(s)
