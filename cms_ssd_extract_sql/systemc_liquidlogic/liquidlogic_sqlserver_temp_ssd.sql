@@ -3418,7 +3418,6 @@ CREATE TABLE #ssd_permanence (
     perm_table_id                        NVARCHAR(48) PRIMARY KEY,
     perm_person_id                       NVARCHAR(48),
     perm_cla_id                          NVARCHAR(48),
-    perm_entered_care_date               DATETIME,              
     perm_adm_decision_date               DATETIME,
     perm_part_of_sibling_group           NCHAR(1),
     perm_siblings_placed_together        INT,
@@ -3453,7 +3452,6 @@ WITH RankedPermanenceData AS (
         END                                               AS perm_table_id,
         p.LEGACY_ID                                       AS perm_person_id,
         fce.FACT_CLA_ID                                   AS perm_cla_id,
-        -- fc.START_DTTM                                     AS perm_entered_care_date, -- rem in v0.3. Ref, towards Potential future use.
         fa.DECISION_DTTM                                  AS perm_adm_decision_date,              
         fa.SIBLING_GROUP                                  AS perm_part_of_sibling_group,
         fa.NUMBER_TOGETHER                                AS perm_siblings_placed_together,
@@ -3580,7 +3578,6 @@ AND EXISTS
 -- -- Create index(es)
 -- CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id ON ssd_permanence(perm_person_id);
  
--- CREATE NONCLUSTERED INDEX idx_ssd_perm_entered_care_date ON ssd_permanence(perm_entered_care_date);
 -- CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date ON ssd_permanence(perm_adm_decision_date);
 -- CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date ON ssd_permanence(perm_permanence_order_date);
  

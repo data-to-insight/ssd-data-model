@@ -3529,7 +3529,6 @@ WITH RankedPermanenceData AS (
         END                                               AS perm_table_id,
         p.LEGACY_ID                                       AS perm_person_id,
         fce.FACT_CLA_ID                                   AS perm_cla_id,
-        -- fc.START_DTTM                                     AS perm_entered_care_date, -- rem in v0.3. Ref, towards Potential future use.
         fa.DECISION_DTTM                                  AS perm_adm_decision_date,              
         fa.SIBLING_GROUP                                  AS perm_part_of_sibling_group,
         fa.NUMBER_TOGETHER                                AS perm_siblings_placed_together,
