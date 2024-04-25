@@ -2,7 +2,6 @@ import os
 import glob
 import re
 
-
 # dir containing SQL files
 directory = 'cms_ssd_extract_sql/mosaic/raw_imports/'
 
