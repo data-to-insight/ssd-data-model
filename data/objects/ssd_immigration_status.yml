@@ -14,10 +14,6 @@ nodes:
     - identity
     - immigration
     - uasc
-    returns:
-    - SSDA903
-    - CINcensus
-    - RIIA
     cms:
     - liquid_logic
     - mosaic
@@ -63,6 +59,7 @@ nodes:
     returns:
     - Local
     - RIIA
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic

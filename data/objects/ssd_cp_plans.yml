@@ -15,8 +15,6 @@ nodes:
     categories:
     - child_protection
     - cp_plan
-    returns:
-    - RIIA
     cms:
     - liquid_logic
     - mosaic
@@ -74,10 +72,6 @@ nodes:
     categories:
     - child_protection
     - cp_plan
-    returns:
-    - SSDA903
-    - CINcensus
-    - RIIA
     cms:
     - liquid_logic
     - mosaic
@@ -99,7 +93,7 @@ nodes:
     - child_protection
     - cp_plan
     returns:
-    - CINcensus
+    - CIN
     - AnnexA
     - RIIA
     cms:
@@ -120,7 +114,7 @@ nodes:
     - child_protection
     - cp_plan
     returns:
-    - CINcensus
+    - CIN
     - AnnexA
     - RIIA
     cms:
@@ -142,6 +136,7 @@ nodes:
     - cp_plan
     returns:
     - Local
+    - AnnexA
     cms_table:
     - liquid_logic:ssd_cp_plans
     - mosaic:ssd_cp_plans
@@ -175,6 +170,7 @@ nodes:
     - cp_plan
     returns:
     - Local
+    - AnnexA
     cms_table:
     - liquid_logic:ssd_cp_plans
     - mosaic:ssd_cp_plans

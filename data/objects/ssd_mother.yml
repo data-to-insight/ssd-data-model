@@ -6,10 +6,19 @@ nodes:
     description: Mother Table ID
     item_ref: MOTH004A
     type: nvarchar
+    primary_key: true
+    validators:
+    - required:
+        enabled: true
+    - unique:
+        enabled: true
     categories:
     - identity
     - looked_after
     - mother
+    returns:
+    - SSDA903
+    - CIN
     cms_field:
     - liquid_logic:moth_table_id
     - mosaic:moth_table_id
@@ -28,7 +37,7 @@ nodes:
     - mother
     returns:
     - SSDA903
-    - CINcensus
+    - CIN
     cms:
     - liquid_logic
     - mosaic
@@ -79,6 +88,7 @@ nodes:
     - mother
     returns:
     - SSDA903
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic

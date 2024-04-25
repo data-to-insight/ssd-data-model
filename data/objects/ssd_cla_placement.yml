@@ -196,6 +196,7 @@ nodes:
     - placement
     returns:
     - SSDA903
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -225,6 +226,7 @@ nodes:
     - placement
     returns:
     - Local
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -244,6 +246,7 @@ nodes:
     - placement
     returns:
     - SSDA903
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic

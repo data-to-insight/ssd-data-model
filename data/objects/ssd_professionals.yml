@@ -89,6 +89,25 @@ nodes:
     - liquid_logic:ssd_professionals
     - mosaic:ssd_professionals
     guidance: Professional Job title, e.g. Social Worker, Keyworker, GP etc.
+  - name: prof_professional_caseload
+    description: Number of cases held on previous 30th Sept
+    item_ref: PROF008A
+    type: int
+    categories:
+    - workforce
+    returns:
+    - CSCWF
+    - RIIA
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:prof_professional_caseload
+    - mosaic:prof_professional_caseload
+    cms_table:
+    - liquid_logic:ssd_professionals
+    - mosaic:ssd_professionals
+    guidance: null
   - name: prof_professional_department
     description: Worker Department e.g. 'Youth Support Team West'
     item_ref: PROF012A
@@ -119,3 +138,15 @@ nodes:
     - liquid_logic:prof_full_time_equivalency
     - mosaic:prof_full_time_equivalency
     guidance: Worker FTE
+  - name: prof_agency_worker_flag
+    description: Flag for whether the worker is agency
+    item_ref: PROF013A
+    type: NCHAR
+    categories:
+    - workforce
+    returns:
+    - Local
+    cms_field:
+    - liquid_logic:prof_agency_worker_flag
+    - mosaic:prof_agency_worker_flag
+    guidance: Professional's Name

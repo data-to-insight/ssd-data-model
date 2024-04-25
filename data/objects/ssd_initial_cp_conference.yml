@@ -51,10 +51,6 @@ nodes:
     categories:
     - s47_enquiry
     - child_protection
-    returns:
-    - SSDA903
-    - CINcensus
-    - RIIA
     cms:
     - liquid_logic
     - mosaic
@@ -82,6 +78,7 @@ nodes:
     - cp_plan
     returns:
     - RIIA
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -119,6 +116,7 @@ nodes:
     returns:
     - Local
     - RIIA
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -137,7 +135,7 @@ nodes:
     - initial_cp_conference
     - child_protection
     returns:
-    - CINcensus
+    - CIN
     cms:
     - liquid_logic
     - mosaic
@@ -157,8 +155,9 @@ nodes:
     - initial_cp_conference
     - child_protection
     returns:
-    - CINcensus
+    - CIN
     - RIIA
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic

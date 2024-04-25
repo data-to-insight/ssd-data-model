@@ -48,9 +48,6 @@ nodes:
     categories:
     - identity
     - family
-    returns:
-    - SSDA903
-    - CINcensus
     cms:
     - liquid_logic
     - mosaic

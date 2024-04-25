@@ -26,10 +26,10 @@ jobs:
     - name: Update CHANGELOG
       run: python tools-ssd_workflow/admin/update_changelog.py
 
-    - name: Commit and push if it changed
-      run: | 
-        git diff
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git commit -m "Update CHANGELOG.md" -a || echo "No changes to commit"
-        git push
+    # - name: Commit and push if it changed
+    #   run: | 
+    #     git diff
+    #     git config --local user.email "action@github.com"
+    #     git config --local user.name "GitHub Action"
+    #     git commit -m "Update CHANGELOG.md" -a || echo "No changes to commit"
+    #     git push

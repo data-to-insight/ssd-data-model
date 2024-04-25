@@ -50,6 +50,7 @@ nodes:
     - workforce
     returns:
     - Local
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic

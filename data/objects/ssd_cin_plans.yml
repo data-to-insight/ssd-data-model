@@ -55,10 +55,6 @@ nodes:
     categories:
     - child_in_need
     - cin_plan
-    returns:
-    - SSDA903
-    - CINcensus
-    - RIIA
     cms:
     - liquid_logic
     - mosaic
@@ -80,8 +76,9 @@ nodes:
     - child_in_need
     - cin_plan
     returns:
-    - CINcensus
+    - CIN
     - RIIA
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -108,8 +105,9 @@ nodes:
     - child_in_need
     - cin_plan
     returns:
-    - CINcensus
     - RIIA
+    - CIN
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic

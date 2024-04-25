@@ -40,7 +40,7 @@ nodes:
     - adoption
     returns:
     - SSDA903
-    - CINcensus
+    - CIN
     cms:
     - liquid_logic
     - mosaic
@@ -59,6 +59,8 @@ nodes:
     - looked_after
     - permanence
     - adoption
+    returns:
+    - SSDA903
     cms:
     - liquid_logic
     - mosaic
@@ -77,7 +79,6 @@ nodes:
     - adoption
     returns:
     - SSDA903
-    - AnnexA
     - ASGLB
     cms:
     - liquid_logic
@@ -102,6 +103,7 @@ nodes:
     - adoption
     returns:
     - ASGLB
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -199,6 +201,8 @@ nodes:
     - looked_after
     - permanence
     - adoption
+    returns:
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -430,7 +434,7 @@ nodes:
     - mosaic:ssd_permanence
     guidance: Type of Permanence order granted - Adoption - Special Guardianship -
       Child Arrangements Order/ Residence Order
-  - name: perm_adoption_worker_name
+  - name: perm_adoption_worker
     description: Adoption social worker
     item_ref: PERM023A
     type: nvarchar
@@ -438,6 +442,8 @@ nodes:
     - looked_after
     - permanence
     - adoption
+    returns:
+    - SSDA903
     cms:
     - liquid_logic
     - mosaic
@@ -469,7 +475,7 @@ nodes:
     - permanence
     - adoption
     returns:
-    - AnnexA
+    - SSDA903
     guidance: 'The Legal Status of the adopter/s/ prospective adopter/s. Code set
 
       L0 - Single Adopter

@@ -14,8 +14,6 @@ nodes:
         enabled: true
     categories:
     - early_help
-    returns:
-    - RIIA
     cms:
     - liquid_logic
     - mosaic
@@ -36,10 +34,6 @@ nodes:
         enabled: true
     categories:
     - early_help
-    returns:
-    - SSDA903
-    - CINcensus
-    - RIIA
     cms:
     - liquid_logic
     - mosaic

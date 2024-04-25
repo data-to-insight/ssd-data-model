@@ -54,7 +54,6 @@ nodes:
     - ehcp_assessment
     returns:
     - 1aNotInCMS
-    - RIIA
     cms:
     - liquid_logic
     cms_field:

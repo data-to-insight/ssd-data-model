@@ -40,7 +40,7 @@ nodes:
     - looked_after
     returns:
     - SSDA903
-    - CINcensus
+    - CIN
     - RIIA
     cms:
     - liquid_logic

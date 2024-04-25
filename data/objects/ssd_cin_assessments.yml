@@ -38,10 +38,6 @@ nodes:
     categories:
     - child_in_need
     - assessment
-    returns:
-    - SSDA903
-    - CINcensus
-    - RIIA
     cms:
     - liquid_logic
     - mosaic
@@ -80,7 +76,7 @@ nodes:
     - child_in_need
     - assessment
     returns:
-    - CINcensus
+    - CIN
     - RIIA
     cms:
     - liquid_logic
@@ -120,8 +116,9 @@ nodes:
     - child_in_need
     - assessment
     returns:
-    - CINcensus
+    - CIN
     - RIIA
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic

@@ -73,8 +73,6 @@ nodes:
     - child_protection
     - cp_plan
     - review
-    returns:
-    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -94,7 +92,7 @@ nodes:
     - cp_plan
     - review
     returns:
-    - CINcensus
+    - CIN
     - AnnexA
     cms:
     - liquid_logic

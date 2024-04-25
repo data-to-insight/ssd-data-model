@@ -49,7 +49,7 @@ nodes:
     - child_in_need
     - assessment
     returns:
-    - CINcensus
+    - CIN
     cms:
     - liquid_logic
     - mosaic

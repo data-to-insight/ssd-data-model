@@ -39,7 +39,6 @@ nodes:
     - ehcp_request
     returns:
     - 1aNotInCMS
-    - RIIA
     cms:
     - liquid_logic
     cms_field:

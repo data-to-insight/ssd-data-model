@@ -28,7 +28,7 @@ nodes:
     - voice_of_child
     returns:
     - SSDA903
-    - CINcensus
+    - CIN
     cms:
     - liquid_logic
     - mosaic

@@ -63,9 +63,6 @@ nodes:
     categories:
     - identity
     - address
-    returns:
-    - SSDA903
-    - CINcensus
     cms:
     - liquid_logic
     - mosaic
@@ -136,7 +133,7 @@ nodes:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
     guidance: Date person left the address
-  - name: addr_address_postcode
+  - name: addr_postcode
     description: Address Postcode
     item_ref: ADDR006A
     type: nvarchar
@@ -152,8 +149,8 @@ nodes:
     - caredirector
     - azeus
     cms_field:
-    - liquid_logic:addr_address_postcode
-    - mosaic:addr_address_postcode
+    - liquid_logic:addr_postcode
+    - mosaic:addr_postcode
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address

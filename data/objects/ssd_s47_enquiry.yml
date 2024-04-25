@@ -15,8 +15,6 @@ nodes:
     categories:
     - s47_enquiry
     - child_protection
-    returns:
-    - RIIA
     cms:
     - liquid_logic
     - mosaic
@@ -58,10 +56,6 @@ nodes:
     categories:
     - s47_enquiry
     - child_protection
-    returns:
-    - SSDA903
-    - CINcensus
-    - RIIA
     cms:
     - liquid_logic
     - mosaic
@@ -83,8 +77,9 @@ nodes:
     - s47_enquiry
     - child_protection
     returns:
-    - CINcensus
+    - CIN
     - RIIA
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -106,6 +101,7 @@ nodes:
     returns:
     - Local
     - RIIA
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -124,7 +120,8 @@ nodes:
     - s47_enquiry
     - child_protection
     returns:
-    - CINcensus
+    - CIN
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -144,7 +141,7 @@ nodes:
     - s47_enquiry
     - child_protection
     returns:
-    - CINcensus
+    - CIN
     cms:
     - liquid_logic
     - mosaic

@@ -118,7 +118,7 @@ nodes:
     returns:
     - 1aNotInCMS
     - SSDA903
-    - CINcensus
+    - CIN
     - RIIA
     cms:
     - liquid_logic

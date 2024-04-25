@@ -34,7 +34,7 @@ with open('CHANGELOG.md', 'w') as f:
     f.write("Agreed data item-level changes are assigned an identifier. A sub-set of the change details for the most recent change (if any) also appears within each objects metadata block(YAML).") 
     f.write("The current change log contains only sample data until we deploy the first pilot release.")
     f.write("Note: Object-level change tracking is not yet available/in progress; feedback/suggestions welcomed.")
-    f.write("Last updated: " + date_time_str + "\n\n")
+    f.write("Last updated: " + date_time_str + "\n\n") # If changelog.yml is enabled for this .py script, this timestamp can cause repo conflicts on remote branches/codespaces
     f.write(tabulate(df, headers='keys', tablefmt='pipe', showindex=False))
 
 print("CHANGELOG.md has been updated.")

@@ -16,7 +16,7 @@ nodes:
     - identity
     returns:
     - SSDA903
-    - CINcensus
+    - CIN
     - AnnexA
     - RIIA
     cms:
@@ -41,6 +41,7 @@ nodes:
     returns:
     - SSDA903
     - RIIA
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -61,7 +62,7 @@ nodes:
     categories:
     - identity
     returns:
-    - CINcensus
+    - CIN
     - RIIA
     cms:
     - liquid_logic
@@ -93,7 +94,7 @@ nodes:
     - identity
     returns:
     - SSDA903
-    - CINcensus
+    - CIN
     - AnnexA
     - RIIA
     cms:
@@ -128,7 +129,7 @@ nodes:
     - identity
     returns:
     - SSDA903
-    - CINcensus
+    - CIN
     - AnnexA
     - RIIA
     cms:
@@ -193,6 +194,7 @@ nodes:
     returns:
     - SSDA903
     - RIIA
+    - CIN
     cms:
     - liquid_logic
     - mosaic
@@ -214,7 +216,7 @@ nodes:
       Child is newly looked-after and the UPN is not yet known UN5 - Sources collating
       UPNs reflect discrepancy(ies) for the child's name and/or surname and/or date
       of birth therefore preventing reliable matching (for example, duplicated UPNs)
-  - name: pers_send_flag
+  - name: pers_send
     description: SEND Flag
     item_ref: PERS008A
     type: nchar
@@ -226,8 +228,8 @@ nodes:
     cms:
     - liquid_logic
     cms_field:
-    - liquid_logic:pers_send_flag
-    - mosaic:pers_send_flag
+    - liquid_logic:pers_send
+    - mosaic:pers_send
     cms_table:
     - liquid_logic:ssd_person
     - mosaic:ssd_person
@@ -240,7 +242,7 @@ nodes:
     categories:
     - identity
     returns:
-    - CINcensus
+    - CIN
     - RIIA
     cms:
     - liquid_logic
@@ -267,7 +269,7 @@ nodes:
     categories:
     - identity
     returns:
-    - CINcensus
+    - CIN
     - RIIA
     cms:
     - liquid_logic

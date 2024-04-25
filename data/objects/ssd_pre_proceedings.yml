@@ -33,7 +33,7 @@ nodes:
     - pre_proceedings
     returns:
     - SSDA903
-    - CINcensus
+    - CIN
     cms:
     - liquid_logic
     - mosaic

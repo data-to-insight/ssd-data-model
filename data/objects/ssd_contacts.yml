@@ -36,10 +36,6 @@ nodes:
         enabled: true
     categories:
     - contact
-    returns:
-    - SSDA903
-    - CINcensus
-    - RIIA
     cms:
     - liquid_logic
     - mosaic
@@ -97,6 +93,8 @@ nodes:
     description: Contact Source Description
     item_ref: CONT006A
     type: nvarchar
+    categories:
+    - contact
     guidance: Contact Source Description
   - name: cont_contact_outcome_json
     description: Contact Outcome

@@ -15,9 +15,6 @@ nodes:
     categories:
     - identity
     - disability
-    returns:
-    - SSDA903
-    - CINcensus
     cms:
     - liquid_logic
     - mosaic
@@ -64,7 +61,8 @@ nodes:
     - identity
     - disability
     returns:
-    - CINcensus
+    - CIN
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic
