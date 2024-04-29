@@ -4002,7 +4002,7 @@ IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_
 
 -- Create structure
 CREATE TABLE ssd_s251_finance (
-    s251_table_id           NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
+    s251_table_id           NVARCHAR(48) PRIMARY KEY,
     s251_cla_placement_id   NVARCHAR(48), 
     s251_placeholder_1      NVARCHAR(48),
     s251_placeholder_2      NVARCHAR(48),
@@ -4064,7 +4064,7 @@ IF OBJECT_ID('tempdb..#ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voi
 
 -- Create structure
 CREATE TABLE ssd_voice_of_child (
-    voch_table_id               NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
+    voch_table_id               NVARCHAR(48) PRIMARY KEY,
     voch_person_id              NVARCHAR(48), 
     voch_explained_worries      NCHAR(1), 
     voch_story_help_understand  NCHAR(1), 
@@ -4138,7 +4138,7 @@ IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pr
 
 -- Create structure
 CREATE TABLE ssd_pre_proceedings (
-    prep_table_id                           NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),
+    prep_table_id                           NVARCHAR(48) PRIMARY KEY,
     prep_person_id                          NVARCHAR(48),
     prep_plo_family_id                      NVARCHAR(48),
     prep_pre_pro_decision_date              DATETIME,
@@ -4338,7 +4338,7 @@ IF OBJECT_ID('tempdb..#ssd_sen_need', 'U') IS NOT NULL DROP TABLE #ssd_sen_need 
  
 -- Create structure
 CREATE TABLE ssd_sen_need (
-    senn_table_id                       NVARCHAR(48),
+    senn_table_id                       NVARCHAR(48) PRIMARY KEY,
     senn_active_ehcp_id                 NVARCHAR(48),
     senn_active_ehcp_need_type          NVARCHAR(100),
     senn_active_ehcp_need_rank          NVARCHAR(1)
