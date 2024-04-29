@@ -3539,6 +3539,9 @@ WITH RankedPermanenceData AS (
         fcpl.FFA_IS_PLAN_DATE                             AS perm_ffa_cp_decision_date,
         fa.PLACEMENT_ORDER_DTTM                           AS perm_placement_order_date,
         fa.MATCHING_DTTM                                  AS perm_matched_date,
+        -- fa.DIM_LOOKUP_ADOPTER_GENDER_CODE                 AS perm_adopter_sex,
+        -- fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE           AS perm_adopter_legal_status,
+        -- fa.NO_OF_ADOPTERS                                 AS perm_number_of_adopters,
         CASE 
             WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
             THEN fcpl.START_DTTM 
@@ -3602,6 +3605,9 @@ INSERT INTO ssd_permanence (
     perm_ffa_cp_decision_date,
     perm_placement_order_date,
     perm_matched_date,
+    -- perm_adopter_sex,
+    -- perm_adopter_legal_status,
+    -- perm_number_of_adopters,
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
     perm_placed_foster_carer_date,
@@ -3626,6 +3632,9 @@ SELECT
     perm_ffa_cp_decision_date,
     perm_placement_order_date,
     perm_matched_date,
+    -- perm_adopter_sex,
+    -- perm_adopter_legal_status,
+    -- perm_number_of_adopters,
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
     perm_placed_foster_carer_date,

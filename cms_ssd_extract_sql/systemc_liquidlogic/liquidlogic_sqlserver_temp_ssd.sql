@@ -3382,6 +3382,7 @@ Object Name: ssd_permanence
 Description: 
 Author: D2I
 Version: 1.0
+            0.5: perm_placed_foster_carer_date placeholder re-added 240424 RH
             0.4: worker_name field name change for consistency 100424 JH
             0.3: entered_care_date removed/moved to cla_episodes 060324 RH
             0.2: perm_placed_foster_carer_date (from fc.START_DTTM) removed RH
@@ -3402,15 +3403,14 @@ Dependencies:
 - FACT_CLA
 =============================================================================
 */
- 
- 
+
 -- [TESTING] Create marker
 SET @TableName = N'ssd_permanence';
 PRINT 'Creating table: ' + @TableName;
- 
- 
+
+
 -- Check if exists & drop
-IF OBJECT_ID('ssd_permanence', 'U') IS NOT NULL DROP TABLE ssd_permanence;
+IF OBJECT_ID('#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
 IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
 
 -- Create structure
@@ -3425,11 +3425,9 @@ CREATE TABLE #ssd_permanence (
     perm_ffa_cp_decision_date            DATETIME,              
     perm_placement_order_date            DATETIME,
     perm_matched_date                    DATETIME,
-    -- perm_adopter_sex                     NVARCHAR(48),
-    -- perm_adopter_legal_status            NVARCHAR(100),
-    -- perm_number_of_adopters              INT,
-    perm_placed_for_adoption_date        DATETIME,            
+    perm_placed_for_adoption_date        DATETIME,             
     perm_adopted_by_carer_flag           NCHAR(1),
+    perm_placed_foster_carer_date        DATETIME,
     perm_placed_ffa_cp_date              DATETIME,
     perm_placement_provider_urn          NVARCHAR(48),  
     perm_decision_reversed_date          DATETIME,                  
@@ -3437,18 +3435,19 @@ CREATE TABLE #ssd_permanence (
     perm_permanence_order_date           DATETIME,              
     perm_permanence_order_type           NVARCHAR(100),        
     perm_adoption_worker_name            NVARCHAR(100)
+    
 );
- 
- 
+
+
 WITH RankedPermanenceData AS (
     -- CTE to rank permanence rows for each person
     -- used to assist in dup filtering on/towards perm_table_id
- 
+
     SELECT
-        CASE
+        CASE 
             WHEN (fa.DIM_PERSON_ID = fce.DIM_PERSON_ID)
             THEN CONCAT(fa.FACT_ADOPTION_ID, fce.FACT_CARE_EPISODES_ID)
-            ELSE fce.FACT_CARE_EPISODES_ID
+            ELSE fce.FACT_CARE_EPISODES_ID 
         END                                               AS perm_table_id,
         p.LEGACY_ID                                       AS perm_person_id,
         fce.FACT_CLA_ID                                   AS perm_cla_id,
@@ -3462,17 +3461,18 @@ WITH RankedPermanenceData AS (
         -- fa.DIM_LOOKUP_ADOPTER_GENDER_CODE                 AS perm_adopter_sex,
         -- fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE           AS perm_adopter_legal_status,
         -- fa.NO_OF_ADOPTERS                                 AS perm_number_of_adopters,
-        CASE
+        CASE 
             WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
-            THEN fcpl.START_DTTM
-            ELSE NULL
+            THEN fcpl.START_DTTM 
+            ELSE NULL 
         END                                               AS perm_placed_for_adoption_date,
         fa.ADOPTED_BY_CARER_FLAG                          AS perm_adopted_by_carer_flag,
+        ''                                                AS perm_placed_foster_carer_date,         -- [PLACEHOLDER_DATA] or ['1900/01/01']
         fa.FOSTER_TO_ADOPT_DTTM                           AS perm_placed_ffa_cp_date,
-        CASE
+        CASE 
             WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
-            THEN fce.OFSTED_URN
-            ELSE NULL
+            THEN fce.OFSTED_URN 
+            ELSE NULL 
         END                                               AS perm_placement_provider_urn,
         fa.NO_LONGER_PLACED_DTTM                          AS perm_decision_reversed_date,
         fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE             AS perm_decision_reversed_reason,
@@ -3486,35 +3486,32 @@ WITH RankedPermanenceData AS (
         fa.ADOPTION_SOCIAL_WORKER_NAME                    AS perm_adoption_worker_name,
         ROW_NUMBER() OVER (
             PARTITION BY p.LEGACY_ID                     -- partition on person identifier
-            ORDER BY CAST(RIGHT(CASE
+            ORDER BY CAST(RIGHT(CASE 
                                     WHEN (fa.DIM_PERSON_ID = fce.DIM_PERSON_ID)
                                     THEN CONCAT(fa.FACT_ADOPTION_ID, fce.FACT_CARE_EPISODES_ID)
-                                    ELSE fce.FACT_CARE_EPISODES_ID
+                                    ELSE fce.FACT_CARE_EPISODES_ID 
                                 END, 5) AS INT) DESC    -- take last 5 digits, coerce to int so we can sort/order
         )                                                 AS rn -- we only want rn==1
-
     FROM Child_Social.FACT_CARE_EPISODES fce
-
     LEFT JOIN Child_Social.FACT_ADOPTION AS fa ON fa.DIM_PERSON_ID = fce.DIM_PERSON_ID AND fa.START_DTTM IS NOT NULL
-    LEFT JOIN Child_Social.FACT_CLA AS fc ON fc.FACT_CLA_ID = fce.FACT_CLA_ID
+    LEFT JOIN Child_Social.FACT_CLA AS fc ON fc.FACT_CLA_ID = fce.FACT_CLA_ID -- [TESTING] IS this still requ if fc.START_DTTM not in use here? 
     LEFT JOIN Child_Social.FACT_CLA_PLACEMENT AS fcpl ON fcpl.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
         AND fcpl.FACT_CLA_PLACEMENT_ID <> '-1'
         AND (fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3', 'A4', 'A5', 'A6') OR fcpl.FFA_IS_PLAN_DATE IS NOT NULL)
-
     LEFT JOIN Child_Social.DIM_PERSON p ON fce.DIM_PERSON_ID = p.DIM_PERSON_ID
     WHERE ((fce.PLACEND IS NULL AND fa.START_DTTM IS NOT NULL)
         OR fce.CARE_REASON_END_CODE IN ('E48', 'E1', 'E44', 'E12', 'E11', 'E43', '45', 'E41', 'E45', 'E47', 'E46'))
         AND fce.DIM_PERSON_ID <> '-1'
-       
-        -- -- Exclusion block commented for further [TESTING]
+
+        -- -- Exclusion block commented for further [TESTING] 
         -- AND EXISTS ( -- ssd records only
         --     SELECT 1
         --     FROM ssd_person p
         --     WHERE p.pers_person_id = fce.DIM_PERSON_ID
         -- )
- 
+
 )
- 
+
 -- Insert data
 INSERT INTO #ssd_permanence (
     perm_table_id,
@@ -3532,6 +3529,7 @@ INSERT INTO #ssd_permanence (
     -- perm_number_of_adopters,
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
+    perm_placed_foster_carer_date,
     perm_placed_ffa_cp_date,
     perm_placement_provider_urn,
     perm_decision_reversed_date,
@@ -3540,7 +3538,8 @@ INSERT INTO #ssd_permanence (
     perm_permanence_order_type,
     perm_adoption_worker_name
 )  
- 
+
+
 SELECT
     perm_table_id,
     perm_person_id,
@@ -3557,6 +3556,7 @@ SELECT
     -- perm_number_of_adopters,
     perm_placed_for_adoption_date,
     perm_adopted_by_carer_flag,
+    perm_placed_foster_carer_date,
     perm_placed_ffa_cp_date,
     perm_placement_provider_urn,
     perm_decision_reversed_date,
@@ -3568,23 +3568,24 @@ SELECT
 FROM RankedPermanenceData
 WHERE rn = 1
 AND EXISTS
-    ( -- only need address data for ssd relevant records
+    ( -- only ssd relevant records
     SELECT 1
     FROM #ssd_person p
     WHERE p.pers_person_id = perm_person_id
     );
- 
- 
--- -- Create index(es)
--- CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id ON ssd_permanence(perm_person_id);
- 
--- CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date ON ssd_permanence(perm_adm_decision_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date ON ssd_permanence(perm_permanence_order_date);
- 
- 
+
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id ON #ssd_permanence(perm_person_id);
+
+CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date ON #ssd_permanence(perm_adm_decision_date);
+CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date ON #ssd_permanence(perm_permanence_order_date);
+
+
 -- -- Add constraint(s)
--- ALTER TABLE ssd_permanence ADD CONSTRAINT FK_perm_person_id
+-- ALTER TABLE #ssd_permanence ADD CONSTRAINT FK_perm_person_id
 -- FOREIGN KEY (perm_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
+
+
  
  
 -- [TESTING] Increment /print progress
