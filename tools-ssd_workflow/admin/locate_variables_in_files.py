@@ -3,11 +3,11 @@ import glob
 import re
 
 # dir containing SQL files
-directory = 'cms_ssd_extract_sql/mosaic/raw_imports/'
+directory = 'cms_ssd_extract_sql/mosaic/import_raw/'
 
 
-variable_name = 'cine_referral_source_code' # var name to search
-variable_stem = 'senn_' # stem to search 
+variable_name = 'moth_person_id' # var name to search
+variable_stem = 'moth' # stem to search 
 search_file_type = '.sql'  # or .py or .txt 
 
 

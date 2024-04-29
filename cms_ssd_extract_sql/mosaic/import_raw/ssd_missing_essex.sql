@@ -100,7 +100,7 @@ select
 			and
 			miss.start_date between cla.EPISODE_START_DATE and coalesce(cla.EPISODE_END_DATE,'1 January 2300')
 	) miss_cla_episode_id,
-	miss.start_date miss_mis_epi_start,
+	miss.start_date miss_mis_epi_start, # miss_missing_episode_start_date
 	miss.missing_category miss_mis_epi_type,
 	miss.end_date miss_mis_epi_end,
 	(
