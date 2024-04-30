@@ -1,4 +1,5 @@
 select
+	NEWID() moth_table_id, -- Gen new GUID, this in-lieu of a known key value (added 290424)
 	rel.PERSON_ID moth_person_id,
 	rel.PERSON_RELATED_TO_ID moth_childs_person_id,
 	(

@@ -2,8 +2,8 @@ select
 	cin.cin_plan_id,
 	cin.Referral_Id cinp_referral_id,
 	cin.Person_ID cinp_person_id,
-	cin.CIN_Plan_Start_Date cinp_cin_plan_start,
-	cin.CIN_Plan_End_Date cinp_cin_plan_end,
+	cin.CIN_Plan_Start_Date cinp_cin_plan_start_date,
+	cin.CIN_Plan_End_Date cinp_cin_plan_end_date,
 	(
 		select
 			max(wro.ORG_ID)

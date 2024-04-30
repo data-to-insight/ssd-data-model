@@ -2,7 +2,6 @@ select
 	null perm_permanence_id,
 	c.id perm_person_id,
 	c.adm_decision_date perm_adm_decision_date,
-	c.poc_start perm_entered_care_date,
 	null perm_ffa_cp_decision_date,
 	c.placement_order_date perm_placement_order_date,
 	c.date_placed_for_adoption perm_placed_for_adoption_date,

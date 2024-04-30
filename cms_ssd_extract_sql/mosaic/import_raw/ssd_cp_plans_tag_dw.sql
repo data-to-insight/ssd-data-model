@@ -12,7 +12,7 @@ select
 			and
 			dbo.future(ref.CLOSURE_DATE)>= cpp.REGISTRATION_START_DATE
 	) cppl_referral_id,
-	cpp.REGISTRATION_STEP_ID cppl_initial_cp_conference_id,
+	cpp.REGISTRATION_STEP_ID cppl_icpc_id, -- [REVIEW] from cppl_initial_cp_conference_id 290424 RH
 	cpp.PERSON_ID cppl_person_id,
 	cpp.REGISTRATION_START_DATE cppl_cp_plan_start_date,
 	cpp.DEREGISTRATION_DATE cppl_cp_plan_end_date,

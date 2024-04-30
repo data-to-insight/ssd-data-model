@@ -105,7 +105,7 @@ SELECT
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL END,                                  --  or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
-    'PLACEHOLDER_DATA',                                 -- [PLACEHOLDER] as f903.NO_UPN_CODE table refresh populated only in reporting period
+    'SSD_PH',                                 -- [PLACEHOLDER] as f903.NO_UPN_CODE table refresh populated only in reporting period
     p.EHM_SEN_FLAG,
         CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
@@ -842,7 +842,7 @@ SELECT
     cafe.START_REASON,
     cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE,
     cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
-    'PLACEHOLDER_DATA'                              -- [PLACEHOLDER_DATA] [TESTING]
+    'SSD_PH'                              -- [PLACEHOLDER_DATA] [TESTING]
 FROM
     Child_Social.FACT_CAF_EPISODE AS cafe
  
@@ -3548,7 +3548,7 @@ WITH RankedPermanenceData AS (
             ELSE NULL 
         END                                               AS perm_placed_for_adoption_date,
         fa.ADOPTED_BY_CARER_FLAG                          AS perm_adopted_by_carer_flag,
-        ''                                                AS perm_placed_foster_carer_date,         -- [PLACEHOLDER_DATA] or ['1900/01/01']
+        '1900/01/01'                                      AS perm_placed_foster_carer_date,         -- [PLACEHOLDER_DATA] [TESTING]
         fa.FOSTER_TO_ADOPT_DTTM                           AS perm_placed_ffa_cp_date,
         CASE 
             WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
@@ -3681,10 +3681,10 @@ Object Name: ssd_professionals
 Description: 
 Author: D2I
 Version: 1.0
-            0.9: prof_professional_id becomes staff_id 090424 JH
-            0.8: prof_table_id becomes prof_professional_id 090424 JH
+            0.9: prof_professional_id now becomes staff_id 090424 JH
+            0.8: prof_table_id(prof_system_id) becomes prof_professional_id 090424 JH
 Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
-Remarks: prof_system_id
+Remarks: 
 Dependencies: 
 - @LastSept30th
 - DIM_WORKER
@@ -3942,7 +3942,7 @@ CREATE TABLE ssd_linked_identifiers (
 --     link_valid_to_date
 -- )
 -- VALUES
---     ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01', '1900/01/01');
+--     ('SSD_PH', 'SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01');
 
 
 
@@ -4020,7 +4020,7 @@ CREATE TABLE ssd_s251_finance (
 --     s251_placeholder_4
 -- )
 -- VALUES
---     ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+--     ('SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH');
 
 
 -- Create index(es)
@@ -4193,12 +4193,12 @@ CREATE TABLE ssd_pre_proceedings (
 -- )
 -- VALUES
 --     (
---     'PLACEHOLDER_DATA', 'PLO_FAMILY1', '1900/01/01', '1900/01/01', 'Outcome1', 
+--     'SSD_PH', 'PLO_FAMILY1', '1900/01/01', '1900/01/01', 'Outcome1', 
 --     '1900/01/01', 3, 'Approved', 2, 1, '1900/01/01', '1900/01/01', 2, 'Y', 
 --     'NA', 'COURT_REF_1', 1, 'Y', 'Reason1', 'Y', 'Initial Plan 1', 'Y', 'Final Plan 1'
 --     ),
 --     (
---     'PLACEHOLDER_DATA', 'PLO_FAMILY2', '1900/01/01', '1900/01/01', 'Outcome2',
+--     'SSD_PH', 'PLO_FAMILY2', '1900/01/01', '1900/01/01', 'Outcome2',
 --     '1900/01/01', 4, 'Denied', 1, 2, '1900/01/01', '1900/01/01', 3, 'Y',
 --     'IS', 'COURT_REF_2', 2, 'Y', 'Reason2', 'Y', 'Initial Plan 2', 'Y', 'Final Plan 2'
 --     );
@@ -4295,7 +4295,7 @@ CREATE TABLE ssd_send (
 --     upn_unknown
 
 -- )
--- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+-- VALUES ('SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH');
  
 
 
@@ -4347,7 +4347,7 @@ CREATE TABLE ssd_sen_need (
  
 -- -- Insert placeholder data
 -- INSERT INTO ssd_sen_need (senn_table_id, senn_active_ehcp_id, senn_active_ehcp_need_type, senn_active_ehcp_need_rank)
--- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '0');
+-- VALUES ('SSD_PH', 'SSD_PH', 'SSD_PH', '0');
  
  
 
@@ -4393,7 +4393,7 @@ CREATE TABLE ssd_ehcp_requests (
 
 -- -- Insert placeholder data
 -- INSERT INTO ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
--- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01', '1900/01/01', 'PLACEHOLDER_DATA');
+-- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01', 'SSD_PH');
 
 
 -- Create constraint(s)
@@ -4446,7 +4446,7 @@ CREATE TABLE ssd_ehcp_assessment (
 
 -- -- Insert placeholder data
 -- INSERT INTO ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
--- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01', 'PLACEHOLDER_DATA', 'PLACEHOLDER_DATA');
+-- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', 'SSD_PH', 'SSD_PH');
 
 
 
@@ -4481,27 +4481,27 @@ Dependencies:
 =============================================================================
 */
 -- [TESTING] Create marker
-SET @TableName = N'ssd_ehcp_named_plan ';
+SET @TableName = N'ssd_ehcp_named_plan';
 PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_named_plan ', 'U') IS NOT NULL DROP TABLE ssd_ehcp_named_plan  ;
-IF OBJECT_ID('tempdb..#ssd_ehcp_named_plan ', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_named_plan  ;
+IF OBJECT_ID('ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE ssd_ehcp_named_plan;
+IF OBJECT_ID('tempdb..#ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_named_plan;
 
 -- Create structure
 CREATE TABLE ssd_ehcp_named_plan (
     ehcn_named_plan_id                  NVARCHAR(48),
     ehcn_ehcp_asmt_id                   NVARCHAR(48),
     ehcn_named_plan_start_date          DATETIME,
-    ehcn_named_plan_cease_date          DATETIME,
-    ehcn_named_plan_cease_reason        NVARCHAR(100)
+    ehcn_named_plan_cease_date          DATETIME,      
+    ehcn_named_plan_cease_reason        NVARCHAR(100)   
 );
 
 
 -- -- Insert placeholder data
 -- INSERT INTO ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_cease_date, ehcn_named_plan_cease_reason)
--- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01', '1900/01/01', 'PLACEHOLDER_DATA');
+-- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01', 'SSD_PH');
 
 
 -- Create constraint(s)
@@ -4550,7 +4550,7 @@ CREATE TABLE ssd_ehcp_active_plans (
 
 -- -- Insert placeholder data
 -- INSERT INTO ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
--- VALUES ('PLACEHOLDER_DATA', 'PLACEHOLDER_DATA', '1900/01/01');
+-- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01');
 
 
 -- Create constraint(s)

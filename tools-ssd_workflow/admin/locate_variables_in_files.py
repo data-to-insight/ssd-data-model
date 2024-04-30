@@ -6,8 +6,8 @@ import re
 directory = 'cms_ssd_extract_sql/mosaic/import_raw/'
 
 
-variable_name = 'prof_agency_worker_flag' # var name to search
-variable_stem = 'prof_' # stem to search 
+variable_name = 'ehcn_named_plan_cease_date ' # var name to search
+variable_stem = 'ehcn_' # stem to search 
 search_file_type = '.sql'  # or .py or .txt 
 
 

@@ -62,7 +62,7 @@ where
 select
 	replace(replace(replace(convert(varchar, cla.EPISODE_START_DATE, 120), '-', ''), ' ', ''), ':', '') + '.' + replicate('0', 9 - len(cast(cla.PERSON_ID as varchar(9)))) + cast(cla.PERSON_ID as varchar(9)) clae_cla_episode_id,
 	cla.PERSON_ID clae_person_id,
-	cla.episode_start_date clae_cla_episode_start,
+	cla.episode_start_date clae_cla_episode_start_date, -- [REVIEW] 290424 RH
 	cla.reason_for_new_episode clae_cla_episode_start_reason,
 	cla.CATEGORY_OF_NEED clae_cla_primary_need,
 	cla.PERIOD_OF_CARE_ID clae_cla_id,
@@ -75,7 +75,7 @@ select
 			ref.PERIOD_OF_CARE_ID = cla.PERIOD_OF_CARE_ID
 	) clae_referral_id,
 	cla.EPISODE_END_DATE clae_cla_episode_ceased,
-	cla.REASON_CEASED_DESCRIPTION clae_cla_episode_cease_reason,
+	cla.REASON_CEASED_DESCRIPTION clae_cla_episode_ceased_reason, -- [REVIEW] 290424 RH
 	(
 		select
 			(

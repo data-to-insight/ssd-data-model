@@ -99,10 +99,11 @@ select
 			cla.PERSON_ID = miss.PERSON_ID
 			and
 			miss.start_date between cla.EPISODE_START_DATE and coalesce(cla.EPISODE_END_DATE,'1 January 2300')
-	) miss_cla_episode_id,
-	miss.start_date miss_mis_epi_start, # miss_missing_episode_start_date
-	miss.missing_category miss_mis_epi_type,
-	miss.end_date miss_mis_epi_end,
+	) miss_cla_episode_id, # could this just become/transition to the correct miss_table_id ? RH [TESTING]
+							# we need miss_person_id in here [TESTING]
+	miss.start_date miss_missing_episode_start_date,
+	miss.missing_category miss_missing_episode_type,
+	miss.end_date miss_missing_episode_end_date,
 	(
 		select
 			max(
@@ -121,7 +122,7 @@ select
 			dates.person_id = miss.person_id
 			and
 			dates.question_user_code = 'missinglettersent'
-	) miss_mis_epi_rhi_offered,
+	) miss_missing_rhi_offered,
 	(
 		select
 			max(
@@ -140,6 +141,6 @@ select
 			lkp.person_id = miss.person_id
 			and
 			lkp.question_user_code = 'missingepisodediscussed'
-	) miss_mis_epi_rhi_accepted
+	) miss_missing_rhi_accepted
 from
 	SCF.Missing_Episodes miss

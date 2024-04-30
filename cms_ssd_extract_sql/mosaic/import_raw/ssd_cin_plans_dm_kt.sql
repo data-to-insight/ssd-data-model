@@ -146,8 +146,8 @@ select
 	sub.cinp_cin_plan_id
 	,sub.cinp_referral_id
 	,sub.cinp_person_id
-	,sub.cinp_cin_plan_start
-	,sub.cinp_cin_plan_end
+	,sub.cinp_cin_plan_start_date
+	,sub.cinp_cin_plan_end_date
 	,sub.cinp_cin_plan_team
 	,sub.cinp_cin_plan_worker_id
 from 
@@ -156,19 +156,19 @@ from
 		o.cin_plan_start_id cinp_cin_plan_id
 		,o.cinp_referral_id
 		,o.person_id cinp_person_id
-		,o.cin_plan_start_date cinp_cin_plan_start
+		,o.cin_plan_start_date cinp_cin_plan_start_date
 		,(
 		select min(x.cin_plan_end) 
 		from output o1
 		cross apply (values (o1.step_up_cla_date),(o1.step_up_cpp_date),(o1.step_down_eh_date),(o1.closing_step_date)) x (cin_plan_end)
 		where o1.person_id = o.person_id
 			and o1.cin_plan_start_id = o.cin_plan_start_id
-		) cinp_cin_plan_end
+		) cinp_cin_plan_end_date
 		,o.responsible_team_id cinp_cin_plan_team
 		,o.assignee_id cinp_cin_plan_worker_id
 	from output o
 	) sub
 where
-	dbo.no_time(sub.cinp_cin_plan_start) <= @end_date
+	dbo.no_time(sub.cinp_cin_plan_start_date) <= @end_date
 	and
-	dbo.future(dbo.no_time(sub.cinp_cin_plan_end)) >= @start_date
+	dbo.future(dbo.no_time(sub.cinp_cin_plan_end_date)) >= @start_date

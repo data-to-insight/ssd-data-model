@@ -71,15 +71,12 @@ where
 		)
 --
 select 
-	sub.clai_immunisations_id,
 	sub.clai_person_id,
 	sub.clai_immunisations_status
 from 
 	(
 	select 
 		sgs.subject_compound_id clai_person_id,
-		dbo.append2(stp.workflow_step_id, '.', sgs.subject_compound_id) clai_immunisations_id,
-
 		case
 			when exists (
 				select
