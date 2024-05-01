@@ -1,12 +1,20 @@
 
-/* ********************************************************************************************************** */
+
+/* **********************************************************************************************************
+
+Notes: 
+This version of the SSD script creates persistant _perm tables. A version that instead creates _temp|session 
+tables is also available to enable those restricted to read access on the cms db|schema.   
+
+
+Development notes:
+Although returns expect dd/mm/YYYY formating on dates. SSD Extract initially maintains DATETIME not DATE. in [REVIEW]
+Extended default field sizes max/exagerated e.g. family_id NVARCHAR(48) in {REVIEW]
+
+********************************************************************************************************** */
+
+
 /* Development set up */
-
--- Note: 
--- This script is for creating PERM(Persistent) tables within the temp DB name space for testing purposes. 
--- SSD extract files with the suffix ..._perm.sql - for creating the persistent table versions.
--- SSD extract files with the suffix ..._temp.sql - for creating the temporary table versions.
-
 
 USE HDM;
 GO
@@ -20,15 +28,17 @@ DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder';
 -- Query run time vars
 DECLARE @StartTime DATETIME, @EndTime DATETIME;
 SET @StartTime = GETDATE(); -- Record the start time
-/* ********************************************************************************************************** */
 
+
+/* ********************************************************************************************************** */
+/* SSD extract set up */
 
 -- ssd extract time-frame (YRS)
 DECLARE @ssd_timeframe_years INT = 6;
 DECLARE @ssd_sub1_range_years INT = 1;
 
--- Determine/Define date on which CASELOAD count required (Currently: September 30th)
-DECLARE @LastSept30th DATE; -- Most recent past September 30th date towards case load calc
+-- store date on which CASELOAD count required. Currently : Most recent past Sept30th
+DECLARE @LastSept30th DATE; 
 
 
 

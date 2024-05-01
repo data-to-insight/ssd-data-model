@@ -1,42 +1,51 @@
 
-/* DEV Notes:
-- Although returns expect dd/mm/YYYY formating on dates. Extract maintains DATETIME not DATE, 
-- Full review needed of max/exagerated/default new field type sizes e.g. family_id NVARCHAR(48)  (keys cannot use MAX)
+/* ********************************************************************************************************** */
+
+/* 
+Notes: 
+This version of the SSD script creates non-persistant _temp tables. A version that instead creates _perm|permanent 
+tables is also available to enable those with unrestricted db permissions on the cms db|schema.   
+
+FK constraints are therefore by default disabled/commented. For initial LA trials, testing and some early
+SSD tools development (e.g. AnnexA and other reporting), the project team has not found this to be restrictive. 
+
+
+
+Development notes:
+Although returns expect dd/mm/YYYY formating on dates. SSD Extract initially maintains DATETIME not DATE. in [REVIEW]
+Extended default field sizes max/exagerated e.g. family_id NVARCHAR(48) in {REVIEW]
+
 */
 
 
 /* ********************************************************************************************************** */
 /* Development set up */
 
--- Note: 
--- This script is for creating PER(Persistent) tables within the temp DB name space for testing purposes. 
--- SSD extract files with the suffix ..._per.sql - for creating the persistent table versions.
--- SSD extract files with the suffix ..._tmp.sql - for creating the temporary table versions.
-
 USE HDM;
 GO
 
 
-/* [TESTING] Set up */
+
+
+/* [TESTING] Set up (to be removed from live v2+)*/
 DECLARE @TestProgress INT = 0;
 DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder';
-
 
 -- Query run time vars
 DECLARE @StartTime DATETIME, @EndTime DATETIME;
 SET @StartTime = GETDATE(); -- Record the start time
-
+/* END [TESTING] (to be removed from live v2+)*/
 
 
 /* ********************************************************************************************************** */
-
+/* SSD extract set up */
 
 -- ssd extract time-frame (YRS)
 DECLARE @ssd_timeframe_years INT = 6;
 DECLARE @ssd_sub1_range_years INT = 1;
 
--- Determine/Define date on which CASELOAD count required (Currently: September 30th)
-DECLARE @LastSept30th DATE; -- Most recent past September 30th date towards case load calc
+-- store date on which CASELOAD count required. Currently : Most recent past Sept30th
+DECLARE @LastSept30th DATE; 
 
 
 
@@ -258,9 +267,9 @@ WHERE EXISTS ( -- only need address data for ssd relevant records
     WHERE p.pers_person_id = fc.DIM_PERSON_ID
     );
 
--- Create constraint(s)
-ALTER TABLE #ssd_family ADD CONSTRAINT FK_family_person
-FOREIGN KEY (fami_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_family ADD CONSTRAINT FK_family_person
+-- FOREIGN KEY (fami_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_family_person_id          ON #ssd_family(fami_person_id);
@@ -360,9 +369,9 @@ WHERE EXISTS
     );
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_address ADD CONSTRAINT FK_address_person
-FOREIGN KEY (addr_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_address ADD CONSTRAINT FK_address_person
+-- FOREIGN KEY (addr_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_address_person        ON #ssd_address(addr_person_id);
@@ -433,9 +442,9 @@ WHERE EXISTS
 
 
     
--- Create constraint(s)
-ALTER TABLE #ssd_disability ADD CONSTRAINT FK_disability_person 
-FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_disability ADD CONSTRAINT FK_disability_person 
+-- FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
     
 
 -- Create index(es)
@@ -516,9 +525,9 @@ WHERE
     );
  
 
--- Create constraint(s)
-ALTER TABLE #ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
-FOREIGN KEY (immi_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
+-- FOREIGN KEY (immi_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
@@ -596,15 +605,15 @@ AND EXISTS
     );
  
 
--- Add constraint(s)
-ALTER TABLE #ssd_mother ADD CONSTRAINT FK_moth_to_person 
-FOREIGN KEY (moth_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_mother ADD CONSTRAINT FK_moth_to_person 
+-- FOREIGN KEY (moth_person_id) REFERENCES #ssd_person(pers_person_id);
 
-ALTER TABLE #ssd_mother ADD CONSTRAINT FK_child_to_person 
-FOREIGN KEY (moth_childs_person_id) REFERENCES #ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_mother ADD CONSTRAINT FK_child_to_person 
+-- FOREIGN KEY (moth_childs_person_id) REFERENCES #ssd_person(pers_person_id);
 
-ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure person cannot be their own mother
-CHECK (moth_person_id <> moth_childs_person_id);
+-- ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure person cannot be their own mother
+-- CHECK (moth_person_id <> moth_childs_person_id);
 
 
 -- Create index(es)
@@ -680,9 +689,9 @@ WHERE EXISTS
     );
  
 
--- Create constraint(s)
-ALTER TABLE #ssd_legal_status ADD CONSTRAINT FK_legal_status_person
-FOREIGN KEY (lega_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_legal_status ADD CONSTRAINT FK_legal_status_person
+-- FOREIGN KEY (lega_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- Create index(es)
@@ -780,9 +789,9 @@ WHERE EXISTS
     );
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_contacts ADD CONSTRAINT FK_contact_person 
-FOREIGN KEY (cont_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_contacts ADD CONSTRAINT FK_contact_person 
+-- FOREIGN KEY (cont_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_contact_person_id ON #ssd_contacts(cont_person_id);
@@ -868,9 +877,9 @@ WHERE EXISTS
     );
 
     
--- Create constraint(s)
-ALTER TABLE #ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
-FOREIGN KEY (earl_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
+-- FOREIGN KEY (earl_person_id) REFERENCES #ssd_person(pers_person_id);
 
  
 -- Create index(es)
@@ -982,9 +991,9 @@ AND
     ;
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
-FOREIGN KEY (cine_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
+-- FOREIGN KEY (cine_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- Create index(es)
@@ -1094,9 +1103,9 @@ WHERE EXISTS
 );
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
-FOREIGN KEY (cina_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
+-- FOREIGN KEY (cina_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_cin_assessments_person_id ON #ssd_cin_assessments(cina_person_id);
@@ -1245,9 +1254,9 @@ WHERE
     fsa.EXTERNAL_ID <> -1;
 
 
--- Add constraint(s)
-ALTER TABLE #ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
-FOREIGN KEY (cinf_assessment_id) REFERENCES #ssd_cin_assessments(cina_assessment_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
+-- FOREIGN KEY (cinf_assessment_id) REFERENCES #ssd_cin_assessments(cina_assessment_id);
 
 
 -- Create index(es)
@@ -1355,9 +1364,9 @@ GROUP BY
     cps.END_DTTM
     ;
 
--- Create constraint(s)
-ALTER TABLE #ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
-FOREIGN KEY (cinp_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
+-- FOREIGN KEY (cinp_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_cin_plans_person_id ON #ssd_cin_plans(cinp_person_id);
@@ -1443,9 +1452,9 @@ AND EXISTS ( -- only ssd relevant records
  
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_person
-FOREIGN KEY (cinv_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_person
+-- FOREIGN KEY (cinv_person_id) REFERENCES #ssd_person(pers_person_id);
  
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_cinv_person_id ON #ssd_cin_visits(cinv_person_id);
@@ -1538,9 +1547,9 @@ FROM
     Child_Social.FACT_S47 AS s47;
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
-FOREIGN KEY (s47e_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
+-- FOREIGN KEY (s47e_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_person_id     ON #ssd_s47_enquiry(s47e_person_id);
@@ -1658,15 +1667,15 @@ WHERE
  
  
 
--- Create constraint(s)
-ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_s47_enquiry_id
-FOREIGN KEY (icpc_s47_enquiry_id) REFERENCES #ssd_s47_enquiry(s47e_s47_enquiry_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_s47_enquiry_id
+-- FOREIGN KEY (icpc_s47_enquiry_id) REFERENCES #ssd_s47_enquiry(s47e_s47_enquiry_id);
 
-ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_person_id
-FOREIGN KEY (icpc_person_id) REFERENCES #ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_person_id
+-- FOREIGN KEY (icpc_person_id) REFERENCES #ssd_person(pers_person_id);
 
-ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_referral_id
-FOREIGN KEY (icpc_referral_id) REFERENCES #ssd_cin_episodes(cine_referral_id);
+-- ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_referral_id
+-- FOREIGN KEY (icpc_referral_id) REFERENCES #ssd_cin_episodes(cine_referral_id);
 
 
 -- Create index(es)
@@ -1759,12 +1768,12 @@ WHERE EXISTS ( -- only ssd relevant records
 
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_person_id
-FOREIGN KEY (cppl_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_person_id
+-- FOREIGN KEY (cppl_person_id) REFERENCES #ssd_person(pers_person_id);
 
-ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_icpc_id
-FOREIGN KEY (cppl_icpc_id) REFERENCES #ssd_initial_cp_conference(icpc_icpc_id);
+-- ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_icpc_id
+-- FOREIGN KEY (cppl_icpc_id) REFERENCES #ssd_initial_cp_conference(icpc_icpc_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_person_id ON #ssd_cp_plans(cppl_person_id);
@@ -1860,9 +1869,9 @@ LEFT JOIN
 WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC'); -- Ref. ( 'STVC','STVCPCOVID')
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
-FOREIGN KEY (cppv_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
+-- FOREIGN KEY (cppv_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_cppv_person_id        ON #ssd_cp_visits(cppv_person_id);
@@ -1989,9 +1998,9 @@ GROUP BY cpr.FACT_CP_REVIEW_ID,
     ;
 
 
--- Add constraint(s)
-ALTER TABLE #ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
-FOREIGN KEY (cppr_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
+-- FOREIGN KEY (cppr_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_cppr_person_id ON #ssd_cp_reviews(cppr_person_id);
@@ -2115,12 +2124,12 @@ GROUP BY
     cn.DIM_PERSON_ID;
 
 
--- Add constraint(s)
-ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_to_person 
-FOREIGN KEY (clae_person_id) REFERENCES #ssd_person (pers_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_to_person 
+-- FOREIGN KEY (clae_person_id) REFERENCES #ssd_person (pers_person_id);
 
-ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_cla_placement_id
-FOREIGN KEY (clae_cla_placement_id) REFERENCES #ssd_cla_placements (clap_cla_placement_id);
+-- ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_cla_placement_id
+-- FOREIGN KEY (clae_cla_placement_id) REFERENCES #ssd_cla_placements (clap_cla_placement_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_clae_person_id ON #ssd_cla_episodes(clae_person_id);
@@ -2192,9 +2201,9 @@ WHERE EXISTS ( -- only ssd relevant records
     );
 
 
--- add constraint(s)
-ALTER TABLE #ssd_cla_convictions ADD CONSTRAINT FK_clac_to_clae 
-FOREIGN KEY (clac_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
+-- -- add constraint(s)
+-- ALTER TABLE #ssd_cla_convictions ADD CONSTRAINT FK_clac_to_clae 
+-- FOREIGN KEY (clac_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 
 -- Create index(es)
@@ -2269,9 +2278,9 @@ WHERE EXISTS ( -- only ssd relevant records
     WHERE p.pers_person_id = fhc.DIM_PERSON_ID
     );
 
--- add constraint(s)
-ALTER TABLE #ssd_cla_health ADD CONSTRAINT FK_clah_to_clae 
-FOREIGN KEY (clah_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
+-- -- add constraint(s)
+-- ALTER TABLE #ssd_cla_health ADD CONSTRAINT FK_clah_to_clae 
+-- FOREIGN KEY (clah_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clah_person_id ON #ssd_cla_health (clah_person_id);
@@ -2356,9 +2365,9 @@ WHERE
     rn = 1; -- pull needed record based on rank==1/most recent record for each DIM_PERSON_ID
 
 
--- add constraint(s)
-ALTER TABLE #ssd_cla_immunisations ADD CONSTRAINT FK_ssd_cla_immunisations_person
-FOREIGN KEY (clai_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- add constraint(s)
+-- ALTER TABLE #ssd_cla_immunisations ADD CONSTRAINT FK_ssd_cla_immunisations_person
+-- FOREIGN KEY (clai_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_clai_person_id ON #ssd_cla_immunisations(clai_person_id);
@@ -2428,9 +2437,9 @@ WHERE EXISTS ( -- only ssd relevant records
     WHERE p.pers_person_id = fSM.DIM_PERSON_ID
     );
 
--- Add constraint(s)
-ALTER TABLE #ssd_cla_substance_misuse ADD CONSTRAINT FK_ssd_cla_substance_misuse_clas_person_id 
-FOREIGN KEY (clas_person_id) REFERENCES #ssd_cla_episodes (clae_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_cla_substance_misuse ADD CONSTRAINT FK_ssd_cla_substance_misuse_clas_person_id 
+-- FOREIGN KEY (clas_person_id) REFERENCES #ssd_cla_episodes (clae_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clas_person_id ON #ssd_cla_substance_misuse (clas_person_id);
@@ -2533,9 +2542,9 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
                                             'H4','H5','H5a','K1','K2','M2','M3','P1','P2','Q1','Q2','R1','R2','R3',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
--- Add constraint(s)
-ALTER TABLE #ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
-FOREIGN KEY (clap_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
+-- FOREIGN KEY (clap_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
 
 
 -- Create index(es)
@@ -2636,9 +2645,9 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
     ;
 
 
--- Add constraint(s)
-ALTER TABLE #ssd_cla_reviews ADD CONSTRAINT FK_clar_to_clae 
-FOREIGN KEY (clar_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_cla_reviews ADD CONSTRAINT FK_clar_to_clae 
+-- FOREIGN KEY (clar_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_clar_cla_id ON #ssd_cla_reviews(clar_cla_id);
@@ -2768,9 +2777,9 @@ GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
  
 
 
--- Add constraint(s)
-ALTER TABLE #ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
-FOREIGN KEY (lapp_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
+-- FOREIGN KEY (lapp_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 
 -- create index(es)
@@ -2910,9 +2919,9 @@ FROM
 WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A';
  
  
--- Add constraint(s)
-ALTER TABLE #ssd_cla_care_plan ADD CONSTRAINT FK_lacp_cla_episode_id
-FOREIGN KEY (lacp_cla_episode_id) REFERENCES #ssd_cla_episodes(clae_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_cla_care_plan ADD CONSTRAINT FK_lacp_cla_episode_id
+-- FOREIGN KEY (lacp_cla_episode_id) REFERENCES #ssd_cla_episodes(clae_person_id);
  
 -- create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_lacp_person_id ON #ssd_cla_care_plan(lacp_person_id);
@@ -3003,9 +3012,9 @@ AND EXISTS ( -- only ssd relevant records
 ;
 
 
--- Add constraint(s)
-ALTER TABLE #ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
-FOREIGN KEY (clav_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
+-- FOREIGN KEY (clav_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 -- create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_clav_person_id ON #ssd_cla_visits(clav_person_id);
@@ -3157,9 +3166,9 @@ WHERE row_num > 1;
  
 /* end V8.1 */
 
--- Add constraint(s)
-ALTER TABLE #ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
-FOREIGN KEY (csdq_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
+-- FOREIGN KEY (csdq_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_csdq_person_id ON #ssd_sdq_scores(csdq_person_id);
@@ -3241,9 +3250,9 @@ WHERE EXISTS ( -- only ssd relevant records
 
 
 
--- Add constraint(s)
-ALTER TABLE #ssd_missing ADD CONSTRAINT FK_missing_to_person
-FOREIGN KEY (miss_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_missing ADD CONSTRAINT FK_missing_to_person
+-- FOREIGN KEY (miss_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_miss_person_id        ON #ssd_missing(miss_person_id);
@@ -3423,9 +3432,9 @@ GROUP BY
     ;
 
 
--- Add constraint(s)
-ALTER TABLE #ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
-FOREIGN KEY (clea_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
+-- FOREIGN KEY (clea_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- Create index(es)
@@ -3640,9 +3649,9 @@ AND EXISTS
     WHERE p.pers_person_id = perm_person_id
     );
 
--- Add constraint(s)
-ALTER TABLE #ssd_permanence ADD CONSTRAINT FK_perm_person_id
-FOREIGN KEY (perm_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_permanence ADD CONSTRAINT FK_perm_person_id
+-- FOREIGN KEY (perm_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 
 -- Create index(es)
@@ -3845,12 +3854,12 @@ WHERE EXISTS
     WHERE p.pers_person_id = fi.DIM_PERSON_ID
     );
 
--- Add constraint(s)
-ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
-FOREIGN KEY (invo_professional_id) REFERENCES #ssd_professionals (prof_professional_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
+-- FOREIGN KEY (invo_professional_id) REFERENCES #ssd_professionals (prof_professional_id);
 
-ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional_role 
-FOREIGN KEY (invo_professional_role_id) REFERENCES #ssd_professionals (prof_social_worker_registration_no);
+-- ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional_role 
+-- FOREIGN KEY (invo_professional_role_id) REFERENCES #ssd_professionals (prof_social_worker_registration_no);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_invo_person_id            ON #ssd_involvements (invo_person_id);
@@ -3932,9 +3941,9 @@ VALUES
 --     );
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
-FOREIGN KEY (link_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
+-- FOREIGN KEY (link_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_link_person_id        ON #ssd_linked_identifiers(link_person_id);
@@ -4006,9 +4015,9 @@ CREATE TABLE #ssd_s251_finance (
 -- VALUES
 --     ('SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH');
 
--- Create constraint(s)
-ALTER TABLE #ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
-FOREIGN KEY (s251_cla_placement_id) REFERENCES #ssd_cla_placement(clap_cla_placement_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
+-- FOREIGN KEY (s251_cla_placement_id) REFERENCES #ssd_cla_placement(clap_cla_placement_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_s251_cla_placement_id ON #ssd_s251_finance(s251_cla_placement_id);
@@ -4082,9 +4091,9 @@ CREATE TABLE #ssd_voice_of_child (
 --     );
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
-FOREIGN KEY (voch_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
+-- FOREIGN KEY (voch_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- Create index(es)
@@ -4197,9 +4206,9 @@ CREATE TABLE #ssd_pre_proceedings (
 --     WHERE p.pers_person_id = ssd_pre_proceedings.DIM_PERSON_ID
 --     );
 
--- Create constraint(s)
-ALTER TABLE #ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
-FOREIGN KEY (prep_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
+-- FOREIGN KEY (prep_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_prep_person_id                ON #ssd_pre_proceedings (prep_person_id);
@@ -4288,9 +4297,9 @@ CREATE TABLE #ssd_send (
  
 
 
--- Add constraint(s)
-ALTER TABLE #ssd_send ADD CONSTRAINT FK_send_to_person 
-FOREIGN KEY (send_person_id) REFERENCES #ssd_person(pers_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_send ADD CONSTRAINT FK_send_to_person 
+-- FOREIGN KEY (send_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- [TESTING] Increment /print progress
@@ -4332,9 +4341,9 @@ CREATE TABLE #ssd_sen_need (
     senn_active_ehcp_need_rank          NVARCHAR(1)
 );
  
--- Add constraint(s)
-ALTER TABLE #ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
-FOREIGN KEY (senn_active_ehcp_id) REFERENCES #ssd_ehcp_active_plans(pers_person_id);
+-- -- Add constraint(s)
+-- ALTER TABLE #ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
+-- FOREIGN KEY (senn_active_ehcp_id) REFERENCES #ssd_ehcp_active_plans(pers_person_id);
 
 -- add index(es)
 
@@ -4387,9 +4396,9 @@ CREATE TABLE #ssd_ehcp_requests (
 );
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
-FOREIGN KEY (ehcr_send_table_id) REFERENCES #ssd_send(send_table_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
+-- FOREIGN KEY (ehcr_send_table_id) REFERENCES #ssd_send(send_table_id);
 
 -- Create index(es)
 
@@ -4440,9 +4449,9 @@ CREATE TABLE #ssd_ehcp_assessment (
     ehca_ehcp_assessment_exceptions     NVARCHAR(100)
 );
 
--- Create constraint(s)
-ALTER TABLE #ssd_ehcp_assessment ADD CONSTRAINT FK_ehcp_assessment_requests
-FOREIGN KEY (ehca_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_ehcp_assessment ADD CONSTRAINT FK_ehcp_assessment_requests
+-- FOREIGN KEY (ehca_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
 
 -- Create index(es)
 
@@ -4498,9 +4507,9 @@ CREATE TABLE #ssd_ehcp_named_plan (
 
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_ehcp_named_plan ADD CONSTRAINT FK_ehcp_named_plan_assessment
-FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES #ssd_ehcp_assessment(ehca_ehcp_assessment_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_ehcp_named_plan ADD CONSTRAINT FK_ehcp_named_plan_assessment
+-- FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES #ssd_ehcp_assessment(ehca_ehcp_assessment_id);
 
 -- Create index(es)
 
@@ -4550,9 +4559,9 @@ CREATE TABLE #ssd_ehcp_active_plans (
     ehcp_active_ehcp_last_review_date   DATETIME
 );
 
--- Create constraint(s)
-ALTER TABLE #ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
-FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
+-- -- Create constraint(s)
+-- ALTER TABLE #ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
+-- FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
 
 
 -- -- Insert placeholder data
