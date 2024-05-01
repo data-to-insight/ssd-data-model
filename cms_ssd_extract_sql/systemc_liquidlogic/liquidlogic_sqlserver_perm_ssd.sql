@@ -2489,6 +2489,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_
 CREATE TABLE ssd_cla_placement (
     clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,
     clap_cla_id                         NVARCHAR(48),
+    clap_person_id                      NVARCHAR(48),
     clap_cla_placement_start_date       DATETIME,
     clap_cla_placement_type             NVARCHAR(100),
     clap_cla_placement_urn              NVARCHAR(48),
@@ -2499,11 +2500,11 @@ CREATE TABLE ssd_cla_placement (
     clap_cla_placement_change_reason    NVARCHAR(100)
 );
  
- 
 -- Insert data
 INSERT INTO ssd_cla_placement (
     clap_cla_placement_id,
     clap_cla_id,
+    clap_person_id,
     clap_cla_placement_start_date,
     clap_cla_placement_type,
     clap_cla_placement_urn,
@@ -2515,7 +2516,8 @@ INSERT INTO ssd_cla_placement (
 )
 SELECT
     fcp.FACT_CLA_PLACEMENT_ID                   AS clap_cla_placement_id,
-    fcp.FACT_CLA_ID                             AS clap_cla_id,                                
+    fcp.FACT_CLA_ID                             AS clap_cla_id,   
+    fcp.DIM_PERSON_ID                           AS clap_person_id,                             
     fcp.START_DTTM                              AS clap_cla_placement_start_date,
     fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE          AS clap_cla_placement_type,
     (
@@ -2547,10 +2549,10 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
                                             'H4','H5','H5a','K1','K2','M2','M3','P1','P2','Q1','Q2','R1','R2','R3',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
+
 -- Add constraint(s)
 ALTER TABLE ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
 FOREIGN KEY (clap_cla_id) REFERENCES ssd_cla_episodes(clae_cla_id);
-
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clap_cla_placement_urn ON ssd_cla_placement (clap_cla_placement_urn);
@@ -3230,13 +3232,13 @@ IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL DROP TABLE #ssd_missing;
 
 -- Create structure
 CREATE TABLE ssd_missing (
-    miss_table_id               NVARCHAR(48) PRIMARY KEY,
-    miss_person_id              NVARCHAR(48),
-    miss_missing_episode_start_date  DATETIME,
-    miss_missing_episode_type   NVARCHAR(100),
-    miss_missing_episode_end_date    DATETIME,
-    miss_missing_rhi_offered    NVARCHAR(10),                   -- [TESTING] Confirm source data/why >7 required
-    miss_missing_rhi_accepted   NVARCHAR(10)                    -- [TESTING] Confirm source data/why >7 required
+    miss_table_id                       NVARCHAR(48) PRIMARY KEY,
+    miss_person_id                      NVARCHAR(48),
+    miss_missing_episode_start_date     DATETIME,
+    miss_missing_episode_type           NVARCHAR(100),
+    miss_missing_episode_end_date       DATETIME,
+    miss_missing_rhi_offered            NVARCHAR(10),                   -- [TESTING] Confirm source data/why >7 required
+    miss_missing_rhi_accepted           NVARCHAR(10)                    -- [TESTING] Confirm source data/why >7 required
 );
 
 

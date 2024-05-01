@@ -2072,7 +2072,7 @@ INSERT INTO #ssd_cla_episodes (
     clae_cla_episode_ceased_reason,
     clae_cla_id,
     clae_referral_id,
-    clae_cla_review_last_iro_contact_date,
+    clae_cla_last_iro_contact_date,
     clae_entered_care_date 
 )
 SELECT
@@ -2484,6 +2484,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_
 CREATE TABLE #ssd_cla_placement (
     clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,
     clap_cla_id                         NVARCHAR(48),
+    clap_person_id                      NVARCHAR(48),
     clap_cla_placement_start_date       DATETIME,
     clap_cla_placement_type             NVARCHAR(100),
     clap_cla_placement_urn              NVARCHAR(48),
@@ -2498,6 +2499,7 @@ CREATE TABLE #ssd_cla_placement (
 INSERT INTO #ssd_cla_placement (
     clap_cla_placement_id,
     clap_cla_id,
+    clap_person_id,
     clap_cla_placement_start_date,
     clap_cla_placement_type,
     clap_cla_placement_urn,
@@ -2509,7 +2511,8 @@ INSERT INTO #ssd_cla_placement (
 )
 SELECT
     fcp.FACT_CLA_PLACEMENT_ID                   AS clap_cla_placement_id,
-    fcp.FACT_CLA_ID                             AS clap_cla_id,                                
+    fcp.FACT_CLA_ID                             AS clap_cla_id,   
+    fcp.DIM_PERSON_ID                           AS clap_person_id,                             
     fcp.START_DTTM                              AS clap_cla_placement_start_date,
     fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE          AS clap_cla_placement_type,
     (
@@ -3210,13 +3213,13 @@ IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL DROP TABLE #ssd_missing;
 
 -- Create structure
 CREATE TABLE #ssd_missing (
-    miss_table_id               NVARCHAR(48) PRIMARY KEY,
-    miss_person_id              NVARCHAR(48),
-    miss_missing_episode_start_date  DATETIME,
-    miss_missing_episode_type   NVARCHAR(100),
-    miss_missing_episode_end_date    DATETIME,
-    miss_missing_rhi_offered    NVARCHAR(10),                   -- [TESTING] Confirm source data/why >7 required
-    miss_missing_rhi_accepted   NVARCHAR(10)                    -- [TESTING] Confirm source data/why >7 required
+    miss_table_id                       NVARCHAR(48) PRIMARY KEY,
+    miss_person_id                      NVARCHAR(48),
+    miss_missing_episode_start_date     DATETIME,
+    miss_missing_episode_type           NVARCHAR(100),
+    miss_missing_episode_end_date       DATETIME,
+    miss_missing_rhi_offered            NVARCHAR(10),                   -- [TESTING] Confirm source data/why >7 required
+    miss_missing_rhi_accepted           NVARCHAR(10)                    -- [TESTING] Confirm source data/why >7 required
 );
 
 
@@ -4619,128 +4622,122 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 
 
 
-/* 
-=============================================================================
-MOD Name: involvements history, involvements type history
-Description: 
-Author: D2I
-Version: 0.1
-Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
-Remarks: 
-Dependencies: 
-- FACT_INVOLVEMENTS
-- ssd_person
-=============================================================================
-*/
-ALTER TABLE #ssd_person
-ADD involvement_history NVARCHAR(4000),  -- Adjust data type as needed
-    involvement_type_story_json NVARCHAR(1000);  -- Adjust data type as needed
+-- /* 
+-- =============================================================================
+-- MOD Name: involvements history, involvements type history
+-- Description: 
+-- Author: D2I
+-- Version: 0.1
+-- Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
+-- Remarks: 
+-- Dependencies: 
+-- - FACT_INVOLVEMENTS
+-- - ssd_person
+-- =============================================================================
+-- */
+-- ALTER TABLE #ssd_person
+-- ADD involvement_history NVARCHAR(4000),  -- Adjust data type as needed
+--     involvement_type_story_json NVARCHAR(1000);  -- Adjust data type as needed
 
 
--- CTE for involvement history incl. worker data
-WITH InvolvementHistoryCTE AS (
-    SELECT 
-        fi.DIM_PERSON_ID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
-        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
+-- -- CTE for involvement history incl. worker data
+-- WITH InvolvementHistoryCTE AS (
+--     SELECT 
+--         fi.DIM_PERSON_ID,
+--         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
+--         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
+--         MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
 
-        JSON_QUERY((
-            -- structure of the main|complete invovements history json
-            SELECT 
-                fi2.FACT_INVOLVEMENTS_ID                AS 'involvement_id',
-                fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE    AS 'involvement_type_code',
-                fi2.START_DTTM                          AS 'start_date', 
-                fi2.END_DTTM                            AS 'end_date', 
-                fi2.DIM_WORKER_ID                       AS 'worker_id', 
-                fi2.DIM_DEPARTMENT_ID                   AS 'department_id'
-            FROM 
-                Child_Social.FACT_INVOLVEMENTS fi2
-            WHERE 
-                fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
-            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-            -- Comment/replace this block(1 of 3)replace the above line with: FOR JSON PATH to enable FULL contact history in _json (involvement_history_json)
-            -- FOR JSON PATH
-            -- end of comment block 1
-        )) AS involvement_history
-    FROM (
+--         JSON_QUERY((
+--             -- structure of the main|complete invovements history json
+--             SELECT 
+--                 fi2.FACT_INVOLVEMENTS_ID                AS 'involvement_id',
+--                 fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE    AS 'involvement_type_code',
+--                 fi2.START_DTTM                          AS 'start_date', 
+--                 fi2.END_DTTM                            AS 'end_date', 
+--                 fi2.DIM_WORKER_ID                       AS 'worker_id', 
+--                 fi2.DIM_DEPARTMENT_ID                   AS 'department_id'
+--             FROM 
+--                 Child_Social.FACT_INVOLVEMENTS fi2
+--             WHERE 
+--                 fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
+--             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--             -- Comment/replace this block(1 of 3)replace the above line with: FOR JSON PATH to enable FULL contact history in _json (involvement_history_json)
+--             -- FOR JSON PATH
+--             -- end of comment block 1
+--         )) AS involvement_history
+--     FROM (
 
-        -- Comment this block(2 of 3) to enable FULL contact history in _json (involvement_history_json)
-        SELECT *,
-            ROW_NUMBER() OVER (
-                PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
-                ORDER BY FACT_INVOLVEMENTS_ID DESC
-            ) AS rn,
-            -- end of comment block 2
+--         -- Comment this block(2 of 3) to enable FULL contact history in _json (involvement_history_json)
+--         SELECT *,
+--             ROW_NUMBER() OVER (
+--                 PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
+--                 ORDER BY FACT_INVOLVEMENTS_ID DESC
+--             ) AS rn,
+--             -- end of comment block 2
 
-            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
-        FROM Child_Social.FACT_INVOLVEMENTS
-        WHERE 
-            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
-            -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
-            AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-            AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-            AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
-                                                -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
-    ) fi
+--             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
+--         FROM Child_Social.FACT_INVOLVEMENTS
+--         WHERE 
+--             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
+--             -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
+--             AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+--             AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+--             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
+--                                                 -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
+--     ) fi
 
-    -- Comment this block(3 of 3) to enable FULL contact history in _json (involvement_history_json)
-    WHERE fi.rn = 1
-    -- end of comment block 3
+--     -- Comment this block(3 of 3) to enable FULL contact history in _json (involvement_history_json)
+--     WHERE fi.rn = 1
+--     -- end of comment block 3
 
-    AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-        SELECT 1 FROM #ssd_person p
-        WHERE p.pers_person_id = fi.DIM_PERSON_ID
-    )
+--     AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+--         SELECT 1 FROM #ssd_person p
+--         WHERE p.pers_person_id = fi.DIM_PERSON_ID
+--     )
 
-    GROUP BY 
-        fi.DIM_PERSON_ID
-),
--- CTE for involvement type story
-InvolvementTypeStoryCTE AS (
-    SELECT 
-        fi.DIM_PERSON_ID,
-        STUFF((
-            -- Concat involvement type codes into string
-            -- cannot use STRING AGG as appears to not work (Needs v2017+)
-            SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
-            FROM Child_Social.FACT_INVOLVEMENTS fi3
-            WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
+--     GROUP BY 
+--         fi.DIM_PERSON_ID
+-- ),
+-- -- CTE for involvement type story
+-- InvolvementTypeStoryCTE AS (
+--     SELECT 
+--         fi.DIM_PERSON_ID,
+--         STUFF((
+--             -- Concat involvement type codes into string
+--             -- cannot use STRING AGG as appears to not work (Needs v2017+)
+--             SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
+--             FROM Child_Social.FACT_INVOLVEMENTS fi3
+--             WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
 
-            AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-                SELECT 1 FROM #ssd_person p
-                WHERE p.pers_person_id = fi3.DIM_PERSON_ID
-            )
+--             AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+--                 SELECT 1 FROM #ssd_person p
+--                 WHERE p.pers_person_id = fi3.DIM_PERSON_ID
+--             )
 
-            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
-            FOR XML PATH('')
-        ), 1, 1, '') AS InvolvementTypeStory
-    FROM 
-        Child_Social.FACT_INVOLVEMENTS fi
+--             ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
+--             FOR XML PATH('')
+--         ), 1, 1, '') AS InvolvementTypeStory
+--     FROM 
+--         Child_Social.FACT_INVOLVEMENTS fi
     
-    WHERE 
-        EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-            SELECT 1 FROM #ssd_person p
-            WHERE p.pers_person_id = fi.DIM_PERSON_ID
-        )
-    GROUP BY 
-        fi.DIM_PERSON_ID
-)
+--     WHERE 
+--         EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+--             SELECT 1 FROM #ssd_person p
+--             WHERE p.pers_person_id = fi.DIM_PERSON_ID
+--         )
+--     GROUP BY 
+--         fi.DIM_PERSON_ID
+-- )
 
 
--- Update
-UPDATE p
-SET
-    p.involvement_history = ih.involvement_history,
-    p.involvement_type_story_json = CONCAT('[', its.InvolvementTypeStory, ']')
-FROM #ssd_person p
-LEFT JOIN InvolvementHistoryCTE ih ON p.pers_person_id = ih.DIM_PERSON_ID
-LEFT JOIN InvolvementTypeStoryCTE its ON p.pers_person_id = its.DIM_PERSON_ID;
-
-
-
-
--- -- [TESTING]
--- SELECT * FROM #SpaceUsedData;
+-- -- Update
+-- UPDATE p
+-- SET
+--     p.involvement_history = ih.involvement_history,
+--     p.involvement_type_story_json = CONCAT('[', its.InvolvementTypeStory, ']')
+-- FROM #ssd_person p
+-- LEFT JOIN InvolvementHistoryCTE ih ON p.pers_person_id = ih.DIM_PERSON_ID
+-- LEFT JOIN InvolvementTypeStoryCTE its ON p.pers_person_id = its.DIM_PERSON_ID;
 
 
