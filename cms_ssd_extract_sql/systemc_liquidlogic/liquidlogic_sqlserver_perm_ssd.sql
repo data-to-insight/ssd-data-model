@@ -6,6 +6,8 @@ Notes:
 This version of the SSD script creates persistant _perm tables. A version that instead creates _temp|session 
 tables is also available to enable those restricted to read access on the cms db|schema.   
 
+There remain some [TESTING] [REVIEW] notes as the project works through wider testing, and similarly some test related 
+console outputs to aid problem solving during set up. These can/will be later removed. 
 
 Development notes:
 Although returns expect dd/mm/YYYY formating on dates. SSD Extract initially maintains DATETIME not DATE. in [REVIEW]
@@ -13,21 +15,20 @@ Extended default field sizes max/exagerated e.g. family_id NVARCHAR(48) in {REVI
 
 ********************************************************************************************************** */
 
-
 /* Development set up */
 
 USE HDM;
 GO
 
 
-/* [TESTING] Set up */
+/* [TESTING] Set up (to be removed from live v2+)*/
 DECLARE @TestProgress INT = 0;
 DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder';
-
 
 -- Query run time vars
 DECLARE @StartTime DATETIME, @EndTime DATETIME;
 SET @StartTime = GETDATE(); -- Record the start time
+/* END [TESTING] (to be removed from live v2+)*/
 
 
 /* ********************************************************************************************************** */

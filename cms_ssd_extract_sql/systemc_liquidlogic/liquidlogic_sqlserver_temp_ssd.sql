@@ -1,7 +1,6 @@
 
-/* ********************************************************************************************************** */
+/* **********************************************************************************************************
 
-/* 
 Notes: 
 This version of the SSD script creates non-persistant _temp tables. A version that instead creates _perm|permanent 
 tables is also available to enable those with unrestricted db permissions on the cms db|schema.   
@@ -10,15 +9,15 @@ FK constraints are therefore by default disabled/commented. For initial LA trial
 SSD tools development (e.g. AnnexA and other reporting), the project team has not found this to be restrictive. 
 
 
+There remain some [TESTING] [REVIEW] notes as the project works through wider testing, and similarly some test related 
+console outputs to aid problem solving during set up. These can/will be later removed. 
 
 Development notes:
 Although returns expect dd/mm/YYYY formating on dates. SSD Extract initially maintains DATETIME not DATE. in [REVIEW]
 Extended default field sizes max/exagerated e.g. family_id NVARCHAR(48) in {REVIEW]
 
-*/
+********************************************************************************************************** */
 
-
-/* ********************************************************************************************************** */
 /* Development set up */
 
 USE HDM;
