@@ -9,6 +9,18 @@ tables is also available to enable those restricted to read access on the cms db
 There remain some [TESTING] [REVIEW] notes as the project works through wider testing, and similarly some test related 
 console outputs to aid problem solving during set up. These can/will be later removed. 
 
+/*
+Dev Status Flags (~in this order):
+Status:     [B]acklog, 
+            [D]ev,              -- Currently being developed 
+            [T]est,             -- Dev work being tested/run time script tests
+            [DT]ataTesting,     -- Sense checking of extract data ongoing
+            [A]waitingReview,   -- Hand-over to SSD project team for review
+            [R]elease,          -- Ready for wider release and secondary data testing
+            [Bl]ocked,          -- Data is not held in CMS/accessible, or other stoppage reason
+            [P]laceholder       -- Data not held by any LA, new data, - Future structure added as placeholder
+*/
+
 Development notes:
 Although returns expect dd/mm/YYYY formating on dates. SSD Extract initially maintains DATETIME not DATE. in [REVIEW]
 Extended default field sizes max/exagerated e.g. family_id NVARCHAR(48) in {REVIEW]
@@ -50,7 +62,7 @@ Description: Person/child details. This the most connected table in the SSD.
 Author: D2I
 Version: 1.0
             0.1 Additional inclusion criteria added to capture care leavers 120324 JH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks:    
             Note: Due to part reliance on 903 table, be aware that if 903 not populated pre-ssd run, 
             this/subsequent queries can return v.low|unexpected row counts.
@@ -217,7 +229,7 @@ Object Name: ssd_family
 Description: Contains the family connections for each person
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 Dependencies: 
 - FACT_CONTACTS
@@ -285,7 +297,7 @@ Object Name: ssd_address
 Description: Contains full address details for every person 
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 Dependencies: 
 - ssd_person
@@ -388,7 +400,7 @@ Description: Contains the Y/N flag for persons with disability
 Author: D2I
 Version: 1.0
             0.1: Removed disability_code replace() into Y/N flag 130324 RH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -461,7 +473,7 @@ Description:
 Author: D2I
 Version: 1.0
             0.9 rem ims.DIM_LOOKUP_IMMGR_STATUS_DESC rpld with _CODE 270324 JH 
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
             increased field size to 100
 Dependencies:
@@ -540,7 +552,7 @@ Description: Contains parent-child relations between mother-child
 Author: D2I
 Version: 1.0
             0.2: updated to exclude relationships with an end date 280224 JH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
 Dependencies: 
 - ssd_person
@@ -627,7 +639,7 @@ Object Name: ssd_legal_status
 Description: 
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -705,7 +717,7 @@ Author: D2I
 Version: 1.0
             0.2 cont_contact_source (_code) field name edit 260124 RH
             0.1 cont_contact_source_desc added RH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks:Inclusion in contacts might differ between LAs. 
         Baseline definition:
         Contains safeguarding and referral to early help data.
@@ -801,7 +813,7 @@ Object Name: ssd_early_help_episodes
 Description: 
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -890,7 +902,7 @@ Description:
 Author: D2I
 Version: 1.0
             0.1: contact_source_desc added, _source now populated with ID 141223 RH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - @ssd_timeframe_years
@@ -1002,7 +1014,7 @@ Object Name: ssd_cin_assessments
 Description: 
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1117,7 +1129,7 @@ Object Name: ssd_assessment_factors
 Description: 
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: This object referrences some large source tables- Instances of 45m+. 
 Dependencies: 
 - ssd_cin_assessments
@@ -1266,7 +1278,7 @@ Description:
 Author: D2I
 Version: 1.0
             0.1: Update fix returning new row for each revision of the plan JH 070224
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1370,7 +1382,7 @@ Object Name: ssd_cin_visits
 Description:
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks:    Source table can be very large! Avoid any unfiltered queries.
             Notes: Does this need to be filtered by only visits in their current Referral episode?
                     however for some this ==2 weeks, others==~17 years
@@ -1458,7 +1470,7 @@ Object Name: ssd_s47_enquiry
 Description: 
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1570,8 +1582,7 @@ Version: 1.0
             0.3 Updated source of CP_PLAN_ID 100424 JH
             0.2 Updated the worker fields 020424 JH
             0.1 Re-instated the worker details 010224 JH
- 
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks:
 Dependencies:
 - FACT_CP_CONFERENCE
@@ -1697,7 +1708,7 @@ Version: 1.0
             0.3: added IS_OLA field to identify OLA temporary plans
             which need to be excluded from statutory returns 090224 JCH
             0.2: removed depreciated team_id and worker id fields RH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks:
 Dependencies:
 - ssd_person
@@ -1796,7 +1807,7 @@ Description:
 Author: D2I
 Version: 1.0
             0.2: cppv_person_id added, where claus removed 'STVCPCOVID' 130224 JH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: Not all CP Visit Casenotes have a link back to the CP Visit -
          using casenote ID as PK and linking to CP Visit where available.
          Will have to use Person ID to link object to Person table
@@ -1890,7 +1901,7 @@ Description:
 Author: D2I
 Version: 1.0
             0.1: Resolved issue with linking to Quoracy information 130224 JH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks:    cppr_cp_review_participation - ON HOLD/Not included in SSD Ver/Iteration 1
             Resolved issue with linking to Quoracy information. Added fm.FACT_MEETING_ID
             so users can identify conferences including multiple children. Reviews held
@@ -2023,7 +2034,7 @@ Description:
 Author: D2I
 Version: 1.0
             0.9: cla_placement_id added as part of cla_placements review RH 060324
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_involvements
@@ -2151,7 +2162,7 @@ Object Name: ssd_cla_convictions
 Description: 
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -2224,7 +2235,7 @@ Object Name: ssd_cla_health
 Description:
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 1.5 JH updated source for clah_health_check_type to resolve blanks.
             Updated to use DIM_LOOKUP_EXAM_STATUS_DESC as opposed to _CODE
             to inprove readability.
@@ -2308,7 +2319,7 @@ Author: D2I
 Version: 1.0
             0.2: most recent status reworked / 903 source removed 220224 JH
             0.1: clai_immunisations_status_date removed RH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -2391,7 +2402,7 @@ Object Name: ssd_cla_substance_misuse
 Description: 
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -2468,7 +2479,7 @@ Author: D2I
 Version: 1.0 
             0.2: 060324 JH
             0.1: Corrected/removal of placement_la & episode_id 090124 RH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
 Dependencies: 
 - ssd_person
@@ -2582,7 +2593,7 @@ Description:
 Author: D2I
 Version: 1.0
             0.1: clar_cla_id change from clar_cla_episode_id 120124 JH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_cla_episodes
@@ -2696,7 +2707,7 @@ Object Name: ssd_cla_previous_permanence
 Description:
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley.
         1.5 JH tmp table was not being referenced, updated query and reduced running
         time considerably, also filtered out rows where ANSWER IS NULL
@@ -2825,7 +2836,7 @@ Description:
 Author: D2I
 Version: 1.0
             0.1: Altered _json keys and groupby towards > clarity 190224 JH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks:    Added short codes to plan type questions to improve readability.
             Removed form type filter, only filtering ffa. on ANSWER_NO.
 Dependencies:
@@ -2969,7 +2980,7 @@ Version: 1.0!
             !0.3: Prep for casenote_id to be removed... not yet actioned RH
             0.2: FK updated to person_id. change from clav.VISIT_DTTM  150224 JH
             0.1: pers_id and cla_id added JH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks:
 Dependencies:
 - FACT_CARE_EPISODES
@@ -3061,7 +3072,7 @@ Object Name: ssd_sdq_scores
 Description:
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
         Removed csdq_form_id as the form id is also being used as csdq_table_id
         Added placeholder for csdq_sdq_reason
@@ -3214,7 +3225,7 @@ Object Name: ssd_missing
 Description: 
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -3304,7 +3315,7 @@ Version: 1.0
             0.3: change of main source to DIM_CLA_ELIGIBILITY in order to capture full care leaver cohort 12/03/24 JH
             0.2: switch field _worker)nm and _team_nm around as in wrong order RH
             0.1: worker/p.a id field changed to descriptive name towards AA reporting JH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
             Dev: Revised V3/4 to aid performance on large involvements table aggr
@@ -3486,7 +3497,7 @@ Version: 1.0
             0.3: entered_care_date removed/moved to cla_episodes 060324 RH
             0.2: perm_placed_foster_carer_date (from fc.START_DTTM) removed RH
             0.1: perm_adopter_sex, perm_adopter_legal_status added RH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
         DEV: 181223: Assumed that only one permanence order per child. 
         - In order to handle/reflect the v.rare cases where this has broken down, further work is required.
@@ -3706,7 +3717,7 @@ Author: D2I
 Version: 1.0
             0.9: prof_professional_id now becomes staff_id 090424 JH
             0.8: prof_table_id(prof_system_id) becomes prof_professional_id 090424 JH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - @LastSept30th
@@ -3810,7 +3821,7 @@ Description:
 Author: D2I
 Version: 1.0
             0.9: added person_id and changed source of professional_team 090424 JH
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks:
 Dependencies:
 - ssd_professionals
@@ -3918,7 +3929,7 @@ Object Name: ssd_linked_identifiers
 Description: 
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [R]elease
 Remarks: The list of allowed identifier_type codes are:
             ['Case Number', 
             'Unique Pupil Number', 
@@ -4003,7 +4014,7 @@ Object Name: ssd_s251_finance
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
+Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4066,7 +4077,7 @@ Object Name: ssd_voice_of_child
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, *Release]
+Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4139,7 +4150,7 @@ Object Name: ssd_pre_proceedings
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
+Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4277,7 +4288,7 @@ Object Name: ssd_send
 Description: 
 Author: D2I
 Version: 1.0
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - FACT_903_DATA
@@ -4335,7 +4346,7 @@ Object Name: ssd_sen_need
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 0.1
-Status: [Backlog, Dev, Blocked, Testing, AwaitingReview, *Release]
+Status: [P]laceholder
 Remarks:
 Dependencies:
 - Yet to be defined
@@ -4388,7 +4399,7 @@ Object Name: ssd_ehcp_requests
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 0.1
-Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
+Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4442,7 +4453,7 @@ Object Name: ssd_ehcp_assessment
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 0.1
-Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
+Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4501,7 +4512,7 @@ Object Name: ssd_ehcp_named_plan
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 0.1
-Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
+Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4556,7 +4567,7 @@ Object Name: ssd_ehcp_active_plans
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 0.1
-Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
+Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
@@ -4635,7 +4646,7 @@ MOD Name: involvements history, involvements type history
 Description: 
 Author: D2I
 Version: 0.1
-Status: [Backlog, Dev, Blocked, *Testing, AwaitingReview, Release]
+Status: [DT]ataTesting
 Remarks: 
 Dependencies: 
 - FACT_INVOLVEMENTS
