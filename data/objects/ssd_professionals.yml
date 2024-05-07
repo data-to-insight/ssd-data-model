@@ -140,7 +140,7 @@ nodes:
     guidance: Worker FTE
   - name: prof_agency_worker_flag
     description: Flag for whether the worker is agency
-    item_ref: PROF013A
+    item_ref: PROF014A
     type: NCHAR
     categories:
     - workforce
@@ -149,4 +149,4 @@ nodes:
     cms_field:
     - liquid_logic:prof_agency_worker_flag
     - mosaic:prof_agency_worker_flag
-    guidance: Professional's Name
+    guidance: null

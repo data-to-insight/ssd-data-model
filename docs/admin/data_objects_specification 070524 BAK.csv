@@ -38,9 +38,9 @@ REFU  -  Refused
 NOBT -  Information not yet obtained "
 PERS005A,ssd_person,identity,,datetime,NULL,pers_dob,Date of Birth,,SSDA903|CIN|AnnexA|RIIA,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : pers_dob|mosaic : pers_dob,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"Person's date of birth. Either Date of Birth or Expected Date of Birth should be recorded, but not both. If the exact day of birth is not known:
 Unknown dates can be a problem for unaccompanied asylum-seeking children, If the day of birth is not known then assume that it was the 15th of the month. Do not use first day of the month as a dummy date of birth."
-PERS013A,ssd_person,identity,,nvarchar,48,pers_common_child_id,Common Child Identifier (NHS Number),,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : pers_common_child_id|mosaic : pers_common_child_id,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"This is a lifetime national identifier allocated from birth, or when a person registers with the NHS 
+PERS013A,ssd_person,identity,,nvarchar,48,pers_common_child_id,Common Child Identifier (NHS Number),,Local,,liquid_logic : pers_common_child_id|mosaic : pers_common_child_id,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"This is a lifetime national identifier allocated from birth, or when a person registers with the NHS 
 for the first time (England, Isle of Man and Wales). Allocated by the PDS, the first nine digits are the identifier and the tenth helps the number test its own validity."
-PERS014A,ssd_person,identity,,nvarchar,48,pers_legacy_id,Person System ID,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : pers_legacy_id|mosaic : pers_legacy_id,,,,,,"This must be a unique ID for each child (no longer than 20 characters) and should be retained from year to year. A child ID should not be reused after a period of time, it should be unique to a single child in your local authority. It can include alphabetic and numeric characters. Do not use non-numeric or non-alphabetic characters. 
+PERS014A,ssd_person,identity,,nvarchar,48,pers_legacy_id,Person System ID,,,,liquid_logic : pers_legacy_id|mosaic : pers_legacy_id,,,,,,"This must be a unique ID for each child (no longer than 20 characters) and should be retained from year to year. A child ID should not be reused after a period of time, it should be unique to a single child in your local authority. It can include alphabetic and numeric characters. Do not use non-numeric or non-alphabetic characters. 
 If a looked-after child is adopted, and subsequently becomes looked-after again later, they should have two separate unlinked records – one for pre-adoption and one for post-adoption – with two different child identifiers."
 PERS007A,ssd_person,identity,,nvarchar,20,pers_upn_unknown,UPN Unknown,,SSDA903|RIIA|CIN,liquid_logic|mosaic|azeus,liquid_logic : pers_upn_unknown|mosaic : pers_upn_unknown,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"If the UPN is unknown, then one of the codes below should be used. If a child is educated outside England, please use UPN unknown code UN3, unless the child has a UPN from previously attending a school in England. If the child is home educated and has previously attended a mainstream school, please provide the UPN allocated earlier. 
 Code set 
@@ -49,7 +49,7 @@ UN2 - Child looked-after has never attended a maintained school in England (for 
 UN3 - Child looked-after is educated outside England 
 UN4 - Child is newly looked-after and the UPN is not yet known 
 UN5 - Sources collating UPNs reflect discrepancy(ies) for the child's name and/or surname and/or date of birth therefore preventing reliable matching (for example, duplicated UPNs)"
-PERS008A,ssd_person,identity,,nchar,1,pers_send_flag,SEND Flag,,NEETandparticipation|RIIA,liquid_logic,liquid_logic : pers_send_flag|mosaic : pers_send_flag,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"Flag showing if a person has an EHC plan recorded on the system. 
+PERS008A,ssd_person,identity,,nchar,1,pers_send,SEND Flag,,NEETandparticipation|RIIA,liquid_logic,liquid_logic : pers_send|mosaic : pers_send,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"Flag showing if a person has an EHC plan recorded on the system. 
 Code set 
 Y - Has an EHC Plan 
 N - Does not have an EHC Plan "
@@ -72,7 +72,7 @@ ADDR002A,ssd_address,identity|address,,nvarchar,48,addr_person_id,Person Unique 
 ADDR003A,ssd_address,identity|address,,nvarchar,48,addr_address_type,Address Type,,Local,liquid_logic|mosaic,liquid_logic : addr_address_type|mosaic : addr_address_type,liquid_logic : ssd_address|mosaic : ssd_address,,,,,"Type of Address, e.g. Home/ Placement/ Primary etc."
 ADDR004A,ssd_address,identity|address,,datetime,NULL,addr_address_start_date,Address Start Date/ From,,Local,liquid_logic|mosaic,liquid_logic : addr_address_start_date|mosaic : addr_address_start_date,liquid_logic : ssd_address|mosaic : ssd_address,,,,,Date person started living at the address
 ADDR005A,ssd_address,identity|address,,datetime,NULL,addr_address_end_date,Address End Date/ To,,Local,liquid_logic|mosaic,liquid_logic : address_end|mosaic : address_end,liquid_logic : ssd_address|mosaic : ssd_address,,,,,Date person left the address 
-ADDR006A,ssd_address,identity|address,,nvarchar,15,addr_address_postcode,Address Postcode,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : addr_address_postcode|mosaic : addr_address_postcode,liquid_logic : ssd_address|mosaic : ssd_address,,,,,"Address Postcode, auto-formatted to remove spaces for consistency"
+ADDR006A,ssd_address,identity|address,,nvarchar,15,addr_postcode,Address Postcode,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : addr_postcode|mosaic : addr_postcode,liquid_logic : ssd_address|mosaic : ssd_address,,,,,"Address Postcode, auto-formatted to remove spaces for consistency"
 DISA001A,ssd_disability,identity|disability,,nvarchar,48,disa_person_id,Person Unique ID,ssd_person.pers_person_id,,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : disa_person_id|mosaic : disa_person_id,liquid_logic : ssd_disability|mosaic : ssd_disability,Yes,Yes,,,Person's ID generated in CMS Database
 DISA003A,ssd_disability,identity|disability,,nvarchar,48,disa_table_id,Disability table row ID,,Local,liquid_logic|mosaic,liquid_logic : disa_table_id|mosaic : disa_table_id,liquid_logic : ssd_disability|mosaic : ssd_disability,,,Yes,,Row identifier for the ssd_disability table
 DISA002A,ssd_disability,identity|disability,,nvarchar,48,disa_disability_code,Disability Code,,CIN|AnnexA,liquid_logic|mosaic,liquid_logic : disa_disability_code|mosaic : disa_disability_code,liquid_logic : ssd_disability|mosaic : ssd_disability,Yes,Yes,,,"The Disability Discrimination Act 2005 (DDA) defines a disabled person as a person with a physical or mental impairment which has a substantial and long-term adverse effect on his/her ability to carry out normal day-to-day activities. The condition must have lasted, or be likely to last at least 12 months in order to be counted as a disability. 
@@ -323,7 +323,7 @@ Code set
 - Sexual abuse
 - Emotional abuse
 - Multiple: [List of relevant categories]"
-CPPL011A,ssd_cp_plans,child_protection|cp_plan,,nvarchar,1,cppl_cp_plan_ola,OLA CP Plan?,,,,,,,,,,
+CPPL0101A,ssd_cp_plans,child_protection|cp_plan,,nvarchar,1,cppl_cp_plan_ola,OLA CP Plan?,,,,,,,,,,
 CPPL010A,ssd_cp_plans,child_protection|cp_plan,,nvarchar,100,cppl_cp_plan_latest_category,CP Plan Latest Category of Abuse,,Local|AnnexA,,,liquid_logic : ssd_cp_plans|mosaic : ssd_cp_plans,,,,,"The latest category of abuse recorded on the CP Plan, this may be the same as above.
 Code set
 - Neglect
@@ -543,7 +543,6 @@ PLACE - Change in the status of placement only
 This code would be used where there is a change of status for the placement, but the child remains with the same carer and there is no change to the care plan. Examples include a foster carer moving to a new house, a foster carer working for a local authority becomes managed by an independent fostering agency, a placement for adoption transferring to a regional adoption agency, or a child in residential accommodation moving under the same provider. Here the ‘reason for new episode’ code will indicate that the child is still living with the same carer.
 OTHER - Other
 Any other reason not captured above. Please note that ’Other’ should only be used in exceptional circumstances."
-CLAP013A,ssd_cla_placement,looked_after|placement,,nvarchar,48,clap_person_id,Person Unique ID,,,liquid_logic|mosaic,liquid_logic : clap_person_id|mosaic : clap_person_id,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,,,,,Person's ID generated in CMS Database
 CLAR001A,ssd_cla_reviews,looked_after|review,,nvarchar,48,clar_cla_review_id,Review ID,,Local,liquid_logic|mosaic,liquid_logic : clar_cla_review_id|mosaic : clar_cla_review_id,liquid_logic : ssd_cla_reviews|mosaic : ssd_cla_reviews,Yes,Yes,Yes,,Row identifier for the ssd_cla_reviews table
 CLAR011A,ssd_cla_reviews,looked_after|review,,nvarchar,48,clar_cla_id,CLA ID,ssd_cla_episodes.clae_cla_id,,liquid_logic|mosaic,liquid_logic : clar_cla_id|mosaic : clar_cla_id,liquid_logic : ssd_cla_reviews|mosaic : ssd_cla_reviews,,,,,"System identifier for the whole period of care, encompassing all episodes included within that period of care."
 CLAR003A,ssd_cla_reviews,looked_after|review,,datetime,NULL,clar_cla_review_due_date,CLA Review Due Date,,Local,liquid_logic|mosaic,liquid_logic : clar_cla_review_due_date|mosaic : clar_cla_review_due_date,liquid_logic : ssd_cla_reviews|mosaic : ssd_cla_reviews,,,,,Date the CLA review was due
@@ -753,35 +752,6 @@ L2   - Civil partnership couple
 L3   - Different gender unmarried couple
 L4   - Same gender couple not married or in a civil partnership"
 PERM027A,ssd_permanence,looked_after|permanence|adoption,,nvarchar,3,perm_number_of_adopters,Number of adopters. As A(1),,SSDA903,,,,,,,,Number of Adopters/ Prospective Adopters
-INVO005A,ssd_involvements,workforce,,nvarchar,48,invo_involvements_id,Involvements table row ID,,Local,liquid_logic|mosaic,liquid_logic : invo_involvements_id|mosaic : invo_involvements_id,,,,,,Row identifier for the ssd_involvements table
-INVO006A,ssd_involvements,workforce,,nvarchar,48,invo_professional_id,Worker ID,ssd_professionals.prof_professional_id,Local,liquid_logic|mosaic,,,,,,,ID for linking to ssd_professionals table
-INVO007A,ssd_involvements,workforce,,nvarchar,200,invo_professional_role_id,Worker role e.g. Allocated Case Worker,,Local,liquid_logic|mosaic,,,,,,,Role of the professional/ team working with the child/ young person
-INVO009A,ssd_involvements,workforce,,nvarchar,200,invo_professional_team,Worker Team,,Local|AnnexA,liquid_logic|mosaic,,,,,,,Name of the Team working with the child/ young person
-INVO002A,ssd_involvements,workforce,,datetime,NULL,invo_involvement_start_date,Social worker episode start date,,SSDA903|RIIA,liquid_logic|azeus,liquid_logic : invo_involvement_start_date|mosaic : invo_involvement_start_date,liquid_logic : ssd_involvements|mosaic : ssd_involvements,,,,,Start Date for team/ worker involvement
-INVO003A,ssd_involvements,workforce,,datetime,NULL,invo_involvement_end_date,Social worker episode end date,,SSDA903|RIIA,liquid_logic|azeus,liquid_logic : invo_involvement_end_date|mosaic : invo_involvement_end_date,liquid_logic : ssd_involvements|mosaic : ssd_involvements,,,,,End Date for team/ worker involvement
-INVO004A,ssd_involvements,workforce,,nvarchar,200,invo_worker_change_reason,Reason for worker change,,SSDA903|RIIA,liquid_logic|azeus,liquid_logic : invo_worker_change_reason|mosaic : invo_worker_change_reason,liquid_logic : ssd_involvements|mosaic : ssd_involvements,,,,,"Reason for change of Social Worker 
-Code set 
-MANAGE - Managing Caseloads 
-FCONTA   - First contact or re-referral 
-LEFTRL     - Previous social worker left role 
-ORGRST  - New social worker assigned following organisational restructure 
-TSPROC   - New social worker assigned following child transfer due to standard process 
-ABSENC  - Absence cover or return from absence  
-CHCHAN - Child requested change from previous social worker 
-PCCHAN - Parent/carer requested change from previous social worker 
-SWDIED - Previous Social Worker died 
-OTHERS - Other reason "
-INVO011A,ssd_involvements,workforce,,nvarchar,48,invo_person_id,Person Unique ID,,,,,,,,,,
-INVO010A,ssd_involvements,workforce,,nvarchar,48,invo_referral_id,Referral ID,,Local,liquid_logic|mosaic,,,,,,,ID for linking to CIN Referral Episode
-PROF001A,ssd_professionals,workforce,,nvarchar,48,prof_professional_id,Professionals table row ID,,Local,liquid_logic,liquid_logic : prof_professional_id|mosaic : prof_professional_id,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,Yes,,Row identifier for the ssd_professionals table
-PROF010A,ssd_professionals,workforce,,nvarchar,48,prof_staff_id,Staff Identifier,,Local,liquid_logic|mosaic|azeus,,,,,,,System ID generated in CMS Database
-PROF013A,ssd_professionals,workforce,,nvarchar,300,prof_professional_name,Staff name,,Local|AnnexA,liquid_logic|mosaic|azeus,,,,,,,Professional's Name
-PROF002A,ssd_professionals,workforce,,nvarchar,48,prof_social_worker_registration_no,Social worker ID - Social Work England (SWE) registration number- if available,,Local,liquid_logic|mosaic|azeus,liquid_logic : prof_social_worker_registration_no|mosaic : prof_social_worker_registration_no,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,,,This is the child and family social worker Social Work England (SWE) number (formerly HCPC code). For social workers this will start ‘SW’. This data item should be in the format ‘AAnnnnnn’ and is up to 12 digits.
-PROF007A,ssd_professionals,workforce,,nvarchar,500,prof_professional_job_title,Worker job title e.g. Social Worker,,CSCWF|RIIA,liquid_logic|mosaic,liquid_logic : prof_professional_job_title|mosaic : prof_professional_job_title,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,,,"Professional Job title, e.g. Social Worker, Keyworker, GP etc."
-PROF008A,ssd_professionals,workforce,,int,5,prof_professional_caseload,Number of cases held on previous 30th Sept,,CSCWF|RIIA,liquid_logic|mosaic,liquid_logic : prof_professional_caseload|mosaic : prof_professional_caseload,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,,,
-PROF012A,ssd_professionals,workforce,,nvarchar,100,prof_professional_department,Worker Department e.g. 'Youth Support Team West',,Local,liquid_logic|mosaic,liquid_logic : prof_professional_department|mosaic : prof_professional_department,,,,,,Professional's team/ organisation
-PROF011A,ssd_professionals,workforce,,float,4,prof_full_time_equivalency,Full Time Equivalency,,Local,liquid_logic|mosaic,liquid_logic : prof_full_time_equivalency|mosaic : prof_full_time_equivalency,,,,,,Worker FTE
-PROF014A,ssd_professionals,workforce,,NCHAR,1,prof_agency_worker_flag,Flag for whether the worker is agency,,Local,,liquid_logic : prof_agency_worker_flag|mosaic : prof_agency_worker_flag,,,,,,
 SEND001A,ssd_send,identity|send,,nvarchar,48,send_table_id,send_table_id,,1aNotInCMS|RIIA,liquid_logic,liquid_logic : send_table_id|mosaic : send_table_id,liquid_logic : ssd_send|mosaic : ssd_send,Yes,Yes,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
 Row identifier for the ssd_send table"
 SEND002A,ssd_send,identity|send,,nvarchar,48,send_upn,UPN,,1aNotInCMS|RIIA,liquid_logic,liquid_logic : send_upn|mosaic : send_upn,liquid_logic : ssd_send|mosaic : ssd_send,Yes,Yes,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
@@ -891,6 +861,34 @@ Please record the nature of the person’s special educational need. These optio
 -OTH   Other difficulty "
 SENN004A,ssd_sen_need,send|ehcp_request|ehcp|need,,nvarchar,1,senn_active_ehcp_need_rank,SEN Type Rank,,1aNotInCMS|SEN2,liquid_logic,liquid_logic : senn_active_ehcp_need_rank|mosaic : senn_active_ehcp_need_rank,liquid_logic : ssd_sen_need|mosaic : ssd_sen_need,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
 If only one type of need is recorded, this should be recorded as rank 1. If multiple types of need are recorded, then the primary type of need should be recorded as rank 1 and the secondary type of need should be recorded as rank 2. Up to two types of need can be recorded."
+INVO005A,ssd_involvements,workforce,,nvarchar,48,invo_involvements_id,Involvements table row ID,,Local,liquid_logic|mosaic,liquid_logic : invo_involvements_id|mosaic : invo_involvements_id,,,,,,Row identifier for the ssd_involvements table
+INVO006A,ssd_involvements,workforce,,nvarchar,48,invo_professional_id,Worker ID,ssd_professionals.prof_professional_id,Local,liquid_logic|mosaic,,,,,,,ID for linking to ssd_professionals table
+INVO007A,ssd_involvements,workforce,,nvarchar,200,invo_professional_role_id,Worker role e.g. Allocated Case Worker,,Local,liquid_logic|mosaic,,,,,,,Role of the professional/ team working with the child/ young person
+INVO009A,ssd_involvements,workforce,,nvarchar,200,invo_professional_team,Worker Team,,Local|AnnexA,liquid_logic|mosaic,,,,,,,Name of the Team working with the child/ young person
+INVO002A,ssd_involvements,workforce,,datetime,NULL,invo_involvement_start_date,Social worker episode start date,,SSDA903|RIIA,liquid_logic|azeus,liquid_logic : invo_involvement_start_date|mosaic : invo_involvement_start_date,liquid_logic : ssd_involvements|mosaic : ssd_involvements,,,,,Start Date for team/ worker involvement
+INVO003A,ssd_involvements,workforce,,datetime,NULL,invo_involvement_end_date,Social worker episode end date,,SSDA903|RIIA,liquid_logic|azeus,liquid_logic : invo_involvement_end_date|mosaic : invo_involvement_end_date,liquid_logic : ssd_involvements|mosaic : ssd_involvements,,,,,End Date for team/ worker involvement
+INVO004A,ssd_involvements,workforce,,nvarchar,200,invo_worker_change_reason,Reason for worker change,,SSDA903|RIIA,liquid_logic|azeus,liquid_logic : invo_worker_change_reason|mosaic : invo_worker_change_reason,liquid_logic : ssd_involvements|mosaic : ssd_involvements,,,,,"Reason for change of Social Worker 
+Code set 
+MANAGE - Managing Caseloads 
+FCONTA   - First contact or re-referral 
+LEFTRL     - Previous social worker left role 
+ORGRST  - New social worker assigned following organisational restructure 
+TSPROC   - New social worker assigned following child transfer due to standard process 
+ABSENC  - Absence cover or return from absence  
+CHCHAN - Child requested change from previous social worker 
+PCCHAN - Parent/carer requested change from previous social worker 
+SWDIED - Previous Social Worker died 
+OTHERS - Other reason "
+INVO011A,ssd_involvements,workforce,,nvarchar,48,invo_person_id,Person Unique ID,,,,,,,,,,
+INVO010A,ssd_involvements,workforce,,nvarchar,48,invo_referral_id,Referral ID,,Local,liquid_logic|mosaic,,,,,,,ID for linking to CIN Referral Episode
+PROF001A,ssd_professionals,workforce,,nvarchar,48,prof_professional_id,Professionals table row ID,,Local,liquid_logic,liquid_logic : prof_professional_id|mosaic : prof_professional_id,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,Yes,,Row identifier for the ssd_professionals table
+PROF010A,ssd_professionals,workforce,,nvarchar,48,prof_staff_id,Staff Identifier,,Local,liquid_logic|mosaic|azeus,,,,,,,System ID generated in CMS Database
+PROF013A,ssd_professionals,workforce,,nvarchar,300,prof_professional_name,Staff name,,Local|AnnexA,liquid_logic|mosaic|azeus,,,,,,,Professional's Name
+PROF002A,ssd_professionals,workforce,,nvarchar,48,prof_social_worker_registration_no,Social worker ID - Social Work England (SWE) registration number- if available,,Local,liquid_logic|mosaic|azeus,liquid_logic : prof_social_worker_registration_no|mosaic : prof_social_worker_registration_no,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,,,This is the child and family social worker Social Work England (SWE) number (formerly HCPC code). For social workers this will start ‘SW’. This data item should be in the format ‘AAnnnnnn’ and is up to 12 digits.
+PROF007A,ssd_professionals,workforce,,nvarchar,500,prof_professional_job_title,Worker job title e.g. Social Worker,,CSCWF|RIIA,liquid_logic|mosaic,liquid_logic : prof_professional_job_title|mosaic : prof_professional_job_title,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,,,"Professional Job title, e.g. Social Worker, Keyworker, GP etc."
+PROF008A,ssd_professionals,workforce,,int,5,prof_professional_caseload,Number of cases held on previous 30th Sept,,CSCWF|RIIA,liquid_logic|mosaic,liquid_logic : prof_professional_caseload|mosaic : prof_professional_caseload,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,,,#N/A
+PROF012A,ssd_professionals,workforce,,nvarchar,100,prof_professional_department,Worker Department e.g. 'Youth Support Team West',,Local,liquid_logic|mosaic,liquid_logic : prof_professional_department|mosaic : prof_professional_department,,,,,,Professional's team/ organisation
+PROF011A,ssd_professionals,workforce,,float,4,prof_full_time_equivalency,Full Time Equivalency,,Local,liquid_logic|mosaic,liquid_logic : prof_full_time_equivalency|mosaic : prof_full_time_equivalency,,,,,,Worker FTE
 PREP024A,ssd_pre_proceedings,pre_proceedings,,nvarchar,48,prep_table_id,Pre-proceedings table row ID,,1bSpecified,liquid_logic|mosaic,liquid_logic : prep_table_id|mosaic : prep_table_id,,,,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
 Row identifier for the ssd_pre_proceedings table"
 PREP001A,ssd_pre_proceedings,pre_proceedings,,nvarchar,48,prep_person_id,Person Unique ID,ssd_person.pers_person_id,SSDA903|CIN,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : prep_person_id|mosaic : prep_person_id,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,Yes,Yes,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
@@ -1011,3 +1009,4 @@ S251005A,ssd_s251_finance,finance,,nvarchar,48,s251_placeholder_3,Placeholder fi
 No guidance available yet "
 S251006A,ssd_s251_finance,finance,,nvarchar,48,s251_placeholder_4,Placeholder field,,1aDraft,liquid_logic|mosaic,liquid_logic : s251_placeholder_4|mosaic : s251_placeholder_4,liquid_logic : ssd_s251_finance|mosaic : ssd_s251_finance,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
 No guidance available yet "
+PROF013A,ssd_professionals,workforce,,NCHAR,1,prof_agency_worker_flag,Flag for whether the worker is agency,,Local,,liquid_logic : prof_agency_worker_flag|mosaic : prof_agency_worker_flag,,,,,,Professional's Name

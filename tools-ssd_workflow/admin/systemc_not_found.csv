@@ -1,6 +1,4 @@
 item_ref,field_name
-PERS008A,pers_send
-ADDR006A,addr_postcode
 IMMI005A,immi_Immigration_status_id
 IMMI003A,immi_immigration_status_start_date
 IMMI004A,immi_immigration_status_end_date

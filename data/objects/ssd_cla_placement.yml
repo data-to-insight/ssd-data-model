@@ -361,3 +361,20 @@ nodes:
       \ will indicate that the child is still living with the same carer.\nOTHER -\
       \ Other\nAny other reason not captured above. Please note that \u2019Other\u2019\
       \ should only be used in exceptional circumstances."
+  - name: clap_person_id
+    description: Person Unique ID
+    item_ref: CLAP013A
+    type: nvarchar
+    categories:
+    - looked_after
+    - placement
+    cms:
+    - liquid_logic
+    - mosaic
+    cms_field:
+    - liquid_logic:clap_person_id
+    - mosaic:clap_person_id
+    cms_table:
+    - liquid_logic:ssd_cla_placement
+    - mosaic:ssd_cla_placement
+    guidance: Person's ID generated in CMS Database

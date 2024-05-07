@@ -158,6 +158,12 @@ nodes:
     - identity
     returns:
     - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:pers_common_child_id
     - mosaic:pers_common_child_id
@@ -174,6 +180,14 @@ nodes:
     type: nvarchar
     categories:
     - identity
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - caredirector
+    - azeus
     cms_field:
     - liquid_logic:pers_legacy_id
     - mosaic:pers_legacy_id
@@ -216,7 +230,7 @@ nodes:
       Child is newly looked-after and the UPN is not yet known UN5 - Sources collating
       UPNs reflect discrepancy(ies) for the child's name and/or surname and/or date
       of birth therefore preventing reliable matching (for example, duplicated UPNs)
-  - name: pers_send
+  - name: pers_send_flag
     description: SEND Flag
     item_ref: PERS008A
     type: nchar
@@ -228,8 +242,8 @@ nodes:
     cms:
     - liquid_logic
     cms_field:
-    - liquid_logic:pers_send
-    - mosaic:pers_send
+    - liquid_logic:pers_send_flag
+    - mosaic:pers_send_flag
     cms_table:
     - liquid_logic:ssd_person
     - mosaic:ssd_person

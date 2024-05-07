@@ -155,7 +155,7 @@ nodes:
       - Multiple: [List of relevant categories]'
   - name: cppl_cp_plan_ola
     description: OLA CP Plan?
-    item_ref: CPPL0101A
+    item_ref: CPPL011A
     type: nvarchar
     categories:
     - child_protection

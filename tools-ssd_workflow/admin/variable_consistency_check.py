@@ -14,7 +14,7 @@ directories = [
 
 # main spec input date to compare against (needs item_ref, field_name as cols)
 csv_path = 'docs/admin/data_objects_specification.csv'  # Path to spec data/csv LIVE
-csv_path = 'docs/admin/spec_consistency_check_data.csv' # TESTING
+# csv_path = 'docs/admin/spec_consistency_check_data.csv' # TESTING
 
 # output_dir = os.path.dirname(__file__)  # Find current location as default
 output_dir = 'tools-ssd_workflow/admin/'  # Used as output dir

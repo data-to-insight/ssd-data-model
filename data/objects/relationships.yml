@@ -250,6 +250,11 @@ relationships:
   child_object: ssd_permanence
   child_key: perm_person_id
   relation: 1:M
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
+  child_object: ssd_involvements
+  child_key: invo_professional_id
+  relation: 1:M
 - parent_object: ssd_send
   parent_key: send_table_id
   child_object: ssd_ehcp_requests
@@ -274,11 +279,6 @@ relationships:
   parent_key: ehcp_active_ehcp_id
   child_object: ssd_sen_need
   child_key: senn_active_ehcp_id
-  relation: 1:M
-- parent_object: ssd_professionals
-  parent_key: prof_professional_id
-  child_object: ssd_involvements
-  child_key: invo_professional_id
   relation: 1:M
 - parent_object: ssd_cla_placement
   parent_key: clap_cla_placement_id
