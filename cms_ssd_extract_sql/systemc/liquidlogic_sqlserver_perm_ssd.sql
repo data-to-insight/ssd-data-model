@@ -466,7 +466,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
-/*
+/* 
 =============================================================================
 Object Name: ssd_immigration_status (UASC)
 Description:
@@ -493,11 +493,11 @@ IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immi
 
 -- Create structure
 CREATE TABLE ssd_immigration_status (
-    immi_immigration_status_id      NVARCHAR(48) PRIMARY KEY,
-    immi_person_id                  NVARCHAR(48),
-    immi_immigration_status_start   DATETIME,
-    immi_immigration_status_end     DATETIME,
-    immi_immigration_status         NVARCHAR(100)
+    immi_immigration_status_id              NVARCHAR(48) PRIMARY KEY,
+    immi_person_id                          NVARCHAR(48),
+    immi_immigration_status_start_date      DATETIME,
+    immi_immigration_status_end_date        DATETIME,
+    immi_immigration_status                 NVARCHAR(100)
 );
  
  
@@ -505,8 +505,8 @@ CREATE TABLE ssd_immigration_status (
 INSERT INTO ssd_immigration_status (
     immi_immigration_status_id,
     immi_person_id,
-    immi_immigration_status_start,
-    immi_immigration_status_end,
+    immi_immigration_status_start_date,
+    immi_immigration_status_end_date,
     immi_immigration_status
 )
 SELECT
@@ -533,8 +533,8 @@ FOREIGN KEY (immi_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON ssd_immigration_status(immi_person_id);
-CREATE NONCLUSTERED INDEX idx_immigration_status_start ON ssd_immigration_status(immi_immigration_status_start);
-CREATE NONCLUSTERED INDEX idx_immigration_status_end ON ssd_immigration_status(immi_immigration_status_end);
+CREATE NONCLUSTERED INDEX idx_immigration_status_start ON ssd_immigration_status(immi_immigration_status_start_date);
+CREATE NONCLUSTERED INDEX idx_immigration_status_end ON ssd_immigration_status(immi_immigration_status_end_date);
 
 
 
@@ -3100,6 +3100,7 @@ CREATE TABLE ssd_sdq_scores (
     csdq_table_id               NVARCHAR(48), -- PRIMARY KEY,
     csdq_person_id              NVARCHAR(48),
     csdq_sdq_score              NVARCHAR(48),
+    csdq_sdq_completed_date     DATETIME,
     csdq_sdq_details_json       NVARCHAR(1000),
     csdq_sdq_reason             NVARCHAR(48)
 );
@@ -3109,6 +3110,7 @@ INSERT INTO ssd_sdq_scores (
     csdq_table_id,
     csdq_person_id,
     csdq_sdq_score,
+    csdq_sdq_completed_date,
     csdq_sdq_details_json,
     csdq_sdq_reason
 )
@@ -3128,6 +3130,7 @@ SELECT
             AND ffa_inner.ANSWER IS NOT NULL
         ORDER BY ffa_inner.ANSWER DESC -- Using the date as it is
     ) AS csdq_sdq_score,
+    'SSD_PH'       AS csdq_sdq_completed_date,
     (
         SELECT
             CASE WHEN ffa_inner.ANSWER_NO = 'FormEndDate'
@@ -3143,7 +3146,7 @@ SELECT
             AND ffa_inner.ANSWER IS NOT NULL
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS csdq_sdq_details_json,
-    'PLACEHOLDER DATA'      AS csdq_sdq_reason
+    'SSD_PH'      AS csdq_sdq_reason
    
 FROM
     Child_Social.FACT_FORMS ff
