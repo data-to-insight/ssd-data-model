@@ -3,101 +3,110 @@ import glob
 import re
 import csv
 
-# Multi dir support
+# Search in the following locations
 directories = [
-    'cms_ssd_extract_sql/mosaic/import_raw/',    # Mosaic scripts
-    'cms_ssd_extract_sql/systemc_liquidlogic/'  # Liquid Logic scripts
+    'cms_ssd_extract_sql/mosaic/',    # Mosaic scripts
+    'cms_ssd_extract_sql/systemc/'    # SystemC scripts
+    # 'cms_ssd_extract_sql/azeus/',     # Azeus scripts
+    # 'cms_ssd_extract_sql/caredirector/', # Care Director scripts
+    # 'cms_ssd_extract_sql/eclipse/' # Eclipse scripts
 ]
 
+# main spec input date to compare against (needs item_ref, field_name as cols)
 csv_path = 'docs/admin/data_objects_specification.csv'  # Path to spec data/csv LIVE
+csv_path = 'docs/admin/spec_consistency_check_data.csv' # TESTING
 
-# List of item_ref codes to ignore
-item_ref_ignore_list = [
-    "S251001A", "S251002A", "S251003A", "S251004A", "S251005A", "S251006A",
-    "VOCH001A", "VOCH002A", "VOCH003A", "VOCH004A", "VOCH005A", "VOCH006A", "VOCH007A",
-    "PREP001A", "PREP002A", "PREP003A", "PREP004A", "PREP005A", "PREP006A", "PREP007A", "PREP008A", "PREP009A", "PREP010A",
-    "PREP011A", "PREP012A", "PREP013A", "PREP014A", "PREP015A", "PREP016A", "PREP017A", "PREP018A", "PREP019A", "PREP020A",
-    "PREP021A", "PREP022A", "PREP023A", "PREP024A"
-]
+# output_dir = os.path.dirname(__file__)  # Find current location as default
+output_dir = 'tools-ssd_workflow/admin/'  # Used as output dir
 
 def load_field_data_from_csv(csv_path):
+    field_names = set()
     field_data = []
     with open(csv_path, mode='r', newline='', encoding='utf-8-sig') as file:
         reader = csv.DictReader(file)
         for row in reader:
             item_ref = row['item_ref'].strip()
             field_name = row['field_name'].strip()
-            if item_ref not in item_ref_ignore_list:
-                field_data.append((item_ref, field_name))
-    return field_data
+            field_names.add(field_name)
+            field_data.append((item_ref, field_name))
+    return field_names, field_data
 
 def extract_variables_from_sql(content):
-    pattern = re.compile(r'\b[a-z0-9]{4}_[a-z0-9_]*\b')
-    return set(pattern.findall(content))
+    content = re.sub(r'\s+', ' ', content)  # clean up whitespace (helps with improved/accurate var search hits)
+    pattern = re.compile(r'\b[a-zA-Z0-9]{4}_[a-zA-Z0-9_]+\b')
+    found_variables = set(pattern.findall(content))
 
-def find_consistency_in_sql_files(directories, field_data):
-    all_not_found = []
-    extra_fields = set()
-    files_checked = 0
+    # filter to remove variables starting with known prefixes
+    prefixes_to_ignore = {'CARE_', 'ROOM_', 'LAST_', 'FACT_', 'SEEN_', 'date_', 'prev_', 'text_', 'step_'} 
+    
+    # rem cms data-point refs so they dont dilute the search outputs
+    filtered_variables = {var for var in found_variables if not var.isupper() and not any(var.startswith(prefix) for prefix in prefixes_to_ignore)} # filter + all-uppercase variables
+    
+    return filtered_variables
 
-    for directory in directories:
-        file_pattern = os.path.join(directory, '*.sql')
-        sql_files = glob.glob(file_pattern)
 
-        for file_path in sql_files:
-            files_checked += 1
-            try:
-                with open(file_path, 'r', encoding='utf-8') as file:
-                    file_content = file.read()
-                    sql_variables = extract_variables_from_sql(file_content)
-                    found_fields = set()
-                    for item_ref, field_name in field_data:
-                        if field_name in sql_variables:
-                            found_fields.add(field_name)
-                    # Gather fields not found in current file
-                    for item_ref, field_name in field_data:
-                        if field_name not in found_fields and item_ref not in item_ref_ignore_list:
-                            all_not_found.append((item_ref, field_name))
-            except UnicodeDecodeError:
-                with open(file_path, 'r', encoding='iso-8859-1') as file:
-                    file_content = file.read()
-                    sql_variables = extract_variables_from_sql(file_content)
-                    found_fields = set()
-                    for item_ref, field_name in field_data:
-                        if field_name in sql_variables:
-                            found_fields.add(field_name)
-                    for item_ref, field_name in field_data:
-                        if field_name not in found_fields and item_ref not in item_ref_ignore_list:
-                            all_not_found.append((item_ref, field_name))
-            extra_fields.update(sql_variables)
+def initialise_not_found_files(directory, field_data):
+    directory_label = os.path.basename(os.path.normpath(directory))
+    not_found_csv_path = os.path.join(output_dir, f'{directory_label}_not_found.csv')
+    with open(not_found_csv_path, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['item_ref', 'field_name'])
+        writer.writerows(field_data)
+    return not_found_csv_path
 
-    return all_not_found, extra_fields, files_checked
+def update_not_found_file(not_found_csv_path, sql_variables):
+    with open(not_found_csv_path, mode='r', newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        remaining_fields = [row for row in reader if row['field_name'] not in sql_variables]
 
-field_data = load_field_data_from_csv(csv_path)
-all_not_found, extra_fields, files_checked = find_consistency_in_sql_files(directories, field_data)
+    with open(not_found_csv_path, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=['item_ref', 'field_name'])
+        writer.writeheader()
+        writer.writerows(remaining_fields)
 
-# Output to CSV
-output_dir = os.path.dirname(__file__)  # Current directory
-not_found_csv_path = os.path.join(output_dir, 'item_refs_not_found.csv')
-missing_fields_csv_path = os.path.join(output_dir, 'missing_fields.csv')
-extra_fields_csv_path = os.path.join(output_dir, 'extra_fields.csv')
+def find_extra_variables(directory, field_names):
+    extra_variables = set()
+    file_pattern = os.path.join(directory, '*.sql')
+    sql_files = glob.glob(file_pattern)
 
-with open(not_found_csv_path, mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-    writer.writerow(['item_ref', 'field_name'])
-    for item_ref, field_name in all_not_found:
-        writer.writerow([item_ref, field_name])
+    for file_path in sql_files:
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                file_content = file.read()
+                sql_variables = extract_variables_from_sql(file_content)
+                extra_variables.update(sql_variables - field_names)
+        except UnicodeDecodeError:
+            continue  # Skip files that can't be decoded
 
-with open(missing_fields_csv_path, mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-    writer.writerow(['item_ref', 'field_name'])
-    for item_ref, field_name in all_not_found:
-        writer.writerow([item_ref, field_name])
+    return extra_variables
 
-with open(extra_fields_csv_path, mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-    writer.writerow(['Extra Variables Not in Spec'])
-    for field in extra_fields:
-        writer.writerow([field])
+field_names, field_data = load_field_data_from_csv(csv_path)
 
-print(f"Results written to {missing_fields_csv_path}, {extra_fields_csv_path}, and {not_found_csv_path}.")
+for directory in directories:
+    cms_label = os.path.basename(os.path.normpath(directory)) # get dir name from path for use as filename
+    not_found_csv_path = initialise_not_found_files(directory, field_data)
+    extra_variables_csv_path = os.path.join(output_dir, f'{cms_label}_extra_variables.csv')
+
+    # Find 'extra' variables before processing individual files
+    # i.e. those that appear in scripts, but not in the spec (chk backwards compatibility)
+    extra_variables = find_extra_variables(directory, field_names)
+
+    sql_files = glob.glob(os.path.join(directory, '*.sql'))
+    for file_path in sql_files:
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                file_content = file.read()
+                sql_variables = extract_variables_from_sql(file_content)
+                update_not_found_file(not_found_csv_path, sql_variables)
+        except UnicodeDecodeError:
+            continue  # Skip files that can't be decoded
+
+    # Write 'extra' variables after processing all SQL files
+    with open(extra_variables_csv_path, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Extra Variables Not in Spec'])
+        for variable in extra_variables:
+            writer.writerow([variable])
+
+    print(f"Variables <not-found> list for {cms_label} saved as: {not_found_csv_path}")
+    print(f"Variables <non-compliant> list for {cms_label} saved as: {extra_variables_csv_path}")

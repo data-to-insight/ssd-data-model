@@ -1,0 +1,24 @@
+Extra Variables Not in Spec
+perm_adoption_worker_name
+immi_immigration_status_start
+cinv_cin_plan_id
+pers_send_flag
+link_link_id
+prof_system_id
+cina_assessment_worker_id
+cppv_casenote_date
+immi_immigration_status_end
+csdq_form_id
+prof_table_id
+csdq_sdq_details_json
+fact_cla_id
+cont_contact_source
+prep_la_inital_plan_approved
+lacp_cla_episode_id
+immi_immigration_status_id
+team_id
+lacp_referral_id
+cinv_cin_casenote_id
+addr_address_postcode
+pers_id
+clar_cla_episode_id
