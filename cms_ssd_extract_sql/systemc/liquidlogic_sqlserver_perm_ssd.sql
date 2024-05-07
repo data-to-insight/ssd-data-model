@@ -11,7 +11,7 @@ console outputs to aid problem solving during set up. These can/will be later re
 
 /*
 Dev Status Flags (~in this order):
-Status:     [B]acklog, 
+Status:     [B]acklog,          -- To do|for review but not current priority
             [D]ev,              -- Currently being developed 
             [T]est,             -- Dev work being tested/run time script tests
             [DT]ataTesting,     -- Sense checking of extract data ongoing
