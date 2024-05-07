@@ -715,7 +715,7 @@ Object Name: ssd_contacts
 Description: 
 Author: D2I
 Version: 1.0
-            0.2 cont_contact_source (_code) field name edit 260124 RH
+            0.2 cont_contact_source_code field name edit 260124 RH
             0.1 cont_contact_source_desc added RH
 Status: [R]elease
 Remarks:Inclusion in contacts might differ between LAs. 
@@ -1707,7 +1707,7 @@ Author: D2I
 Version: 1.0
             0.3: added IS_OLA field to identify OLA temporary plans
             which need to be excluded from statutory returns 090224 JCH
-            0.2: removed depreciated team_id and worker id fields RH
+            0.2: removed depreciated team/worker id fields RH
 Status: [R]elease
 Remarks:
 Dependencies:
@@ -1806,6 +1806,7 @@ Object Name: ssd_cp_visits
 Description:
 Author: D2I
 Version: 1.0
+            0.3: (cppv casenote date) removed 070524 RH
             0.2: cppv_person_id added, where claus removed 'STVCPCOVID' 130224 JH
 Status: [R]elease
 Remarks: Not all CP Visit Casenotes have a link back to the CP Visit -
@@ -1833,7 +1834,6 @@ CREATE TABLE ssd_cp_visits (
     cppv_cp_visit_id         NVARCHAR(48), -- PRIMARY KEY, [TESTING] Violation of PRIMARY KEY constraint 'PK__#ssd_cp___C8F3FAA6A5454E90'. The duplicate key value is (6041053).
     cppv_person_id           NVARCHAR(48),
     cppv_cp_plan_id          NVARCHAR(48),
-    cppv_casenote_date       DATETIME,
     cppv_cp_visit_date       DATETIME,
     cppv_cp_visit_seen       NCHAR(1),
     cppv_cp_visit_seen_alone NCHAR(1),
@@ -1845,8 +1845,7 @@ INSERT INTO ssd_cp_visits
 (
     cppv_cp_visit_id,
     cppv_person_id,
-    cppv_cp_plan_id,
-    cppv_casenote_date,        
+    cppv_cp_plan_id,        
     cppv_cp_visit_date,      
     cppv_cp_visit_seen,      
     cppv_cp_visit_seen_alone,
@@ -1857,7 +1856,6 @@ SELECT
     cn.FACT_CASENOTE_ID     AS cppv_cp_visit_id,  
     p.DIM_PERSON_ID         AS cppv_person_id,            
     cpv.FACT_CP_PLAN_ID     AS cppv_cp_plan_id,  
-    cn.CREATED_DTTM         AS cppv_casenote_date,        
     cn.EVENT_DTTM           AS cppv_cp_visit_date,
     cn.SEEN_FLAG            AS cppv_cp_visit_seen,
     cn.SEEN_ALONE_FLAG      AS cppv_cp_visit_seen_alone,
@@ -2107,7 +2105,7 @@ SELECT
 FROM
     Child_Social.FACT_CARE_EPISODES AS fce
 JOIN
-    Child_Social.FACT_CLA AS fc ON fce.fact_cla_id = fc.FACT_CLA_ID
+    Child_Social.FACT_CLA AS fc ON fce.FACT_CLA_ID = fc.FACT_CLA_ID
  
 LEFT JOIN
     Child_Social.FACT_CASENOTES cn               ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
@@ -2592,7 +2590,7 @@ Object Name: ssd_cla_reviews
 Description: 
 Author: D2I
 Version: 1.0
-            0.1: clar_cla_id change from clar_cla_episode_id 120124 JH
+            0.1: clar_cla_id change from clar cla episode id 120124 JH
 Status: [R]elease
 Remarks: 
 Dependencies: 
@@ -2902,7 +2900,7 @@ ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
 CREATE TABLE ssd_cla_care_plan (
     lacp_table_id                       NVARCHAR(48) PRIMARY KEY,
     lacp_person_id                      NVARCHAR(48),
-    --lacp_referral_id                  NVARCHAR(48),
+    --lacp_referral_id                  NVARCHAR(48), -- [DEPRECIATED] [TESTING]
     lacp_cla_care_plan_start_date       DATETIME,
     lacp_cla_care_plan_end_date         DATETIME,
     lacp_cla_care_plan_json             NVARCHAR(1000)
@@ -2918,7 +2916,7 @@ INSERT INTO ssd_cla_care_plan (
 )
 SELECT
     fcp.FACT_CARE_PLAN_ID          AS lacp_table_id,
-    fcp.DIM_PERSON_ID                   AS lacp_person_id,
+    fcp.DIM_PERSON_ID              AS lacp_person_id,
     fcp.START_DTTM                 AS lacp_cla_care_plan_start_date,
     fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
     (
@@ -2953,8 +2951,8 @@ WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A';
  
 
 -- Add constraint(s)
-ALTER TABLE ssd_cla_care_plan ADD CONSTRAINT FK_lacp_cla_episode_id
-FOREIGN KEY (lacp_cla_episode_id) REFERENCES ssd_cla_episodes(clae_person_id);
+ALTER TABLE ssd_cla_care_plan ADD CONSTRAINT FK_lacp_person_id
+FOREIGN KEY (lacp_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
  
 -- create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_lacp_person_id ON ssd_cla_care_plan(lacp_person_id);
@@ -2979,7 +2977,7 @@ Author: D2I
 Version: 1.0!
             !0.3: Prep for casenote_id to be removed... not yet actioned RH
             0.2: FK updated to person_id. change from clav.VISIT_DTTM  150224 JH
-            0.1: pers_id and cla_id added JH
+            0.1: pers_person_id and clav_cla_id  added JH
 Status: [R]elease
 Remarks:
 Dependencies:
@@ -3167,7 +3165,7 @@ WHERE EXISTS (
     SELECT
         *,
         -- Assign unique row nums <within each partition> of csdq_person_id,
-        -- the most recent csdq_form_id will have a row number of 1.
+        -- the most recent csdq_form_id/csdq_table_id will have a row number of 1.
         ROW_NUMBER() OVER (PARTITION BY csdq_person_id ORDER BY csdq_table_id DESC) AS rn
     FROM
         ssd_sdq_scores
@@ -3970,7 +3968,7 @@ CREATE TABLE ssd_linked_identifiers (
 
 -- -- Insert placeholder data [TESTING]
 -- INSERT INTO ssd_linked_identifiers (
---     -- row id ommitted as ID generated (link_link_id,)
+--     -- row id ommitted as ID generated (link_table_id)
 --     link_person_id,
 --     link_identifier_type,
 --     link_identifier_value,
@@ -4315,7 +4313,7 @@ CREATE TABLE ssd_send (
     send_person_id      NVARCHAR(48),
     send_upn            NVARCHAR(48),
     send_uln            NVARCHAR(48),
-    upn_unknown         NVARCHAR(48)
+    send_upn_unknown         NVARCHAR(48)
     );
 
 -- -- Insert placeholder data
@@ -4324,7 +4322,7 @@ CREATE TABLE ssd_send (
 --     send_person_id, 
 --     send_upn,
 --     send_uln,
---     upn_unknown
+--     send_upn_unknown
 
 -- )
 -- VALUES ('SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH');
