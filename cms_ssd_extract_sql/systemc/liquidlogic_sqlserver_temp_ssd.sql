@@ -850,7 +850,7 @@ CREATE TABLE #ssd_early_help_episodes (
     earl_episode_reason         NVARCHAR(MAX),
     earl_episode_end_reason     NVARCHAR(MAX),
     earl_episode_organisation   NVARCHAR(MAX),
-    earl_episode_worker_name    NVARCHAR(48)    -- consider for removal [TESTING]
+    earl_episode_worker_name    NVARCHAR(100)    -- consider for removal [TESTING]
 );
 
 
@@ -945,7 +945,7 @@ CREATE TABLE #ssd_cin_episodes
     cine_close_reason           NVARCHAR(100),
     cine_close_date             DATETIME,
     cine_referral_team_name     NVARCHAR(255),
-    cine_referral_worker_name   NVARCHAR(48)
+    cine_referral_worker_name   NVARCHAR(100)
 );
  
 -- Insert data
@@ -1054,7 +1054,7 @@ CREATE TABLE #ssd_cin_assessments
     cina_assessment_outcome_json NVARCHAR(1000),        -- enlarged due to comments field    
     cina_assessment_outcome_nfa NCHAR(1), 
     cina_assessment_team_name   NVARCHAR(255),
-    cina_assessment_worker_name NVARCHAR(48)
+    cina_assessment_worker_name NVARCHAR(100)
 );
 
 
@@ -1314,7 +1314,7 @@ CREATE TABLE #ssd_cin_plans (
     cinp_cin_plan_start_date    DATETIME,
     cinp_cin_plan_end_date      DATETIME,
     cinp_cin_plan_team_name     NVARCHAR(255),
-    cinp_cin_plan_worker_name   NVARCHAR(48)
+    cinp_cin_plan_worker_name   NVARCHAR(100)
 );
  
 -- Insert data
@@ -1500,15 +1500,15 @@ IF OBJECT_ID('tempdb..#ssd_s47_enquiry') IS NOT NULL DROP TABLE #ssd_s47_enquiry
 
 -- Create structure 
 CREATE TABLE #ssd_s47_enquiry (
-    s47e_s47_enquiry_id             NVARCHAR(48) PRIMARY KEY,
-    s47e_referral_id                NVARCHAR(48),
-    s47e_person_id                  NVARCHAR(48),
-    s47e_s47_start_date             DATETIME,
-    s47e_s47_end_date               DATETIME,
-    s47e_s47_nfa                    NCHAR(1),
-    s47e_s47_outcome_json           NVARCHAR(1000),
-    s47e_s47_completed_by_team_name     NVARCHAR(100),
-    s47e_s47_completed_by_worker_name    NVARCHAR(48)
+    s47e_s47_enquiry_id                 NVARCHAR(48) PRIMARY KEY,
+    s47e_referral_id                    NVARCHAR(48),
+    s47e_person_id                      NVARCHAR(48),
+    s47e_s47_start_date                 DATETIME,
+    s47e_s47_end_date                   DATETIME,
+    s47e_s47_nfa                        NCHAR(1),
+    s47e_s47_outcome_json               NVARCHAR(1000),
+    s47e_s47_completed_by_team_name     NVARCHAR(255),
+    s47e_s47_completed_by_worker_name   NVARCHAR(100)
 );
 
 
@@ -1609,8 +1609,8 @@ CREATE TABLE #ssd_initial_cp_conference (
     icpc_icpc_date                  DATETIME,
     icpc_icpc_outcome_cp_flag       NCHAR(1),
     icpc_icpc_outcome_json          NVARCHAR(1000),
-    icpc_icpc_team_name             NVARCHAR(100),
-    icpc_icpc_worker_name           NVARCHAR(48)
+    icpc_icpc_team_name             NVARCHAR(255),
+    icpc_icpc_worker_name           NVARCHAR(100)
 );
  
  
@@ -3326,8 +3326,8 @@ CREATE TABLE #ssd_care_leavers
     clea_care_leaver_activity               NVARCHAR(100),
     clea_pathway_plan_review_date           DATETIME,
     clea_care_leaver_personal_advisor       NVARCHAR(100),
-    clea_care_leaver_allocated_team_name    NVARCHAR(48),
-    clea_care_leaver_worker_name            NVARCHAR(48)        
+    clea_care_leaver_allocated_team_name    NVARCHAR(255),
+    clea_care_leaver_worker_name            NVARCHAR(100)        
 );
  
 /* V4 */
