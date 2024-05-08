@@ -3099,7 +3099,7 @@ SELECT
             AND ffa_inner.ANSWER IS NOT NULL
         ORDER BY ffa_inner.ANSWER DESC -- Using the date as it is
     ) AS csdq_sdq_score,
-    'SSD_PH'       AS csdq_sdq_completed_date,
+    '1900/01/01'         AS csdq_sdq_completed_date,
     (
         SELECT
             CASE WHEN ffa_inner.ANSWER_NO = 'FormEndDate'

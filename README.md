@@ -46,9 +46,9 @@ The object specification input file[csv] can be found in the [admin](./docs/admi
 
 Defining the scope of objects/data points capturing LA Childrens Services data during the different stages of an individual's progress through the CSC system(s). Published for iterative review.
 
-- [data object/conceptual model](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/index.html)
-- [data object/item-guidance model](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/guidance.html)
-- [existing data returns map](https://github.com/data-to-insight/ssd-data-model/blob/main/docs/existingreturnsmap.html)
+- [data object/conceptual model](https://data-to-insight.github.io/ssd-data-model/index.html)
+- [data object/item-guidance model](https://data-to-insight.github.io/ssd-data-model/guidance.html)
+- [existing data returns map](https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html)
 
 
 
