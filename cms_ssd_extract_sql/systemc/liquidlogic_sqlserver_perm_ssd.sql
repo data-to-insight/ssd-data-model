@@ -87,8 +87,8 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 -- Create structure
 CREATE TABLE ssd_person (
-    pers_legacy_id          NVARCHAR(48),
-    pers_person_id          NVARCHAR(48) PRIMARY KEY,
+    pers_legacy_id          NVARCHAR(48),               
+    pers_person_id          NVARCHAR(48) PRIMARY KEY,   
     pers_sex                NVARCHAR(48),
     pers_gender             NVARCHAR(48),                  
     pers_ethnicity          NVARCHAR(38),
@@ -1014,6 +1014,7 @@ Object Name: ssd_cin_assessments
 Description: 
 Author: D2I
 Version: 1.0
+            0.9: fa.COMPLETED_BY_USER_NAME replaces fa.COMPLETED_BY_USER_STAFF_ID 080524
 Status: [R]elease
 Remarks: 
 Dependencies: 
@@ -1085,7 +1086,7 @@ SELECT
     ) AS cina_assessment_outcome_json, 
     fa.OUTCOME_NFA_FLAG                                     AS cina_assessment_outcome_nfa,
     fa.COMPLETED_BY_DEPT_NAME                               AS cina_assessment_team_name,
-    fa.COMPLETED_BY_USER_STAFF_ID                           AS cina_assessment_worker_name
+    fa.COMPLETED_BY_USER_NAME                               AS cina_assessment_worker_name
 FROM 
     Child_Social.FACT_SINGLE_ASSESSMENT AS fa
 
@@ -1105,12 +1106,6 @@ CREATE NONCLUSTERED INDEX idx_ssd_cin_assessments_person_id ON ssd_cin_assessmen
 CREATE NONCLUSTERED INDEX idx_cina_assessment_start_date ON ssd_cin_assessments(cina_assessment_start_date);
 CREATE NONCLUSTERED INDEX idx_cina_assessment_auth_date ON ssd_cin_assessments(cina_assessment_auth_date);
 CREATE NONCLUSTERED INDEX idx_cina_referral_id ON ssd_cin_assessments(cina_referral_id);
-
-
-
--- -- #DtoI-1564 121223 RH [TESTING]
--- ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_ssd_involvements
--- FOREIGN KEY (cina_assessment_worker_id) REFERENCES ssd_involvements(invo_professional_id);
 
 
 
