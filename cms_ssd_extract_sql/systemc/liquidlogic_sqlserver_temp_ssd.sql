@@ -4514,8 +4514,8 @@ CREATE TABLE #ssd_ehcp_named_plan (
     ehcn_named_plan_id              NVARCHAR(48),
     ehcn_ehcp_asmt_id               NVARCHAR(48),
     ehcn_named_plan_start_date      DATETIME,
-    ehcn_named_plan_cease_date      DATETIME,
-    ehcn_named_plan_cease_reason    NVARCHAR(100)
+    ehcn_named_plan_ceased_date     DATETIME,
+    ehcn_named_plan_ceased_reason   NVARCHAR(100)
 );
 
 
@@ -4528,7 +4528,7 @@ CREATE TABLE #ssd_ehcp_named_plan (
 
 
 -- -- Insert placeholder data
--- INSERT INTO #ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_cease_date, ehcn_named_plan_cease_reason)
+-- INSERT INTO #ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_ceased_date, ehcn_named_plan_ceased_reason)
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01', 'SSD_PH');
 
 
