@@ -87,22 +87,21 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 -- Create structure
 CREATE TABLE ssd_person (
-    pers_legacy_id          NVARCHAR(48),               -- item_ref=PERS014A, 
-    pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- item_ref=PERS001A,    
-    pers_sex                NVARCHAR(48),               -- item_ref=PERS002A, 
-    pers_gender             NVARCHAR(48),               -- item_ref=PERS003A,                 
+    pers_legacy_id          NVARCHAR(48),               
+    pers_person_id          NVARCHAR(48) PRIMARY KEY,   
+    pers_sex                NVARCHAR(48),
+    pers_gender             NVARCHAR(48),                  
     pers_ethnicity          NVARCHAR(38),
     pers_dob                DATETIME,
-    pers_common_child_id    NVARCHAR(10),                   
-    pers_upn_unknown        NVARCHAR(10),                                
+    pers_common_child_id    NVARCHAR(10),                   -- [PLACEHOLDER]  [Takes NHS Number]
+    pers_upn_unknown        NVARCHAR(10),                   -- [PLACEHOLDER]               
     pers_send_flag          NVARCHAR(1),
-    pers_expected_dob       DATETIME,                   
+    pers_expected_dob       DATETIME,                       -- Date or NULL
     pers_death_date         DATETIME,
     pers_is_mother          NVARCHAR(48),
     pers_nationality        NVARCHAR(48)
 );
-
-
+ 
 -- Insert data
 INSERT INTO ssd_person (
     pers_legacy_id,
@@ -742,8 +741,8 @@ CREATE TABLE ssd_contacts (
     cont_contact_id             NVARCHAR(48) PRIMARY KEY,
     cont_person_id              NVARCHAR(48),
     cont_contact_date           DATETIME,
-    cont_contact_source_code    NVARCHAR(48),   
-    cont_contact_source_desc    NVARCHAR(255),  
+    cont_contact_source_code    NVARCHAR(48),   -- 
+    cont_contact_source_desc    NVARCHAR(255),  -- 
     cont_contact_outcome_json   NVARCHAR(500) 
 );
 
@@ -840,7 +839,7 @@ CREATE TABLE ssd_early_help_episodes (
     earl_episode_reason         NVARCHAR(MAX),
     earl_episode_end_reason     NVARCHAR(MAX),
     earl_episode_organisation   NVARCHAR(MAX),
-    earl_episode_worker_name    NVARCHAR(100)   
+    earl_episode_worker_name    NVARCHAR(100)    -- consider for removal [TESTING]
 );
  
  
@@ -1039,8 +1038,8 @@ CREATE TABLE ssd_cin_assessments
     cina_referral_id                NVARCHAR(48),
     cina_assessment_start_date      DATETIME,
     cina_assessment_child_seen      NCHAR(1), 
-    cina_assessment_auth_date       DATETIME,               
-    cina_assessment_outcome_json    NVARCHAR(1000),           
+    cina_assessment_auth_date       DATETIME,               -- [TESTING]
+    cina_assessment_outcome_json    NVARCHAR(1000),         -- enlarged due to comments field    
     cina_assessment_outcome_nfa     NCHAR(1), 
     cina_assessment_team_name       NVARCHAR(255),
     cina_assessment_worker_name     NVARCHAR(100)
@@ -1054,7 +1053,7 @@ INSERT INTO ssd_cin_assessments
     cina_referral_id,
     cina_assessment_start_date,
     cina_assessment_child_seen,
-    cina_assessment_auth_date,      
+    cina_assessment_auth_date,      -- [TESTING]
     cina_assessment_outcome_json,
     cina_assessment_outcome_nfa,
     cina_assessment_team_name,
@@ -1066,7 +1065,7 @@ SELECT
     fa.FACT_REFERRAL_ID,
     fa.START_DTTM,
     fa.SEEN_FLAG,
-    fa.START_DTTM,                 
+    fa.START_DTTM,                  -- [TESTING]
     (
         SELECT 
             NULLIF(fa.OUTCOME_NFA_FLAG, '')                 AS "OUTCOME_NFA_FLAG",
@@ -1400,6 +1399,8 @@ IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
 -- Create structure
 CREATE TABLE ssd_cin_visits
 (
+    -- cinv_cin_casenote_id,                -- [DEPRECIATED in Iteration1] [TESTING]
+    -- cinv_cin_plan_id,                    -- [DEPRECIATED in Iteration1] [TESTING]
     cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,      
     cinv_person_id              NVARCHAR(48),
     cinv_cin_visit_date         DATETIME,
@@ -1825,7 +1826,7 @@ IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
  
 -- Create structure
 CREATE TABLE ssd_cp_visits (
-    cppv_cp_visit_id         NVARCHAR(48), 
+    cppv_cp_visit_id         NVARCHAR(48), -- PRIMARY KEY, [TESTING] Violation of PRIMARY KEY constraint 'PK__#ssd_cp___C8F3FAA6A5454E90'. The duplicate key value is (6041053).
     cppv_person_id           NVARCHAR(48),
     cppv_cp_plan_id          NVARCHAR(48),
     cppv_cp_visit_date       DATETIME,
@@ -1930,7 +1931,7 @@ CREATE TABLE ssd_cp_reviews
     cppr_cp_review_meeting_id           NVARCHAR(48),      
     cppr_cp_review_outcome_continue_cp  NCHAR(1),
     cppr_cp_review_quorate              NVARCHAR(18),      
-    cppr_cp_review_participation        NVARCHAR(18)       
+    cppr_cp_review_participation        NVARCHAR(18)        -- ['PLACEHOLDER_DATA'][TESTING] - ON HOLD/Not included in SSD Ver/Iteration 1
 );
  
 -- Insert data
@@ -2496,7 +2497,7 @@ CREATE TABLE ssd_cla_placement (
     clap_cla_placement_start_date       DATETIME,
     clap_cla_placement_type             NVARCHAR(100),
     clap_cla_placement_urn              NVARCHAR(48),
-    clap_cla_placement_distance         FLOAT, 
+    clap_cla_placement_distance         FLOAT, -- Float precision determined by value (or use DECIMAL(3, 2), -- Adjusted to fixed precision)
     clap_cla_placement_provider         NVARCHAR(48),
     clap_cla_placement_postcode         NVARCHAR(8),
     clap_cla_placement_end_date         DATETIME,
@@ -2894,6 +2895,7 @@ ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
 CREATE TABLE ssd_cla_care_plan (
     lacp_table_id                       NVARCHAR(48) PRIMARY KEY,
     lacp_person_id                      NVARCHAR(48),
+    --lacp_referral_id                  NVARCHAR(48), -- [DEPRECIATED] [TESTING]
     lacp_cla_care_plan_start_date       DATETIME,
     lacp_cla_care_plan_end_date         DATETIME,
     lacp_cla_care_plan_json             NVARCHAR(1000)
@@ -3088,7 +3090,7 @@ IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_sco
 /* V8.1 */
 -- Create structure
 CREATE TABLE ssd_sdq_scores (
-    csdq_table_id               NVARCHAR(48), 
+    csdq_table_id               NVARCHAR(48), -- PRIMARY KEY,
     csdq_person_id              NVARCHAR(48),
     csdq_sdq_score              NVARCHAR(48),
     csdq_sdq_completed_date     DATETIME,
@@ -3242,8 +3244,8 @@ CREATE TABLE ssd_missing (
     miss_missing_episode_start_date     DATETIME,
     miss_missing_episode_type           NVARCHAR(100),
     miss_missing_episode_end_date       DATETIME,
-    miss_missing_rhi_offered            NVARCHAR(10),                   
-    miss_missing_rhi_accepted           NVARCHAR(10)                   
+    miss_missing_rhi_offered            NVARCHAR(10),                   -- [TESTING] Confirm source data/why >7 required
+    miss_missing_rhi_accepted           NVARCHAR(10)                    -- [TESTING] Confirm source data/why >7 required
 );
 
 
@@ -3745,7 +3747,7 @@ CREATE TABLE ssd_professionals (
     prof_social_worker_registration_no    NVARCHAR(48),
     prof_agency_worker_flag               NCHAR(1),
     prof_professional_job_title           NVARCHAR(500),
-    prof_professional_caseload            INT,              
+    prof_professional_caseload            INT,              -- aggr result field
     prof_professional_department          NVARCHAR(100),
     prof_full_time_equivalency            FLOAT
 );
@@ -4169,7 +4171,7 @@ CREATE TABLE ssd_pre_proceedings (
     prep_initial_pre_pro_meeting_date       DATETIME,
     prep_pre_pro_outcome                    NVARCHAR(100),
     prep_agree_stepdown_issue_date          DATETIME,
-    prep_cp_plans_referral_period           INT, 
+    prep_cp_plans_referral_period           INT, -- count cp plans the child has been subject within referral period (cin episode)
     prep_legal_gateway_outcome              NVARCHAR(100),
     prep_prev_pre_proc_child                INT,
     prep_prev_care_proc_child               INT,
@@ -4306,7 +4308,7 @@ CREATE TABLE ssd_send (
     send_person_id      NVARCHAR(48),
     send_upn            NVARCHAR(48),
     send_uln            NVARCHAR(48),
-    send_upn_unknown    NVARCHAR(48)
+    send_upn_unknown         NVARCHAR(48)
     );
 
 -- -- Insert placeholder data
@@ -4579,9 +4581,9 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE #ssd_
 
 -- Create structure
 CREATE TABLE ssd_ehcp_active_plans (
-    ehcp_active_ehcp_id                 NVARCHAR(48),
-    ehcp_ehcp_request_id                NVARCHAR(48),
-    ehcp_active_ehcp_last_review_date   DATETIME
+    ehcp_active_ehcp_id NVARCHAR(48),
+    ehcp_ehcp_request_id NVARCHAR(48),
+    ehcp_active_ehcp_last_review_date DATETIME
 );
 
 
