@@ -277,9 +277,14 @@ WHERE EXISTS
     );
 
 
--- Create constraint(s)
-ALTER TABLE ssd_family ADD CONSTRAINT FK_family_person
-FOREIGN KEY (fami_person_id) REFERENCES ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE ssd_family ADD CONSTRAINT FK_family_person
+-- FOREIGN KEY (fami_person_id) REFERENCES ssd_person(pers_person_id);
+
+-- DEV NOTES [TESTING]
+-- Msg 3728, Level 16, State 1, Line 1
+-- 'FK_family_person' is not a constraint.Could not drop constraint. See previous errors.
+
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_family_person_id              ON ssd_family(fami_person_id);
@@ -617,7 +622,7 @@ FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
 -- ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
 -- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
 
--- DEV NOTES
+-- DEV NOTES [TESTING]
 -- Msg 547, Level 16, State 0, Line 617
 -- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_child_to_person". 
 -- The conflict occurred in database "HDM_Local", table "ssd_development.ssd_person", column 'pers_person_id'.
@@ -1150,7 +1155,7 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('ssd_assessment_factors') IS NOT NULL DROP TABLE ssd_assessment_factors;
 IF OBJECT_ID('tempdb..#ssd_assessment_factors') IS NOT NULL DROP TABLE #ssd_assessment_factors;
 
-IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE ssd_TMP_PRE_assessment_factors;
+IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
 
 
 -- Create TMP structure with filtered answers
@@ -1177,9 +1182,9 @@ WHERE
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_assessment_factors (
-    cinf_table_id                   NVARCHAR(48) PRIMARY KEY, -- item_ref=CINF003A, type=nvarchar, max_field_size=48,
-    cinf_assessment_id              NVARCHAR(48), -- item_ref=CINF001A, type=nvarchar, max_field_size=48,
-    cinf_assessment_factors_json    NVARCHAR(1000) -- size might need testing -- item_ref=CINF002A, type=nvarchar, max_field_size=1000
+    cinf_table_id                   NVARCHAR(48) PRIMARY KEY,       -- item_ref=CINF003A, type=nvarchar, max_field_size=48,
+    cinf_assessment_id              NVARCHAR(48),                   -- item_ref=CINF001A, type=nvarchar, max_field_size=48,
+    cinf_assessment_factors_json    NVARCHAR(1000)                  -- item_ref=CINF002A, type=nvarchar, max_field_size=1000
 );
 
 -- Insert data
@@ -1251,15 +1256,22 @@ WHERE
     fsa.EXTERNAL_ID <> -1;
 
 
--- Add constraint(s)
-ALTER TABLE ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
-FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_cin_assessments(cina_assessment_id);
+-- -- Add constraint(s)
+-- ALTER TABLE ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
+-- FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_cin_assessments(cina_assessment_id);
 
+-- DEV NOTES [TESTING]:
+-- Msg 547, Level 16, State 0, Line 1255
+-- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_cinf_assessment_id". 
+-- The conflict occurred in database "HDM_Local", table "ssd_development.ssd_cin_assessments", column 'cina_assessment_id'.
+-- Total execution time: 00:00:55.236
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_cinf_assessment_id ON ssd_assessment_factors(cinf_assessment_id);
 
 
+-- Drop tmp/pre-processing structure(s)
+IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
 
 
 /* issues with join [TESTING]
