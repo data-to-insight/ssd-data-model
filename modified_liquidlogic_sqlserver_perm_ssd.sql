@@ -2411,10 +2411,10 @@ IF OBJECT_ID('tempdb..#ssd_cla_substance_misuse') IS NOT NULL DROP TABLE #ssd_cl
 
 -- Create structure 
 CREATE TABLE ssd_cla_substance_misuse (
-    clas_substance_misuse_id NVARCHAR(48) PRIMARY KEY -- item_ref=CLAS001A, type=nvarchar, max_field_size=48,
-    clas_person_id NVARCHAR(48) -- item_ref=CLAS002A, type=nvarchar, max_field_size=48,
-    clas_substance_misuse_date DATETIME -- item_ref=CLAS003A, type=datetime, max_field_size=NULL,
-    clas_substance_misused NVARCHAR(100) -- item_ref=CLAS004A, type=nchar, max_field_size=100,
+    clas_substance_misuse_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CLAS001A, type=nvarchar, max_field_size=48,
+    clas_person_id NVARCHAR(48), -- item_ref=CLAS002A, type=nvarchar, max_field_size=48,
+    clas_substance_misuse_date DATETIME, -- item_ref=CLAS003A, type=datetime, max_field_size=NULL,
+    clas_substance_misused NVARCHAR(100), -- item_ref=CLAS004A, type=nchar, max_field_size=100,
     clas_intervention_received NCHAR(1) -- item_ref=CLAS005A, type=nchar, max_field_size=1
 );
 
@@ -2489,16 +2489,16 @@ IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_
   
 -- Create structure
 CREATE TABLE ssd_cla_placement (
-    clap_cla_placement_id NVARCHAR(48) PRIMARY KEY -- item_ref=CLAP001A, type=nvarchar, max_field_size=48,
-    clap_cla_id NVARCHAR(48) -- item_ref=CLAP012A, type=nvarchar, max_field_size=48,
-    clap_person_id NVARCHAR(48) -- item_ref=CLAP013A, type=nvarchar, max_field_size=48,
-    clap_cla_placement_start_date DATETIME -- item_ref=CLAP003A, type=datetime, max_field_size=NULL,
-    clap_cla_placement_type NVARCHAR(100) -- item_ref=CLAP004A, type=nvarchar, max_field_size=100,
-    clap_cla_placement_urn NVARCHAR(48) -- item_ref=CLAP005A, type=nvarchar, max_field_size=48,
-    clap_cla_placement_distance FLOAT -- item_ref=CLAP011A, type=float, max_field_size=4, 
-    clap_cla_placement_provider NVARCHAR(48) -- item_ref=CLAP007A, type=nvarchar, max_field_size=48,
-    clap_cla_placement_postcode NVARCHAR(8) -- item_ref=CLAP008A, type=nvarchar, max_field_size=8,
-    clap_cla_placement_end_date DATETIME -- item_ref=CLAP009A, type=datetime, max_field_size=NULL,
+    clap_cla_placement_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CLAP001A, type=nvarchar, max_field_size=48,
+    clap_cla_id NVARCHAR(48), -- item_ref=CLAP012A, type=nvarchar, max_field_size=48,
+    clap_person_id NVARCHAR(48), -- item_ref=CLAP013A, type=nvarchar, max_field_size=48,
+    clap_cla_placement_start_date DATETIME, -- item_ref=CLAP003A, type=datetime, max_field_size=NULL,
+    clap_cla_placement_type NVARCHAR(100), -- item_ref=CLAP004A, type=nvarchar, max_field_size=100,
+    clap_cla_placement_urn NVARCHAR(48), -- item_ref=CLAP005A, type=nvarchar, max_field_size=48,
+    clap_cla_placement_distance FLOAT, -- item_ref=CLAP011A, type=float, max_field_size=4, 
+    clap_cla_placement_provider NVARCHAR(48), -- item_ref=CLAP007A, type=nvarchar, max_field_size=48,
+    clap_cla_placement_postcode NVARCHAR(8), -- item_ref=CLAP008A, type=nvarchar, max_field_size=8,
+    clap_cla_placement_end_date DATETIME, -- item_ref=CLAP009A, type=datetime, max_field_size=NULL,
     clap_cla_placement_change_reason NVARCHAR(100) -- item_ref=CLAP010A, type=nvarchar, max_field_size=100
 );
  
@@ -2605,11 +2605,11 @@ IF OBJECT_ID('tempdb..#ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE #ssd_cla_re
   
 -- Create structure
 CREATE TABLE ssd_cla_reviews (
-    clar_cla_review_id NVARCHAR(48) PRIMARY KEY -- item_ref=CLAR001A, type=nvarchar, max_field_size=48,
-    clar_cla_id NVARCHAR(48) -- item_ref=CLAR011A, type=nvarchar, max_field_size=48,
-    clar_cla_review_due_date DATETIME -- item_ref=CLAR003A, type=datetime, max_field_size=NULL,
-    clar_cla_review_date DATETIME -- item_ref=CLAR004A, type=datetime, max_field_size=NULL,
-    clar_cla_review_cancelled NVARCHAR(48) -- item_ref=CLAR012A, type=nvarchar, max_field_size=1,
+    clar_cla_review_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CLAR001A, type=nvarchar, max_field_size=48,
+    clar_cla_id NVARCHAR(48), -- item_ref=CLAR011A, type=nvarchar, max_field_size=48,
+    clar_cla_review_due_date DATETIME, -- item_ref=CLAR003A, type=datetime, max_field_size=NULL,
+    clar_cla_review_date DATETIME, -- item_ref=CLAR004A, type=datetime, max_field_size=NULL,
+    clar_cla_review_cancelled NVARCHAR(1), -- item_ref=CLAR012A, type=nvarchar, max_field_size=1,
     clar_cla_review_participation NVARCHAR(100) -- item_ref=CLAR007A, type=nvarchar, max_field_size=100
     );
  
@@ -2740,11 +2740,11 @@ WHERE
 
 -- Create structure
 CREATE TABLE ssd_cla_previous_permanence (
-    lapp_table_id NVARCHAR(48) PRIMARY KEY -- item_ref=LAPP001A, type=nvarchar, max_field_size=48,
-    lapp_person_id NVARCHAR(48) -- item_ref=LAPP002A, type=nvarchar, max_field_size=48,
-    lapp_previous_permanence_option NVARCHAR(200) -- item_ref=LAPP004A, type=nvarchar, max_field_size=200,
-    lapp_previous_permanence_la NVARCHAR(100) -- item_ref=LAPP005A, type=nvarchar, max_field_size=100,
-    lapp_previous_permanence_order_date NVARCHAR(10) -- item_ref=LAPP003A, type=nvarchar, max_field_size=100
+    lapp_table_id NVARCHAR(48) PRIMARY KEY, -- item_ref=LAPP001A, type=nvarchar, max_field_size=48,
+    lapp_person_id NVARCHAR(48), -- item_ref=LAPP002A, type=nvarchar, max_field_size=48,
+    lapp_previous_permanence_option NVARCHAR(200), -- item_ref=LAPP004A, type=nvarchar, max_field_size=200,
+    lapp_previous_permanence_la NVARCHAR(100), -- item_ref=LAPP005A, type=nvarchar, max_field_size=100,
+    lapp_previous_permanence_order_date DATETIME -- item_ref=LAPP003A, type=nvarchar, max_field_size=100
 );
  
 -- Insert data

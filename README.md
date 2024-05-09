@@ -10,7 +10,9 @@ The dataset in-part aims to standardise existing local variation in how collecte
 
 ## Running the SSD for/within your LA (Summarised getting started introduction)
 Any representative from your LA is welcome to get in touch directly with questions or requests for support to get started with, or run the SSD (see following subscribe/contact/volunteer details). Obviously we welcome questions/input regardless of your involvement decision etc!  
-The SSD is essentially a single SQL script, that creates labelled persistent tables in your database. There is no data sharing, and no changes to your existing systems required. It does require that tables and indexes for the SSD be created, and therefore in some/most cases will need either your IT team support and/or agreement. The SQL script is always non-destructive, i.e. it does nothing to your existing data/tables/anything - the SSD is simply a series of SELECT statements, pulling copied data into a new standardised field and table structure on your own system for access by only you/your LA.  
+
+The SSD is essentially a single SQL script, that creates labelled persistent tables in your existing database. There is no data sharing, and no changes to your existing systems are required. Data tables(with data copied from the raw CMS tables) and indexes for the SSD are created, and therefore in some cases will need support and/or agreement from either your IT or Intelligence team. The SQL script is always non-destructive, i.e. it does nothing to your existing data/tables/anything - the SSD process is simply a series of SELECT statements, pulling copied data into a new standardised field and table structure on your own system for access by only you/your LA.  
+
 ### Getting started workflow: 
 The development and deployment of the SSD is functional only within, and as a result of direct involvement with Local Authorities. So we're not expectant of a one-size-fits-all approach, and will work with your team(s) to ensure confidence in, and successfull implementation of the SSD for your LA.  
 - Contact us with your interest --> Conversations to assist running(within LA) & any basic set up needed --> Access given to the SSD script by email or via Github --> LA runs SSD --> Support available if needed --> shared access given to any available further tools e.g. stat-returns scripts etc. --> Feedback and improvements change requests as needed.
@@ -27,6 +29,8 @@ The project will use [GIT][git] to track and approve proposed changes to the saf
 The object specification input file[csv] can be found in the [admin](./docs/admin) subfolder, and there is further ongoing work to provide further 'human readable' reporting methods beyond the aforementioned [data object conceptual model](https://data-to-insight.github.io/ssd-data-model/). We are aiming to publish our full data-landscape overview that resulted in the specification. 
 
 #### SSD in conjuction with (project|sector)developments
+
+As part of the projects research and initial scoping, the team have considered input and results from all of the following sector developments towards ensuring that the SSD take current and changing LA/DfE needs into account. 
 - CSC National Framework  
 - SEN2
 - ADCS Safeguarding
@@ -42,6 +46,21 @@ The object specification input file[csv] can be found in the [admin](./docs/admi
 - Social worker CMS input data (DDSF 2a)
 
 
+### Local Authorities guiding development
+
+**Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority | Essex CC : Project Management and Mosaic Pilot Development | **ADCS North West** (hosted by **Stockport Council**) | **Blackpool CC** : Mosaic Pilot Development | **East Riding CC** : Azeus Pilot Development  
+
+Repo forks, and direct involvement with the project are welcomed and you can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/)
+
+--- 
+##  SSD development details
+
+### Technical and low-level SSD detail
+
+The additional explanation detail that follows is relevant to those seeking a more in depth understanding of the granular SSD development detail. The majority of what follows on this page can be ignored/is less relevant to those looking only to set up their LA for SSD use. 
+
+
+
 ### Data objects Conceptual Model
 
 Defining the scope of objects/data points capturing LA Childrens Services data during the different stages of an individual's progress through the CSC system(s). Published for iterative review.
@@ -49,7 +68,6 @@ Defining the scope of objects/data points capturing LA Childrens Services data d
 - [data object/conceptual model](https://data-to-insight.github.io/ssd-data-model/index.html)
 - [data object/item-guidance model](https://data-to-insight.github.io/ssd-data-model/guidance.html)
 - [existing data returns map](https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html)
-
 
 
 
@@ -152,12 +170,6 @@ The project is following a transparent and iterative development cycle, within t
 | 2 | Feedback | Product delivered to the DfE and offer supported adoption for LA's and iterative further development. |
 | 2 | Continuous Deployment | Maintenance roadmap and framework agreement towards iterative improvement-driven approach. |
 
-
-### Local Authorities guiding development
-
-**Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority | Essex CC : Project Management and Mosaic Pilot Development | **ADCS North West** (hosted by **Stockport Council**) | **Blackpool CC** : Mosaic Pilot Development | **East Riding CC** : Azeus Pilot Development  
-
-Repo forks, and direct involvement with the project are welcomed and you can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/)
 
 
 ## Repo workflow
