@@ -29,7 +29,9 @@ Extended default field sizes max/exagerated e.g. family_id NVARCHAR(48) in {REVI
 
 /* Development set up */
 
-USE HDM;
+-- USE HDM;
+-- GO
+USE HDM_Local;
 GO
 
 
@@ -86,7 +88,7 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 
 -- Create structure
-CREATE TABLE ssd_person (
+CREATE TABLE ssd_development.ssd_person (
     pers_legacy_id          NVARCHAR(48),               -- item_ref=PERS014A, type=nvarchar, max_field_size=48,               
     pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- item_ref=PERS001A, type=nvarchar, max_field_size=48,   
     pers_sex                NVARCHAR(48),               -- item_ref=PERS002A, type=nvarchar, max_field_size=48,
@@ -247,7 +249,7 @@ IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
 
 -- Create structure
-CREATE TABLE ssd_family (
+CREATE TABLE ssd_development.ssd_family (
     fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- item_ref=FAMI003A, type=nvarchar, max_field_size=48, 
     fami_family_id  NVARCHAR(48),               -- item_ref=FAMI001A, type=nvarchar, max_field_size=48,
     fami_person_id  NVARCHAR(48)                -- item_ref=FAMI002A, type=nvarchar, max_field_size=48
@@ -315,7 +317,7 @@ IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
 
 -- Create structure
-CREATE TABLE ssd_address (
+CREATE TABLE ssd_development.ssd_address (
     addr_table_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=ADDR007A, type=nvarchar, max_field_size=48,
     addr_person_id          NVARCHAR(48),               -- item_ref=ADDR002A, type=nvarchar, max_field_size=48, 
     addr_address_type       NVARCHAR(48),               -- item_ref=ADDR003A, type=nvarchar, max_field_size=48,
@@ -417,7 +419,7 @@ IF OBJECT_ID('ssd_disability') IS NOT NULL DROP TABLE ssd_disability;
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 
 -- Create the structure
-CREATE TABLE ssd_disability
+CREATE TABLE ssd_development.ssd_disability
 (
     disa_table_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=DISA003A, type=nvarchar, max_field_size=48,
     disa_person_id          NVARCHAR(48) NOT NULL,      -- item_ref=DISA001A, type=nvarchar, max_field_size=48,
@@ -492,7 +494,7 @@ IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immi
 
 
 -- Create structure
-CREATE TABLE ssd_immigration_status (
+CREATE TABLE ssd_development.ssd_immigration_status (
     immi_immigration_status_id          NVARCHAR(48) PRIMARY KEY,   -- item_ref=IMMI005A, type=nvarchar, max_field_size=48,
     immi_person_id                      NVARCHAR(48),               -- item_ref=IMMI001A, type=nvarchar, max_field_size=48,
     immi_immigration_status_start_date  DATETIME,                   -- item_ref=IMMI003A, type=datetime, max_field_size=NULL,
@@ -570,7 +572,7 @@ IF OBJECT_ID('tempdb..#ssd_mother') IS NOT NULL DROP TABLE #ssd_mother;
 
 
 -- Create structure
-CREATE TABLE ssd_mother (
+CREATE TABLE ssd_development.ssd_mother (
     moth_table_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=MOTH004A, type=nvarchar, max_field_size=48,
     moth_person_id          NVARCHAR(48),               -- item_ref=MOTH002A, type=nvarchar, max_field_size=48,
     moth_childs_person_id   NVARCHAR(48),               -- item_ref=MOTH001A, type=nvarchar, max_field_size=48,
@@ -612,8 +614,15 @@ AND EXISTS
 ALTER TABLE ssd_mother ADD CONSTRAINT FK_moth_to_person 
 FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
 
-ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
-FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
+-- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
+
+-- DEV NOTES
+-- Msg 547, Level 16, State 0, Line 617
+-- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_child_to_person". 
+-- The conflict occurred in database "HDM_Local", table "ssd_development.ssd_person", column 'pers_person_id'.
+
+
 
 ALTER TABLE ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure person cannot be their own mother
 CHECK (moth_person_id <> moth_childs_person_id);
@@ -656,7 +665,7 @@ IF OBJECT_ID('ssd_legal_status') IS NOT NULL DROP TABLE ssd_legal_status;
 IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
 
 -- Create structure
-CREATE TABLE ssd_legal_status (
+CREATE TABLE ssd_development.ssd_legal_status (
     lega_legal_status_id            NVARCHAR(48) PRIMARY KEY,   -- item_ref=LEGA001A, type=nvarchar, max_field_size=48,
     lega_person_id                  NVARCHAR(48),               -- item_ref=LEGA002A, type=nvarchar, max_field_size=48,
     lega_legal_status               NVARCHAR(100),              -- item_ref=LEGA003A, type=nvarchar, max_field_size=100,
@@ -737,7 +746,7 @@ IF OBJECT_ID('tempdb..#ssd_contacts') IS NOT NULL DROP TABLE #ssd_contacts;
 
 
 -- Create structure
-CREATE TABLE ssd_contacts (
+CREATE TABLE ssd_development.ssd_contacts (
     cont_contact_id                 NVARCHAR(48) PRIMARY KEY,   -- item_ref=CONT001A, type=nvarchar, max_field_size=48,
     cont_person_id                  NVARCHAR(48),               -- item_ref=CONT002A, type=nvarchar, max_field_size=48,
     cont_contact_date               DATETIME,                   -- item_ref=CONT003A, type=datetime, max_field_size=NULL,
@@ -831,7 +840,7 @@ IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL DROP TABLE #ssd_ear
 
 
 -- Create structure
-CREATE TABLE ssd_early_help_episodes (
+CREATE TABLE ssd_development.ssd_early_help_episodes (
     earl_episode_id             NVARCHAR(48) PRIMARY KEY,   -- item_ref=EARL001A, type=nvarchar, max_field_size=48,
     earl_person_id              NVARCHAR(48),               -- item_ref=EARL002A, type=nvarchar, max_field_size=48,
     earl_episode_start_date     DATETIME,                   -- item_ref=EARL003A, type=datetime, max_field_size=NULL,
@@ -919,7 +928,7 @@ IF OBJECT_ID('ssd_cin_episodes') IS NOT NULL DROP TABLE ssd_cin_episodes;
 IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
 -- Create structure
-CREATE TABLE ssd_cin_episodes
+CREATE TABLE ssd_development.ssd_cin_episodes
 (
     cine_referral_id                INT,            -- item_ref=CINE001A, type=int, max_field_size=48,
     cine_person_id                  NVARCHAR(48),   -- item_ref=CINE002A, type=nvarchar, max_field_size=48,
@@ -1031,7 +1040,7 @@ PRINT 'Creating table: ' + @TableName;
 IF OBJECT_ID('ssd_cin_assessments') IS NOT NULL DROP TABLE ssd_cin_assessments;
 
 -- Create structure
-CREATE TABLE ssd_cin_assessments
+CREATE TABLE ssd_development.ssd_cin_assessments
 (
     cina_assessment_id              NVARCHAR(48) PRIMARY KEY,   -- item_ref=CINA001A, type=nvarchar, max_field_size=48,
     cina_person_id                  NVARCHAR(48),               -- item_ref=CINA002A, type=nvarchar, max_field_size=48,
@@ -1167,10 +1176,10 @@ WHERE
 
 
 -- Create structure
-CREATE TABLE ssd_assessment_factors (
-    cinf_table_id NVARCHAR(48) PRIMARY KEY -- item_ref=CINF003A, type=nvarchar, max_field_size=48,
-    cinf_assessment_id NVARCHAR(48) -- item_ref=CINF001A, type=nvarchar, max_field_size=48,
-    cinf_assessment_factors_json NVARCHAR(1000) -- size might need testing -- item_ref=CINF002A, type=nvarchar, max_field_size=1000
+CREATE TABLE ssd_development.ssd_assessment_factors (
+    cinf_table_id                   NVARCHAR(48) PRIMARY KEY, -- item_ref=CINF003A, type=nvarchar, max_field_size=48,
+    cinf_assessment_id              NVARCHAR(48), -- item_ref=CINF001A, type=nvarchar, max_field_size=48,
+    cinf_assessment_factors_json    NVARCHAR(1000) -- size might need testing -- item_ref=CINF002A, type=nvarchar, max_field_size=1000
 );
 
 -- Insert data
@@ -1291,7 +1300,7 @@ IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plan
 
 
 -- Create structure
-CREATE TABLE ssd_cin_plans (
+CREATE TABLE ssd_development.ssd_cin_plans (
     cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,   -- item_ref=CINP001A, type=nvarchar, max_field_size=48,
     cinp_referral_id            NVARCHAR(48),               -- item_ref=CINP007A, type=nvarchar, max_field_size=48,
     cinp_person_id              NVARCHAR(48),               -- item_ref=CINP002A, type=nvarchar, max_field_size=48,
@@ -1397,7 +1406,7 @@ IF OBJECT_ID('ssd_cin_visits') IS NOT NULL DROP TABLE ssd_cin_visits;
 IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
  
 -- Create structure
-CREATE TABLE ssd_cin_visits
+CREATE TABLE ssd_development.ssd_cin_visits
 (
     cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=CINV001A, type=nvarchar, max_field_size=48,      
     cinv_person_id              NVARCHAR(48),               -- item_ref=CINV007A, type=nvarchar, max_field_size=48,
@@ -1482,7 +1491,7 @@ IF OBJECT_ID('ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_s47_enquiry;
 IF OBJECT_ID('tempdb..#ssd_s47_enquiry') IS NOT NULL DROP TABLE #ssd_s47_enquiry;
 
 -- Create structure 
-CREATE TABLE ssd_s47_enquiry (
+CREATE TABLE ssd_development.ssd_s47_enquiry (
     s47e_s47_enquiry_id                 NVARCHAR(48) PRIMARY KEY,   -- item_ref=S47E001A, type=nvarchar, max_field_size=48,
     s47e_referral_id                    NVARCHAR(48),               -- item_ref=S47E010A, type=nvarchar, max_field_size=48,
     s47e_person_id                      NVARCHAR(48),               -- item_ref=S47E002A, type=nvarchar, max_field_size=48,
@@ -1593,7 +1602,7 @@ IF OBJECT_ID('tempdb..#ssd_initial_cp_conference') IS NOT NULL DROP TABLE #ssd_i
  
 
 -- Create structure
-CREATE TABLE ssd_initial_cp_conference (
+CREATE TABLE ssd_development.ssd_initial_cp_conference (
     icpc_icpc_id                NVARCHAR(48) PRIMARY KEY, -- item_ref=ICPC001A, type=nvarchar, max_field_size=48,
     icpc_icpc_meeting_id        NVARCHAR(48), -- item_ref=ICPC009A, type=nvarchar, max_field_size=48,
     icpc_s47_enquiry_id         NVARCHAR(48), -- item_ref=ICPC002A, type=nvarchar, max_field_size=48,
@@ -1720,7 +1729,7 @@ IF OBJECT_ID('ssd_cp_plans') IS NOT NULL DROP TABLE ssd_cp_plans;
 IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
 
 -- Create structure
-CREATE TABLE ssd_cp_plans (
+CREATE TABLE ssd_development.ssd_cp_plans (
     cppl_cp_plan_id                 NVARCHAR(48) PRIMARY KEY,   -- item_ref=CPPL001A, type=nvarchar, max_field_size=48,
     cppl_referral_id                NVARCHAR(48),               -- item_ref=CPPL007A, type=nvarchar, max_field_size=48,
     cppl_icpc_id                    NVARCHAR(48),               -- item_ref=CPPL008A, type=nvarchar, max_field_size=48, 
@@ -1823,7 +1832,7 @@ IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
   
  
 -- Create structure
-CREATE TABLE ssd_cp_visits (
+CREATE TABLE ssd_development.ssd_cp_visits (
     cppv_cp_visit_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CPPV007A, type=nvarchar, max_field_size=48, 
     cppv_person_id NVARCHAR(48), -- item_ref=CPPV008A, type=nvarchar, max_field_size=48,
     cppv_cp_plan_id NVARCHAR(48), -- item_ref=CPPV001A, type=nvarchar, max_field_size=48,
@@ -1919,7 +1928,7 @@ IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
   
  
 -- Create structure
-CREATE TABLE ssd_cp_reviews
+CREATE TABLE ssd_development.ssd_cp_reviews
 (
     cppr_cp_review_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CPPR001A, type=nvarchar, max_field_size=48,
     cppr_person_id NVARCHAR(48), -- item_ref=CPPR008A, type=nvarchar, max_field_size=48,
@@ -1977,6 +1986,11 @@ LEFT JOIN
 LEFT JOIN
     Child_Social.DIM_PERSON p ON cpr.DIM_PERSON_ID = p.DIM_PERSON_ID
  
+WHERE EXISTS ( -- only ssd relevant records
+    SELECT 1 
+    FROM ssd_person p
+    WHERE p.pers_person_id = cpr.DIM_PERSON_ID
+)
 GROUP BY cpr.FACT_CP_REVIEW_ID,
     cpr.FACT_CP_PLAN_ID,
     cpr.DIM_PERSON_ID,
@@ -1987,13 +2001,7 @@ GROUP BY cpr.FACT_CP_REVIEW_ID,
     fms.FACT_OUTCM_FORM_ID,
     ffa.ANSWER_NO,
     ffa.FACT_FORM_ID,
-    ffa.ANSWER
-
-WHERE EXISTS ( -- only ssd relevant records
-    SELECT 1 
-    FROM ssd_person p
-    WHERE p.pers_person_id = cpr.DIM_PERSON_ID
-    );
+    ffa.ANSWER;
 
 -- Add constraint(s)
 ALTER TABLE ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
@@ -2047,7 +2055,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episod
 
  
 -- Create structure
-CREATE TABLE ssd_cla_episodes (
+CREATE TABLE ssd_development.ssd_cla_episodes (
     clae_cla_episode_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CLAE001A, type=nvarchar, max_field_size=48,
     clae_person_id NVARCHAR(48), -- item_ref=CLAE002A, type=nvarchar, max_field_size=48,
     clae_cla_placement_id NVARCHAR(48), -- item_ref=CLAE013A, type=nvarchar, max_field_size=48, 
@@ -2171,7 +2179,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cl
 
 
 -- create structure
-CREATE TABLE ssd_cla_convictions (
+CREATE TABLE ssd_development.ssd_cla_convictions (
     clac_cla_conviction_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CLAC001A, type=nvarchar, max_field_size=48,
     clac_person_id NVARCHAR(48), -- item_ref=CLAC002A, type=nvarchar, max_field_size=48,
     clac_cla_conviction_date DATETIME, -- item_ref=CLAC003A, type=datetime, max_field_size=NULL,
@@ -2245,7 +2253,7 @@ IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_cla_health;
 IF OBJECT_ID('tempdb..#ssd_cla_health', 'U') IS NOT NULL DROP TABLE #ssd_cla_health;
 
 -- create structure
-CREATE TABLE ssd_cla_health (
+CREATE TABLE ssd_development.ssd_cla_health (
     clah_health_check_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CLAH001A, type=nvarchar, max_field_size=48,
     clah_person_id NVARCHAR(48), -- item_ref=CLAH002A, type=nvarchar, max_field_size=48,
     clah_health_check_type NVARCHAR(500), -- item_ref=CLAH003A, type=nvarchar, max_field_size=500,
@@ -2328,7 +2336,7 @@ IF OBJECT_ID('ssd_cla_immunisations') IS NOT NULL DROP TABLE ssd_cla_immunisatio
 IF OBJECT_ID('tempdb..#ssd_cla_immunisations') IS NOT NULL DROP TABLE #ssd_cla_immunisations;
 
 -- Create structure
-CREATE TABLE ssd_cla_immunisations (
+CREATE TABLE ssd_development.ssd_cla_immunisations (
     clai_person_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CLAI002A, type=nvarchar, max_field_size=48,
     clai_immunisations_status NCHAR(1), -- item_ref=CLAI004A, type=nchar, max_field_size=1,
     clai_immunisations_status_date DATETIME -- item_ref=CLAI005A, type=, max_field_size=
@@ -2410,7 +2418,7 @@ IF OBJECT_ID('ssd_cla_substance_misuse') IS NOT NULL DROP TABLE ssd_cla_substanc
 IF OBJECT_ID('tempdb..#ssd_cla_substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_substance_misuse;
 
 -- Create structure 
-CREATE TABLE ssd_cla_substance_misuse (
+CREATE TABLE ssd_development.ssd_cla_substance_misuse (
     clas_substance_misuse_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CLAS001A, type=nvarchar, max_field_size=48,
     clas_person_id NVARCHAR(48), -- item_ref=CLAS002A, type=nvarchar, max_field_size=48,
     clas_substance_misuse_date DATETIME, -- item_ref=CLAS003A, type=datetime, max_field_size=NULL,
@@ -2488,7 +2496,7 @@ IF OBJECT_ID('ssd_cla_placement', 'U') IS NOT NULL DROP TABLE ssd_cla_placement;
 IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_placement;
   
 -- Create structure
-CREATE TABLE ssd_cla_placement (
+CREATE TABLE ssd_development.ssd_cla_placement (
     clap_cla_placement_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CLAP001A, type=nvarchar, max_field_size=48,
     clap_cla_id NVARCHAR(48), -- item_ref=CLAP012A, type=nvarchar, max_field_size=48,
     clap_person_id NVARCHAR(48), -- item_ref=CLAP013A, type=nvarchar, max_field_size=48,
@@ -2604,7 +2612,7 @@ IF OBJECT_ID('ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE ssd_cla_reviews;
 IF OBJECT_ID('tempdb..#ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE #ssd_cla_reviews;
   
 -- Create structure
-CREATE TABLE ssd_cla_reviews (
+CREATE TABLE ssd_development.ssd_cla_reviews (
     clar_cla_review_id NVARCHAR(48) PRIMARY KEY, -- item_ref=CLAR001A, type=nvarchar, max_field_size=48,
     clar_cla_id NVARCHAR(48), -- item_ref=CLAR011A, type=nvarchar, max_field_size=48,
     clar_cla_review_due_date DATETIME, -- item_ref=CLAR003A, type=datetime, max_field_size=NULL,
@@ -2739,7 +2747,7 @@ WHERE
 
 
 -- Create structure
-CREATE TABLE ssd_cla_previous_permanence (
+CREATE TABLE ssd_development.ssd_cla_previous_permanence (
     lapp_table_id NVARCHAR(48) PRIMARY KEY, -- item_ref=LAPP001A, type=nvarchar, max_field_size=48,
     lapp_person_id NVARCHAR(48), -- item_ref=LAPP002A, type=nvarchar, max_field_size=48,
     lapp_previous_permanence_option NVARCHAR(200), -- item_ref=LAPP004A, type=nvarchar, max_field_size=200,
@@ -2890,12 +2898,12 @@ ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
  
  
 -- Create structure
-CREATE TABLE ssd_cla_care_plan (
-    lacp_table_id NVARCHAR(48) PRIMARY KEY -- item_ref=LACP001A, type=nvarchar, max_field_size=48,
-    lacp_person_id NVARCHAR(48) -- item_ref=LACP007A, type=nvarchar, max_field_size=48,
-    lacp_cla_care_plan_start_date DATETIME -- item_ref=LACP004A, type=datetime, max_field_size=NULL,
-    lacp_cla_care_plan_end_date DATETIME -- item_ref=LACP005A, type=datetime, max_field_size=NULL,
-    lacp_cla_care_plan_json NVARCHAR(1000) -- item_ref=LACP003A, type=nvarchar, max_field_size=100
+CREATE TABLE ssd_development.ssd_cla_care_plan (
+    lacp_table_id NVARCHAR(48) PRIMARY KEY, -- item_ref=LACP001A, type=nvarchar, max_field_size=48,
+    lacp_person_id NVARCHAR(48), -- item_ref=LACP007A, type=nvarchar, max_field_size=48,
+    lacp_cla_care_plan_start_date DATETIME, -- item_ref=LACP004A, type=datetime, max_field_size=NULL,
+    lacp_cla_care_plan_end_date DATETIME, -- item_ref=LACP005A, type=datetime, max_field_size=NULL,
+    lacp_cla_care_plan_json NVARCHAR(1000) -- item_ref=LACP003A, type=nvarchar, max_field_size=1000
 );
  
 -- Insert data
@@ -2989,13 +2997,13 @@ IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_vis
 
 
 -- Create structure
-CREATE TABLE ssd_cla_visits (
-    clav_cla_visit_id NVARCHAR(48) PRIMARY KEY -- item_ref=CLAV001A, type=nvarchar, max_field_size=48,
-    clav_cla_id NVARCHAR(48) -- item_ref=CLAV007A, type=nvarchar, max_field_size=48,
-    clav_person_id NVARCHAR(48) -- item_ref=CLAV008A, type=nvarchar, max_field_size=48,
-    clav_cla_visit_date DATETIME -- item_ref=CLAV003A, type=datetime, max_field_size=NULL,
-    clav_cla_visit_seen NCHAR(1) -- item_ref=CLAV004A, type=nchar, max_field_size=1,
-    clav_cla_visit_seen_alone NCHAR(1) -- item_ref=CLAV005A, type=nchar, max_field_size=1
+CREATE TABLE ssd_development.ssd_cla_visits (
+    clav_cla_visit_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=CLAV001A, type=nvarchar, max_field_size=48,
+    clav_cla_id                 NVARCHAR(48),               -- item_ref=CLAV007A, type=nvarchar, max_field_size=48,
+    clav_person_id              NVARCHAR(48),               -- item_ref=CLAV008A, type=nvarchar, max_field_size=48,
+    clav_cla_visit_date         DATETIME,                   -- item_ref=CLAV003A, type=datetime, max_field_size=NULL,
+    clav_cla_visit_seen         NCHAR(1),                   -- item_ref=CLAV004A, type=nchar, max_field_size=1,
+    clav_cla_visit_seen_alone   NCHAR(1)                    -- item_ref=CLAV005A, type=nchar, max_field_size=1
 );
  
 -- Insert data
@@ -3086,13 +3094,13 @@ IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_sco
 
 /* V8.1 */
 -- Create structure
-CREATE TABLE ssd_sdq_scores (
-    csdq_table_id NVARCHAR(48) -- item_ref=CSDQ001A, type=nvarchar, max_field_size=48, 
-    csdq_person_id NVARCHAR(48) -- item_ref=CSDQ002A, type=nvarchar, max_field_size=48,
-    csdq_sdq_score NVARCHAR(48) -- item_ref=CSDQ005A, type=nvarchar, max_field_size=100,
-    csdq_sdq_completed_date DATETIME -- item_ref=CSDQ003A, type=datetime, max_field_size=NULL,
+CREATE TABLE ssd_development.ssd_sdq_scores (
+    csdq_table_id               NVARCHAR(48) PRIMARY KEY,   -- item_ref=CSDQ001A, type=nvarchar, max_field_size=48, 
+    csdq_person_id              NVARCHAR(48),               -- item_ref=CSDQ002A, type=nvarchar, max_field_size=48,
+    csdq_sdq_score              NVARCHAR(100),              -- item_ref=CSDQ005A, type=nvarchar, max_field_size=100,
+    csdq_sdq_completed_date     DATETIME,                   -- item_ref=CSDQ003A, type=datetime, max_field_size=NULL,
     csdq_sdq_details_json       NVARCHAR(1000),
-    csdq_sdq_reason NVARCHAR(48) -- item_ref=CSDQ004A, type=nvarchar, max_field_size=100
+    csdq_sdq_reason             NVARCHAR(100)               -- item_ref=CSDQ004A, type=nvarchar, max_field_size=100
 );
  
 -- Insert data
@@ -3235,14 +3243,14 @@ IF OBJECT_ID('ssd_missing', 'U') IS NOT NULL DROP TABLE ssd_missing;
 IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL DROP TABLE #ssd_missing;
 
 -- Create structure
-CREATE TABLE ssd_missing (
-    miss_table_id NVARCHAR(48) PRIMARY KEY -- item_ref=MISS001A, type=nvarchar, max_field_size=48,
-    miss_person_id NVARCHAR(48) -- item_ref=MISS002A, type=nvarchar, max_field_size=48,
-    miss_missing_episode_start_date DATETIME -- item_ref=MISS003A, type=datetime, max_field_size=NULL,
-    miss_missing_episode_type NVARCHAR(100) -- item_ref=MISS004A, type=nvarchar, max_field_size=100,
-    miss_missing_episode_end_date DATETIME -- item_ref=MISS005A, type=datetime, max_field_size=NULL,
-    miss_missing_rhi_offered NVARCHAR(10) -- item_ref=MISS006A, type=nchar, max_field_size=1,                   
-    miss_missing_rhi_accepted NVARCHAR(10)                    -- item_ref=MISS007A, type=nchar, max_field_size=1
+CREATE TABLE ssd_development.ssd_missing (
+    miss_table_id                   NVARCHAR(48) PRIMARY KEY,   -- item_ref=MISS001A, type=nvarchar, max_field_size=48,
+    miss_person_id                  NVARCHAR(48),               -- item_ref=MISS002A, type=nvarchar, max_field_size=48,
+    miss_missing_episode_start_date DATETIME,                   -- item_ref=MISS003A, type=datetime, max_field_size=NULL,
+    miss_missing_episode_type       NVARCHAR(100),              -- item_ref=MISS004A, type=nvarchar, max_field_size=100,
+    miss_missing_episode_end_date   DATETIME,                   -- item_ref=MISS005A, type=datetime, max_field_size=NULL,
+    miss_missing_rhi_offered        NCHAR(1),                   -- item_ref=MISS006A, type=nchar, max_field_size=1,                   
+    miss_missing_rhi_accepted       NCHAR(1)                    -- item_ref=MISS007A, type=nchar, max_field_size=1
 );
 
 
@@ -3331,20 +3339,20 @@ IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_
  
  
 -- Create structure
-CREATE TABLE ssd_care_leavers
+CREATE TABLE ssd_development.ssd_care_leavers
 (
-    clea_table_id NVARCHAR(48) -- item_ref=CLEA001A, type=nvarchar, max_field_size=48,
-    clea_person_id NVARCHAR(48) -- item_ref=CLEA002A, type=nvarchar, max_field_size=48,
-    clea_care_leaver_eligibility NVARCHAR(100) -- item_ref=CLEA003A, type=nvarchar, max_field_size=100,
-    clea_care_leaver_in_touch NVARCHAR(100) -- item_ref=CLEA004A, type=nvarchar, max_field_size=100,
-    clea_care_leaver_latest_contact DATETIME -- item_ref=CLEA005A, type=datetime, max_field_size=NULL,
-    clea_care_leaver_accommodation NVARCHAR(100) -- item_ref=CLEA006A, type=nvarchar, max_field_size=100,
-    clea_care_leaver_accom_suitable NVARCHAR(100) -- item_ref=CLEA007A, type=nvarchar, max_field_size=100,
-    clea_care_leaver_activity NVARCHAR(100) -- item_ref=CLEA008A, type=nvarchar, max_field_size=100,
-    clea_pathway_plan_review_date DATETIME -- item_ref=CLEA009A, type=datetime, max_field_size=NULL,
-    clea_care_leaver_personal_advisor NVARCHAR(100) -- item_ref=CLEA010A, type=nvarchar, max_field_size=100,
-    clea_care_leaver_allocated_team_name NVARCHAR(255) -- item_ref=CLEA011A, type=nvarchar, max_field_size=48,
-    clea_care_leaver_worker_name NVARCHAR(100)         -- item_ref=CLEA012A, type=nvarchar, max_field_size=48
+    clea_table_id                           NVARCHAR(48) PRIMARY KEY,   -- item_ref=CLEA001A, type=nvarchar, max_field_size=48,
+    clea_person_id                          NVARCHAR(48),               -- item_ref=CLEA002A, type=nvarchar, max_field_size=48,
+    clea_care_leaver_eligibility            NVARCHAR(100),              -- item_ref=CLEA003A, type=nvarchar, max_field_size=100,
+    clea_care_leaver_in_touch               NVARCHAR(100),              -- item_ref=CLEA004A, type=nvarchar, max_field_size=100,
+    clea_care_leaver_latest_contact         DATETIME,                   -- item_ref=CLEA005A, type=datetime, max_field_size=NULL,
+    clea_care_leaver_accommodation          NVARCHAR(100),              -- item_ref=CLEA006A, type=nvarchar, max_field_size=100,
+    clea_care_leaver_accom_suitable         NVARCHAR(100),              -- item_ref=CLEA007A, type=nvarchar, max_field_size=100,
+    clea_care_leaver_activity               NVARCHAR(100),              -- item_ref=CLEA008A, type=nvarchar, max_field_size=100,
+    clea_pathway_plan_review_date           DATETIME,                   -- item_ref=CLEA009A, type=datetime, max_field_size=NULL,
+    clea_care_leaver_personal_advisor       NVARCHAR(100),              -- item_ref=CLEA010A, type=nvarchar, max_field_size=100,
+    clea_care_leaver_allocated_team_name    NVARCHAR(255),              -- item_ref=CLEA011A, type=nvarchar, max_field_size=48,
+    clea_care_leaver_worker_name            NVARCHAR(100)               -- item_ref=CLEA012A, type=nvarchar, max_field_size=48
 );
  
 /* V4 */
@@ -3517,30 +3525,30 @@ IF OBJECT_ID('ssd_permanence', 'U') IS NOT NULL DROP TABLE ssd_permanence;
 IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
 
 -- Create structure
-CREATE TABLE ssd_permanence (
-    perm_table_id NVARCHAR(48) PRIMARY KEY -- item_ref=PERM001A, type=nvarchar, max_field_size=48,
-    perm_person_id NVARCHAR(48) -- item_ref=PERM002A, type=nvarchar, max_field_size=48,
-    perm_cla_id NVARCHAR(48) -- item_ref=PERM022A, type=nvarchar, max_field_size=48,
-    perm_adm_decision_date DATETIME -- item_ref=PERM003A, type=datetime, max_field_size=NULL,
-    perm_part_of_sibling_group NCHAR(1) -- item_ref=PERM012A, type=nchar, max_field_size=1,
-    perm_siblings_placed_together INT -- item_ref=PERM013A, type=int, max_field_size=2,
-    perm_siblings_placed_apart INT -- item_ref=PERM014A, type=int, max_field_size=2,
-    perm_ffa_cp_decision_date DATETIME -- item_ref=PERM004A, type=datetime, max_field_size=NULL,              
-    perm_placement_order_date DATETIME -- item_ref=PERM006A, type=datetime, max_field_size=NULL,
-    perm_matched_date DATETIME -- item_ref=PERM008A, type=datetime, max_field_size=NULL,
-    perm_adopter_sex NVARCHAR(48) -- item_ref=PERM025A, type=nvarchar, max_field_size=48,
-    perm_adopter_legal_status NVARCHAR(100) -- item_ref=PERM026A, type=nvarchar, max_field_size=100,
-    perm_number_of_adopters INT -- item_ref=PERM027A, type=nvarchar, max_field_size=3,
-    perm_placed_for_adoption_date DATETIME -- item_ref=PERM007A, type=datetime, max_field_size=NULL,             
-    perm_adopted_by_carer_flag NCHAR(1) -- item_ref=PERM021A, type=nchar, max_field_size=1,
-    perm_placed_foster_carer_date DATETIME -- item_ref=PERM011A, type=datetime, max_field_size=NULL,
-    perm_placed_ffa_cp_date DATETIME -- item_ref=PERM009A, type=datetime, max_field_size=NULL,
-    perm_placement_provider_urn NVARCHAR(48) -- item_ref=PERM015A, type=nvarchar, max_field_size=48,  
-    perm_decision_reversed_date DATETIME -- item_ref=PERM010A, type=datetime, max_field_size=NULL,                  
-    perm_decision_reversed_reason NVARCHAR(100) -- item_ref=PERM016A, type=nvarchar, max_field_size=100,
-    perm_permanence_order_date DATETIME -- item_ref=PERM017A, type=datetime, max_field_size=NULL,              
-    perm_permanence_order_type NVARCHAR(100) -- item_ref=PERM018A, type=nvarchar, max_field_size=100,        
-    perm_adoption_worker_name            NVARCHAR(100)
+CREATE TABLE ssd_development.ssd_permanence (
+    perm_table_id                   NVARCHAR(48) PRIMARY KEY,   -- item_ref=PERM001A, type=nvarchar, max_field_size=48,
+    perm_person_id                  NVARCHAR(48),               -- item_ref=PERM002A, type=nvarchar, max_field_size=48,
+    perm_cla_id                     NVARCHAR(48),               -- item_ref=PERM022A, type=nvarchar, max_field_size=48,
+    perm_adm_decision_date          DATETIME,                   -- item_ref=PERM003A, type=datetime, max_field_size=NULL,
+    perm_part_of_sibling_group      NCHAR(1),                   -- item_ref=PERM012A, type=nchar, max_field_size=1,
+    perm_siblings_placed_together   INT,                        -- item_ref=PERM013A, type=int, max_field_size=2,
+    perm_siblings_placed_apart      INT,                        -- item_ref=PERM014A, type=int, max_field_size=2,
+    perm_ffa_cp_decision_date       DATETIME,                   -- item_ref=PERM004A, type=datetime, max_field_size=NULL,              
+    perm_placement_order_date       DATETIME,                   -- item_ref=PERM006A, type=datetime, max_field_size=NULL,
+    perm_matched_date               DATETIME,                   -- item_ref=PERM008A, type=datetime, max_field_size=NULL,
+    perm_adopter_sex                NVARCHAR(48),               -- item_ref=PERM025A, type=nvarchar, max_field_size=48,
+    perm_adopter_legal_status       NVARCHAR(100),              -- item_ref=PERM026A, type=nvarchar, max_field_size=100,
+    perm_number_of_adopters         INT,                        -- item_ref=PERM027A, type=nvarchar, max_field_size=3,
+    perm_placed_for_adoption_date   DATETIME,                   -- item_ref=PERM007A, type=datetime, max_field_size=NULL,             
+    perm_adopted_by_carer_flag      NCHAR(1),                   -- item_ref=PERM021A, type=nchar, max_field_size=1,
+    perm_placed_foster_carer_date   DATETIME,                   -- item_ref=PERM011A, type=datetime, max_field_size=NULL,
+    perm_placed_ffa_cp_date         DATETIME,                   -- item_ref=PERM009A, type=datetime, max_field_size=NULL,
+    perm_placement_provider_urn     NVARCHAR(48),               -- item_ref=PERM015A, type=nvarchar, max_field_size=48,  
+    perm_decision_reversed_date     DATETIME,                   -- item_ref=PERM010A, type=datetime, max_field_size=NULL,                  
+    perm_decision_reversed_reason   NVARCHAR(100),              -- item_ref=PERM016A, type=nvarchar, max_field_size=100,
+    perm_permanence_order_date      DATETIME,                   -- item_ref=PERM017A, type=datetime, max_field_size=NULL,              
+    perm_permanence_order_type      NVARCHAR(100),              -- item_ref=PERM018A, type=nvarchar, max_field_size=100,        
+    perm_adoption_worker_name       NVARCHAR(100)
     
 );
 
@@ -3737,16 +3745,16 @@ SET @LastSept30th = CASE
 
 
 -- Create structure
-CREATE TABLE ssd_professionals (
-    prof_professional_id NVARCHAR(48) PRIMARY KEY -- item_ref=PROF001A, type=nvarchar, max_field_size=48,
-    prof_staff_id NVARCHAR(48) -- item_ref=PROF010A, type=nvarchar, max_field_size=48,
-    prof_professional_name NVARCHAR(300) -- item_ref=PROF013A, type=nvarchar, max_field_size=300,
-    prof_social_worker_registration_no NVARCHAR(48) -- item_ref=PROF002A, type=nvarchar, max_field_size=48,
-    prof_agency_worker_flag NCHAR(1) -- item_ref=PROF014A, type=NCHAR, max_field_size=1,
-    prof_professional_job_title NVARCHAR(500) -- item_ref=PROF007A, type=nvarchar, max_field_size=500,
-    prof_professional_caseload INT -- item_ref=PROF008A, type=int, max_field_size=5,              
-    prof_professional_department NVARCHAR(100) -- item_ref=PROF012A, type=nvarchar, max_field_size=100,
-    prof_full_time_equivalency FLOAT -- item_ref=PROF011A, type=float, max_field_size=4
+CREATE TABLE ssd_development.ssd_professionals (
+    prof_professional_id                NVARCHAR(48) PRIMARY KEY,   -- item_ref=PROF001A, type=nvarchar, max_field_size=48,
+    prof_staff_id                       NVARCHAR(48),               -- item_ref=PROF010A, type=nvarchar, max_field_size=48,
+    prof_professional_name              NVARCHAR(300),              -- item_ref=PROF013A, type=nvarchar, max_field_size=300,
+    prof_social_worker_registration_no  NVARCHAR(48),               -- item_ref=PROF002A, type=nvarchar, max_field_size=48,
+    prof_agency_worker_flag             NCHAR(1),                   -- item_ref=PROF014A, type=NCHAR, max_field_size=1,
+    prof_professional_job_title         NVARCHAR(500),              -- item_ref=PROF007A, type=nvarchar, max_field_size=500,
+    prof_professional_caseload          INT,                        -- item_ref=PROF008A, type=int, max_field_size=5,              
+    prof_professional_department        NVARCHAR(100),              -- item_ref=PROF012A, type=nvarchar, max_field_size=100,
+    prof_full_time_equivalency          FLOAT                       -- item_ref=PROF011A, type=float, max_field_size=4
 );
 
 
@@ -3831,16 +3839,16 @@ IF OBJECT_ID('ssd_involvements', 'U') IS NOT NULL DROP TABLE ssd_involvements;
 IF OBJECT_ID('tempdb..#ssd_involvements', 'U') IS NOT NULL DROP TABLE #ssd_involvements;
  
 -- Create structure
-CREATE TABLE ssd_involvements (
-    invo_involvements_id NVARCHAR(48) PRIMARY KEY -- item_ref=INVO005A, type=nvarchar, max_field_size=48,
-    invo_professional_id NVARCHAR(48) -- item_ref=INVO006A, type=nvarchar, max_field_size=48,
-    invo_professional_role_id NVARCHAR(200) -- item_ref=INVO007A, type=nvarchar, max_field_size=200,
-    invo_professional_team NVARCHAR(1000) -- item_ref=INVO009A, type=nvarchar, max_field_size=200,
-    invo_person_id NVARCHAR(48) -- item_ref=INVO011A, type=nvarchar, max_field_size=48,
-    invo_involvement_start_date DATETIME -- item_ref=INVO002A, type=datetime, max_field_size=NULL,
-    invo_involvement_end_date DATETIME -- item_ref=INVO003A, type=datetime, max_field_size=NULL,
-    invo_worker_change_reason NVARCHAR(200) -- item_ref=INVO004A, type=nvarchar, max_field_size=200,
-    invo_referral_id NVARCHAR(48) -- item_ref=INVO010A, type=nvarchar, max_field_size=48
+CREATE TABLE ssd_development.ssd_involvements (
+    invo_involvements_id        NVARCHAR(48) PRIMARY KEY,   -- item_ref=INVO005A, type=nvarchar, max_field_size=48,
+    invo_professional_id        NVARCHAR(48),               -- item_ref=INVO006A, type=nvarchar, max_field_size=48,
+    invo_professional_role_id   NVARCHAR(200),              -- item_ref=INVO007A, type=nvarchar, max_field_size=200,
+    invo_professional_team      NVARCHAR(1000),             -- item_ref=INVO009A, type=nvarchar, max_field_size=200,
+    invo_person_id              NVARCHAR(48),               -- item_ref=INVO011A, type=nvarchar, max_field_size=48,
+    invo_involvement_start_date DATETIME,                   -- item_ref=INVO002A, type=datetime, max_field_size=NULL,
+    invo_involvement_end_date   DATETIME,                   -- item_ref=INVO003A, type=datetime, max_field_size=NULL,
+    invo_worker_change_reason   NVARCHAR(200),              -- item_ref=INVO004A, type=nvarchar, max_field_size=200,
+    invo_referral_id            NVARCHAR(48)                -- item_ref=INVO010A, type=nvarchar, max_field_size=48
 );
  
 -- Insert data
@@ -3949,13 +3957,13 @@ IF OBJECT_ID('ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_linked_id
 IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
 
 -- Create structure
-CREATE TABLE ssd_linked_identifiers (
-    link_table_id NVARCHAR(48) PRIMARY KEY DEFAULT NEWID() -- item_ref=LINK001A, type=nvarchar, max_field_size=48,
-    link_person_id NVARCHAR(48) -- item_ref=LINK002A, type=nvarchar, max_field_size=48, 
-    link_identifier_type NVARCHAR(100) -- item_ref=LINK003A, type=nvarchar, max_field_size=20,
-    link_identifier_value NVARCHAR(100) -- item_ref=LINK004A, type=nvarchar, max_field_size=20,
-    link_valid_from_date DATETIME -- item_ref=LINK005A, type=datetime, max_field_size=NULL,
-    link_valid_to_date DATETIME -- item_ref=LINK006A, type=datetime, max_field_size=NULL
+CREATE TABLE ssd_development.ssd_linked_identifiers (
+    link_table_id               NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),   -- item_ref=LINK001A, type=nvarchar, max_field_size=48,
+    link_person_id              NVARCHAR(48),                               -- item_ref=LINK002A, type=nvarchar, max_field_size=48, 
+    link_identifier_type        NVARCHAR(100),                              -- item_ref=LINK003A, type=nvarchar, max_field_size=20,
+    link_identifier_value       NVARCHAR(100),                              -- item_ref=LINK004A, type=nvarchar, max_field_size=20,
+    link_valid_from_date        DATETIME,                                   -- item_ref=LINK005A, type=datetime, max_field_size=NULL,
+    link_valid_to_date          DATETIME                                    -- item_ref=LINK006A, type=datetime, max_field_size=NULL
 );
 
 -- -- Insert placeholder data [TESTING]
@@ -4024,13 +4032,13 @@ IF OBJECT_ID('ssd_s251_finance', 'U') IS NOT NULL DROP TABLE ssd_s251_finance;
 IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_finance;
 
 -- Create structure
-CREATE TABLE ssd_s251_finance (
-    s251_table_id NVARCHAR(48) PRIMARY KEY -- item_ref=S251001A, type=nvarchar, max_field_size=48,
-    s251_cla_placement_id NVARCHAR(48) -- item_ref=S251002A, type=nvarchar, max_field_size=48, 
-    s251_placeholder_1 NVARCHAR(48) -- item_ref=S251003A, type=nvarchar, max_field_size=48,
-    s251_placeholder_2 NVARCHAR(48) -- item_ref=S251004A, type=nvarchar, max_field_size=48,
-    s251_placeholder_3 NVARCHAR(48) -- item_ref=S251005A, type=nvarchar, max_field_size=48,
-    s251_placeholder_4 NVARCHAR(48) -- item_ref=S251006A, type=nvarchar, max_field_size=48
+CREATE TABLE ssd_development.ssd_s251_finance (
+    s251_table_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=S251001A, type=nvarchar, max_field_size=48,
+    s251_cla_placement_id   NVARCHAR(48),               -- item_ref=S251002A, type=nvarchar, max_field_size=48, 
+    s251_placeholder_1      NVARCHAR(48),               -- item_ref=S251003A, type=nvarchar, max_field_size=48,
+    s251_placeholder_2      NVARCHAR(48),               -- item_ref=S251004A, type=nvarchar, max_field_size=48,
+    s251_placeholder_3      NVARCHAR(48),               -- item_ref=S251005A, type=nvarchar, max_field_size=48,
+    s251_placeholder_4      NVARCHAR(48)                -- item_ref=S251006A, type=nvarchar, max_field_size=48
 );
 
 -- -- Insert placeholder data [TESTING]
@@ -4086,14 +4094,14 @@ IF OBJECT_ID('ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE ssd_voice_of_chil
 IF OBJECT_ID('tempdb..#ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voice_of_child;
 
 -- Create structure
-CREATE TABLE ssd_voice_of_child (
-    voch_table_id NVARCHAR(48) PRIMARY KEY -- item_ref=VOCH007A, type=nvarchar, max_field_size=48,
-    voch_person_id NVARCHAR(48) -- item_ref=VOCH001A, type=nvarchar, max_field_size=48, 
-    voch_explained_worries NCHAR(1) -- item_ref=VOCH002A, type=nchar, max_field_size=1, 
-    voch_story_help_understand NCHAR(1) -- item_ref=VOCH003A, type=nchar, max_field_size=1, 
-    voch_agree_worker NCHAR(1) -- item_ref=VOCH004A, type=nchar, max_field_size=1, 
-    voch_plan_safe NCHAR(1) -- item_ref=VOCH005A, type=nchar, max_field_size=1, 
-    voch_tablet_help_explain NCHAR(1) -- item_ref=VOCH006A, type=nchar, max_field_size=1
+CREATE TABLE ssd_development.ssd_voice_of_child (
+    voch_table_id               NVARCHAR(48) PRIMARY KEY,   -- item_ref=VOCH007A
+    voch_person_id              NVARCHAR(48),               -- item_ref=VOCH001A
+    voch_explained_worries      NCHAR(1),                   -- item_ref=VOCH002A
+    voch_story_help_understand  NCHAR(1),                   -- item_ref=VOCH003A
+    voch_agree_worker           NCHAR(1),                   -- item_ref=VOCH004A
+    voch_plan_safe              NCHAR(1),                   -- item_ref=VOCH005A
+    voch_tablet_help_explain    NCHAR(1)                    -- item_ref=VOCH006A
 );
 
 -- -- Insert placeholder data [TESTING]
@@ -4160,31 +4168,31 @@ IF OBJECT_ID('ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE ssd_pre_proceedi
 IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pre_proceedings;
 
 -- Create structure
-CREATE TABLE ssd_pre_proceedings (
-    prep_table_id NVARCHAR(48) PRIMARY KEY -- item_ref=PREP024A, type=nvarchar, max_field_size=48,
-    prep_person_id NVARCHAR(48) -- item_ref=PREP001A, type=nvarchar, max_field_size=48,
-    prep_plo_family_id NVARCHAR(48) -- item_ref=PREP002A, type=nvarchar, max_field_size=48,
-    prep_pre_pro_decision_date DATETIME -- item_ref=PREP003A, type=datetime, max_field_size=NULL,
-    prep_initial_pre_pro_meeting_date DATETIME -- item_ref=PREP004A, type=datetime, max_field_size=NULL,
-    prep_pre_pro_outcome NVARCHAR(100) -- item_ref=PREP005A, type=nvarchar, max_field_size=100,
-    prep_agree_stepdown_issue_date DATETIME -- item_ref=PREP006A, type=datetime, max_field_size=NULL,
-    prep_cp_plans_referral_period INT -- item_ref=PREP007A, type=int, max_field_size=4, 
-    prep_legal_gateway_outcome NVARCHAR(100) -- item_ref=PREP008A, type=nvarchar, max_field_size=100,
-    prep_prev_pre_proc_child INT -- item_ref=PREP009A, type=int, max_field_size=4,
-    prep_prev_care_proc_child INT -- item_ref=PREP010A, type=int, max_field_size=4,
-    prep_pre_pro_letter_date DATETIME -- item_ref=PREP011A, type=datetime, max_field_size=NULL,
-    prep_care_pro_letter_date DATETIME -- item_ref=PREP012A, type=datetime, max_field_size=NULL,
-    prep_pre_pro_meetings_num INT -- item_ref=PREP013A, type=int, max_field_size=4,
-    prep_pre_pro_parents_legal_rep NCHAR(1) -- item_ref=PREP014A, type=nchar, max_field_size=1, 
-    prep_parents_legal_rep_point_of_issue NCHAR(2) -- item_ref=PREP015A, type=nchar, max_field_size=2,
-    prep_court_reference NVARCHAR(48) -- item_ref=PREP016A, type=nvarchar, max_field_size=48,
-    prep_care_proc_court_hearings INT -- item_ref=PREP017A, type=int, max_field_size=4,
-    prep_care_proc_short_notice NCHAR(1) -- item_ref=PREP018A, type=nchar, max_field_size=1, 
-    prep_proc_short_notice_reason NVARCHAR(100) -- item_ref=PREP019A, type=nvarchar, max_field_size=100,
-    prep_la_inital_plan_approved            NCHAR(1), 
-    prep_la_initial_care_plan NVARCHAR(100) -- item_ref=PREP021A, type=nvarchar, max_field_size=100,
-    prep_la_final_plan_approved NCHAR(1) -- item_ref=PREP022A, type=nchar, max_field_size=1, 
-    prep_la_final_care_plan NVARCHAR(100) -- item_ref=PREP023A, type=nvarchar, max_field_size=100
+CREATE TABLE ssd_development.ssd_pre_proceedings (
+    prep_table_id                           NVARCHAR(48) PRIMARY KEY,   -- item_ref=PREP024A
+    prep_person_id                          NVARCHAR(48),               -- item_ref=PREP001A
+    prep_plo_family_id                      NVARCHAR(48),               -- item_ref=PREP002A
+    prep_pre_pro_decision_date              DATETIME,                   -- item_ref=PREP003A
+    prep_initial_pre_pro_meeting_date       DATETIME,                   -- item_ref=PREP004A
+    prep_pre_pro_outcome                    NVARCHAR(100),              -- item_ref=PREP005A
+    prep_agree_stepdown_issue_date          DATETIME,                   -- item_ref=PREP006A
+    prep_cp_plans_referral_period           INT,                        -- item_ref=PREP007A
+    prep_legal_gateway_outcome              NVARCHAR(100),              -- item_ref=PREP008A
+    prep_prev_pre_proc_child                INT,                        -- item_ref=PREP009A
+    prep_prev_care_proc_child               INT,                        -- item_ref=PREP010A
+    prep_pre_pro_letter_date                DATETIME,                   -- item_ref=PREP011A
+    prep_care_pro_letter_date               DATETIME,                   -- item_ref=PREP012A
+    prep_pre_pro_meetings_num               INT,                        -- item_ref=PREP013A
+    prep_pre_pro_parents_legal_rep          NCHAR(1),                   -- item_ref=PREP014A
+    prep_parents_legal_rep_point_of_issue   NCHAR(2),                   -- item_ref=PREP015A
+    prep_court_reference                    NVARCHAR(48),               -- item_ref=PREP016A
+    prep_care_proc_court_hearings           INT,                        -- item_ref=PREP017A
+    prep_care_proc_short_notice             NCHAR(1),                   -- item_ref=PREP018A
+    prep_proc_short_notice_reason           NVARCHAR(100),              -- item_ref=PREP019A
+    prep_la_inital_plan_approved            NCHAR(1),                   -- item_ref=PREP020A
+    prep_la_initial_care_plan               NVARCHAR(100),              -- item_ref=PREP021A
+    prep_la_final_plan_approved             NCHAR(1),                   -- item_ref=PREP022A
+    prep_la_final_care_plan                 NVARCHAR(100)               -- item_ref=PREP023A
 );
 
 -- -- Insert placeholder data
@@ -4300,12 +4308,12 @@ IF OBJECT_ID('ssd_send') IS NOT NULL DROP TABLE ssd_send;
 IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL DROP TABLE #ssd_send;
 
 -- Create structure 
-CREATE TABLE ssd_send (
-    send_table_id NVARCHAR(48) PRIMARY KEY -- item_ref=SEND001A, type=nvarchar, max_field_size=48,
-    send_person_id NVARCHAR(48) -- item_ref=SEND005A, type=nvarchar, max_field_size=48,
-    send_upn NVARCHAR(48) -- item_ref=SEND002A, type=nvarchar, max_field_size=48,
-    send_uln NVARCHAR(48) -- item_ref=SEND003A, type=nvarchar, max_field_size=48,
-    send_upn_unknown NVARCHAR(48) -- item_ref=SEND004A, type=nchar, max_field_size=1
+CREATE TABLE ssd_development.ssd_send (
+    send_table_id       NVARCHAR(48) PRIMARY KEY,   -- item_ref=SEND001A
+    send_person_id      NVARCHAR(48),               -- item_ref=SEND005A
+    send_upn            NVARCHAR(48),               -- item_ref=SEND002A
+    send_uln            NVARCHAR(48),               -- item_ref=SEND003A
+    send_upn_unknown    NVARCHAR(4)                 -- item_ref=SEND004A
     );
 
 -- -- Insert placeholder data
@@ -4357,11 +4365,11 @@ IF OBJECT_ID('tempdb..#ssd_sen_need', 'U') IS NOT NULL DROP TABLE #ssd_sen_need 
  
  
 -- Create structure
-CREATE TABLE ssd_sen_need (
-    senn_table_id NVARCHAR(48) PRIMARY KEY -- item_ref=SENN001A, type=nvarchar, max_field_size=48,
-    senn_active_ehcp_id NVARCHAR(48) -- item_ref=SENN002A, type=nvarchar, max_field_size=48,
-    senn_active_ehcp_need_type NVARCHAR(100) -- item_ref=SENN003A, type=nvarchar, max_field_size=100,
-    senn_active_ehcp_need_rank NVARCHAR(1) -- item_ref=SENN004A, type=nvarchar, max_field_size=1
+CREATE TABLE ssd_development.ssd_sen_need (
+    senn_table_id                   NVARCHAR(48) PRIMARY KEY,   -- item_ref=SENN001A
+    senn_active_ehcp_id             NVARCHAR(48),               -- item_ref=SENN002A
+    senn_active_ehcp_need_type      NVARCHAR(100),              -- item_ref=SENN003A
+    senn_active_ehcp_need_rank      NVARCHAR(1)                 -- item_ref=SENN004A
 );
  
 -- Create constraint(s)
@@ -4410,12 +4418,12 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE #ssd_ehcp
 
 
 -- Create structure
-CREATE TABLE ssd_ehcp_requests (
-    ehcr_ehcp_request_id NVARCHAR(48) PRIMARY KEY -- item_ref=EHCR001A, type=nvarchar, max_field_size=48,
-    ehcr_send_table_id NVARCHAR(48) -- item_ref=EHCR002A, type=nvarchar, max_field_size=48,
-    ehcr_ehcp_req_date DATETIME -- item_ref=EHCR003A, type=datetime, max_field_size=NULL,
-    ehcr_ehcp_req_outcome_date DATETIME -- item_ref=EHCR004A, type=datetime, max_field_size=NULL,
-    ehcr_ehcp_req_outcome NVARCHAR(100) -- item_ref=EHCR005A, type=nvarchar, max_field_size=100
+CREATE TABLE ssd_development.ssd_ehcp_requests (
+    ehcr_ehcp_request_id            NVARCHAR(48) PRIMARY KEY,   -- item_ref=EHCR001A
+    ehcr_send_table_id              NVARCHAR(48),               -- item_ref=EHCR002A
+    ehcr_ehcp_req_date              DATETIME,                   -- item_ref=EHCR003A
+    ehcr_ehcp_req_outcome_date      DATETIME,                   -- item_ref=EHCR004A
+    ehcr_ehcp_req_outcome           NVARCHAR(100)               -- item_ref=EHCR005A
 );
 
 
@@ -4464,12 +4472,12 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE #ssd_eh
 
 
 -- Create ssd_ehcp_assessment table
-CREATE TABLE ssd_ehcp_assessment (
-    ehca_ehcp_assessment_id NVARCHAR(48) PRIMARY KEY -- item_ref=EHCA001A, type=nvarchar, max_field_size=48,
-    ehca_ehcp_request_id NVARCHAR(48) -- item_ref=EHCA002A, type=nvarchar, max_field_size=48,
-    ehca_ehcp_assessment_outcome_date DATETIME -- item_ref=EHCA003A, type=datetime, max_field_size=NULL,
-    ehca_ehcp_assessment_outcome NVARCHAR(100) -- item_ref=EHCA004A, type=nvarchar, max_field_size=100,
-    ehca_ehcp_assessment_exceptions NVARCHAR(100) -- item_ref=EHCA005A, type=nvarchar, max_field_size=100
+CREATE TABLE ssd_development.ssd_ehcp_assessment (
+    ehca_ehcp_assessment_id                 NVARCHAR(48) PRIMARY KEY,   -- item_ref=EHCA001A
+    ehca_ehcp_request_id                    NVARCHAR(48),               -- item_ref=EHCA002A
+    ehca_ehcp_assessment_outcome_date       DATETIME,                   -- item_ref=EHCA003A
+    ehca_ehcp_assessment_outcome            NVARCHAR(100),              -- item_ref=EHCA004A
+    ehca_ehcp_assessment_exceptions         NVARCHAR(100)               -- item_ref=EHCA005A
 );
 
 
@@ -4522,12 +4530,12 @@ IF OBJECT_ID('ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE ssd_ehcp_named_p
 IF OBJECT_ID('tempdb..#ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_named_plan;
 
 -- Create structure
-CREATE TABLE ssd_ehcp_named_plan (
-    ehcn_named_plan_id NVARCHAR(48) -- item_ref=EHCN001A, type=nvarchar, max_field_size=48,
-    ehcn_ehcp_asmt_id NVARCHAR(48) -- item_ref=EHCN002A, type=nvarchar, max_field_size=48,
-    ehcn_named_plan_start_date DATETIME -- item_ref=EHCN003A, type=datetime, max_field_size=NULL,
-    ehcn_named_plan_ceased_date         DATETIME,      
-    ehcn_named_plan_ceased_reason       NVARCHAR(100)   
+CREATE TABLE ssd_development.ssd_ehcp_named_plan (
+    ehcn_named_plan_id              NVARCHAR(48) PRIMARY KEY,   -- item_ref=EHCN001A
+    ehcn_ehcp_asmt_id               NVARCHAR(48),               -- item_ref=EHCN002A
+    ehcn_named_plan_start_date      DATETIME,                   -- item_ref=EHCN003A
+    ehcn_named_plan_ceased_date     DATETIME,      
+    ehcn_named_plan_ceased_reason   NVARCHAR(100)   
 );
 
 
@@ -4577,10 +4585,10 @@ IF OBJECT_ID('ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE ssd_ehcp_activ
 IF OBJECT_ID('tempdb..#ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_active_plans  ;
 
 -- Create structure
-CREATE TABLE ssd_ehcp_active_plans (
-    ehcp_active_ehcp_id NVARCHAR(48) -- item_ref=EHCP001A, type=nvarchar, max_field_size=48,
-    ehcp_ehcp_request_id NVARCHAR(48) -- item_ref=EHCP002A, type=nvarchar, max_field_size=48,
-    ehcp_active_ehcp_last_review_date DATETIME -- item_ref=EHCP003A, type=datetime, max_field_size=NULL
+CREATE TABLE ssd_development.ssd_ehcp_active_plans (
+    ehcp_active_ehcp_id                 NVARCHAR(48) PRIMARY KEY,   -- item_ref=EHCP001A
+    ehcp_ehcp_request_id                NVARCHAR(48),               -- item_ref=EHCP002A
+    ehcp_active_ehcp_last_review_date   DATETIME                    -- item_ref=EHCP003A
 );
 
 
@@ -4618,8 +4626,6 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 
 
 
-
-
 /* Start
 
         Non-SDD Bespoke extract mods
@@ -4633,121 +4639,121 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 
 
 
-/* 
-=============================================================================
-MOD Name: involvements history, involvements type history
-Description: 
-Author: D2I
-Version: 0.1
-Status: [DT]ataTesting
-Remarks: 
-Dependencies: 
-- FACT_INVOLVEMENTS
-- ssd_person
-=============================================================================
-*/
-ALTER TABLE ssd_person
-ADD involvement_history_json NVARCHAR(4000),  -- Adjust data type as needed
-    involvement_type_story NVARCHAR(1000);  -- Adjust data type as needed
+-- /* 
+-- =============================================================================
+-- MOD Name: involvements history, involvements type history
+-- Description: 
+-- Author: D2I
+-- Version: 0.1
+-- Status: [DT]ataTesting
+-- Remarks: 
+-- Dependencies: 
+-- - FACT_INVOLVEMENTS
+-- - ssd_person
+-- =============================================================================
+-- */
+-- ALTER TABLE ssd_person
+-- ADD involvement_history_json NVARCHAR(4000),  -- Adjust data type as needed
+--     involvement_type_story NVARCHAR(1000);  -- Adjust data type as needed
 
 
--- CTE for involvement history incl. worker data
-WITH InvolvementHistoryCTE AS (
-    SELECT 
-        fi.DIM_PERSON_ID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
-        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
+-- -- CTE for involvement history incl. worker data
+-- WITH InvolvementHistoryCTE AS (
+--     SELECT 
+--         fi.DIM_PERSON_ID,
+--         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
+--         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
+--         MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
 
-        JSON_QUERY((
-            -- structure of the main|complete invovements history json 
-            SELECT 
-                fi2.FACT_INVOLVEMENTS_ID                AS 'involvement_id',
-                fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE    AS 'involvement_type_code',
-                fi2.START_DTTM                          AS 'start_date', 
-                fi2.END_DTTM                            AS 'end_date', 
-                fi2.DIM_WORKER_ID                       AS 'worker_id', 
-                fi2.DIM_DEPARTMENT_ID                   AS 'department_id'
-            FROM 
-                Child_Social.FACT_INVOLVEMENTS fi2
-            WHERE 
-                fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
+--         JSON_QUERY((
+--             -- structure of the main|complete invovements history json 
+--             SELECT 
+--                 fi2.FACT_INVOLVEMENTS_ID                AS 'involvement_id',
+--                 fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE    AS 'involvement_type_code',
+--                 fi2.START_DTTM                          AS 'start_date', 
+--                 fi2.END_DTTM                            AS 'end_date', 
+--                 fi2.DIM_WORKER_ID                       AS 'worker_id', 
+--                 fi2.DIM_DEPARTMENT_ID                   AS 'department_id'
+--             FROM 
+--                 Child_Social.FACT_INVOLVEMENTS fi2
+--             WHERE 
+--                 fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
 
-            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-            -- Comment/replace this block(1 of 3)replace the above line with: FOR JSON PATH to enable FULL contact history in _json (involvement_history_json)
-            -- FOR JSON PATH
-            -- end of comment block 1
-        )) AS involvement_history
-    FROM (
+--             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--             -- Comment/replace this block(1 of 3)replace the above line with: FOR JSON PATH to enable FULL contact history in _json (involvement_history_json)
+--             -- FOR JSON PATH
+--             -- end of comment block 1
+--         )) AS involvement_history
+--     FROM (
 
-        -- Comment this block(2 of 3) to enable FULL contact history in _json (involvement_history_json)
-        SELECT *,
-            ROW_NUMBER() OVER (
-                PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
-                ORDER BY FACT_INVOLVEMENTS_ID DESC
-            ) AS rn,
-            -- end of comment block 2
+--         -- Comment this block(2 of 3) to enable FULL contact history in _json (involvement_history_json)
+--         SELECT *,
+--             ROW_NUMBER() OVER (
+--                 PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
+--                 ORDER BY FACT_INVOLVEMENTS_ID DESC
+--             ) AS rn,
+--             -- end of comment block 2
 
-            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
-        FROM Child_Social.FACT_INVOLVEMENTS
-        WHERE 
-            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
-            -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
-            AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-            AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-            AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
-                                                -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
-    ) fi
+--             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
+--         FROM Child_Social.FACT_INVOLVEMENTS
+--         WHERE 
+--             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
+--             -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
+--             AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+--             AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+--             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
+--                                                 -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
+--     ) fi
 
-    -- Comment this block(3 of 3) to enable FULL contact history in _json (involvement_history_json)
-    WHERE fi.rn = 1
-    -- end of comment block 3
+--     -- Comment this block(3 of 3) to enable FULL contact history in _json (involvement_history_json)
+--     WHERE fi.rn = 1
+--     -- end of comment block 3
 
-    AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-        SELECT 1 FROM ssd_person p
-        WHERE p.pers_person_id = fi.DIM_PERSON_ID
-    )
+--     AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+--         SELECT 1 FROM ssd_person p
+--         WHERE p.pers_person_id = fi.DIM_PERSON_ID
+--     )
 
-    GROUP BY 
-        fi.DIM_PERSON_ID
-),
--- CTE for involvement type story
-InvolvementTypeStoryCTE AS (
-    SELECT 
-        fi.DIM_PERSON_ID,
-        STUFF((
-            -- Concat involvement type codes into string
-            -- cannot use STRING AGG as appears to not work (Needs v2017+)
-            SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
-            FROM Child_Social.FACT_INVOLVEMENTS fi3
-            WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
+--     GROUP BY 
+--         fi.DIM_PERSON_ID
+-- ),
+-- -- CTE for involvement type story
+-- InvolvementTypeStoryCTE AS (
+--     SELECT 
+--         fi.DIM_PERSON_ID,
+--         STUFF((
+--             -- Concat involvement type codes into string
+--             -- cannot use STRING AGG as appears to not work (Needs v2017+)
+--             SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
+--             FROM Child_Social.FACT_INVOLVEMENTS fi3
+--             WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
 
-            AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-                SELECT 1 FROM ssd_person p
-                WHERE p.pers_person_id = fi3.DIM_PERSON_ID
-            )
+--             AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+--                 SELECT 1 FROM ssd_person p
+--                 WHERE p.pers_person_id = fi3.DIM_PERSON_ID
+--             )
 
-            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
-            FOR XML PATH('')
-        ), 1, 1, '') AS InvolvementTypeStory
-    FROM 
-        Child_Social.FACT_INVOLVEMENTS fi
+--             ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
+--             FOR XML PATH('')
+--         ), 1, 1, '') AS InvolvementTypeStory
+--     FROM 
+--         Child_Social.FACT_INVOLVEMENTS fi
     
-    WHERE 
-        EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-            SELECT 1 FROM ssd_person p
-            WHERE p.pers_person_id = fi.DIM_PERSON_ID
-        )
-    GROUP BY 
-        fi.DIM_PERSON_ID
-)
+--     WHERE 
+--         EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+--             SELECT 1 FROM ssd_person p
+--             WHERE p.pers_person_id = fi.DIM_PERSON_ID
+--         )
+--     GROUP BY 
+--         fi.DIM_PERSON_ID
+-- )
 
 
--- Update
-UPDATE p
-SET
-    p.involvement_history_json = ih.involvement_history,
-    p.involvement_type_story = CONCAT('[', its.InvolvementTypeStory, ']')
-FROM ssd_person p
-LEFT JOIN InvolvementHistoryCTE ih ON p.pers_person_id = ih.DIM_PERSON_ID
-LEFT JOIN InvolvementTypeStoryCTE its ON p.pers_person_id = its.DIM_PERSON_ID;
+-- -- Update
+-- UPDATE p
+-- SET
+--     p.involvement_history_json = ih.involvement_history,
+--     p.involvement_type_story = CONCAT('[', its.InvolvementTypeStory, ']')
+-- FROM ssd_person p
+-- LEFT JOIN InvolvementHistoryCTE ih ON p.pers_person_id = ih.DIM_PERSON_ID
+-- LEFT JOIN InvolvementTypeStoryCTE its ON p.pers_person_id = its.DIM_PERSON_ID;
