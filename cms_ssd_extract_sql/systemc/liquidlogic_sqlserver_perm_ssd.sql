@@ -96,10 +96,10 @@ CREATE TABLE ssd_development.ssd_person (
     pers_dob                DATETIME,                   -- item_ref=PERS005A
     pers_common_child_id    NVARCHAR(10),               -- item_ref=PERS013A                   
     pers_upn_unknown        NVARCHAR(20),               -- item_ref=PERS007A                                
-    pers_send_flag          NVARCHAR(1),                -- item_ref=PERS008A,    max_field_size=1,
+    pers_send_flag          NVARCHAR(1),                -- item_ref=PERS008A
     pers_expected_dob       DATETIME,                   -- item_ref=PERS009A                   
     pers_death_date         DATETIME,                   -- item_ref=PERS010A
-    pers_is_mother          NVARCHAR(1),                -- item_ref=PERS011A,    max_field_size=1,
+    pers_is_mother          NVARCHAR(1),                -- item_ref=PERS011A
     pers_nationality        NVARCHAR(48)                -- item_ref=PERS012A
 );
  

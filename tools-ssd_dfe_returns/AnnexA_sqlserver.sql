@@ -56,28 +56,29 @@ SELECT
 		WHEN p.pers_sex = 'I' THEN 'd) Neither'
 	END											AS Gender,
     CASE
-		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-		ELSE 't) NOBT' -- 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'
-	END											AS Ethnicity,
+        WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
+        WHEN p.pers_ethnicity IN ('WIRI', 'A2') THEN 'b) WIRI'
+        WHEN p.pers_ethnicity IN ('WIRT', 'A4') THEN 'c) WIRT'
+        WHEN p.pers_ethnicity IN ('WOTH', 'A3') THEN 'd) WOTH'
+        WHEN p.pers_ethnicity IN ('WROM', 'A5') THEN 'e) WROM'
+        WHEN p.pers_ethnicity IN ('MWBC', 'B1') THEN 'f) MWBC'
+        WHEN p.pers_ethnicity IN ('MWBA', 'B2') THEN 'g) MWBA'
+        WHEN p.pers_ethnicity IN ('MWAS', 'B3') THEN 'h) MWAS'
+        WHEN p.pers_ethnicity IN ('MOTH', 'B4') THEN 'i) MOTH'
+        WHEN p.pers_ethnicity IN ('AIND', 'C1') THEN 'j) AIND'
+        WHEN p.pers_ethnicity IN ('APKN', 'C2') THEN 'k) APKN'
+        WHEN p.pers_ethnicity IN ('ABAN', 'C3') THEN 'l) ABAN'
+        WHEN p.pers_ethnicity IN ('AOTH', 'C4') THEN 'm) AOTH'
+        WHEN p.pers_ethnicity IN ('BCRB', 'D1') THEN 'n) BCRB'
+        WHEN p.pers_ethnicity IN ('BAFR', 'D2') THEN 'o) BAFR'
+        WHEN p.pers_ethnicity IN ('BOTH', 'D3') THEN 'p) BOTH'
+        WHEN p.pers_ethnicity IN ('CHNE', 'E1') THEN 'q) CHNE'
+        WHEN p.pers_ethnicity IN ('OOTH', 'E2') THEN 'r) OOTH'
+        WHEN p.pers_ethnicity IN ('REFU', 'E3') THEN 's) REFU'
+        WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
+        WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
+        ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
+    END                                                 AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
 
 	DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
@@ -180,28 +181,29 @@ SELECT
 		WHEN p.pers_sex = 'I' THEN 'd) Neither'
 	END											AS Gender,
     CASE
-		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-		ELSE 't) NOBT' -- 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
-	END											AS Ethnicity,
+        WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
+        WHEN p.pers_ethnicity IN ('WIRI', 'A2') THEN 'b) WIRI'
+        WHEN p.pers_ethnicity IN ('WIRT', 'A4') THEN 'c) WIRT'
+        WHEN p.pers_ethnicity IN ('WOTH', 'A3') THEN 'd) WOTH'
+        WHEN p.pers_ethnicity IN ('WROM', 'A5') THEN 'e) WROM'
+        WHEN p.pers_ethnicity IN ('MWBC', 'B1') THEN 'f) MWBC'
+        WHEN p.pers_ethnicity IN ('MWBA', 'B2') THEN 'g) MWBA'
+        WHEN p.pers_ethnicity IN ('MWAS', 'B3') THEN 'h) MWAS'
+        WHEN p.pers_ethnicity IN ('MOTH', 'B4') THEN 'i) MOTH'
+        WHEN p.pers_ethnicity IN ('AIND', 'C1') THEN 'j) AIND'
+        WHEN p.pers_ethnicity IN ('APKN', 'C2') THEN 'k) APKN'
+        WHEN p.pers_ethnicity IN ('ABAN', 'C3') THEN 'l) ABAN'
+        WHEN p.pers_ethnicity IN ('AOTH', 'C4') THEN 'm) AOTH'
+        WHEN p.pers_ethnicity IN ('BCRB', 'D1') THEN 'n) BCRB'
+        WHEN p.pers_ethnicity IN ('BAFR', 'D2') THEN 'o) BAFR'
+        WHEN p.pers_ethnicity IN ('BOTH', 'D3') THEN 'p) BOTH'
+        WHEN p.pers_ethnicity IN ('CHNE', 'E1') THEN 'q) CHNE'
+        WHEN p.pers_ethnicity IN ('OOTH', 'E2') THEN 'r) OOTH'
+        WHEN p.pers_ethnicity IN ('REFU', 'E3') THEN 's) REFU'
+        WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
+        WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
+        ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
+    END                                                 AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
 
 	DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
@@ -262,47 +264,48 @@ IF OBJECT_ID('tempdb..#AA_3_referrals') IS NOT NULL DROP TABLE #AA_3_referrals;
 
 
 SELECT
-		/* Common AA fields */
-		p.pers_person_id							AS ChildUniqueID,	
-		CASE
-			WHEN p.pers_sex = 'M' THEN 'a) Male'
-			WHEN p.pers_sex = 'F' THEN 'b) Female'
-			WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-			WHEN p.pers_sex = 'I' THEN 'd) Neither'
-		END											AS Gender,
-		CASE
-			WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-			WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-			WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-			WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-			WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-			WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-			WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-			WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-			WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-			WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-			WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-			WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-			WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-			WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-			WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-			WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-			WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-			WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-			WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-			WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-			ELSE 't) NOBT' --'Catch All' for Ethnicities not in above list; could also be 'r) OOTH'
-		END											AS Ethnicity,
-		FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
+    /* Common AA fields */
+    p.pers_person_id							AS ChildUniqueID,	
+    CASE
+        WHEN p.pers_sex = 'M' THEN 'a) Male'
+        WHEN p.pers_sex = 'F' THEN 'b) Female'
+        WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+        WHEN p.pers_sex = 'I' THEN 'd) Neither'
+    END											AS Gender,
+    CASE
+        WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
+        WHEN p.pers_ethnicity IN ('WIRI', 'A2') THEN 'b) WIRI'
+        WHEN p.pers_ethnicity IN ('WIRT', 'A4') THEN 'c) WIRT'
+        WHEN p.pers_ethnicity IN ('WOTH', 'A3') THEN 'd) WOTH'
+        WHEN p.pers_ethnicity IN ('WROM', 'A5') THEN 'e) WROM'
+        WHEN p.pers_ethnicity IN ('MWBC', 'B1') THEN 'f) MWBC'
+        WHEN p.pers_ethnicity IN ('MWBA', 'B2') THEN 'g) MWBA'
+        WHEN p.pers_ethnicity IN ('MWAS', 'B3') THEN 'h) MWAS'
+        WHEN p.pers_ethnicity IN ('MOTH', 'B4') THEN 'i) MOTH'
+        WHEN p.pers_ethnicity IN ('AIND', 'C1') THEN 'j) AIND'
+        WHEN p.pers_ethnicity IN ('APKN', 'C2') THEN 'k) APKN'
+        WHEN p.pers_ethnicity IN ('ABAN', 'C3') THEN 'l) ABAN'
+        WHEN p.pers_ethnicity IN ('AOTH', 'C4') THEN 'm) AOTH'
+        WHEN p.pers_ethnicity IN ('BCRB', 'D1') THEN 'n) BCRB'
+        WHEN p.pers_ethnicity IN ('BAFR', 'D2') THEN 'o) BAFR'
+        WHEN p.pers_ethnicity IN ('BOTH', 'D3') THEN 'p) BOTH'
+        WHEN p.pers_ethnicity IN ('CHNE', 'E1') THEN 'q) CHNE'
+        WHEN p.pers_ethnicity IN ('OOTH', 'E2') THEN 'r) OOTH'
+        WHEN p.pers_ethnicity IN ('REFU', 'E3') THEN 's) REFU'
+        WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
+        WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
+        ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
+    END                                                 AS Ethnicity,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
 
-		DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
-				CASE 
-					WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
-					THEN 1
-					ELSE 0
-				END									AS Age,
+    DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
+            CASE 
+                WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
+                THEN 1
+                ELSE 0
+            END									AS Age,
 
-		/* List additional AA fields */
+    /* List additional AA fields */
 
     FORMAT(ce.cine_referral_date, 'dd/MM/yyyy')	AS ReferralDate,
 	CASE
@@ -407,45 +410,46 @@ IF OBJECT_ID('tempdb..#AA_4_assessments') IS NOT NULL DROP TABLE #AA_4_assessmen
 
 
 SELECT
-		/* Common AA fields */
-		p.pers_person_id							AS ChildUniqueID,	
-		CASE
-			WHEN p.pers_sex = 'M' THEN 'a) Male'
-			WHEN p.pers_sex = 'F' THEN 'b) Female'
-			WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-			WHEN p.pers_sex = 'I' THEN 'd) Neither'
-		END											AS Gender,
-		CASE
-			WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-			WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-			WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-			WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-			WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-			WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-			WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-			WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-			WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-			WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-			WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-			WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-			WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-			WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-			WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-			WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-			WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-			WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-			WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-			WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-			ELSE 't) NOBT' --'Catch All' for Ethnicities not in above list; could also be 'r) OOTH'
-		END											AS Ethnicity,
-		FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
+    /* Common AA fields */
+    p.pers_person_id							AS ChildUniqueID,	
+    CASE
+        WHEN p.pers_sex = 'M' THEN 'a) Male'
+        WHEN p.pers_sex = 'F' THEN 'b) Female'
+        WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+        WHEN p.pers_sex = 'I' THEN 'd) Neither'
+    END											AS Gender,
+    CASE
+        WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
+        WHEN p.pers_ethnicity IN ('WIRI', 'A2') THEN 'b) WIRI'
+        WHEN p.pers_ethnicity IN ('WIRT', 'A4') THEN 'c) WIRT'
+        WHEN p.pers_ethnicity IN ('WOTH', 'A3') THEN 'd) WOTH'
+        WHEN p.pers_ethnicity IN ('WROM', 'A5') THEN 'e) WROM'
+        WHEN p.pers_ethnicity IN ('MWBC', 'B1') THEN 'f) MWBC'
+        WHEN p.pers_ethnicity IN ('MWBA', 'B2') THEN 'g) MWBA'
+        WHEN p.pers_ethnicity IN ('MWAS', 'B3') THEN 'h) MWAS'
+        WHEN p.pers_ethnicity IN ('MOTH', 'B4') THEN 'i) MOTH'
+        WHEN p.pers_ethnicity IN ('AIND', 'C1') THEN 'j) AIND'
+        WHEN p.pers_ethnicity IN ('APKN', 'C2') THEN 'k) APKN'
+        WHEN p.pers_ethnicity IN ('ABAN', 'C3') THEN 'l) ABAN'
+        WHEN p.pers_ethnicity IN ('AOTH', 'C4') THEN 'm) AOTH'
+        WHEN p.pers_ethnicity IN ('BCRB', 'D1') THEN 'n) BCRB'
+        WHEN p.pers_ethnicity IN ('BAFR', 'D2') THEN 'o) BAFR'
+        WHEN p.pers_ethnicity IN ('BOTH', 'D3') THEN 'p) BOTH'
+        WHEN p.pers_ethnicity IN ('CHNE', 'E1') THEN 'q) CHNE'
+        WHEN p.pers_ethnicity IN ('OOTH', 'E2') THEN 'r) OOTH'
+        WHEN p.pers_ethnicity IN ('REFU', 'E3') THEN 's) REFU'
+        WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
+        WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
+        ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
+    END                                                 AS Ethnicity,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
 
-		DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
-				CASE 
-					WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
-					THEN 1
-					ELSE 0
-				END									AS Age,
+    DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
+            CASE 
+                WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
+                THEN 1
+                ELSE 0
+            END									AS Age,
 
 		/* List additional AA fields */
 	CASE
@@ -534,45 +538,46 @@ IF OBJECT_ID('tempdb..#AA_5_s47_enquiries') IS NOT NULL DROP TABLE #AA_5_s47_enq
 
 
 SELECT
-		/* Common AA fields */
-		p.pers_person_id							AS ChildUniqueID,	
-		CASE
-			WHEN p.pers_sex = 'M' THEN 'a) Male'
-			WHEN p.pers_sex = 'F' THEN 'b) Female'
-			WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-			WHEN p.pers_sex = 'I' THEN 'd) Neither'
-		END											AS Gender,
-		CASE
-			WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-			WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-			WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-			WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-			WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-			WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-			WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-			WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-			WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-			WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-			WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-			WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-			WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-			WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-			WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-			WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-			WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-			WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-			WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-			WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-			ELSE 't) NOBT' --'Catch All' for Ethnicities not in above list; could also be 'r) OOTH'
-		END											AS Ethnicity,
-		FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
+    /* Common AA fields */
+    p.pers_person_id							AS ChildUniqueID,	
+    CASE
+        WHEN p.pers_sex = 'M' THEN 'a) Male'
+        WHEN p.pers_sex = 'F' THEN 'b) Female'
+        WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+        WHEN p.pers_sex = 'I' THEN 'd) Neither'
+    END											AS Gender,
+    CASE
+        WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
+        WHEN p.pers_ethnicity IN ('WIRI', 'A2') THEN 'b) WIRI'
+        WHEN p.pers_ethnicity IN ('WIRT', 'A4') THEN 'c) WIRT'
+        WHEN p.pers_ethnicity IN ('WOTH', 'A3') THEN 'd) WOTH'
+        WHEN p.pers_ethnicity IN ('WROM', 'A5') THEN 'e) WROM'
+        WHEN p.pers_ethnicity IN ('MWBC', 'B1') THEN 'f) MWBC'
+        WHEN p.pers_ethnicity IN ('MWBA', 'B2') THEN 'g) MWBA'
+        WHEN p.pers_ethnicity IN ('MWAS', 'B3') THEN 'h) MWAS'
+        WHEN p.pers_ethnicity IN ('MOTH', 'B4') THEN 'i) MOTH'
+        WHEN p.pers_ethnicity IN ('AIND', 'C1') THEN 'j) AIND'
+        WHEN p.pers_ethnicity IN ('APKN', 'C2') THEN 'k) APKN'
+        WHEN p.pers_ethnicity IN ('ABAN', 'C3') THEN 'l) ABAN'
+        WHEN p.pers_ethnicity IN ('AOTH', 'C4') THEN 'm) AOTH'
+        WHEN p.pers_ethnicity IN ('BCRB', 'D1') THEN 'n) BCRB'
+        WHEN p.pers_ethnicity IN ('BAFR', 'D2') THEN 'o) BAFR'
+        WHEN p.pers_ethnicity IN ('BOTH', 'D3') THEN 'p) BOTH'
+        WHEN p.pers_ethnicity IN ('CHNE', 'E1') THEN 'q) CHNE'
+        WHEN p.pers_ethnicity IN ('OOTH', 'E2') THEN 'r) OOTH'
+        WHEN p.pers_ethnicity IN ('REFU', 'E3') THEN 's) REFU'
+        WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
+        WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
+        ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
+    END                                                 AS Ethnicity,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
 
-		DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
-				CASE 
-					WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
-					THEN 1
-					ELSE 0
-				END									AS Age,
+    DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
+            CASE 
+                WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
+                THEN 1
+                ELSE 0
+            END									AS Age,
 
 		/* List additional AA fields */
 	CASE
@@ -742,38 +747,39 @@ INTO #AA_6_children_in_need
 
 FROM
 (
-	SELECT
-		/* Common AA fields */
-		p.pers_person_id							AS ChildUniqueID,	
-		CASE
-			WHEN p.pers_sex = 'M' THEN 'a) Male'
-			WHEN p.pers_sex = 'F' THEN 'b) Female'
-			WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-			WHEN p.pers_sex = 'I' THEN 'd) Neither'
-		END											AS Gender,
-		CASE
-			WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-			WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-			WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-			WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-			WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-			WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-			WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-			WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-			WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-			WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-			WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-			WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-			WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-			WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-			WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-			WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-			WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-			WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-			WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-			WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-			ELSE 't) NOBT' --'Catch All' for Ethnicities not in above list; could also be 'r) OOTH'
-		END											AS Ethnicity,
+    SELECT
+        /* Common AA fields */
+        p.pers_person_id							AS ChildUniqueID,	
+        CASE
+            WHEN p.pers_sex = 'M' THEN 'a) Male'
+            WHEN p.pers_sex = 'F' THEN 'b) Female'
+            WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+            WHEN p.pers_sex = 'I' THEN 'd) Neither'
+        END											AS Gender,
+        CASE
+            WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
+            WHEN p.pers_ethnicity IN ('WIRI', 'A2') THEN 'b) WIRI'
+            WHEN p.pers_ethnicity IN ('WIRT', 'A4') THEN 'c) WIRT'
+            WHEN p.pers_ethnicity IN ('WOTH', 'A3') THEN 'd) WOTH'
+            WHEN p.pers_ethnicity IN ('WROM', 'A5') THEN 'e) WROM'
+            WHEN p.pers_ethnicity IN ('MWBC', 'B1') THEN 'f) MWBC'
+            WHEN p.pers_ethnicity IN ('MWBA', 'B2') THEN 'g) MWBA'
+            WHEN p.pers_ethnicity IN ('MWAS', 'B3') THEN 'h) MWAS'
+            WHEN p.pers_ethnicity IN ('MOTH', 'B4') THEN 'i) MOTH'
+            WHEN p.pers_ethnicity IN ('AIND', 'C1') THEN 'j) AIND'
+            WHEN p.pers_ethnicity IN ('APKN', 'C2') THEN 'k) APKN'
+            WHEN p.pers_ethnicity IN ('ABAN', 'C3') THEN 'l) ABAN'
+            WHEN p.pers_ethnicity IN ('AOTH', 'C4') THEN 'm) AOTH'
+            WHEN p.pers_ethnicity IN ('BCRB', 'D1') THEN 'n) BCRB'
+            WHEN p.pers_ethnicity IN ('BAFR', 'D2') THEN 'o) BAFR'
+            WHEN p.pers_ethnicity IN ('BOTH', 'D3') THEN 'p) BOTH'
+            WHEN p.pers_ethnicity IN ('CHNE', 'E1') THEN 'q) CHNE'
+            WHEN p.pers_ethnicity IN ('OOTH', 'E2') THEN 'r) OOTH'
+            WHEN p.pers_ethnicity IN ('REFU', 'E3') THEN 's) REFU'
+            WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
+            WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
+            ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
+        END                                                 AS Ethnicity,
 		FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
 
 		DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
@@ -1068,27 +1074,28 @@ FROM
             WHEN p.pers_sex = 'I' THEN 'd) Neither'
         END                                                 AS Gender,
         CASE
-            WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-            WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-            WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-            WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-            WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-            WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-            WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-            WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-            WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-            WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-            WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-            WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-            WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-            WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-            WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-            WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-            WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-            WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-            WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-            WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-            ELSE 't) NOBT' /*PW - 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'*/
+            WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
+            WHEN p.pers_ethnicity IN ('WIRI', 'A2') THEN 'b) WIRI'
+            WHEN p.pers_ethnicity IN ('WIRT', 'A4') THEN 'c) WIRT'
+            WHEN p.pers_ethnicity IN ('WOTH', 'A3') THEN 'd) WOTH'
+            WHEN p.pers_ethnicity IN ('WROM', 'A5') THEN 'e) WROM'
+            WHEN p.pers_ethnicity IN ('MWBC', 'B1') THEN 'f) MWBC'
+            WHEN p.pers_ethnicity IN ('MWBA', 'B2') THEN 'g) MWBA'
+            WHEN p.pers_ethnicity IN ('MWAS', 'B3') THEN 'h) MWAS'
+            WHEN p.pers_ethnicity IN ('MOTH', 'B4') THEN 'i) MOTH'
+            WHEN p.pers_ethnicity IN ('AIND', 'C1') THEN 'j) AIND'
+            WHEN p.pers_ethnicity IN ('APKN', 'C2') THEN 'k) APKN'
+            WHEN p.pers_ethnicity IN ('ABAN', 'C3') THEN 'l) ABAN'
+            WHEN p.pers_ethnicity IN ('AOTH', 'C4') THEN 'm) AOTH'
+            WHEN p.pers_ethnicity IN ('BCRB', 'D1') THEN 'n) BCRB'
+            WHEN p.pers_ethnicity IN ('BAFR', 'D2') THEN 'o) BAFR'
+            WHEN p.pers_ethnicity IN ('BOTH', 'D3') THEN 'p) BOTH'
+            WHEN p.pers_ethnicity IN ('CHNE', 'E1') THEN 'q) CHNE'
+            WHEN p.pers_ethnicity IN ('OOTH', 'E2') THEN 'r) OOTH'
+            WHEN p.pers_ethnicity IN ('REFU', 'E3') THEN 's) REFU'
+            WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
+            WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
+            ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
         END                                                 AS Ethnicity,
         FORMAT(p.pers_dob, 'dd/MM/yyyy')                    AS DateOfBirth,
  
@@ -1319,28 +1326,29 @@ SELECT
         WHEN p.pers_sex = 'I' THEN 'd) Neither'
     END                                                         AS Gender,
     CASE
-        WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-        WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-        WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-        WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-        WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-        WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-        WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-        WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-        WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-        WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-        WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-        WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-        WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-        WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-        WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-        WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-        WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-        WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-        WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-        WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-        ELSE 't) NOBT' --'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'
-    END                                                         AS Ethnicity,
+        WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
+        WHEN p.pers_ethnicity IN ('WIRI', 'A2') THEN 'b) WIRI'
+        WHEN p.pers_ethnicity IN ('WIRT', 'A4') THEN 'c) WIRT'
+        WHEN p.pers_ethnicity IN ('WOTH', 'A3') THEN 'd) WOTH'
+        WHEN p.pers_ethnicity IN ('WROM', 'A5') THEN 'e) WROM'
+        WHEN p.pers_ethnicity IN ('MWBC', 'B1') THEN 'f) MWBC'
+        WHEN p.pers_ethnicity IN ('MWBA', 'B2') THEN 'g) MWBA'
+        WHEN p.pers_ethnicity IN ('MWAS', 'B3') THEN 'h) MWAS'
+        WHEN p.pers_ethnicity IN ('MOTH', 'B4') THEN 'i) MOTH'
+        WHEN p.pers_ethnicity IN ('AIND', 'C1') THEN 'j) AIND'
+        WHEN p.pers_ethnicity IN ('APKN', 'C2') THEN 'k) APKN'
+        WHEN p.pers_ethnicity IN ('ABAN', 'C3') THEN 'l) ABAN'
+        WHEN p.pers_ethnicity IN ('AOTH', 'C4') THEN 'm) AOTH'
+        WHEN p.pers_ethnicity IN ('BCRB', 'D1') THEN 'n) BCRB'
+        WHEN p.pers_ethnicity IN ('BAFR', 'D2') THEN 'o) BAFR'
+        WHEN p.pers_ethnicity IN ('BOTH', 'D3') THEN 'p) BOTH'
+        WHEN p.pers_ethnicity IN ('CHNE', 'E1') THEN 'q) CHNE'
+        WHEN p.pers_ethnicity IN ('OOTH', 'E2') THEN 'r) OOTH'
+        WHEN p.pers_ethnicity IN ('REFU', 'E3') THEN 's) REFU'
+        WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
+        WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
+        ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
+    END                                                 AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')                            AS DateOfBirth,
  
     DATEDIFF(YEAR, p.pers_dob, GETDATE()) -
@@ -1836,29 +1844,30 @@ SELECT
 		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
 		WHEN p.pers_sex = 'I' THEN 'd) Neither'
 	END															AS Gender,
-	CASE
-		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-		ELSE 't) NOBT' -- 'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'
-	END															AS Ethnicity,
+    CASE
+        WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
+        WHEN p.pers_ethnicity IN ('WIRI', 'A2') THEN 'b) WIRI'
+        WHEN p.pers_ethnicity IN ('WIRT', 'A4') THEN 'c) WIRT'
+        WHEN p.pers_ethnicity IN ('WOTH', 'A3') THEN 'd) WOTH'
+        WHEN p.pers_ethnicity IN ('WROM', 'A5') THEN 'e) WROM'
+        WHEN p.pers_ethnicity IN ('MWBC', 'B1') THEN 'f) MWBC'
+        WHEN p.pers_ethnicity IN ('MWBA', 'B2') THEN 'g) MWBA'
+        WHEN p.pers_ethnicity IN ('MWAS', 'B3') THEN 'h) MWAS'
+        WHEN p.pers_ethnicity IN ('MOTH', 'B4') THEN 'i) MOTH'
+        WHEN p.pers_ethnicity IN ('AIND', 'C1') THEN 'j) AIND'
+        WHEN p.pers_ethnicity IN ('APKN', 'C2') THEN 'k) APKN'
+        WHEN p.pers_ethnicity IN ('ABAN', 'C3') THEN 'l) ABAN'
+        WHEN p.pers_ethnicity IN ('AOTH', 'C4') THEN 'm) AOTH'
+        WHEN p.pers_ethnicity IN ('BCRB', 'D1') THEN 'n) BCRB'
+        WHEN p.pers_ethnicity IN ('BAFR', 'D2') THEN 'o) BAFR'
+        WHEN p.pers_ethnicity IN ('BOTH', 'D3') THEN 'p) BOTH'
+        WHEN p.pers_ethnicity IN ('CHNE', 'E1') THEN 'q) CHNE'
+        WHEN p.pers_ethnicity IN ('OOTH', 'E2') THEN 'r) OOTH'
+        WHEN p.pers_ethnicity IN ('REFU', 'E3') THEN 's) REFU'
+        WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
+        WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
+        ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
+    END                                                 AS Ethnicity,
 	FORMAT(p.pers_dob, 'dd/MM/yyyy')							AS DateOfBirth,
 
 	DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
@@ -2015,29 +2024,30 @@ SELECT
 		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
 		WHEN p.pers_sex = 'I' THEN 'd) Neither'
 	END															AS Gender,
-	CASE
-		WHEN p.pers_ethnicity = 'WBRI' THEN 'a) WBRI'
-		WHEN p.pers_ethnicity = 'WIRI' THEN 'b) WIRI'
-		WHEN p.pers_ethnicity = 'WIRT' THEN 'c) WIRT'
-		WHEN p.pers_ethnicity = 'WOTH' THEN 'd) WOTH'
-		WHEN p.pers_ethnicity = 'WROM' THEN 'e) WROM'
-		WHEN p.pers_ethnicity = 'MWBC' THEN 'f) MWBC'
-		WHEN p.pers_ethnicity = 'MWBA' THEN 'g) MWBA'
-		WHEN p.pers_ethnicity = 'MWAS' THEN 'h) MWAS'
-		WHEN p.pers_ethnicity = 'MOTH' THEN 'i) MOTH'
-		WHEN p.pers_ethnicity = 'AIND' THEN 'j) AIND'
-		WHEN p.pers_ethnicity = 'APKN' THEN 'k) APKN'
-		WHEN p.pers_ethnicity = 'ABAN' THEN 'l) ABAN'
-		WHEN p.pers_ethnicity = 'AOTH' THEN 'm) AOTH'
-		WHEN p.pers_ethnicity = 'BCRB' THEN 'n) BCRB'
-		WHEN p.pers_ethnicity = 'BAFR' THEN 'o) BAFR'
-		WHEN p.pers_ethnicity = 'BOTH' THEN 'p) BOTH'
-		WHEN p.pers_ethnicity = 'CHNE' THEN 'q) CHNE'
-		WHEN p.pers_ethnicity = 'OOTH' THEN 'r) OOTH'
-		WHEN p.pers_ethnicity = 'REFU' THEN 's) REFU'
-		WHEN p.pers_ethnicity = 'NOBT' THEN 't) NOBT'
-		ELSE 't) NOBT' --'Catch All' for any other Ethnicities not in above list; could also be 'r) OOTH'
-	END															AS Ethnicity,
+    CASE
+        WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
+        WHEN p.pers_ethnicity IN ('WIRI', 'A2') THEN 'b) WIRI'
+        WHEN p.pers_ethnicity IN ('WIRT', 'A4') THEN 'c) WIRT'
+        WHEN p.pers_ethnicity IN ('WOTH', 'A3') THEN 'd) WOTH'
+        WHEN p.pers_ethnicity IN ('WROM', 'A5') THEN 'e) WROM'
+        WHEN p.pers_ethnicity IN ('MWBC', 'B1') THEN 'f) MWBC'
+        WHEN p.pers_ethnicity IN ('MWBA', 'B2') THEN 'g) MWBA'
+        WHEN p.pers_ethnicity IN ('MWAS', 'B3') THEN 'h) MWAS'
+        WHEN p.pers_ethnicity IN ('MOTH', 'B4') THEN 'i) MOTH'
+        WHEN p.pers_ethnicity IN ('AIND', 'C1') THEN 'j) AIND'
+        WHEN p.pers_ethnicity IN ('APKN', 'C2') THEN 'k) APKN'
+        WHEN p.pers_ethnicity IN ('ABAN', 'C3') THEN 'l) ABAN'
+        WHEN p.pers_ethnicity IN ('AOTH', 'C4') THEN 'm) AOTH'
+        WHEN p.pers_ethnicity IN ('BCRB', 'D1') THEN 'n) BCRB'
+        WHEN p.pers_ethnicity IN ('BAFR', 'D2') THEN 'o) BAFR'
+        WHEN p.pers_ethnicity IN ('BOTH', 'D3') THEN 'p) BOTH'
+        WHEN p.pers_ethnicity IN ('CHNE', 'E1') THEN 'q) CHNE'
+        WHEN p.pers_ethnicity IN ('OOTH', 'E2') THEN 'r) OOTH'
+        WHEN p.pers_ethnicity IN ('REFU', 'E3') THEN 's) REFU'
+        WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
+        WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
+        ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
+    END                                                 AS Ethnicity,
 	FORMAT(p.pers_dob, 'dd/MM/yyyy')							AS DateOfBirth,
 
 	DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
