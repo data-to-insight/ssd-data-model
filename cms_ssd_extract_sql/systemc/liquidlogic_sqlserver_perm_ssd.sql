@@ -1,13 +1,12 @@
 
-
 /* **********************************************************************************************************
 
 Notes: 
 This version of the SSD script creates persistant _perm tables. A version that instead creates _temp|session 
 tables is also available to enable those restricted to read access on the cms db|schema.   
 
-There remain some [TESTING] [REVIEW] notes as the project works through wider testing, and similarly some test related 
-console outputs to aid problem solving during set up. These can/will be later removed. 
+There remain some [TESTING] [REVIEW] notes as the project iterates wider testing results; similarly some test related 
+console outputs remain to aid such as run-time problem solving. These [TESTING] blocks can/will be removed. 
 
 /*
 Dev Status Flags (~in this order):
@@ -22,9 +21,10 @@ Status:     [B]acklog,          -- To do|for review but not current priority
 */
 
 Development notes:
-Although returns expect dd/mm/YYYY formating on dates. SSD Extract initially maintains DATETIME not DATE. in [REVIEW]
-Extended default field sizes max/exagerated e.g. family_id NVARCHAR(48) in {REVIEW]
-
+Currently in [REVIEW]
+- DfE returns expect dd/mm/YYYY formating on dates, SSD Extract initially maintains DATETIME not DATE. 
+- Extended default field sizes are max/exagerated e.g. family_id NVARCHAR(48)
+- Caseload counts - should these be full system counts or restricted to SSD timeframe counts
 ********************************************************************************************************** */
 
 /* Development set up */
@@ -90,16 +90,16 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 CREATE TABLE ssd_development.ssd_person (
     pers_legacy_id          NVARCHAR(48),               -- item_ref=PERS014A               
     pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- item_ref=PERS001A   
-    pers_sex                NVARCHAR(48),               -- item_ref=PERS002A
-    pers_gender             NVARCHAR(20),               -- item_ref=PERS003A                  
+    pers_sex                NVARCHAR(20),               -- item_ref=PERS002A
+    pers_gender             NVARCHAR(5),                -- item_ref=PERS003A                  
     pers_ethnicity          NVARCHAR(48),               -- item_ref=PERS004A
     pers_dob                DATETIME,                   -- item_ref=PERS005A
-    pers_common_child_id    NVARCHAR(10),               -- item_ref=PERS013A                   
-    pers_upn_unknown        NVARCHAR(20),               -- item_ref=PERS007A                                
-    pers_send_flag          NVARCHAR(1),                -- item_ref=PERS008A
+    pers_common_child_id    NVARCHAR(48),               -- item_ref=PERS013A                   
+    pers_upn_unknown        NVARCHAR(10),               -- item_ref=PERS007A    -- SEN2 guidance suggests size(4) UN1-10                            
+    pers_send_flag          NCHAR(1),                   -- item_ref=PERS008A
     pers_expected_dob       DATETIME,                   -- item_ref=PERS009A                   
     pers_death_date         DATETIME,                   -- item_ref=PERS010A
-    pers_is_mother          NVARCHAR(1),                -- item_ref=PERS011A
+    pers_is_mother          NCHAR(1),                   -- item_ref=PERS011A
     pers_nationality        NVARCHAR(48)                -- item_ref=PERS012A
 );
  
@@ -940,8 +940,8 @@ CREATE TABLE ssd_development.ssd_cin_episodes
     cine_cin_primary_need           NVARCHAR(10),   -- item_ref=CINE010A
     cine_referral_source_code       NVARCHAR(48),   -- item_ref=CINE004A    
     cine_referral_source_desc       NVARCHAR(255),  -- item_ref=CINE012A
-    cine_referral_outcome_json      NVARCHAR(500),  -- item_ref=CINE005A,
-    cine_referral_nfa               NCHAR(1),       -- item_ref=CINE011A,
+    cine_referral_outcome_json      NVARCHAR(500),  -- item_ref=CINE005A
+    cine_referral_nfa               NCHAR(1),       -- item_ref=CINE011A
     cine_close_reason               NVARCHAR(100),  -- item_ref=CINE006A
     cine_close_date                 DATETIME,       -- item_ref=CINE007A
     cine_referral_team_name         NVARCHAR(255),  -- item_ref=CINE008A
@@ -1027,7 +1027,8 @@ Object Name: ssd_cin_assessments
 Description: 
 Author: D2I
 Version: 1.0
-            0.9: fa.COMPLETED_BY_USER_NAME replaces fa.COMPLETED_BY_USER_STAFF_ID 080524
+            0.2: cina_assessment_child_seen type change from nvarchar 100524 RH
+            0.1: fa.COMPLETED_BY_USER_NAME replaces fa.COMPLETED_BY_USER_STAFF_ID 080524
 Status: [R]elease
 Remarks: 
 Dependencies: 
@@ -1625,13 +1626,13 @@ CREATE TABLE ssd_development.ssd_initial_cp_conference (
     icpc_person_id              NVARCHAR(48),               -- item_ref=ICPC010A
     icpc_cp_plan_id             NVARCHAR(48),               -- item_ref=ICPC011A
     icpc_referral_id            NVARCHAR(48),               -- item_ref=ICPC012A
-    icpc_icpc_transfer_in       NCHAR(1),                   -- item_ref=ICPC003A,
+    icpc_icpc_transfer_in       NCHAR(1),                   -- item_ref=ICPC003A
     icpc_icpc_target_date       DATETIME,                   -- item_ref=ICPC004A
     icpc_icpc_date              DATETIME,                   -- item_ref=ICPC005A
-    icpc_icpc_outcome_cp_flag   NCHAR(1),                   -- item_ref=ICPC013A,
-    icpc_icpc_outcome_json      NVARCHAR(1000),             -- item_ref=ICPC006A,
+    icpc_icpc_outcome_cp_flag   NCHAR(1),                   -- item_ref=ICPC013A
+    icpc_icpc_outcome_json      NVARCHAR(1000),             -- item_ref=ICPC006A
     icpc_icpc_team_name         NVARCHAR(255),              -- item_ref=ICPC007A
-    icpc_icpc_worker_name       NVARCHAR(100),              -- item_ref=ICPC008A00
+    icpc_icpc_worker_name       NVARCHAR(100),              -- item_ref=ICPC008A
 );
  
  
@@ -1723,6 +1724,7 @@ Object Name: ssd_cp_plans
 Description:
 Author: D2I
 Version: 1.0
+            0.4: cppl_cp_plan_ola type change from nvarchar 100524 RH
             0.3: added IS_OLA field to identify OLA temporary plans
             which need to be excluded from statutory returns 090224 JCH
             0.2: removed depreciated team/worker id fields RH
@@ -1752,7 +1754,7 @@ CREATE TABLE ssd_development.ssd_cp_plans (
     cppl_person_id                  NVARCHAR(48),               -- item_ref=CPPL002A
     cppl_cp_plan_start_date         DATETIME,                   -- item_ref=CPPL003A
     cppl_cp_plan_end_date           DATETIME,                   -- item_ref=CPPL004A
-    cppl_cp_plan_ola                NVARCHAR(1),                -- item_ref=CPPL011A       
+    cppl_cp_plan_ola                NCHAR(1),                   -- item_ref=CPPL011A       
     cppl_cp_plan_initial_category   NVARCHAR(100),              -- item_ref=CPPL009A
     cppl_cp_plan_latest_category    NVARCHAR(100),              -- item_ref=CPPL010A
 );
@@ -2613,6 +2615,7 @@ Object Name: ssd_cla_reviews
 Description: 
 Author: D2I
 Version: 1.0
+            0.2: clar_cla_review_cancelled type change from nvarchar 100524 RH
             0.1: clar_cla_id change from clar cla episode id 120124 JH
 Status: [R]elease
 Remarks: 
@@ -2639,7 +2642,7 @@ CREATE TABLE ssd_development.ssd_cla_reviews (
     clar_cla_id                     NVARCHAR(48),               -- item_ref=CLAR011A
     clar_cla_review_due_date        DATETIME,                   -- item_ref=CLAR003A
     clar_cla_review_date            DATETIME,                   -- item_ref=CLAR004A
-    clar_cla_review_cancelled       NVARCHAR(1),                -- item_ref=CLAR012A
+    clar_cla_review_cancelled       NCHAR(1),                   -- item_ref=CLAR012A
     clar_cla_review_participation   NVARCHAR(100)               -- item_ref=CLAR007A
     );
  
@@ -2774,7 +2777,7 @@ CREATE TABLE ssd_development.ssd_cla_previous_permanence (
     lapp_person_id                      NVARCHAR(48),               -- item_ref=LAPP002A
     lapp_previous_permanence_option     NVARCHAR(200),              -- item_ref=LAPP004A
     lapp_previous_permanence_la         NVARCHAR(100),              -- item_ref=LAPP005A
-    lapp_previous_permanence_order_date NVARCHAR(100)               -- item_ref=LAPP003A00 -- must remain NVARCHAR
+    lapp_previous_permanence_order_date NVARCHAR(100)               -- item_ref=LAPP003A -- must remain NVARCHAR
 );
  
 -- Insert data
@@ -3253,6 +3256,7 @@ Object Name: ssd_missing
 Description: 
 Author: D2I
 Version: 1.0
+            0.9 miss_missing_rhi_accepted/offered increased to size (2) 100524 RH
 Status: [R]elease
 Remarks: 
 Dependencies: 
@@ -3276,8 +3280,8 @@ CREATE TABLE ssd_development.ssd_missing (
     miss_missing_episode_start_date DATETIME,                   -- item_ref=MISS003A
     miss_missing_episode_type       NVARCHAR(100),              -- item_ref=MISS004A
     miss_missing_episode_end_date   DATETIME,                   -- item_ref=MISS005A
-    miss_missing_rhi_offered        NCHAR(1),                   -- item_ref=MISS006A                  
-    miss_missing_rhi_accepted       NCHAR(2)                    -- item_ref=MISS007A -- Data fails if (1) [TESTING]
+    miss_missing_rhi_offered        NVARCHAR(2),                -- item_ref=MISS006A                  
+    miss_missing_rhi_accepted       NVARCHAR(2)                 -- item_ref=MISS007A
 );
 
 
@@ -3814,6 +3818,7 @@ FROM
 LEFT JOIN (
     SELECT 
         -- Calculate CASELOAD 
+        -- [REVIEW][TESTING] -- restrict to only those relevant within SSD timeframe?
         DIM_WORKER_ID,
         COUNT(*) AS OpenCases
     FROM 
@@ -4340,7 +4345,7 @@ CREATE TABLE ssd_development.ssd_send (
     send_person_id      NVARCHAR(48),               -- item_ref=SEND005A
     send_upn            NVARCHAR(48),               -- item_ref=SEND002A
     send_uln            NVARCHAR(48),               -- item_ref=SEND003A
-    send_upn_unknown    NVARCHAR(4)                 -- item_ref=SEND004A
+    send_upn_unknown    NVARCHAR(10)                -- item_ref=SEND004A
     );
 
 -- -- Insert placeholder data
@@ -4396,7 +4401,7 @@ CREATE TABLE ssd_development.ssd_sen_need (
     senn_table_id                   NVARCHAR(48) PRIMARY KEY,   -- item_ref=SENN001A
     senn_active_ehcp_id             NVARCHAR(48),               -- item_ref=SENN002A
     senn_active_ehcp_need_type      NVARCHAR(100),              -- item_ref=SENN003A
-    senn_active_ehcp_need_rank      NVARCHAR(1)                 -- item_ref=SENN004A
+    senn_active_ehcp_need_rank      NCHAR(1)                    -- item_ref=SENN004A
 );
  
 -- -- Create constraint(s)

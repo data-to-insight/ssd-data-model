@@ -1,9 +1,9 @@
-USE HDM_Local;  -- Make sure in the right database
+USE HDM_Local;  -- Chk its the right database!
 
 DECLARE @sql NVARCHAR(MAX) = N'';
 
 
--- Generate commands to drop foreign key constraints
+-- Generate commands to drop FK constraints
 SELECT @sql += 'ALTER TABLE ' + QUOTENAME(SCHEMA_NAME(fk.schema_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) 
                + ' DROP CONSTRAINT ' + QUOTENAME(fk.name) + '; '
 FROM sys.foreign_keys AS fk
@@ -11,19 +11,19 @@ INNER JOIN sys.tables AS t ON fk.parent_object_id = t.object_id
 INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
 WHERE s.name = N'ssd_development';
 
--- Execute the generated commands to drop the foreign keys
+-- Execute drop FK
 EXEC sp_executesql @sql;
 
 --------------------------------------------------------------
 
 
--- Generate DROP TABLE commands for each table in the specified schema
+-- Generate DROP TABLE for each table in the schema
 SELECT @sql += 'DROP TABLE ' + QUOTENAME(s.name) + '.' + QUOTENAME(t.name) + '; '
 FROM sys.tables AS t
 INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
 WHERE s.name = N'ssd_development';
 
--- Execute the dynamic SQL to drop the tables
+-- Execute drop tables
 EXEC sp_executesql @sql;
 
 
