@@ -999,9 +999,9 @@ AND
     DIM_PERSON_ID <> -1;  -- Exclude rows with '-1'
     ;
 
--- Create constraint(s)
-ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
-FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
+-- FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 -- Create index(es)

@@ -4,12 +4,12 @@ import re
 
 # Multiple directories support
 directories = [
-    'cms_ssd_extract_sql/mosaic/import_raw/',    # Mosaic scripts
+    'cms_ssd_extract_sql/mosaic/',    # Mosaic scripts
     'cms_ssd_extract_sql/systemc_liquidlogic/'  # Liquid Logic scripts
 ]
 
-variable_name = 'pers_person_id'  # var name to search
-variable_stem = 'pers_'  # stem to search 
+variable_name = 'perm_adoption_worker'  # var name to search
+variable_stem = 'perm_'  # stem to search 
 search_file_type = '.sql'  # or .py or .txt 
 
 def find_variables_in_sql_files(directories, variable_name, variable_stem, search_file_type):
