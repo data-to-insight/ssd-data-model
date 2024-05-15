@@ -120,7 +120,6 @@ nodes:
     - s47_enquiry
     - child_protection
     returns:
-    - CIN
     - AnnexA
     cms:
     - liquid_logic
@@ -140,8 +139,6 @@ nodes:
     categories:
     - s47_enquiry
     - child_protection
-    returns:
-    - CIN
     cms:
     - liquid_logic
     - mosaic

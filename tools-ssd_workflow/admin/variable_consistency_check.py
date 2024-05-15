@@ -37,7 +37,7 @@ def extract_variables_from_sql(content):
     found_variables = set(pattern.findall(content))
 
     # filter to remove variables starting with known prefixes
-    prefixes_to_ignore = {'CARE_', 'ROOM_', 'LAST_', 'FACT_', 'SEEN_', 'date_', 'prev_', 'text_', 'step_'} 
+    prefixes_to_ignore = {'CARE_', 'ROOM_', 'LAST_', 'FACT_', 'SEEN_', 'date_', 'prev_', 'text_', 'step_', 'days_', 'form_', 'MSRS_', 'full_', 'calc_'} 
     
     # rem cms data-point refs so they dont dilute the search outputs
     filtered_variables = {var for var in found_variables if not var.isupper() and not any(var.startswith(prefix) for prefix in prefixes_to_ignore)} # filter + all-uppercase variables

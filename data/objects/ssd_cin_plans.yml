@@ -32,6 +32,9 @@ nodes:
     item_ref: CINP007A
     type: nvarchar
     foreign_key: ssd_cin_episodes.cine_referral_id
+    categories:
+    - child_in_need
+    - cin_plan
     returns:
     - Local
     cms:

@@ -139,7 +139,7 @@ nodes:
   - name: miss_missing_rhi_offered
     description: RHI Offered
     item_ref: MISS006A
-    type: nchar
+    type: nvarchar
     categories:
     - looked_after
     - missing
@@ -159,7 +159,7 @@ nodes:
   - name: miss_missing_rhi_accepted
     description: RHI Accepted
     item_ref: MISS007A
-    type: nchar
+    type: nvarchar
     categories:
     - looked_after
     - missing

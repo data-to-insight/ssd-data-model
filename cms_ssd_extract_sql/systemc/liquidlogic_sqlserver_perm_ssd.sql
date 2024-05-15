@@ -3002,7 +3002,7 @@ Object Name: ssd_cla_visits
 Description:
 Author: D2I
 Version: 1.0!
-            !0.3: Prep for casenote_id to be removed... not yet actioned RH
+            !0.3: Prep for casenote _ id to be removed... not yet actioned RH
             0.2: FK updated to person_id. change from clav.VISIT_DTTM  150224 JH
             0.1: pers_person_id and clav_cla_id  added JH
 Status: [R]elease
@@ -3099,7 +3099,7 @@ Author: D2I
 Version: 1.0
 Status: [R]elease
 Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
-        Removed csdq_form_id as the form id is also being used as csdq_table_id
+        Removed csdq _form_ id as the form id is also being used as csdq_table_id
         Added placeholder for csdq_sdq_reason
         Removed PRIMARY KEY stipulation for csdq_table_id
 Dependencies:
@@ -3192,7 +3192,7 @@ WHERE EXISTS (
     SELECT
         *,
         -- Assign unique row nums <within each partition> of csdq_person_id,
-        -- the most recent csdq_form_id/csdq_table_id will have a row number of 1.
+        -- the most recent csdq _form_ id/csdq_table_id will have a row number of 1.
         ROW_NUMBER() OVER (PARTITION BY csdq_person_id ORDER BY csdq_table_id DESC) AS rn
     FROM
         ssd_sdq_scores
@@ -3746,7 +3746,7 @@ Description:
 Author: D2I
 Version: 1.0
             0.9: prof_professional_id now becomes staff_id 090424 JH
-            0.8: prof_table_id(prof_system_id) becomes prof_professional_id 090424 JH
+            0.8: prof _table_ id(prof _system_ id) becomes prof _professional_ id 090424 JH
 Status: [R]elease
 Remarks: 
 Dependencies: 

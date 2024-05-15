@@ -206,7 +206,6 @@ nodes:
     categories:
     - identity
     returns:
-    - SSDA903
     - RIIA
     - CIN
     cms:

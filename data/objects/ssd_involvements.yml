@@ -62,7 +62,6 @@ nodes:
     categories:
     - workforce
     returns:
-    - SSDA903
     - RIIA
     cms:
     - liquid_logic
@@ -81,7 +80,6 @@ nodes:
     categories:
     - workforce
     returns:
-    - SSDA903
     - RIIA
     cms:
     - liquid_logic
@@ -100,7 +98,6 @@ nodes:
     categories:
     - workforce
     returns:
-    - SSDA903
     - RIIA
     cms:
     - liquid_logic

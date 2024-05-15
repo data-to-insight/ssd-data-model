@@ -39,8 +39,6 @@ nodes:
     - identity
     - looked_after
     returns:
-    - SSDA903
-    - CIN
     - RIIA
     cms:
     - liquid_logic

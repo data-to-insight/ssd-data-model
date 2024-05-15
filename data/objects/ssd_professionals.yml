@@ -107,7 +107,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_professionals
     - mosaic:ssd_professionals
-    guidance: null
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
   - name: prof_professional_department
     description: Worker Department e.g. 'Youth Support Team West'
     item_ref: PROF012A
@@ -149,4 +149,5 @@ nodes:
     cms_field:
     - liquid_logic:prof_agency_worker_flag
     - mosaic:prof_agency_worker_flag
-    guidance: null
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Y/N flag
+      indicating if worker is an Agency worker

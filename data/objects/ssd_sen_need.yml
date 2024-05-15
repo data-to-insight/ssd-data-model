@@ -85,7 +85,7 @@ nodes:
   - name: senn_active_ehcp_need_rank
     description: SEN Type Rank
     item_ref: SENN004A
-    type: nvarchar
+    type: nchar
     categories:
     - send
     - ehcp_request

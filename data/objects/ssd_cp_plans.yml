@@ -156,7 +156,7 @@ nodes:
   - name: cppl_cp_plan_ola
     description: OLA CP Plan?
     item_ref: CPPL011A
-    type: nvarchar
+    type: nchar
     categories:
     - child_protection
     - cp_plan

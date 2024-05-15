@@ -342,7 +342,6 @@ nodes:
     foreign_key: ssd_cla_placements.clap_placement_id
     categories:
     - looked_after
-    - review
     cms:
     - liquid_logic
     - mosaic
@@ -356,10 +355,9 @@ nodes:
   - name: clae_entered_care_date
     description: Date the child entered Care
     item_ref: CLAE014A
-    type: nvarchar
+    type: datetime
     categories:
     - looked_after
-    - review
     cms:
     - liquid_logic
     - mosaic
@@ -376,7 +374,6 @@ nodes:
     type: datetime
     categories:
     - looked_after
-    - review
     returns:
     - AnnexA
     cms:

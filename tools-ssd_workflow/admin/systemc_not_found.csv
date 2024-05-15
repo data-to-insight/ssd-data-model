@@ -1,8 +1,1 @@
 item_ref,field_name
-IMMI005A,immi_Immigration_status_id
-IMMI003A,immi_immigration_status_start_date
-IMMI004A,immi_immigration_status_end_date
-CSDQ003A,csdq_sdq_completed_date
-PERM023A,perm_adoption_worker
-SEND004A,send_upn_unknown
-PREP020A,prep_la_inital _plan_approved

@@ -1,22 +1,3 @@
 Extra Variables Not in Spec
-prof_system_id
-perm_adoption_worker_name
-lacp_cla_episode_id
-cinv_cin_casenote_id
-csdq_form_id
-cina_assessment_worker_id
-immi_immigration_status_end
-lacp_referral_id
-cinv_cin_plan_id
-fact_cla_id
-immi_immigration_status_start
-prep_la_inital_plan_approved
+item_ref
 csdq_sdq_details_json
-prof_table_id
-link_link_id
-pers_id
-team_id
-immi_immigration_status_id
-cont_contact_source
-clar_cla_episode_id
-cppv_casenote_date

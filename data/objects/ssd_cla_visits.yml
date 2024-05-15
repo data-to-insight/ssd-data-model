@@ -26,6 +26,9 @@ nodes:
     description: null
     item_ref: CLAV007A
     type: nvarchar
+    categories:
+    - looked_after
+    - visit
     guidance: System identifier for the whole period of care, encompassing all episodes
       included within that period of care.
   - name: clav_person_id
@@ -35,7 +38,7 @@ nodes:
     foreign_key: ssd_cla_episodes.clae_person_id
     categories:
     - looked_after
-    - review
+    - visit
     cms:
     - liquid_logic
     - mosaic

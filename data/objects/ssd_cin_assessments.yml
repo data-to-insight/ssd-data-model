@@ -56,6 +56,9 @@ nodes:
     item_ref: CINA010A
     type: nvarchar
     foreign_key: ssd_cin_episodes.cine_referral_id
+    categories:
+    - child_in_need
+    - assessment
     returns:
     - Local
     cms:
@@ -91,7 +94,7 @@ nodes:
   - name: cina_assessment_child_seen
     description: Child Seen During Assessment
     item_ref: CINA004A
-    type: nvarchar
+    type: nchar
     categories:
     - child_in_need
     - assessment

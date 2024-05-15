@@ -32,9 +32,6 @@ nodes:
     - looked_after
     - health
     - substance_misuse
-    returns:
-    - SSDA903
-    - CIN
     cms:
     - liquid_logic
     - mosaic
@@ -73,8 +70,6 @@ nodes:
     - looked_after
     - health
     - substance_misuse
-    returns:
-    - SSDA903
     cms:
     - liquid_logic
     - mosaic

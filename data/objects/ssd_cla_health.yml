@@ -27,9 +27,6 @@ nodes:
     categories:
     - looked_after
     - health
-    returns:
-    - SSDA903
-    - CIN
     cms:
     - liquid_logic
     - mosaic

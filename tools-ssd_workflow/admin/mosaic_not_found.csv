@@ -29,6 +29,7 @@ CLEA007A,clea_care_leaver_accom_suitable
 CLEA011A,clea_care_leaver_allocated_team_name
 CLEA012A,clea_care_leaver_worker_name
 PERM001A,perm_table_id
+PERM023A,perm_adoption_worker_name
 INVO011A,invo_person_id
 PROF010A,prof_staff_id
 PROF013A,prof_professional_name
@@ -46,9 +47,8 @@ EHCA005A,ehca_ehcp_assessment_exceptions
 EHCN001A,ehcn_named_plan_id
 EHCN002A,ehcn_ehcp_asmt_id
 EHCN003A,ehcn_named_plan_start_date
-EHCN004A,ehcn_named_plan_cease_date
-EHCN005A,ehcn_named_plan_cease_reason
+EHCN004A,ehcn_named_plan_ceased_date
+EHCN005A,ehcn_named_plan_ceased_reason
 EHCP001A,ehcp_active_ehcp_id
 EHCP002A,ehcp_ehcp_request_id
 EHCP003A,ehcp_active_ehcp_last_review_date
-PREP020A,prep_la_inital _plan_approved

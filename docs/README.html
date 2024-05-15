@@ -27,13 +27,13 @@
     </head>
     <body>
     <h1>Children's Services Standard Safeguarding Dataset (SSD)</h1>
-<p>This is the (in progress)source repository for the Standard CSC Dataset for Local Authorities (Project 1a DDSF). A broader, more granular, standardised dataset for Children's Social Care (CSC) in safeguarding authorities. Enabling increased scope for bespoke local analysis, using sector-driven national level data, that extends the existing DfE returns <em>(Ref: Project Stage 1)</em> combined with a suite of methods/tools that all local authorities can adopt at near-zero running cost to independently produce the standardised dataset <em>(Ref: Project Stage 2)</em>. Current variation in local data caputure and storage limits data collaboration between LAs to standard ‘core’ datasets – most notably the Children in Need (CIN) Census and SSDA903, for children in need and looked after children respectively – and Ofsted’s “Annex A” specification of child-level data. These datasets often lack the depth and granularity that some individual LAs incorporate in bespoke local analysis, including to understand quality of practice and improved outcomes for vunerable children. 
+<p>This is the source repository for the Standard CSC Dataset for Local Authorities (Project 1a DDSF). A broader, more granular, standardised dataset for Children's Social Care (CSC) in safeguarding authorities. Enabling increased scope for bespoke local analysis using sector-driven national level data <em>(Ref: Project Stage 1)</em>; combined with a suite of methods/tools that all local authorities can adopt at near-zero running cost to independently produce the standardised dataset <em>(Ref: Project Stage 2)</em>. Current variation in local data caputure and storage limits data collaboration between LAs to standard ‘core’ datasets – most notably the Children in Need (CIN) Census and SSDA903, for children in need and looked after children respectively – and Ofsted’s “Annex A” specification of child-level data. These datasets often lack the depth and granularity that some individual LAs incorporate in bespoke local analysis, including to understand quality of practice and improved outcomes for vunerable children. 
 Current phase : <a href="#current-phase">deployment</a>. </p>
 <h2>Initial core of the SSD</h2>
 <p>The dataset in-part aims to standardise existing local variation in how collected data is stored, thus enabling a significantly expanded collaborative set of data items and providing wider multi-regional/national level consistency, improved independent LA benchmarking and potential for identifying best practice outcomes journeys. A six-year historical data scope is proposed across the range of safeguarding activities performed by councils. Project oversight and governance via a dedicated steering group, DfE project team and volunteer LA's as part of an initial pilot and extended development group. </p>
 <h2>Running the SSD for/within your LA (Summarised getting started introduction)</h2>
-<p>Any representative from your LA is welcome to get in touch directly with questions or requests for support to get started with, or run the SSD (see following subscribe/contact/volunteer details). Obviously we welcome questions/input regardless of your involvement decision etc!<br />
-The SSD is essentially a single SQL script, that creates labelled persistent tables in your database. There is no data sharing, and no changes to your existing systems required. It does require that tables and indexes for the SSD be created, and therefore in some/most cases will need either your IT team support and/or agreement. The SQL script is always non-destructive, i.e. it does nothing to your existing data/tables/anything - the SSD is simply a series of SELECT statements, pulling copied data into a new standardised field and table structure on your own system for access by only you/your LA.  </p>
+<p>Any representative from your LA is welcome to get in touch directly with questions or requests for support to get started with, or run the SSD (see following subscribe/contact/volunteer details). Obviously we welcome questions/input regardless of your involvement decision etc!  </p>
+<p>The SSD is essentially a single SQL script, that creates labelled persistent tables in your existing database. There is no data sharing, and no changes to your existing systems are required. Data tables(with data copied from the raw CMS tables) and indexes for the SSD are created, and therefore in some cases will need support and/or agreement from either your IT or Intelligence team. The SQL script is always non-destructive, i.e. it does nothing to your existing data/tables/anything - the SSD process is simply a series of SELECT statements, pulling copied data into a new standardised field and table structure on your own system for access by only you/your LA.  </p>
 <h3>Getting started workflow:</h3>
 <p>The development and deployment of the SSD is functional only within, and as a result of direct involvement with Local Authorities. So we're not expectant of a one-size-fits-all approach, and will work with your team(s) to ensure confidence in, and successfull implementation of the SSD for your LA.<br />
 - Contact us with your interest --&gt; Conversations to assist running(within LA) &amp; any basic set up needed --&gt; Access given to the SSD script by email or via Github --&gt; LA runs SSD --&gt; Support available if needed --&gt; shared access given to any available further tools e.g. stat-returns scripts etc. --&gt; Feedback and improvements change requests as needed.</p>
@@ -44,27 +44,33 @@ The SSD is essentially a single SQL script, that creates labelled persistent tab
 <p>The project will use <a href="https://git-scm.com/">GIT</a> to track and approve proposed changes to the safeguarding data standard.
 The object specification input file[csv] can be found in the <a href="./docs/admin">admin</a> subfolder, and there is further ongoing work to provide further 'human readable' reporting methods beyond the aforementioned <a href="https://data-to-insight.github.io/ssd-data-model/">data object conceptual model</a>. We are aiming to publish our full data-landscape overview that resulted in the specification. </p>
 <h4>SSD in conjuction with (project|sector)developments</h4>
-<ul>
-<li>CSC National Framework  </li>
-<li>SEN2</li>
-<li>ADCS Safeguarding</li>
-<li>School Census</li>
-<li>EH Benchmarking</li>
-<li>EET Activity</li>
-<li>Linking data items to strategic goals</li>
-<li>Additional ongoing user research input</li>
-<li>Kinship Care (DDSF 1b(i))</li>
-<li>Pre-Proceedings (DDSF 1b(ii))</li>
-<li>Section 251 Finance (DDSF 1b(iii))</li>
-<li>Voice of Child &amp; Family (DDSF 1b(iv))</li>
-<li>Social worker CMS input data (DDSF 2a)</li>
-</ul>
+<p>As part of the projects research and initial scoping, the team have considered input and results from all of the following sector developments towards ensuring that the SSD take current and changing LA/DfE needs into account. 
+- CSC National Framework<br />
+- SEN2
+- ADCS Safeguarding
+- School Census
+- EH Benchmarking
+- EET Activity
+- Linking data items to strategic goals
+- Additional ongoing user research input
+- Kinship Care (DDSF 1b(i))
+- Pre-Proceedings (DDSF 1b(ii))
+- Section 251 Finance (DDSF 1b(iii))
+- Voice of Child &amp; Family (DDSF 1b(iv))
+- Social worker CMS input data (DDSF 2a)</p>
+<h3>Local Authorities guiding development</h3>
+<p><strong>Hertfordshire CC</strong> : Bid Lead | <strong>Knowsley CC</strong> : Steering Group | <strong>Data2Insight</strong> : Project Lead | <strong>East Sussex CC</strong> : Host Authority | Essex CC : Project Management and Mosaic Pilot Development | <strong>ADCS North West</strong> (hosted by <strong>Stockport Council</strong>) | <strong>Blackpool CC</strong> : Mosaic Pilot Development | <strong>East Riding CC</strong> : Azeus Pilot Development  </p>
+<p>Repo forks, and direct involvement with the project are welcomed and you can find more information about Data2Insight on our website <a href="https://www.datatoinsight.org/">https://www.datatoinsight.org/</a></p>
+<hr />
+<h2>SSD development details</h2>
+<h3>Technical and low-level SSD detail</h3>
+<p>The additional explanation detail that follows is relevant to those seeking a more in depth understanding of the granular SSD development detail. The majority of what follows on this page can be ignored/is less relevant to those looking only to set up their LA for SSD use. </p>
 <h3>Data objects Conceptual Model</h3>
 <p>Defining the scope of objects/data points capturing LA Childrens Services data during the different stages of an individual's progress through the CSC system(s). Published for iterative review.</p>
 <ul>
-<li><a href="https://github.com/data-to-insight/ssd-data-model/blob/main/docs/index.html">data object/conceptual model</a></li>
-<li><a href="https://github.com/data-to-insight/ssd-data-model/blob/main/docs/guidance.html">data object/item-guidance model</a></li>
-<li><a href="https://github.com/data-to-insight/ssd-data-model/blob/main/docs/existingreturnsmap.html">existing data returns map</a></li>
+<li><a href="https://data-to-insight.github.io/ssd-data-model/index.html">data object/conceptual model</a></li>
+<li><a href="https://data-to-insight.github.io/ssd-data-model/guidance.html">data object/item-guidance model</a></li>
+<li><a href="https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html">existing data returns map</a></li>
 </ul>
 <h3>Change log</h3>
 <p>Agreed data item-level changes are assigned an identifier, and will be traceable within the <a href="./CHANGELOG.md">changelog.md</a>. A sub-set of the change details for the most recent change (if any) also appear within each objects metadata block within the YAML file(s). The current change log contains sample data until we deploy the first pilot release. Note: Object-level change tracking is not yet available/in progress; feedback/suggestions welcomed. </p>
@@ -139,9 +145,6 @@ in an interchange format. The description is optional, and is not provided where
 <tr><td>2</td><td>Feedback</td><td>Product delivered to the DfE and offer supported adoption for LA's and iterative further development.</td></tr>
 <tr><td>2</td><td>Continuous Deployment</td><td>Maintenance roadmap and framework agreement towards iterative improvement-driven approach.</td></tr>
 </tbody></table>
-<h3>Local Authorities guiding development</h3>
-<p><strong>Hertfordshire CC</strong> : Bid Lead | <strong>Knowsley CC</strong> : Steering Group | <strong>Data2Insight</strong> : Project Lead | <strong>East Sussex CC</strong> : Host Authority | Essex CC : Project Management and Mosaic Pilot Development | <strong>ADCS North West</strong> (hosted by <strong>Stockport Council</strong>) | <strong>Blackpool CC</strong> : Mosaic Pilot Development | <strong>East Riding CC</strong> : Azeus Pilot Development  </p>
-<p>Repo forks, and direct involvement with the project are welcomed and you can find more information about Data2Insight on our website <a href="https://www.datatoinsight.org/">https://www.datatoinsight.org/</a></p>
 <h2>Repo workflow</h2>
 <p>In brief, folders <a href="./data/">data</a>, <a href="./docs/">docs</a> &amp; <a href="./sql/">sql</a> are output folders. Python scripts within the tools folder generate those files with the exception of <a href="./docs/admin">docs/admin</a> which contains the import csv definitions of all data objects &amp; relationships. <a href="./tools/">tools/*.py</a> are numbered to dictate their required run order when updating the specification. This workflow enables the entire project and all outputs to be instantly updated enabling full development transparency and ease of later updates both minor modifications and new modules/objects. It is anticipated that most LA's will only need to access the generated extract <a href="./sql/">SQL files</a> for their particular CMS. </p>
 <h3>Repo running notes</h3>

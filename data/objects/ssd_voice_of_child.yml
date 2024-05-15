@@ -26,9 +26,6 @@ nodes:
         enabled: true
     categories:
     - voice_of_child
-    returns:
-    - SSDA903
-    - CIN
     cms:
     - liquid_logic
     - mosaic

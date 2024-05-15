@@ -5,7 +5,7 @@ nodes:
   - name: cine_referral_id
     description: CIN Referral ID
     item_ref: CINE001A
-    type: int
+    type: nvarchar
     primary_key: true
     validators:
     - required:
@@ -166,7 +166,6 @@ nodes:
     - child_in_need
     - referral
     returns:
-    - CIN
     - AnnexA
     - RIIA
     cms:

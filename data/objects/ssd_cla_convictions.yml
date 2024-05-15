@@ -10,8 +10,6 @@ nodes:
     categories:
     - looked_after
     - convictions
-    returns:
-    - SSDA903
     cms:
     - liquid_logic
     - mosaic
@@ -33,9 +31,6 @@ nodes:
     categories:
     - looked_after
     - convictions
-    returns:
-    - SSDA903
-    - CIN
     cms:
     - liquid_logic
     - mosaic

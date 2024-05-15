@@ -88,7 +88,10 @@ nodes:
   - name: clar_cla_review_cancelled
     description: null
     item_ref: CLAR012A
-    type: nvarchar
+    type: nchar
+    categories:
+    - looked_after
+    - review
     guidance: Flag showing if the review was Cancelled. Y/N
   - name: clar_cla_review_participation
     description: Participation code

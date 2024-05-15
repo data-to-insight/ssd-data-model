@@ -77,7 +77,7 @@ nodes:
   - name: send_upn_unknown
     description: UPN and ULN unknown
     item_ref: SEND004A
-    type: nchar
+    type: nvarchar
     categories:
     - identity
     - send
@@ -117,8 +117,6 @@ nodes:
     - send
     returns:
     - 1aNotInCMS
-    - SSDA903
-    - CIN
     - RIIA
     cms:
     - liquid_logic

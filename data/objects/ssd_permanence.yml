@@ -38,9 +38,6 @@ nodes:
     - looked_after
     - permanence
     - adoption
-    returns:
-    - SSDA903
-    - CIN
     cms:
     - liquid_logic
     - mosaic
@@ -59,8 +56,6 @@ nodes:
     - looked_after
     - permanence
     - adoption
-    returns:
-    - SSDA903
     cms:
     - liquid_logic
     - mosaic
@@ -219,7 +214,6 @@ nodes:
     - permanence
     - adoption
     returns:
-    - SSDA903
     - AnnexA
     - ASGLB
     cms:
@@ -264,7 +258,6 @@ nodes:
     - permanence
     - adoption
     returns:
-    - SSDA903
     - AnnexA
     - ASGLB
     cms:
@@ -355,8 +348,6 @@ nodes:
     - looked_after
     - permanence
     - adoption
-    returns:
-    - SSDA903
     cms:
     - liquid_logic
     - mosaic
@@ -400,7 +391,6 @@ nodes:
     - looked_after
     - permanence
     returns:
-    - SSDA903
     - AnnexA
     - ASGLB
     cms:
@@ -421,7 +411,6 @@ nodes:
     - looked_after
     - permanence
     returns:
-    - SSDA903
     - ASGLB
     cms:
     - liquid_logic
@@ -434,7 +423,7 @@ nodes:
     - mosaic:ssd_permanence
     guidance: Type of Permanence order granted - Adoption - Special Guardianship -
       Child Arrangements Order/ Residence Order
-  - name: perm_adoption_worker
+  - name: perm_adoption_worker_name
     description: Adoption social worker
     item_ref: PERM023A
     type: nvarchar
@@ -442,8 +431,6 @@ nodes:
     - looked_after
     - permanence
     - adoption
-    returns:
-    - SSDA903
     cms:
     - liquid_logic
     - mosaic

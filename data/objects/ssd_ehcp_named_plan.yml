@@ -79,7 +79,7 @@ nodes:
     - mosaic:ssd_ehcp_named_plan
     guidance: (currently 'PLACEHOLDER_DATA' pending further development) Date of current
       EHC plan.
-  - name: ehcn_named_plan_cease_date
+  - name: ehcn_named_plan_ceased_date
     description: Cease Date
     item_ref: EHCN004A
     type: datetime
@@ -93,8 +93,8 @@ nodes:
     cms:
     - liquid_logic
     cms_field:
-    - liquid_logic:ehcn_named_plan_cease_date
-    - mosaic:ehcn_named_plan_cease_date
+    - liquid_logic:ehcn_named_plan_ceased_date
+    - mosaic:ehcn_named_plan_ceased_date
     cms_table:
     - liquid_logic:ssd_ehcp_named_plan
     - mosaic:ssd_ehcp_named_plan
@@ -103,7 +103,7 @@ nodes:
       local authority. Do not record the date of the decision to cease. Local authorities
       must continue to maintain the EHC plan until the time has passed for bringing
       an appeal or, when an appeal has been registered, until it has been concluded.
-  - name: ehcn_named_plan_cease_reason
+  - name: ehcn_named_plan_ceased_reason
     description: Cease Reason
     item_ref: EHCN005A
     type: nvarchar
@@ -117,8 +117,8 @@ nodes:
     cms:
     - liquid_logic
     cms_field:
-    - liquid_logic:ehcn_named_plan_cease_reason
-    - mosaic:ehcn_named_plan_cease_reason
+    - liquid_logic:ehcn_named_plan_ceased_reason
+    - mosaic:ehcn_named_plan_ceased_reason
     cms_table:
     - liquid_logic:ssd_ehcp_named_plan
     - mosaic:ssd_ehcp_named_plan
