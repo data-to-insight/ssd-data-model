@@ -88,19 +88,19 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_person (
-    pers_legacy_id          NVARCHAR(48),               -- item_ref=PERS014A               
-    pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- item_ref=PERS001A   
-    pers_sex                NVARCHAR(20),               -- item_ref=PERS002A
-    pers_gender             NVARCHAR(5),                -- item_ref=PERS003A                  
-    pers_ethnicity          NVARCHAR(48),               -- item_ref=PERS004A
-    pers_dob                DATETIME,                   -- item_ref=PERS005A
-    pers_common_child_id    NVARCHAR(48),               -- item_ref=PERS013A                   
-    pers_upn_unknown        NVARCHAR(10),               -- item_ref=PERS007A    -- SEN2 guidance suggests size(4) UN1-10                            
-    pers_send_flag          NCHAR(1),                   -- item_ref=PERS008A
-    pers_expected_dob       DATETIME,                   -- item_ref=PERS009A                   
-    pers_death_date         DATETIME,                   -- item_ref=PERS010A
-    pers_is_mother          NCHAR(1),                   -- item_ref=PERS011A
-    pers_nationality        NVARCHAR(48)                -- item_ref=PERS012A
+    pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
+    pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}   
+    pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A"} 
+    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A"}   -- ["unknown",NULL, F, U, M, I] [REVIEW][TESTING]        
+    pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"} 
+    pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
+    pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A"}                  
+    pers_upn_unknown        NVARCHAR(10),               -- metadata={"item_ref":"PERS007A"}    -- SEN2 guidance suggests size(4) UN1-10                            
+    pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A"} 
+    pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}                  
+    pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"} 
+    pers_is_mother          NCHAR(5),                   -- metadata={"item_ref":"PERS011A"}
+    pers_nationality        NVARCHAR(48)                -- metadata={"item_ref":"PERS012A"} 
 );
  
 -- Insert data
@@ -123,17 +123,19 @@ SELECT
     p.LEGACY_ID,
     p.DIM_PERSON_ID,
     p.GENDER_MAIN_CODE,
-    p.NHS_NUMBER,                                       -- [PLACEHOLDER] 
+    p.NHS_NUMBER,                                       -- [REVIEW] 
     p.ETHNICITY_MAIN_CODE,
-        CASE WHEN (p.DOB_ESTIMATED) = 'N'              
+    CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
-        ELSE NULL END,                                  --  or NULL
+        ELSE NULL 
+    END,                                                --  or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
-    'SSD_PH',                                 -- [PLACEHOLDER] as f903.NO_UPN_CODE table refresh populated only in reporting period
+    'SSD_PH',                                           -- [PLACEHOLDER] as f903.NO_UPN_CODE table refresh populated only in reporting period
     p.EHM_SEN_FLAG,
-        CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
+    CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
-        ELSE NULL END,                                  --  or NULL
+        ELSE NULL 
+    END,                                                --  or NULL
     p.DEATH_DTTM,
     CASE
         WHEN p.GENDER_MAIN_CODE <> 'M' AND              -- Assumption that if male is not mother
@@ -249,9 +251,9 @@ IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_family (
-    fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- item_ref=FAMI003A 
-    fami_family_id  NVARCHAR(48),               -- item_ref=FAMI001A
-    fami_person_id  NVARCHAR(48)                -- item_ref=FAMI002A
+    fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"FAMI003A"} 
+    fami_family_id  NVARCHAR(48),               -- metadata={"item_ref":"FAMI001A"}
+    fami_person_id  NVARCHAR(48)                -- metadata={"item_ref":"FAMI002A"}
 );
 
 -- Insert data 
@@ -322,13 +324,13 @@ IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_address (
-    addr_table_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=ADDR007A
-    addr_person_id          NVARCHAR(48),               -- item_ref=ADDR002A 
-    addr_address_type       NVARCHAR(48),               -- item_ref=ADDR003A
-    addr_address_start_date DATETIME,                   -- item_ref=ADDR004A
-    addr_address_end_date   DATETIME,                   -- item_ref=ADDR005A
-    addr_address_postcode   NVARCHAR(15),               -- item_ref=ADDR006A
-    addr_address_json       NVARCHAR(1000)              -- item_ref=ADDR001A
+    addr_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"ADDR007A"}
+    addr_person_id          NVARCHAR(48),               -- metadata={"item_ref":"ADDR002A"} 
+    addr_address_type       NVARCHAR(48),               -- metadata={"item_ref":"ADDR003A"}
+    addr_address_start_date DATETIME,                   -- metadata={"item_ref":"ADDR004A"}
+    addr_address_end_date   DATETIME,                   -- metadata={"item_ref":"ADDR005A"}
+    addr_address_postcode   NVARCHAR(15),               -- metadata={"item_ref":"ADDR006A"}
+    addr_address_json       NVARCHAR(1000)              -- metadata={"item_ref":"ADDR001A"}
 );
 
 
@@ -425,9 +427,9 @@ IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 -- Create the structure
 CREATE TABLE ssd_development.ssd_disability
 (
-    disa_table_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=DISA003A
-    disa_person_id          NVARCHAR(48) NOT NULL,      -- item_ref=DISA001A
-    disa_disability_code    NVARCHAR(48) NOT NULL       -- item_ref=DISA002A
+    disa_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"DISA003A"}
+    disa_person_id          NVARCHAR(48) NOT NULL,      -- metadata={"item_ref":"DISA001A"}
+    disa_disability_code    NVARCHAR(48) NOT NULL       -- metadata={"item_ref":"DISA002A"}
 );
 
 
@@ -499,11 +501,11 @@ IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immi
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_immigration_status (
-    immi_immigration_status_id          NVARCHAR(48) PRIMARY KEY,   -- item_ref=IMMI005A
-    immi_person_id                      NVARCHAR(48),               -- item_ref=IMMI001A
-    immi_immigration_status_start_date  DATETIME,                   -- item_ref=IMMI003A
-    immi_immigration_status_end_date    DATETIME,                   -- item_ref=IMMI004A
-    immi_immigration_status             NVARCHAR(100)               -- item_ref=IMMI002A
+    immi_immigration_status_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"IMMI005A"}
+    immi_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"IMMI001A"}
+    immi_immigration_status_start_date  DATETIME,                   -- metadata={"item_ref":"IMMI003A"}
+    immi_immigration_status_end_date    DATETIME,                   -- metadata={"item_ref":"IMMI004A"}
+    immi_immigration_status             NVARCHAR(100)               -- metadata={"item_ref":"IMMI002A"}
 );
  
  
@@ -577,10 +579,10 @@ IF OBJECT_ID('tempdb..#ssd_mother') IS NOT NULL DROP TABLE #ssd_mother;
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_mother (
-    moth_table_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=MOTH004A
-    moth_person_id          NVARCHAR(48),               -- item_ref=MOTH002A
-    moth_childs_person_id   NVARCHAR(48),               -- item_ref=MOTH001A
-    moth_childs_dob         DATETIME                    -- item_ref=MOTH003A
+    moth_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"MOTH004A"}
+    moth_person_id          NVARCHAR(48),               -- metadata={"item_ref":"MOTH002A"}
+    moth_childs_person_id   NVARCHAR(48),               -- metadata={"item_ref":"MOTH001A"}
+    moth_childs_dob         DATETIME                    -- metadata={"item_ref":"MOTH003A"}
 );
  
 -- Insert data
@@ -670,11 +672,11 @@ IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_stat
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_legal_status (
-    lega_legal_status_id            NVARCHAR(48) PRIMARY KEY,   -- item_ref=LEGA001A
-    lega_person_id                  NVARCHAR(48),               -- item_ref=LEGA002A
-    lega_legal_status               NVARCHAR(100),              -- item_ref=LEGA003A
-    lega_legal_status_start_date    DATETIME,                   -- item_ref=LEGA004A
-    lega_legal_status_end_date      DATETIME                    -- item_ref=LEGA005A
+    lega_legal_status_id            NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LEGA001A"}
+    lega_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LEGA002A"}
+    lega_legal_status               NVARCHAR(100),              -- metadata={"item_ref":"LEGA003A"}
+    lega_legal_status_start_date    DATETIME,                   -- metadata={"item_ref":"LEGA004A"}
+    lega_legal_status_end_date      DATETIME                    -- metadata={"item_ref":"LEGA005A"}
 );
  
 -- Insert data
@@ -751,12 +753,12 @@ IF OBJECT_ID('tempdb..#ssd_contacts') IS NOT NULL DROP TABLE #ssd_contacts;
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_contacts (
-    cont_contact_id                 NVARCHAR(48) PRIMARY KEY,   -- item_ref=CONT001A
-    cont_person_id                  NVARCHAR(48),               -- item_ref=CONT002A
-    cont_contact_date               DATETIME,                   -- item_ref=CONT003A
-    cont_contact_source_code        NVARCHAR(48),               -- item_ref=CONT004A   
-    cont_contact_source_desc        NVARCHAR(255),              -- item_ref=CONT006A 
-    cont_contact_outcome_json       NVARCHAR(500)               -- item_ref=CONT005A
+    cont_contact_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CONT001A"}
+    cont_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CONT002A"}
+    cont_contact_date               DATETIME,                   -- metadata={"item_ref":"CONT003A"}
+    cont_contact_source_code        NVARCHAR(48),               -- metadata={"item_ref":"CONT004A"} 
+    cont_contact_source_desc        NVARCHAR(255),              -- metadata={"item_ref":"CONT006A"} 
+    cont_contact_outcome_json       NVARCHAR(500)               -- metadata={"item_ref":"CONT005A"}
 );
 
 -- Insert data
@@ -845,14 +847,14 @@ IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL DROP TABLE #ssd_ear
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_early_help_episodes (
-    earl_episode_id             NVARCHAR(48) PRIMARY KEY,   -- item_ref=EARL001A
-    earl_person_id              NVARCHAR(48),               -- item_ref=EARL002A
-    earl_episode_start_date     DATETIME,                   -- item_ref=EARL003A
-    earl_episode_end_date       DATETIME,                   -- item_ref=EARL004A
-    earl_episode_reason         NVARCHAR(MAX),              -- item_ref=EARL005A
-    earl_episode_end_reason     NVARCHAR(MAX),              -- item_ref=EARL006A
-    earl_episode_organisation   NVARCHAR(MAX),              -- item_ref=EARL007A
-    earl_episode_worker_name    NVARCHAR(100)               -- item_ref=EARL008A
+    earl_episode_id             NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EARL001A"}
+    earl_person_id              NVARCHAR(48),               -- metadata={"item_ref":"EARL002A"}
+    earl_episode_start_date     DATETIME,                   -- metadata={"item_ref":"EARL003A"}
+    earl_episode_end_date       DATETIME,                   -- metadata={"item_ref":"EARL004A"}
+    earl_episode_reason         NVARCHAR(MAX),              -- metadata={"item_ref":"EARL005A"}
+    earl_episode_end_reason     NVARCHAR(MAX),              -- metadata={"item_ref":"EARL006A"}
+    earl_episode_organisation   NVARCHAR(MAX),              -- metadata={"item_ref":"EARL007A"}
+    earl_episode_worker_name    NVARCHAR(100)               -- metadata={"item_ref":"EARL008A"}
 );
  
  
@@ -934,18 +936,18 @@ IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episod
 -- Create structure
 CREATE TABLE ssd_development.ssd_cin_episodes
 (
-    cine_referral_id                INT,            -- item_ref=CINE001A
-    cine_person_id                  NVARCHAR(48),   -- item_ref=CINE002A
-    cine_referral_date              DATETIME,       -- item_ref=CINE003A
-    cine_cin_primary_need           NVARCHAR(10),   -- item_ref=CINE010A
-    cine_referral_source_code       NVARCHAR(48),   -- item_ref=CINE004A    
-    cine_referral_source_desc       NVARCHAR(255),  -- item_ref=CINE012A
-    cine_referral_outcome_json      NVARCHAR(500),  -- item_ref=CINE005A
-    cine_referral_nfa               NCHAR(1),       -- item_ref=CINE011A
-    cine_close_reason               NVARCHAR(100),  -- item_ref=CINE006A
-    cine_close_date                 DATETIME,       -- item_ref=CINE007A
-    cine_referral_team_name         NVARCHAR(255),  -- item_ref=CINE008A
-    cine_referral_worker_name       NVARCHAR(100),  -- item_ref=CINE009A
+    cine_referral_id                INT,            -- metadata={"item_ref":"CINE001A"}
+    cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
+    cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
+    cine_cin_primary_need           NVARCHAR(10),   -- metadata={"item_ref":"CINE010A"}
+    cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
+    cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
+    cine_referral_outcome_json      NVARCHAR(500),  -- metadata={"item_ref":"CINE005A"}
+    cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A"}
+    cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
+    cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
+    cine_referral_team_name         NVARCHAR(255),  -- metadata={"item_ref":"CINE008A"}
+    cine_referral_worker_name       NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
 );
  
 -- Insert data
@@ -1047,16 +1049,16 @@ IF OBJECT_ID('ssd_cin_assessments') IS NOT NULL DROP TABLE ssd_cin_assessments;
 -- Create structure
 CREATE TABLE ssd_development.ssd_cin_assessments
 (
-    cina_assessment_id              NVARCHAR(48) PRIMARY KEY,   -- item_ref=CINA001A
-    cina_person_id                  NVARCHAR(48),               -- item_ref=CINA002A
-    cina_referral_id                NVARCHAR(48),               -- item_ref=CINA010A
-    cina_assessment_start_date      DATETIME,                   -- item_ref=CINA003A
-    cina_assessment_child_seen      NCHAR(1),                   -- item_ref=CINA004A
-    cina_assessment_auth_date       DATETIME,                   -- item_ref=CINA005A               
-    cina_assessment_outcome_json    NVARCHAR(1000),             -- item_ref=CINA006A           
-    cina_assessment_outcome_nfa     NCHAR(1),                   -- item_ref=CINA009A
-    cina_assessment_team_name       NVARCHAR(255),              -- item_ref=CINA007A
-    cina_assessment_worker_name     NVARCHAR(100)               -- item_ref=CINA008A
+    cina_assessment_id              NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINA001A"}
+    cina_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CINA002A"}
+    cina_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CINA010A"}
+    cina_assessment_start_date      DATETIME,                   -- metadata={"item_ref":"CINA003A"}
+    cina_assessment_child_seen      NCHAR(1),                   -- metadata={"item_ref":"CINA004A"}
+    cina_assessment_auth_date       DATETIME,                   -- metadata={"item_ref":"CINA005A"}             
+    cina_assessment_outcome_json    NVARCHAR(1000),             -- metadata={"item_ref":"CINA006A"}           
+    cina_assessment_outcome_nfa     NCHAR(1),                   -- metadata={"item_ref":"CINA009A"}
+    cina_assessment_team_name       NVARCHAR(255),              -- metadata={"item_ref":"CINA007A"}
+    cina_assessment_worker_name     NVARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
 );
 
 -- Insert data
@@ -1182,9 +1184,9 @@ WHERE
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_assessment_factors (
-    cinf_table_id                   NVARCHAR(48) PRIMARY KEY,       -- item_ref=CINF003A
-    cinf_assessment_id              NVARCHAR(48),                   -- item_ref=CINF001A
-    cinf_assessment_factors_json    NVARCHAR(1000)                  -- item_ref=CINF002A
+    cinf_table_id                   NVARCHAR(48) PRIMARY KEY,       -- metadata={"item_ref":"CINF003A"}
+    cinf_assessment_id              NVARCHAR(48),                   -- metadata={"item_ref":"CINF001A"}
+    cinf_assessment_factors_json    NVARCHAR(1000)                  -- metadata={"item_ref":"CINF002A"}
 );
 
 -- Insert data
@@ -1313,13 +1315,13 @@ IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plan
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_cin_plans (
-    cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,   -- item_ref=CINP001A
-    cinp_referral_id            NVARCHAR(48),               -- item_ref=CINP007A
-    cinp_person_id              NVARCHAR(48),               -- item_ref=CINP002A
-    cinp_cin_plan_start_date    DATETIME,                   -- item_ref=CINP003A
-    cinp_cin_plan_end_date      DATETIME,                   -- item_ref=CINP004A
-    cinp_cin_plan_team_name     NVARCHAR(255),              -- item_ref=CINP005A
-    cinp_cin_plan_worker_name   NVARCHAR(100),              -- item_ref=CINP006A
+    cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINP001A"}
+    cinp_referral_id            NVARCHAR(48),               -- metadata={"item_ref":"CINP007A"}
+    cinp_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINP002A"}
+    cinp_cin_plan_start_date    DATETIME,                   -- metadata={"item_ref":"CINP003A"}
+    cinp_cin_plan_end_date      DATETIME,                   -- metadata={"item_ref":"CINP004A"}
+    cinp_cin_plan_team_name     NVARCHAR(255),              -- metadata={"item_ref":"CINP005A"}
+    cinp_cin_plan_worker_name   NVARCHAR(100),              -- metadata={"item_ref":"CINP006A"}
 );
  
 -- Insert data
@@ -1420,12 +1422,12 @@ IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
 -- Create structure
 CREATE TABLE ssd_development.ssd_cin_visits
 (
-    cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=CINV001A      
-    cinv_person_id              NVARCHAR(48),               -- item_ref=CINV007A
-    cinv_cin_visit_date         DATETIME,                   -- item_ref=CINV003A
-    cinv_cin_visit_seen         NCHAR(1),                   -- item_ref=CINV004A
-    cinv_cin_visit_seen_alone   NCHAR(1),                   -- item_ref=CINV005A
-    cinv_cin_visit_bedroom      NCHAR(1)                    -- item_ref=CINV006A
+    cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINV001A"}      
+    cinv_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINV007A"}
+    cinv_cin_visit_date         DATETIME,                   -- metadata={"item_ref":"CINV003A"}
+    cinv_cin_visit_seen         NCHAR(1),                   -- metadata={"item_ref":"CINV004A"}
+    cinv_cin_visit_seen_alone   NCHAR(1),                   -- metadata={"item_ref":"CINV005A"}
+    cinv_cin_visit_bedroom      NCHAR(1)                    -- metadata={"item_ref":"CINV006A"}
 );
  
 -- Insert data
@@ -1504,15 +1506,15 @@ IF OBJECT_ID('tempdb..#ssd_s47_enquiry') IS NOT NULL DROP TABLE #ssd_s47_enquiry
 
 -- Create structure 
 CREATE TABLE ssd_development.ssd_s47_enquiry (
-    s47e_s47_enquiry_id                 NVARCHAR(48) PRIMARY KEY,   -- item_ref=S47E001A
-    s47e_referral_id                    NVARCHAR(48),               -- item_ref=S47E010A
-    s47e_person_id                      NVARCHAR(48),               -- item_ref=S47E002A
-    s47e_s47_start_date                 DATETIME,                   -- item_ref=S47E004A
-    s47e_s47_end_date                   DATETIME,                   -- item_ref=S47E005A
-    s47e_s47_nfa                        NCHAR(1),                   -- item_ref=S47E006A
-    s47e_s47_outcome_json               NVARCHAR(1000),             -- item_ref=S47E007A
-    s47e_s47_completed_by_team_name     NVARCHAR(255),              -- item_ref=S47E009A
-    s47e_s47_completed_by_worker_name   NVARCHAR(100),              -- item_ref=S47E008A
+    s47e_s47_enquiry_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"S47E001A"}
+    s47e_referral_id                    NVARCHAR(48),               -- metadata={"item_ref":"S47E010A"}
+    s47e_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"S47E002A"}
+    s47e_s47_start_date                 DATETIME,                   -- metadata={"item_ref":"S47E004A"}
+    s47e_s47_end_date                   DATETIME,                   -- metadata={"item_ref":"S47E005A"}
+    s47e_s47_nfa                        NCHAR(1),                   -- metadata={"item_ref":"S47E006A"}
+    s47e_s47_outcome_json               NVARCHAR(1000),             -- metadata={"item_ref":"S47E007A"}
+    s47e_s47_completed_by_team_name     NVARCHAR(255),              -- metadata={"item_ref":"S47E009A"}
+    s47e_s47_completed_by_worker_name   NVARCHAR(100),              -- metadata={"item_ref":"S47E008A"}
 );
 
 -- insert data
@@ -1620,19 +1622,19 @@ IF OBJECT_ID('tempdb..#ssd_initial_cp_conference') IS NOT NULL DROP TABLE #ssd_i
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_initial_cp_conference (
-    icpc_icpc_id                NVARCHAR(48) PRIMARY KEY,   -- item_ref=ICPC001A
-    icpc_icpc_meeting_id        NVARCHAR(48),               -- item_ref=ICPC009A
-    icpc_s47_enquiry_id         NVARCHAR(48),               -- item_ref=ICPC002A
-    icpc_person_id              NVARCHAR(48),               -- item_ref=ICPC010A
-    icpc_cp_plan_id             NVARCHAR(48),               -- item_ref=ICPC011A
-    icpc_referral_id            NVARCHAR(48),               -- item_ref=ICPC012A
-    icpc_icpc_transfer_in       NCHAR(1),                   -- item_ref=ICPC003A
-    icpc_icpc_target_date       DATETIME,                   -- item_ref=ICPC004A
-    icpc_icpc_date              DATETIME,                   -- item_ref=ICPC005A
-    icpc_icpc_outcome_cp_flag   NCHAR(1),                   -- item_ref=ICPC013A
-    icpc_icpc_outcome_json      NVARCHAR(1000),             -- item_ref=ICPC006A
-    icpc_icpc_team_name         NVARCHAR(255),              -- item_ref=ICPC007A
-    icpc_icpc_worker_name       NVARCHAR(100),              -- item_ref=ICPC008A
+    icpc_icpc_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"ICPC001A"}
+    icpc_icpc_meeting_id        NVARCHAR(48),               -- metadata={"item_ref":"ICPC009A"}
+    icpc_s47_enquiry_id         NVARCHAR(48),               -- metadata={"item_ref":"ICPC002A"}
+    icpc_person_id              NVARCHAR(48),               -- metadata={"item_ref":"ICPC010A"}
+    icpc_cp_plan_id             NVARCHAR(48),               -- metadata={"item_ref":"ICPC011A"}
+    icpc_referral_id            NVARCHAR(48),               -- metadata={"item_ref":"ICPC012A"}
+    icpc_icpc_transfer_in       NCHAR(1),                   -- metadata={"item_ref":"ICPC003A"}
+    icpc_icpc_target_date       DATETIME,                   -- metadata={"item_ref":"ICPC004A"}
+    icpc_icpc_date              DATETIME,                   -- metadata={"item_ref":"ICPC005A"}
+    icpc_icpc_outcome_cp_flag   NCHAR(1),                   -- metadata={"item_ref":"ICPC013A"}
+    icpc_icpc_outcome_json      NVARCHAR(1000),             -- metadata={"item_ref":"ICPC006A"}
+    icpc_icpc_team_name         NVARCHAR(255),              -- metadata={"item_ref":"ICPC007A"}
+    icpc_icpc_worker_name       NVARCHAR(100),              -- metadata={"item_ref":"ICPC008A"}
 );
  
  
@@ -1748,15 +1750,15 @@ IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_cp_plans (
-    cppl_cp_plan_id                 NVARCHAR(48) PRIMARY KEY,   -- item_ref=CPPL001A
-    cppl_referral_id                NVARCHAR(48),               -- item_ref=CPPL007A
-    cppl_icpc_id                    NVARCHAR(48),               -- item_ref=CPPL008A 
-    cppl_person_id                  NVARCHAR(48),               -- item_ref=CPPL002A
-    cppl_cp_plan_start_date         DATETIME,                   -- item_ref=CPPL003A
-    cppl_cp_plan_end_date           DATETIME,                   -- item_ref=CPPL004A
-    cppl_cp_plan_ola                NCHAR(1),                   -- item_ref=CPPL011A       
-    cppl_cp_plan_initial_category   NVARCHAR(100),              -- item_ref=CPPL009A
-    cppl_cp_plan_latest_category    NVARCHAR(100),              -- item_ref=CPPL010A
+    cppl_cp_plan_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPL001A"}
+    cppl_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CPPL007A"}
+    cppl_icpc_id                    NVARCHAR(48),               -- metadata={"item_ref":"CPPL008A"}
+    cppl_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CPPL002A"}
+    cppl_cp_plan_start_date         DATETIME,                   -- metadata={"item_ref":"CPPL003A"}
+    cppl_cp_plan_end_date           DATETIME,                   -- metadata={"item_ref":"CPPL004A"}
+    cppl_cp_plan_ola                NCHAR(1),                   -- metadata={"item_ref":"CPPL011A"}       
+    cppl_cp_plan_initial_category   NVARCHAR(100),              -- metadata={"item_ref":"CPPL009A"}
+    cppl_cp_plan_latest_category    NVARCHAR(100),              -- metadata={"item_ref":"CPPL010A"}
 );
  
  
@@ -1851,13 +1853,13 @@ IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
  
 -- Create structure
 CREATE TABLE ssd_development.ssd_cp_visits (
-    cppv_cp_visit_id                NVARCHAR(48),   -- item_ref=CPPV007A PRIMARY KEY,
-    cppv_person_id                  NVARCHAR(48),   -- item_ref=CPPV008A
-    cppv_cp_plan_id                 NVARCHAR(48),   -- item_ref=CPPV001A
-    cppv_cp_visit_date              DATETIME,       -- item_ref=CPPV003A
-    cppv_cp_visit_seen              NCHAR(1),       -- item_ref=CPPV004A
-    cppv_cp_visit_seen_alone        NCHAR(1),       -- item_ref=CPPV005A
-    cppv_cp_visit_bedroom           NCHAR(1)        -- item_ref=CPPV006A
+    cppv_cp_visit_id                NVARCHAR(48),   -- metadata={"item_ref":"CPPV007A"} PRIMARY KEY,
+    cppv_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CPPV008A"}
+    cppv_cp_plan_id                 NVARCHAR(48),   -- metadata={"item_ref":"CPPV001A"}
+    cppv_cp_visit_date              DATETIME,       -- metadata={"item_ref":"CPPV003A"}
+    cppv_cp_visit_seen              NCHAR(1),       -- metadata={"item_ref":"CPPV004A"}
+    cppv_cp_visit_seen_alone        NCHAR(1),       -- metadata={"item_ref":"CPPV005A"}
+    cppv_cp_visit_bedroom           NCHAR(1)        -- metadata={"item_ref":"CPPV006A"}
 );
  
 -- Insert data
@@ -1953,15 +1955,15 @@ IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
 -- Create structure
 CREATE TABLE ssd_development.ssd_cp_reviews
 (
-    cppr_cp_review_id                   NVARCHAR(48) PRIMARY KEY,   -- item_ref=CPPR001A
-    cppr_person_id                      NVARCHAR(48),               -- item_ref=CPPR008A
-    cppr_cp_plan_id                     NVARCHAR(48),               -- item_ref=CPPR002A    
-    cppr_cp_review_due                  DATETIME NULL,              -- item_ref=CPPR003A
-    cppr_cp_review_date                 DATETIME NULL,              -- item_ref=CPPR004A
-    cppr_cp_review_meeting_id           NVARCHAR(48),               -- item_ref=CPPR009A      
-    cppr_cp_review_outcome_continue_cp  NCHAR(1),                   -- item_ref=CPPR005A
-    cppr_cp_review_quorate              NVARCHAR(100),              -- item_ref=CPPR006A      
-    cppr_cp_review_participation        NVARCHAR(100)               -- item_ref=CPPR007A
+    cppr_cp_review_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPR001A"}
+    cppr_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"CPPR008A"}
+    cppr_cp_plan_id                     NVARCHAR(48),               -- metadata={"item_ref":"CPPR002A"}  
+    cppr_cp_review_due                  DATETIME NULL,              -- metadata={"item_ref":"CPPR003A"}
+    cppr_cp_review_date                 DATETIME NULL,              -- metadata={"item_ref":"CPPR004A"}
+    cppr_cp_review_meeting_id           NVARCHAR(48),               -- metadata={"item_ref":"CPPR009A"}      
+    cppr_cp_review_outcome_continue_cp  NCHAR(1),                   -- metadata={"item_ref":"CPPR005A"}
+    cppr_cp_review_quorate              NVARCHAR(100),              -- metadata={"item_ref":"CPPR006A"}      
+    cppr_cp_review_participation        NVARCHAR(100)               -- metadata={"item_ref":"CPPR007A"}
 );
  
 -- Insert data
@@ -2080,18 +2082,18 @@ IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episod
  
 -- Create structure
 CREATE TABLE ssd_development.ssd_cla_episodes (
-    clae_cla_episode_id             NVARCHAR(48) PRIMARY KEY,   -- item_ref=CLAE001A
-    clae_person_id                  NVARCHAR(48),               -- item_ref=CLAE002A
-    clae_cla_placement_id           NVARCHAR(48),               -- item_ref=CLAE013A 
-    clae_cla_episode_start_date     DATETIME,                   -- item_ref=CLAE003A
-    clae_cla_episode_start_reason   NVARCHAR(100),              -- item_ref=CLAE004A
-    clae_cla_primary_need           NVARCHAR(100),              -- item_ref=CLAE009A
-    clae_cla_episode_ceased         DATETIME,                   -- item_ref=CLAE005A
-    clae_cla_episode_ceased_reason  NVARCHAR(255),              -- item_ref=CLAE006A
-    clae_cla_id                     NVARCHAR(48),               -- item_ref=CLAE010A
-    clae_referral_id                NVARCHAR(48),               -- item_ref=CLAE011A
-    clae_cla_last_iro_contact_date  DATETIME,                   -- item_ref=CLAE012A 
-    clae_entered_care_date          DATETIME                    -- item_ref=CLAE014A
+    clae_cla_episode_id             NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAE001A"}
+    clae_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CLAE002A"}
+    clae_cla_placement_id           NVARCHAR(48),               -- metadata={"item_ref":"CLAE013A"} 
+    clae_cla_episode_start_date     DATETIME,                   -- metadata={"item_ref":"CLAE003A"}
+    clae_cla_episode_start_reason   NVARCHAR(100),              -- metadata={"item_ref":"CLAE004A"}
+    clae_cla_primary_need           NVARCHAR(100),              -- metadata={"item_ref":"CLAE009A"}
+    clae_cla_episode_ceased         DATETIME,                   -- metadata={"item_ref":"CLAE005A"}
+    clae_cla_episode_ceased_reason  NVARCHAR(255),              -- metadata={"item_ref":"CLAE006A"}
+    clae_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAE010A"}
+    clae_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CLAE011A"}
+    clae_cla_last_iro_contact_date  DATETIME,                   -- metadata={"item_ref":"CLAE012A"} 
+    clae_entered_care_date          DATETIME                    -- metadata={"item_ref":"CLAE014A"}
 );
  
 -- Insert data
@@ -2204,10 +2206,10 @@ IF OBJECT_ID('tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cl
 
 -- create structure
 CREATE TABLE ssd_development.ssd_cla_convictions (
-    clac_cla_conviction_id      NVARCHAR(48) PRIMARY KEY,   -- item_ref=CLAC001A
-    clac_person_id              NVARCHAR(48),               -- item_ref=CLAC002A
-    clac_cla_conviction_date    DATETIME,                   -- item_ref=CLAC003A
-    clac_cla_conviction_offence NVARCHAR(1000)              -- item_ref=CLAC004A
+    clac_cla_conviction_id      NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAC001A"}
+    clac_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAC002A"}
+    clac_cla_conviction_date    DATETIME,                   -- metadata={"item_ref":"CLAC003A"}
+    clac_cla_conviction_offence NVARCHAR(1000)              -- metadata={"item_ref":"CLAC004A"}
 );
 
 -- insert data
@@ -2278,11 +2280,11 @@ IF OBJECT_ID('tempdb..#ssd_cla_health', 'U') IS NOT NULL DROP TABLE #ssd_cla_hea
 
 -- create structure
 CREATE TABLE ssd_development.ssd_cla_health (
-    clah_health_check_id        NVARCHAR(48) PRIMARY KEY,   -- item_ref=CLAH001A
-    clah_person_id              NVARCHAR(48),               -- item_ref=CLAH002A
-    clah_health_check_type      NVARCHAR(500),              -- item_ref=CLAH003A
-    clah_health_check_date      DATETIME,                   -- item_ref=CLAH004A
-    clah_health_check_status    NVARCHAR(48)                -- item_ref=CLAH005A
+    clah_health_check_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAH001A"}
+    clah_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAH002A"}
+    clah_health_check_type      NVARCHAR(500),              -- metadata={"item_ref":"CLAH003A"}
+    clah_health_check_date      DATETIME,                   -- metadata={"item_ref":"CLAH004A"}
+    clah_health_check_status    NVARCHAR(48)                -- metadata={"item_ref":"CLAH005A"}
 );
  
 -- insert data
@@ -2361,9 +2363,9 @@ IF OBJECT_ID('tempdb..#ssd_cla_immunisations') IS NOT NULL DROP TABLE #ssd_cla_i
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_cla_immunisations (
-    clai_person_id                  NVARCHAR(48) PRIMARY KEY,   -- item_ref=CLAI002A
-    clai_immunisations_status       NCHAR(1),                   -- item_ref=CLAI004A
-    clai_immunisations_status_date  DATETIME                    -- item_ref=CLAI005A
+    clai_person_id                  NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAI002A"}
+    clai_immunisations_status       NCHAR(1),                   -- metadata={"item_ref":"CLAI004A"}
+    clai_immunisations_status_date  DATETIME                    -- metadata={"item_ref":"CLAI005A"}
 );
 
 -- CTE rank records by LAST_UPDATED_DTTM (on DIM_PERSON_ID)
@@ -2443,11 +2445,11 @@ IF OBJECT_ID('tempdb..#ssd_cla_substance_misuse') IS NOT NULL DROP TABLE #ssd_cl
 
 -- Create structure 
 CREATE TABLE ssd_development.ssd_cla_substance_misuse (
-    clas_substance_misuse_id        NVARCHAR(48) PRIMARY KEY,   -- item_ref=CLAS001A
-    clas_person_id                  NVARCHAR(48),               -- item_ref=CLAS002A
-    clas_substance_misuse_date      DATETIME,                   -- item_ref=CLAS003A
-    clas_substance_misused          NVARCHAR(100),              -- item_ref=CLAS004A
-    clas_intervention_received      NCHAR(1)                    -- item_ref=CLAS005A
+    clas_substance_misuse_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAS001A"}
+    clas_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CLAS002A"}
+    clas_substance_misuse_date      DATETIME,                   -- metadata={"item_ref":"CLAS003A"}
+    clas_substance_misused          NVARCHAR(100),              -- metadata={"item_ref":"CLAS004A"}
+    clas_intervention_received      NCHAR(1)                    -- metadata={"item_ref":"CLAS005A"}
 );
 
 -- Insert data
@@ -2521,17 +2523,17 @@ IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_
   
 -- Create structure
 CREATE TABLE ssd_development.ssd_cla_placement (
-    clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,   -- item_ref=CLAP001A
-    clap_cla_id                         NVARCHAR(48),               -- item_ref=CLAP012A
-    clap_person_id                      NVARCHAR(48),               -- item_ref=CLAP013A
-    clap_cla_placement_start_date       DATETIME,                   -- item_ref=CLAP003A
-    clap_cla_placement_type             NVARCHAR(100),              -- item_ref=CLAP004A
-    clap_cla_placement_urn              NVARCHAR(48),               -- item_ref=CLAP005A
-    clap_cla_placement_distance         FLOAT,                      -- item_ref=CLAP011A
-    clap_cla_placement_provider         NVARCHAR(48),               -- item_ref=CLAP007A
-    clap_cla_placement_postcode         NVARCHAR(8),                -- item_ref=CLAP008A
-    clap_cla_placement_end_date         DATETIME,                   -- item_ref=CLAP009A
-    clap_cla_placement_change_reason    NVARCHAR(100)               -- item_ref=CLAP010A
+    clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAP001A"}
+    clap_cla_id                         NVARCHAR(48),               -- metadata={"item_ref":"CLAP012A"}
+    clap_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"CLAP013A"}
+    clap_cla_placement_start_date       DATETIME,                   -- metadata={"item_ref":"CLAP003A"}
+    clap_cla_placement_type             NVARCHAR(100),              -- metadata={"item_ref":"CLAP004A"}
+    clap_cla_placement_urn              NVARCHAR(48),               -- metadata={"item_ref":"CLAP005A"}
+    clap_cla_placement_distance         FLOAT,                      -- metadata={"item_ref":"CLAP011A"}
+    clap_cla_placement_provider         NVARCHAR(48),               -- metadata={"item_ref":"CLAP007A"}
+    clap_cla_placement_postcode         NVARCHAR(8),                -- metadata={"item_ref":"CLAP008A"}
+    clap_cla_placement_end_date         DATETIME,                   -- metadata={"item_ref":"CLAP009A"}
+    clap_cla_placement_change_reason    NVARCHAR(100)               -- metadata={"item_ref":"CLAP010A"}
 );
  
 -- Insert data
@@ -2638,12 +2640,12 @@ IF OBJECT_ID('tempdb..#ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE #ssd_cla_re
   
 -- Create structure
 CREATE TABLE ssd_development.ssd_cla_reviews (
-    clar_cla_review_id              NVARCHAR(48) PRIMARY KEY,   -- item_ref=CLAR001A
-    clar_cla_id                     NVARCHAR(48),               -- item_ref=CLAR011A
-    clar_cla_review_due_date        DATETIME,                   -- item_ref=CLAR003A
-    clar_cla_review_date            DATETIME,                   -- item_ref=CLAR004A
-    clar_cla_review_cancelled       NCHAR(1),                   -- item_ref=CLAR012A
-    clar_cla_review_participation   NVARCHAR(100)               -- item_ref=CLAR007A
+    clar_cla_review_id              NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAR001A"}
+    clar_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAR011A"}
+    clar_cla_review_due_date        DATETIME,                   -- metadata={"item_ref":"CLAR003A"}
+    clar_cla_review_date            DATETIME,                   -- metadata={"item_ref":"CLAR004A"}
+    clar_cla_review_cancelled       NCHAR(1),                   -- metadata={"item_ref":"CLAR012A"}
+    clar_cla_review_participation   NVARCHAR(100)               -- metadata={"item_ref":"CLAR007A"}
     );
  
 -- Insert data
@@ -2773,11 +2775,11 @@ WHERE
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_cla_previous_permanence (
-    lapp_table_id                       NVARCHAR(48) PRIMARY KEY,   -- item_ref=LAPP001A
-    lapp_person_id                      NVARCHAR(48),               -- item_ref=LAPP002A
-    lapp_previous_permanence_option     NVARCHAR(200),              -- item_ref=LAPP004A
-    lapp_previous_permanence_la         NVARCHAR(100),              -- item_ref=LAPP005A
-    lapp_previous_permanence_order_date NVARCHAR(100)               -- item_ref=LAPP003A -- must remain NVARCHAR
+    lapp_table_id                       NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LAPP001A"}
+    lapp_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"LAPP002A"}
+    lapp_previous_permanence_option     NVARCHAR(200),              -- metadata={"item_ref":"LAPP004A"}
+    lapp_previous_permanence_la         NVARCHAR(100),              -- metadata={"item_ref":"LAPP005A"}
+    lapp_previous_permanence_order_date NVARCHAR(100)               -- metadata={"item_ref":"LAPP003A"} -- must remain NVARCHAR
 );
  
 -- Insert data
@@ -2924,11 +2926,11 @@ ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
  
 -- Create structure
 CREATE TABLE ssd_development.ssd_cla_care_plan (
-    lacp_table_id                   NVARCHAR(48) PRIMARY KEY,   -- item_ref=LACP001A
-    lacp_person_id                  NVARCHAR(48),               -- item_ref=LACP007A
-    lacp_cla_care_plan_start_date   DATETIME,                   -- item_ref=LACP004A
-    lacp_cla_care_plan_end_date     DATETIME,                   -- item_ref=LACP005A
-    lacp_cla_care_plan_json         NVARCHAR(1000)              -- item_ref=LACP003A
+    lacp_table_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LACP001A"}
+    lacp_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LACP007A"}
+    lacp_cla_care_plan_start_date   DATETIME,                   -- metadata={"item_ref":"LACP004A"}
+    lacp_cla_care_plan_end_date     DATETIME,                   -- metadata={"item_ref":"LACP005A"}
+    lacp_cla_care_plan_json         NVARCHAR(1000)              -- metadata={"item_ref":"LACP003A"}
 );
  
 -- Insert data
@@ -3023,12 +3025,12 @@ IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_vis
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_cla_visits (
-    clav_cla_visit_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=CLAV001A
-    clav_cla_id                 NVARCHAR(48),               -- item_ref=CLAV007A
-    clav_person_id              NVARCHAR(48),               -- item_ref=CLAV008A
-    clav_cla_visit_date         DATETIME,                   -- item_ref=CLAV003A
-    clav_cla_visit_seen         NCHAR(1),                   -- item_ref=CLAV004A
-    clav_cla_visit_seen_alone   NCHAR(1)                    -- item_ref=CLAV005A
+    clav_cla_visit_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAV001A"}
+    clav_cla_id                 NVARCHAR(48),               -- metadata={"item_ref":"CLAV007A"}
+    clav_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAV008A"}
+    clav_cla_visit_date         DATETIME,                   -- metadata={"item_ref":"CLAV003A"}
+    clav_cla_visit_seen         NCHAR(1),                   -- metadata={"item_ref":"CLAV004A"}
+    clav_cla_visit_seen_alone   NCHAR(1)                    -- metadata={"item_ref":"CLAV005A"}
 );
  
 -- Insert data
@@ -3120,12 +3122,12 @@ IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_sco
 /* V8.1 */
 -- Create structure
 CREATE TABLE ssd_development.ssd_sdq_scores (
-    csdq_table_id               NVARCHAR(48),               -- item_ref=CSDQ001A PRIMARY KEY
-    csdq_person_id              NVARCHAR(48),               -- item_ref=CSDQ002A
-    csdq_sdq_score              NVARCHAR(100),              -- item_ref=CSDQ005A
-    csdq_sdq_completed_date     DATETIME,                   -- item_ref=CSDQ003A
+    csdq_table_id               NVARCHAR(48),               -- metadata={"item_ref":"CSDQ001A"} PRIMARY KEY
+    csdq_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CSDQ002A"}
+    csdq_sdq_score              NVARCHAR(100),              -- metadata={"item_ref":"CSDQ005A"}
+    csdq_sdq_completed_date     DATETIME,                   -- metadata={"item_ref":"CSDQ003A"}
     csdq_sdq_details_json       NVARCHAR(1000),             -- Depreciated to be removed [TESTING]
-    csdq_sdq_reason             NVARCHAR(100)               -- item_ref=CSDQ004A
+    csdq_sdq_reason             NVARCHAR(100)               -- metadata={"item_ref":"CSDQ004A"}
 );
  
 -- Insert data
@@ -3214,11 +3216,7 @@ WHERE rn > 1;
 -- Delete dups
 DELETE FROM DuplicateSDQScores
 WHERE row_num > 1;
- 
- 
--- -- [TESTING]
--- select * from ssd_sdq_scores
--- order by csdq_person_id desc, csdq_table_id desc;
+
  
 -- non-spec column clean-up
 ALTER TABLE ssd_sdq_scores DROP COLUMN csdq_sdq_score;
@@ -3275,13 +3273,13 @@ IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL DROP TABLE #ssd_missing;
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_missing (
-    miss_table_id                   NVARCHAR(48) PRIMARY KEY,   -- item_ref=MISS001A
-    miss_person_id                  NVARCHAR(48),               -- item_ref=MISS002A
-    miss_missing_episode_start_date DATETIME,                   -- item_ref=MISS003A
-    miss_missing_episode_type       NVARCHAR(100),              -- item_ref=MISS004A
-    miss_missing_episode_end_date   DATETIME,                   -- item_ref=MISS005A
-    miss_missing_rhi_offered        NVARCHAR(2),                -- item_ref=MISS006A                  
-    miss_missing_rhi_accepted       NVARCHAR(2)                 -- item_ref=MISS007A
+    miss_table_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"MISS001A"}
+    miss_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"MISS002A"}
+    miss_missing_episode_start_date DATETIME,                   -- metadata={"item_ref":"MISS003A"}
+    miss_missing_episode_type       NVARCHAR(100),              -- metadata={"item_ref":"MISS004A"}
+    miss_missing_episode_end_date   DATETIME,                   -- metadata={"item_ref":"MISS005A"}
+    miss_missing_rhi_offered        NVARCHAR(2),                -- metadata={"item_ref":"MISS006A"}                
+    miss_missing_rhi_accepted       NVARCHAR(2)                 -- metadata={"item_ref":"MISS007A"}
 );
 
 
@@ -3372,18 +3370,18 @@ IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_
 -- Create structure
 CREATE TABLE ssd_development.ssd_care_leavers
 (
-    clea_table_id                           NVARCHAR(48) PRIMARY KEY,   -- item_ref=CLEA001A
-    clea_person_id                          NVARCHAR(48),               -- item_ref=CLEA002A
-    clea_care_leaver_eligibility            NVARCHAR(100),              -- item_ref=CLEA003A
-    clea_care_leaver_in_touch               NVARCHAR(100),              -- item_ref=CLEA004A
-    clea_care_leaver_latest_contact         DATETIME,                   -- item_ref=CLEA005A
-    clea_care_leaver_accommodation          NVARCHAR(100),              -- item_ref=CLEA006A
-    clea_care_leaver_accom_suitable         NVARCHAR(100),              -- item_ref=CLEA007A
-    clea_care_leaver_activity               NVARCHAR(100),              -- item_ref=CLEA008A
-    clea_pathway_plan_review_date           DATETIME,                   -- item_ref=CLEA009A
-    clea_care_leaver_personal_advisor       NVARCHAR(100),              -- item_ref=CLEA010A
-    clea_care_leaver_allocated_team_name    NVARCHAR(255),              -- item_ref=CLEA011A
-    clea_care_leaver_worker_name            NVARCHAR(100)               -- item_ref=CLEA012A
+    clea_table_id                           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLEA001A"}
+    clea_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"CLEA002A"}
+    clea_care_leaver_eligibility            NVARCHAR(100),              -- metadata={"item_ref":"CLEA003A"}
+    clea_care_leaver_in_touch               NVARCHAR(100),              -- metadata={"item_ref":"CLEA004A"}
+    clea_care_leaver_latest_contact         DATETIME,                   -- metadata={"item_ref":"CLEA005A"}
+    clea_care_leaver_accommodation          NVARCHAR(100),              -- metadata={"item_ref":"CLEA006A"}
+    clea_care_leaver_accom_suitable         NVARCHAR(100),              -- metadata={"item_ref":"CLEA007A"}
+    clea_care_leaver_activity               NVARCHAR(100),              -- metadata={"item_ref":"CLEA008A"}
+    clea_pathway_plan_review_date           DATETIME,                   -- metadata={"item_ref":"CLEA009A"}
+    clea_care_leaver_personal_advisor       NVARCHAR(100),              -- metadata={"item_ref":"CLEA010A"}
+    clea_care_leaver_allocated_team_name    NVARCHAR(255),              -- metadata={"item_ref":"CLEA011A"}
+    clea_care_leaver_worker_name            NVARCHAR(100)               -- metadata={"item_ref":"CLEA012A"}
 );
  
 /* V4 */
@@ -3557,29 +3555,29 @@ IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permane
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_permanence (
-    perm_table_id                   NVARCHAR(48) PRIMARY KEY,   -- item_ref=PERM001A
-    perm_person_id                  NVARCHAR(48),               -- item_ref=PERM002A
-    perm_cla_id                     NVARCHAR(48),               -- item_ref=PERM022A
-    perm_adm_decision_date          DATETIME,                   -- item_ref=PERM003A
-    perm_part_of_sibling_group      NCHAR(1),                   -- item_ref=PERM012A
-    perm_siblings_placed_together   INT,                        -- item_ref=PERM013A
-    perm_siblings_placed_apart      INT,                        -- item_ref=PERM014A
-    perm_ffa_cp_decision_date       DATETIME,                   -- item_ref=PERM004A              
-    perm_placement_order_date       DATETIME,                   -- item_ref=PERM006A
-    perm_matched_date               DATETIME,                   -- item_ref=PERM008A
-    perm_adopter_sex                NVARCHAR(48),               -- item_ref=PERM025A
-    perm_adopter_legal_status       NVARCHAR(100),              -- item_ref=PERM026A
-    perm_number_of_adopters         INT,                        -- item_ref=PERM027A
-    perm_placed_for_adoption_date   DATETIME,                   -- item_ref=PERM007A             
-    perm_adopted_by_carer_flag      NCHAR(1),                   -- item_ref=PERM021A
-    perm_placed_foster_carer_date   DATETIME,                   -- item_ref=PERM011A
-    perm_placed_ffa_cp_date         DATETIME,                   -- item_ref=PERM009A
-    perm_placement_provider_urn     NVARCHAR(48),               -- item_ref=PERM015A  
-    perm_decision_reversed_date     DATETIME,                   -- item_ref=PERM010A                  
-    perm_decision_reversed_reason   NVARCHAR(100),              -- item_ref=PERM016A
-    perm_permanence_order_date      DATETIME,                   -- item_ref=PERM017A              
-    perm_permanence_order_type      NVARCHAR(100),              -- item_ref=PERM018A        
-    perm_adoption_worker_name       NVARCHAR(100)               -- item_ref=PERM023A
+    perm_table_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERM001A"}
+    perm_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"PERM002A"}
+    perm_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"PERM022A"}
+    perm_adm_decision_date          DATETIME,                   -- metadata={"item_ref":"PERM003A"}
+    perm_part_of_sibling_group      NCHAR(1),                   -- metadata={"item_ref":"PERM012A"}
+    perm_siblings_placed_together   INT,                        -- metadata={"item_ref":"PERM013A"}
+    perm_siblings_placed_apart      INT,                        -- metadata={"item_ref":"PERM014A"}
+    perm_ffa_cp_decision_date       DATETIME,                   -- metadata={"item_ref":"PERM004A"}              
+    perm_placement_order_date       DATETIME,                   -- metadata={"item_ref":"PERM006A"}
+    perm_matched_date               DATETIME,                   -- metadata={"item_ref":"PERM008A"}
+    perm_adopter_sex                NVARCHAR(48),               -- metadata={"item_ref":"PERM025A"}
+    perm_adopter_legal_status       NVARCHAR(100),              -- metadata={"item_ref":"PERM026A"}
+    perm_number_of_adopters         INT,                        -- metadata={"item_ref":"PERM027A"}
+    perm_placed_for_adoption_date   DATETIME,                   -- metadata={"item_ref":"PERM007A"}             
+    perm_adopted_by_carer_flag      NCHAR(1),                   -- metadata={"item_ref":"PERM021A"}
+    perm_placed_foster_carer_date   DATETIME,                   -- metadata={"item_ref":"PERM011A"}
+    perm_placed_ffa_cp_date         DATETIME,                   -- metadata={"item_ref":"PERM009A"}
+    perm_placement_provider_urn     NVARCHAR(48),               -- metadata={"item_ref":"PERM015A"}  
+    perm_decision_reversed_date     DATETIME,                   -- metadata={"item_ref":"PERM010A"}                  
+    perm_decision_reversed_reason   NVARCHAR(100),              -- metadata={"item_ref":"PERM016A"}
+    perm_permanence_order_date      DATETIME,                   -- metadata={"item_ref":"PERM017A"}              
+    perm_permanence_order_type      NVARCHAR(100),              -- metadata={"item_ref":"PERM018A"}        
+    perm_adoption_worker_name       NVARCHAR(100)               -- metadata={"item_ref":"PERM023A"}
     
 );
 
@@ -3777,15 +3775,15 @@ SET @LastSept30th = CASE
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_professionals (
-    prof_professional_id                NVARCHAR(48) PRIMARY KEY,   -- item_ref=PROF001A
-    prof_staff_id                       NVARCHAR(48),               -- item_ref=PROF010A
-    prof_professional_name              NVARCHAR(300),              -- item_ref=PROF013A
-    prof_social_worker_registration_no  NVARCHAR(48),               -- item_ref=PROF002A
-    prof_agency_worker_flag             NCHAR(1),                   -- item_ref=PROF014A
-    prof_professional_job_title         NVARCHAR(500),              -- item_ref=PROF007A
-    prof_professional_caseload          INT,                        -- item_ref=PROF008A             
-    prof_professional_department        NVARCHAR(100),              -- item_ref=PROF012A
-    prof_full_time_equivalency          FLOAT                       -- item_ref=PROF011A
+    prof_professional_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PROF001A"}
+    prof_staff_id                       NVARCHAR(48),               -- metadata={"item_ref":"PROF010A"}
+    prof_professional_name              NVARCHAR(300),              -- metadata={"item_ref":"PROF013A"}
+    prof_social_worker_registration_no  NVARCHAR(48),               -- metadata={"item_ref":"PROF002A"}
+    prof_agency_worker_flag             NCHAR(1),                   -- metadata={"item_ref":"PROF014A"}
+    prof_professional_job_title         NVARCHAR(500),              -- metadata={"item_ref":"PROF007A"}
+    prof_professional_caseload          INT,                        -- metadata={"item_ref":"PROF008A"}             
+    prof_professional_department        NVARCHAR(100),              -- metadata={"item_ref":"PROF012A"}
+    prof_full_time_equivalency          FLOAT                       -- metadata={"item_ref":"PROF011A"}
 );
 
 
@@ -3872,15 +3870,15 @@ IF OBJECT_ID('tempdb..#ssd_involvements', 'U') IS NOT NULL DROP TABLE #ssd_invol
  
 -- Create structure
 CREATE TABLE ssd_development.ssd_involvements (
-    invo_involvements_id        NVARCHAR(48) PRIMARY KEY,   -- item_ref=INVO005A
-    invo_professional_id        NVARCHAR(48),               -- item_ref=INVO006A
-    invo_professional_role_id   NVARCHAR(200),              -- item_ref=INVO007A
-    invo_professional_team      NVARCHAR(1000),             -- item_ref=INVO009A
-    invo_person_id              NVARCHAR(48),               -- item_ref=INVO011A
-    invo_involvement_start_date DATETIME,                   -- item_ref=INVO002A
-    invo_involvement_end_date   DATETIME,                   -- item_ref=INVO003A
-    invo_worker_change_reason   NVARCHAR(200),              -- item_ref=INVO004A
-    invo_referral_id            NVARCHAR(48)                -- item_ref=INVO010A
+    invo_involvements_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"INVO005A"}
+    invo_professional_id        NVARCHAR(48),               -- metadata={"item_ref":"INVO006A"}
+    invo_professional_role_id   NVARCHAR(200),              -- metadata={"item_ref":"INVO007A"}
+    invo_professional_team      NVARCHAR(1000),             -- metadata={"item_ref":"INVO009A"}
+    invo_person_id              NVARCHAR(48),               -- metadata={"item_ref":"INVO011A"}
+    invo_involvement_start_date DATETIME,                   -- metadata={"item_ref":"INVO002A"}
+    invo_involvement_end_date   DATETIME,                   -- metadata={"item_ref":"INVO003A"}
+    invo_worker_change_reason   NVARCHAR(200),              -- metadata={"item_ref":"INVO004A"}
+    invo_referral_id            NVARCHAR(48)                -- metadata={"item_ref":"INVO010A"}
 );
  
 -- Insert data
@@ -3990,12 +3988,12 @@ IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_linked_identifiers (
-    link_table_id               NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),   -- item_ref=LINK001A
-    link_person_id              NVARCHAR(48),                               -- item_ref=LINK002A 
-    link_identifier_type        NVARCHAR(100),                              -- item_ref=LINK003A
-    link_identifier_value       NVARCHAR(100),                              -- item_ref=LINK004A
-    link_valid_from_date        DATETIME,                                   -- item_ref=LINK005A
-    link_valid_to_date          DATETIME                                    -- item_ref=LINK006A
+    link_table_id               NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),   -- metadata={"item_ref":"LINK001A"}
+    link_person_id              NVARCHAR(48),                               -- metadata={"item_ref":"LINK002A"} 
+    link_identifier_type        NVARCHAR(100),                              -- metadata={"item_ref":"LINK003A"}
+    link_identifier_value       NVARCHAR(100),                              -- metadata={"item_ref":"LINK004A"}
+    link_valid_from_date        DATETIME,                                   -- metadata={"item_ref":"LINK005A"}
+    link_valid_to_date          DATETIME                                    -- metadata={"item_ref":"LINK006A"}
 );
 
 -- -- Insert placeholder data [TESTING]
@@ -4065,12 +4063,12 @@ IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_s251_finance (
-    s251_table_id           NVARCHAR(48) PRIMARY KEY,   -- item_ref=S251001A
-    s251_cla_placement_id   NVARCHAR(48),               -- item_ref=S251002A 
-    s251_placeholder_1      NVARCHAR(48),               -- item_ref=S251003A
-    s251_placeholder_2      NVARCHAR(48),               -- item_ref=S251004A
-    s251_placeholder_3      NVARCHAR(48),               -- item_ref=S251005A
-    s251_placeholder_4      NVARCHAR(48)                -- item_ref=S251006A
+    s251_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"S251001A"}
+    s251_cla_placement_id   NVARCHAR(48),               -- metadata={"item_ref":"S251002A"} 
+    s251_placeholder_1      NVARCHAR(48),               -- metadata={"item_ref":"S251003A"}
+    s251_placeholder_2      NVARCHAR(48),               -- metadata={"item_ref":"S251004A"}
+    s251_placeholder_3      NVARCHAR(48),               -- metadata={"item_ref":"S251005A"}
+    s251_placeholder_4      NVARCHAR(48)                -- metadata={"item_ref":"S251006A"}
 );
 
 -- -- Insert placeholder data [TESTING]
@@ -4127,13 +4125,13 @@ IF OBJECT_ID('tempdb..#ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voi
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_voice_of_child (
-    voch_table_id               NVARCHAR(48) PRIMARY KEY,   -- item_ref=VOCH007A
-    voch_person_id              NVARCHAR(48),               -- item_ref=VOCH001A
-    voch_explained_worries      NCHAR(1),                   -- item_ref=VOCH002A
-    voch_story_help_understand  NCHAR(1),                   -- item_ref=VOCH003A
-    voch_agree_worker           NCHAR(1),                   -- item_ref=VOCH004A
-    voch_plan_safe              NCHAR(1),                   -- item_ref=VOCH005A
-    voch_tablet_help_explain    NCHAR(1)                    -- item_ref=VOCH006A
+    voch_table_id               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"VOCH007A"}
+    voch_person_id              NVARCHAR(48),               -- metadata={"item_ref":"VOCH001A"}
+    voch_explained_worries      NCHAR(1),                   -- metadata={"item_ref":"VOCH002A"}
+    voch_story_help_understand  NCHAR(1),                   -- metadata={"item_ref":"VOCH003A"}
+    voch_agree_worker           NCHAR(1),                   -- metadata={"item_ref":"VOCH004A"}
+    voch_plan_safe              NCHAR(1),                   -- metadata={"item_ref":"VOCH005A"}
+    voch_tablet_help_explain    NCHAR(1)                    -- metadata={"item_ref":"VOCH006A"}
 );
 
 -- -- Insert placeholder data [TESTING]
@@ -4201,30 +4199,30 @@ IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pr
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_pre_proceedings (
-    prep_table_id                           NVARCHAR(48) PRIMARY KEY,   -- item_ref=PREP024A
-    prep_person_id                          NVARCHAR(48),               -- item_ref=PREP001A
-    prep_plo_family_id                      NVARCHAR(48),               -- item_ref=PREP002A
-    prep_pre_pro_decision_date              DATETIME,                   -- item_ref=PREP003A
-    prep_initial_pre_pro_meeting_date       DATETIME,                   -- item_ref=PREP004A
-    prep_pre_pro_outcome                    NVARCHAR(100),              -- item_ref=PREP005A
-    prep_agree_stepdown_issue_date          DATETIME,                   -- item_ref=PREP006A
-    prep_cp_plans_referral_period           INT,                        -- item_ref=PREP007A
-    prep_legal_gateway_outcome              NVARCHAR(100),              -- item_ref=PREP008A
-    prep_prev_pre_proc_child                INT,                        -- item_ref=PREP009A
-    prep_prev_care_proc_child               INT,                        -- item_ref=PREP010A
-    prep_pre_pro_letter_date                DATETIME,                   -- item_ref=PREP011A
-    prep_care_pro_letter_date               DATETIME,                   -- item_ref=PREP012A
-    prep_pre_pro_meetings_num               INT,                        -- item_ref=PREP013A
-    prep_pre_pro_parents_legal_rep          NCHAR(1),                   -- item_ref=PREP014A
-    prep_parents_legal_rep_point_of_issue   NCHAR(2),                   -- item_ref=PREP015A
-    prep_court_reference                    NVARCHAR(48),               -- item_ref=PREP016A
-    prep_care_proc_court_hearings           INT,                        -- item_ref=PREP017A
-    prep_care_proc_short_notice             NCHAR(1),                   -- item_ref=PREP018A
-    prep_proc_short_notice_reason           NVARCHAR(100),              -- item_ref=PREP019A
-    prep_la_inital_plan_approved            NCHAR(1),                   -- item_ref=PREP020A
-    prep_la_initial_care_plan               NVARCHAR(100),              -- item_ref=PREP021A
-    prep_la_final_plan_approved             NCHAR(1),                   -- item_ref=PREP022A
-    prep_la_final_care_plan                 NVARCHAR(100)               -- item_ref=PREP023A
+    prep_table_id                           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PREP024A"}
+    prep_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"PREP001A"}
+    prep_plo_family_id                      NVARCHAR(48),               -- metadata={"item_ref":"PREP002A"}
+    prep_pre_pro_decision_date              DATETIME,                   -- metadata={"item_ref":"PREP003A"}
+    prep_initial_pre_pro_meeting_date       DATETIME,                   -- metadata={"item_ref":"PREP004A"}
+    prep_pre_pro_outcome                    NVARCHAR(100),              -- metadata={"item_ref":"PREP005A"}
+    prep_agree_stepdown_issue_date          DATETIME,                   -- metadata={"item_ref":"PREP006A"}
+    prep_cp_plans_referral_period           INT,                        -- metadata={"item_ref":"PREP007A"}
+    prep_legal_gateway_outcome              NVARCHAR(100),              -- metadata={"item_ref":"PREP008A"}
+    prep_prev_pre_proc_child                INT,                        -- metadata={"item_ref":"PREP009A"}
+    prep_prev_care_proc_child               INT,                        -- metadata={"item_ref":"PREP010A"}
+    prep_pre_pro_letter_date                DATETIME,                   -- metadata={"item_ref":"PREP011A"}
+    prep_care_pro_letter_date               DATETIME,                   -- metadata={"item_ref":"PREP012A"}
+    prep_pre_pro_meetings_num               INT,                        -- metadata={"item_ref":"PREP013A"}
+    prep_pre_pro_parents_legal_rep          NCHAR(1),                   -- metadata={"item_ref":"PREP014A"}
+    prep_parents_legal_rep_point_of_issue   NCHAR(2),                   -- metadata={"item_ref":"PREP015A"}
+    prep_court_reference                    NVARCHAR(48),               -- metadata={"item_ref":"PREP016A"}
+    prep_care_proc_court_hearings           INT,                        -- metadata={"item_ref":"PREP017A"}
+    prep_care_proc_short_notice             NCHAR(1),                   -- metadata={"item_ref":"PREP018A"}
+    prep_proc_short_notice_reason           NVARCHAR(100),              -- metadata={"item_ref":"PREP019A"}
+    prep_la_inital_plan_approved            NCHAR(1),                   -- metadata={"item_ref":"PREP020A"}
+    prep_la_initial_care_plan               NVARCHAR(100),              -- metadata={"item_ref":"PREP021A"}
+    prep_la_final_plan_approved             NCHAR(1),                   -- metadata={"item_ref":"PREP022A"}
+    prep_la_final_care_plan                 NVARCHAR(100)               -- metadata={"item_ref":"PREP023A"}
 );
 
 -- -- Insert placeholder data
@@ -4341,11 +4339,11 @@ IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL DROP TABLE #ssd_send;
 
 -- Create structure 
 CREATE TABLE ssd_development.ssd_send (
-    send_table_id       NVARCHAR(48) PRIMARY KEY,   -- item_ref=SEND001A
-    send_person_id      NVARCHAR(48),               -- item_ref=SEND005A
-    send_upn            NVARCHAR(48),               -- item_ref=SEND002A
-    send_uln            NVARCHAR(48),               -- item_ref=SEND003A
-    send_upn_unknown    NVARCHAR(10)                -- item_ref=SEND004A
+    send_table_id       NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"SEND001A"}
+    send_person_id      NVARCHAR(48),               -- metadata={"item_ref":"SEND005A"}
+    send_upn            NVARCHAR(48),               -- metadata={"item_ref":"SEND002A"}
+    send_uln            NVARCHAR(48),               -- metadata={"item_ref":"SEND003A"}
+    send_upn_unknown    NVARCHAR(10)                -- metadata={"item_ref":"SEND004A"}
     );
 
 -- -- Insert placeholder data
@@ -4398,10 +4396,10 @@ IF OBJECT_ID('tempdb..#ssd_sen_need', 'U') IS NOT NULL DROP TABLE #ssd_sen_need 
  
 -- Create structure
 CREATE TABLE ssd_development.ssd_sen_need (
-    senn_table_id                   NVARCHAR(48) PRIMARY KEY,   -- item_ref=SENN001A
-    senn_active_ehcp_id             NVARCHAR(48),               -- item_ref=SENN002A
-    senn_active_ehcp_need_type      NVARCHAR(100),              -- item_ref=SENN003A
-    senn_active_ehcp_need_rank      NCHAR(1)                    -- item_ref=SENN004A
+    senn_table_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"SENN001A"}
+    senn_active_ehcp_id             NVARCHAR(48),               -- metadata={"item_ref":"SENN002A"}
+    senn_active_ehcp_need_type      NVARCHAR(100),              -- metadata={"item_ref":"SENN003A"}
+    senn_active_ehcp_need_rank      NCHAR(1)                    -- metadata={"item_ref":"SENN004A"}
 );
  
 -- -- Create constraint(s)
@@ -4451,11 +4449,11 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE #ssd_ehcp
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_ehcp_requests (
-    ehcr_ehcp_request_id            NVARCHAR(48) PRIMARY KEY,   -- item_ref=EHCR001A
-    ehcr_send_table_id              NVARCHAR(48),               -- item_ref=EHCR002A
-    ehcr_ehcp_req_date              DATETIME,                   -- item_ref=EHCR003A
-    ehcr_ehcp_req_outcome_date      DATETIME,                   -- item_ref=EHCR004A
-    ehcr_ehcp_req_outcome           NVARCHAR(100)               -- item_ref=EHCR005A
+    ehcr_ehcp_request_id            NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCR001A"}
+    ehcr_send_table_id              NVARCHAR(48),               -- metadata={"item_ref":"EHCR002A"}
+    ehcr_ehcp_req_date              DATETIME,                   -- metadata={"item_ref":"EHCR003A"}
+    ehcr_ehcp_req_outcome_date      DATETIME,                   -- metadata={"item_ref":"EHCR004A"}
+    ehcr_ehcp_req_outcome           NVARCHAR(100)               -- metadata={"item_ref":"EHCR005A"}
 );
 
 
@@ -4505,11 +4503,11 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE #ssd_eh
 
 -- Create ssd_ehcp_assessment table
 CREATE TABLE ssd_development.ssd_ehcp_assessment (
-    ehca_ehcp_assessment_id                 NVARCHAR(48) PRIMARY KEY,   -- item_ref=EHCA001A
-    ehca_ehcp_request_id                    NVARCHAR(48),               -- item_ref=EHCA002A
-    ehca_ehcp_assessment_outcome_date       DATETIME,                   -- item_ref=EHCA003A
-    ehca_ehcp_assessment_outcome            NVARCHAR(100),              -- item_ref=EHCA004A
-    ehca_ehcp_assessment_exceptions         NVARCHAR(100)               -- item_ref=EHCA005A
+    ehca_ehcp_assessment_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCA001A"}
+    ehca_ehcp_request_id                    NVARCHAR(48),               -- metadata={"item_ref":"EHCA002A"}
+    ehca_ehcp_assessment_outcome_date       DATETIME,                   -- metadata={"item_ref":"EHCA003A"}
+    ehca_ehcp_assessment_outcome            NVARCHAR(100),              -- metadata={"item_ref":"EHCA004A"}
+    ehca_ehcp_assessment_exceptions         NVARCHAR(100)               -- metadata={"item_ref":"EHCA005A"}
 );
 
 
@@ -4563,11 +4561,11 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE #ssd_eh
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_ehcp_named_plan (
-    ehcn_named_plan_id              NVARCHAR(48) PRIMARY KEY,   -- item_ref=EHCN001A
-    ehcn_ehcp_asmt_id               NVARCHAR(48),               -- item_ref=EHCN002A
-    ehcn_named_plan_start_date      DATETIME,                   -- item_ref=EHCN003A
-    ehcn_named_plan_ceased_date     DATETIME,                   -- item_ref=EHCN004A     
-    ehcn_named_plan_ceased_reason   NVARCHAR(100)               -- item_ref=EHCN005A   
+    ehcn_named_plan_id              NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCN001A"}
+    ehcn_ehcp_asmt_id               NVARCHAR(48),               -- metadata={"item_ref":"EHCN002A"}
+    ehcn_named_plan_start_date      DATETIME,                   -- metadata={"item_ref":"EHCN003A"}
+    ehcn_named_plan_ceased_date     DATETIME,                   -- metadata={"item_ref":"EHCN004A"}     
+    ehcn_named_plan_ceased_reason   NVARCHAR(100)               -- metadata={"item_ref":"EHCN005A"}   
 );
 
 
@@ -4618,9 +4616,9 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE #ssd_
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_ehcp_active_plans (
-    ehcp_active_ehcp_id                 NVARCHAR(48) PRIMARY KEY,   -- item_ref=EHCP001A
-    ehcp_ehcp_request_id                NVARCHAR(48),               -- item_ref=EHCP002A
-    ehcp_active_ehcp_last_review_date   DATETIME                    -- item_ref=EHCP003A
+    ehcp_active_ehcp_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCP001A"}
+    ehcp_ehcp_request_id                NVARCHAR(48),               -- metadata={"item_ref":"EHCP002A"}
+    ehcp_active_ehcp_last_review_date   DATETIME                    -- metadata={"item_ref":"EHCP003A"}
 );
 
 
