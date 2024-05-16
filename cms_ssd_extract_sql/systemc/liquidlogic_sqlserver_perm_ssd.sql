@@ -62,6 +62,7 @@ Object Name: ssd_person
 Description: Person/child details. This the most connected table in the SSD.
 Author: D2I
 Version: 1.0
+            0.2: upn _unknown size change in line with DfE to 4 160524 RH
             0.1 Additional inclusion criteria added to capture care leavers 120324 JH
 Status: [R]elease
 Remarks:    
@@ -95,11 +96,11 @@ CREATE TABLE ssd_development.ssd_person (
     pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"} 
     pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
     pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A"}                  
-    pers_upn_unknown        NVARCHAR(10),               -- metadata={"item_ref":"PERS007A"}    -- SEN2 guidance suggests size(4) UN1-10                            
+    pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A"}    -- SEN2 guidance suggests size(4) UN1-10                            
     pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A"} 
     pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}                  
     pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"} 
-    pers_is_mother          NCHAR(5),                   -- metadata={"item_ref":"PERS011A"}
+    pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
     pers_nationality        NVARCHAR(48)                -- metadata={"item_ref":"PERS012A"} 
 );
  
@@ -358,16 +359,16 @@ SELECT
     END AS CleanedPostcode,
     (
         SELECT 
-            NULLIF(pa.ROOM_NO, '')    AS ROOM, 
-            NULLIF(pa.FLOOR_NO, '')   AS FLOOR, 
-            NULLIF(pa.FLAT_NO, '')    AS FLAT, 
-            NULLIF(pa.BUILDING, '')   AS BUILDING, 
-            NULLIF(pa.HOUSE_NO, '')   AS HOUSE, 
-            NULLIF(pa.STREET, '')     AS STREET, 
-            NULLIF(pa.TOWN, '')       AS TOWN,
-            NULLIF(pa.UPRN, '')       AS UPRN,
-            NULLIF(pa.EASTING, '')    AS EASTING,
-            NULLIF(pa.NORTHING, '')   AS NORTHING
+            NULLIF(pa.ROOM_NO, '')    AS "ROOM", 
+            NULLIF(pa.FLOOR_NO, '')   AS "FLOOR", 
+            NULLIF(pa.FLAT_NO, '')    AS "FLAT", 
+            NULLIF(pa.BUILDING, '')   AS "BUILDING", 
+            NULLIF(pa.HOUSE_NO, '')   AS "HOUSE", 
+            NULLIF(pa.STREET, '')     AS "STREET", 
+            NULLIF(pa.TOWN, '')       AS "TOWN",
+            NULLIF(pa.UPRN, '')       AS "UPRN",
+            NULLIF(pa.EASTING, '')    AS "EASTING",
+            NULLIF(pa.NORTHING, '')   AS "NORTHING"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS addr_address_json
 FROM 
@@ -776,17 +777,17 @@ SELECT
     fc.CONTACT_DTTM,
     fc.DIM_LOOKUP_CONT_SORC_ID,
     fc.DIM_LOOKUP_CONT_SORC_ID_DESC,
-    (   -- Create JSON string for the address
+    (   -- Create JSON string for outcomes
         SELECT 
-            NULLIF(fc.OUTCOME_NEW_REFERRAL_FLAG, '')           AS "OUTCOME_NEW_REFERRAL_FLAG",
-            NULLIF(fc.OUTCOME_EXISTING_REFERRAL_FLAG, '')      AS "OUTCOME_EXISTING_REFERRAL_FLAG",
-            NULLIF(fc.OUTCOME_CP_ENQUIRY_FLAG, '')             AS "OUTCOME_CP_ENQUIRY_FLAG",
-            NULLIF(fc.OUTCOME_NFA_FLAG, '')                    AS "OUTCOME_NFA_FLAG",
-            NULLIF(fc.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '')    AS "OUTCOME_NON_AGENCY_ADOPTION_FLAG",
-            NULLIF(fc.OUTCOME_PRIVATE_FOSTERING_FLAG, '')      AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
-            NULLIF(fc.OUTCOME_ADVICE_FLAG, '')                 AS "OUTCOME_ADVICE_FLAG",
-            NULLIF(fc.OUTCOME_MISSING_FLAG, '')                AS "OUTCOME_MISSING_FLAG",
-            NULLIF(fc.OUTCOME_OLA_CP_FLAG, '')                 AS "OUTCOME_OLA_CP_FLAG",
+            NULLIF(fc.OUTCOME_NEW_REFERRAL_FLAG, '')           AS "NEW_REFERRAL_FLAG",
+            NULLIF(fc.OUTCOME_EXISTING_REFERRAL_FLAG, '')      AS "EXISTING_REFERRAL_FLAG",
+            NULLIF(fc.OUTCOME_CP_ENQUIRY_FLAG, '')             AS "CP_ENQUIRY_FLAG",
+            NULLIF(fc.OUTCOME_NFA_FLAG, '')                    AS "NFA_FLAG",
+            NULLIF(fc.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '')    AS "NON_AGENCY_ADOPTION_FLAG",
+            NULLIF(fc.OUTCOME_PRIVATE_FOSTERING_FLAG, '')      AS "PRIVATE_FOSTERING_FLAG",
+            NULLIF(fc.OUTCOME_ADVICE_FLAG, '')                 AS "ADVICE_FLAG",
+            NULLIF(fc.OUTCOME_MISSING_FLAG, '')                AS "MISSING_FLAG",
+            NULLIF(fc.OUTCOME_OLA_CP_FLAG, '')                 AS "OLA_CP_FLAG",
             NULLIF(fc.OTHER_OUTCOMES_EXIST_FLAG, '')           AS "OTHER_OUTCOMES_EXIST_FLAG"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS cont_contact_outcome_json
@@ -975,15 +976,15 @@ SELECT
     fr.DIM_LOOKUP_CONT_SORC_ID_DESC,
     (
         SELECT
-            NULLIF(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS "OUTCOME_SINGLE_ASSESSMENT_FLAG",
-            NULLIF(fr.OUTCOME_NFA_FLAG, '')                 AS "OUTCOME_NFA_FLAG",
-            NULLIF(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS "OUTCOME_STRATEGY_DISCUSSION_FLAG",
-            NULLIF(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS "OUTCOME_CLA_REQUEST_FLAG",
-            NULLIF(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS "OUTCOME_NON_AGENCY_ADOPTION_FLAG",
-            NULLIF(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
-            NULLIF(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS "OUTCOME_CP_TRANSFER_IN_FLAG",
-            NULLIF(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS "OUTCOME_CP_CONFERENCE_FLAG",
-            NULLIF(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS "OUTCOME_CARE_LEAVER_FLAG",
+            NULLIF(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS "SINGLE_ASSESSMENT_FLAG",
+            NULLIF(fr.OUTCOME_NFA_FLAG, '')                 AS "NFA_FLAG",
+            NULLIF(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS "STRATEGY_DISCUSSION_FLAG",
+            NULLIF(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS "CLA_REQUEST_FLAG",
+            NULLIF(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS "NON_AGENCY_ADOPTION_FLAG",
+            NULLIF(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS "PRIVATE_FOSTERING_FLAG",
+            NULLIF(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS "CP_TRANSFER_IN_FLAG",
+            NULLIF(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS "CP_CONFERENCE_FLAG",
+            NULLIF(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS "CARE_LEAVER_FLAG",
             NULLIF(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS "OTHER_OUTCOMES_EXIST_FLAG"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS cine_referral_outcome_json,
@@ -1084,20 +1085,20 @@ SELECT
     fa.START_DTTM,                 
     (
         SELECT 
-            NULLIF(fa.OUTCOME_NFA_FLAG, '')                 AS "OUTCOME_NFA_FLAG",
-            NULLIF(fa.OUTCOME_NFA_S47_END_FLAG, '')         AS "OUTCOME_NFA_S47_END_FLAG",
-            NULLIF(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS "OUTCOME_STRATEGY_DISCUSSION_FLAG",
-            NULLIF(fa.OUTCOME_CLA_REQUEST_FLAG, '')         AS "OUTCOME_CLA_REQUEST_FLAG",
-            NULLIF(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS "OUTCOME_PRIVATE_FOSTERING_FLAG",
-            NULLIF(fa.OUTCOME_LEGAL_ACTION_FLAG, '')        AS "OUTCOME_LEGAL_ACTION_FLAG",
-            NULLIF(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '')    AS "OUTCOME_PROV_OF_SERVICES_FLAG",
-            NULLIF(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '')     AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
-            NULLIF(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '') AS "OUTCOME_SPECIALIST_ASSESSMENT_FLAG",
-            NULLIF(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '') AS "OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG",
-            NULLIF(fa.OUTCOME_OTHER_ACTIONS_FLAG, '')       AS "OUTCOME_OTHER_ACTIONS_FLAG",
-            NULLIF(fa.OTHER_OUTCOMES_EXIST_FLAG, '')        AS "OTHER_OUTCOMES_EXIST_FLAG",
-            NULLIF(fa.TOTAL_NO_OF_OUTCOMES, '')             AS "TOTAL_NO_OF_OUTCOMES",
-            NULLIF(fa.OUTCOME_COMMENTS, '')                 AS "OUTCOME_COMMENTS" -- dictates a larger _json size
+            NULLIF(fa.OUTCOME_NFA_FLAG, '')                     AS "NFA_FLAG",
+            NULLIF(fa.OUTCOME_NFA_S47_END_FLAG, '')             AS "NFA_S47_END_FLAG",
+            NULLIF(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '')     AS "STRATEGY_DISCUSSION_FLAG",
+            NULLIF(fa.OUTCOME_CLA_REQUEST_FLAG, '')             AS "CLA_REQUEST_FLAG",
+            NULLIF(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '')       AS "PRIVATE_FOSTERING_FLAG",
+            NULLIF(fa.OUTCOME_LEGAL_ACTION_FLAG, '')            AS "LEGAL_ACTION_FLAG",
+            NULLIF(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '')        AS "PROV_OF_SERVICES_FLAG",
+            NULLIF(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '')         AS "PROV_OF_SB_CARE_FLAG",
+            NULLIF(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '')   AS "SPECIALIST_ASSESSMENT_FLAG",
+            NULLIF(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '') AS "REFERRAL_TO_OTHER_AGENCY_FLAG",
+            NULLIF(fa.OUTCOME_OTHER_ACTIONS_FLAG, '')           AS "OTHER_ACTIONS_FLAG",
+            NULLIF(fa.OTHER_OUTCOMES_EXIST_FLAG, '')            AS "OTHER_OUTCOMES_EXIST_FLAG",
+            NULLIF(fa.TOTAL_NO_OF_OUTCOMES, '')                 AS "TOTAL_NO_OF_OUTCOMES",
+            NULLIF(fa.OUTCOME_COMMENTS, '')                     AS "COMMENTS" -- dictates a larger _json size
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS cina_assessment_outcome_json, 
     fa.OUTCOME_NFA_FLAG                                     AS cina_assessment_outcome_nfa,
@@ -1538,13 +1539,13 @@ SELECT
     s47.OUTCOME_NFA_FLAG,
     (
         SELECT 
-            NULLIF(s47.OUTCOME_NFA_FLAG, '')                   AS "OUTCOME_NFA_FLAG",
-            NULLIF(s47.OUTCOME_LEGAL_ACTION_FLAG, '')          AS "OUTCOME_LEGAL_ACTION_FLAG",
-            NULLIF(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '')      AS "OUTCOME_PROV_OF_SERVICES_FLAG",
-            NULLIF(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '')       AS "OUTCOME_PROV_OF_SB_CARE_FLAG",
-            NULLIF(s47.OUTCOME_CP_CONFERENCE_FLAG, '')         AS "OUTCOME_CP_CONFERENCE_FLAG",
-            NULLIF(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '')   AS "OUTCOME_NFA_CONTINUE_SINGLE_FLAG",
-            NULLIF(s47.OUTCOME_MONITOR_FLAG, '')               AS "OUTCOME_MONITOR_FLAG",
+            NULLIF(s47.OUTCOME_NFA_FLAG, '')                   AS "NFA_FLAG",
+            NULLIF(s47.OUTCOME_LEGAL_ACTION_FLAG, '')          AS "LEGAL_ACTION_FLAG",
+            NULLIF(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '')      AS "PROV_OF_SERVICES_FLAG",
+            NULLIF(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '')       AS "PROV_OF_SB_CARE_FLAG",
+            NULLIF(s47.OUTCOME_CP_CONFERENCE_FLAG, '')         AS "CP_CONFERENCE_FLAG",
+            NULLIF(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '')   AS "NFA_CONTINUE_SINGLE_FLAG",
+            NULLIF(s47.OUTCOME_MONITOR_FLAG, '')               AS "MONITOR_FLAG",
             NULLIF(s47.OTHER_OUTCOMES_EXIST_FLAG, '')          AS "OTHER_OUTCOMES_EXIST_FLAG",
             NULLIF(s47.TOTAL_NO_OF_OUTCOMES, '')               AS "TOTAL_NO_OF_OUTCOMES",
             NULLIF(s47.OUTCOME_COMMENTS, '')                   AS "OUTCOME_COMMENTS"
@@ -1668,14 +1669,14 @@ SELECT
     fcpc.OUTCOME_CP_FLAG,
     (
         SELECT
-            NULLIF(fcpc.OUTCOME_NFA_FLAG, '')                       AS "OUTCOME_NFA_FLAG",
-            NULLIF(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS "OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG",
-            NULLIF(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS "OUTCOME_SINGLE_ASSESSMENT_FLAG",
-            NULLIF(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS "OUTCOME_PROV_OF_SERVICES_FLAG",
-            NULLIF(fcpc.OUTCOME_CP_FLAG, '')                        AS "OUTCOME_CP_FLAG",
+            NULLIF(fcpc.OUTCOME_NFA_FLAG, '')                       AS "NFA_FLAG",
+            NULLIF(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS "REFERRAL_TO_OTHER_AGENCY_FLAG",
+            NULLIF(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS "SINGLE_ASSESSMENT_FLAG",
+            NULLIF(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS "PROV_OF_SERVICES_FLAG",
+            NULLIF(fcpc.OUTCOME_CP_FLAG, '')                        AS "CP_FLAG",
             NULLIF(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')              AS "OTHER_OUTCOMES_EXIST_FLAG",
             NULLIF(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS "TOTAL_NO_OF_OUTCOMES",
-            NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "OUTCOME_COMMENTS"
+            NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     )                                                               AS icpc_icpc_outcome_json,
     fcpc.ORGANISED_BY_DEPT_NAME                                     AS icpc_icpc_team_name,
@@ -3131,7 +3132,7 @@ CREATE TABLE ssd_development.ssd_sdq_scores (
 );
  
 -- Insert data
-INSERT INTO ssd_sdq_scores (
+INSERT INTO ssd_development.ssd_sdq_scores (
     csdq_table_id,
     csdq_person_id,
     csdq_sdq_score,
@@ -4319,6 +4320,7 @@ Object Name: ssd_send
 Description: 
 Author: D2I
 Version: 1.0
+            0.1: upn _unknown size change in line with DfE to 4 160524 RH
 Status: [P]laceholder
 Remarks: 
 Dependencies: 
@@ -4343,7 +4345,7 @@ CREATE TABLE ssd_development.ssd_send (
     send_person_id      NVARCHAR(48),               -- metadata={"item_ref":"SEND005A"}
     send_upn            NVARCHAR(48),               -- metadata={"item_ref":"SEND002A"}
     send_uln            NVARCHAR(48),               -- metadata={"item_ref":"SEND003A"}
-    send_upn_unknown    NVARCHAR(10)                -- metadata={"item_ref":"SEND004A"}
+    send_upn_unknown    NVARCHAR(6)                 -- metadata={"item_ref":"SEND004A"}
     );
 
 -- -- Insert placeholder data
