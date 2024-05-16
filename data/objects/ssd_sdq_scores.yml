@@ -38,6 +38,8 @@ nodes:
     categories:
     - looked_after
     - sdq
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -88,14 +90,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sdq_scores
     - mosaic:ssd_sdq_scores
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) If it is\
-      \ not possible to collect the SDQ score for a looked-after child, then a reason\
-      \ should be recorded using the codes below.\nCode set\nSDQ1 - No form returned\
-      \ as child was aged under 4 or over 16 at date of latest assessment\nSDQ2 -\
-      \ Carer(s) refused to complete and return questionnaire\nSDQ3 - Not possible\
-      \ to complete the questionnaire due to severity of the child\u2019s disability\n\
-      SDQ4 - Other\nSDQ5 - Child or young person refuses to allow a strengths and\
-      \ difficulties questionnaire (SDQ) to be completed"
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
   - name: csdq_sdq_score
     description: SDQ Score
     item_ref: CSDQ005A

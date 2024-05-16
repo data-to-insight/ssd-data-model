@@ -68,42 +68,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_placement
     - mosaic:ssd_cla_placement
-    guidance: "This category can be defined, in a broad sense, as indicating where\
-      \ the child is living.\nCode set A3 - Placed for adoption with parental/guardian\
-      \ consent with current foster carer(s) (S19 Adoption and Children Act 2002)\
-      \ or with a freeing order where parental/guardian consent has been given (S18(1)(a)\
-      \ Adoption Act 1976)\nA4 - Placed for adoption with parental/guardian consent\
-      \ not with current foster carer(s) (S19 Adoption and Children Act 2002) or with\
-      \ a freeing order where parental/guardian consent has been given (S18(1)(a)\
-      \ Adoption Act 1976)\nA5 - Placed for adoption with placement order with current\
-      \ foster carer(s) (S21 Adoption and Children Act 2002) or with a freeing order\
-      \ where parental/guardian consent was dispensed with (S18(1)(b) Adoption Act\
-      \ 1976)\nA6 - Placed for adoption with placement order not with current foster\
-      \ carer(s) (S21 Adoption and Children Act 2002) or with a freeing order where\
-      \ parental/guardian consent was dispensed with (S18(1)(b) of the Adoption Act\
-      \ 1976)\nH5 - Semi-independent living accommodation not subject to children\u2019\
-      s homes regulations\nK1 - Secure children\u2019s homes\nK2 - Children\u2019\
-      s Homes subject to Children\u2019s Homes Regulations\nP1 - Placed with own parent(s)\
-      \ or other person(s) with parental responsibility\nP2 - Independent living e.g.\
-      \ in a flat/ lodgings, bedsit, B&B or with friends, with or without formal support\n\
-      P3 - Residential employment\nR1 - Residential care home\nR2 - National Health\
-      \ Service (NHS)/health trust or other establishment providing medical or nursing\
-      \ care\nR3 - Family centre or mother and baby unit\nR5 - Young offender institution\
-      \ (YOI)\nS1 - All residential schools, except where dual-registered as a school\
-      \ and children\u2019s home\nT0 - All types of temporary move (see paragraphs\
-      \ above for further details)\nT1 - Temporary periods in hospital\nT2 - Temporary\
-      \ absences of the child on holiday\nT3 - Temporary accommodation whilst normal\
-      \ foster carer(s) is/are on holiday\nT4 - Temporary accommodation of seven days\
-      \ or less, for any reason, not covered by codes T1 to T3\nU1 - Foster placement\
-      \ with relative(s) or friend(s) \u2013 long term fostering\nU2 - Fostering placement\
-      \ with relative(s) or friend(s) who is/are also an approved adopter(s) \u2013\
-      \ FFA/ concurrent planning\nU3 - Fostering placement with relative(s) or friend(s)\
-      \ who is/are not long-term or FFA/ concurrent planning\nU4 - Foster placement\
-      \ with other foster carer(s) \u2013 long term fostering\nU5 - Foster placement\
-      \ with other foster carer(s) who is/are also an approved adopter(s) \u2013 FFA/\
-      \ concurrent planning\nU6 - Foster placement with other foster carer(s) \u2013\
-      \ not long term or FFA/ concurrent planning\nZ1 - Other placements (must be\
-      \ listed on a schedule sent to DfE with annual submission)"
+    guidance: This category can be defined, in a broad sense, as indicating where
+      the child is living.
   - name: clap_cla_placement_urn
     description: URN of Placement
     item_ref: CLAP005A
@@ -123,27 +89,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_placement
     - mosaic:ssd_cla_placement
-    guidance: "A new requirement was introduced in the collection year 2015 to 2016,\
-      \ to return the unique reference number (URN) where the setting is subject to\
-      \ Ofsted inspections.\nFor children\u2019s homes this would be the URN of the\
-      \ individual home and for foster or adoptive placements this would be the URN\
-      \ of the relevant service or agency providing the placement. For larger providers\
-      \ with multiple settings or branches the precise URN for the particular setting\
-      \ or branch is required.\nIn some cases, it will be valid to provide different\
-      \ information to that registered with Ofsted, for example if a child is placed\
-      \ at the provider but at a different postcode to the main site. This could be\
-      \ the case if a child is residing in a dormitory with a different postcode to\
-      \ the registered site. Here the actual postcode where the child resides should\
-      \ be reported.\nThe URN is in the format SC999999 or 9999999 for newly registered\
-      \ providers. Note that secure training centres may have both a 6-digit education\
-      \ URN and a 7-digit social care URN and it is the 7-digit social care URN which\
-      \ should be returned in the SSDA903. Where local authorities are certain that\
-      \ a provider is not inspected by Ofsted but is inspected by the Care Quality\
-      \ Commission (CQC) or Independent Schools Inspectorate (ISI) then the code \u2018\
-      XXXXXXX\u2019 should be used. Similarly, the code \u2018XXXXXXX\u2019 should\
-      \ be used when the provider is a regional adoption agency. Where placements\
-      \ are of a type or in a setting not inspected by Ofsted, such as placed with\
-      \ parents, then no URN is expected."
+    guidance: A new requirement was introduced in the collection year 2015 to 2016,
+      to return the unique reference number (URN) where the setting is subject to
+      Ofsted inspections.
   - name: clap_cla_placement_distance
     description: Distance of Placement from Home
     item_ref: CLAP011A
@@ -152,7 +100,7 @@ nodes:
     - looked_after
     - placement
     returns:
-    - Local
+    - SSDA903
     cms:
     - liquid_logic
     cms_field:
@@ -206,17 +154,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_placement
     - mosaic:ssd_cla_placement
-    guidance: "For each placement, except those children looked-after placed in temporary\
-      \ placements (T0-T4) or other placements (Z1) a placement provider code is required.\
-      \ This will record information on the party providing the placement. Children\
-      \ placed with their own parents do not strictly have a placement provider and\
-      \ should be allocated code PR0, only.\nCode set\nPR0 - Parent(s) or other person(s)\
-      \ with parental responsibility\nPR1 - Own provision (by the local authority)\
-      \ including a regional adoption agency where the child\u2019s responsible local\
-      \ authority is the host authority\nPR2 - Other local authority provision, including\
-      \ a regional adoption agency where another local authority is the host authority\n\
-      PR3 - Other public provision (for example, a primary care trust)\nPR4 - Private\
-      \ provision\nPR5 - Voluntary/third sector provision"
+    guidance: For each placement, except those children looked-after placed in temporary
+      placements (T0-T4) or other placements (Z1) a placement provider code is required.
+      This will record information on the party providing the placement. Children
+      placed with their own parents do not strictly have a placement provider and
+      should be allocated code PR0, only.
   - name: clap_cla_placement_postcode
     description: Placement Postcode
     item_ref: CLAP008A
@@ -225,7 +167,7 @@ nodes:
     - looked_after
     - placement
     returns:
-    - Local
+    - SSDA903
     - AnnexA
     cms:
     - liquid_logic
@@ -277,90 +219,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_placement
     - mosaic:ssd_cla_placement
-    guidance: "Reason for placement change. The reason for placement change should\
-      \ be recorded against the episode that is ceasing, not against the new episode\
-      \ starting.\nCode set\nCARPL - Change to/Implementation of Care Plan\nThis code\
-      \ would be used where the change of placement is a planned part of the child\u2019\
-      s care plan and will be a move to a placement that meets the child\u2019s assessed\
-      \ needs on a temporary or permanent basis. This would include circumstances\
-      \ where a placement change was not expected but becomes necessary. The key factor\
-      \ is that planning takes place and the decision is recorded in the child\u2019\
-      s care plan before the change takes place. This would include moves from short\
-      \ to long term foster care or where a child is placed for adoption with the\
-      \ current foster carer. It also includes movements to semi-independence. The\
-      \ nature of the change in plan will be monitored through the placement codes\
-      \ before and after this move. This should not include changes where the foster\
-      \ carer has moved to a new house or where the carer is the same but has changed\
-      \ provider type.\nCLOSE - Resignation/ closure of provision\nThis code would\
-      \ be used where a child has to be moved because a foster carer decides to resign\
-      \ or the setting closes. This code would be used in a planned move; not in an\
-      \ emergency. The foster carer\u2019s decision to resign may be because their\
-      \ circumstances have changed, for example, the foster carer becomes ill or another\
-      \ change of circumstances means that the foster carer is no longer able to provide\
-      \ a placement for the child. Circumstances may also include where the child\u2019\
-      s placement had lasted longer than expected and the foster carer is no longer\
-      \ able to provide a placement for the child. Use of this code would also include\
-      \ where a setting (for example, a children\u2019s home or a fostering service)\
-      \ closes and is therefore no longer a registered provision with Ofsted.\nALLEG\
-      \ - Allegation (s47)\nThis code would be used where a child has been removed\
-      \ from placement because of an allegation which is being investigated under\
-      \ s47 (Children Act 1989). This allegation may relate to the carer or another\
-      \ child at the setting. This code should not be used if the allegation has resulted\
-      \ in the setting\u2019s approval (for example, a children\u2019s home or a fostering\
-      \ service) being terminated \u2013 in this case, \u2018approval removed\u2019\
-      \ should be used.\nSTAND - Standards of care concern\nThis code would be used\
-      \ where a child has been removed from placement by the responsible authority\
-      \ or provider as a result of concerns about standards of care. This does not\
-      \ mean a child protection investigation (s47) but a formal process followed\
-      \ by the provider. For example, see the National Minimum Standards for Fostering\
-      \ Service 2011, standard. 22. This code can be used for all types of placement\
-      \ such as foster care, residential care. This code should not be used if the\
-      \ setting\u2019s approval is terminated as a result of standards of care concerns\
-      \ \u2013 in this case, \u2018approval removed\u2019 should be used.\nCUSTOD\
-      \ - Custody arrangement\nThis code would be used where a child has been admitted\
-      \ into custody.\nAPPRR Approval removed\nThis code would be used where a setting\
-      \ is no longer approved/registered with the appropriate statutory body (such\
-      \ as Ofsted). This code can be used for all types of placement such as foster\
-      \ care, residential care. For example, this code should be used where a foster\
-      \ carer\u2019s approval is terminated by the service following a s47 investigation,\
-      \ a standards of care issue, a complaint or for other reasons that relate to\
-      \ the carers\u2019 conduct. It should also be used where Ofsted take enforcement\
-      \ action resulting in the closure of a residential setting. This code should\
-      \ not be used when a foster carer resigns or a provision is closed voluntarily\
-      \ and they are no longer registered with the relevant statutory body (such as\
-      \ Ofsted).\nCREQB - Carer(s) requests placement end due to child\u2019s behaviour\n\
-      This code would be used where because of the child\u2019s behaviour the placement\
-      \ has broken down or disrupted, and the carer has asked for the placement to\
-      \ end and the child to be moved to another placement. There may be some planning\
-      \ involved and a short period of time may pass but this is not a planned move.\n\
-      CREQO - Carer(s) requests placement end other than due to child\u2019s behaviour\n\
-      These codes would be used where it was intended that the placement was a short\
-      \ or long term arrangement but has broken down or disrupted and the carer [foster\
-      \ carer, residential unit or connected person] has asked for the child to be\
-      \ moved to another placement. There may be some planning involved and a short\
-      \ period of time may pass but this is not a planned move.\nCHILD - Child requests\
-      \ placement end\nThis code would be used where it was intended that the placement\
-      \ was a short- or long-term arrangement but has broken down or disrupted and\
-      \ the child has asked to move to another placement. There may be some planning\
-      \ involved and a short period of time may pass but this is not a planned move.\n\
-      LAREQ - Responsible/area authority requests placement end\nThis code would be\
-      \ used where it was intended that the placement was a short- or long-term placement\
-      \ but the responsible authority has decided that the placement no longer meets\
-      \ the child\u2019s needs. There may be some planning involved and a short period\
-      \ of time may pass but this is not a planned move. There will be circumstances\
-      \ where the child is at risk of harm and this would be coded as an allegation\
-      \ or standards of care concern. Where the placement no longer meets a child\u2019\
-      s need but there is no immediate risk \u2013 this code would be used.\nPLACE\
-      \ - Change in the status of placement only\nThis code would be used where there\
-      \ is a change of status for the placement, but the child remains with the same\
-      \ carer and there is no change to the care plan. Examples include a foster carer\
-      \ moving to a new house, a foster carer working for a local authority becomes\
-      \ managed by an independent fostering agency, a placement for adoption transferring\
-      \ to a regional adoption agency, or a child in residential accommodation moving\
-      \ under the same provider. Here the \u2018reason for new episode\u2019 code\
-      \ will indicate that the child is still living with the same carer.\nOTHER -\
-      \ Other\nAny other reason not captured above. Please note that \u2019Other\u2019\
-      \ should only be used in exceptional circumstances."
+    guidance: Reason for placement change. The reason for placement change should
+      be recorded against the episode that is ceasing, not against the new episode
+      starting.
   - name: clap_person_id
     description: Person Unique ID
     item_ref: CLAP013A
@@ -368,6 +229,8 @@ nodes:
     categories:
     - looked_after
     - placement
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic

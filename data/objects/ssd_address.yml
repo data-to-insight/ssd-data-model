@@ -63,6 +63,8 @@ nodes:
     categories:
     - identity
     - address
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -141,7 +143,9 @@ nodes:
     - identity
     - address
     returns:
-    - Local
+    - SSDA903
+    - AnnexA
+    - SEN2
     cms:
     - liquid_logic
     - mosaic

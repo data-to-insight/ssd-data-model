@@ -23,6 +23,8 @@ nodes:
     - child_protection
     - cp_plan
     - visit
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -82,7 +84,6 @@ nodes:
     - visit
     returns:
     - Local
-    - AnnexA
     cms:
     - liquid_logic
     - mosaic

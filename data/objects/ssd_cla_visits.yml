@@ -29,6 +29,8 @@ nodes:
     categories:
     - looked_after
     - visit
+    returns:
+    - Local
     guidance: System identifier for the whole period of care, encompassing all episodes
       included within that period of care.
   - name: clav_person_id
@@ -39,6 +41,8 @@ nodes:
     categories:
     - looked_after
     - visit
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic

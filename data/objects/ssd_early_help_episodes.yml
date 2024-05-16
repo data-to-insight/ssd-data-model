@@ -14,6 +14,8 @@ nodes:
         enabled: true
     categories:
     - early_help
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -34,6 +36,8 @@ nodes:
         enabled: true
     categories:
     - early_help
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -150,7 +154,6 @@ nodes:
     categories:
     - early_help
     returns:
-    - Local
     - RIIA
     cms:
     - liquid_logic

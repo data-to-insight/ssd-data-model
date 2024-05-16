@@ -16,6 +16,7 @@ nodes:
     - child_in_need
     - assessment
     returns:
+    - CIN
     - RIIA
     cms:
     - liquid_logic
@@ -38,6 +39,8 @@ nodes:
     categories:
     - child_in_need
     - assessment
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -131,12 +134,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: "This is the date the assessment is completed and authorised.\nAn assessment\
-      \ is deemed to be completed once the social worker has informed, in writing,\
-      \ all the relevant agencies and the family of their decisions and if the child\
-      \ is a child in need, of the plan for providing support/ or once the assessment\
-      \ has been discussed with the child\u2019s family (or carers) and the team manager\
-      \ has viewed and authorised the assessment."
+    guidance: This is the date the assessment is completed and authorised.
   - name: cina_assessment_outcome_json
     description: Assessment Outcome
     item_ref: CINA006A
@@ -157,33 +155,7 @@ nodes:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
     guidance: 'Outcome of the single assessment. Combined dictionary/ json type containing
-      the following, where there is a value recorded:
-
-      - OUTCOME_NFA_FLAG
-
-      - OUTCOME_NFA_S47_END_FLAG
-
-      - OUTCOME_STRATEGY_DISCUSSION_FLAG
-
-      - OUTCOME_CLA_REQUEST_FLAG
-
-      - OUTCOME_PRIVATE_FOSTERING_FLAG
-
-      - OUTCOME_LEGAL_ACTION_FLAG
-
-      - OUTCOME_PROV_OF_SERVICES_FLAG
-
-      - OUTCOME_PROV_OF_SB_CARE_FLAG
-
-      - OUTCOME_SPECIALIST_ASSESSMENT_FLAG
-
-      - OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG
-
-      - OUTCOME_OTHER_ACTIONS_FLAG
-
-      - OTHER_OUTCOMES_EXIST_FLAG
-
-      - TOTAL_NO_OF_OUTCOMES'
+      the following, where there is a value recorded:'
   - name: cina_assessment_outcome_nfa
     description: Assessment NFA
     item_ref: CINA009A
@@ -192,8 +164,9 @@ nodes:
     - child_in_need
     - assessment
     returns:
-    - AnnexA
+    - CIN
     - RIIA
+    - AnnexA
     cms:
     - liquid_logic
     - mosaic

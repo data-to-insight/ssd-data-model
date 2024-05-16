@@ -15,7 +15,7 @@ nodes:
     categories:
     - contact
     returns:
-    - RIIA
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -36,6 +36,8 @@ nodes:
         enabled: true
     categories:
     - contact
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -95,6 +97,8 @@ nodes:
     type: nvarchar
     categories:
     - contact
+    returns:
+    - Local
     guidance: Contact Source Description
   - name: cont_contact_outcome_json
     description: Contact Outcome
@@ -114,4 +118,5 @@ nodes:
     cms_table:
     - liquid_logic:ssd_contacts
     - mosaic:ssd_contacts
-    guidance: Contact Outcome e.g. New Referral, No Further Action
+    guidance: 'Outcome of the Contact. Combined dictionary/ json type containing the
+      following, where there is a value recorded:'

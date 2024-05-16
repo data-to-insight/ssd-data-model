@@ -15,6 +15,8 @@ nodes:
     categories:
     - identity
     - disability
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -72,44 +74,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_disability
     - mosaic:ssd_disability
-    guidance: "The Disability Discrimination Act 2005 (DDA) defines a disabled person\
-      \ as a person with a physical or mental impairment which has a substantial and\
-      \ long-term adverse effect on his/her ability to carry out normal day-to-day\
-      \ activities. The condition must have lasted, or be likely to last at least\
-      \ 12 months in order to be counted as a disability. Code set NONE - \u2018NO\
-      \ DISABILITY\u2019 MOB - \u2018MOBILITY\u2019 \u2013 getting about the house\
-      \ and beyond HAND - \u2018HAND FUNCTION\u2019 \u2013 holding and touching PC\
-      \ - \u2018PERSONAL CARE\u2019 \u2013 For example, eating, washing, going to\
-      \ the toilet dressing INC - \u2018INCONTINENCE\u2019 \u2013 controlling the\
-      \ passage of urine or faeces COMM - \u2018COMMUNICATION\u2019 \u2013 speaking\
-      \ and/or understanding others LD - \u2018LEARNING\u2019 \u2013 For example,\
-      \ having special educational needs HEAR - \u2018HEARING\u2019 VIS - \u2018VISION\u2019\
-      \ BEH - \u2018BEHAVIOUR\u2019 \u2013 a condition entailing behavioural difficulties,\
-      \ includes attention deficit hyperactivity disorder (ADHD) CON - \u2018CONCIOUSNESS\u2019\
-      \ \u2013 seizures AUT - \u2018DIAGNOSED WITH AUTISM OR ASPERGER SYNDROME\u2019\
-      \ \u2013 diagnosed by a qualified medical practitioner as having classical autism\
-      \ or Asperger syndrome. Do not include children who have merely been identified\
-      \ as having an autistic spectrum disorder (ASD), for example by their school.\
-      \ This can be associated with the behaviour and learning categories above. DDA\
-      \ - \u2018OTHER DDA\u2019 \u2013 one or more of the child\u2019s disabilities\
-      \ under the Disability Discrimination Act 2005 (DDA) does not fall into any\
-      \ of the above categories. Certain conditions are not regarded as impairments\
-      \ for the purposes of the act: \u2022 addiction to, or dependency on, alcohol,\
-      \ nicotine, or any other substance (other than as a result of the substance\
-      \ being medically prescribed); \u2022 the condition known as seasonal allergic\
-      \ rhinitis (hay fever), except where it aggravates the effect of another condition;\
-      \ \u2022 tendency to start fires; \u2022 tendency to steal; \u2022 tendency\
-      \ to physically or sexually abuse other persons; \u2022 exhibitionism; \u2022\
-      \ voyeurism In addition, disfigurements such as tattoos, non-medical body piercing,\
-      \ or something attached through such piercing, are not regarded as having a\
-      \ substantial adverse effect on the person\u2019s ability to carry out normal\
-      \ day-to-day activities. If a child is disabled or becomes disabled at any time\
-      \ during the collection year, record all the relevant disabilities that have\
-      \ affected the child. For example, children may have multiple disabilities in\
-      \ which case more than one category from the below list can be selected. \u2018\
-      Other DDA\u2019 can also be used in conjunction with any of the other categories.\n\
-      If your MIS does not allow for the identification of individual disabilities,\
-      \ then the code \u2018Other DDA\u2019 may be used for all children with a disability.\
-      \ If a child has no disability, do not leave this item blank; use the code \u2018\
-      NONE\u2019. However, if a child is unborn then the disability item should be\
-      \ left blank."
+    guidance: The Disability Discrimination Act 2005 (DDA) defines a disabled person
+      as a person with a physical or mental impairment which has a substantial and
+      long-term adverse effect on his/her ability to carry out normal day-to-day activities.
+      The condition must have lasted, or be likely to last at least 12 months in order
+      to be counted as a disability.

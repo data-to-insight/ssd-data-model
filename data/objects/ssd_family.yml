@@ -9,6 +9,8 @@ nodes:
     categories:
     - identity
     - family
+    returns:
+    - Local
     guidance: Row identifier for the ssd_family table
   - name: fami_family_id
     description: Family identifier
@@ -48,6 +50,8 @@ nodes:
     categories:
     - identity
     - family
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic

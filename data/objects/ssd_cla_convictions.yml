@@ -10,6 +10,8 @@ nodes:
     categories:
     - looked_after
     - convictions
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -31,6 +33,8 @@ nodes:
     categories:
     - looked_after
     - convictions
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic

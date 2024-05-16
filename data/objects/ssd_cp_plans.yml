@@ -15,6 +15,8 @@ nodes:
     categories:
     - child_protection
     - cp_plan
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -72,6 +74,8 @@ nodes:
     categories:
     - child_protection
     - cp_plan
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -135,24 +139,12 @@ nodes:
     - child_protection
     - cp_plan
     returns:
-    - Local
+    - CIN
     - AnnexA
     cms_table:
     - liquid_logic:ssd_cp_plans
     - mosaic:ssd_cp_plans
-    guidance: 'The category of abuse as assessed when the child protection plan commenced.
-
-      Code set
-
-      - Neglect
-
-      - Physical abuse
-
-      - Sexual abuse
-
-      - Emotional abuse
-
-      - Multiple: [List of relevant categories]'
+    guidance: The category of abuse as assessed when the child protection plan commenced.
   - name: cppl_cp_plan_ola
     description: OLA CP Plan?
     item_ref: CPPL011A
@@ -160,6 +152,8 @@ nodes:
     categories:
     - child_protection
     - cp_plan
+    returns:
+    - Local
     guidance: null
   - name: cppl_cp_plan_latest_category
     description: CP Plan Latest Category of Abuse
@@ -169,22 +163,10 @@ nodes:
     - child_protection
     - cp_plan
     returns:
-    - Local
+    - CIN
     - AnnexA
     cms_table:
     - liquid_logic:ssd_cp_plans
     - mosaic:ssd_cp_plans
-    guidance: 'The latest category of abuse recorded on the CP Plan, this may be the
+    guidance: The latest category of abuse recorded on the CP Plan, this may be the
       same as above.
-
-      Code set
-
-      - Neglect
-
-      - Physical abuse
-
-      - Sexual abuse
-
-      - Emotional abuse
-
-      - Multiple: [List of relevant categories]'

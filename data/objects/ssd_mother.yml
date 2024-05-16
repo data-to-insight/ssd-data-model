@@ -16,6 +16,8 @@ nodes:
     - identity
     - looked_after
     - mother
+    returns:
+    - Local
     cms_field:
     - liquid_logic:moth_table_id
     - mosaic:moth_table_id
@@ -32,6 +34,8 @@ nodes:
     - identity
     - looked_after
     - mother
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic

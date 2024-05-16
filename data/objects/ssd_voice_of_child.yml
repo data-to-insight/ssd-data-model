@@ -14,8 +14,7 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Row identifier
-      for the ssd_voice_of_child table
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
   - name: voch_person_id
     description: Person Unique ID
     item_ref: VOCH001A
@@ -26,6 +25,8 @@ nodes:
         enabled: true
     categories:
     - voice_of_child
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -38,8 +39,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Person's
-      ID generated in CMS Database
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
   - name: voch_explained_worries
     description: Has someone explained to you why people are worried for your family
       in a way that you can understand?
@@ -58,8 +58,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Child answer
-      from questionnaire
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
     metadata:
       release: In review|pending
       change_id: SSD-0023
@@ -85,8 +84,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Child answer
-      from questionnaire
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
     metadata:
       release: In review|pending
       change_id: SSD-0024
@@ -112,8 +110,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Child answer
-      from questionnaire
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
     metadata:
       release: In review|pending
       change_id: SSD-0025
@@ -139,8 +136,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Child answer
-      from questionnaire
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
     metadata:
       release: In review|pending
       change_id: SSD-0026
@@ -166,8 +162,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_voice_of_child
     - mosaic:ssd_voice_of_child
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Child answer
-      from questionnaire
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
     metadata:
       release: In review|pending
       change_id: SSD-0027

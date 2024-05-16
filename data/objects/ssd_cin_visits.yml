@@ -37,6 +37,8 @@ nodes:
     - child_in_need
     - cin_plan
     - visit
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic

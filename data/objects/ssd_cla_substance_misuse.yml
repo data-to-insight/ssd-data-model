@@ -32,6 +32,8 @@ nodes:
     - looked_after
     - health
     - substance_misuse
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -54,7 +56,7 @@ nodes:
     - health
     - substance_misuse
     returns:
-    - Local
+    - SSDA903
     cms:
     - liquid_logic
     - mosaic
@@ -70,6 +72,8 @@ nodes:
     - looked_after
     - health
     - substance_misuse
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic

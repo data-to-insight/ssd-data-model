@@ -26,17 +26,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_named_plan
     - mosaic:ssd_ehcp_named_plan
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development) EHCP named
-      plan unique ID from system or auto-generated as part of export.
-
-      This module collects information on the content of the EHC plan, i.e. what is
-      in Section I. It should be completed for all existing active EHC plans.
-
-      It is possible that multiple plans may be recorded for a single person. For
-      example, if an EHC plan has previously ceased and a further plan has later been
-      issued following a new needs assessment. Changes may occur to this section from
-      one year to the next for the same person, for example where an establishment
-      named on the EHC plan is changed.'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
   - name: ehcn_ehcp_asmt_id
     description: Assessment ID
     item_ref: EHCN002A
@@ -56,8 +46,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_named_plan
     - mosaic:ssd_ehcp_named_plan
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) EHCP assessment
-      record unique ID from system or auto-generated as part of export.
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
   - name: ehcn_named_plan_start_date
     description: Start Date
     item_ref: EHCN003A
@@ -77,8 +66,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_named_plan
     - mosaic:ssd_ehcp_named_plan
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Date of current
-      EHC plan.
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
   - name: ehcn_named_plan_ceased_date
     description: Cease Date
     item_ref: EHCN004A
@@ -98,11 +86,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_named_plan
     - mosaic:ssd_ehcp_named_plan
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Please provide
-      the date the EHC plan ended or the date the EHC plan was transferred to another
-      local authority. Do not record the date of the decision to cease. Local authorities
-      must continue to maintain the EHC plan until the time has passed for bringing
-      an appeal or, when an appeal has been registered, until it has been concluded.
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
   - name: ehcn_named_plan_ceased_reason
     description: Cease Reason
     item_ref: EHCN005A
@@ -122,12 +106,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_named_plan
     - mosaic:ssd_ehcp_named_plan
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Please provide\
-      \ the reason the EHC plan ended from the list below 1 \u2013 Reached maximum\
-      \ age (this is the end of the academic year during which the young person turned\
-      \ 25) 2 \u2013 Ongoing educational or training needs being met without an EHC\
-      \ plan 3 \u2013 Moved on to higher education 4 \u2013 Moved on to paid employment,\
-      \ excluding apprenticeships 5 \u2013 Transferred to another LA 6 \u2013 Young\
-      \ person no longer wishes to engage in education or training 7 \u2013 Child\
-      \ or young person has moved outside England 8 \u2013 Child or young person deceased\
-      \ 9 \u2013 Other"
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development)

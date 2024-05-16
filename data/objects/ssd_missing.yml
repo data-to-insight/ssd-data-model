@@ -72,17 +72,7 @@ nodes:
       \ the child was last seen by a responsible adult (whichever was the latest).\
       \ For this purpose, a responsible adult is either the child\u2019s carer, or\
       \ a professional directly associated with the child\u2019s welfare or education\
-      \ (like a doctor, school-teacher or social worker).\nAny UASC that go missing\
-      \ before being accommodated for 24 hours for data collection purposes should\
-      \ still be recorded as missing with a start date as the date in which they left\
-      \ his or her normal placement or the date the child was last seen by a responsible\
-      \ adult (whichever was the latest). For this purpose, a responsible adult is\
-      \ either the child\u2019s carer, or a professional directly associated with\
-      \ the child\u2019s welfare or education (like a doctor, school-teacher, home\
-      \ office official or social worker).\nUnresolved cases should remain open and\
-      \ until the child\u2019s 18th birthday, at which point the case should be closed\
-      \ using the appropriate reason code. Records must not be closed before this\
-      \ point."
+      \ (like a doctor, school-teacher or social worker)."
   - name: miss_missing_episode_type
     description: Episode Type (Missing/ Absent)
     item_ref: MISS004A
@@ -103,15 +93,7 @@ nodes:
     - liquid_logic:ssd_missing
     - mosaic:ssd_missing
     guidance: "Record each episode where a child was \u2018missing\u2019 or \u2018\
-      away from placement without authorisation\u2019 according to the following definitions:\n\
-      \u2022 Missing - Missing from care: a looked-after child who is not at their\
-      \ placement or the place they are expected to be (for example school) and their\
-      \ whereabouts is not known\n\u2022 Away - Away from placement without authorisation:\
-      \ a looked-after child whose whereabouts is known but who is not at their placement\
-      \ or place they are expected to be and the carer has concerns or the incident\
-      \ has been notified to the local authority or the police.\nAny children missing\
-      \ from care or away from placement without authorisation for any length of time\
-      \ should be recorded."
+      away from placement without authorisation\u2019 according to the following definitions:"
   - name: miss_missing_episode_end_date
     description: Missing Episode End
     item_ref: MISS005A

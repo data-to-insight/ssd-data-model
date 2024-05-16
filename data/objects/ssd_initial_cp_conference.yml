@@ -51,6 +51,8 @@ nodes:
     categories:
     - s47_enquiry
     - child_protection
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -114,7 +116,6 @@ nodes:
     - initial_cp_conference
     - child_protection
     returns:
-    - Local
     - RIIA
     - AnnexA
     cms:
@@ -146,7 +147,7 @@ nodes:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
     guidance: The date that is 15 working days after the strategy discussion at which
-      section 47 enquiries were initiated.
+      section 47
   - name: icpc_icpc_date
     description: Date of Initial CP Conference
     item_ref: ICPC005A
@@ -173,7 +174,6 @@ nodes:
     item_ref: ICPC013A
     type: nchar
     returns:
-    - Local
     - AnnexA
     cms_field:
     - liquid_logic:icpc_icpc_outcome_cp_flag
@@ -202,23 +202,7 @@ nodes:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
     guidance: 'Outcome of the Initial CP Conference. Combined dictionary/ json type
-      containing the following, where there is a value recorded:
-
-      - OUTCOME_NFA_FLAG
-
-      - OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG
-
-      - OUTCOME_SINGLE_ASSESSMENT_FLAG
-
-      - OUTCOME_PROV_OF_SERVICES_FLAG
-
-      - OUTCOME_CP_FLAG
-
-      - OTHER_OUTCOMES_EXIST_FLAG
-
-      - TOTAL_NO_OF_OUTCOMES
-
-      - OUTCOME_COMMENTS'
+      containing the following, where there is a value recorded:'
   - name: icpc_icpc_team_name
     description: ICPC Completed by Team
     item_ref: ICPC007A

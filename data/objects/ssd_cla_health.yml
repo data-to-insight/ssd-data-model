@@ -27,6 +27,8 @@ nodes:
     categories:
     - looked_after
     - health
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -99,10 +101,4 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_health
     - mosaic:ssd_cla_health
-    guidance: 'Status of Health Check Code set
-
-      Planned
-
-      Refused Cancelled
-
-      Completed'
+    guidance: Status of Health Check

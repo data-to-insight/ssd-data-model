@@ -15,6 +15,8 @@ nodes:
     categories:
     - child_in_need
     - referral
+    returns:
+    - Loca;
     cms:
     - liquid_logic
     - mosaic
@@ -35,6 +37,8 @@ nodes:
         enabled: true
     categories:
     - child_in_need
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -72,7 +76,7 @@ nodes:
   - name: cine_cin_primary_need
     description: CIN Primary Need Code
     item_ref: CINE010A
-    type: int
+    type: nvarchar
     categories:
     - child_in_need
     - referral
@@ -89,46 +93,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
-    guidance: "CIN Primary Need Code. This code indicates the main reason why a child\
-      \ started to receive services. The categories are designed only to identify\
-      \ what kind of pressures are placed on social services. They have no diagnostic\
-      \ value with regard to the children themselves and must not be used to determine\
-      \ what type of service the child should receive.\nIf there is difficulty choosing\
-      \ between two or more categories of need, choose the category that comes highest\
-      \ up in the table, for example, if trying to decide between family in acute\
-      \ stress and family dysfunction, choose family in acute stress.\nThe order of\
-      \ the categories relates to the specificity of the description and not necessarily\
-      \ importance. However, the order is fixed so that there is consistency.\nThe\
-      \ children in need census for 2005 and earlier tried to account for all money\
-      \ spent in a census week. To allow for this, \u2018N9\u2019 was created, but\
-      \ as this census is specifically child based, the definition of \u2018N9\u2019\
-      \ from 2005 is not applicable. As in previous years, \u2018N9\u2019 can be used\
-      \ if a child is no longer in need and the only service they are receiving is\
-      \ adoption support (on an open case) immediately after they have been in need.\n\
-      Code Set\nN1 - Abuse or neglect\nChildren in need as a result of, or at risk\
-      \ of, abuse or neglect; also includes children at risk because of domestic violence.\n\
-      N2 - Child\u2019s disability\nChildren and families whose main need for services\
-      \ arises because of their child\u2019s disability, illness or intrinsic condition.\n\
-      N3 - Parental disability or illness\nChildren whose main need for services arises\
-      \ because the capacity of their parent(s) (or carer(s)) to care for them is\
-      \ impaired by the parent(s) (or carer(s)) disability, physical or mental illness,\
-      \ or addictions.\nN4 - Family in acute stress\nChildren whose needs arise from\
-      \ living in a family that is going through a temporary crisis that diminishes\
-      \ the parental capacity to adequately meet some of the children\u2019s needs.\n\
-      N5 - Family dysfunction\nChildren whose needs primarily arise from living in\
-      \ a family where the parenting capacity is chronically inadequate.\nN6 - Socially\
-      \ unacceptable behaviour\nChildren and families whose need for services primarily\
-      \ arise out of the child\u2019s behaviour impacting detrimentally on the community.\n\
-      N7 - Low income\nChildren, living in families or independently, whose needs\
-      \ primarily arise from being dependent on an income below the standard state\
-      \ entitlements.\nN8 - Absent parenting\nChildren whose needs for services arise\
-      \ mainly from having no parents available to provide for them.\nN9 - Cases other\
-      \ than children in need\nChildren who have been adopted and, although they are\
-      \ no longer a child in need, receive adoption support from children\u2019s social\
-      \ services immediately after adoption. This should not be used where a child\
-      \ receives an adoption payment only.\nN0 - Not stated\nChildren whose reference\
-      \ data is not completely entered on the system and whose need code is yet to\
-      \ be determined, or the case is a referral that has been closed following assessment."
+    guidance: CIN Primary Need Code. This code indicates the main reason why a child
+      started to receive services.
   - name: cine_referral_source_code
     description: CIN Referral Source code
     item_ref: CINE004A
@@ -157,6 +123,8 @@ nodes:
     categories:
     - child_in_need
     - referral
+    returns:
+    - Local
     guidance: Contact Source Name
   - name: cine_referral_outcome_json
     description: CIN Referral Outcome
@@ -177,31 +145,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
-    guidance: 'Outcome of the Referral. This indicates the outcome of the initial
-      Referral, not the CIN Episode.
-
-      Combined dictionary/ json type containing the following, where there is a value
-      recorded:
-
-      - OUTCOME_SINGLE_ASSESSMENT_FLAG
-
-      - OUTCOME_NFA_FLAG
-
-      - OUTCOME_STRATEGY_DISCUSSION_FLAG
-
-      - OUTCOME_CLA_REQUEST_FLAG
-
-      - OUTCOME_NON_AGENCY_ADOPTION_FLAG
-
-      - OUTCOME_PRIVATE_FOSTERING_FLAG
-
-      - OUTCOME_CP_TRANSFER_IN_FLAG
-
-      - OUTCOME_CP_CONFERENCE_FLAG
-
-      - OUTCOME_CARE_LEAVER_FLAG
-
-      - OTHER_OUTCOMES_EXIST_FLAG'
+    guidance: Outcome of the Referral. This indicates the outcome of the initial Referral,
+      not the CIN Episode.
   - name: cine_referral_nfa
     description: CIN Referral NFA Flag
     item_ref: CINE011A
@@ -242,28 +187,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
-    guidance: 'This is the reason the local authority stops providing services to
-      the child.
-
-      Code set
-
-      RC1 - Adopted.
-
-      RC2 - Died.
-
-      RC3 - Child arrangements order.
-
-      RC4 - Special guardianship order.
-
-      RC5 - Transferred to services of another local authority.
-
-      RC6 - Transferred to adult social care services.
-
-      RC7 - Services ceased for any other reason, including child no longer in need.
-
-      RC8 - Case closed after assessment, no further action.
-
-      RC9 - Case closed after assessment, referred to early help.'
+    guidance: This is the reason the local authority stops providing services to the
+      child.
   - name: cine_close_date
     description: CIN Closure Date
     item_ref: CINE007A
