@@ -917,6 +917,7 @@ Object Name: ssd_cin_episodes
 Description: 
 Author: D2I
 Version: 1.0
+            0.2: primary _need type/size adjustment from revised spec 160524 RH
             0.1: contact_source_desc added, _source now populated with ID 141223 RH
 Status: [R]elease
 Remarks: 
@@ -940,7 +941,7 @@ CREATE TABLE ssd_development.ssd_cin_episodes
     cine_referral_id                INT,            -- metadata={"item_ref":"CINE001A"}
     cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
     cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
-    cine_cin_primary_need           NVARCHAR(10),   -- metadata={"item_ref":"CINE010A"}
+    cine_cin_primary_need           NVARCHAR(3),    -- metadata={"item_ref":"CINE010A"} -- codes N0-9
     cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
     cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
     cine_referral_outcome_json      NVARCHAR(500),  -- metadata={"item_ref":"CINE005A"}
@@ -2059,7 +2060,8 @@ Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
 Version: 1.0
-            0.9: cla_placement_id added as part of cla_placements review RH 060324
+            0.2: primary _need type/size adjustment from revised spec 160524 RH
+            0.1: cla_placement_id added as part of cla_placements review RH 060324
 Status: [R]elease
 Remarks: 
 Dependencies: 
@@ -2088,7 +2090,7 @@ CREATE TABLE ssd_development.ssd_cla_episodes (
     clae_cla_placement_id           NVARCHAR(48),               -- metadata={"item_ref":"CLAE013A"} 
     clae_cla_episode_start_date     DATETIME,                   -- metadata={"item_ref":"CLAE003A"}
     clae_cla_episode_start_reason   NVARCHAR(100),              -- metadata={"item_ref":"CLAE004A"}
-    clae_cla_primary_need           NVARCHAR(100),              -- metadata={"item_ref":"CLAE009A"}
+    clae_cla_primary_need           NVARCHAR(3),              ``-- metadata={"item_ref":"CLAE009A"} -- codes N0-9
     clae_cla_episode_ceased         DATETIME,                   -- metadata={"item_ref":"CLAE005A"}
     clae_cla_episode_ceased_reason  NVARCHAR(255),              -- metadata={"item_ref":"CLAE006A"}
     clae_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAE010A"}
@@ -2344,7 +2346,6 @@ Description:
 Author: D2I
 Version: 1.0
             0.2: most recent status reworked / 903 source removed 220224 JH
-            0.1: clai_immunisations_status_date removed RH
 Status: [R]elease
 Remarks: 
 Dependencies: 
