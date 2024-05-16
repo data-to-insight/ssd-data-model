@@ -1038,6 +1038,8 @@ Remarks:
 Dependencies: 
 - ssd_person
 - FACT_SINGLE_ASSESSMENT
+- FACT_FORMS
+- FACT_FORM_ANSWERS
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -1047,6 +1049,8 @@ PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists, & drop 
 IF OBJECT_ID('ssd_cin_assessments') IS NOT NULL DROP TABLE ssd_cin_assessments;
+IF OBJECT_ID('tempdb..#ssd_cin_assessments') IS NOT NULL DROP TABLE #ssd_cin_assessments;
+
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_cin_assessments
@@ -1063,6 +1067,33 @@ CREATE TABLE ssd_development.ssd_cin_assessments
     cina_assessment_worker_name     NVARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
 );
 
+-- CTE for the EXISTS
+WITH RelevantPersons AS (
+    SELECT p.pers_person_id
+    FROM #ssd_person p
+),
+ 
+-- CTE for the JOIN
+FormAnswers AS (
+    SELECT
+        ffa.FACT_FORM_ID,
+        ffa.ANSWER_NO,
+        ffa.ANSWER,
+        ffa.DIM_ASSESSMENT_TEMPLATE_QUESTION_ID_DESC
+    FROM Child_Social.FACT_FORM_ANSWERS ffa
+    WHERE ffa.ANSWER_NO IN ('seenYN', 'FormEndDate')
+),
+ 
+-- CTE for aggregating form answers
+AggregatedFormAnswers AS (
+    SELECT
+        ffa.FACT_FORM_ID,
+        MAX(CASE WHEN ffa.ANSWER_NO = 'seenYN' THEN ffa.ANSWER ELSE NULL END) AS seenYN,
+        MAX(CASE WHEN ffa.ANSWER_NO = 'FormEndDate' THEN TRY_CAST(ffa.ANSWER AS DATETIME) ELSE NULL END) AS AssessmentAuthorisedDate
+    FROM FormAnswers ffa
+    GROUP BY ffa.FACT_FORM_ID
+)
+ 
 -- Insert data
 INSERT INTO ssd_cin_assessments
 (
@@ -1077,15 +1108,19 @@ INSERT INTO ssd_cin_assessments
     cina_assessment_team_name,
     cina_assessment_worker_name
 )
-SELECT 
+SELECT
     fa.FACT_SINGLE_ASSESSMENT_ID,
     fa.DIM_PERSON_ID,
     fa.FACT_REFERRAL_ID,
     fa.START_DTTM,
-    fa.SEEN_FLAG,
-    fa.START_DTTM,                 
+    CASE
+        WHEN afa.seenYN = 'Yes' THEN 'Y'
+        WHEN afa.seenYN = 'No' THEN 'N'
+        ELSE NULL
+    END AS seenYN,
+    afa.AssessmentAuthorisedDate,
     (
-        SELECT 
+        SELECT
             NULLIF(fa.OUTCOME_NFA_FLAG, '')                     AS "NFA_FLAG",
             NULLIF(fa.OUTCOME_NFA_S47_END_FLAG, '')             AS "NFA_S47_END_FLAG",
             NULLIF(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '')     AS "STRATEGY_DISCUSSION_FLAG",
@@ -1101,19 +1136,26 @@ SELECT
             NULLIF(fa.TOTAL_NO_OF_OUTCOMES, '')                 AS "TOTAL_NO_OF_OUTCOMES",
             NULLIF(fa.OUTCOME_COMMENTS, '')                     AS "COMMENTS" -- dictates a larger _json size
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) AS cina_assessment_outcome_json, 
-    fa.OUTCOME_NFA_FLAG                                     AS cina_assessment_outcome_nfa,
-    fa.COMPLETED_BY_DEPT_NAME                               AS cina_assessment_team_name,
-    fa.COMPLETED_BY_USER_NAME                               AS cina_assessment_worker_name
-FROM 
-    Child_Social.FACT_SINGLE_ASSESSMENT AS fa
-
-WHERE EXISTS 
-    (   -- only ssd relevant records
-    SELECT 1 
-    FROM ssd_person p
+    ) AS cina_assessment_outcome_json,
+    fa.OUTCOME_NFA_FLAG                                         AS cina_assessment_outcome_nfa,
+    fa.COMPLETED_BY_DEPT_NAME                                   AS cina_assessment_team_name,
+    fa.COMPLETED_BY_USER_NAME                                   AS cina_assessment_worker_name
+ 
+FROM
+    Child_Social.FACT_SINGLE_ASSESSMENT fa
+ 
+LEFT JOIN
+    -- access pre-processed data in CTE
+    AggregatedFormAnswers afa ON fa.FACT_FORM_ID = afa.FACT_FORM_ID
+ 
+WHERE fa.DIM_LOOKUP_STEP_SUBSTATUS_CODE NOT IN ('X','D')        --Excludes draft and cancelled assessments
+ 
+AND EXISTS (
+    -- access pre-processed data in CTE
+    SELECT 1
+    FROM RelevantPersons p
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
-    );
+);
 
 -- Create constraint(s)
 ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
