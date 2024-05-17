@@ -9,12 +9,12 @@ There remain some [TESTING] [REVIEW] notes as the project iterates wider testing
 console outputs remain to aid such as run-time problem solving. These [TESTING] blocks can/will be removed. 
 
 /*
-Dev Status Flags (~in this order):
+Dev Objact & Item Status Flags (~in this order):
 Status:     [B]acklog,          -- To do|for review but not current priority
             [D]ev,              -- Currently being developed 
             [T]est,             -- Dev work being tested/run time script tests
             [DT]ataTesting,     -- Sense checking of extract data ongoing
-            [A]waitingReview,   -- Hand-over to SSD project team for review
+            [AR]waitingReview,   -- Hand-over to SSD project team for review
             [R]elease,          -- Ready for wider release and secondary data testing
             [Bl]ocked,          -- Data is not held in CMS/accessible, or other stoppage reason
             [P]laceholder       -- Data not held by any LA, new data, - Future structure added as placeholder
@@ -3788,7 +3788,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_professionals
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.1
+            1.0: caseload count revised to be within ssd timeframe 170524 RH
             0.9: prof_professional_id now becomes staff_id 090424 JH
             0.8: prof _table_ id(prof _system_ id) becomes prof _professional_ id 090424 JH
 Status: [R]elease
@@ -3797,6 +3798,7 @@ Dependencies:
 - @LastSept30th
 - DIM_WORKER
 - FACT_REFERRALS
+- ssd_cin_episodes (if counting caseloads within SSD timeframe)
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -3815,6 +3817,8 @@ SET @LastSept30th = CASE
                         THEN DATEFROMPARTS(YEAR(GETDATE()), 9, 30)
                         ELSE DATEFROMPARTS(YEAR(GETDATE()) - 1, 9, 30)
                     END;
+
+DECLARE @TimeframeStartDate DATE = DATEADD(YEAR, -@ssd_timeframe_years, @LastSept30th);
 
 
 -- Create structure
@@ -3860,17 +3864,20 @@ FROM
 LEFT JOIN (
     SELECT 
         -- Calculate CASELOAD 
-        -- [REVIEW][TESTING] -- restrict to only those relevant within SSD timeframe?
+        -- [REVIEW][TESTING] count within restricted ssd timeframe only
         DIM_WORKER_ID,
         COUNT(*) AS OpenCases
     FROM 
         Child_Social.FACT_REFERRALS
     WHERE 
         REFRL_START_DTTM <= @LastSept30th AND 
-        (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM >= @LastSept30th)
+        (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM >= @LastSept30th) AND
+        REFRL_START_DTTM >= @TimeframeStartDate  -- ssd timeframe constraint
     GROUP BY 
         DIM_WORKER_ID
 ) AS rc ON dw.DIM_WORKER_ID = rc.DIM_WORKER_ID;
+
+
 
 
 -- Add constraint(s)
