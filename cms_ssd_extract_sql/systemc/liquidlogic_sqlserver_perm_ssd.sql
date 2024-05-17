@@ -1,3 +1,16 @@
+/*
+STANDARD SAFEGUARDING DATASET EXTRACT 
+https://data-to-insight.github.io/ssd-data-model/
+
+Script creates labelled persistent(unless set otherwise) tables in your existing|specified database. 
+There is no data sharing, and no changes to your existing systems are required. Data tables(with data copied 
+from the raw CMS tables) and indexes for the SSD are created, and therefore in some cases will need support 
+and/or agreement from either your IT or Intelligence team. The SQL script is always non-destructive, i.e. it 
+does nothing to your existing data/tables/anything - the SSD process is simply a series of SELECT statements, 
+pulling copied data into a new standardised field and table structure on your own system for access by only 
+you/your LA.
+*/
+
 
 /* **********************************************************************************************************
 

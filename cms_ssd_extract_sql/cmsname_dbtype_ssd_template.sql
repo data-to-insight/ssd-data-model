@@ -1,6 +1,7 @@
 
 /*
 STANDARD SAFEGUARDING DATASET EXTRACT 
+https://data-to-insight.github.io/ssd-data-model/
 
 Script creates labelled persistent(unless set otherwise) tables in your existing|specified database. 
 There is no data sharing, and no changes to your existing systems are required. Data tables(with data copied 
