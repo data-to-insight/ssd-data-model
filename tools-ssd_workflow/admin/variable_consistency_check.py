@@ -3,6 +3,18 @@ import glob
 import re
 import csv
 
+
+"""
+This script checks the consistency between specification data from a CSV file 
+and variables in SQL scripts within specified directories. It loads field data from 
+the CSV, extracts variables from the SQL files, and compares these against the 
+specification. It generates two CSV reports per directory: one listing fields from 
+the specification not found in the SQL scripts, and another listing extra variables 
+in the SQL scripts not present in the specification. This helps ensure SQL scripts 
+align with the specified data requirements and identifies any discrepancies.
+"""
+
+
 # Search in the following locations
 directories = [
     'cms_ssd_extract_sql/mosaic/',    # Mosaic scripts
@@ -20,6 +32,22 @@ csv_path = 'docs/admin/data_objects_specification.csv'  # Path to spec data/csv 
 output_dir = 'tools-ssd_workflow/admin/'  # Used as output dir
 
 def load_field_data_from_csv(csv_path):
+    """
+    Load field data from a CSV file.
+
+    This function reads a CSV file containing specification data, extracts the 
+    'item_ref' and 'field_name' columns, and returns a set of field names and a list 
+    of tuples containing item references and field names. If a row contains missing 
+    or None values for 'item_ref' or 'field_name', it is skipped, and an error message 
+    is printed.
+
+    Parameters:
+    csv_path (str): The path to the CSV file.
+
+    Returns:
+    set: A set of field names extracted from the CSV file.
+    list: A list of tuples, each containing an item reference and a field name.
+    """
     field_names = set()
     field_data = []
     with open(csv_path, mode='r', newline='', encoding='utf-8-sig') as file:
@@ -42,6 +70,21 @@ def load_field_data_from_csv(csv_path):
     return field_names, field_data
 
 def extract_variables_from_sql(content):
+    """
+    Extract variables from SQL content.
+
+    This function processes the content of an SQL file to identify and extract 
+    variables that follow a specific naming convention. It filters out variables 
+    that start with known prefixes or are in all uppercase, aiming to focus on 
+    relevant variables only.
+
+    Parameters:
+    content (str): The content of an SQL file as a single string.
+
+    Returns:
+    set: A set of variables found in the SQL content, excluding those with 
+         specified prefixes or in all uppercase.
+    """
     content = re.sub(r'\s+', ' ', content)  # clean up whitespace (helps with improved/accurate var search hits)
     pattern = re.compile(r'\b[a-zA-Z0-9]{4}_[a-zA-Z0-9_]+\b')
     found_variables = set(pattern.findall(content))
@@ -65,6 +108,20 @@ def initialise_not_found_files(directory, field_data):
     return not_found_csv_path
 
 def update_not_found_file(not_found_csv_path, sql_variables):
+    """
+    Update the not found CSV file by removing found SQL variables.
+
+    This function reads the existing not found CSV file and removes entries where the
+    field names are found in the given set of SQL variables. The updated list of 
+    remaining fields is then written back to the CSV file.
+
+    Parameters:
+    not_found_csv_path (str): The path to the not found CSV file.
+    sql_variables (set): A set of variable names extracted from SQL files.
+
+    Returns:
+    None
+    """
     with open(not_found_csv_path, mode='r', newline='', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         remaining_fields = [row for row in reader if row['field_name'] not in sql_variables]
@@ -75,6 +132,20 @@ def update_not_found_file(not_found_csv_path, sql_variables):
         writer.writerows(remaining_fields)
 
 def find_extra_variables(directory, field_names):
+    """
+    Find extra variables in SQL files that are not in the specification.
+
+    This function scans all SQL files in the specified directory, extracts variables,
+    and identifies those that are not present in the given set of field names. These
+    extra variables are collected and returned.
+
+    Parameters:
+    directory (str): The path to the directory containing the SQL files.
+    field_names (set): A set of field names from the specification.
+
+    Returns:
+    set: A set of extra variables found in the SQL files that are not in the specification.
+    """
     extra_variables = set()
     file_pattern = os.path.join(directory, '*.sql')
     sql_files = glob.glob(file_pattern)
