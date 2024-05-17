@@ -3216,7 +3216,7 @@ SELECT
             AND ffa_inner.ANSWER IS NOT NULL
         ORDER BY ffa_inner.ANSWER DESC -- Using the date as it is
     ) AS csdq_sdq_score,
-    '1900/01/01'         AS csdq_sdq_completed_date,
+    CAST('1900/01/01' AS DATETIME)          AS csdq_sdq_completed_date,
     (
         SELECT
             CASE WHEN ffa_inner.ANSWER_NO = 'FormEndDate'
@@ -3280,7 +3280,7 @@ WHERE row_num > 1;
 
  
 -- non-spec column clean-up
-ALTER TABLE ssd_sdq_scores DROP COLUMN csdq_sdq_score;
+-- ALTER TABLE ssd_sdq_scores DROP COLUMN csdq_sdq_score;
 
 /* end V8.1 */
 
@@ -3671,7 +3671,7 @@ WITH RankedPermanenceData AS (
             ELSE NULL 
         END                                               AS perm_placed_for_adoption_date,
         fa.ADOPTED_BY_CARER_FLAG                          AS perm_adopted_by_carer_flag,
-        '1900/01/01'                                      AS perm_placed_foster_carer_date,         -- [PLACEHOLDER_DATA] [TESTING]
+        CAST('1900/01/01' AS DATETIME)                    AS perm_placed_foster_carer_date,         -- [PLACEHOLDER_DATA] [TESTING] 
         fa.FOSTER_TO_ADOPT_DTTM                           AS perm_placed_ffa_cp_date,
         CASE 
             WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
