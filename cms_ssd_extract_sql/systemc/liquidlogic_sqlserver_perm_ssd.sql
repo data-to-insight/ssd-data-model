@@ -3789,7 +3789,7 @@ Object Name: ssd_professionals
 Description: 
 Author: D2I
 Version: 1.1
-            1.0: caseload count revised to be within ssd timeframe 170524 RH
+            1.0: #DtoI-1743 caseload count revised to be within ssd timeframe 170524 RH
             0.9: prof_professional_id now becomes staff_id 090424 JH
             0.8: prof _table_ id(prof _system_ id) becomes prof _professional_ id 090424 JH
 Status: [R]elease
