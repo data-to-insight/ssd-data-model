@@ -154,7 +154,27 @@ nodes:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
     guidance: 'Outcome of the Section 47 Enquiry. Combined dictionary/ json type containing
-      the following, where there is a value recorded:'
+      the following, where there is a value recorded:
+
+      - NFA_FLAG
+
+      - LEGAL_ACTION_FLAG
+
+      - PROV_OF_SERVICES_FLAG
+
+      - PROV_OF_SB_CARE_FLAG
+
+      - CP_CONFERENCE_FLAG
+
+      - NFA_CONTINUE_SINGLE_FLAG
+
+      - MONITOR_FLAG
+
+      - OTHER_OUTCOMES_EXIST_FLAG
+
+      - TOTAL_NO_OF_OUTCOMES
+
+      - COMMENTS'
   - name: s47e_s47_completed_by_worker_name
     description: S47 Enquiries completed by worker
     item_ref: S47E008A

@@ -69,7 +69,26 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: The current Care Leaver Eligibility Status of the Child/ Young Person.
+    guidance: "The current Care Leaver Eligibility Status of the Child/ Young Person.\
+      \ Code set Relevant Former Relevant Eligible Qualifying No Current Eligibility\
+      \ A relevant child is: \u2022 a young person aged 16 or 17 \u2022 is no longer\
+      \ looked-after \u2022 before last ceasing to be looked-after, was an \u2018\
+      eligible child\u2019 (see definition below) OR \u2022 a young person aged 16\
+      \ or 17 \u2022 not subject to a care order \u2022 detained, or in hospital on\
+      \ their 16th birthday \u2022 immediately before being detained or admitted to\
+      \ hospital had been looked-after for at least 13 weeks which began after they\
+      \ reached age 14. A former relevant child is one who is: \u2022 aged 18 or above,\
+      \ AND EITHER \u2022 has been a relevant child and would be one if he were under\
+      \ 18, OR \u2022 immediately before he ceased to be looked-after at age 18, was\
+      \ an eligible child. The definition of eligible children is given below- relevant\
+      \ and former relevant children will have been an eligible child in the past.\
+      \ An eligible child is: \u2022 a young person aged 16 or 17 \u2022 who is looked-after\
+      \ \u2022 and has been looked-after for at least 13 weeks which began after they\
+      \ reached the age of 14 and ended after they reached the age of 16. A qualifying\
+      \ Care Leaver is: \u2022 aged between 16 and 25 \u2022 who was looked after\
+      \ by children\u2019s services on, or after, their 16th birthday and no longer\
+      \ looked after \u2022 and spent less than 13 weeks in care since 14th birthday,\
+      \ i.e. do not fulfill criteria for eligible or relevant child"
   - name: clea_care_leaver_in_touch
     description: In Touch Category
     item_ref: CLEA004A
@@ -88,7 +107,12 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: Is the local authority in touch with this young person?
+    guidance: "Is the local authority in touch with this young person? Code set YES\
+      \ - Yes - in touch NO - No \u2013 not in touch DIED - Died after leaving care\
+      \ REFU - Young person refuses contact NREQ - Young person no longer requires\
+      \ children\u2019s social care services RHOM - Young person returned to live\
+      \ with parents or someone with parental responsibility for a continuous period\
+      \ of 6 months or more"
   - name: clea_care_leaver_latest_contact
     description: Latest Date of Contact
     item_ref: CLEA005A
@@ -128,10 +152,32 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: The type of accommodation that the young person is living in on or around
-      their 17th, 18th, 19th, 20th or 21st birthday, or the accommodation the young
-      person is living in at the time of their latest contact during the year if they
-      are aged 22-to-25-years-old.
+    guidance: "The type of accommodation that the young person is living in on or\
+      \ around their 17th, 18th, 19th, 20th or 21st birthday, or the accommodation\
+      \ the young person is living in at the time of their latest contact during the\
+      \ year if they are aged 22-to-25-years-old. Code set B - With parent(s) or relative(s)\
+      \ C - Community home or other form of residential care such as an National Health\
+      \ Service (NHS) establishment D - Semi-independent, transitional accommodation\
+      \ (like a supported hostel, trainer flats); self-contained accommodation with\
+      \ specialist personal assistance support (for example, for young people with\
+      \ disabilities, pregnant young women and single parents); and self-contained\
+      \ accommodation with floating support E - Supported lodgings (accommodation,\
+      \ usually in a family home, where adult(s) in the \u201Chost family\u201D provide\
+      \ formal advice and support) G - Gone abroad H - Deported K - Ordinary lodgings,\
+      \ without formal support R - Residence not known S - No fixed abode / homeless\
+      \ T - Foyers and similar supported accommodation which combines the accommodation\
+      \ with opportunities for education, training or employment U - Independent living,\
+      \ for example independent tenancy of flat, house or bedsit, including local\
+      \ authority or housing association tenancy, or accommodation provided by a college\
+      \ or university. Includes flat sharing V - Emergency accommodation (like a night\
+      \ shelter, direct access or emergency hostel) W - Bed and breakfast X - In custody\
+      \ Y - Other accommodation Z - With former foster carer(s) - where the young\
+      \ person has been fostered and on turning 18 continues to remain with the same\
+      \ carer(s) who had fostered them immediately prior to their reaching legal adulthood,\
+      \ and where the plan for their care involves their remaining with this former\
+      \ foster family for the future. This code should not be used for 17-year-old\
+      \ care leavers. If the foster carer is also a relative this code should be used\
+      \ rather than \u2018B - with parents or relatives\u2019."
   - name: clea_care_leaver_accom_suitable
     description: Suitability of Accommodation
     item_ref: CLEA007A
@@ -154,7 +200,8 @@ nodes:
       \ as suitable if it provides safe, secure and affordable provision for young\
       \ people. Accommodation that clearly exposes the person to risk of harm or social\
       \ exclusion by reason of its location or other factors should be coded as \u2018\
-      unsuitable\u2019."
+      unsuitable\u2019. Code set 1 - Accommodation is considered suitable\n2 - Accommodation\
+      \ is considered unsuitable"
   - name: clea_care_leaver_activity
     description: Activity Status
     item_ref: CLEA008A
@@ -174,11 +221,24 @@ nodes:
     cms_table:
     - liquid_logic:ssd_care_leavers
     - mosaic:ssd_care_leavers
-    guidance: For care leavers aged 17 to 21 years, the young person's main activity
+    guidance: 'For care leavers aged 17 to 21 years, the young person''s main activity
       status on or around their birthday if the LA was in touch with them, or if the
       LA was not in touch with them but was certain of their activity on their birthday.
       For care leavers aged 22 to 25 years, this will be their main activity status
-      at their last contact with the LA.
+      at their last contact with the LA. Code set F1 - Young person engaged full time
+      in higher education (for example studies beyond A level) P1 - Young person engaged
+      part time in higher education (for example studies beyond A level) F2 - Young
+      person engaged full time in education other than higher education P2 - Young
+      person engaged part time in education other than higher education F4 - Young
+      person engaged full time in an apprenticeship P4 - Young person engaged part
+      time in an apprenticeship F5 - Young person engaged full time in training or
+      employment (not apprenticeship) P5 - Young person engaged part time in training
+      or employment (not apprenticeship) G4 - Young person not in education, employment
+      or training because of illness or disability G5 - Young person not in education,
+      employment or training: other circumstances G6 - Young person not in education,
+      employment or training due to pregnancy or parenting F3 - (superseded by F4/F5)
+      Young person engaged full time in training or employment P3 - (superseded by
+      F4/F5) Young person engaged part time in training or employment'
   - name: clea_pathway_plan_review_date
     description: Latest Pathway Plan Review Date
     item_ref: CLEA009A

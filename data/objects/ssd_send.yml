@@ -26,7 +26,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_send
     - mosaic:ssd_send
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Row identifier
+      for the ssd_send table
   - name: send_upn
     description: UPN
     item_ref: SEND002A
@@ -51,7 +52,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_send
     - mosaic:ssd_send
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) The Child's
+      Unique Pupil Number
   - name: send_uln
     description: ULN
     item_ref: SEND003A
@@ -93,7 +95,18 @@ nodes:
     cms_table:
     - liquid_logic:ssd_send
     - mosaic:ssd_send
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Where no\
+      \ identifier is available, please record one of the following options:\n-UN1\
+      \ Child is aged under 6 years old and is not yet assigned a UPN\n-UN2 Child\
+      \ has never attended a state-funded school in England and has not been assigned\
+      \ a UPN\n-UN3 Child is educated outside of England and has not been assigned\
+      \ a UPN\n-UN5 Sources collating UPNs reflect discrepancy/ies for the child\u2019\
+      s name and/or surname and/or date of birth therefore prevent reliable matching\
+      \ (for example duplicated UPN)\n-UN8 Person is new to LA and the UPN or ULN\
+      \ is not yet known\n-UN9 Young person has never attended a state-funded school\
+      \ or further education setting in England and has not been assigned a UPN or\
+      \ ULN\n-UN10 Request for assessment resulted in no further action before UPN\
+      \ or ULN known"
   - name: send_person_id
     description: Person Unique ID
     item_ref: SEND005A
@@ -116,4 +129,5 @@ nodes:
     cms_table:
     - liquid_logic:ssd_send
     - mosaic:ssd_send
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Person's
+      ID generated in CMS Database

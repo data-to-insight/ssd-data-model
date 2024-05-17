@@ -26,7 +26,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_active_plans
     - mosaic:ssd_ehcp_active_plans
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) EHCP active
+      plan unique ID from system or auto-generated as part of export.
   - name: ehcp_ehcp_request_id
     description: Request ID
     item_ref: EHCP002A
@@ -46,7 +47,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_active_plans
     - mosaic:ssd_ehcp_active_plans
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) EHCP request
+      record unique ID from system or auto-generated as part of export.
   - name: ehcp_active_ehcp_last_review_date
     description: Last Review
     item_ref: EHCP003A
@@ -66,4 +68,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_active_plans
     - mosaic:ssd_ehcp_active_plans
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Please enter
+      the date when the local authority wrote to the parent or young person with the
+      notification of the decision as to whether to retain, cease or amend the plan
+      following the annual review meeting. Note that this date will not be the same
+      as the date of the review meeting.

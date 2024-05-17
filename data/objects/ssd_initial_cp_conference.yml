@@ -147,7 +147,7 @@ nodes:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
     guidance: The date that is 15 working days after the strategy discussion at which
-      section 47
+      section 47 enquiries were initiated.
   - name: icpc_icpc_date
     description: Date of Initial CP Conference
     item_ref: ICPC005A
@@ -202,7 +202,23 @@ nodes:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
     guidance: 'Outcome of the Initial CP Conference. Combined dictionary/ json type
-      containing the following, where there is a value recorded:'
+      containing the following, where there is a value recorded:
+
+      - NFA_FLAG
+
+      - REFERRAL_TO_OTHER_AGENCY_FLAG
+
+      - SINGLE_ASSESSMENT_FLAG
+
+      - PROV_OF_SERVICES_FLAG
+
+      - CP_FLAG
+
+      - OTHER_OUTCOMES_EXIST_FLAG
+
+      - TOTAL_NO_OF_OUTCOMES
+
+      - COMMENTS'
   - name: icpc_icpc_team_name
     description: ICPC Completed by Team
     item_ref: ICPC007A

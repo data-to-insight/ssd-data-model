@@ -134,7 +134,12 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
-    guidance: This is the date the assessment is completed and authorised.
+    guidance: "This is the date the assessment is completed and authorised.\nAn assessment\
+      \ is deemed to be completed once the social worker has informed, in writing,\
+      \ all the relevant agencies and the family of their decisions and if the child\
+      \ is a child in need, of the plan for providing support/ or once the assessment\
+      \ has been discussed with the child\u2019s family (or carers) and the team manager\
+      \ has viewed and authorised the assessment."
   - name: cina_assessment_outcome_json
     description: Assessment Outcome
     item_ref: CINA006A
@@ -155,7 +160,35 @@ nodes:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
     guidance: 'Outcome of the single assessment. Combined dictionary/ json type containing
-      the following, where there is a value recorded:'
+      the following, where there is a value recorded:
+
+      - NFA_FLAG
+
+      - NFA_S47_END_FLAG
+
+      - STRATEGY_DISCUSSION_FLAG
+
+      - CLA_REQUEST_FLAG
+
+      - PRIVATE_FOSTERING_FLAG
+
+      - LEGAL_ACTION_FLAG
+
+      - PROV_OF_SERVICES_FLAG
+
+      - PROV_OF_SB_CARE_FLAG
+
+      - SPECIALIST_ASSESSMENT_FLAG
+
+      - REFERRAL_TO_OTHER_AGENCY_FLAG
+
+      - OTHER_ACTIONS_FLAG
+
+      - OTHER_OUTCOMES_EXIST_FLAG
+
+      - TOTAL_NO_OF_OUTCOMES
+
+      - COMMENTS'
   - name: cina_assessment_outcome_nfa
     description: Assessment NFA
     item_ref: CINA009A

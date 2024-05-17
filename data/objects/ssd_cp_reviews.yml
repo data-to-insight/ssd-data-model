@@ -161,7 +161,14 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_reviews
     - mosaic:ssd_cp_reviews
-    guidance: Was the conference quorate?
+    guidance: 'Was the conference quorate?
+
+      The primary principle for determining quoracy is that there should be sufficient
+      agencies or key disciplines present to enable safe decisions to be made in the
+      individual circumstances. Minimum representation is Children''s Social Care
+      and at least two other agencies or key disciplines that have had direct contact
+      with the child and family. In a case relating to fabricated or induced illness,
+      it is important to ensure the paediatrician is able to attend.'
   - name: cppr_cp_review_participation
     description: Child Participation at Review
     item_ref: CPPR007A
@@ -181,4 +188,29 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_reviews
     - mosaic:ssd_cp_reviews
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development) The Child/
+      Young Person''s method of participation at review. Code set
+
+      PN0 - Child aged under 4 at the time of the review
+
+      PN1 - Child physically attends and speaks for him or herself (Attendance).
+
+      PN2 - Child physically attends and an advocate speaks on his or her behalf.
+      (Attendance views represented by advocate or Child Protection Adisor (CPA))
+
+      PN3 - Child attends and conveys his or her view symbolically (non-verbally)
+      (Attendance symbols)
+
+      PN4 - Child physically attends but does not speak for him or herself, does not
+      convey his or her view symbolically (non-verbally) and does not ask an advocate
+      to speak for him or her (Attendance without contribution)
+
+      PN5 - Child does not attend physically but briefs an advocate to speak for him
+      or her (Views represented by advocate or independent reviewing officer (IRO)
+      through texting, written format, phone, audio/video, viewpoint)
+
+      PN6 - Child does not attend but conveys his or her feelings to the review by
+      a facilitative medium (Texting the chair, written format, phone, audio/video,
+      viewpoint)
+
+      PN7 - Child does not attend nor are his or her views conveyed to the review'

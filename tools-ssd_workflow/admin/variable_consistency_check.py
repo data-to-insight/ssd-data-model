@@ -25,11 +25,20 @@ def load_field_data_from_csv(csv_path):
     with open(csv_path, mode='r', newline='', encoding='utf-8-sig') as file:
         reader = csv.DictReader(file)
         for row in reader:
-            item_ref = row.get('item_ref', '').strip()
-            field_name = row.get('field_name', '').strip()
-            if item_ref and field_name:  # Only add if both are not empty
-                field_names.add(field_name)
-                field_data.append((item_ref, field_name))
+            try:
+                item_ref = row['item_ref']
+                field_name = row['field_name']
+                if item_ref is None or field_name is None:
+                    raise ValueError(f"Missing value in row: {row}")
+                item_ref = item_ref.strip()
+                field_name = field_name.strip()
+                if item_ref and field_name:  # Only add if both are not empty
+                    field_names.add(field_name)
+                    field_data.append((item_ref, field_name))
+            except KeyError as e:
+                print(f"Missing expected column in row: {row}. Error: {e}")
+            except ValueError as e:
+                print(f"Data error: {e}")
     return field_names, field_data
 
 def extract_variables_from_sql(content):

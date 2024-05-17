@@ -27,7 +27,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sen_need
     - mosaic:ssd_sen_need
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) SEN need
+      record unique ID from system or auto-generated as part of export.
   - name: senn_active_ehcp_id
     description: Plan ID
     item_ref: SENN002A
@@ -48,7 +49,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sen_need
     - mosaic:ssd_sen_need
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) EHCP active
+      plan unique ID from system or auto-generated as part of export.
   - name: senn_active_ehcp_need_type
     description: SEN Type
     item_ref: SENN003A
@@ -69,7 +71,17 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sen_need
     - mosaic:ssd_sen_need
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Please record\
+      \ the nature of the person\u2019s special educational need. These options are\
+      \ consistent with those collected within the spring term school census. Where\
+      \ multiple types of need are recorded and ranked, the primary type of need should\
+      \ be ranked 1 under Type of need rank, and if applicable a secondary type of\
+      \ need should be ranked 2. -SPLD Specific learning difficulty -MLD Moderate\
+      \ learning difficulty -SLD Severe learning difficulty -PMLD Profound and multiple\
+      \ learning difficulty -SEMH Social, emotional and mental health -SLCN Speech,\
+      \ language and communication needs -HI Hearing impairment -VI Vision impairment\
+      \ -MSI Multi-sensory impairment -PD Physical disability -ASD Autistic spectrum\
+      \ disorder -OTH Other difficulty"
   - name: senn_active_ehcp_need_rank
     description: SEN Type Rank
     item_ref: SENN004A
@@ -90,4 +102,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sen_need
     - mosaic:ssd_sen_need
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) If only one
+      type of need is recorded, this should be recorded as rank 1. If multiple types
+      of need are recorded, then the primary type of need should be recorded as rank
+      1 and the secondary type of need should be recorded as rank 2. Up to two types
+      of need can be recorded.

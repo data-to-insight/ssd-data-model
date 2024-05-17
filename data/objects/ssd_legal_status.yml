@@ -73,9 +73,15 @@ nodes:
     cms_table:
     - liquid_logic:ssd_legal_status
     - mosaic:ssd_legal_status
-    guidance: Legal Status type. If a child is looked-after because it is accommodated,
-      the legal status goes some way to describe (in legal terms at least) why the
-      child is being looked after.
+    guidance: "Legal Status type. If a child is looked-after because it is accommodated,\
+      \ the legal status goes some way to describe (in legal terms at least) why the\
+      \ child is being looked after. There are many legal statuses arising from the\
+      \ Children Act, or the Youth Justice System, to which a child can be subject,\
+      \ but which have no bearing on whether a child is \u2018looked-after\u2019 or\
+      \ not. These are included in the SSD extract despite not being rerutned in the\
+      \ SSDA903. These incude statuses for permanence orders, e.g. Special Guardianship\
+      \ and Child Arrangement Orders, as well as Private Fostering and Care Leaver\
+      \ legal stauses, among others."
   - name: lega_legal_status_start_date
     description: Legal Status Start Date
     item_ref: LEGA004A
