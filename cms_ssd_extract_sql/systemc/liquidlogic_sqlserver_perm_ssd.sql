@@ -3176,33 +3176,32 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
+IF OBJECT_ID('ssd_development.ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_sdq_scores;
 IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
  
-
-/* V8.1 */
+ 
 -- Create structure
 CREATE TABLE ssd_development.ssd_sdq_scores (
     csdq_table_id               NVARCHAR(48),               -- metadata={"item_ref":"CSDQ001A"} PRIMARY KEY
     csdq_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CSDQ002A"}
-    csdq_sdq_score              NVARCHAR(100),              -- metadata={"item_ref":"CSDQ005A"}
     csdq_sdq_completed_date     DATETIME,                   -- metadata={"item_ref":"CSDQ003A"}
-    csdq_sdq_details_json       NVARCHAR(1000),             -- Depreciated to be removed [TESTING]
-    csdq_sdq_reason             NVARCHAR(100)               -- metadata={"item_ref":"CSDQ004A"}
+    csdq_sdq_score              INT,                        -- metadata={"item_ref":"CSDQ005A"}
+    csdq_sdq_reason             NVARCHAR(100)               -- metadata={"item_ref":"CSDQ004A", "item_status":"P"}
 );
- 
--- Insert data
+
+-- insert data
 INSERT INTO ssd_development.ssd_sdq_scores (
-    csdq_table_id,
-    csdq_person_id,
-    csdq_sdq_score,
-    csdq_sdq_completed_date,
-    csdq_sdq_details_json,
+    csdq_table_id, 
+    csdq_person_id, 
+    csdq_sdq_completed_date, 
+    csdq_sdq_score, 
     csdq_sdq_reason
 )
+
 SELECT
-    ff.FACT_FORM_ID         AS csdq_table_id,
-    ff.DIM_PERSON_ID        AS csdq_person_id,
+    ff.FACT_FORM_ID                     AS csdq_table_id,
+    ff.DIM_PERSON_ID                    AS csdq_person_id,
+    CAST('1900-01-01' AS DATETIME)      AS csdq_sdq_completed_date,
     (
         SELECT TOP 1
             CASE
@@ -3214,75 +3213,64 @@ SELECT
             AND ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
             AND ffa_inner.ANSWER_NO = 'SDQScore'
             AND ffa_inner.ANSWER IS NOT NULL
-        ORDER BY ffa_inner.ANSWER DESC -- Using the date as it is
-    ) AS csdq_sdq_score,
-    CAST('1900/01/01' AS DATETIME)          AS csdq_sdq_completed_date,
-    (
-        SELECT
-            CASE WHEN ffa_inner.ANSWER_NO = 'FormEndDate'
-            THEN ffa_inner.ANSWER END AS "SDQ_COMPLETED_DATE",
-            CASE WHEN ffa_inner.ANSWER_NO = 'SDQScore'
-            THEN
-                CASE WHEN ISNUMERIC(ffa_inner.ANSWER) = 1 THEN CAST(ffa_inner.ANSWER AS INT) ELSE NULL END
-            END AS "SDQ_SCORE"
-        FROM Child_Social.FACT_FORM_ANSWERS ffa_inner
-        WHERE ff.FACT_FORM_ID = ffa_inner.FACT_FORM_ID
-            AND ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
-            AND ffa_inner.ANSWER_NO IN ('FormEndDate','SDQScore')
-            AND ffa_inner.ANSWER IS NOT NULL
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-    ) AS csdq_sdq_details_json,
-    'SSD_PH'      AS csdq_sdq_reason
-   
+        ORDER BY ffa_inner.ANSWER DESC
+    )                                   AS csdq_sdq_score,
+    'SSD_PH'                            AS csdq_sdq_reason
 FROM
     Child_Social.FACT_FORMS ff
 JOIN
     Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
     AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
-    AND ffa.ANSWER_NO IN ('FormEndDate','SDQScore')
+    AND ffa.ANSWER_NO IN ('FormEndDate', 'SDQScore')
     AND ffa.ANSWER IS NOT NULL
 WHERE EXISTS (
     SELECT 1
     FROM ssd_person p
     WHERE p.pers_person_id = ff.DIM_PERSON_ID
 );
- 
- 
--- Ensure the previous statement is terminated
+
+-- Rank the records within the main table
 ;WITH RankedSDQScores AS (
     SELECT
-        *,
+        csdq_table_id,
+        csdq_person_id,
+        csdq_sdq_completed_date,
+        csdq_sdq_score,
+        csdq_sdq_reason,
         -- Assign unique row nums <within each partition> of csdq_person_id,
         -- the most recent csdq _form_ id/csdq_table_id will have a row number of 1.
         ROW_NUMBER() OVER (PARTITION BY csdq_person_id ORDER BY csdq_table_id DESC) AS rn
-    FROM
-        ssd_sdq_scores
+    FROM ssd_development.ssd_sdq_scores
 )
- 
+
 -- delete all records from the ssd_sdq_scores table where row number(rn) > 1
 -- i.e. keep only the most recent
-DELETE FROM RankedSDQScores
-WHERE rn > 1;
- 
--- identify and remove exact dups
+DELETE FROM ssd_development.ssd_sdq_scores
+WHERE csdq_table_id IN (
+    SELECT csdq_table_id
+    FROM RankedSDQScores
+    WHERE rn > 1
+);
+
+-- Identify and remove exact duplicates
 ;WITH DuplicateSDQScores AS (
     SELECT
-        *,
+        csdq_table_id,
+        csdq_person_id,
+        csdq_sdq_completed_date,
+        csdq_sdq_score,
+        csdq_sdq_reason,
         -- Assign row num to each set of dups,
         -- partitioned by all columns that could potentially make a row unique
-        ROW_NUMBER() OVER (PARTITION BY csdq_table_id, csdq_person_id, csdq_sdq_details_json ORDER BY csdq_table_id) AS row_num
-    FROM
-        ssd_sdq_scores
+        ROW_NUMBER() OVER (PARTITION BY csdq_table_id, csdq_person_id ORDER BY csdq_table_id) AS row_num
+    FROM ssd_development.ssd_sdq_scores
 )
--- Delete dups
-DELETE FROM DuplicateSDQScores
-WHERE row_num > 1;
-
- 
--- non-spec column clean-up
--- ALTER TABLE ssd_sdq_scores DROP COLUMN csdq_sdq_score;
-
-/* end V8.1 */
+DELETE FROM ssd_development.ssd_sdq_scores
+WHERE csdq_table_id IN (
+    SELECT csdq_table_id
+    FROM DuplicateSDQScores
+    WHERE row_num > 1
+);
 
 
 -- -- Add constraint(s)
@@ -3293,6 +3281,7 @@ WHERE row_num > 1;
 -- Msg 2627, Level 14, State 1, Line 3129
 -- Violation of PRIMARY KEY constraint 'PK__ssd_sdq___EACA4F0597284006'. 
 -- Cannot insert duplicate key in object 'ssd_development.ssd_sdq_scores'. The duplicate key value is (2316504).
+
 
 -- create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_csdq_person_id ON ssd_sdq_scores(csdq_person_id);
