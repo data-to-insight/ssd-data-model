@@ -2499,11 +2499,6 @@ INSERT INTO ssd_development.ssd_sdq_scores (
 -- ALTER TABLE ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
 -- FOREIGN KEY (csdq_person_id) REFERENCES ssd_person(pers_person_id);
 
--- DEV NOTES [TESTING]
--- Msg 2627, Level 14, State 1, Line 3129
--- Violation of PRIMARY KEY constraint 'PK__ssd_sdq___EACA4F0597284006'. 
--- Cannot insert duplicate key in object 'ssd_development.ssd_sdq_scores'. The duplicate key value is (2316504).
-
 -- create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_csdq_person_id ON ssd_sdq_scores(csdq_person_id);
 
