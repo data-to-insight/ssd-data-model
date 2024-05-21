@@ -1,5 +1,5 @@
 -- LA specific vars
-USE HDM;
+USE HDM_local;
 GO
 
 -- Set reporting period in Mths
@@ -120,10 +120,10 @@ SELECT
 INTO #AA_1_contacts
 
 FROM
-    #ssd_contact c
+    ssd_development.ssd_contacts c
 
 LEFT JOIN
-    #ssd_person p ON c.cont_person_id = p.pers_person_id
+    ssd_person p ON c.cont_person_id = p.pers_person_id
 
 WHERE
     c.cont_contact_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
@@ -221,10 +221,10 @@ SELECT
 INTO #AA_2_early_help_assessments
 
 FROM
-    #ssd_early_help_episodes e	
+    ssd_development.ssd_early_help_episodes e	
 
 LEFT JOIN
-    #ssd_person p ON e.earl_person_id = p.pers_person_id	
+    ssd_person p ON e.earl_person_id = p.pers_person_id	
 
 WHERE
 
@@ -309,28 +309,28 @@ SELECT
 
     FORMAT(ce.cine_referral_date, 'dd/MM/yyyy')	AS ReferralDate,
 	CASE
-		WHEN ce.cine_referral_source = '1A' THEN 'a) 1A: Individual'
-		WHEN ce.cine_referral_source = '1B' THEN 'b) 1B: Individual'
-		WHEN ce.cine_referral_source = '1C' THEN 'c) 1C: Individual'
-		WHEN ce.cine_referral_source = '1D' THEN 'd) 1D: Individual'
-		WHEN ce.cine_referral_source = '2A' THEN 'e) 2A: Schools'
-		WHEN ce.cine_referral_source = '2B' THEN 'f) 2B: Education services'
-		WHEN ce.cine_referral_source = '3A' THEN 'g) 3A: Health services'
-		WHEN ce.cine_referral_source = '3B' THEN 'h) 3B: Health services'
-		WHEN ce.cine_referral_source = '3C' THEN 'i) 3C: Health services'
-		WHEN ce.cine_referral_source = '3D' THEN 'j) 3D: Health services'
-		WHEN ce.cine_referral_source = '3E' THEN 'k) 3E: Health services'
-		WHEN ce.cine_referral_source = '3F' THEN 'l) 3F: Health services'
-		WHEN ce.cine_referral_source = '4' THEN 'm) 4: Housing'
-		WHEN ce.cine_referral_source = '5A' THEN 'n) 5A: LA services'
-		WHEN ce.cine_referral_source = '5B' THEN 'o) 5B: LA services'
-		WHEN ce.cine_referral_source = '5C' THEN 'p) 5C: LA services'
-		WHEN ce.cine_referral_source = '5D' THEN 'p1) 5D: LA services'
-		WHEN ce.cine_referral_source = '6' THEN 'q) 6: Police'
-		WHEN ce.cine_referral_source = '7' THEN 'r) 7: Other legal agency'
-		WHEN ce.cine_referral_source = '8' THEN 's) 8: Other'
-		WHEN ce.cine_referral_source = '9' THEN 't) 9: Anonymous'
-		WHEN ce.cine_referral_source = '10' THEN 'u) 10: Unknown'
+		WHEN ce.cine_referral_source_code = '1A' THEN 'a) 1A: Individual'
+		WHEN ce.cine_referral_source_code = '1B' THEN 'b) 1B: Individual'
+		WHEN ce.cine_referral_source_code = '1C' THEN 'c) 1C: Individual'
+		WHEN ce.cine_referral_source_code = '1D' THEN 'd) 1D: Individual'
+		WHEN ce.cine_referral_source_code = '2A' THEN 'e) 2A: Schools'
+		WHEN ce.cine_referral_source_code = '2B' THEN 'f) 2B: Education services'
+		WHEN ce.cine_referral_source_code = '3A' THEN 'g) 3A: Health services'
+		WHEN ce.cine_referral_source_code = '3B' THEN 'h) 3B: Health services'
+		WHEN ce.cine_referral_source_code = '3C' THEN 'i) 3C: Health services'
+		WHEN ce.cine_referral_source_code = '3D' THEN 'j) 3D: Health services'
+		WHEN ce.cine_referral_source_code = '3E' THEN 'k) 3E: Health services'
+		WHEN ce.cine_referral_source_code = '3F' THEN 'l) 3F: Health services'
+		WHEN ce.cine_referral_source_code = '4' THEN 'm) 4: Housing'
+		WHEN ce.cine_referral_source_code = '5A' THEN 'n) 5A: LA services'
+		WHEN ce.cine_referral_source_code = '5B' THEN 'o) 5B: LA services'
+		WHEN ce.cine_referral_source_code = '5C' THEN 'p) 5C: LA services'
+		WHEN ce.cine_referral_source_code = '5D' THEN 'p1) 5D: LA services'
+		WHEN ce.cine_referral_source_code = '6' THEN 'q) 6: Police'
+		WHEN ce.cine_referral_source_code = '7' THEN 'r) 7: Other legal agency'
+		WHEN ce.cine_referral_source_code = '8' THEN 's) 8: Other'
+		WHEN ce.cine_referral_source_code = '9' THEN 't) 9: Anonymous'
+		WHEN ce.cine_referral_source_code = '10' THEN 'u) 10: Unknown'
 		ELSE 'u) 10: Unknown' -- 'Catch All' for any other Contact/Referral Sources not in above list
 	END											AS ReferralSource,
 	CASE -- indicate if the most recent referral (or individual referral) resulted in 'No Further Action' (NFA)
@@ -343,16 +343,16 @@ SELECT
 	/*PW Note - Have used Team and Worker that Referral was assinged to as per Annex A guidance
 					However in Blackpool, all Contact/Referral WorkflowSteps are processed by the 'Front Door' (Request for Support Hub) with generic worker 'Referral Coordinator'
 					Therefore Current / Latest Worker may provide better information (as with Annex A Lists 6-8).  This is the approach used in Blackpool*/
-	ce.cine_referral_team						AS AllocatedTeam,
+	ce.cine_referral_team_name					AS AllocatedTeam,
     ce.cine_referral_worker_name				AS AllocatedWorker
 
 INTO #AA_3_referrals
 
 FROM
-    #ssd_cin_episodes ce
+    ssd_development.ssd_cin_episodes ce
 
 LEFT JOIN
-    #ssd_person p ON ce.cine_person_id = p.pers_person_id
+    ssd_person p ON ce.cine_person_id = p.pers_person_id
 
 LEFT JOIN
     (
@@ -363,7 +363,7 @@ LEFT JOIN
                 ELSE 0
             END as count_12months
         FROM 
-            #ssd_cin_episodes
+            ssd_development.ssd_cin_episodes
         WHERE
             cine_referral_date >= DATEADD(MONTH, -12, GETDATE())
         GROUP BY
@@ -471,16 +471,16 @@ SELECT
 	END													AS CSCSupportRequired,	/*PW - will depend on each Local Authority's interpretation of cina_assessment_outcome_nfa*/
 
     -- Step type (SEE ALSO CONTACTS)
-    a.cina_assessment_team								AS AllocatedTeam,
+    a.cina_assessment_team_name							AS AllocatedTeam,
     a.cina_assessment_worker_name						AS AllocatedWorker
 
 INTO #AA_4_assessments
 
 FROM
-    #ssd_cin_assessments a
+    ssd_development.ssd_cin_assessments a
 
 INNER JOIN
-    #ssd_person p ON a.cina_person_id = p.pers_person_id
+    ssd_person p ON a.cina_person_id = p.pers_person_id
 
 /*PW - Amended as #ssd_disability table can have multiple records for a single child*/
 LEFT JOIN   -- ensure we get all records even if there's no matching disability
@@ -488,7 +488,7 @@ LEFT JOIN   -- ensure we get all records even if there's no matching disability
 		SELECT DISTINCT
 			dis.disa_person_id 
 		FROM
-			#ssd_disability dis
+			ssd_development.ssd_disability dis
 		WHERE
 			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 	) AS d ON p.pers_person_id = d.disa_person_id
