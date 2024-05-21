@@ -618,17 +618,17 @@ SELECT
 INTO #AA_5_s47_enquiries 
 
 FROM
-    #ssd_s47_enquiry s47e	/*PW - # added to start of table name*/
+    ssd_development.ssd_s47_enquiry s47e	/*PW - # added to start of table name*/
 
 INNER JOIN
-    #ssd_person p ON s47e.s47e_person_id = p.pers_person_id		/*PW - # added to start of table name*/
+    ssd_person p ON s47e.s47e_person_id = p.pers_person_id		/*PW - # added to start of table name*/
 
 LEFT JOIN  
     (
 		SELECT DISTINCT
 			dis.disa_person_id 
 		FROM
-			#ssd_disability dis
+			ssd_development.ssd_disability dis
 		WHERE
 			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 	) AS d ON p.pers_person_id = d.disa_person_id
@@ -636,7 +636,7 @@ LEFT JOIN
 -- [TESTING]
 -- towards icpc.icpc_icpc_outcome_cp_flag 
 LEFT JOIN
-	#ssd_initial_cp_conference icpc ON s47e.s47e_s47_enquiry_id = icpc.icpc_s47_enquiry_id	/*PW - # added to start of table name*/
+	ssd_initial_cp_conference icpc ON s47e.s47e_s47_enquiry_id = icpc.icpc_s47_enquiry_id	/*PW - # added to start of table name*/
 										AND s47e.s47e_person_id = icpc.icpc_person_id		/*PW - additional join added because WorkflowStepID used as enquiry_id and this isn't unique due to group working*/
 
 LEFT JOIN 
@@ -649,9 +649,9 @@ LEFT JOIN
 			COUNT(s47e2.s47e_s47_enquiry_id) as CountS47s12m,
 			DENSE_RANK() OVER(PARTITION BY s47e.s47e_person_id ORDER BY s47e.s47e_s47_start_date DESC, s47e.s47e_s47_enquiry_id DESC) Rnk
 		FROM
-			#ssd_s47_enquiry s47e
+			ssd_development.ssd_s47_enquiry s47e
 		LEFT JOIN
-			#ssd_s47_enquiry s47e2 ON s47e.s47e_person_id = s47e2.s47e_person_id
+			ssd_s47_enquiry s47e2 ON s47e.s47e_person_id = s47e2.s47e_person_id
 				AND (s47e2.s47e_s47_start_date between DATEADD(MONTH, -12, s47e.s47e_s47_start_date) and DATEADD(DAY, -1, s47e.s47e_s47_start_date)
 				OR (s47e2.s47e_s47_start_date = s47e.s47e_s47_start_date and s47e2.s47e_s47_enquiry_id < s47e.s47e_s47_enquiry_id))	/*PW - allows for cases where 2 S47s start on same day*/
 		WHERE
@@ -671,9 +671,9 @@ LEFT JOIN
 			COUNT(icpc_icpc_date) as CountICPCs12m,
 			DENSE_RANK() OVER(PARTITION BY s47e.s47e_person_id ORDER BY s47e.s47e_s47_start_date DESC, s47e.s47e_s47_enquiry_id DESC) Rnk
 		FROM
-			#ssd_s47_enquiry s47e
+			ssd_development.ssd_s47_enquiry s47e
 		LEFT JOIN
-			#ssd_initial_cp_conference icpc on s47e.s47e_person_id = icpc.icpc_person_id
+			ssd_initial_cp_conference icpc on s47e.s47e_person_id = icpc.icpc_person_id
 			AND icpc_icpc_date between DATEADD(MONTH, -12, s47e.s47e_s47_start_date) and DATEADD(DAY, -1, s47e.s47e_s47_start_date)
 		WHERE
 			COALESCE(s47e.s47e_s47_end_date,'99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -838,86 +838,86 @@ FROM
 		DENSE_RANK() OVER(PARTITION BY p.pers_person_id ORDER BY ce.cine_referral_date DESC, COALESCE(ce.cine_close_date,'99991231') DESC) Rnk
 
 	FROM
-		#ssd_cin_episodes ce
+		ssd_development.ssd_cin_episodes ce
 
 	INNER JOIN
-		#ssd_person p ON ce.cine_person_id = p.pers_person_id	
+		ssd_person p ON ce.cine_person_id = p.pers_person_id	
 
 	LEFT JOIN 
 		(
 			SELECT DISTINCT
 				dis.disa_person_id 
 			FROM
-				#ssd_disability dis
+				ssd_development.ssd_disability dis
 			WHERE
 				COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 		) AS d ON p.pers_person_id = d.disa_person_id
 
 	-- added to get date child last seen (latest visit date - CIN, CP or CLA)
 	-- Note - Blackpool ChAT also pulls information from certain Mosaic Case Note Types, Mosaic Visits Screen and Care Leaver Contact WorkflowSteps but these aren't in SSDS*/
-	LEFT JOIN
-		(
-			SELECT
-				v2.PersonID,
-				v2.CINStartDate,
-				v2.CINClosureDate,
-				MAX(v2.VisitDate) LatestVisit
-			FROM
-				(
-					SELECT
-						ce.cine_person_id PersonID,
-						ce.cine_referral_date CINStartDate,
-						ce.cine_close_date CINClosureDate,
-						v.cinv_cin_visit_date VisitDate
-					FROM
-						#ssd_cin_episodes ce
-					INNER JOIN
-						#ssd_cin_visits v ON ce.cine_person_id = v.PersonID
-						AND v.cinv_cin_visit_date between ce.cine_referral_date and COALESCE(ce.cine_close_date, GETDATE())
+    LEFT JOIN
+        (
+            SELECT
+                v2.PersonID,
+                v2.CINStartDate,
+                v2.CINClosureDate,
+                MAX(v2.VisitDate) LatestVisit
+            FROM
+                (
+                    SELECT
+                        ce.cine_person_id PersonID,
+                        ce.cine_referral_date CINStartDate,
+                        ce.cine_close_date CINClosureDate,
+                        v.cinv_cin_visit_date VisitDate
+                    FROM
+                        ssd_development.ssd_cin_episodes ce
+                    INNER JOIN
+                        ssd_cin_visits v ON ce.cine_person_id = v.cinv_person_id -- corrected column name
+                    AND v.cinv_cin_visit_date between ce.cine_referral_date and COALESCE(ce.cine_close_date, GETDATE())
 
-					UNION
+                    UNION
 
-					SELECT
-						ce.cine_person_id PersonID,
-						ce.cine_referral_date CINStartDate,
-						ce.cine_close_date CINClosureDate,
-						v.cppv_cp_visit_date VisitDate
-					FROM
-						#ssd_cin_episodes ce
-					INNER JOIN
-						#ssd_cp_visits v ON ce.cine_person_id = v.PersonID
-						AND v.cppv_cp_visit_date between ce.cine_referral_date and COALESCE(ce.cine_close_date, GETDATE())
+                    SELECT
+                        ce.cine_person_id PersonID,
+                        ce.cine_referral_date CINStartDate,
+                        ce.cine_close_date CINClosureDate,
+                        v.cppv_cp_visit_date VisitDate
+                    FROM
+                        ssd_development.ssd_cin_episodes ce
+                    INNER JOIN
+                        ssd_cp_visits v ON ce.cine_person_id = v.cppv_person_id -- corrected column name
+                    AND v.cppv_cp_visit_date between ce.cine_referral_date and COALESCE(ce.cine_close_date, GETDATE())
 
-					UNION
+                    UNION
 
-					SELECT
-						ce.cine_person_id PersonID,
-						ce.cine_referral_date CINStartDate,
-						ce.cine_close_date CINClosureDate,
-						v.clav_cla_visit_date VisitDate
-					FROM
-						#ssd_cin_episodes ce
-					INNER JOIN
-						#ssd_cla_visits v ON ce.cine_person_id = v.clav_person_id
-						AND v.clav_cla_visit_date between ce.cine_referral_date and COALESCE(ce.cine_close_date, GETDATE())
-				) AS v2
+                    SELECT
+                        ce.cine_person_id PersonID,
+                        ce.cine_referral_date CINStartDate,
+                        ce.cine_close_date CINClosureDate,
+                        v.clav_cla_visit_date VisitDate
+                    FROM
+                        ssd_development.ssd_cin_episodes ce
+                    INNER JOIN
+                        ssd_cla_visits v ON ce.cine_person_id = v.clav_person_id
+                    AND v.clav_cla_visit_date between ce.cine_referral_date and COALESCE(ce.cine_close_date, GETDATE())
+                ) AS v2
 
-			GROUP BY
-				v2.PersonID,
-				v2.CINStartDate,
-				v2.CINClosureDate
-		) AS v ON ce.cine_person_id = v.PersonID
-			AND ce.cine_referral_date = v.CINStartDate
-			AND COALESCE(ce.cine_close_date,'99991231') = COALESCE(v.CINClosureDate,'99991231')
+            GROUP BY
+                v2.PersonID,
+                v2.CINStartDate,
+                v2.CINClosureDate
+        ) AS v ON ce.cine_person_id = v.PersonID
+        AND ce.cine_referral_date = v.CINStartDate
+        AND COALESCE(ce.cine_close_date,'99991231') = COALESCE(v.CINClosureDate,'99991231')
 
 	LEFT JOIN	-- Identify Children Looked After - note #ssd_legal_status used so children subject to Short Breaks can be excluded
 		(
 			SELECT DISTINCT
 				ls.lega_person_id
 			FROM
-				#ssd_legal_status ls
+				ssd_development.ssd_legal_status ls
 			INNER JOIN
-				#ssd_person p ON ls.lega_person_id = p.pers_person_id
+				ssd_person p ON ls.lega_person_id = p.pers_person_id
 			WHERE
 				ls.lega_legal_status not in ('V1','V3','V4')	--Exclude children subject to Short Breaks
 				AND ls.lega_legal_status_start_date <= GETDATE()
@@ -930,7 +930,7 @@ FROM
 			SELECT DISTINCT
 				cp.cppl_person_id
 			FROM
-				#ssd_cp_plans cp
+				ssd_development.ssd_cp_plans cp
 			WHERE
 				cp.cppl_cp_plan_start_date <= GETDATE()
 				AND COALESCE(cp.cppl_cp_plan_end_date,'99991231') > GETDATE()
@@ -941,10 +941,10 @@ FROM
 			SELECT DISTINCT
 				cin.cinp_person_id
 			FROM
-				#ssd_cin_plans cin
+				ssd_development.ssd_cin_plans cin
 			WHERE
-				cin.cinp_cin_plan_start <= GETDATE()
-				AND COALESCE(cin.cinp_cin_plan_end,'99991231') > GETDATE()
+				cin.cinp_cin_plan_start_date <= GETDATE()
+				AND COALESCE(cin.cinp_cin_plan_end_date,'99991231') > GETDATE()
 		) AS cin ON ce.cine_person_id = cin.cinp_person_id
 
 	LEFT JOIN	-- Identify Children with open Assessment
@@ -952,7 +952,7 @@ FROM
 			SELECT DISTINCT
 				ass.cina_person_id
 			FROM
-				#ssd_cin_assessments ass
+				ssd_development.ssd_cin_assessments ass
 			WHERE
 				ass.cina_assessment_start_date <= GETDATE()
 				AND COALESCE(ass.cina_assessment_auth_date,'99991231') > GETDATE()
@@ -963,7 +963,7 @@ FROM
 			SELECT DISTINCT
 				cl.clea_person_id
 			FROM
-				#ssd_care_leavers cl
+				ssd_development.ssd_care_leavers cl
 		) AS cl ON ce.cine_person_id = cl.clea_person_id
 
 	-- Added to get latest allocatd Team and Worker
@@ -982,13 +982,13 @@ FROM
 				DENSE_RANK() OVER(PARTITION BY cine.cine_person_id, cine.cine_referral_id 
 									ORDER BY COALESCE(inv.invo_involvement_end_date,'99991231') DESC, inv.invo_involvement_start_date DESC, inv.invo_involvements_id DESC) Rnk
 			FROM
-				#ssd_cin_episodes cine
+				ssd_development.ssd_cin_episodes cine
 			INNER JOIN
-				#ssd_involvements inv ON cine.cine_person_id = inv.PersonID
+				ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
 				AND inv.invo_involvement_start_date <= COALESCE(cine.cine_close_date,'99991231')
 				AND COALESCE(inv.invo_involvement_end_date,'99991231') > cine.cine_referral_date
 			INNER JOIN
-				#ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
+				ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
 			WHERE
 				COALESCE(cine.cine_close_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
 		) AS inv ON ce.cine_person_id = inv.PersonID
