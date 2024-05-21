@@ -1110,7 +1110,7 @@ AggregatedFormAnswers AS (
         MAX(CASE WHEN ffa.ANSWER_NO = 'FormEndDate' THEN TRY_CAST(ffa.ANSWER AS DATETIME) ELSE NULL END) AS AssessmentAuthorisedDate
     FROM FormAnswers ffa
     GROUP BY ffa.FACT_FORM_ID
-)
+) 
  
 -- Insert data
 INSERT INTO ssd_cin_assessments
@@ -1139,20 +1139,20 @@ SELECT
     afa.AssessmentAuthorisedDate,
     (
         SELECT
-            NULLIF(fa.OUTCOME_NFA_FLAG, '')                     AS "NFA_FLAG",
-            NULLIF(fa.OUTCOME_NFA_S47_END_FLAG, '')             AS "NFA_S47_END_FLAG",
-            NULLIF(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '')     AS "STRATEGY_DISCUSSION_FLAG",
-            NULLIF(fa.OUTCOME_CLA_REQUEST_FLAG, '')             AS "CLA_REQUEST_FLAG",
-            NULLIF(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '')       AS "PRIVATE_FOSTERING_FLAG",
-            NULLIF(fa.OUTCOME_LEGAL_ACTION_FLAG, '')            AS "LEGAL_ACTION_FLAG",
-            NULLIF(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '')        AS "PROV_OF_SERVICES_FLAG",
-            NULLIF(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '')         AS "PROV_OF_SB_CARE_FLAG",
-            NULLIF(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '')   AS "SPECIALIST_ASSESSMENT_FLAG",
-            NULLIF(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '') AS "REFERRAL_TO_OTHER_AGENCY_FLAG",
-            NULLIF(fa.OUTCOME_OTHER_ACTIONS_FLAG, '')           AS "OTHER_ACTIONS_FLAG",
-            NULLIF(fa.OTHER_OUTCOMES_EXIST_FLAG, '')            AS "OTHER_OUTCOMES_EXIST_FLAG",
-            NULLIF(fa.TOTAL_NO_OF_OUTCOMES, '')                 AS "TOTAL_NO_OF_OUTCOMES",
-            NULLIF(fa.OUTCOME_COMMENTS, '')                     AS "COMMENTS" -- dictates a larger _json size
+            NULLIF(ISNULL(fa.OUTCOME_NFA_FLAG, ''), '')                     AS "NFA_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_NFA_S47_END_FLAG, ''), '')             AS "NFA_S47_END_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, ''), '')     AS "STRATEGY_DISCUSSION_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_CLA_REQUEST_FLAG, ''), '')             AS "CLA_REQUEST_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, ''), '')       AS "PRIVATE_FOSTERING_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_LEGAL_ACTION_FLAG, ''), '')            AS "LEGAL_ACTION_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_PROV_OF_SERVICES_FLAG, ''), '')        AS "PROV_OF_SERVICES_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, ''), '')         AS "PROV_OF_SB_CARE_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, ''), '')   AS "SPECIALIST_ASSESSMENT_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, ''), '') AS "REFERRAL_TO_OTHER_AGENCY_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_OTHER_ACTIONS_FLAG, ''), '')           AS "OTHER_ACTIONS_FLAG",
+            NULLIF(ISNULL(fa.OTHER_OUTCOMES_EXIST_FLAG, ''), '')            AS "OTHER_OUTCOMES_EXIST_FLAG",
+            NULLIF(ISNULL(fa.TOTAL_NO_OF_OUTCOMES, ''), '')                 AS "TOTAL_NO_OF_OUTCOMES",
+            NULLIF(ISNULL(fa.OUTCOME_COMMENTS, ''), '')                     AS "COMMENTS" -- dictates a larger _json size
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS cina_assessment_outcome_json,
     fa.OUTCOME_NFA_FLAG                                         AS cina_assessment_outcome_nfa,
@@ -1405,13 +1405,13 @@ SELECT
  
     (SELECT
         MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
-                 THEN fp.DIM_PLAN_COORD_DEPT_ID_DESC END))
+                 THEN ISNULL(fp.DIM_PLAN_COORD_DEPT_ID_DESC, '') END))
  
                                        AS cinp_cin_plan_team_name,
  
     (SELECT
         MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
-                 THEN fp.DIM_PLAN_COORD_ID_DESC END))
+                 THEN ISNULL(fp.DIM_PLAN_COORD_ID_DESC, '') END))
                  
                                        AS cinp_cin_plan_worker_name
  
@@ -2150,7 +2150,7 @@ CREATE TABLE ssd_development.ssd_cla_episodes (
     clae_cla_placement_id           NVARCHAR(48),               -- metadata={"item_ref":"CLAE013A"} 
     clae_cla_episode_start_date     DATETIME,                   -- metadata={"item_ref":"CLAE003A"}
     clae_cla_episode_start_reason   NVARCHAR(100),              -- metadata={"item_ref":"CLAE004A"}
-    clae_cla_primary_need           NVARCHAR(3),              ``-- metadata={"item_ref":"CLAE009A", "info":"Expecting codes N0-N9"} 
+    clae_cla_primary_need           NVARCHAR(3),                -- metadata={"item_ref":"CLAE009A", "info":"Expecting codes N0-N9"} 
     clae_cla_episode_ceased         DATETIME,                   -- metadata={"item_ref":"CLAE005A"}
     clae_cla_episode_ceased_reason  NVARCHAR(255),              -- metadata={"item_ref":"CLAE006A"}
     clae_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAE010A"}
@@ -2188,7 +2188,7 @@ SELECT
         (SELECT MAX(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
         --AND cn.DIM_CREATED_BY_DEPT_ID IN (5956,727)
         AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
-        THEN cn.EVENT_DTTM END))                                                        
+        THEN ISNULL(cn.EVENT_DTTM, '1900-01-01') END))                                                      
                                             AS clae_cla_last_iro_contact_date,
     fc.START_DTTM                           AS clae_entered_care_date -- [TESTING] Added RH 060324
  
@@ -2729,8 +2729,7 @@ SELECT
  
     (SELECT MAX(CASE WHEN fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
         AND fms.DIM_PERSON_ID = fcr.DIM_PERSON_ID
-        THEN fms.DIM_LOOKUP_PARTICIPATION_CODE_DESC END))  
- 
+        THEN ISNULL(fms.DIM_LOOKUP_PARTICIPATION_CODE_DESC, '') END)) 
                                                     AS clar_cla_review_participation
  
 FROM
@@ -3010,18 +3009,16 @@ SELECT
     fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
     (
         SELECT  -- Combined _json field with 'ICP' responses
-               
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN tmp_cpl.ANSWER END), NULL) AS REMAINSUP,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN tmp_cpl.ANSWER END), NULL) AS RETURN1M,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN tmp_cpl.ANSWER END), NULL) AS RETURN6M,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN tmp_cpl.ANSWER END), NULL) AS RETURNEV,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN tmp_cpl.ANSWER END), NULL) AS LTRELFR,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN tmp_cpl.ANSWER END), NULL) AS LTFOST18,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN tmp_cpl.ANSWER END), NULL) AS RESPLMT,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN tmp_cpl.ANSWER END), NULL) AS SUPPLIV,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER END), NULL) AS ADOPTION,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END), NULL) AS OTHERPLN
-   
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS REMAINSUP,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS RETURN1M,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS RETURN6M,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS RETURNEV,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS LTRELFR,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS LTFOST18,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS RESPLMT,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS SUPPLIV,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS ADOPTION,
+            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS OTHERPLN
         FROM
             #ssd_TMP_PRE_cla_care_plan tmp_cpl
  
