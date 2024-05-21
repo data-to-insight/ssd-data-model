@@ -12,6 +12,7 @@ specification. It generates two CSV reports per directory: one listing fields fr
 the specification not found in the SQL scripts, and another listing extra variables 
 in the SQL scripts not present in the specification. This helps ensure SQL scripts 
 align with the specified data requirements and identifies any discrepancies.
+
 """
 
 

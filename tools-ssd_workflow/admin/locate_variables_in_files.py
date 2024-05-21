@@ -2,14 +2,21 @@ import os
 import glob
 import re
 
+
+"""
+This script ....
+
+chmod +x locate_variables_in_files.py
+"""
+
 # Multiple directories support
 directories = [
     'cms_ssd_extract_sql/mosaic/',    # Mosaic scripts
     'cms_ssd_extract_sql/systemc_liquidlogic/'  # Liquid Logic scripts
 ]
 
-variable_name = 'cont_contact_outcome_json'  # var name to search
-variable_stem = 'cont_'  # stem to search 
+variable_name = 'cinp_cin_plan_team'  # var name to search
+variable_stem = 'cinp_'  # stem to search 
 search_file_type = '.sql'  # or .py or .txt 
 
 def find_variables_in_sql_files(directories, variable_name, variable_stem, search_file_type):

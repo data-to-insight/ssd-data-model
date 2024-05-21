@@ -38,6 +38,7 @@ Currently in [REVIEW]
 - DfE returns expect dd/mm/YYYY formating on dates, SSD Extract initially maintains DATETIME not DATE.
 - Extended default field sizes - Some are exagerated e.g. family_id NVARCHAR(48), to ensure cms/la compatibility
 - Caseload counts - should these be restricted to SSD timeframe counts(currently this) or full system counts?
+- item level metadata using the format ={"item_ref":"", "item_status":"", "expected_data":[], "info":""} 
 ********************************************************************************************************** */
 
 /* Development set up */
@@ -109,12 +110,12 @@ CREATE TABLE ssd_development.ssd_person (
     pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
     pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}   
     pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A"} 
-    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A"}   -- ["unknown",NULL, F, U, M, I] [REVIEW][TESTING]        
+    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"T", "expected_data":["unknown","NULL", "F", "U", "M", "I"]}       
     pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"} 
     pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
-    pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A"}                  
-    pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A"}    -- SEN2 guidance suggests size(4) UN1-10                            
-    pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A"} 
+    pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
+    pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A", "info":"SEN2 guidance suggests size(4) UN1-10"}                                 
+    pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A", "item_status":"P"} 
     pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}                  
     pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"} 
     pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
@@ -129,8 +130,8 @@ INSERT INTO ssd_person (
     pers_gender,
     pers_ethnicity,
     pers_dob,
-    pers_common_child_id,                               -- [PLACEHOLDER] [Takes NHS Number]
-    pers_upn_unknown,                                   -- [PLACEHOLDER] 
+    pers_common_child_id,                               
+    pers_upn_unknown,                                  
     pers_send_flag,
     pers_expected_dob,
     pers_death_date,
@@ -141,7 +142,7 @@ SELECT
     p.LEGACY_ID,
     p.DIM_PERSON_ID,
     p.GENDER_MAIN_CODE,
-    p.NHS_NUMBER,                                       -- [REVIEW] 
+    p.NHS_NUMBER,                                       
     p.ETHNICITY_MAIN_CODE,
     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
@@ -872,7 +873,7 @@ CREATE TABLE ssd_development.ssd_early_help_episodes (
     earl_episode_reason         NVARCHAR(MAX),              -- metadata={"item_ref":"EARL005A"}
     earl_episode_end_reason     NVARCHAR(MAX),              -- metadata={"item_ref":"EARL006A"}
     earl_episode_organisation   NVARCHAR(MAX),              -- metadata={"item_ref":"EARL007A"}
-    earl_episode_worker_name    NVARCHAR(100)               -- metadata={"item_ref":"EARL008A"}
+    earl_episode_worker_name    NVARCHAR(100)               -- metadata={"item_ref":"EARL008A", "item_status": "A", "info":"Consider for removal"}
 );
  
  
@@ -885,7 +886,7 @@ INSERT INTO ssd_early_help_episodes (
     earl_episode_reason,
     earl_episode_end_reason,
     earl_episode_organisation,
-    earl_episode_worker_name                    -- consider for removal [TESTING]
+    earl_episode_worker_name                    
 )
  
 SELECT
@@ -896,7 +897,7 @@ SELECT
     cafe.START_REASON,
     cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE,
     cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
-    'SSD_PH'                              -- [PLACEHOLDER_DATA] [TESTING]
+    'SSD_PH'                             
 FROM
     Child_Social.FACT_CAF_EPISODE AS cafe
  
@@ -958,7 +959,7 @@ CREATE TABLE ssd_development.ssd_cin_episodes
     cine_referral_id                INT,            -- metadata={"item_ref":"CINE001A"}
     cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
     cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
-    cine_cin_primary_need           NVARCHAR(3),    -- metadata={"item_ref":"CINE010A"} -- codes N0-9
+    cine_cin_primary_need           NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
     cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
     cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
     cine_referral_outcome_json      NVARCHAR(500),  -- metadata={"item_ref":"CINE005A"}
@@ -1087,7 +1088,7 @@ CREATE TABLE ssd_development.ssd_cin_assessments
 -- CTE for the EXISTS
 WITH RelevantPersons AS (
     SELECT p.pers_person_id
-    FROM #ssd_person p
+    FROM ssd_person p
 ),
  
 -- CTE for the JOIN
@@ -1914,7 +1915,7 @@ IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
  
 -- Create structure
 CREATE TABLE ssd_development.ssd_cp_visits (
-    cppv_cp_visit_id                NVARCHAR(48),   -- metadata={"item_ref":"CPPV007A"} PRIMARY KEY,
+    cppv_cp_visit_id                NVARCHAR(48),   -- metadata={"item_ref":"CPPV007A"} -- [TESTING] Can PRIMARY KEY be re-instated?
     cppv_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CPPV008A"}
     cppv_cp_plan_id                 NVARCHAR(48),   -- metadata={"item_ref":"CPPV001A"}
     cppv_cp_visit_date              DATETIME,       -- metadata={"item_ref":"CPPV003A"}
@@ -2051,7 +2052,7 @@ SELECT
     (CASE WHEN ffa.ANSWER_NO = 'WasConf'
         AND fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
         THEN ffa.ANSWER END)                    AS cppr_cp_review_quorate,    
-    'PLACEHOLDER DATA'                          AS cppr_cp_review_participation
+    'SSD_PH'                                    AS cppr_cp_review_participation
  
 FROM
     Child_Social.FACT_CP_REVIEW as cpr
@@ -2149,7 +2150,7 @@ CREATE TABLE ssd_development.ssd_cla_episodes (
     clae_cla_placement_id           NVARCHAR(48),               -- metadata={"item_ref":"CLAE013A"} 
     clae_cla_episode_start_date     DATETIME,                   -- metadata={"item_ref":"CLAE003A"}
     clae_cla_episode_start_reason   NVARCHAR(100),              -- metadata={"item_ref":"CLAE004A"}
-    clae_cla_primary_need           NVARCHAR(3),              ``-- metadata={"item_ref":"CLAE009A"} -- codes N0-9
+    clae_cla_primary_need           NVARCHAR(3),              ``-- metadata={"item_ref":"CLAE009A", "info":"Expecting codes N0-N9"} 
     clae_cla_episode_ceased         DATETIME,                   -- metadata={"item_ref":"CLAE005A"}
     clae_cla_episode_ceased_reason  NVARCHAR(255),              -- metadata={"item_ref":"CLAE006A"}
     clae_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAE010A"}
@@ -2840,7 +2841,7 @@ CREATE TABLE ssd_development.ssd_cla_previous_permanence (
     lapp_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"LAPP002A"}
     lapp_previous_permanence_option     NVARCHAR(200),              -- metadata={"item_ref":"LAPP004A"}
     lapp_previous_permanence_la         NVARCHAR(100),              -- metadata={"item_ref":"LAPP005A"}
-    lapp_previous_permanence_order_date NVARCHAR(100)               -- metadata={"item_ref":"LAPP003A"} -- must remain NVARCHAR
+    lapp_previous_permanence_order_date NVARCHAR(100)               -- metadata={"item_ref":"LAPP003A", "info": "must remain NVARCHAR"}
 );
  
 -- Insert data
@@ -3833,9 +3834,9 @@ CREATE TABLE ssd_development.ssd_professionals (
     prof_staff_id                       NVARCHAR(48),               -- metadata={"item_ref":"PROF010A"}
     prof_professional_name              NVARCHAR(300),              -- metadata={"item_ref":"PROF013A"}
     prof_social_worker_registration_no  NVARCHAR(48),               -- metadata={"item_ref":"PROF002A"}
-    prof_agency_worker_flag             NCHAR(1),                   -- metadata={"item_ref":"PROF014A"}
+    prof_agency_worker_flag             NCHAR(1),                   -- metadata={"item_ref":"PROF014A", "item_status": "P", "info":"Not available in SSD V1"}
     prof_professional_job_title         NVARCHAR(500),              -- metadata={"item_ref":"PROF007A"}
-    prof_professional_caseload          INT,                        -- metadata={"item_ref":"PROF008A"}             
+    prof_professional_caseload          INT,                        -- metadata={"item_ref":"PROF008A", "item_status": "T"}             
     prof_professional_department        NVARCHAR(100),              -- metadata={"item_ref":"PROF012A"}
     prof_full_time_equivalency          FLOAT                       -- metadata={"item_ref":"PROF011A"}
 );
@@ -3954,7 +3955,7 @@ SELECT
     fi.FACT_INVOLVEMENTS_ID                       AS invo_involvements_id,
     fi.DIM_WORKER_ID                              AS invo_professional_id,
     fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
-    -- use first non-NULL value for prof team, in order of depat, grp, or relevant comment
+    -- use first non-NULL value for prof team, in order of : i)dept, ii)grp, or iii)relevant comment
     COALESCE(
         fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC,   -- prev/relevant dept name if available
         fi.DIM_DEPARTMENT_NAME,                   -- otherwise, use existing dept name
