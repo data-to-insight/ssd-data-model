@@ -1946,17 +1946,17 @@ SELECT
 INTO #AA_9_care_leavers
 
 FROM
-    #ssd_care_leavers clea
+    ssd_development.ssd_care_leavers clea
 
 INNER JOIN
-	#ssd_person p ON clea.clea_person_id = p.pers_person_id
+	ssd_person p ON clea.clea_person_id = p.pers_person_id
 
 LEFT JOIN  
 	(
 		SELECT DISTINCT
 			dis.disa_person_id 
 		FROM
-			#ssd_disability dis
+			ssd_development.ssd_disability dis
 		WHERE
 			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 	) AS d ON p.pers_person_id = d.disa_person_id
@@ -1967,7 +1967,7 @@ LEFT JOIN
 		SELECT DISTINCT
 			uasc.immi_person_id 
 		FROM
-			#ssd_immigration_status uasc
+			ssd_development.ssd_immigration_status uasc
 		WHERE
 			uasc.immi_immigration_status = 'UASC'
 			--AND COALESCE(uasc.immi_immigration_status_end_date,'99991231') >= DATEADD(MONTH, -12 , GETDATE())	/*PW - Row commented out as giving error 'Arithmetic overflow error converting expression to data type datetime' (possibly because no records have end date)*/
@@ -1975,7 +1975,7 @@ LEFT JOIN
 
 LEFT JOIN
 -- [TESTING] field is renamed to _name, but is actually the ID field? 
-	#ssd_professionals pro on clea.clea_care_leaver_worker_name = pro.prof_professional_id
+	ssd_professionals pro on clea.clea_care_leaver_worker_name = pro.prof_professional_id
 
 
 -- [TESTING]
@@ -2081,17 +2081,17 @@ SELECT
 INTO #AA_10_adoption
 
 FROM
-	#ssd_permanence perm
+	ssd_development.ssd_permanence perm
 
 INNER JOIN
-	#ssd_person p ON perm.perm_person_id = p.pers_person_id
+	ssd_person p ON perm.perm_person_id = p.pers_person_id
 
 LEFT JOIN  
 	(
 		SELECT DISTINCT
 			dis.disa_person_id 
 		FROM
-			#ssd_disability dis
+			ssd_development.ssd_disability dis
 		WHERE
 			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 	) AS d ON p.pers_person_id = d.disa_person_id
@@ -2178,10 +2178,10 @@ SELECT
     END                                         AS Age, 
 
     /* List additional AA fields */
-	CASE
-		WHEN d.disa_person_id is not null THEN 'a) Yes'
-		ELSE 'b) No'
-	END			  
+    CASE
+        WHEN d.disa_person_id is not null THEN 'a) Yes'
+        ELSE 'b) No'
+    END AS HasDisability,
 
     perm.perm_adopted_by_carer_flag             AS AdoptedByCarer, -- Is the (prospective) adopter fostering for adoption?
     '1900-01-01'                                AS EnquiryDate,         -- Date enquiry received
@@ -2191,33 +2191,36 @@ SELECT
     '1900-01-01'                                AS Stage2EndDate,       -- Date Stage 2 ended
     '1900-01-01'                                AS ApplicationDate,     -- Date application submitted
     '1900-01-01'                                AS ApplicationApprDate, -- Date application approved
-    perm.perm_matched_date                      AS MatchedDate, 		-- Date adopter matched with child(ren)
-    perm.perm_placed_for_adoption_date          AS PlacedDate, 			-- Date child/children placed with adopter(s)
-    perm.perm_siblings_placed_together          AS NumSiblingsPlaced, 	-- No. of children placed
-    perm.perm_permanence_order_date             AS AdoptionOrderDate, 	-- Date of Adoption Order
-    perm.perm_decision_reversed_date            AS AdoptionLeaveDate, 	-- Date of leaving adoption process
-    perm.perm_decision_reversed_reason          AS AdoptingLeaveReason	-- Reason for leaving adoption process
+    perm.perm_matched_date                      AS MatchedDate,         -- Date adopter matched with child(ren)
+    perm.perm_placed_for_adoption_date          AS PlacedDate,          -- Date child/children placed with adopter(s)
+    perm.perm_siblings_placed_together          AS NumSiblingsPlaced,   -- No. of children placed
+    perm.perm_permanence_order_date             AS AdoptionOrderDate,   -- Date of Adoption Order
+    perm.perm_decision_reversed_date            AS AdoptionLeaveDate,   -- Date of leaving adoption process
+    perm.perm_decision_reversed_reason          AS AdoptingLeaveReason  -- Reason for leaving adoption process
 
 INTO #AA_11_adopters
 
 FROM
-    #ssd_permanence perm
+    ssd_development.ssd_permanence perm
 
 INNER JOIN
-    #ssd_person p ON perm.perm_person_id = p.pers_person_id
+    ssd_person p ON perm.perm_person_id = p.pers_person_id
 
 LEFT JOIN  
-	(
-		SELECT DISTINCT
-			dis.disa_person_id 
-		FROM
-			#ssd_disability dis
-		WHERE
-			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
-	) AS d ON p.pers_person_id = d.disa_person_id
+    (
+        SELECT DISTINCT
+            dis.disa_person_id 
+        FROM
+            ssd_development.ssd_disability dis
+        WHERE
+            COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
+    ) AS d ON p.pers_person_id = d.disa_person_id
 
 LEFT JOIN
-    #ssd_contacts c ON perm.perm_person_id = c.cont_person_id 
+    ssd_contacts c ON perm.perm_person_id = c.cont_person_id 
 
 WHERE
-    c.cont_contact_start >= DATEADD(MONTH, -12, GETDATE()) -- Filter on last 12 months
+    c.cont_contact_date >= DATEADD(MONTH, -12, GETDATE()); -- Filter on last 12 months
+
+    -- [TESTING]
+select * from #AA_11_adopters;
