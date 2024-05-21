@@ -5431,7 +5431,7 @@ Dependencies:
 			cine_referral_id						int,
 			cine_person_id							varchar(48),
 			cine_referral_date						datetime,
-			cine_cin_primary_need					varchar(16),
+			cine_cin_primary_need_code				varchar(3),
 			cine_referral_source_code				varchar(48),
 			cine_referral_source_desc				varchar(255),
 			cine_referral_outcome_json				varchar(500),

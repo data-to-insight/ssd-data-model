@@ -798,16 +798,16 @@ FROM
 		
 		FORMAT(ce.cine_referral_date, 'dd/MM/yyyy')	AS CINStartDate,
 		CASE
-			WHEN ce.cine_cin_primary_need = 'N1' THEN 'N1 - Abuse or neglect'
-			WHEN ce.cine_cin_primary_need = 'N2' THEN 'N2 - Child’s disability'
-			WHEN ce.cine_cin_primary_need = 'N3' THEN 'N3 - Parental disability or illness'
-			WHEN ce.cine_cin_primary_need = 'N4' THEN 'N4 - Family in acute stress'
-			WHEN ce.cine_cin_primary_need = 'N5' THEN 'N5 - Family dysfunction'
-			WHEN ce.cine_cin_primary_need = 'N6' THEN 'N6 - Socially unacceptable behaviour'
-			WHEN ce.cine_cin_primary_need = 'N7' THEN 'N7 - Low income'
-			WHEN ce.cine_cin_primary_need = 'N8' THEN 'N8 - Absent parenting'
-			WHEN ce.cine_cin_primary_need = 'N9' THEN 'N9 - Cases other than children in need'
-			WHEN ce.cine_cin_primary_need = 'N0' THEN 'N0 - Not stated'
+			WHEN ce.cine_cin_primary_need_code = 'N1' THEN 'N1 - Abuse or neglect'
+			WHEN ce.cine_cin_primary_need_code = 'N2' THEN 'N2 - Child’s disability'
+			WHEN ce.cine_cin_primary_need_code = 'N3' THEN 'N3 - Parental disability or illness'
+			WHEN ce.cine_cin_primary_need_code = 'N4' THEN 'N4 - Family in acute stress'
+			WHEN ce.cine_cin_primary_need_code = 'N5' THEN 'N5 - Family dysfunction'
+			WHEN ce.cine_cin_primary_need_code = 'N6' THEN 'N6 - Socially unacceptable behaviour'
+			WHEN ce.cine_cin_primary_need_code = 'N7' THEN 'N7 - Low income'
+			WHEN ce.cine_cin_primary_need_code = 'N8' THEN 'N8 - Absent parenting'
+			WHEN ce.cine_cin_primary_need_code = 'N9' THEN 'N9 - Cases other than children in need'
+			WHEN ce.cine_cin_primary_need_code = 'N0' THEN 'N0 - Not stated'
 		END											AS PrimaryNeedCode,		
 		FORMAT(v.LatestVisit, 'dd/MM/yyyy')			AS DateChildLastSeen,		
 		FORMAT(ce.cine_close_date, 'dd/MM/yyyy')	AS CINClosureDate,

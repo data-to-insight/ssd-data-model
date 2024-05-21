@@ -935,6 +935,7 @@ Object Name: ssd_cin_episodes
 Description: 
 Author: D2I
 Version: 1.0
+            0.3 primary _need suffix of _code added #DtoI-1738 2105 RH
             0.2: primary _need type/size adjustment from revised spec 160524 RH
             0.1: contact_source_desc added, _source now populated with ID 141223 RH
 Status: [R]elease
@@ -959,7 +960,7 @@ CREATE TABLE ssd_development.ssd_cin_episodes
     cine_referral_id                INT,            -- metadata={"item_ref":"CINE001A"}
     cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
     cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
-    cine_cin_primary_need           NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
+    cine_cin_primary_need_code      NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
     cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
     cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
     cine_referral_outcome_json      NVARCHAR(500),  -- metadata={"item_ref":"CINE005A"}
@@ -976,7 +977,7 @@ INSERT INTO ssd_cin_episodes
     cine_referral_id,
     cine_person_id,
     cine_referral_date,
-    cine_cin_primary_need,
+    cine_cin_primary_need_code,
     cine_referral_source_code,
     cine_referral_source_desc,
     cine_referral_outcome_json,
