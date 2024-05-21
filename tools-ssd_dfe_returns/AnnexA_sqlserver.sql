@@ -1148,17 +1148,17 @@ FROM
  
        
     FROM
-        #ssd_cp_plans cp
+        ssd_development.ssd_cp_plans cp
  
     INNER JOIN
-        #ssd_person p ON cp.cppl_person_id = p.pers_person_id  
+        ssd_person p ON cp.cppl_person_id = p.pers_person_id  
  
     LEFT JOIN
         (
             SELECT DISTINCT
                 dis.disa_person_id
             FROM
-                #ssd_disability dis
+                ssd_development.ssd_disability dis
             WHERE
                 COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
         ) AS d ON p.pers_person_id = d.disa_person_id
@@ -1173,9 +1173,9 @@ FROM
                 vis.cppv_cp_visit_seen_alone ChildSeenAlone,
                 DENSE_RANK() OVER(PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id ORDER BY vis.cppv_cp_visit_date DESC, vis.cppv_cp_visit_seen_alone DESC, vis.cppv_cp_visit_id) Rnk
             FROM
-                #ssd_cp_plans cp
+                ssd_development.ssd_cp_plans cp
             INNER JOIN
-                #ssd_cp_visits vis ON cp.cppl_person_id = vis.cppv_person_id
+                ssd_cp_visits vis ON cp.cppl_person_id = vis.cppv_person_id
                 AND cp.cppl_cp_plan_id = vis.cppv_cp_plan_id
                 AND vis.cppv_cp_visit_date between cp.cppl_cp_plan_start_date and COALESCE(cp.cppl_cp_plan_end_date, GETDATE())
             WHERE
@@ -1192,9 +1192,9 @@ FROM
                 cp.cppl_cp_plan_id CPRegID,
                 MAX(rev.cppr_cp_review_date) ReviewDate
             FROM
-                #ssd_cp_plans cp
+                ssd_development.ssd_cp_plans cp
             INNER JOIN
-                #ssd_cp_reviews rev ON cp.cppl_person_id = rev.cppr_person_id
+                ssd_cp_reviews rev ON cp.cppl_person_id = rev.cppr_person_id
                 AND cp.cppl_cp_plan_id = rev.cppr_cp_plan_id
                 AND rev.cppr_cp_review_date between cp.cppl_cp_plan_start_date and COALESCE(cp.cppl_cp_plan_end_date, GETDATE())
             WHERE
@@ -1211,7 +1211,7 @@ FROM
             SELECT DISTINCT
                 ls.lega_person_id
             FROM
-                #ssd_legal_status ls
+                ssd_development.ssd_legal_status ls
             WHERE
                 ls.lega_legal_status in ('L1','L2')
                 AND COALESCE(ls.lega_legal_status_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -1226,9 +1226,9 @@ FROM
                 cp.cppl_cp_plan_id,
                 COUNT(cp2.cppl_cp_plan_id) as CountPrevCPPlans
             FROM
-                #ssd_cp_plans cp
+                ssd_development.ssd_cp_plans cp
             LEFT JOIN
-                #ssd_cp_plans cp2 ON cp.cppl_person_id = cp2.cppl_person_id
+                ssd_cp_plans cp2 ON cp.cppl_person_id = cp2.cppl_person_id
                 AND cp2.cppl_cp_plan_start_date < cp.cppl_cp_plan_start_date
             WHERE
                 COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -1249,16 +1249,16 @@ FROM
                 DENSE_RANK() OVER(PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id
                                     ORDER BY COALESCE(inv.invo_involvement_end_date,'99991231') DESC, inv.invo_involvement_start_date DESC, inv.invo_involvements_id DESC) Rnk
             FROM
-                #ssd_cp_plans cp
+                ssd_development.ssd_cp_plans cp
             INNER JOIN
-                #ssd_cin_episodes cine ON cp.cppl_person_id = cine.cine_person_id
+                ssd_cin_episodes cine ON cp.cppl_person_id = cine.cine_person_id
                 AND cp.cppl_referral_id = cine.cine_referral_id
             INNER JOIN
-                #ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
+                ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
                 AND inv.invo_involvement_start_date <= COALESCE(cine.cine_close_date,'99991231')
                 AND COALESCE(inv.invo_involvement_end_date,'99991231') > cine.cine_referral_date
             INNER JOIN
-                #ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
+                ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
             WHERE
                 COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
         ) AS inv on cp.cppl_person_id = inv.PersonID
@@ -1453,9 +1453,9 @@ FROM
                                     ORDER BY clap.clap_cla_placement_start_date DESC,
                                         COALESCE(clap.clap_cla_placement_end_date,'99991231') DESC) Rnk
                 FROM
-                    #ssd_cla_placement clap
+                    ssd_development.ssd_cla_placement clap
  
-                LEFT JOIN #ssd_cla_episodes clae on clap.clap_cla_placement_id = clae.clae_cla_placement_id
+                LEFT JOIN ssd_cla_episodes clae on clap.clap_cla_placement_id = clae.clae_cla_placement_id
  
                 WHERE
                     COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -1465,14 +1465,14 @@ FROM
     )
     clapl
 INNER JOIN
-    #ssd_person p ON clapl.PersonID = p.pers_person_id
+    ssd_person p ON clapl.PersonID = p.pers_person_id
  
 LEFT JOIN  
     (
         SELECT DISTINCT
             dis.disa_person_id
         FROM
-            #ssd_disability dis
+            ssd_development.ssd_disability dis
         WHERE
             COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
     ) AS d ON p.pers_person_id = d.disa_person_id
@@ -1483,7 +1483,7 @@ LEFT JOIN
         SELECT DISTINCT
             uasc.immi_person_id
         FROM
-            #ssd_immigration_status uasc
+            ssd_development.ssd_immigration_status uasc
         WHERE
             uasc.immi_immigration_status = 'UASC'
             -- [TESTING]7174251
@@ -1495,18 +1495,18 @@ LEFT JOIN
     (
         SELECT
             clae.clae_person_id PersonID,
-            clae.clae_cla_episode_start CLAEpiStart,    /*PW - included as used in join later on to get Worker and Team*/
+            clae.clae_cla_episode_start_date CLAEpiStart,    /*PW - included as used in join later on to get Worker and Team*/
             clae.clae_cla_primary_need CategoryOfNeed,
             clae.clae_cla_episode_ceased DateEpisodeCeased,
-            clae.clae_cla_episode_cease_reason ReasonEpisodeCeased,
+            clae.clae_cla_episode_ceased_reason ReasonEpisodeCeased,
             clae.clae_cla_last_iro_contact_date LatestIROVisit,
             DENSE_RANK() OVER(PARTITION BY clae.clae_person_id
                             ORDER BY clap.clap_cla_placement_start_date DESC,
-                                        clae.clae_cla_episode_start DESC) Rnk
+                                        clae.clae_cla_episode_start_date DESC) Rnk
         FROM
-            #ssd_cla_placement clap
+            ssd_development.ssd_cla_placement clap
         INNER JOIN
-            #ssd_cla_episodes clae ON clap.clap_cla_id = clae.clae_cla_id
+            ssd_cla_episodes clae ON clap.clap_cla_id = clae.clae_cla_id
         WHERE
             COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
             AND COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -1518,16 +1518,16 @@ LEFT JOIN
     (
         SELECT
             clae.clae_person_id,
-            MIN(clae.clae_cla_episode_start) FirstLACStartDate
+            MIN(clae.clae_cla_episode_start_date) FirstLACStartDate
         FROM
-            #ssd_cla_episodes clae
+            ssd_development.ssd_cla_episodes clae
         INNER JOIN
-            #ssd_legal_status leg on clae.clae_person_id = leg.lega_person_id
-            AND clae.clae_cla_episode_start = leg.lega_legal_status_start_date
+            ssd_legal_status leg on clae.clae_person_id = leg.lega_person_id
+            AND clae.clae_cla_episode_start_date = leg.lega_legal_status_start_date
         WHERE
             clae.clae_cla_episode_start_reason = 'S'
             AND COALESCE(leg.lega_legal_status,'zzz') not in ('V1','V3','V4')   -- Exclude Short Breaks
-            AND clae.clae_cla_episode_start >= DATEADD(MONTH, -12, GETDATE())
+            AND clae.clae_cla_episode_start_date >= DATEADD(MONTH, -12, GETDATE())
         GROUP BY
             clae.clae_person_id
     ) AS subs ON clapl.PersonID = subs.clae_person_id
@@ -1544,10 +1544,10 @@ LEFT JOIN
             DENSE_RANK() OVER(PARTITION BY clap.clap_person_id
             ORDER BY clap.clap_cla_placement_start_date DESC, clals.lega_legal_status_start_date DESC) Rnk
         FROM
-            #ssd_cla_placement clap
+            ssd_development.ssd_cla_placement clap
        
         LEFT JOIN
-            #ssd_legal_status clals ON clap.clap_person_id = clals.lega_person_id
+            ssd_legal_status clals ON clap.clap_person_id = clals.lega_person_id
         WHERE
             COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
             AND COALESCE(clals.lega_legal_status_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -1579,13 +1579,13 @@ LEFT JOIN
             clap.clap_person_id PersonID,
             MAX(rev.clar_cla_review_date) ReviewDate
         FROM
-            #ssd_cla_placement clap
+            ssd_development.ssd_cla_placement clap
  
         INNER JOIN
-            #ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
+            ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
  
         INNER JOIN
-            #ssd_cla_reviews rev ON clae.clae_cla_id = rev.clar_cla_id
+            ssd_cla_reviews rev ON clae.clae_cla_id = rev.clar_cla_id
  
         WHERE
             COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -1602,10 +1602,10 @@ LEFT JOIN
             clap.clap_person_id PersonID,
             MAX(vis.clav_cla_visit_date) VisitDate
         FROM
-            #ssd_cla_placement clap
+            ssd_development.ssd_cla_placement clap
  
         INNER JOIN
-            #ssd_cla_visits vis ON clap.clap_person_id = vis.clav_person_id           ------- Invalid column name 'PersonID'
+            ssd_cla_visits vis ON clap.clap_person_id = vis.clav_person_id           ------- Invalid column name 'PersonID'
             AND vis.clav_cla_visit_date between clap.clap_cla_placement_start_date                   ------- Invalid column name 'LACStart'
              and COALESCE(clap.clap_cla_placement_end_date, GETDATE())
              /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
@@ -1625,13 +1625,13 @@ LEFT JOIN
             lacp.lacp_cla_care_plan_json CarePlan,                                              ------ Invalid column name 'lacp_cla_care_plan'
             DENSE_RANK() OVER(PARTITION BY lacp.lacp_person_id ORDER BY clap.clap_cla_placement_start_date DESC, lacp.lacp_cla_care_plan_start_date DESC, lacp.lacp_table_id DESC) Rnk
         FROM                                ------ Invalid column name 'PersonID' -----Invalid column name 'lacp_cla_care_plan'
-            #ssd_cla_placement clap
+            ssd_development.ssd_cla_placement clap
        
         INNER JOIN
-            #ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
+            ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
  
         INNER JOIN
-            #ssd_cla_care_plan lacp ON clae.clae_person_id = lacp.lacp_person_id             ------- Invalid column name 'PersonID'
+            ssd_cla_care_plan lacp ON clae.clae_person_id = lacp.lacp_person_id             ------- Invalid column name 'PersonID'
             AND lacp.lacp_cla_care_plan_start_date between clae.clae_entered_care_date and COALESCE(clap.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
         WHERE                                                   ------ Invalid column name 'LACStart'
             COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -1645,13 +1645,13 @@ LEFT JOIN
             clap.clap_person_id PersonID,
             MAX(h.clah_health_check_date) HealthAssessmentDate
         FROM
-            #ssd_cla_placement clap
+            ssd_development.ssd_cla_placement clap
  
         INNER JOIN
-            #ssd_cla_episodes clae ON clae.clae_cla_placement_id = clap.clap_cla_placement_id
+            ssd_cla_episodes clae ON clae.clae_cla_placement_id = clap.clap_cla_placement_id
  
         INNER JOIN
-            #ssd_cla_health h ON clae.clae_person_id = h.clah_person_id
+            ssd_cla_health h ON clae.clae_person_id = h.clah_person_id
             AND h.clah_health_check_type in ('HEALTH', 'Health Assessment')
             AND h.clah_health_check_date between clae.clae_entered_care_date and COALESCE(clap.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
         WHERE                                        
@@ -1667,13 +1667,13 @@ LEFT JOIN
             clap.clap_person_id PersonID,                                        
             MAX(h.clah_health_check_date) DentalCheckDate
         FROM
-            #ssd_cla_placement clap
+            ssd_development.ssd_cla_placement clap
  
         INNER JOIN
-            #ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
+            ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
  
         INNER JOIN
-            #ssd_cla_health h ON clae.clae_person_id = h.clah_person_id          
+            ssd_cla_health h ON clae.clae_person_id = h.clah_person_id          
             AND h.clah_health_check_type in ('DENTAL', 'Dental Check')
             AND h.clah_health_check_date between clae.clae_entered_care_date and COALESCE(clap.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
         WHERE                                      
@@ -1689,11 +1689,11 @@ LEFT JOIN
             clae.clae_person_id,
             COUNT(clae.clae_person_id) as CountCLAPlacements
         FROM
-            #ssd_cla_episodes clae
+            ssd_development.ssd_cla_episodes clae
         WHERE
             COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -12, GETDATE())
             AND (clae.clae_cla_episode_start_reason in ('S','P','B')
-                OR (clae.clae_cla_episode_start <= DATEADD(MONTH, -12, GETDATE())   /*PW Additional clause to ensure initial placement from 12 months ago is counted if with same carer*/
+                OR (clae.clae_cla_episode_start_date <= DATEADD(MONTH, -12, GETDATE())   /*PW Additional clause to ensure initial placement from 12 months ago is counted if with same carer*/
                     AND clae.clae_cla_episode_ceased > DATEADD(MONTH, -12, GETDATE())
                     AND clae.clae_cla_episode_start_reason in ('T','U')))
         GROUP BY
@@ -1709,13 +1709,13 @@ LEFT JOIN
             COUNT(m.miss_table_id) MissingEpi,
             DENSE_RANK() OVER(PARTITION BY clap.clap_person_id, clap.clap_cla_placement_id ORDER BY clap.clap_cla_placement_start_date DESC, clap.clap_cla_placement_id DESC) Rnk
         FROM
-            #ssd_cla_placement clap
+            ssd_development.ssd_cla_placement clap
  
         INNER JOIN
-            #ssd_missing m ON clap.clap_person_id = m.miss_person_id
+            ssd_missing m ON clap.clap_person_id = m.miss_person_id
             AND m.miss_missing_episode_type in ('M', 'Missing')
-            AND m.miss_missing_episode_start >= DATEADD(MONTH, -12, GETDATE())
-            --AND m.miss_missing_episode_start between clae.clae_entered_care_date and COALESCE(clap.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
+            AND m.miss_missing_episode_start_date >= DATEADD(MONTH, -12, GETDATE())
+            --AND m.miss_missing_episode_start_date between clae.clae_entered_care_date and COALESCE(clap.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
         WHERE
             COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
         GROUP BY
@@ -1734,13 +1734,13 @@ LEFT JOIN
             COUNT(m.miss_table_id) AbsenceEpi,
             DENSE_RANK() OVER(PARTITION BY clap.clap_person_id, clap.clap_cla_placement_id ORDER BY clap.clap_cla_placement_start_date DESC, clap.clap_cla_placement_id DESC) Rnk
         FROM
-            #ssd_cla_placement clap
+            ssd_development.ssd_cla_placement clap
  
         INNER JOIN
-            #ssd_missing m ON clap.clap_person_id = m.miss_person_id
+            ssd_missing m ON clap.clap_person_id = m.miss_person_id
             AND m.miss_missing_episode_type in ('A', 'Absent','Away')
-            AND m.miss_missing_episode_start >= DATEADD(MONTH, -12, GETDATE())
-            AND m.miss_missing_episode_start between clap.clap_cla_placement_start_date and COALESCE(clap.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
+            AND m.miss_missing_episode_start_date >= DATEADD(MONTH, -12, GETDATE())
+            AND m.miss_missing_episode_start_date between clap.clap_cla_placement_start_date and COALESCE(clap.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
         WHERE
             COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
         GROUP BY
@@ -1756,16 +1756,16 @@ LEFT JOIN
             clap.clap_person_id PersonID,
             m.miss_missing_rhi_offered,
             m.miss_missing_rhi_accepted,
-            DENSE_RANK() OVER(PARTITION BY clap.clap_person_id ORDER BY CASE WHEN m.miss_missing_episode_end is not null then 1 else 2 END, /*Gives priority to Completed Missing Episodes over Ongoing Missing Episodes so Return Interview Details are available*/
-                                                    clap.clap_cla_placement_start_date DESC, m.miss_missing_episode_start DESC, m.miss_table_id DESC) Rnk
+            DENSE_RANK() OVER(PARTITION BY clap.clap_person_id ORDER BY CASE WHEN m.miss_missing_episode_end_date is not null then 1 else 2 END, /*Gives priority to Completed Missing Episodes over Ongoing Missing Episodes so Return Interview Details are available*/
+                                                    clap.clap_cla_placement_start_date DESC, m.miss_missing_episode_start_date DESC, m.miss_table_id DESC) Rnk
         FROM
-            #ssd_cla_placement clap
+            ssd_development.ssd_cla_placement clap
  
         INNER JOIN
-            #ssd_missing m ON clap.clap_person_id = m.miss_person_id
+            ssd_missing m ON clap.clap_person_id = m.miss_person_id
             AND m.miss_missing_episode_type in ('M', 'Missing')
-            AND m.miss_missing_episode_start >= DATEADD(MONTH, -12, GETDATE())
-            AND m.miss_missing_episode_start between clap.clap_cla_placement_start_date and COALESCE(clap.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
+            AND m.miss_missing_episode_start_date >= DATEADD(MONTH, -12, GETDATE())
+            AND m.miss_missing_episode_start_date between clap.clap_cla_placement_start_date and COALESCE(clap.clap_cla_placement_end_date, GETDATE()) /*PW - Comment out if LAC Start Date not added to #ssd_cla_placement*/
         WHERE
             COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
     ) AS rhi ON clapl.PersonID = rhi.PersonID
@@ -1776,22 +1776,22 @@ LEFT JOIN
     (
         SELECT
             clae.clae_person_id PersonID,
-            clae.clae_cla_episode_start CLAEpiStart,
+            clae.clae_cla_episode_start_date CLAEpiStart,
             inv.invo_professional_team Team,
             pro.prof_professional_name WorkerName,
-            DENSE_RANK() OVER(PARTITION BY clae.clae_person_id, clae.clae_cla_episode_start
+            DENSE_RANK() OVER(PARTITION BY clae.clae_person_id, clae.clae_cla_episode_start_date
                                 ORDER BY COALESCE(inv.invo_involvement_end_date,'99991231') DESC, inv.invo_involvement_start_date DESC, inv.invo_involvements_id DESC) Rnk
         FROM
-            #ssd_cla_episodes clae
+            ssd_development.ssd_cla_episodes clae
         INNER JOIN
-            #ssd_cin_episodes cine ON clae.clae_person_id = cine.cine_person_id
+            ssd_cin_episodes cine ON clae.clae_person_id = cine.cine_person_id
             AND clae.clae_referral_id = cine.cine_referral_id
         INNER JOIN
-            #ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
+            ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
             AND inv.invo_involvement_start_date <= COALESCE(cine.cine_close_date,'99991231')
             AND COALESCE(inv.invo_involvement_end_date,'99991231') > cine.cine_referral_date
         INNER JOIN
-            #ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
+            ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
         WHERE
             COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
     ) AS inv on claepi.PersonID = inv.PersonID
