@@ -15,8 +15,8 @@ directories = [
     'cms_ssd_extract_sql/systemc_liquidlogic/'  # Liquid Logic scripts
 ]
 
-variable_name = 'cinp_cin_plan_team'  # var name to search
-variable_stem = 'cinp_'  # stem to search 
+variable_name = 'clar_cla_review_cancelled'  # var name to search
+variable_stem = 'clar_'  # stem to search 
 search_file_type = '.sql'  # or .py or .txt 
 
 def find_variables_in_sql_files(directories, variable_name, variable_stem, search_file_type):

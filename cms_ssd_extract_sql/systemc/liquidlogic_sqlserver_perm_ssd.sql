@@ -3302,7 +3302,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_missing
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.1
+            1.0 miss_ missing_ rhi_accepted/offered 'NA' not valid value 240524 RH
             0.9 miss_missing_rhi_accepted/offered increased to size (2) 100524 RH
 Status: [R]elease
 Remarks: 
@@ -3327,8 +3328,8 @@ CREATE TABLE ssd_development.ssd_missing (
     miss_missing_episode_start_date DATETIME,                   -- metadata={"item_ref":"MISS003A"}
     miss_missing_episode_type       NVARCHAR(100),              -- metadata={"item_ref":"MISS004A"}
     miss_missing_episode_end_date   DATETIME,                   -- metadata={"item_ref":"MISS005A"}
-    miss_missing_rhi_offered        NVARCHAR(2),                -- metadata={"item_ref":"MISS006A"}                
-    miss_missing_rhi_accepted       NVARCHAR(2)                 -- metadata={"item_ref":"MISS007A"}
+    miss_missing_rhi_offered        NCHAR(2),                   -- metadata={"item_ref":"MISS006A"}                
+    miss_missing_rhi_accepted       NCHAR(2)                    -- metadata={"item_ref":"MISS007A"}
 );
 
 
@@ -3348,8 +3349,16 @@ SELECT
     fmp.START_DTTM                      AS miss_missing_episode_start_date,
     fmp.MISSING_STATUS                  AS miss_missing_episode_type,
     fmp.END_DTTM                        AS miss_missing_episode_end_date,
-    fmp.RETURN_INTERVIEW_OFFERED        AS miss_missing_rhi_offered,   
-    fmp.RETURN_INTERVIEW_ACCEPTED       AS miss_missing_rhi_accepted 
+    CASE 
+        WHEN fmp.RETURN_INTERVIEW_OFFERED = 'Yes' THEN 'Y'
+        WHEN fmp.RETURN_INTERVIEW_OFFERED = 'No' THEN 'N'
+        ELSE NULL
+    END                                 AS miss_missing_rhi_offered,
+    CASE 
+        WHEN fmp.RETURN_INTERVIEW_ACCEPTED = 'Yes' THEN 'Y'
+        WHEN fmp.RETURN_INTERVIEW_ACCEPTED = 'No' THEN 'N'
+        ELSE NULL
+    END                                 AS miss_missing_rhi_accepted
 FROM 
     Child_Social.FACT_MISSING_PERSON AS fmp
 
