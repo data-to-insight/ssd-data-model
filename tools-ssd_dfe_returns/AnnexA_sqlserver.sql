@@ -1,3 +1,42 @@
+/*
+ANNEX A
+
+tool provided as part of the
+STANDARD SAFEGUARDING DATASET EXTRACT 
+https://data-to-insight.github.io/ssd-data-model/
+
+Script creates DfE AnnexA outputs list 1->10 from the SSD structure. 
+Prerequisit(s): The SSD extract must have been run/set up before running this tool.
+List queries L1-10 might need to be run seperately, or output to a file(not provided) in order to view the outputs. 
+Each list populates a temporary table of the extracted data to enable additional peocessing/monitoring to be 
+undertaken. 
+*/
+
+
+/* **********************************************************************************************************
+
+Notes: 
+-
+
+There remain some [TESTING] [REVIEW] notes as the project iterates wider testing results. 
+
+/*
+Dev Objact & Item Status Flags (~in this order):
+Status:     [B]acklog,          -- To do|for review but not current priority
+            [D]ev,              -- Currently being developed 
+            [T]est,             -- Dev work being tested/run time script tests
+            [DT]ataTesting,     -- Sense checking of extract data ongoing
+            [AR]waitingReview,   -- Hand-over to SSD project team for review
+            [R]elease,          -- Ready for wider release and secondary data testing
+            [Bl]ocked,          -- Data is not held in CMS/accessible, or other stoppage reason
+            [P]laceholder       -- Data not held by any LA, new data, - Future structure added as placeholder
+*/
+
+Development notes:
+Currently in [REVIEW]
+- 
+********************************************************************************************************** */
+
 -- LA specific vars
 USE HDM_local;
 GO
@@ -33,7 +72,7 @@ Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.4: contact_source_desc added
             0.3: apply revised obj/item naming. 
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_contacts
@@ -150,7 +189,7 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming. 
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_cin_episodes
@@ -251,7 +290,7 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming. 
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_cin_episodes
@@ -395,7 +434,7 @@ Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.5 Further edits of source obj referencing, Fixed to working state
             0.3: Removed old obj/item naming. 
-Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -522,7 +561,7 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming. 
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_cp_plans
@@ -708,7 +747,7 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming RH 
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_disability
@@ -1025,7 +1064,7 @@ Version: 1.0
             0.9 JH excluded temporary OLA plans
             0.8 PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming.
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [R]elease
 Remarks:
 Dependencies:
 - ssd_person
@@ -1291,9 +1330,9 @@ Author: D2I
 Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
-            0.9 PW/Blackpool major edits/reworked PW 030324
+            0.9: PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming.
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [DT]DataTesting
 Remarks:
 Dependencies:
 - ssd_cp_plans
@@ -1823,7 +1862,7 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming. 
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -1867,7 +1906,7 @@ SELECT
         WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
         WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
         ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
-    END                                                 AS Ethnicity,
+    END                                                         AS Ethnicity,
 	FORMAT(p.pers_dob, 'dd/MM/yyyy')							AS DateOfBirth,
 
 	DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
@@ -1999,7 +2038,7 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming. 
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [R]elease
 Remarks: 
 Dependencies: 
 - ssd_person
@@ -2132,7 +2171,7 @@ DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming. 
-Status: [Dev, Testing, Release, Blocked, *AwaitingReview, Backlog]
+Status: [R]elease
 Remarks: Incomplete as required data not held within the ssd and beyond 
             project scope. 
 Dependencies: 
@@ -2183,20 +2222,23 @@ SELECT
         ELSE 'b) No'
     END AS HasDisability,
 
-    perm.perm_adopted_by_carer_flag             AS AdoptedByCarer, -- Is the (prospective) adopter fostering for adoption?
-    '1900-01-01'                                AS EnquiryDate,         -- Date enquiry received
-    '1900-01-01'                                AS Stage1StartDate,     -- Date Stage 1 started
-    '1900-01-01'                                AS Stage1EndDate,       -- Date Stage 1 ended
-    '1900-01-01'                                AS Stage2StartDate,     -- Date Stage 2 started
-    '1900-01-01'                                AS Stage2EndDate,       -- Date Stage 2 ended
-    '1900-01-01'                                AS ApplicationDate,     -- Date application submitted
-    '1900-01-01'                                AS ApplicationApprDate, -- Date application approved
-    perm.perm_matched_date                      AS MatchedDate,         -- Date adopter matched with child(ren)
-    perm.perm_placed_for_adoption_date          AS PlacedDate,          -- Date child/children placed with adopter(s)
-    perm.perm_siblings_placed_together          AS NumSiblingsPlaced,   -- No. of children placed
-    perm.perm_permanence_order_date             AS AdoptionOrderDate,   -- Date of Adoption Order
-    perm.perm_decision_reversed_date            AS AdoptionLeaveDate,   -- Date of leaving adoption process
-    perm.perm_decision_reversed_reason          AS AdoptingLeaveReason  -- Reason for leaving adoption process
+    perm.perm_adopted_by_carer_flag                                 AS AdoptedByCarer, -- Is the (prospective) adopter fostering for adoption?
+    '01/01/1900'                                                    AS EnquiryDate,         -- Date enquiry received
+    '01/01/1900'                                                    AS Stage1StartDate,     -- Date Stage 1 started
+    '01/01/1900'                                                    AS Stage1EndDate,       -- Date Stage 1 ended
+    '01/01/1900'                                                    AS Stage2StartDate,     -- Date Stage 2 started
+    '01/01/1900'                                                    AS Stage2EndDate,       -- Date Stage 2 ended
+    '01/01/1900'                                                    AS ApplicationDate,     -- Date application submitted
+    '01/01/1900'                                                    AS ApplicationApprDate, -- Date application approved
+    FORMAT(perm.perm_matched_date, 'dd/MM/yyyy')                    AS MatchedDate,         -- Date adopter matched with child(ren)
+    FORMAT(perm.perm_placed_for_adoption_date, 'dd/MM/yyyy')        AS PlacedDate,          -- Date child/children placed with adopter(s)
+    FORMAT(perm.perm_siblings_placed_together                       AS NumSiblingsPlaced,   -- No. of children placed
+    FORMAT(perm.perm_permanence_order_date, 'dd/MM/yyyy')           AS AdoptionOrderDate,   -- Date of Adoption Order
+    FORMAT(perm.perm_decision_reversed_date, 'dd/MM/yyyy')          AS AdoptionLeaveDate,   -- Date of leaving adoption process
+    FORMAT(perm.perm_decision_reversed_reason                       AS AdoptingLeaveReason  -- Reason for leaving adoption process
+    
+    
+
 
 INTO #AA_11_adopters
 

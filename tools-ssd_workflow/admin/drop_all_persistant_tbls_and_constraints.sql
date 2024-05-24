@@ -1,11 +1,14 @@
-USE HDM_Local;  -- Chk its the right database!
+USE HDM_Local;  -- Check its the right database!
 
 DECLARE @sql NVARCHAR(MAX) = N'';
 
-
 -- Generate commands to drop FK constraints
-SELECT @sql += 'ALTER TABLE ' + QUOTENAME(SCHEMA_NAME(fk.schema_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) 
-               + ' DROP CONSTRAINT ' + QUOTENAME(fk.name) + '; '
+SELECT @sql += '
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = ' + QUOTENAME(fk.name, '''') + ')
+BEGIN
+    ALTER TABLE ' + QUOTENAME(SCHEMA_NAME(fk.schema_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) + ' DROP CONSTRAINT ' + QUOTENAME(fk.name) + ';
+END;
+'
 FROM sys.foreign_keys AS fk
 INNER JOIN sys.tables AS t ON fk.parent_object_id = t.object_id
 INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
@@ -14,17 +17,23 @@ WHERE s.name = N'ssd_development';
 -- Execute drop FK
 EXEC sp_executesql @sql;
 
---------------------------------------------------------------
-
+-- Clear the SQL variable
+SET @sql = N'';
 
 -- Generate DROP TABLE for each table in the schema
-SELECT @sql += 'DROP TABLE ' + QUOTENAME(s.name) + '.' + QUOTENAME(t.name) + '; '
+SELECT @sql += '
+IF OBJECT_ID(''' + s.name + '.' + t.name + ''', ''U'') IS NOT NULL
+BEGIN
+    DROP TABLE ' + QUOTENAME(s.name) + '.' + QUOTENAME(t.name) + ';
+END;
+'
 FROM sys.tables AS t
 INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
 WHERE s.name = N'ssd_development';
 
 -- Execute drop tables
 EXEC sp_executesql @sql;
+
 
 
 --------------------------------------------------------------

@@ -297,9 +297,9 @@ WHERE EXISTS
     );
 
 
--- -- Create constraint(s)
--- ALTER TABLE ssd_family ADD CONSTRAINT FK_family_person
--- FOREIGN KEY (fami_person_id) REFERENCES ssd_person(pers_person_id);
+-- Create constraint(s)
+ALTER TABLE ssd_family ADD CONSTRAINT FK_family_person
+FOREIGN KEY (fami_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- DEV NOTES [TESTING]
 -- Msg 3728, Level 16, State 1, Line 1
@@ -639,8 +639,8 @@ AND EXISTS
 ALTER TABLE ssd_mother ADD CONSTRAINT FK_moth_to_person 
 FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
 
--- ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
--- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
+FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- DEV NOTES [TESTING]
 -- Msg 547, Level 16, State 0, Line 617
@@ -649,7 +649,7 @@ FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 
-ALTER TABLE ssd_mother ADD CONSTRAINT CHK_NoSelfParenting -- Ensure person cannot be their own mother
+ALTER TABLE ssd_mother ADD CONSTRAINT CHK_no_self_parenting -- Ensure person cannot be their own mother
 CHECK (moth_person_id <> moth_childs_person_id);
 
 
