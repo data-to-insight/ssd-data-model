@@ -3328,8 +3328,8 @@ CREATE TABLE ssd_development.ssd_missing (
     miss_missing_episode_start_date DATETIME,                   -- metadata={"item_ref":"MISS003A"}
     miss_missing_episode_type       NVARCHAR(100),              -- metadata={"item_ref":"MISS004A"}
     miss_missing_episode_end_date   DATETIME,                   -- metadata={"item_ref":"MISS005A"}
-    miss_missing_rhi_offered        NCHAR(2),                   -- metadata={"item_ref":"MISS006A"}                
-    miss_missing_rhi_accepted       NCHAR(2)                    -- metadata={"item_ref":"MISS007A"}
+    miss_missing_rhi_offered        NCHAR(1),                   -- metadata={"item_ref":"MISS006A"}                
+    miss_missing_rhi_accepted       NCHAR(1)                    -- metadata={"item_ref":"MISS007A"}
 );
 
 
