@@ -39,6 +39,15 @@ Currently in [REVIEW]
 - DfE returns expect dd/mm/YYYY formating on dates, SSD Extract initially maintains DATETIME not DATE.
 - Extended default field sizes - Some are exagerated e.g. family_id NVARCHAR(48), to ensure cms/la compatibility
 - Caseload counts - should these be restricted to SSD timeframe counts(currently this) or full system counts?
+- ITEM level metadata using the format/key labels: 
+- metadata={
+            "item_ref"      :"AAAA000A", 
+            
+            -- and where applicable any of the following: 
+            "item_status"   :"[B], [D].." As per the above status list, 
+            "expected_data" :[csv list of "strings" or nums]
+            "info"          : "short string desc"
+            }
 ********************************************************************************************************** */
 
 /* Development set up */

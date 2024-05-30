@@ -8,7 +8,6 @@ DECLARE
 
 
 Select
-NEWID() as moth_table_id,  -- Gen new GUID, this in-lieu of a known key value (added 290424)
 p.PersonID moth_person_id,
 r.RelTargetPerson moth_childs_person_id,
 p2.PDoB moth_childs_dob

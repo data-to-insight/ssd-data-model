@@ -1,6 +1,6 @@
 select
-	null prof_table_id,
-	wkr.WORKER_ID prof_professional_id,
+	null prof_professional_id,
+	wkr.WORKER_ID prof_staff_id, -- [REVIEW]
 	(
 		select
 			sw_no.REFERENCE

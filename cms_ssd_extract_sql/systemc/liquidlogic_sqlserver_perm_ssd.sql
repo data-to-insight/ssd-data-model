@@ -38,7 +38,15 @@ Currently in [REVIEW]
 - DfE returns expect dd/mm/YYYY formating on dates, SSD Extract initially maintains DATETIME not DATE.
 - Extended default field sizes - Some are exagerated e.g. family_id NVARCHAR(48), to ensure cms/la compatibility
 - Caseload counts - should these be restricted to SSD timeframe counts(currently this) or full system counts?
-- item level metadata using the format ={"item_ref":"", "item_status":"", "expected_data":[], "info":""} 
+- ITEM level metadata using the format/key labels: 
+- metadata={
+            "item_ref"      :"AAAA000A", 
+
+            -- and where applicable any of the following: 
+            "item_status"   :"[B], [D].." As per the above status list, 
+            "expected_data" :[csv list of "strings" or nums]
+            "info"          : "short string desc"
+            }
 ********************************************************************************************************** */
 
 /* Development set up */
@@ -114,7 +122,7 @@ CREATE TABLE ssd_development.ssd_person (
     pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"} 
     pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
     pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
-    pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A", "info":"SEN2 guidance suggests size(4) UN1-10"}                                 
+    pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A", "info":"SEN2 guidance suggests size(4)", "expected_data":["UN1-10"]}                                 
     pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A", "item_status":"P"} 
     pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}                  
     pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"} 
@@ -1407,13 +1415,13 @@ SELECT
     (SELECT
         MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
                  THEN ISNULL(fp.DIM_PLAN_COORD_DEPT_ID_DESC, '') END))
- 
+
                                        AS cinp_cin_plan_team_name,
- 
+
     (SELECT
         MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
                  THEN ISNULL(fp.DIM_PLAN_COORD_ID_DESC, '') END))
-                 
+
                                        AS cinp_cin_plan_worker_name
  
 FROM Child_Social.FACT_CARE_PLAN_SUMMARY cps  

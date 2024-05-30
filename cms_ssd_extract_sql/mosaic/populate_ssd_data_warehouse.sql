@@ -638,6 +638,7 @@ Dependencies:
 			DROP TABLE ##ssd_cla_visits
 		--
 		create table ##ssd_cla_visits (
+			clav_casenote_id				varchar(48),
 			clav_cla_id						varchar(48),
 			clav_cla_visit_id				varchar(48),
 			clav_cla_visit_date				datetime,
@@ -663,6 +664,7 @@ Dependencies:
 			('child_seen')
 		--
 		insert into ##ssd_cla_visits (
+			clav_casenote_id,
 			clav_cla_id,
 			clav_cla_visit_id,
 			clav_cla_visit_date,
@@ -671,7 +673,7 @@ Dependencies:
 			clav_person_id
 		)
 		select
-			-- [REVIEW] casenote_id rem 290424 RH
+			null clav_casenote_id,
 			(
 				select
 					poc.PERIOD_OF_CARE_ID
@@ -1523,6 +1525,7 @@ Dependencies:
 			DROP TABLE ##ssd_cla_immunisations
 		--
 		create table ##ssd_cla_immunisations (
+			clai_immunisations_id			varchar(48),
 			clai_person_id					varchar(48),
 			clai_immunisations_status		varchar(1)
 		)
@@ -1596,16 +1599,19 @@ Dependencies:
 				)
 		--
 		insert into ##ssd_cla_immunisations (
+			clai_immunisations_id,
 			clai_person_id,
 			clai_immunisations_status
 		)
 		select 
+			sub.clai_immunisations_id,
 			sub.clai_person_id,
 			sub.clai_immunisations_status
 		from 
 			(
 			select 
 				sgs.subject_compound_id clai_person_id,
+				dbo.append2(stp.workflow_step_id, '.', sgs.subject_compound_id) clai_immunisations_id,
 
 				case
 					when exists (
@@ -3292,20 +3298,17 @@ Dependencies:
 			DROP TABLE ##ssd_mother
 		--
 		create table ##ssd_mother (
-			moth_table_id              uniqueidentifier default newid() PRIMARY KEY, -- Gen new GUID, this in-lieu of a known key value (added 290424)
 			moth_person_id				varchar(48),
 			moth_childs_person_id		varchar(48),
 			moth_childs_dob				datetime
 		)
 		--
 		insert into ##ssd_mother (
-			moth_table_id,
 			moth_person_id,
 			moth_childs_person_id,
 			moth_childs_dob
 		)
 		select
-			NEWID() as moth_table_id,
 			pr.PERSON_ID moth_person_id,
 			pr.OTHER_PERSON_ID moth_childs_person_id,
 			(
@@ -3339,8 +3342,6 @@ go
 if object_id('tempdb..##populate_ssd_missing') is not null
 	drop procedure ##populate_ssd_missing
 go
-
-
 --
 create procedure ##populate_ssd_missing (@start_date datetime, @end_date datetime) as
 begin
@@ -4441,7 +4442,7 @@ Dependencies:
 		create table ##ssd_cp_plans (
 			cppl_cp_plan_id						varchar(48),
 			cppl_referral_id					varchar(48),
-			cppl_icpc_id						varchar(48), -- [REVIEW]
+			cppl_initial_cp_conference_id		varchar(48),
 			cppl_person_id						varchar(48),
 			cppl_cp_plan_start_date				datetime,
 			cppl_cp_plan_end_date				datetime,
@@ -4452,7 +4453,7 @@ Dependencies:
 		insert into ##ssd_cp_plans (
 			cppl_cp_plan_id,
 			cppl_referral_id,
-			cppl_icpc_id,
+			cppl_initial_cp_conference_id,
 			cppl_person_id,
 			cppl_cp_plan_start_date,
 			cppl_cp_plan_end_date,
@@ -4473,7 +4474,7 @@ Dependencies:
 					and
 					dbo.future(ref.CLOSURE_DATE)>= cpp.REGISTRATION_START_DATE
 			) cppl_referral_id,
-			cpp.REGISTRATION_STEP_ID cppl_icpc_id, -- [REVIEW]
+			cpp.REGISTRATION_STEP_ID cppl_initial_cp_conference_id,
 			cpp.PERSON_ID cppl_person_id,
 			cpp.REGISTRATION_START_DATE cppl_cp_plan_start_date,
 			cpp.DEREGISTRATION_DATE cppl_cp_plan_end_date,
@@ -5225,7 +5226,7 @@ Dependencies:
 		create table ##ssd_cla_episodes (
 			clae_cla_episode_id						varchar(48),
 			clae_person_id							varchar(48),
-			clae_cla_episode_start_date				datetime, -- [REVIEW] 290424 RH
+			clae_cla_episode_start					datetime,
 			clae_episode_start_reason				varchar(100),
 			clae_cla_primary_need					varchar(100),
 			clae_cla_id								varchar(48),
@@ -5234,12 +5235,12 @@ Dependencies:
 			clae_cla_episode_ceased					datetime,
 			clae_cla_placement_id					varchar(48),
 			clae_entered_care_date					datetime,
-			clae_cla_episode_ceased_reason			varchar(255) -- [REVIEW] 290424 RH
+			clae_cla_episode_cease_reason			varchar(255)
 		)
 		insert into ##ssd_cla_episodes (
 			clae_cla_episode_id,
 			clae_person_id,
-			clae_cla_episode_start_date, -- [REVIEW]
+			clae_cla_episode_start,
 			clae_episode_start_reason,
 			clae_cla_primary_need,
 			clae_cla_id,
@@ -5248,12 +5249,12 @@ Dependencies:
 			clae_cla_episode_ceased,
 			clae_cla_placement_id,
 			clae_entered_care_date,
-			clae_cla_episode_ceased_reason -- [REVIEW]
+			clae_cla_episode_cease_reason
 		)
 		select
 			dbo.to_weighted_start(cla.START_DATE,cla.PERSON_ID) clae_cla_episode_id,
 			cla.PERSON_ID clae_person_id,
-			cla.START_DATE clae_cla_episode_start_date, -- [REVIEW] 290424 RH
+			cla.START_DATE clae_cla_episode_start_date,
 			case
 				when pla.start_date = poc.start_date
 				and  leg.start_date = poc.start_date then 
@@ -5317,7 +5318,7 @@ Dependencies:
 			cla.END_DATE clae_cla_episode_ceased,
 			cla.placement_id clae_cla_placement_id,
 			poc.start_date clae_entered_care_date,
-			pla.REASON_EPISODE_CEASED clae_cla_episode_ceased_reason -- [REVIEW] 290424 RH
+			pla.REASON_EPISODE_CEASED clae_cla_episode_cease_reason
 		from
 			dm_cla_summaries cla
 		inner join dm_PERIODS_OF_CARE poc
@@ -5431,7 +5432,7 @@ Dependencies:
 			cine_referral_id						int,
 			cine_person_id							varchar(48),
 			cine_referral_date						datetime,
-			cine_cin_primary_need_code				varchar(3),
+			cine_cin_primary_need					varchar(16),
 			cine_referral_source_code				varchar(48),
 			cine_referral_source_desc				varchar(255),
 			cine_referral_outcome_json				varchar(500),
@@ -6422,56 +6423,9 @@ Dependencies:
 	end catch
 end
 go
---
+-- 
 
-[REVIEW] added RH 290424
-if object_id('tempdb..##populate_ssd_s251_finance') is not null
-	drop procedure ##populate_ssd_s251_finance
-go
---
-create procedure ##populate_ssd_s251_finance as
-begin
-/*
-=============================================================================
-Object Name: ssd_s251_finance
-Description: Placeholder structure as source data not common|confirmed
-Author: D2I
-Version: 1.0
-Status: AwaitingReview
-Remarks:
-Dependencies:
-- Yet to be defined
-=============================================================================
-*/
-begin try
-    --set nocount on
-    --
-    IF OBJECT_ID('tempdb..##ssd_s251_finance') IS NOT NULL
-        DROP TABLE ##ssd_s251_finance
-    --
-    create table ##ssd_s251_finance (
-        s251_table_id           nvarchar(48) primary key default NEWID(),
-        s251_cla_placement_id   nvarchar(48),
-        s251_placeholder_1      nvarchar(48),
-        s251_placeholder_2      nvarchar(48),
-        s251_placeholder_3      nvarchar(48),
-        s251_placeholder_4      nvarchar(48)
-    )
-    --
-    return 0
-end try
-begin catch
-    -- Record error details in log
-    declare @v_error_number        int,
-            @v_error_message    nvarchar(4000)
-    select
-        @v_error_number = error_number(),
-        @v_error_message = error_message()
-    --
-    return @v_error_number
-end catch
-go
---
+
 
 
 --[REVIEW] added RH 290424
@@ -6534,6 +6488,60 @@ go
 --
 
 
+
+
+
+
+-- [REVIEW] added RH 290424
+if object_id('tempdb..##populate_ssd_s251_finance') is not null
+	drop procedure ##populate_ssd_s251_finance
+go
+--
+create procedure ##populate_ssd_s251_finance as
+begin
+/*
+=============================================================================
+Object Name: ssd_s251_finance
+Description: Placeholder structure as source data not common|confirmed
+Author: D2I
+Version: 1.0
+Status: Testing
+Remarks:
+Dependencies:
+- Yet to be defined
+=============================================================================
+*/
+begin try
+    --set nocount on
+    --
+    IF OBJECT_ID('tempdb..##ssd_s251_finance') IS NOT NULL
+        DROP TABLE ##ssd_s251_finance
+    --
+    create table ##ssd_s251_finance (
+        s251_table_id           nvarchar(48) primary key default NEWID(),
+        s251_cla_placement_id   nvarchar(48),
+        s251_placeholder_1      nvarchar(48),
+        s251_placeholder_2      nvarchar(48),
+        s251_placeholder_3      nvarchar(48),
+        s251_placeholder_4      nvarchar(48)
+    )
+    --
+    return 0
+end try
+begin catch
+    -- Record error details in log
+    declare @v_error_number        int,
+            @v_error_message    nvarchar(4000)
+    select
+        @v_error_number = error_number(),
+        @v_error_message = error_message()
+    --
+    return @v_error_number
+end catch
+go
+--
+
+
 --[REVIEW] added RH 290424
 if object_id('tempdb..##populate_ssd_voice_of_child') is not null
     drop procedure ##populate_ssd_voice_of_child
@@ -6547,7 +6555,7 @@ Object Name: ssd_voice_of_child
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 1.0
-Status: AwaitingReview
+Status: AwaitingReview|[REVIEW]
 Remarks:
 Dependencies:
 - Yet to be defined
@@ -6560,7 +6568,7 @@ begin try
         DROP TABLE ##ssd_voice_of_child
     --
     create table ##ssd_voice_of_child (
-        voch_table_id               nvarchar(48) primary key default NEWID(),
+        voch_table_id               nvarchar(48) primary key,
         voch_person_id              nvarchar(48),
         voch_explained_worries      nchar(1),
         voch_story_help_understand  nchar(1),
@@ -6598,7 +6606,7 @@ Object Name: ssd_pre_proceedings
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 1.0
-Status: AwaitingReview
+Status: AwaitingReview|[REVIEW]
 Remarks:
 Dependencies:
 - Yet to be defined
@@ -6666,7 +6674,7 @@ Object Name: ssd_send
 Description: 
 Author: D2I
 Version: 1.0
-Status: AwaitingReview
+Status: Testing
 Remarks: 
 Dependencies: 
 -
@@ -6714,7 +6722,7 @@ Object Name: ssd_sen_need
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 0.1
-Status: Release
+Status: Testing
 Remarks:
 Dependencies:
 - Yet to be defined
@@ -6731,7 +6739,7 @@ begin try
         senn_table_id                       nvarchar(48) primary key,
         senn_active_ehcp_id                 nvarchar(48),
         senn_active_ehcp_need_type          nvarchar(100),
-        senn_active_ehcp_need_rank          nvarchar(1)
+        senn_active_ehcp_need_rank          nchar(1)
     )
     --
     return 0
@@ -6748,6 +6756,205 @@ begin catch
 end catch
 go
 --
+
+--[REVIEW] added RH 300424
+if object_id('tempdb..##populate_ssd_ehcp_requests') is not null
+    drop procedure ##populate_ssd_ehcp_requests
+go
+--
+create procedure ##populate_ssd_ehcp_requests
+begin
+/*
+=============================================================================
+Object Name: ssd_ehcp_requests
+Description: Placeholder structure as source data not common|confirmed
+Author: D2I
+Version: 0.1
+Status: Testing
+Remarks:
+Dependencies:
+- Yet to be defined
+-
+=============================================================================
+*/
+begin try
+    --set nocount on
+    --
+    IF OBJECT_ID('tempdb..##ssd_ehcp_requests') IS NOT NULL
+        DROP TABLE ##ssd_ehcp_requests
+    --
+
+	create table ##ssd_ehcp_requests (
+		ehcr_ehcp_request_id            NVARCHAR(48) primary key,
+		ehcr_send_table_id              NVARCHAR(48),
+		ehcr_ehcp_req_date              DATETIME,
+		ehcr_ehcp_req_outcome_date      DATETIME,
+		ehcr_ehcp_req_outcome           NVARCHAR(100)
+	)
+
+    --
+    return 0
+end try
+begin catch
+    -- Record error details in log
+    declare @v_error_number        int,
+            @v_error_message    nvarchar(4000)
+    select
+        @v_error_number = error_number(),
+        @v_error_message = error_message()
+    --
+    return @v_error_number
+end catch
+go
+--
+
+--[REVIEW] added RH 300424
+if object_id('tempdb..##populate_ssd_ehcp_assessment') is not null
+    drop procedure ##populate_ssd_ehcp_assessment
+go
+--
+create procedure ##populate_ssd_ehcp_assessment
+begin
+/*
+=============================================================================
+Object Name: ssd_ehcp_assessment
+Description: Placeholder structure as source data not common|confirmed
+Author: D2I
+Version: 0.1
+Status: Testing
+Remarks:
+Dependencies:
+- Yet to be defined
+-
+=============================================================================
+*/
+begin try
+    --set nocount on
+    --
+    IF OBJECT_ID('tempdb..##ssd_ehcp_assessment') IS NOT NULL
+        DROP TABLE ##ssd_ehcp_assessment
+    --
+    create table ##ssd_ehcp_assessment (
+		ehca_ehcp_assessment_id             NVARCHAR(48) primary key,
+		ehca_ehcp_request_id                NVARCHAR(48),
+		ehca_ehcp_assessment_outcome_date   DATETIME,
+		ehca_ehcp_assessment_outcome        NVARCHAR(100),
+		ehca_ehcp_assessment_exceptions     NVARCHAR(100)
+	)
+    --
+    return 0
+end try
+begin catch
+    -- Record error details in log
+    declare @v_error_number        int,
+            @v_error_message    nvarchar(4000)
+    select
+        @v_error_number = error_number(),
+        @v_error_message = error_message()
+    --
+    return @v_error_number
+end catch
+go
+--
+
+--[REVIEW] added RH 300424
+if object_id('tempdb..##populate_ssd_ehcp_named_plan') is not null
+    drop procedure ##populate_ssd_ehcp_named_plan
+go
+--
+create procedure ##populate_ssd_ehcp_named_plan
+begin
+/*
+=============================================================================
+Object Name: ssd_ehcp_named_plan
+Description: Placeholder structure as source data not common|confirmed
+Author: D2I
+Version: 0.1
+Status: Testing
+Remarks:
+Dependencies:
+- Yet to be defined
+-
+=============================================================================
+*/
+begin try
+    --set nocount on
+    --
+    IF OBJECT_ID('tempdb..##ssd_ehcp_named_plan') IS NOT NULL
+        DROP TABLE ##ssd_ehcp_named_plan
+    --
+    create table ##ssd_ehcp_named_plan (
+		ehcn_named_plan_id              NVARCHAR(48) primary key,
+		ehcn_ehcp_asmt_id               NVARCHAR(48),
+		ehcn_named_plan_start_date      DATETIME,
+		ehcn_named_plan_ceased_date      DATETIME,
+		ehcn_named_plan_ceased_reason    NVARCHAR(100)
+	)
+    --
+    return 0
+end try
+begin catch
+    -- Record error details in log
+    declare @v_error_number        int,
+            @v_error_message    nvarchar(4000)
+    select
+        @v_error_number = error_number(),
+        @v_error_message = error_message()
+    --
+    return @v_error_number
+end catch
+go
+--
+
+
+--[REVIEW] added RH 300424
+if object_id('tempdb..##populate_ssd_ehcp_active_plans') is not null
+    drop procedure ##populate_ssd_ehcp_active_plans
+go
+--
+create procedure ##populate_ssd_ehcp_active_plans
+begin
+/*
+=============================================================================
+Object Name: ssd_ehcp_active_plans
+Description: Placeholder structure as source data not common|confirmed
+Author: D2I
+Version: 0.1
+Status: Testing
+Remarks:
+Dependencies:
+- Yet to be defined
+-
+=============================================================================
+*/
+begin try
+    --set nocount on
+    --
+    IF OBJECT_ID('tempdb..##ssd_ehcp_active_plans') IS NOT NULL
+        DROP TABLE ##ssd_ehcp_active_plans
+    --
+    create table ##ssd_ehcp_active_plans (
+		ehcp_active_ehcp_id                 NVARCHAR(48) primary key,
+		ehcp_ehcp_request_id                NVARCHAR(48),
+		ehcp_active_ehcp_last_review_date   DATETIME
+	)
+    --
+    return 0
+end try
+begin catch
+    -- Record error details in log
+    declare @v_error_number        int,
+            @v_error_message    nvarchar(4000)
+    select
+        @v_error_number = error_number(),
+        @v_error_message = error_message()
+    --
+    return @v_error_number
+end catch
+go
+--
+
+
 
 --
 if object_id('tempdb..##populate_ssd_main') is not null
@@ -6773,13 +6980,21 @@ begin
 		rd.curr_day = dbo.today()
 	--
 
-	-- placeholder tables, incl. SSDF Other DfE projects (1b, 2(a,b) [REVIEW]
-	exec ##populate_ssd_linked_identifiers;
-	exec ##ssd_pre_proceedings;
-	exec ##populate_ssd_s251_finance;
-	exec ##ssd_send;
-	exec ##ssd_sen_need;
+
+	-- placeholder tables, incl. Non-core cms or SSDF Other DfE projects (1b, 2(a,b) [REVIEW]
+
+	exec ##populate_ssd_s251_finance;		-- Testing [REVIEW] added RH 290424
+	exec ##ssd_voice_of_child;				-- Testing [REVIEW] added RH 290424
+	exec ##ssd_pre_proceedings;				-- Testing [REVIEW] added RH 290424
+	exec ##ssd_send;						-- Testing [REVIEW] added RH 290424
+	exec ##ssd_sen_need;					-- Testing [REVIEW] added RH 290424
+	exec ##ssd_ehcp_requests;				-- Testing [REVIEW] added RH 290424
+	exec ##ssd_ehcp_assessment;				-- Testing [REVIEW] added RH 290424
+	exec ##ssd_ehcp_named_plan;				-- Testing [REVIEW] added RH 290424
+	exec ##ssd_ehcp_active_plans;			-- Testing [REVIEW] added RH 290424
+
 	-- end placeholder tables
+
 
 	exec ##populate_ssd_care_leavers;
 	exec ##populate_ssd_assessment_factors @start_date, @end_date;
@@ -6795,7 +7010,7 @@ begin
 	exec ##populate_ssd_initial_cp_conference @start_date, @end_date;
 	exec ##populate_ssd_involvements @start_date, @end_date;
 	exec ##populate_ssd_legal_status @start_date, @end_date;
-	exec ##populate_ssd_linked_identifiers;
+	exec ##populate_ssd_linked_identifiers; -- AwaitingReview
 	exec ##populate_ssd_missing @start_date, @end_date;
 	exec ##populate_ssd_mother;
 	exec ##populate_ssd_permanence;

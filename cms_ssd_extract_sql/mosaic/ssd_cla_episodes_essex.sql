@@ -74,7 +74,7 @@ select
 		where
 			ref.PERIOD_OF_CARE_ID = cla.PERIOD_OF_CARE_ID
 	) clae_referral_id,
-	cla.EPISODE_END_DATE clae_cla_episode_ceased,
+	cla.EPISODE_END_DATE clae_cla_episode_ceased, -- [REVIEW] 290424 RH
 	cla.REASON_CEASED_DESCRIPTION clae_cla_episode_ceased_reason, -- [REVIEW] 290424 RH
 	(
 		select
