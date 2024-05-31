@@ -150,7 +150,7 @@ perm_guardian_status VARCHAR(50),
 perm_guardian_age VARCHAR(20),
 perm_adopted_by_carer_flag VARCHAR(1),
 perm_cla_id INT,
-perm_adoption_worker INT,
+perm_adoption_worker_id INT, -- [REVIEW] 310524 RH
 perm_allocated_worker INT
 )
 
@@ -179,7 +179,7 @@ perm_guardian_status,
 perm_guardian_age,
 perm_adopted_by_carer_flag,
 perm_cla_id,
-perm_adoption_worker,
+perm_adoption_worker_id,
 perm_allocated_worker
 )
 
@@ -208,7 +208,7 @@ NULL perm_guardian_status,
 NULL perm_guardian_age,
 NULL perm_adopted_by_carer_flag,
 lac.LLPID perm_cla_id,
-NULL perm_adoption_worker,
+NULL perm_adoption_worker_id,
 NULL perm_allocated_worker
 
 from moLive.dbo.PERSON_LEGAL_STATUSES a
@@ -248,7 +248,7 @@ NULL perm_guardian_status,
 NULL perm_guardian_age,
 NULL perm_adopted_by_carer_flag,
 lac.LLPID perm_cla_id,
-NULL perm_adoption_worker,
+NULL perm_adoption_worker_id,
 NULL perm_allocated_worker
 
 from moLive.dbo.LOOKED_AFTER_PLACEMENTS p
@@ -303,7 +303,7 @@ NULL perm_guardian_status,
 NULL perm_guardian_age,
 NULL perm_adopted_by_carer_flag,
 lac.LLPID perm_cla_id,
-NULL perm_adoption_worker,
+NULL perm_adoption_worker_id,
 NULL perm_allocated_worker
 
 from moLive.dbo.LOOKED_AFTER_PLACEMENTS p
@@ -362,7 +362,7 @@ NULL perm_guardian_status,
 NULL perm_guardian_age,
 NULL perm_adopted_by_carer_flag,
 lac.LLPID perm_cla_id,
-NULL perm_adoption_worker,
+NULL perm_adoption_worker_id,
 NULL perm_allocated_worker
 
 from moLive.dbo.LOOKED_AFTER_PLACEMENTS a
@@ -375,7 +375,7 @@ and a.REASON_EPISODE_CEASED between 'E41' and 'E48'
 
 /*Latest Adoption Worker*/
 UPDATE #t
-SET perm_adoption_worker = d.perm_adoption_worker
+SET perm_adoption_worker_id = d.perm_adoption_worker_id
 
 from #t t
 inner join
@@ -383,7 +383,7 @@ inner join
 	Select
 	t.perm_person_id,
 	COALESCE(t.perm_permanence_order_date, t.PlacementOrderEnd, '99991231') PermEndDate,
-	pw.WORKER_ID perm_adoption_worker,
+	pw.WORKER_ID perm_adoption_worker_id,
 	DENSE_RANK() OVER(PARTITION BY t.perm_person_id, COALESCE(t.perm_permanence_order_date, t.PlacementOrderEnd, '99991231') ORDER BY pw.END_DATE DESC, pw.ID DESC) Rnk
 
 	from #t t
@@ -449,7 +449,7 @@ t.perm_guardian_status,
 t.perm_guardian_age,
 t.perm_adopted_by_carer_flag,
 t.perm_cla_id,
-t.perm_adoption_worker,
+t.perm_adoption_worker_id,
 t.perm_allocated_worker
 
 from #t t

@@ -79,7 +79,7 @@ select
 			for xml path('')),1,len(','),''
 			)
 		) s47e_s47_outcome_json,
-	stp.assignee_id s47e_s47_completed_by_worker,
+	stp.assignee_id s47e_s47_completed_by_worker_id,
 	stp.responsible_team_id s47e_s47_completed_by_team
 from
 	dm_workflow_steps_people_vw stp

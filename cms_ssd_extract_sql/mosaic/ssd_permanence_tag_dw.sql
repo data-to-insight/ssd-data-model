@@ -438,7 +438,7 @@ select
 	null perm_guardian_age,
 	null perm_adopted_by_carer_flag,
 	aj.PERIOD_OF_CARE_ID perm_cla_id,
-	null perm_adoption_worker, -- [REVIEW][_name]
+	null perm_adoption_worker_id, -- [REVIEW][_name]
 	null perm_allocated_worker
 from
 	adoption_journeys aj
@@ -480,8 +480,8 @@ select
 	null perm_guardian_age,
 	null perm_adopted_by_carer_flag,
 	poc.period_of_care_id perm_cla_id,
-	null perm_adoption_worker, -- [REVIEW][_name]
-	null perm_allocated_worker
+	null perm_adoption_worker_id, -- [REVIEW][_name]
+	null perm_allocated_worker -- depreciated field
 from 
 	DM_NON_LA_LEGAL_STATUSES nleg
 inner join DM_NON_LA_LEGAL_STATUS_TYPES ntyp

@@ -1057,7 +1057,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cin_assessments
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.1
+            1.0: Fix Aggr warnings use of isnull() 310524 RH
             0.2: cina_assessment_child_seen type change from nvarchar 100524 RH
             0.1: fa.COMPLETED_BY_USER_NAME replaces fa.COMPLETED_BY_USER_STAFF_ID 080524
 Status: [R]elease
@@ -1115,8 +1116,8 @@ FormAnswers AS (
 AggregatedFormAnswers AS (
     SELECT
         ffa.FACT_FORM_ID,
-        MAX(CASE WHEN ffa.ANSWER_NO = 'seenYN' THEN ffa.ANSWER ELSE NULL END) AS seenYN,
-        MAX(CASE WHEN ffa.ANSWER_NO = 'FormEndDate' THEN TRY_CAST(ffa.ANSWER AS DATETIME) ELSE NULL END) AS AssessmentAuthorisedDate
+        MAX(ISNULL(CASE WHEN ffa.ANSWER_NO = 'seenYN' THEN ffa.ANSWER ELSE NULL END, ''))                                       AS seenYN, -- [REVIEW] 310524 RH
+        MAX(ISNULL(CASE WHEN ffa.ANSWER_NO = 'FormEndDate' THEN TRY_CAST(ffa.ANSWER AS DATETIME) ELSE NULL END, '1900-01-01'))  AS AssessmentAuthorisedDate -- [REVIEW] 310524 RH
     FROM FormAnswers ffa
     GROUP BY ffa.FACT_FORM_ID
 ) 
@@ -1365,7 +1366,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cin_plans
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.1
+            1.0: Fix Aggr warnings use of isnull() 310524 RH
             0.1: Update fix returning new row for each revision of the plan JH 070224
 Status: [R]elease
 Remarks: 
@@ -1412,18 +1414,27 @@ SELECT
     cps.START_DTTM                     AS cinp_cin_plan_start_date,
     cps.END_DTTM                       AS cinp_cin_plan_end_date,
  
+    -- (SELECT
+    --     MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
+    --              THEN ISNULL(fp.DIM_PLAN_COORD_DEPT_ID_DESC, '') END))
+
+    --                                    AS cinp_cin_plan_team_name,
+
+    -- (SELECT
+    --     MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
+    --              THEN ISNULL(fp.DIM_PLAN_COORD_ID_DESC, '') END))
+
+    --                                    AS cinp_cin_plan_worker_name
     (SELECT
-        MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
-                 THEN ISNULL(fp.DIM_PLAN_COORD_DEPT_ID_DESC, '') END))
-
-                                       AS cinp_cin_plan_team_name,
+        MAX(ISNULL(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  -- [REVIEW] 310524 RH
+                THEN fp.DIM_PLAN_COORD_DEPT_ID_DESC END, '')))
+                                            AS cinp_cin_plan_team_name,
 
     (SELECT
-        MAX(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  
-                 THEN ISNULL(fp.DIM_PLAN_COORD_ID_DESC, '') END))
+        MAX(ISNULL(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  -- [REVIEW] 310524 RH
+                THEN fp.DIM_PLAN_COORD_ID_DESC END, '')))
+                                            AS cinp_cin_plan_worker_name
 
-                                       AS cinp_cin_plan_worker_name
- 
 FROM Child_Social.FACT_CARE_PLAN_SUMMARY cps  
  
 LEFT JOIN Child_Social.FACT_CARE_PLANS fp ON fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID
@@ -2128,7 +2139,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_episodes
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.1
+            1.0: Fix Aggr warnings use of isnull() 310524 RH
             0.2: primary _need type/size adjustment from revised spec 160524 RH
             0.1: cla_placement_id added as part of cla_placements review RH 060324
 Status: [R]elease
@@ -2194,12 +2206,17 @@ SELECT
     fce.CARE_REASON_END_DESC                AS clae_cla_episode_ceased_reason,
     fc.FACT_CLA_ID                          AS clae_cla_id,                    
     fc.FACT_REFERRAL_ID                     AS clae_referral_id,
-        (SELECT MAX(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
-        --AND cn.DIM_CREATED_BY_DEPT_ID IN (5956,727)
+        -- (SELECT MAX(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+        -- --AND cn.DIM_CREATED_BY_DEPT_ID IN (5956,727)
+        -- AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+        -- THEN ISNULL(cn.EVENT_DTTM, '1900-01-01') END))                                                      
+        --                                  AS clae_cla_last_iro_contact_date,
+        (SELECT MAX(ISNULL(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID -- [REVIEW] 310524 RH
         AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
-        THEN ISNULL(cn.EVENT_DTTM, '1900-01-01') END))                                                      
+        THEN cn.EVENT_DTTM END, '1900-01-01')))                                                      
                                             AS clae_cla_last_iro_contact_date,
-    fc.START_DTTM                           AS clae_entered_care_date -- [TESTING] Added RH 060324
+    fc.START_DTTM                           AS clae_entered_care_date -- [REVIEW][TESTING] Added RH 060324
+
  
 FROM
     Child_Social.FACT_CARE_EPISODES AS fce
@@ -2802,7 +2819,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_previous_permanence
 Description:
 Author: D2I
-Version: 1.0
+Version: 1.1 
+            1.0: Fix Aggr warnings use of isnull() 310524 RH
 Status: [R]elease
 Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley.
         1.5 JH tmp table was not being referenced, updated query and reduced running
@@ -2863,31 +2881,30 @@ INSERT INTO ssd_cla_previous_permanence (
 SELECT
     tmp_ffa.FACT_FORM_ID AS lapp_table_id,
     ff.DIM_PERSON_ID AS lapp_person_id,
-    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_option,
-    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG'        THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_la,
+    COALESCE(MAX(ISNULL(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN tmp_ffa.ANSWER END, '')), NULL) AS lapp_previous_permanence_option,
+    COALESCE(MAX(ISNULL(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG' THEN tmp_ffa.ANSWER END, '')), NULL) AS lapp_previous_permanence_la,
     CASE 
-        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END)) = 0 AND 
-             CAST(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END) AS INT) BETWEEN 1 AND 31 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END) 
+        WHEN PATINDEX('%[^0-9]%', ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '')) = 0 AND 
+             CAST(ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '') AS INT) BETWEEN 1 AND 31 THEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '') 
         ELSE 'zz' 
     END + '/' + 
- -- Adjusted CASE statement for ORDERMONTH to convert month names to numbers
     CASE 
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('January', 'Jan')  THEN '01'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('February', 'Feb') THEN '02'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('March', 'Mar')    THEN '03'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('April', 'Apr')    THEN '04'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('May')             THEN '05'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('June', 'Jun')     THEN '06'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('July', 'Jul')     THEN '07'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('August', 'Aug')   THEN '08'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('September', 'Sep') THEN '09'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('October', 'Oct')  THEN '10'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('November', 'Nov') THEN '11'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('December', 'Dec') THEN '12'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('January', 'Jan')  THEN '01'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('February', 'Feb') THEN '02'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('March', 'Mar')    THEN '03'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('April', 'Apr')    THEN '04'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('May')             THEN '05'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('June', 'Jun')     THEN '06'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('July', 'Jul')     THEN '07'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('August', 'Aug')   THEN '08'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('September', 'Sep') THEN '09'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('October', 'Oct')  THEN '10'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('November', 'Nov') THEN '11'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('December', 'Dec') THEN '12'
         ELSE 'zz' -- also handles 'unknown' string
     END + '/' + 
     CASE 
-        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END)) = 0 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END) 
+        WHEN PATINDEX('%[^0-9]%', ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END), '')) = 0 THEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END), '') 
         ELSE 'zzzz' 
     END
     AS lapp_previous_permanence_order_date
@@ -2895,7 +2912,7 @@ FROM
     #ssd_TMP_PRE_previous_permanence tmp_ffa
 JOIN
     Child_Social.FACT_FORMS ff ON tmp_ffa.FACT_FORM_ID = ff.FACT_FORM_ID
- 
+
  
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
@@ -2930,7 +2947,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cla_care_plan
 Description:
 Author: D2I
-Version: 1.0
+Version: 1.1
+            1.0: Fix Aggr warnings use of isnull() 310524 RH
             0.1: Altered _json keys and groupby towards > clarity 190224 JH
 Status: [R]elease
 Remarks:    Added short codes to plan type questions to improve readability.
@@ -3018,16 +3036,16 @@ SELECT
     fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
     (
         SELECT  -- Combined _json field with 'ICP' responses
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS REMAINSUP,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS RETURN1M,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS RETURN6M,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS RETURNEV,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS LTRELFR,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS LTFOST18,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS RESPLMT,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS SUPPLIV,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS ADOPTION,
-            COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN ISNULL(tmp_cpl.ANSWER, '') END), NULL) AS OTHERPLN
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN tmp_cpl.ANSWER END, '')), NULL) AS REMAINSUP,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN1M,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN6M,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURNEV,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN tmp_cpl.ANSWER END, '')), NULL) AS LTRELFR,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN tmp_cpl.ANSWER END, '')), NULL) AS LTFOST18,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RESPLMT,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN tmp_cpl.ANSWER END, '')), NULL) AS SUPPLIV,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER END, '')), NULL) AS ADOPTION,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END, '')), NULL) AS OTHERPLN
         FROM
             #ssd_TMP_PRE_cla_care_plan tmp_cpl
  
@@ -3407,7 +3425,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_care_leavers
 Description:
 Author: D2I
-Version: 1.0
+Version: 1.1
+            1.0: Fix Aggr warnings use of isnull() 310524 RH
             0.3: change of main source to DIM_CLA_ELIGIBILITY in order to capture full care leaver cohort 12/03/24 JH
             0.2: switch field _worker)nm and _team_nm around as in wrong order RH
             0.1: worker/p.a id field changed to descriptive name towards AA reporting JH
@@ -3450,16 +3469,18 @@ CREATE TABLE ssd_development.ssd_care_leavers
     clea_care_leaver_worker_name            NVARCHAR(100)               -- metadata={"item_ref":"CLEA012A"}
 );
  
-/* V4 */
 -- CTE for involvement history incl. worker data
 -- aggregate/extract current worker infos, allocated team, and p.advisor ID
 WITH InvolvementHistoryCTE AS (
     SELECT
         fi.DIM_PERSON_ID,
         -- worker, alloc team, and p.advisor dets <<per involvement type>>
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.DIM_WORKER_NAME END)                      AS CurrentWorkerName,  -- c.w name for the 'CW' inv type
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)  AS AllocatedTeamName,  -- team desc for the 'CW' inv type
-        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS' THEN fi.DIM_WORKER_NAME END)                  AS PersonalAdvisorName -- p.a. for the '16PLUS' inv type
+        MAX(ISNULL(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.DIM_WORKER_NAME END, ''))                      AS CurrentWorkerName,    -- c.w name for the 'CW' inv type
+        MAX(ISNULL(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END, ''))  AS AllocatedTeamName,    -- team desc for the 'CW' inv type
+        MAX(ISNULL(CASE WHEN fi.RecentInvolvement = '16PLUS' THEN fi.DIM_WORKER_NAME END, ''))                  AS PersonalAdvisorName   -- p.a. for the '16PLUS' inv type
+
+    
+    
     FROM (
         SELECT *,
             -- Assign a row number, partition by p + inv type
@@ -3519,10 +3540,14 @@ SELECT
     fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC             AS clea_care_leaver_accom_suitable,
     fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC                      AS clea_care_leaver_activity,
  
-    MAX(CASE WHEN fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
-        AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'
-        THEN fcp.MODIF_DTTM END)                            AS clea_pathway_plan_review_date,
- 
+    -- MAX(CASE WHEN fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+    --     AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'
+    --     THEN fcp.MODIF_DTTM END)                            AS clea_pathway_plan_review_date,
+
+ MAX(ISNULL(CASE WHEN fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID 
+    AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH' 
+    THEN fcp.MODIF_DTTM END, '1900-01-01'))                 AS clea_pathway_plan_review_date,
+
     ih.PersonalAdvisorName                                  AS clea_care_leaver_personal_advisor,
     ih.AllocatedTeamName                                    AS clea_care_leaver_allocated_team_name,
     ih.CurrentWorkerName                                    AS clea_care_leaver_worker_name
@@ -3643,7 +3668,7 @@ CREATE TABLE ssd_development.ssd_permanence (
     perm_decision_reversed_reason   NVARCHAR(100),              -- metadata={"item_ref":"PERM016A"}
     perm_permanence_order_date      DATETIME,                   -- metadata={"item_ref":"PERM017A"}              
     perm_permanence_order_type      NVARCHAR(100),              -- metadata={"item_ref":"PERM018A"}        
-    perm_adoption_worker_name       NVARCHAR(100)               -- metadata={"item_ref":"PERM023A"}
+    perm_adoption_worker            NVARCHAR(100)               -- metadata={"item_ref":"PERM023A"}
     
 );
 
@@ -3692,7 +3717,7 @@ WITH RankedPermanenceData AS (
             WHEN fce.CARE_REASON_END_CODE IN ('45', 'E41') THEN 'Child Arrangements/ Residence Order'
             ELSE NULL
         END                                               AS perm_permanence_order_type,
-        fa.ADOPTION_SOCIAL_WORKER_NAME                    AS perm_adoption_worker_name,
+        fa.ADOPTION_SOCIAL_WORKER_NAME                    AS perm_adoption_worker,
         ROW_NUMBER() OVER (
             PARTITION BY p.LEGACY_ID                     -- partition on person identifier
             ORDER BY CAST(RIGHT(CASE 
@@ -3745,7 +3770,7 @@ INSERT INTO ssd_permanence (
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker_name
+    perm_adoption_worker
 )  
 
 
@@ -3772,7 +3797,7 @@ SELECT
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker_name
+    perm_adoption_worker
 
 FROM RankedPermanenceData
 WHERE rn = 1
