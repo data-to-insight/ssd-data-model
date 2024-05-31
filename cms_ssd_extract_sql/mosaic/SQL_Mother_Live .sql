@@ -8,6 +8,7 @@ DECLARE
 
 
 Select
+NEWID() moth_table_id, -- [REVIEW] Gen new GUID, this in-lieu of a known key value (added 290424)
 p.PERSON_ID moth_person_id,
 rel.PERSON_RELATED_TO_ID moth_childs_person_id,
 CAST(p2.DATE_OF_BIRTH as date) moth_childs_dob

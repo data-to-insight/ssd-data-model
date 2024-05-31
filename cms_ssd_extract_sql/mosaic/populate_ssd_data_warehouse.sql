@@ -1525,7 +1525,7 @@ Dependencies:
 			DROP TABLE ##ssd_cla_immunisations
 		--
 		create table ##ssd_cla_immunisations (
-			clai_immunisations_id			varchar(48),
+			-- clai_immunisations_id			varchar(48), -- [REVIEW] depreciated 310524 
 			clai_person_id					varchar(48),
 			clai_immunisations_status		varchar(1)
 		)
@@ -1599,19 +1599,19 @@ Dependencies:
 				)
 		--
 		insert into ##ssd_cla_immunisations (
-			clai_immunisations_id,
+			-- clai_immunisations_id, -- [REVIEW] depreciated 310524 
 			clai_person_id,
 			clai_immunisations_status
 		)
 		select 
-			sub.clai_immunisations_id,
+    		-- sub.clai_immunisations_id,   -- [REVIEW] depreciated 310524 
 			sub.clai_person_id,
 			sub.clai_immunisations_status
 		from 
 			(
 			select 
 				sgs.subject_compound_id clai_person_id,
-				dbo.append2(stp.workflow_step_id, '.', sgs.subject_compound_id) clai_immunisations_id,
+				-- dbo.append2(stp.workflow_step_id, '.', sgs.subject_compound_id) clai_immunisations_id, [REVIEW] depreciated 310524 
 
 				case
 					when exists (
@@ -3298,17 +3298,20 @@ Dependencies:
 			DROP TABLE ##ssd_mother
 		--
 		create table ##ssd_mother (
+			moth_table_id				varchar(48),
 			moth_person_id				varchar(48),
 			moth_childs_person_id		varchar(48),
 			moth_childs_dob				datetime
 		)
 		--
 		insert into ##ssd_mother (
+			moth_table_id,
 			moth_person_id,
 			moth_childs_person_id,
 			moth_childs_dob
 		)
 		select
+			NEWID() moth_table_id, -- [REVIEW] Gen new GUID, in-lieu of a known key value (added 290424)
 			pr.PERSON_ID moth_person_id,
 			pr.OTHER_PERSON_ID moth_childs_person_id,
 			(
