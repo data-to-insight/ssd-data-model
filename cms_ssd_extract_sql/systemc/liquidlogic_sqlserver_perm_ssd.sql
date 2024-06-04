@@ -894,7 +894,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_early_help_episodes
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.2
+            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
 Status: [R]elease
 Remarks: 
 Dependencies: 
@@ -921,7 +922,7 @@ CREATE TABLE ssd_development.ssd_early_help_episodes (
     earl_episode_reason         NVARCHAR(MAX),              -- metadata={"item_ref":"EARL005A"}
     earl_episode_end_reason     NVARCHAR(MAX),              -- metadata={"item_ref":"EARL006A"}
     earl_episode_organisation   NVARCHAR(MAX),              -- metadata={"item_ref":"EARL007A"}
-    earl_episode_worker_name    NVARCHAR(100)               -- metadata={"item_ref":"EARL008A", "item_status": "A", "info":"Consider for removal"}
+    earl_episode_worker_id      NVARCHAR(100)               -- metadata={"item_ref":"EARL008A", "item_status": "A", "info":"Consider for removal"}
 );
  
  
@@ -934,7 +935,7 @@ INSERT INTO ssd_early_help_episodes (
     earl_episode_reason,
     earl_episode_end_reason,
     earl_episode_organisation,
-    earl_episode_worker_name                    
+    earl_episode_worker_id                    
 )
  
 SELECT
@@ -982,7 +983,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cin_episodes
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.2
+            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
             0.3 primary _need suffix of _code added #DtoI-1738 2105 RH
             0.2: primary _need type/size adjustment from revised spec 160524 RH
             0.1: contact_source_desc added, _source now populated with ID 141223 RH
@@ -1015,8 +1017,8 @@ CREATE TABLE ssd_development.ssd_cin_episodes
     cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A"}
     cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
     cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
-    cine_referral_team_name         NVARCHAR(255),  -- metadata={"item_ref":"CINE008A"}
-    cine_referral_worker_name       NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
+    cine_referral_team              NVARCHAR(255),  -- metadata={"item_ref":"CINE008A"}
+    cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
 );
  
 -- Insert data
@@ -1032,8 +1034,8 @@ INSERT INTO ssd_cin_episodes
     cine_referral_nfa,
     cine_close_reason,
     cine_close_date,
-    cine_referral_team_name,
-    cine_referral_worker_name
+    cine_referral_team,
+    cine_referral_worker_id
 )
 SELECT
     fr.FACT_REFERRAL_ID,
@@ -1097,7 +1099,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cin_assessments
 Description: 
 Author: D2I
-Version: 1.1
+Version: 1.2
+            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
             1.0: Fix Aggr warnings use of isnull() 310524 RH
             0.2: cina_assessment_child_seen type change from nvarchar 100524 RH
             0.1: fa.COMPLETED_BY_USER_NAME replaces fa.COMPLETED_BY_USER_STAFF_ID 080524
@@ -1131,8 +1134,8 @@ CREATE TABLE ssd_development.ssd_cin_assessments
     cina_assessment_auth_date       DATETIME,                   -- metadata={"item_ref":"CINA005A"}             
     cina_assessment_outcome_json    NVARCHAR(1000),             -- metadata={"item_ref":"CINA006A"}           
     cina_assessment_outcome_nfa     NCHAR(1),                   -- metadata={"item_ref":"CINA009A"}
-    cina_assessment_team_name       NVARCHAR(255),              -- metadata={"item_ref":"CINA007A"}
-    cina_assessment_worker_name     NVARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
+    cina_assessment_team            NVARCHAR(255),              -- metadata={"item_ref":"CINA007A"}
+    cina_assessment_worker_id       NVARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
 );
 
 -- CTE for the EXISTS
@@ -1173,8 +1176,8 @@ INSERT INTO ssd_cin_assessments
     cina_assessment_auth_date,      
     cina_assessment_outcome_json,
     cina_assessment_outcome_nfa,
-    cina_assessment_team_name,
-    cina_assessment_worker_name
+    cina_assessment_team,
+    cina_assessment_worker_id
 )
 SELECT
     fa.FACT_SINGLE_ASSESSMENT_ID,
@@ -1182,8 +1185,8 @@ SELECT
     fa.FACT_REFERRAL_ID,
     fa.START_DTTM,
     CASE
-        WHEN afa.seenYN = 'Yes' THEN 'Y'
-        WHEN afa.seenYN = 'No' THEN 'N'
+        WHEN UPPER(afa.seenYN) = 'YES'  THEN 'Y'
+        WHEN UPPER(afa.seenYN) = 'NO'   THEN 'N'
         ELSE NULL
     END AS seenYN,
     afa.AssessmentAuthorisedDate,
@@ -1206,8 +1209,8 @@ SELECT
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS cina_assessment_outcome_json,
     fa.OUTCOME_NFA_FLAG                                         AS cina_assessment_outcome_nfa,
-    fa.COMPLETED_BY_DEPT_NAME                                   AS cina_assessment_team_name,
-    fa.COMPLETED_BY_USER_NAME                                   AS cina_assessment_worker_name
+    fa.COMPLETED_BY_DEPT_ID                                     AS cina_assessment_team,        -- fa.COMPLETED_BY_DEPT_NAME also available
+    fa.COMPLETED_BY_USER_STAFF_ID                               AS cina_assessment_worker_id    -- fa.COMPLETED_BY_USER_NAME also available
  
 FROM
     Child_Social.FACT_SINGLE_ASSESSMENT fa
@@ -1406,7 +1409,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_cin_plans
 Description: 
 Author: D2I
-Version: 1.1
+Version: 1.2
+            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
             1.0: Fix Aggr warnings use of isnull() 310524 RH
             0.1: Update fix returning new row for each revision of the plan JH 070224
 Status: [R]elease
@@ -1433,8 +1437,8 @@ CREATE TABLE ssd_development.ssd_cin_plans (
     cinp_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINP002A"}
     cinp_cin_plan_start_date    DATETIME,                   -- metadata={"item_ref":"CINP003A"}
     cinp_cin_plan_end_date      DATETIME,                   -- metadata={"item_ref":"CINP004A"}
-    cinp_cin_plan_team_name     NVARCHAR(255),              -- metadata={"item_ref":"CINP005A"}
-    cinp_cin_plan_worker_name   NVARCHAR(100),              -- metadata={"item_ref":"CINP006A"}
+    cinp_cin_plan_team          NVARCHAR(255),              -- metadata={"item_ref":"CINP005A"}
+    cinp_cin_plan_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"CINP006A"}
 );
  
 -- Insert data
@@ -1444,8 +1448,8 @@ INSERT INTO ssd_cin_plans (
     cinp_person_id,
     cinp_cin_plan_start_date,
     cinp_cin_plan_end_date,
-    cinp_cin_plan_team_name,
-    cinp_cin_plan_worker_name
+    cinp_cin_plan_team,
+    cinp_cin_plan_worker_id
 )
 SELECT
     cps.FACT_CARE_PLAN_SUMMARY_ID      AS cinp_cin_plan_id,
@@ -1466,14 +1470,14 @@ SELECT
 
     --                                    AS cinp_cin_plan_worker_name
     (SELECT
-        MAX(ISNULL(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  -- [REVIEW] 310524 RH
-                THEN fp.DIM_PLAN_COORD_DEPT_ID_DESC END, '')))
-                                            AS cinp_cin_plan_team_name,
+        MAX(ISNULL(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID   -- [REVIEW] 310524 RH
+                THEN fp.DIM_PLAN_COORD_DEPT_ID END, '')))                                   -- was fp.DIM_PLAN_COORD_DEPT_ID_DESC
+                                            AS cinp_cin_plan_team,
 
     (SELECT
-        MAX(ISNULL(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID  -- [REVIEW] 310524 RH
-                THEN fp.DIM_PLAN_COORD_ID_DESC END, '')))
-                                            AS cinp_cin_plan_worker_name
+        MAX(ISNULL(CASE WHEN fp.FACT_CARE_PLAN_SUMMARY_ID = cps.FACT_CARE_PLAN_SUMMARY_ID   -- [REVIEW] 310524 RH
+                THEN fp.DIM_PLAN_COORD_ID END, '')))                                        -- was fp.DIM_PLAN_COORD_ID_DESC
+                                            AS cinp_cin_plan_worker_id
 
 FROM Child_Social.FACT_CARE_PLAN_SUMMARY cps  
  
@@ -1607,7 +1611,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_s47_enquiry
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.2
+            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
 Status: [R]elease
 Remarks: 
 Dependencies: 
@@ -1635,8 +1640,8 @@ CREATE TABLE ssd_development.ssd_s47_enquiry (
     s47e_s47_end_date                   DATETIME,                   -- metadata={"item_ref":"S47E005A"}
     s47e_s47_nfa                        NCHAR(1),                   -- metadata={"item_ref":"S47E006A"}
     s47e_s47_outcome_json               NVARCHAR(1000),             -- metadata={"item_ref":"S47E007A"}
-    s47e_s47_completed_by_team_name     NVARCHAR(255),              -- metadata={"item_ref":"S47E009A"}
-    s47e_s47_completed_by_worker_name   NVARCHAR(100),              -- metadata={"item_ref":"S47E008A"}
+    s47e_s47_completed_by_team          NVARCHAR(255),              -- metadata={"item_ref":"S47E009A"}
+    s47e_s47_completed_by_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"S47E008A"}
 );
 
 -- insert data
@@ -1648,8 +1653,8 @@ INSERT INTO ssd_s47_enquiry(
     s47e_s47_end_date,
     s47e_s47_nfa,
     s47e_s47_outcome_json,
-    s47e_s47_completed_by_team_name,
-    s47e_s47_completed_by_worker_name
+    s47e_s47_completed_by_team,
+    s47e_s47_completed_by_worker_id
 )
 SELECT 
     s47.FACT_S47_ID,
@@ -1672,8 +1677,8 @@ SELECT
             NULLIF(s47.OUTCOME_COMMENTS, '')                   AS "OUTCOME_COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS s47e_s47_outcome_json,
-    s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team_name,
-    s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker_name
+    s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
+    s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker_id
 
 FROM 
     Child_Social.FACT_S47 AS s47;
@@ -1721,7 +1726,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_initial_cp_conference
 Description:
 Author: D2I
-Version: 1.0
+Version: 1.2
+            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
             0.3 Updated source of CP_PLAN_ID 100424 JH
             0.2 Updated the worker fields 020424 JH
             0.1 Re-instated the worker details 010224 JH
@@ -1755,8 +1761,8 @@ CREATE TABLE ssd_development.ssd_initial_cp_conference (
     icpc_icpc_date              DATETIME,                   -- metadata={"item_ref":"ICPC005A"}
     icpc_icpc_outcome_cp_flag   NCHAR(1),                   -- metadata={"item_ref":"ICPC013A"}
     icpc_icpc_outcome_json      NVARCHAR(1000),             -- metadata={"item_ref":"ICPC006A"}
-    icpc_icpc_team_name         NVARCHAR(255),              -- metadata={"item_ref":"ICPC007A"}
-    icpc_icpc_worker_name       NVARCHAR(100),              -- metadata={"item_ref":"ICPC008A"}
+    icpc_icpc_team              NVARCHAR(255),              -- metadata={"item_ref":"ICPC007A"}
+    icpc_icpc_worker_id         NVARCHAR(100),              -- metadata={"item_ref":"ICPC008A"}
 );
  
  
@@ -1773,8 +1779,8 @@ INSERT INTO ssd_initial_cp_conference(
     icpc_icpc_date,
     icpc_icpc_outcome_cp_flag,
     icpc_icpc_outcome_json,
-    icpc_icpc_team_name,
-    icpc_icpc_worker_name
+    icpc_icpc_team,
+    icpc_icpc_worker_id
 )
  
 SELECT
@@ -1800,8 +1806,8 @@ SELECT
             NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     )                                                               AS icpc_icpc_outcome_json,
-    fcpc.ORGANISED_BY_DEPT_NAME                                     AS icpc_icpc_team_name,
-    fcpc.ORGANISED_BY_USER_NAME                                     AS icpc_icpc_worker_name
+    fcpc.ORGANISED_BY_DEPT_ID                                       AS icpc_icpc_team,          -- was fcpc.ORGANISED_BY_DEPT_NAME 
+    fcpc.ORGANISED_BY_USER_STAFF_ID                                 AS icpc_icpc_worker_id      -- was fcpc.ORGANISED_BY_USER_NAME
  
  
 FROM
@@ -3470,7 +3476,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_care_leavers
 Description:
 Author: D2I
-Version: 1.1
+Version: 1.2
+            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
             1.0: Fix Aggr warnings use of isnull() 310524 RH
             0.3: change of main source to DIM_CLA_ELIGIBILITY in order to capture full care leaver cohort 12/03/24 JH
             0.2: switch field _worker)nm and _team_nm around as in wrong order RH
@@ -3510,8 +3517,8 @@ CREATE TABLE ssd_development.ssd_care_leavers
     clea_care_leaver_activity               NVARCHAR(100),              -- metadata={"item_ref":"CLEA008A"}
     clea_pathway_plan_review_date           DATETIME,                   -- metadata={"item_ref":"CLEA009A"}
     clea_care_leaver_personal_advisor       NVARCHAR(100),              -- metadata={"item_ref":"CLEA010A"}
-    clea_care_leaver_allocated_team_name    NVARCHAR(255),              -- metadata={"item_ref":"CLEA011A"}
-    clea_care_leaver_worker_name            NVARCHAR(100)               -- metadata={"item_ref":"CLEA012A"}
+    clea_care_leaver_allocated_team         NVARCHAR(255),              -- metadata={"item_ref":"CLEA011A"}
+    clea_care_leaver_worker_id              NVARCHAR(100)               -- metadata={"item_ref":"CLEA012A"}
 );
  
 -- CTE for involvement history incl. worker data
@@ -3520,11 +3527,11 @@ WITH InvolvementHistoryCTE AS (
     SELECT
         fi.DIM_PERSON_ID,
         -- worker, alloc team, and p.advisor dets <<per involvement type>>
-        MAX(ISNULL(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.DIM_WORKER_NAME END, ''))                      AS CurrentWorkerName,    -- c.w name for the 'CW' inv type
-        MAX(ISNULL(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END, ''))  AS AllocatedTeamName,    -- team desc for the 'CW' inv type
-        MAX(ISNULL(CASE WHEN fi.RecentInvolvement = '16PLUS' THEN fi.DIM_WORKER_NAME END, ''))                  AS PersonalAdvisorName   -- p.a. for the '16PLUS' inv type
+        MAX(ISNULL(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.DIM_WORKER_ID END, ''))                      AS CurrentWorker,    -- c.w name for the 'CW' inv type
+        MAX(ISNULL(CASE WHEN fi.RecentInvolvement = 'CW' THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_ID END, ''))  AS AllocatedTeam,    -- team desc for the 'CW' inv type
+        MAX(ISNULL(CASE WHEN fi.RecentInvolvement = '16PLUS' THEN fi.DIM_WORKER_ID END, ''))                  AS PersonalAdvisor   -- p.a. for the '16PLUS' inv type
 
-    
+        -- was fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC & fi.FACT_WORKER_NAME. fi.DIM_DEPARTMENT_ID also available
     
     FROM (
         SELECT *,
@@ -3567,8 +3574,8 @@ INSERT INTO ssd_care_leavers
     clea_care_leaver_activity,
     clea_pathway_plan_review_date,
     clea_care_leaver_personal_advisor,                  
-    clea_care_leaver_allocated_team_name,
-    clea_care_leaver_worker_name            
+    clea_care_leaver_allocated_team,
+    clea_care_leaver_worker_id            
 )
  
 SELECT
@@ -3593,9 +3600,9 @@ SELECT
     AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH' 
     THEN fcp.MODIF_DTTM END, '1900-01-01'))                 AS clea_pathway_plan_review_date,
 
-    ih.PersonalAdvisorName                                  AS clea_care_leaver_personal_advisor,
-    ih.AllocatedTeamName                                    AS clea_care_leaver_allocated_team_name,
-    ih.CurrentWorkerName                                    AS clea_care_leaver_worker_name
+    ih.PersonalAdvisor                                      AS clea_care_leaver_personal_advisor,
+    ih.AllocatedTeam                                        AS clea_care_leaver_allocated_team,
+    ih.CurrentWorker                                        AS clea_care_leaver_worker_id
  
 FROM
     Child_Social.DIM_CLA_ELIGIBILITY AS dce
@@ -3625,9 +3632,9 @@ GROUP BY
     fccl.DIM_LOOKUP_ACCOMMODATION_CODE_DESC,
     fccl.DIM_LOOKUP_ACCOMMODATION_SUITABLE_DESC,
     fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC,
-    ih.PersonalAdvisorName,
-    ih.CurrentWorkerName,
-    ih.AllocatedTeamName          
+    ih.PersonalAdvisor,
+    ih.CurrentWorker,
+    ih.AllocatedTeam          
     ;
 
 
@@ -3657,7 +3664,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_permanence
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.2
+            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
             0.5: perm_placed_foster_carer_date placeholder re-added 240424 RH
             0.4: worker_name field name change for consistency 100424 JH
             0.3: entered_care_date removed/moved to cla_episodes 060324 RH
@@ -3713,7 +3721,7 @@ CREATE TABLE ssd_development.ssd_permanence (
     perm_decision_reversed_reason   NVARCHAR(100),              -- metadata={"item_ref":"PERM016A"}
     perm_permanence_order_date      DATETIME,                   -- metadata={"item_ref":"PERM017A"}              
     perm_permanence_order_type      NVARCHAR(100),              -- metadata={"item_ref":"PERM018A"}        
-    perm_adoption_worker            NVARCHAR(100)               -- metadata={"item_ref":"PERM023A"}
+    perm_adoption_worker_id         NVARCHAR(100)               -- metadata={"item_ref":"PERM023A"}
     
 );
 
@@ -3762,7 +3770,7 @@ WITH RankedPermanenceData AS (
             WHEN fce.CARE_REASON_END_CODE IN ('45', 'E41') THEN 'Child Arrangements/ Residence Order'
             ELSE NULL
         END                                               AS perm_permanence_order_type,
-        fa.ADOPTION_SOCIAL_WORKER_NAME                    AS perm_adoption_worker,
+        fa.ADOPTION_SOCIAL_WORKER_ID                      AS perm_adoption_worker_id,
         ROW_NUMBER() OVER (
             PARTITION BY p.LEGACY_ID                     -- partition on person identifier
             ORDER BY CAST(RIGHT(CASE 
@@ -3815,7 +3823,7 @@ INSERT INTO ssd_permanence (
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker
+    perm_adoption_worker_id
 )  
 
 
@@ -3842,7 +3850,7 @@ SELECT
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker
+    perm_adoption_worker_id
 
 FROM RankedPermanenceData
 WHERE rn = 1
