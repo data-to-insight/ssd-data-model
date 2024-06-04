@@ -1,0 +1,1029 @@
+item_ref,object_name,categories,constraints,type,max_field_size,field_name,description,foreign_key,expected_data,returns,cms,cms_field,cms_table,required_enabled,unique_enabled,primary_key,join_type,guidance
+PERS001A,ssd_person,identity,,nvarchar,48,pers_person_id,Person Unique ID,,,SSDA903|CIN|AnnexA|RIIA|SEN2,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : pers_person_id|mosaic : pers_person_id,liquid_logic : ssd_person|mosaic : ssd_person,Yes,Yes,Yes,,Person's ID generated in CMS Database
+PERS002A,ssd_person,identity,,nvarchar,20,pers_sex,Sex,,,SSDA903|RIIA|AnnexA|SEN2,liquid_logic|mosaic|eclipse|caredirector,liquid_logic : pers_sex|mosaic : pers_sex,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"Person's Sex, as recorded on a birth certificate or in a gender recognition certificate. 
+Code set 
+F - Female 
+M - Male 
+U - Unknown "
+PERS003A,ssd_person,identity,,nvarchar,10,pers_gender,Gender,,"[""unknown"",NULL, F, U, M, I] ",CIN|RIIA,liquid_logic|mosaic|azeus,liquid_logic : pers_gender|mosaic : pers_gender,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"A person’s inner concept of self as male, female, neither or a blend of both. 
+Code set 
+00 - Not known (for example, question has not been asked, answer was refused) 
+01 - Man / Boy / Male [systems should display the most appropriate value, e.g. Boy for children, Man for adults, Male if preferred]  
+02 - Woman / Girl / Female [systems should display the most appropriate value, e.g. Girl for children, Woman for adults, Female if preferred] 
+09 - Prefer to Self-Describe 
+Codes 10 to 99 to be available for local use but to be regarded as subcodes of 9 (Other). Free text field or locally defined codes to be available for recording individual’s identification where ‘Prefer to Self-Describe’ has been chosen. While there are no plans to transfer this data it is envisaged that, if transfer of codes were to be implemented, only code ‘9’ would be transferred rather than codes ‘11’, ‘12’ etc."
+PERS004A,ssd_person,identity,,nvarchar,48,pers_ethnicity,Ethnicity,,,SSDA903|CIN|AnnexA|RIIA|SEN2,liquid_logic|mosaic|azeus,liquid_logic : pers_ethnicity|mosaic : pers_ethnicity,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"Person's Ethnicity. This information must come from the child, or the parent, guardian or carer. 
+Where the ethnicity has not yet been collected, this is recorded as ‘NOBT’ (information not yet obtained). Where a child, parent, guardian or carer declines to provide ethnicity data, code ‘REFU’ (refused) is recorded. 
+Ethnicity should be recorded using one of the DfE main categories shown below, which replicate those used in the school census and the children in need (CIN) return. 
+Code set 
+WBRI   -   White British 
+WIRI    -   White Irish 
+WOTH -   Any other White background  
+WIRT    -  Traveller of Irish Heritage 
+WROM -  Gypsy/Roma 
+MWBC -  White and Black Caribbean 
+MWBA -  White and Black African 
+MWAS -  White and Asian 
+MOTH  -  Any other Mixed background 
+AIND    -  Indian 
+APKN   -  Pakistani 
+ABAN   -  Bangladeshi 
+CNHE   -  Chinese 
+AOTH  -  Any other Asian background 
+BCRB  -  Caribbean 
+BAFR  -  African 
+BOTH -  Any other Black background 
+OOTH -  Any other ethnic group 
+REFU  -  Refused 
+NOBT -  Information not yet obtained "
+PERS005A,ssd_person,identity,,datetime,NULL,pers_dob,Date of Birth,,,SSDA903|CIN|AnnexA|RIIA|SEN2,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : pers_dob|mosaic : pers_dob,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"Person's date of birth. Either Date of Birth or Expected Date of Birth should be recorded, but not both. If the exact day of birth is not known:
+Unknown dates can be a problem for unaccompanied asylum-seeking children, If the day of birth is not known then assume that it was the 15th of the month. Do not use first day of the month as a dummy date of birth."
+PERS013A,ssd_person,identity,,nvarchar,48,pers_common_child_id,Common Child Identifier (NHS Number),,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : pers_common_child_id|mosaic : pers_common_child_id,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"This is a lifetime national identifier allocated from birth, or when a person registers with the NHS 
+for the first time (England, Isle of Man and Wales). Allocated by the PDS, the first nine digits are the identifier and the tenth helps the number test its own validity."
+PERS014A,ssd_person,identity,,nvarchar,48,pers_legacy_id,Person System ID,,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : pers_legacy_id|mosaic : pers_legacy_id,,,,,,"This must be a unique ID for each child (no longer than 20 characters) and should be retained from year to year. A child ID should not be reused after a period of time, it should be unique to a single child in your local authority. It can include alphabetic and numeric characters. Do not use non-numeric or non-alphabetic characters. 
+If a looked-after child is adopted, and subsequently becomes looked-after again later, they should have two separate unlinked records – one for pre-adoption and one for post-adoption – with two different child identifiers."
+PERS007A,ssd_person,identity,,nvarchar,6,pers_upn_unknown,UPN Unknown,,,RIIA|CIN|SEN2,liquid_logic|mosaic|azeus,liquid_logic : pers_upn_unknown|mosaic : pers_upn_unknown,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"If the UPN is unknown, then one of the codes below should be used. If a child is educated outside England, please use UPN unknown code UN3, unless the child has a UPN from previously attending a school in England. If the child is home educated and has previously attended a mainstream school, please provide the UPN allocated earlier. 
+Code set 
+UN1 - Child looked-after is not of school age and has not yet been assigned a UPN 
+UN2 - Child looked-after has never attended a maintained school in England (for example, some unaccompanied asylum-seeking children (UASC)) 
+UN3 - Child looked-after is educated outside England 
+UN4 - Child is newly looked-after and the UPN is not yet known 
+UN5 - Sources collating UPNs reflect discrepancy(ies) for the child's name and/or surname and/or date of birth therefore preventing reliable matching (for example, duplicated UPNs)"
+PERS008A,ssd_person,identity,,nchar,1,pers_send_flag,SEND Flag,,,NEETandparticipation|RIIA,liquid_logic,liquid_logic : pers_send_flag|mosaic : pers_send_flag,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"Flag showing if a person has an EHC plan recorded on the system. 
+Code set 
+Y - Has an EHC Plan 
+N - Does not have an EHC Plan "
+PERS009A,ssd_person,identity,,datetime,NULL,pers_expected_dob,Expected Birth Date,,,CIN|RIIA,liquid_logic|azeus,liquid_logic : pers_expected_dob|mosaic : pers_expected_dob,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"The expected date of birth (due date) is recorded for a child who is unborn at the time of referral. 
+If the child is born before the case is closed, then the actual date of birth should be recorded.
+If a child is stillborn, or the mother suffers a miscarriage (including a chemical pregnancy) or a phantom pregnancy, or there is a termination of the pregnancy, please record the expected date of birth and leave the date of birth blank. The children in need (CIN) closure date does not need to match the date on the death certificate. The date of death and the final closure date can both be recorded. The reason for CIN closure should be recorded as ‘RC2 died’."
+PERS010A,ssd_person,identity,,datetime,NULL,pers_death_date,Date of Death,,,CIN|RIIA,liquid_logic|azeus,liquid_logic : pers_death_date|mosaic : pers_death_date,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"Date of death, which should be verified from the death certificate.
+"
+PERS011A,ssd_person,identity,,nchar,1,pers_is_mother,Mother,,,SSDA903|RIIA,liquid_logic|azeus,liquid_logic : pers_is_mother|mosaic : pers_is_mother,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"Calculated within the SSD extract based on if a parent-child relationship exists for persons with a sex code other than Male (i.e. Female or Unknown). A child will be classified as a mother even if they do not care for the child themselves (for example, if consent was given for the child to be adopted). 
+Code set 
+N - Child is not a mother 
+Y - Child is a mother "
+PERS012A,ssd_person,identity,,nvarchar,48,pers_nationality,Country of Origin (UASC),,,ADCS_SP|RIIA,liquid_logic|mosaic,liquid_logic : pers_nationality|mosaic : pers_nationality,liquid_logic : ssd_person|mosaic : ssd_person,,,,,"Required for UASC, reported in the ADCS Safeguarding Pressures research."
+FAMI003A,ssd_family,identity|family,,nvarchar,48,fami_table_id,Family table row id,,,Local,,,,,,,,Row identifier for the ssd_family table
+FAMI001A,ssd_family,identity|family,,nvarchar,48,fami_family_id,Family identifier,,,ASGLB|AnnexA,liquid_logic|mosaic,liquid_logic : fami_family_id|mosaic : fami_family_id,liquid_logic : ssd_family|mosaic : ssd_family,Yes,Yes,Yes,,For linking to adoptive family or Family-level interventions e.g. Early Help
+FAMI002A,ssd_family,identity|family,,nvarchar,48,fami_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic,liquid_logic : fami_person_id|mosaic : fami_person_id,liquid_logic : ssd_family|mosaic : ssd_family,Yes,,,LEFT,Person's ID generated in CMS Database
+ADDR007A,ssd_address,identity|address,,nvarchar,48,addr_table_id,Address table row ID,,,Local,liquid_logic|mosaic,liquid_logic : addr_table_id|mosaic : addr_table_id,liquid_logic : ssd_address|mosaic : ssd_address,Yes,Yes,Yes,,Row identifier for the ssd_address table
+ADDR001A,ssd_address,identity|address,,nvarchar,1000,addr_address_json,Address,,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : addr_address_json|mosaic : addr_address_json,liquid_logic : ssd_address|mosaic : ssd_address,Yes,Yes,,,"Address (combined dictionary/json type containing: room, floor, flat, building, house num, street, locality, town, county, uprn, easting, northing)"
+ADDR002A,ssd_address,identity|address,,nvarchar,48,addr_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : addr_person_id|mosaic : addr_person_id,liquid_logic : ssd_address|mosaic : ssd_address,,,,INNER,Person's ID generated in CMS Database
+ADDR003A,ssd_address,identity|address,,nvarchar,48,addr_address_type,Address Type,,,Local,liquid_logic|mosaic,liquid_logic : addr_address_type|mosaic : addr_address_type,liquid_logic : ssd_address|mosaic : ssd_address,,,,,"Type of Address, e.g. Home/ Placement/ Primary etc."
+ADDR004A,ssd_address,identity|address,,datetime,NULL,addr_address_start_date,Address Start Date/ From,,,Local,liquid_logic|mosaic,liquid_logic : addr_address_start_date|mosaic : addr_address_start_date,liquid_logic : ssd_address|mosaic : ssd_address,,,,,Date person started living at the address
+ADDR005A,ssd_address,identity|address,,datetime,NULL,addr_address_end_date,Address End Date/ To,,,Local,liquid_logic|mosaic,liquid_logic : address_end|mosaic : address_end,liquid_logic : ssd_address|mosaic : ssd_address,,,,,Date person left the address 
+ADDR006A,ssd_address,identity|address,,nvarchar,15,addr_address_postcode,Address Postcode,,,SSDA903|AnnexA|SEN2,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : addr_address_postcode|mosaic : addr_address_postcode,liquid_logic : ssd_address|mosaic : ssd_address,,,,,"Address Postcode, auto-formatted to remove spaces for consistency"
+DISA001A,ssd_disability,identity|disability,,nvarchar,48,disa_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : disa_person_id|mosaic : disa_person_id,liquid_logic : ssd_disability|mosaic : ssd_disability,Yes,Yes,,,Person's ID generated in CMS Database
+DISA003A,ssd_disability,identity|disability,,nvarchar,48,disa_table_id,Disability table row ID,,,Local,liquid_logic|mosaic,liquid_logic : disa_table_id|mosaic : disa_table_id,liquid_logic : ssd_disability|mosaic : ssd_disability,,,Yes,,Row identifier for the ssd_disability table
+DISA002A,ssd_disability,identity|disability,,nvarchar,48,disa_disability_code,Disability Code,,,CIN|AnnexA,liquid_logic|mosaic,liquid_logic : disa_disability_code|mosaic : disa_disability_code,liquid_logic : ssd_disability|mosaic : ssd_disability,Yes,Yes,,,"The Disability Discrimination Act 2005 (DDA) defines a disabled person as a person with a physical or mental impairment which has a substantial and long-term adverse effect on his/her ability to carry out normal day-to-day activities. The condition must have lasted, or be likely to last at least 12 months in order to be counted as a disability. 
+Code set 
+NONE - ‘NO DISABILITY’ 
+MOB - ‘MOBILITY’ – getting about the house and beyond 
+HAND - ‘HAND FUNCTION’ – holding and touching 
+PC - ‘PERSONAL CARE’ – For example, eating, washing, going to the toilet dressing 
+INC - ‘INCONTINENCE’ – controlling the passage of urine or faeces 
+COMM - ‘COMMUNICATION’ – speaking and/or understanding others 
+LD - ‘LEARNING’ – For example, having special educational needs 
+HEAR - ‘HEARING’ 
+VIS - ‘VISION’ 
+BEH - ‘BEHAVIOUR’ – a condition entailing behavioural difficulties, includes attention deficit hyperactivity disorder (ADHD) 
+CON - ‘CONCIOUSNESS’ – seizures 
+AUT - ‘DIAGNOSED WITH AUTISM OR ASPERGER SYNDROME’ – diagnosed by a qualified medical practitioner as having classical autism or Asperger syndrome. Do not include children who have merely been identified as having an autistic spectrum disorder (ASD), for example by their school. This can be associated with the behaviour and learning categories above. 
+DDA - ‘OTHER DDA’ – one or more of the child’s disabilities under the Disability Discrimination Act 2005 (DDA) does not fall into any of the above categories. 
+
+Certain conditions are not regarded as impairments for the purposes of the act: 
+• addiction to, or dependency on, alcohol, nicotine, or any other substance (other than as a result of the substance being medically prescribed); 
+• the condition known as seasonal allergic rhinitis (hay fever), except where it aggravates the effect of another condition; 
+• tendency to start fires; 
+• tendency to steal; 
+• tendency to physically or sexually abuse other persons; 
+• exhibitionism; 
+• voyeurism 
+In addition, disfigurements such as tattoos, non-medical body piercing, or something attached through such piercing, are not regarded as having a substantial adverse effect on the person’s ability to carry out normal day-to-day activities. 
+If a child is disabled or becomes disabled at any time during the collection year, record all the relevant disabilities that have affected the child. For example, children may have multiple disabilities in which case more than one category from the below list can be selected. ‘Other DDA’ can also be used in conjunction with any of the other categories.
+If your MIS does not allow for the identification of individual disabilities, then the code ‘Other DDA’ may be used for all children with a disability. 
+If a child has no disability, do not leave this item blank; use the code ‘NONE’. However, if a child is unborn then the disability item should be left blank."
+IMMI001A,ssd_immigration_status,identity|immigration|uasc,,nvarchar,48,immi_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : immi_person_id|mosaic : immi_person_id,liquid_logic : ssd_immigration_status|mosaic : ssd_immigration_status,,Yes,,,Person's ID generated in CMS Database
+IMMI005A,ssd_immigration_status,identity|immigration|uasc,,nvarchar,48,immi_immigration_status_id,Immigration Status ID,,,Local,liquid_logic|mosaic,liquid_logic : immi_immigration_status_id|mosaic : immi_immigration_status_id,liquid_logic : ssd_immigration_status|mosaic : ssd_immigration_status,,,Yes,,Row identifier for the ssd_immigration_status table
+IMMI002A,ssd_immigration_status,identity|immigration|uasc,,nvarchar,48,immi_immigration_status,Immigration Status,,,SSDA903|RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : immi_immigration_status|mosaic : immi_immigration_status,liquid_logic : ssd_immigration_status|mosaic : ssd_immigration_status,,,,,Immigration Status e.g. Unaccompanied Asylum Seeking Child
+IMMI003A,ssd_immigration_status,identity|immigration|uasc,,datetime,NULL,immi_immigration_status_start_date,Immigration Status Start,,,RIIA,liquid_logic|mosaic,liquid_logic : immi_immigration_status_start_date|mosaic : immi_immigration_status_start_date,liquid_logic : ssd_immigration_status|mosaic : ssd_immigration_status,,,,,Start Date of Immigration Status
+IMMI004A,ssd_immigration_status,identity|immigration|uasc,,datetime,NULL,immi_immigration_status_end_date,Immigration Status End,,,SSDA903|RIIA,liquid_logic|mosaic,liquid_logic : immi_immigration_status_end_date|mosaic : immi_immigration_status_end_date,liquid_logic : ssd_immigration_status|mosaic : ssd_immigration_status,,,,,End Date of Immigration Status
+MOTH004A,ssd_mother,identity|looked_after|mother,,nvarchar,48,moth_table_id,Mother Table ID,,,Local,,liquid_logic : moth_table_id|mosaic : moth_table_id,,Yes,Yes,Yes,,
+MOTH002A,ssd_mother,identity|looked_after|mother,,nvarchar,48,moth_person_id,Person Unique ID (Mother),ssd_person.pers_person_id (field is both PK/FK),,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : moth_person_id|mosaic : moth_person_id,liquid_logic : ssd_mother|mosaic : ssd_mother,Yes,,,,Person's ID generated in CMS Database
+MOTH001A,ssd_mother,identity|looked_after|mother,,nvarchar,48,moth_childs_person_id,Mother's Child's Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic,liquid_logic : moth_childs_person_id|mosaic : moth_childs_person_id,liquid_logic : ssd_mother|mosaic : ssd_mother,Yes,Yes,Yes, ,The unique identifier of the mother's child.
+MOTH003A,ssd_mother,identity|looked_after|mother,,datetime,NULL,moth_childs_dob,Date of birth of mother's child,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : moth_childs_dob|mosaic : moth_childs_dob,liquid_logic : ssd_mother|mosaic : ssd_mother,,,,,The SSD will include all children for each mother. This information is only currently collected in the SSDA903 (CLA) return where the DOB of the mother's first child is required.
+LEGA001A,ssd_legal_status,identity|looked_after,,nvarchar,48,lega_legal_status_id,Legal Status ID,,,Local,liquid_logic|mosaic,liquid_logic : lega_legal_status_id|mosaic : lega_legal_status_id,liquid_logic : ssd_legal_status|mosaic : ssd_legal_status,Yes,Yes,Yes,,Row identifier for the ssd_legal_status table
+LEGA002A,ssd_legal_status,identity|looked_after,,nvarchar,48,lega_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : lega_person_id|mosaic : lega_person_id,liquid_logic : ssd_legal_status|mosaic : ssd_legal_status,Yes,,,,Person's ID generated in CMS Database
+LEGA003A,ssd_legal_status,identity|looked_after,,nvarchar,100,lega_legal_status,Legal Status,,,SSDA903|AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : lega_legal_status|mosaic : lega_legal_status,liquid_logic : ssd_legal_status|mosaic : ssd_legal_status,,,,,"Legal Status type. If a child is looked-after because it is accommodated, the legal status goes some way to describe (in legal terms at least) why the child is being looked after. 
+There are many legal statuses arising from the Children Act, or the Youth Justice System, to which a child can be subject, but which have no bearing on whether a child is ‘looked-after’ or not. These are included in the SSD extract despite not being rerutned in the SSDA903. 
+These incude statuses for permanence orders, e.g. Special Guardianship and Child Arrangement Orders, as well as Private Fostering and Care Leaver legal stauses, among others."
+LEGA004A,ssd_legal_status,identity|looked_after,,datetime,NULL,lega_legal_status_start_date,Legal Status Start Date,,,RIIA,liquid_logic|mosaic,liquid_logic : lega_legal_status_start_date|mosaic : lega_legal_status_start_date,liquid_logic : ssd_legal_status|mosaic : ssd_legal_status,,,,,Start Date of Legal Status
+LEGA005A,ssd_legal_status,identity|looked_after,,datetime,NULL,lega_legal_status_end_date,Legal Status End Date,,,RIIA,liquid_logic|mosaic,liquid_logic : lega_legal_status_end_date|mosaic : lega_legal_status_end_date,liquid_logic : ssd_legal_status|mosaic : ssd_legal_status,,,,,End Date of Legal Status
+CONT001A,ssd_contacts,contact,,nvarchar,48,cont_contact_id,Contact ID,,,Local,liquid_logic|mosaic,liquid_logic : cont_contact_id|mosaic : cont_contact_id,liquid_logic : ssd_contacts|mosaic : ssd_contacts,Yes,Yes,Yes,,Row identifier for the ssd_contacts table
+CONT002A,ssd_contacts,contact,,nvarchar,48,cont_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : cont_person_id|mosaic : cont_person_id,liquid_logic : ssd_contacts|mosaic : ssd_contacts,Yes,,,,Person's ID generated in CMS Database
+CONT003A,ssd_contacts,contact,,datetime,NULL,cont_contact_date,Date of Contact,,,AnnexA|RIIA,liquid_logic|mosaic|azeus,liquid_logic : cont_contact_date|mosaic : cont_contact_date,liquid_logic : ssd_contacts|mosaic : ssd_contacts,,,,,Date Contact received into LA
+CONT004A,ssd_contacts,contact,,nvarchar,48,cont_contact_source_code,Contact Source Code,,,AnnexA|RIIA,liquid_logic|mosaic|azeus,liquid_logic : cont_contact_source_code|mosaic : cont_contact_source_code,liquid_logic : ssd_contacts|mosaic : ssd_contacts,,,,,Contact Source Code
+CONT006A,ssd_contacts,contact,,nvarchar,255,cont_contact_source_desc,Contact Source Description,,,Local,,,,,,,,Contact Source Description
+CONT005A,ssd_contacts,contact,,nvarchar,500,cont_contact_outcome_json,Contact Outcome ,,,ADCS_SP|RIIA,liquid_logic|mosaic,liquid_logic : cont_contact_outcome_json|mosaic : cont_contact_outcome_json,liquid_logic : ssd_contacts|mosaic : ssd_contacts,,,,,"Outcome of the Contact. Combined dictionary/ json type containing the following, where there is a value recorded:
+- NEW_REFERRAL_FLAG
+- EXISTING_REFERRAL_FLAG
+- CP_ENQUIRY_FLAG
+- NFA_FLAG
+- NON_AGENCY_ADOPTION_FLAG
+- PRIVATE_FOSTERING_FLAG
+- FAADVICE_FLAG
+- MISSING_FLAG
+- OLA_CP_FLAG
+- OTHER_OUTCOMES_EXIST_FLAG
+- NUMBER_OF_OUTCOMES
+- COMMENTS"
+EARL001A,ssd_early_help_episodes,early_help,,nvarchar,48,earl_episode_id,EH Episode ID,,,Local,liquid_logic|mosaic,liquid_logic : earl_episode_id|mosaic : earl_episode_id,liquid_logic : ssd_early_help_episodes|mosaic : ssd_early_help_episodes,Yes,Yes,Yes,,Row identifier for the ssd_early_help_episodes table
+EARL002A,ssd_early_help_episodes,early_help,,nvarchar,48,earl_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : earl_person_id|mosaic : earl_person_id,liquid_logic : ssd_early_help_episodes|mosaic : ssd_early_help_episodes,Yes,,,,Person's ID generated in CMS Database
+EARL003A,ssd_early_help_episodes,early_help,,datetime,NULL,earl_episode_start_date,EH Episode Start Date,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : earl_episode_start_date|mosaic : earl_episode_start_date,liquid_logic : ssd_early_help_episodes|mosaic : ssd_early_help_episodes,,,,,Date Episode Started
+EARL004A,ssd_early_help_episodes,early_help,,datetime,NULL,earl_episode_end_date,EH Episode End Date,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : earl_episode_end_date|mosaic : earl_episode_end_date,liquid_logic : ssd_early_help_episodes|mosaic : ssd_early_help_episodes,,,,,Date Episode Ended
+EARL005A,ssd_early_help_episodes,early_help,,nvarchar,100,earl_episode_reason,EH Episode Reason for Involvement,,,ADCS_SP|RIIA,liquid_logic|mosaic,liquid_logic : earl_episode_reason|mosaic : earl_episode_reason,liquid_logic : ssd_early_help_episodes|mosaic : ssd_early_help_episodes,,,,,Broad categorisation of Reason for Early Help Involvement. 
+EARL006A,ssd_early_help_episodes,early_help,,nvarchar,100,earl_episode_end_reason,EH Episode End Reason,,,ADCS_SP|RIIA,liquid_logic|mosaic,liquid_logic : earl_episode_end_reason|mosaic : earl_episode_end_reason,liquid_logic : ssd_early_help_episodes|mosaic : ssd_early_help_episodes,,,,,Reason Episode endeed e.g. Outcomes met/ Step-up/ NFA
+EARL007A,ssd_early_help_episodes,early_help,,nvarchar,100,earl_episode_organisation,EH Episode Allocated Organisation,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : earl_episode_organisation|mosaic : earl_episode_organisation,liquid_logic : ssd_early_help_episodes|mosaic : ssd_early_help_episodes,,,,,Organisation responsible for Early Help provision
+EARL008A,ssd_early_help_episodes,early_help,,nvarchar,100,earl_episode_worker_name,EH Episode Allocated Worker,ssd_involvements.invo_professional_id,,RIIA,liquid_logic|mosaic,liquid_logic : earl_episode_worker_name|mosaic : earl_episode_worker_name,liquid_logic : ssd_early_help_episodes|mosaic : ssd_early_help_episodes,,,,,Allocated worker responsible for Early Help provision
+CINE001A,ssd_cin_episodes,child_in_need|referral,,nvarchar,48,cine_referral_id,CIN Referral ID,,,Loca;,liquid_logic|mosaic,liquid_logic : cine_referral_id|mosaic : cine_referral_id,liquid_logic : ssd_cin_episodes|mosaic : ssd_cin_episodes,Yes,Yes,Yes,,Row identifier for the ssd_cin_episodes table
+CINE002A,ssd_cin_episodes,child_in_need,,nvarchar,48,cine_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : cine_person_id|mosaic : cine_person_id,liquid_logic : ssd_cin_episodes|mosaic : ssd_cin_episodes,Yes,,,,Person's ID generated in CMS Database
+CINE003A,ssd_cin_episodes,child_in_need|referral,,datetime,NULL,cine_referral_date,CIN Referral Date,,,CIN|AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cine_referral_date|mosaic : cine_referral_date,liquid_logic : ssd_cin_episodes|mosaic : ssd_cin_episodes,,,,,Date the Referral is effective from
+CINE010A,ssd_cin_episodes,child_in_need|referral,,nvarchar,3,cine_cin_primary_need,CIN Primary Need Code,,,CIN|AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cine_cin_primary_need|mosaic : cine_cin_primary_need,liquid_logic : ssd_cin_episodes|mosaic : ssd_cin_episodes,,,,,"CIN Primary Need Code. This code indicates the main reason why a child started to receive services. 
+The categories are designed only to identify what kind of pressures are placed on social services. They have no diagnostic value with regard to the children themselves and must not be used to determine what type of service the child should receive.
+If there is difficulty choosing between two or more categories of need, choose the category that comes highest up in the table, for example, if trying to decide between family in acute stress and family dysfunction, choose family in acute stress.
+The order of the categories relates to the specificity of the description and not necessarily importance. However, the order is fixed so that there is consistency.
+The children in need census for 2005 and earlier tried to account for all money spent in a census week. To allow for this, ‘N9’ was created, but as this census is specifically child based, the definition of ‘N9’ from 2005 is not applicable. As in previous years, ‘N9’ can be used if a child is no longer in need and the only service they are receiving is adoption support (on an open case) immediately after they have been in need.
+Code Set
+N1 - Abuse or neglect
+Children in need as a result of, or at risk of, abuse or neglect; also includes children at risk because of domestic violence.
+N2 - Child’s disability
+Children and families whose main need for services arises because of their child’s disability, illness or intrinsic condition.
+N3 - Parental disability or illness
+Children whose main need for services arises because the capacity of their parent(s) (or carer(s)) to care for them is impaired by the parent(s) (or carer(s)) disability, physical or mental illness, or addictions.
+N4 - Family in acute stress
+Children whose needs arise from living in a family that is going through a temporary crisis that diminishes the parental capacity to adequately meet some of the children’s needs.
+N5 - Family dysfunction
+Children whose needs primarily arise from living in a family where the parenting capacity is chronically inadequate.
+N6 - Socially unacceptable behaviour
+Children and families whose need for services primarily arise out of the child’s behaviour impacting detrimentally on the community.
+N7 - Low income
+Children, living in families or independently, whose needs primarily arise from being dependent on an income below the standard state entitlements.
+N8 - Absent parenting
+Children whose needs for services arise mainly from having no parents available to provide for them.
+N9 - Cases other than children in need
+Children who have been adopted and, although they are no longer a child in need, receive adoption support from children’s social services immediately after adoption. This should not be used where a child receives an adoption payment only.
+N0 - Not stated
+Children whose reference data is not completely entered on the system and whose need code is yet to be determined, or the case is a referral that has been closed following assessment."
+CINE004A,ssd_cin_episodes,child_in_need|referral,,nvarchar,48,cine_referral_source_code,CIN Referral Source code,,,CIN|AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cine_referral_source_code|mosaic : cine_referral_source_code,liquid_logic : ssd_cin_episodes|mosaic : ssd_cin_episodes,,,,,Contact Source Code
+CINE012A,ssd_cin_episodes,child_in_need|referral,,nvarchar,255,cine_referral_source_desc,CIN Referral Source description,,,Local,,,,,,,,Contact Source Name
+CINE005A,ssd_cin_episodes,child_in_need|referral,,nvarchar,500,cine_referral_outcome_json,CIN Referral Outcome,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cine_referral_outcome_json|mosaic : cine_referral_outcome_json,liquid_logic : ssd_cin_episodes|mosaic : ssd_cin_episodes,,,,,"Outcome of the Referral. This indicates the outcome of the initial Referral, not the CIN Episode.
+Combined dictionary/ json type containing the following, where there is a value recorded:
+- SINGLE_ASSESSMENT_FLAG
+- NFA_FLAG
+- STRATEGY_DISCUSSION_FLAG
+- CLA_REQUEST_FLAG
+- NON_AGENCY_ADOPTION_FLAG
+- PRIVATE_FOSTERING_FLAG
+- CP_TRANSFER_IN_FLAG
+- CP_CONFERENCE_FLAG
+- CARE_LEAVER_FLAG
+- OTHER_OUTCOMES_EXIST_FLAG
+- NUMBER_OF_OUTCOMES
+- COMMENTS"
+CINE011A,ssd_cin_episodes,child_in_need|referral,,nchar,1,cine_referral_nfa,CIN Referral NFA Flag,,,CIN|AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cine_referral_nfa|mosaic : cine_referral_nfa,liquid_logic : ssd_cin_episodes|mosaic : ssd_cin_episodes,,,,,Indicates the outcome of this contact was that there was no further assessment required
+CINE006A,ssd_cin_episodes,child_in_need,,nvarchar,100,cine_close_reason,CIN Closure Reason,,,CIN|RIIA,liquid_logic|mosaic,liquid_logic : cine_close_reason|mosaic : cine_close_reason,liquid_logic : ssd_cin_episodes|mosaic : ssd_cin_episodes,,,,,"This is the reason the local authority stops providing services to the child.
+Code set
+RC1 - Adopted.
+RC2 - Died.
+RC3 - Child arrangements order.
+RC4 - Special guardianship order.
+RC5 - Transferred to services of another local authority.
+RC6 - Transferred to adult social care services.
+RC7 - Services ceased for any other reason, including child no longer in need.
+RC8 - Case closed after assessment, no further action.
+RC9 - Case closed after assessment, referred to early help."
+CINE007A,ssd_cin_episodes,child_in_need,,datetime,NULL,cine_close_date,CIN Closure Date,,,CIN|RIIA,liquid_logic|mosaic,liquid_logic : cine_close_date|mosaic : cine_close_date,liquid_logic : ssd_cin_episodes|mosaic : ssd_cin_episodes,,,,,"Date the Referral is effective to, i.e. Case Closure Date"
+CINE008A,ssd_cin_episodes,child_in_need|referral,,nvarchar,255,cine_referral_team_name,CIN Referral Completed by Team,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cine_referral_team_name|mosaic : cine_referral_team_name,liquid_logic : ssd_cin_episodes|mosaic : ssd_cin_episodes,,,,,Team responsible for completing the initial Referral
+CINE009A,ssd_cin_episodes,child_in_need|referral,,nvarchar,100,cine_referral_worker_name,CIN Referral Completed by Worker Name,ssd_involvements.invo_professional_id,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cine_referral_worker_name|mosaic : cine_referral_worker_name,liquid_logic : ssd_cin_episodes|mosaic : ssd_cin_episodes,,,,,Worker responsible for completing initial Referral
+CINA001A,ssd_cin_assessments,child_in_need|assessment,,nvarchar,48,cina_assessment_id,Assessment ID,,,CIN|RIIA,liquid_logic|mosaic,liquid_logic : cina_assessment_id|mosaic : cina_assessment_id,liquid_logic : ssd_cin_assessments|mosaic : ssd_cin_assessments,Yes,Yes,Yes,,Row identifier for the ssd_cin_assessments table.
+CINA002A,ssd_cin_assessments,child_in_need|assessment,,nvarchar,48,cina_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : cina_person_id|mosaic : cina_person_id,liquid_logic : ssd_cin_assessments|mosaic : ssd_cin_assessments,Yes,,,,Person's ID generated in CMS Database
+CINA010A,ssd_cin_assessments,child_in_need|assessment,,nvarchar,48,cina_referral_id,Referral ID,ssd_cin_episodes.cine_referral_id,,Local,liquid_logic|mosaic,liquid_logic : cina_referral_id|mosaic : cina_referral_id,liquid_logic : ssd_cin_assessments|mosaic : ssd_cin_assessments,,,,,ID for linking to CIN Referral Episode
+CINA003A,ssd_cin_assessments,child_in_need|assessment,,datetime,NULL,cina_assessment_start_date,Assessment Start Date,,,CIN|RIIA,liquid_logic|mosaic,liquid_logic : cina_assessment_start_date|mosaic : cina_assessment_start_date,liquid_logic : ssd_cin_assessments|mosaic : ssd_cin_assessments,,,,,This is the actual start date of the continuous assessment.
+CINA004A,ssd_cin_assessments,child_in_need|assessment,,nchar,1,cina_assessment_child_seen,Child Seen During Assessment,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cina_assessment_child_seen|mosaic : cina_assessment_child_seen,liquid_logic : ssd_cin_assessments|mosaic : ssd_cin_assessments,,,,,Was the child seen during the Assessment process?
+CINA005A,ssd_cin_assessments,child_in_need|assessment,,datetime,NULL,cina_assessment_auth_date,Assessment Authorised Date,,,CIN|RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : cina_assessment_auth_date|mosaic : cina_assessment_auth_date,liquid_logic : ssd_cin_assessments|mosaic : ssd_cin_assessments,,,,,"This is the date the assessment is completed and authorised.
+An assessment is deemed to be completed once the social worker has informed, in writing, all the relevant agencies and the family of their decisions and if the child is a child in need, of the plan for providing support/ or once the assessment has been discussed with the child’s family (or carers) and the team manager has viewed and authorised the assessment."
+CINA006A,ssd_cin_assessments,child_in_need|assessment,,nvarchar,1000,cina_assessment_outcome_json,Assessment Outcome,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cina_assessment_outcome_json|mosaic : cina_assessment_outcome_json,liquid_logic : ssd_cin_assessments|mosaic : ssd_cin_assessments,,,,,"Outcome of the single assessment. Combined dictionary/ json type containing the following, where there is a value recorded:
+- NFA_FLAG
+- NFA_S47_END_FLAG
+- STRATEGY_DISCUSSION_FLAG
+- CLA_REQUEST_FLAG
+- PRIVATE_FOSTERING_FLAG
+- LEGAL_ACTION_FLAG
+- PROV_OF_SERVICES_FLAG
+- PROV_OF_SB_CARE_FLAG
+- SPECIALIST_ASSESSMENT_FLAG
+- REFERRAL_TO_OTHER_AGENCY_FLAG
+- OTHER_ACTIONS_FLAG
+- OTHER_OUTCOMES_EXIST_FLAG
+- TOTAL_NO_OF_OUTCOMES
+- COMMENTS"
+CINA009A,ssd_cin_assessments,child_in_need|assessment,,NCHAR,1,cina_assessment_outcome_nfa,Assessment NFA,,,CIN|RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : cina_assessment_outcome_nfa|mosaic : cina_assessment_outcome_nfa,liquid_logic : ssd_cin_assessments|mosaic : ssd_cin_assessments,,,,,Standalone field showing whether or not the Assessment resulted in No Further Action.
+CINA007A,ssd_cin_assessments,child_in_need|assessment,,nvarchar,255,cina_assessment_team_name,Assessment Completed by Team,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cina_assessment_team_name|mosaic : cina_assessment_team_name,liquid_logic : ssd_cin_assessments|mosaic : ssd_cin_assessments,,,,,Team responsible for completing the Assessment
+CINA008A,ssd_cin_assessments,child_in_need|assessment,,nvarchar,100,cina_assessment_worker_name,Assessment Completed by Worker name,ssd_involvements.invo_professional_id,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cina_assessment_worker_name|mosaic : cina_assessment_worker_name,liquid_logic : ssd_cin_assessments|mosaic : ssd_cin_assessments,,,,,Worker responsible for completing the Assessment
+CINF003A,ssd_assessment_factors,child_in_need|assessment,,nvarchar,48,cinf_table_id,Assessment Factors Table ID,,,Local,,liquid_logic : cinf_table_id|mosaic : cinf_table_id,,,,Yes,,Row identifier for the ssd_assessment_factors table.
+CINF001A,ssd_assessment_factors,child_in_need|assessment,,nvarchar,48,cinf_assessment_id,Assessment ID,ssd_cin_assessments.cina_assessment_id,,Local,liquid_logic|mosaic,liquid_logic : cinf_assessment_id|mosaic : cinf_assessment_id,liquid_logic : ssd_assessment_factors|mosaic : ssd_assessment_factors,Yes,Yes,,,ID for linking to CIN Assessment record
+CINF002A,ssd_assessment_factors,child_in_need|assessment,,nvarchar,1000,cinf_assessment_factors_json,Assessment Factors,,,CIN,liquid_logic|mosaic,liquid_logic : cinf_assessment_factors_json|mosaic : cinf_assessment_factors_json,liquid_logic : ssd_assessment_factors|mosaic : ssd_assessment_factors,,,,,"Record of the factors as understood at the end of the Assessment.
+Code set
+1A/1B/1C - Alcohol misuse by the child/ parent(s) or carer(s)/ another person living in the household.
+2A/2B/2C - Drug misuse by the child/ parent(s) or carer(s)/ another person living in the household.
+3A/3B/3C - Concerns about the child/ parent(s) or carer(s)/ another person living in the household being the subject of domestic violence.
+4A/4B/4C - Concerns about Mental Health of the child/ parent(s) or carer(s)/ another person living in the household.
+5A/5B/5C - Concerns about Learning Disability of the Child/ parent(s) or carer(s)/ another person living in the household.
+6A/6B/6C - Concerns about Physical Disability/ illness of the Child/ parent(s) or carer(s)/ another person living in the household.
+7A - Young carer: concerns child’s health or development may be impaired due to their caring responsibilities.
+8B   - Privately fostered - overseas children who intend to return
+8C   - Privately fostered - overseas children who intend to stay
+8D   - Privately fostered - UK children in educational placements
+8E   - Privately fostered - UK children making alternative family arrangements
+8F   - Privately fostered - other
+9A   - UASC unaccompanied asylum-seeking child
+10A - Missing: concerns that the child may be at risk of harm due to going/being missing.
+11A - Child sexual exploitation: concerns that the child may be at risk of harm due to child sexual exploitation.
+12A - Trafficking: concerns that services may be required or the child may be at risk of harm due to trafficking.
+13A - Gangs: concerns that the child may be at risk of harm because of involvement in/with gangs.
+14A - Socially unacceptable behaviour: concerns the child may be at risk due to their socially unacceptable behaviour.
+15A - Self-harm: concerns that services may be required or due to suspected/actual self-harming child may be at risk of harm.
+16A - Abuse or neglect – ‘NEGLECT’: concerns child may be at risk due to neglect.
+17A - Abuse or neglect – ‘EMOTIONAL ABUSE’: concerns child may be at risk due to emotional abuse.
+18B - Abuse or neglect – ‘PHYSICAL ABUSE’ (child on child): concerns child may be at risk due to physical abuse by another child.
+18C - Abuse or neglect – ‘PHYSICAL ABUSE’ (adult on child): concerns child may be at risk due to physical abuse by an adult.
+19B - Abuse or neglect – ‘SEXUAL ABUSE’ (child on child): concerns child may be at risk due to sexual abuse by another child.
+19C - Abuse or neglect – ‘SEXUAL ABUSE’ (adult on child): concerns child may be at risk due to sexual abuse by an adult.
+20   - Other.
+21   - No factors identified - no evidence of any of the factors listed above or below and no further action is being taken.F68
+22A - Female genital mutilation (FGM) - concerns child may be at risk due to female genital mutilation.
+23A - Abuse linked to faith or belief - concerns child may be at risk due to abuse linked to faith or belief.
+24A - Child criminal exploitation - concerns child may be at risk of harm due to child criminal exploitation."
+CINP001A,ssd_cin_plans,child_in_need|cin_plan,,nvarchar,48,cinp_cin_plan_id,CIN Plan ID,,,RIIA,liquid_logic|mosaic,liquid_logic : cinp_cin_plan_id|mosaic : cinp_cin_plan_id,liquid_logic : ssd_cin_plans|mosaic : ssd_cin_plans,Yes,Yes,Yes,,Row identifier for the ssd_cin_plans table.
+CINP007A,ssd_cin_plans,child_in_need|cin_plan,,nvarchar,48,cinp_referral_id,Referral ID,ssd_cin_episodes.cine_referral_id,,Local,liquid_logic|mosaic,liquid_logic : cinp_referral_id|mosaic : cinp_referral_id,liquid_logic : ssd_cin_plans|mosaic : ssd_cin_plans,,,,,ID for linking to CIN Referral Episode
+CINP002A,ssd_cin_plans,child_in_need|cin_plan,,nvarchar,48,cinp_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : cinp_person_id|mosaic : cinp_person_id,liquid_logic : ssd_cin_plans|mosaic : ssd_cin_plans,Yes,,,,Person's ID generated in CMS Database
+CINP003A,ssd_cin_plans,child_in_need|cin_plan,,datetime,NULL,cinp_cin_plan_start_date,CIN Plan Start Date,,,CIN|RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : cinp_cin_plan_start_date|mosaic : cinp_cin_plan_start_date,liquid_logic : ssd_cin_plans|mosaic : ssd_cin_plans,,,,,"Start Date of CIN Plan
+A CIN plan should be developed where the outcome of an assessment is that a local authority children’s social care should provide services. The CIN plan sets out which organisations and agencies will provide which services to the child and family. The plan should also set clear measurable outcomes for the child and expectations for the parent(s) or carer(s). More information on CIN plans is provided in ‘Working together to safeguard children’.
+A child can have one, more than one or no CIN plan(s) – but can only have one at a time.
+CIN plans do not include other plans such as leaving care support or adoption support."
+CINP004A,ssd_cin_plans,child_in_need|cin_plan,,datetime,NULL,cinp_cin_plan_end_date,CIN Plan End Date,,,RIIA|CIN|AnnexA,liquid_logic|mosaic,liquid_logic : cinp_cin_plan_end_date|mosaic : cinp_cin_plan_end_date,liquid_logic : ssd_cin_plans|mosaic : ssd_cin_plans,,,,,"End Date of CIN Plan
+A CIN plan should be developed where the outcome of an assessment is that a local authority children’s social care should provide services. The CIN plan sets out which organisations and agencies will provide which services to the child and family. The plan should also set clear measurable outcomes for the child and expectations for the parent(s) or carer(s). More information on CIN plans is provided in ‘Working together to safeguard children’.
+A CIN plan should be recorded as ended when the period of the CIN plan ends. This may be because the child becomes the subject of a child protection plan; the child becomes looked after; or the child ceases receiving support from children’s social services (due to no longer needing support, being stepped down to early help, or reaching adulthood).
+A child can have one, more than one or no CIN plan(s) – but can only have one at a time.
+CIN plans do not include other plans such as leaving care support or adoption support."
+CINP005A,ssd_cin_plans,child_in_need|cin_plan,,nvarchar,255,cinp_cin_plan_team_name,CIN Plan Allocated Team,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cinp_cin_plan_team_name|mosaic : cinp_cin_plan_team_name,liquid_logic : ssd_cin_plans|mosaic : ssd_cin_plans,,,,,Team responsible for CIN Plan
+CINP006A,ssd_cin_plans,child_in_need|cin_plan,,nvarchar,100,cinp_cin_plan_worker_name,CIN Plan Worker Name,ssd_involvements.invo_professional_id,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cinp_cin_plan_worker_name|mosaic : cinp_cin_plan_worker_name,liquid_logic : ssd_cin_plans|mosaic : ssd_cin_plans,,,,,Worker responsible for CIN Plan
+CINV001A,ssd_cin_visits,child_in_need|cin_plan|visit,,nvarchar,48,cinv_cin_visit_id,CIN Visit ID,,,Local,liquid_logic|mosaic,liquid_logic : cinv_cin_visit_id|mosaic : cinv_cin_visit_id,liquid_logic : ssd_cin_visits|mosaic : ssd_cin_visits,Yes,Yes,Yes,,Row identifier for the ssd_cin_visits table.
+CINV007A,ssd_cin_visits,child_in_need|cin_plan|visit,,nvarchar,48,cinv_person_id,Person Unique ID,ssd_cin_episodes.cine_person_id,,Local,liquid_logic|mosaic,liquid_logic : cinv_person_id|mosaic : cinv_person_id,,,,,,Person's ID generated in CMS Database
+CINV003A,ssd_cin_visits,child_in_need|cin_plan|visit,,datetime,NULL,cinv_cin_visit_date,CIN Visit Date,,,Local,liquid_logic|mosaic,liquid_logic : cinv_cin_visit_date|mosaic : cinv_cin_visit_date,liquid_logic : ssd_cin_visits|mosaic : ssd_cin_visits,,,,,Date of Visit
+CINV004A,ssd_cin_visits,child_in_need|cin_plan|visit,,nchar,1,cinv_cin_visit_seen,Child Seen,,,AnnexA,liquid_logic|mosaic,liquid_logic : cinv_cin_visit_seen|mosaic : cinv_cin_visit_seen,liquid_logic : ssd_cin_visits|mosaic : ssd_cin_visits,,,,,Was the child seen during this visit? Y/N
+CINV005A,ssd_cin_visits,child_in_need|cin_plan|visit,,nchar,1,cinv_cin_visit_seen_alone,Child Seen Alone,,,Local,liquid_logic|mosaic,liquid_logic : cinv_cin_visit_seen_alone|mosaic : cinv_cin_visit_seen_alone,liquid_logic : ssd_cin_visits|mosaic : ssd_cin_visits,,,,,Was the child seen alone during this visit? Y/N
+CINV006A,ssd_cin_visits,child_in_need|cin_plan|visit,,NCHAR,1,cinv_cin_visit_bedroom,Child Bedroom Seen,,,Local,liquid_logic|mosaic,liquid_logic : cinv_cin_visit_bedroom|mosaic : cinv_cin_visit_bedroom,liquid_logic : ssd_cin_visits|mosaic : ssd_cin_visits,,,,,Was the child's bedroom seen during this visit? Y/N
+S47E001A,ssd_s47_enquiry,s47_enquiry|child_protection,,nvarchar,48,s47e_s47_enquiry_id,S47 Enquiry ID,,,Local,liquid_logic|mosaic,liquid_logic : s47e_s47_enquiry_id|mosaic : s47e_s47_enquiry_id,liquid_logic : ssd_s47_enquiry|mosaic : ssd_s47_enquiry,Yes,Yes,Yes,,Row identifier for the ssd_s47_enquiry table.
+S47E010A,ssd_s47_enquiry,s47_enquiry|child_protection,,nvarchar,48,s47e_referral_id,Referral ID,ssd_cin_episodes.cine_referral_id,,Local,liquid_logic|mosaic,liquid_logic : s47e_referral_id|mosaic : s47e_referral_id,liquid_logic : ssd_s47_enquiry|mosaic : ssd_s47_enquiry,,,,,ID for linking to CIN Referral Episode
+S47E002A,ssd_s47_enquiry,s47_enquiry|child_protection,,nvarchar,48,s47e_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : s47e_person_id|mosaic : s47e_person_id,liquid_logic : ssd_s47_enquiry|mosaic : ssd_s47_enquiry,Yes,,,,Person's ID generated in CMS Database
+S47E004A,ssd_s47_enquiry,s47_enquiry|child_protection,,datetime,NULL,s47e_s47_start_date,S47 Start Date,,,CIN|RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : s47e_s47_start_date|mosaic : s47e_s47_start_date,liquid_logic : ssd_s47_enquiry|mosaic : ssd_s47_enquiry,,,,,Date of the strategy discussion at which the Section 47 Enquiries were initiated.
+S47E005A,ssd_s47_enquiry,s47_enquiry|child_protection,,datetime,NULL,s47e_s47_end_date,S47 End Date,,,RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : s47e_s47_end_date|mosaic : s47e_s47_end_date,liquid_logic : ssd_s47_enquiry|mosaic : ssd_s47_enquiry,,,,,The actual date on which the S47 Enquiry is completed and authorised.
+S47E006A,ssd_s47_enquiry,s47_enquiry|child_protection,,nchar,1,s47e_s47_nfa,S47 NFA,,,AnnexA,liquid_logic|mosaic,liquid_logic : s47e_s47_nfa|mosaic : s47e_s47_nfa,liquid_logic : ssd_s47_enquiry|mosaic : ssd_s47_enquiry,,,,,Standalone field showing whether or not the S47 Enquiry resulted in No Further Action.
+S47E007A,ssd_s47_enquiry,s47_enquiry|child_protection,,nvarchar,1000,s47e_s47_outcome_json,S47 Outcome,,,Local,liquid_logic|mosaic,liquid_logic : s47e_s47_outcome_json|mosaic : s47e_s47_outcome_json,liquid_logic : ssd_s47_enquiry|mosaic : ssd_s47_enquiry,,,,,"Outcome of the Section 47 Enquiry. Combined dictionary/ json type containing the following, where there is a value recorded:
+- NFA_FLAG
+- LEGAL_ACTION_FLAG
+- PROV_OF_SERVICES_FLAG
+- PROV_OF_SB_CARE_FLAG
+- CP_CONFERENCE_FLAG
+- NFA_CONTINUE_SINGLE_FLAG
+- MONITOR_FLAG
+- OTHER_OUTCOMES_EXIST_FLAG
+- TOTAL_NO_OF_OUTCOMES
+- COMMENTS"
+S47E008A,ssd_s47_enquiry,s47_enquiry|child_protection,,nvarchar,100,s47e_s47_completed_by_worker_name,S47 Enquiries completed by worker,,,Local,,liquid_logic : s47e_s47_completed_by_worker_name|mosaic : s47e_s47_completed_by_worker_name,liquid_logic : ssd_s47_enquiry|mosaic : ssd_s47_enquiry,,,,,Section 47 Enquiry completed by Worker
+S47E009A,ssd_s47_enquiry,s47_enquiry|child_protection,,nvarchar,255,s47e_s47_completed_by_team_name,S47 Enquiries completed by team,,,Local,,liquid_logic : s47e_s47_completed_by_team_name|mosaic : s47e_s47_completed_by_team_name,liquid_logic : ssd_s47_enquiry|mosaic : ssd_s47_enquiry,,,,,Section 47 Enquiry completed by Team
+ICPC001A,ssd_initial_cp_conference,initial_cp_conference|child_protection,,nvarchar,48,icpc_icpc_id,Initial CP Conference ID,,,Local,,,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,,,Yes,,Row identifier for the ssd_initial_cp_conference table
+ICPC009A,ssd_initial_cp_conference,,,nvarchar,48,icpc_icpc_meeting_id,Initial CP Conference Meeting ID,,,Local,,,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,,,,,Identifier for the Initial CP Conference Meeting
+ICPC002A,ssd_initial_cp_conference,,,nvarchar,48,icpc_s47_enquiry_id,S47 Enquiry ID,ssd_s47_enquiry.s47e_s47_enquiry_id,,RIIA,liquid_logic|mosaic,,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,,,,,ID for linking to Section 47 Enquiry
+ICPC010A,ssd_initial_cp_conference,s47_enquiry|child_protection,,nvarchar,48,icpc_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : icpc_person_id|mosaic : icpc_person_id,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,Yes,,,,Person's ID generated in CMS Database
+ICPC011A,ssd_initial_cp_conference,child_protection|cp_plan,,nvarchar,48,icpc_cp_plan_id,CP Plan ID,,,RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : CPPL_cp_plan_id|mosaic : CPPL_cp_plan_id,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,Yes,Yes,,,CP Plan ID for ICPC's resulting in a CP Plan
+ICPC012A,ssd_initial_cp_conference,,,nvarchar,48,icpc_referral_id,Referral ID,ssd_cin_episodes.cine_referral_id,,Local,liquid_logic|mosaic,liquid_logic : icpc_referral_id|mosaic : icpc_referral_id,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,,,,,ID for linking to CIN Referral Episode
+ICPC003A,ssd_initial_cp_conference,initial_cp_conference|child_protection,,nchar,1,icpc_icpc_transfer_in,Is this a transferred in ICPC?,,,RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : icpc_icpc_transfer_in|mosaic : icpc_icpc_transfer_in,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,,,,,Is this is a transfer in ICPC? Y/N
+ICPC004A,ssd_initial_cp_conference,initial_cp_conference|child_protection,,datetime,NULL,icpc_icpc_target_date,Target ICPC date,,,CIN,liquid_logic|mosaic,liquid_logic : icpc_icpc_target_date|mosaic : icpc_icpc_target_date,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,,,,,"The date that is 15 working days after the strategy discussion at which section 47 
+enquiries were initiated."
+ICPC005A,ssd_initial_cp_conference,initial_cp_conference|child_protection,,datetime,NULL,icpc_icpc_date,Date of Initial CP Conference,,,CIN|RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : icpc_icpc_date|mosaic : icpc_icpc_date,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,,,,,The date on which the initial child protection conference took place.
+ICPC013A,ssd_initial_cp_conference,,,nchar,1,icpc_icpc_outcome_cp_flag,ICPC Outcome CP Flag,,,AnnexA,,liquid_logic : icpc_icpc_outcome_cp_flag|mosaic : icpc_icpc_outcome_cp_flag,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,,,,,Standalone field showing whether or not the ICPC resulted in a CP Plan
+ICPC006A,ssd_initial_cp_conference,initial_cp_conference|child_protection,,nvarchar,500,icpc_icpc_outcome_json,Outcome of Initial CP Conference,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : icpc_icpc_outcome_json|mosaic : icpc_icpc_outcome_json,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,,,,,"Outcome of the Initial CP Conference. Combined dictionary/ json type containing the following, where there is a value recorded:
+- NFA_FLAG
+- REFERRAL_TO_OTHER_AGENCY_FLAG
+- SINGLE_ASSESSMENT_FLAG
+- PROV_OF_SERVICES_FLAG
+- CP_FLAG
+- OTHER_OUTCOMES_EXIST_FLAG
+- TOTAL_NO_OF_OUTCOMES
+- COMMENTS"
+ICPC007A,ssd_initial_cp_conference,initial_cp_conference|child_protection,,nvarchar,255,icpc_icpc_team_name,ICPC Completed by Team,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : icpc_icpc_team_name|mosaic : icpc_icpc_team_name,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,,,,,Team responsible for organising ICPC
+ICPC008A,ssd_initial_cp_conference,initial_cp_conference|child_protection,,nvarchar,100,icpc_icpc_worker_name,ICPC Completed by Worker,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : icpc_icpc_worker_name|mosaic : icpc_icpc_worker_name,liquid_logic : ssd_initial_cp_conference|mosaic : ssd_initial_cp_conference,,,,,Worker who organised the ICPC
+CPPL001A,ssd_cp_plans,child_protection|cp_plan,,nvarchar,48,cppl_cp_plan_id,CP Plan ID,,,Local,liquid_logic|mosaic,liquid_logic : cppl_cp_plan_id|mosaic : cppl_cp_plan_id,liquid_logic : ssd_cp_plans|mosaic : ssd_cp_plans,Yes,Yes,Yes,,Row identifier for the ssd_cp_plans table
+CPPL007A,ssd_cp_plans,child_protection|cp_plan,,nvarchar,48,cppl_referral_id,Referral ID,,,Local,,liquid_logic : cppl_referral_id|mosaic : cppl_referral_id,liquid_logic : ssd_cp_plans|mosaic : ssd_cp_plans,,,,,ID for linking to CIN Referral Episode
+CPPL008A,ssd_cp_plans,child_protection|cp_plan,,nvarchar,48,cppl_icpc_id,Initial CP Conference ID,ssd_initial_cp_conference.icpc_icpc_id,,Local,liquid_logic|mosaic,liquid_logic : cppl_icpc_id|mosaic : cppl_icpc_id,liquid_logic : ssd_cp_plans|mosaic : ssd_cp_plans,,,,,ID for linking to Initial CP Conference
+CPPL002A,ssd_cp_plans,child_protection|cp_plan,,nvarchar,48,cppl_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : cppl_person_id|mosaic : cppl_person_id,liquid_logic : ssd_cp_plans|mosaic : ssd_cp_plans,Yes,,,,Person's ID generated in CMS Database
+CPPL003A,ssd_cp_plans,child_protection|cp_plan,,datetime,NULL,cppl_cp_plan_start_date,CP Plan Start Date,,,CIN|AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cppl_cp_plan_start_date|mosaic : cppl_cp_plan_start_date,liquid_logic : ssd_cp_plans|mosaic : ssd_cp_plans,,,,,The Start Date of the Child Protection Plan.
+CPPL004A,ssd_cp_plans,child_protection|cp_plan,,datetime,NULL,cppl_cp_plan_end_date,CP Plan End Date,,,CIN|AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : cppl_cp_plan_end_date|mosaic : cppl_cp_plan_end_date,liquid_logic : ssd_cp_plans|mosaic : ssd_cp_plans,,,,,The End Date of the Child Protection Plan.
+CPPL009A,ssd_cp_plans,child_protection|cp_plan,,nvarchar,100,cppl_cp_plan_initial_category,CP Plan Initial Category of Abuse,,,CIN|AnnexA,,,liquid_logic : ssd_cp_plans|mosaic : ssd_cp_plans,,,,,"The category of abuse as assessed when the child protection plan commenced.
+Code set
+- Neglect
+- Physical abuse
+- Sexual abuse
+- Emotional abuse
+- Multiple: [List of relevant categories]"
+CPPL011A,ssd_cp_plans,child_protection|cp_plan,,nchar,1,cppl_cp_plan_ola,OLA CP Plan?,,,Local,,,,,,,,
+CPPL010A,ssd_cp_plans,child_protection|cp_plan,,nvarchar,100,cppl_cp_plan_latest_category,CP Plan Latest Category of Abuse,,,CIN|AnnexA,,,liquid_logic : ssd_cp_plans|mosaic : ssd_cp_plans,,,,,"The latest category of abuse recorded on the CP Plan, this may be the same as above.
+Code set
+- Neglect
+- Physical abuse
+- Sexual abuse
+- Emotional abuse
+- Multiple: [List of relevant categories]"
+CPPV007A,ssd_cp_visits,child_protection|cp_plan|visit,,nvarchar,48,cppv_cp_visit_id,Casenote ID (Visit record),,,Local,,,,,,Yes,,Row identifier for the ssd_cp_visits table
+CPPV008A,ssd_cp_visits,child_protection|cp_plan|visit,,nvarchar,48,cppv_person_id,Person Unique ID,ssd_cp_plans.cppl_person_id,,Local,liquid_logic|mosaic,,,,,,,Person's ID generated in CMS Database
+CPPV001A,ssd_cp_visits,child_protection|cp_plan|visit,,nvarchar,48,cppv_cp_plan_id,CP Plan ID,,,Local,liquid_logic|mosaic,liquid_logic : cppv_cp_plan_id|mosaic : cppv_cp_plan_id,liquid_logic : ssd_cp_visits|mosaic : ssd_cp_visits,Yes,Yes,,,ID for linking to the CP Plan
+CPPV003A,ssd_cp_visits,child_protection|cp_plan|visit,,datetime,NULL,cppv_cp_visit_date,Date of Visit,,,AnnexA,liquid_logic|mosaic,liquid_logic : cppv_cp_visit_date|mosaic : cppv_cp_visit_date,liquid_logic : ssd_cp_visits|mosaic : ssd_cp_visits,,,,,Actual date of Visit
+CPPV004A,ssd_cp_visits,child_protection|cp_plan|visit,,nchar,1,cppv_cp_visit_seen,Child Seen,,,Local,liquid_logic|mosaic,liquid_logic : cppv_cp_visit_seen|mosaic : cppv_cp_visit_seen,liquid_logic : ssd_cp_visits|mosaic : ssd_cp_visits,,,,,Was the child seen during this visit? Y/N
+CPPV005A,ssd_cp_visits,child_protection|cp_plan|visit,,nchar,1,cppv_cp_visit_seen_alone,Child Seen Alone,,,AnnexA,liquid_logic|mosaic,liquid_logic : cppv_cp_visit_seen_alone|mosaic : cppv_cp_visit_seen_alone,liquid_logic : ssd_cp_visits|mosaic : ssd_cp_visits,,,,,Was the child seen alone during this visit? Y/N
+CPPV006A,ssd_cp_visits,child_protection|cp_plan|visit,,nchar,1,cppv_cp_visit_bedroom,Child Bedroom Seen,,,Local,liquid_logic|mosaic,liquid_logic : cppv_cp_visit_bedroom|mosaic : cppv_cp_visit_bedroom,liquid_logic : ssd_cp_visits|mosaic : ssd_cp_visits,,,,,Was the child's bedroom seen during this visit? Y/N
+CPPR001A,ssd_cp_reviews,child_protection|cp_plan|review,,nvarchar,48,cppr_cp_review_id,Review ID,,,Local,liquid_logic|mosaic,liquid_logic : cppr_cp_review_id|mosaic : cppr_cp_review_id,liquid_logic : ssd_cp_reviews|mosaic : ssd_cp_reviews,Yes,Yes,Yes,,Row identifier for the ssd_cp_reviews table
+CPPR008A,ssd_cp_reviews,child_protection|cp_plan|review,,nvarchar,48,cppr_person_id,Person Unique ID,ssd_cp_plans.cppl_person_id,,Local,liquid_logic|mosaic,liquid_logic : cppr_person_id|mosaic : cppr_person_id,,,,,,Person's ID generated in CMS Database
+CPPR002A,ssd_cp_reviews,child_protection|cp_plan|review,,nvarchar,48,cppr_cp_plan_id,CP Plan ID,ssd_cp_plans.cppl_cp_plan_id,,Local,liquid_logic|mosaic,liquid_logic : cppr_cp_plan_id|mosaic : cppr_cp_plan_id,liquid_logic : ssd_cp_reviews|mosaic : ssd_cp_reviews,,,,,ID for linking to the CP Plan
+CPPR003A,ssd_cp_reviews,child_protection|cp_plan|review,,datetime,NULL,cppr_cp_review_due,Review Due Date,,,Local,liquid_logic|mosaic,liquid_logic : cppr_cp_review_due|mosaic : cppr_cp_review_due,liquid_logic : ssd_cp_reviews|mosaic : ssd_cp_reviews,,,,,The due date of the review conference.
+CPPR004A,ssd_cp_reviews,child_protection|cp_plan|review,,datetime,NULL,cppr_cp_review_date,Date of Review,,,CIN|AnnexA,liquid_logic|mosaic,liquid_logic : cppr_cp_review_date|mosaic : cppr_cp_review_date,liquid_logic : ssd_cp_reviews|mosaic : ssd_cp_reviews,,,,,The actual date on which the Review Conference was held
+CPPR009A,ssd_cp_reviews,child_protection|cp_plan|review,,nvarchar,48,cppr_cp_review_meeting_id,CP Review Meeting ID,,,Local,,liquid_logic : cppr_cp_review_meeting_id|mosaic : cppr_cp_review_meeting_id,,,,,,Identifier for the Review CP Conference Meeting
+CPPR005A,ssd_cp_reviews,child_protection|cp_plan|review,,nchar,1,cppr_cp_review_outcome_continue_cp,CP Plan to Continue?,,,Local,liquid_logic|mosaic,liquid_logic : cppr_cp_review_outcome_continue_cp|mosaic : cppr_cp_review_outcome_continue_cp,liquid_logic : ssd_cp_reviews|mosaic : ssd_cp_reviews,,,,,Was the outcome of the conference to continue the CP Plan? Y/N
+CPPR006A,ssd_cp_reviews,child_protection|cp_plan|review,,nchar,100,cppr_cp_review_quorate,Quorate?,,,Local,liquid_logic|mosaic,liquid_logic : cppr_cp_review_quorate|mosaic : cppr_cp_review_quorate,liquid_logic : ssd_cp_reviews|mosaic : ssd_cp_reviews,,,,,"Was the conference quorate?
+The primary principle for determining quoracy is that there should be sufficient agencies or key disciplines present to enable safe decisions to be made in the individual circumstances. Minimum representation is Children's Social Care and at least two other agencies or key disciplines that have had direct contact with the child and family. In a case relating to fabricated or induced illness, it is important to ensure the paediatrician is able to attend."
+CPPR007A,ssd_cp_reviews,child_protection|cp_plan|review,,nchar,100,cppr_cp_review_participation,Child Participation at Review,,,Local,liquid_logic|mosaic,liquid_logic : cppr_cp_review_participation|mosaic : cppr_cp_review_participation,liquid_logic : ssd_cp_reviews|mosaic : ssd_cp_reviews,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+The Child/ Young Person's method of participation at review. 
+Code set
+PN0 - Child aged under 4 at the time of the review
+PN1 - Child physically attends and speaks for him or herself (Attendance).
+PN2 - Child physically attends and an advocate speaks on his or her behalf. (Attendance views represented by advocate or Child Protection Adisor (CPA))
+PN3 - Child attends and conveys his or her view symbolically (non-verbally) (Attendance symbols)
+PN4 - Child physically attends but does not speak for him or herself, does not convey his or her view symbolically (non-verbally) and does not ask an advocate to speak for him or her (Attendance without contribution)
+PN5 - Child does not attend physically but briefs an advocate to speak for him or her (Views represented by advocate or independent reviewing officer (IRO) through texting, written format, phone, audio/video, viewpoint)
+PN6 - Child does not attend but conveys his or her feelings to the review by a facilitative medium (Texting the chair, written format, phone, audio/video, viewpoint)
+PN7 - Child does not attend nor are his or her views conveyed to the review"
+CLAE001A,ssd_cla_episodes,looked_after,,nvarchar,48,clae_cla_episode_id,Episode ID,,,RIIA,liquid_logic|mosaic,liquid_logic : clae_cla_episode_id|mosaic : clae_cla_episode_id,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,Yes,Yes,Yes,,Row identifier for the ssd_cla_episodes table
+CLAE002A,ssd_cla_episodes,looked_after,,nvarchar,48,clae_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : clae_person_id|mosaic : clae_person_id,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,Yes,,,,Person's ID generated in CMS Database
+CLAE003A,ssd_cla_episodes,looked_after,,datetime,NULL,clae_cla_episode_start_date,Date Episode Commenced,,,SSDA903|RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : clae_cla_episode_start_date|mosaic : clae_cla_episode_start_date,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,,,,,The date that CLA Episode began.
+CLAE004A,ssd_cla_episodes,looked_after,,nvarchar,100,clae_cla_episode_start_reason,Reason for New CLA Episode,,,SSDA903|RIIA,liquid_logic|mosaic,liquid_logic : clae_cla_episode_start_reason|mosaic : clae_cla_episode_start_reason,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,,,,,"Code Set
+S - Started to be looked after
+L - Change of legal status only
+P - Change of placement and carer(s) only
+T - Change of placement (but same carer(s)) only
+B - Change of legal status and placement and carer(s) at the same time
+U - Change of legal status and change of placement (but same carer(s)) at the same time
+
+Use Code S where a child is starting to be looked-after for the first time, or had previously ceased to be looked-after, and is now starting to be looked-after again. 
+Also use code S when recording agreements to provide short-term placements (legal status V4), and for individual breaks under such an agreement, if these are being recorded separately (legal status V3).
+Use Code L where there is a change of legal status, but the placement does not change. By ‘legal status’ we mean the legal status underlying the fact that the child is looked-after.
+Use Code P where there is a change of placement and carer, but the legal status does not change. This would include the following scenarios:
+• Move from one foster carer to another foster carer (for example, U3 to another U3 placement type code).
+• Move from a foster carer to a children’s home (for example, U3 to K2 placement types).
+In both scenarios there has been a change of carer. When a child is living independently, a new episode should be created each time they move, and code P should be used.
+Use Code T where there is a change of placement, but the child remains with the same carer and the legal status does not change. This would include the following scenarios:
+• Child moves to a new house with current foster carer (either inside or outside of local authority boundary).
+• Child remains with same carer or within same setting but either the URN of the setting changes or the provider type changes (for example, a foster carer moves from an IFA to the local authority provider, or a placement for adoption transferring to a regional adoption agency, or an unregulated independent or 
+semi independent setting registering with Ofsted).
+In both scenarios, the child has remained with the same carer, but for some other reason, a new placement is required on the SSDA903.
+Use Code B where both legal status and placement change, with a change of carer, on the same day. The two changes do not need to be simultaneous or consequent one upon the other. The code simply reflects that there was a change in carer and a change in legal status, for whatever reason, on the same day.
+Use Code U where both legal status and placement change on the same day, but the child remains with the same carer. The two changes do not need to be simultaneous or consequent one upon the other. The code simply reflects that there was a change in placement and a change in legal status, for whatever reason, on the same day."
+CLAE009A,ssd_cla_episodes,looked_after,,nvarchar,3,clae_cla_primary_need,CIN Primary Need Code,,,SSDA903|AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : clae_cla_primary_need|mosaic : clae_cla_primary_need,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,,,,,"Category of need (CIN) codes record the main reason why a child is being provided with services. This provides a further insight as to why a particular child is being looked-after.
+Use the category of need code most relevant at the time the current period of being looked-after began. The category of need code relates to the reason the child originally became looked-after and should remain the same throughout their period of care.
+Code set
+N1 - Abuse or neglect
+Child in need as a result of, or at risk of, abuse or neglect.
+N2 - Child’s disability
+Child and their family whose main need for children’s social care services arises out of the child’s disabilities, illness or intrinsic condition
+N3 - Parental illness or disability
+Child whose main need for children’s social care services arises because the capacity of their parent(s) or carer(s) to care for them is impaired by disability, illness, mental illness, or addictions
+N4 - Family in acute stress 
+Child whose needs arise from living in a family going through a temporary crisis such that parenting capacity is diminished and some of the children’s needs are not being adequately met
+N5 - Family dysfunction
+Child whose needs arise mainly out of their living with a family where the parenting capacity is chronically inadequate
+N6 - Socially unacceptable behaviour
+Child and family whose need for children’s social care services arises primarily out of their behaviour impacting detrimentally on the community
+N7 - Low income
+Child, either living in a family or independently, whose need for children’s social care services arises mainly from being dependent on an income below the standard state entitlements
+N8 - Absent parenting
+Child whose need for children’s social care services arises mainly from having no parent(s) available to provide for them. A child whose parent(s) decide it is in the best interest for the child to be adopted would be included in this category"
+CLAE005A,ssd_cla_episodes,looked_after,,datetime,NULL,clae_cla_episode_ceased,Date Episode Ceased,,,SSDA903|AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : clae_cla_episode_ceased|mosaic : clae_cla_episode_ceased,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,,,,,"This item records the date that each episode ended.
+An episode cannot start and end on the same day. Where a child has not left care, a new episode must start on the same day as the previous episode finished.
+When a child ceases to be looked-after because of adoption (reason episode ceased codes of E11 or E12), the date episode ceased is the date the court makes the adoption order.
+When a child ceases to be looked-after because he/she dies whilst being looked-after (reason episode ceased code E2), the date episode ceased must be the same as the date of death as recorded on the death certificate."
+CLAE006A,ssd_cla_episodes,looked_after,,nvarchar,255,clae_cla_episode_ceased_reason,Reason Episode Ceased,,,SSDA903|AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : clae_cla_episode_ceased_reason|mosaic : clae_cla_episode_ceased_reason,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,,,,,"When an episode has ended and a further episode, in the same period of care, has started, use the code, X1. All other ‘reason episode ceased’ codes record the circumstances when a child ceases to be looked-after.
+If a child ceases to be looked-after because he/she has turned 18, this can already be deduced from his/her date of birth. Therefore, the appropriate code below should be used to capture the destination of the young person.
+X1   - Episode ceases, and new episode begins on same day, for any reason
+E11 - Adopted - application for an adoption order unopposed
+E12 - Adopted – consent dispensed with by the court
+E2   - Died
+E3   - Care taken over by another local authority in the UK
+E4A - Returned home to live with parent(s), relative(s), or other person(s) with parental responsibility as part of the care planning process (not under a special guardianship order or residence order/ child arrangement order).
+E4B - Returned home to live with parent(s), relative(s), or other person(s) with parental responsibility which was not part of the current care planning process (not under a special guardianship order or residence order or (from 22 April 2014) a child arrangement order).
+E13 - Left care to live with parent(s), relative(s), or other person(s) with no parental responsibility.
+E41 - Residence order/ child arrangement order which sets out with whom the child is to live) granted
+E45 - Special guardianship order made to former foster carer(s), who was/are a relative(s) or friend(s)
+E46 - Special guardianship order made to former foster carer(s), other than relative(s) or friend(s)
+E47 - Special guardianship order made to carer(s), other than former foster carer(s), who was/are a relative(s) or friend(s)
+E48 - Special guardianship order made to carer(s), other than former foster carer(s), other than relative(s) or friend(s)
+E5   - Moved into independent living arrangement and no longer looked-after: supportive accommodation providing formalised advice/support arrangements (such as most hostels, young men’s Christian association, foyers, staying close and care leavers projects). Includes both children leaving care before and at age 18
+E6  - Moved into independent living arrangement and no longer looked-after: accommodation providing no formalised advice/support arrangements (such as bedsit, own flat, living with friend(s)). Includes both children leaving care before and at age 18
+E7   - Transferred to residential care funded by adult social care services
+E9   - Sentenced to custody
+E14 - Accommodation on remand ended
+E15 - Age assessment determined child is aged 18 or over and E5, E6 and E7 do not apply, such as an unaccompanied asylum-seeking child (UASC) whose age has been disputed
+E16 - Child moved abroad
+E17 - Aged 18 (or over) and remained with current carers (inc under staying put arrangements)
+E8   - Period of being looked-after ceased for any other reason (where none of the other reasons apply)
+
+Further detail on when some of the codes should be used is provided below:
+E4A - Relates to a planned move where the child returns home as part of their agreed care plan. This return home has been discussed as part of the care planning process and happens within a planned timeframe.
+E4B - Relates to an unplanned move - includes instances where the child’s return home is immediate (for example, within 24 hours) and has not been discussed as part of the care planning process or does not occur within the planned timeframe. This would include instances where a child under a voluntary arrangement is removed from care by their parents and this was not agreed as part of the care planning process.
+E13 - Left care to live with parents, relatives, or other person with no parental responsibility – this code should be used if the child left care to live with parents, relatives or another person, but this person did not have parental responsibility.
+E14 - Accommodation on remand ended – this code should be used if a child was remanded to youth detention accommodation and has stopped their episode of care because they are no longer remanded.
+E15 - Age assessment determined child is aged 18 or over and E5, E6 and E7 do not apply, for example, an unaccompanied asylum seeking child whose age has been disputed – this code should be used if the episode of care ended because the age was disputed, an assessment revealed the child was 18 or over and the young person was not transferred to residential care and did not move into independent living arrangements. 
+E16 - Moved abroad – use this code if the child left care because they moved to another country, including when a child is deported.
+E17 - Aged 18 (or over) and remained with current carers (inc under staying put arrangements) – use this code whenever the young person has ceased care and remains with their former carers, irrespective of placement type. Young people in foster care who are ‘staying put’ are only a subset of this group.
+E8   - Period of being looked-after ceased for any other reason – this code should never be used purely because a child has reached the age of 18 as this can already be deduced from his/her date of birth. It should only be used when none of the alternative destinations listed are appropriate. E8 should also be used when a child turns 18 and continues to be missing.
+If a looked-after child is sentenced to custody and placed in a secure children’s home, secure training centre or young offenders’ institution, their status in that setting depends on the legislative framework under which the custodial sentence is applied. If the child is subject to a Care Order (Section 31 Children Act 1989) then they remain looked-after regardless of being sentenced to custody. If the child is accommodated in care by a voluntary agreement under Section 20 of the Children Act 1989, then they cease to be looked-after when they are admitted to custody."
+CLAE010A,ssd_cla_episodes,looked_after,,nvarchar,48,clae_cla_id,CLA ID,,,Local,liquid_logic|mosaic,liquid_logic : clae_cla_id|mosaic : clae_cla_id,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,,,,,"System identifier for the whole period of care, encompassing all episodes included within that period of care."
+CLAE011A,ssd_cla_episodes,looked_after,,nvarchar,48,clae_referral_id,Referral ID,,,Local,liquid_logic|mosaic,liquid_logic : clae_referral_id|mosaic : clae_referral_id,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,,,,,ID for linking to CIN Referral Episode
+CLAE013A,ssd_cla_episodes,looked_after,,nvarchar,48,clae_cla_placement_id,fk reference from cla_placements,ssd_cla_placements.clap_placement_id,,Local,liquid_logic|mosaic,liquid_logic : clae_cla_placement_id|mosaic : clae_cla_placement_id,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,,,,,ID for linking to CLA Placement record
+CLAE014A,ssd_cla_episodes,looked_after,,datetime,NULL,clae_entered_care_date,Date the child entered Care,,,SSD903,liquid_logic|mosaic,liquid_logic : clae_entered_care_date|mosaic : clae_entered_care_date,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,,,,,Start Date of the current Looked After period.
+CLAE012A,ssd_cla_episodes,looked_after,,datetime,NULL,clae_cla_last_iro_contact_date,Date of Last IRO Visit / Contact to the Child,,,AnnexA,liquid_logic|mosaic,liquid_logic : clae_cla_last_iro_contact_date|mosaic : clae_cla_last_iro_contact_date,liquid_logic : ssd_cla_episodes|mosaic : ssd_cla_episodes,,,,,Date of Last IRO Visit/ Contact to the Child
+CLAC001A,ssd_cla_convictions,looked_after|convictions,,nvarchar,48,clac_cla_conviction_id,Conviction ID,,,Local,liquid_logic|mosaic,liquid_logic : clac_cla_conviction_id|mosaic : clac_cla_conviction_id,liquid_logic : ssd_cla_convictions|mosaic : ssd_cla_convictions,,,Yes,,Row identifier for the ssd_cla_convictions table
+CLAC002A,ssd_cla_convictions,looked_after|convictions,,nvarchar,48,clac_person_id,Person Unique ID,ssd_cla_episodes.clae_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : clac_person_id|mosaic : clac_person_id,liquid_logic : ssd_cla_convictions|mosaic : ssd_cla_convictions,Yes,,,,Person's ID generated in CMS Database
+CLAC003A,ssd_cla_convictions,looked_after|convictions,,datetime,NULL,clac_cla_conviction_date,Date of Offence,,,SSDA903,liquid_logic|mosaic,liquid_logic : clac_cla_conviction_date|mosaic : clac_cla_conviction_date,liquid_logic : ssd_cla_convictions|mosaic : ssd_cla_convictions,,,,,Date of Offence
+CLAC004A,ssd_cla_convictions,looked_after|convictions,,nvarchar,1000,clac_cla_conviction_offence,Description,,,Local,,,liquid_logic : ssd_cla_convictions|mosaic : ssd_cla_convictions,,,,,Details of offence committed.
+CLAH001A,ssd_cla_health,looked_after|health,,nvarchar,48,clah_health_check_id,Health Check ID,,,Local,,,liquid_logic : ssd_cla_health|mosaic : ssd_cla_health,,,Yes,,Row identifier for the ssd_cla_health table
+CLAH002A,ssd_cla_health,looked_after|health,,nvarchar,48,clah_person_id,Person Unique ID,ssd_cla_episodes.clae_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : clah_person_id|mosaic : clah_person_id,liquid_logic : ssd_cla_health|mosaic : ssd_cla_health,Yes,,,,Person's ID generated in CMS Database
+CLAH003A,ssd_cla_health,looked_after|health,,nvarchar,500,clah_health_check_type,Health surveillance checks/ Health Assessment/ Dental Check,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : clah_health_check_type|mosaic : clah_health_check_type,liquid_logic : ssd_cla_health|mosaic : ssd_cla_health,,,,,"Health Check/ Assessment Type e.g. Health Assessment, Dental Check"
+CLAH004A,ssd_cla_health,looked_after|health,,datetime,NULL,clah_health_check_date,Date of Last Health Assessment,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : clah_health_check_date|mosaic : clah_health_check_date,liquid_logic : ssd_cla_health|mosaic : ssd_cla_health,,,,,Date of Health Check/ Assessment
+CLAH005A,ssd_cla_health,looked_after|health,,nvarchar,48,clah_health_check_status,,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : clah_health_check_status|mosaic : clah_health_check_status,liquid_logic : ssd_cla_health|mosaic : ssd_cla_health,,,,,"Status of Health Check 
+Code set
+Planned
+Refused 
+Cancelled
+Completed"
+CLAI002A,ssd_cla_immunisations,looked_after|health|immunisations,,nvarchar,48,clai_person_id,Person Unique ID,ssd_cla_episodes.clae_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : clai_person_id|mosaic : clai_person_id,liquid_logic : ssd_cla_immunisations|mosaic : ssd_cla_immunisations,Yes,,,,"Person's ID generated in CMS Database, Row identifier for the ssd_cla_immunisations table"
+CLAI004A,ssd_cla_immunisations,looked_after|health|immunisations,,nchar,1,clai_immunisations_status,Immunisations up to Date,,,SSDA903,liquid_logic|mosaic,liquid_logic : clai_immunisations_status|mosaic : clai_immunisations_status,liquid_logic : ssd_cla_immunisations|mosaic : ssd_cla_immunisations,,,,,Immunisations up to date? Y/N
+CLAI005A,ssd_cla_immunisations,looked_after|health|immunisations,,datetime,NULL,clai_immunisations_status_date,Immunisations Last Updated Date,,,Local,,liquid_logic : clai_immunisations_status_date|mosaic : clai_immunisations_status_date,liquid_logic : ssd_cla_immunisations|mosaic : ssd_cla_immunisations,,,,,Immunisations status last updated
+CLAS001A,ssd_cla_substance_misuse,looked_after|health|substance_misuse,,nvarchar,48,clas_substance_misuse_id,Substance Misuse ID,,,Local,liquid_logic|mosaic,,liquid_logic : ssd_cla_substance_misuse|mosaic : ssd_cla_substance_misuse,,,Yes,,Row identifier for the ssd_substance_misuse table
+CLAS002A,ssd_cla_substance_misuse,looked_after|health|substance_misuse,,nvarchar,48,clas_person_id,Person Unique ID,ssd_cla_episodes.clae_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : clas_person_id|mosaic : clas_person_id,liquid_logic : ssd_cla_substance_misuse|mosaic : ssd_cla_substance_misuse,Yes,,,,Person's ID generated in CMS Database
+CLAS003A,ssd_cla_substance_misuse,looked_after|health|substance_misuse,,datetime,NULL,clas_substance_misuse_date,Date of substance misuse,,,SSDA903,liquid_logic|mosaic,,liquid_logic : ssd_cla_substance_misuse|mosaic : ssd_cla_substance_misuse,,,,,Date of substance misuse
+CLAS004A,ssd_cla_substance_misuse,looked_after|health|substance_misuse,,nchar,100,clas_substance_misused,Substance misused,,,Local,liquid_logic|mosaic,liquid_logic : clas_substance_misused|mosaic : clas_substance_misused,liquid_logic : ssd_cla_substance_misuse|mosaic : ssd_cla_substance_misuse,,,,,Substance that was being misused
+CLAS005A,ssd_cla_substance_misuse,looked_after|health|substance_misuse,,nchar,1,clas_intervention_received,Child received intervention for substance misuse problem,,,SSDA903,liquid_logic|mosaic,liquid_logic : clas_intervention_received|mosaic : clas_intervention_received,liquid_logic : ssd_cla_substance_misuse|mosaic : ssd_cla_substance_misuse,,,,,Did child receive intervention for substance misuse problem?
+CLAP001A,ssd_cla_placement,looked_after|placement,,nvarchar,48,clap_cla_placement_id,Placement ID,,,Local,liquid_logic|mosaic,liquid_logic : clap_cla_placement_id|mosaic : clap_cla_placement_id,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,Yes,Yes,Yes,,Row identifier for the ssd_cla_placement table
+CLAP003A,ssd_cla_placement,looked_after|placement,,datetime,NULL,clap_cla_placement_start_date,Placement Start Date,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : clap_cla_placement_start_date|mosaic : clap_cla_placement_start_date,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,,,,,"This item records the date that each placement began. Where placements are consecutive, the new placement must start on the same day that the previous placement ended."
+CLAP004A,ssd_cla_placement,looked_after|placement,,nvarchar,100,clap_cla_placement_type,Placement Type,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : clap_cla_placement_type|mosaic : clap_cla_placement_type,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,,,,,"This category can be defined, in a broad sense, as indicating where the child is living.
+Code set 
+A3 - Placed for adoption with parental/guardian consent with current foster carer(s) (S19 Adoption and Children Act 2002) or with a freeing order where parental/guardian consent has been given (S18(1)(a) Adoption Act 1976)
+A4 - Placed for adoption with parental/guardian consent not with current foster carer(s) (S19 Adoption and Children Act 2002) or with a freeing order where parental/guardian consent has been given (S18(1)(a) Adoption Act 1976)
+A5 - Placed for adoption with placement order with current foster carer(s) (S21  Adoption and Children Act 2002) or with a freeing order where parental/guardian consent was dispensed with (S18(1)(b) Adoption Act 1976)
+A6 - Placed for adoption with placement order not with current foster carer(s) (S21 Adoption and Children Act 2002) or with a freeing order where parental/guardian consent was dispensed with (S18(1)(b) of the Adoption Act 1976)
+H5 - Semi-independent living accommodation not subject to children’s homes regulations
+K1 - Secure children’s homes
+K2 - Children’s Homes subject to Children’s Homes Regulations
+P1 - Placed with own parent(s) or other person(s) with parental responsibility
+P2 - Independent living e.g. in a flat/ lodgings, bedsit, B&B or with friends, with or without formal support
+P3 - Residential employment
+R1 - Residential care home
+R2 - National Health Service (NHS)/health trust or other establishment providing medical or nursing care
+R3 - Family centre or mother and baby unit
+R5 - Young offender institution (YOI)
+S1 - All residential schools, except where dual-registered as a school and children’s home
+T0 - All types of temporary move (see paragraphs above for further details)
+T1 - Temporary periods in hospital
+T2 - Temporary absences of the child on holiday
+T3 - Temporary accommodation whilst normal foster carer(s) is/are on holiday
+T4 - Temporary accommodation of seven days or less, for any reason, not covered by codes T1 to T3
+U1 - Foster placement with relative(s) or friend(s) – long term fostering
+U2 - Fostering placement with relative(s) or friend(s) who is/are also an approved adopter(s) – FFA/ concurrent planning
+U3 - Fostering placement with relative(s) or friend(s) who is/are not long-term or FFA/ concurrent planning
+U4 - Foster placement with other foster carer(s) – long term fostering
+U5 - Foster placement with other foster carer(s) who is/are also an approved adopter(s) – FFA/ concurrent planning
+U6 - Foster placement with other foster carer(s) – not long term or FFA/ concurrent planning
+Z1 - Other placements (must be listed on a schedule sent to DfE with annual submission)"
+CLAP005A,ssd_cla_placement,looked_after|placement,,nvarchar,48,clap_cla_placement_urn,URN of Placement,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : clap_cla_placement_urn|mosaic : clap_cla_placement_urn,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,,,,,"A new requirement was introduced in the collection year 2015 to 2016, to return the unique reference number (URN) where the setting is subject to Ofsted inspections.
+For children’s homes this would be the URN of the individual home and for foster or adoptive placements this would be the URN of the relevant service or agency providing the placement. For larger providers with multiple settings or branches the precise URN for the particular setting or branch is required.
+In some cases, it will be valid to provide different information to that registered with Ofsted, for example if a child is placed at the provider but at a different postcode to the main site. This could be the case if a child is residing in a dormitory with a different postcode to the registered site. Here the actual postcode where the child resides should be reported.
+The URN is in the format SC999999 or 9999999 for newly registered providers. Note that secure training centres may have both a 6-digit education URN and a 7-digit social care URN and it is the 7-digit social care URN which should be returned in the SSDA903. Where local authorities are certain that a provider is not inspected by Ofsted but is inspected by the Care Quality Commission (CQC) or Independent Schools Inspectorate (ISI) then the code ‘XXXXXXX’ should be used. Similarly, the code ‘XXXXXXX’ should be used when the provider is a regional adoption agency.
+
+Where placements are of a type or in a setting not inspected by Ofsted, such as placed with parents, then no URN is expected."
+CLAP011A,ssd_cla_placement,looked_after|placement,,float,4,clap_cla_placement_distance,Distance of Placement from Home,,,SSDA903,liquid_logic,liquid_logic : clap_cla_placement_distance|mosaic : clap_cla_placement_distance,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,,,,,"Distance of Placement from Child's home address (miles). When a child’s home postcode is outside of England or not available, or the placement postcode is not available, please use 999.9 for the distance. This includes children from overseas, children whose parents were homeless or children who had no fixed address as they belonged to a traveller family."
+CLAP012A,ssd_cla_placement,looked_after|placement,,nvarchar,48,clap_cla_id,CLA ID,ssd_cla_episodes.clae_cla_id,,Local,liquid_logic|mosaic,liquid_logic : clap_cla_id|mosaic : clap_cla_id,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,,,,,"System identifier for the whole period of care, encompassing all episodes included within that period of care."
+CLAP007A,ssd_cla_placement,looked_after|placement,,nvarchar,48,clap_cla_placement_provider,Placement Provider,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : clap_cla_placement_provider|mosaic : clap_cla_placement_provider,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,,,,,"For each placement, except those children looked-after placed in temporary placements (T0-T4) or other placements (Z1) a placement provider code is required. This will record information on the party providing the placement. Children placed with their own parents do not strictly have a placement provider and should be allocated code PR0, only.
+Code set
+PR0 - Parent(s) or other person(s) with parental responsibility
+PR1 - Own provision (by the local authority) including a regional adoption agency where the child’s responsible local authority is the host authority
+PR2 - Other local authority provision, including a regional adoption agency where another local authority is the host authority
+PR3 - Other public provision (for example, a primary care trust)
+PR4 - Private provision
+PR5 - Voluntary/third sector provision"
+CLAP008A,ssd_cla_placement,looked_after|placement,,nvarchar,8,clap_cla_placement_postcode,Placement Postcode,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : clap_cla_placement_postcode|mosaic : clap_cla_placement_postcode,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,,,,,The postcode of the location where the child is placed.
+CLAP009A,ssd_cla_placement,looked_after|placement,,datetime,NULL,clap_cla_placement_end_date,Placement End Date,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : clap_cla_placement_end_date|mosaic : clap_cla_placement_end_date,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,,,,,"This item records the date that each placement ended. A placement cannot start and end on the same day. Where a child has not left care, a new placement must start on the same day as the previous placement finished."
+CLAP010A,ssd_cla_placement,looked_after|placement,,nvarchar,100,clap_cla_placement_change_reason,Reason for Placement Change,,,SSDA903,liquid_logic|mosaic,liquid_logic : clap_cla_placement_change_reason|mosaic : clap_cla_placement_change_reason,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,,,,,"Reason for placement change. The reason for placement change should be recorded against the episode that is ceasing, not against the new episode starting.
+Code set
+CARPL - Change to/Implementation of Care Plan
+This code would be used where the change of placement is a planned part of the child’s care plan and will be a move to a placement that meets the child’s assessed needs on a temporary or permanent basis. This would include circumstances where a placement change was not expected but becomes necessary. The key factor is that planning takes place and the decision is recorded in the child’s care plan before the change takes place. This would include moves from short to long term foster care or where a child is placed for adoption with the current foster carer. It also includes movements to semi-independence. The nature of the change in plan will be monitored through the placement codes before and after this move. This should not include changes where the foster carer has moved to a new house or where the carer is the same but has changed provider type.
+CLOSE - Resignation/ closure of provision
+This code would be used where a child has to be moved because a foster carer decides to resign or the setting closes. This code would be used in a planned move; not in an emergency. The foster carer’s decision to resign may be because their circumstances have changed, for example, the foster carer becomes ill or another change of circumstances means that the foster carer is no longer able to provide a placement for the child. Circumstances may also include where the child’s placement had lasted longer than expected and the foster carer is no longer able to provide a placement for the child. Use of this code would also include where a setting (for example, a children’s home or a fostering service) closes and is therefore no longer a registered provision with Ofsted.
+ALLEG - Allegation (s47)
+This code would be used where a child has been removed from placement because of an allegation which is being investigated under s47 (Children Act 1989). This allegation may relate to the carer or another child at the setting. This code should not be used if the allegation has resulted in the setting’s approval (for example, a children’s home or a fostering service) being terminated – in this case, ‘approval removed’ should be used.
+STAND - Standards of care concern
+This code would be used where a child has been removed from placement by the responsible authority or provider as a result of concerns about standards of care. This does not mean a child protection investigation (s47) but a formal process followed by the provider. For example, see the National Minimum Standards for Fostering Service 2011, standard. 22. This code can be used for all types of placement such as foster care, residential care. This code should not be used if the setting’s approval is terminated as a result of standards of care concerns – in this case, ‘approval removed’ should be used.
+CUSTOD - Custody arrangement
+This code would be used where a child has been admitted into custody.
+APPRR   Approval removed
+This code would be used where a setting is no longer approved/registered with the appropriate statutory body (such as Ofsted). This code can be used for all types of placement such as foster care, residential care. For example, this code should be used where a foster carer’s approval is terminated by the service following a s47 investigation, a standards of care issue, a complaint or for other reasons that relate to the carers’ conduct. It should also be used where Ofsted take enforcement action resulting in the closure of a residential setting. This code should not be used when a foster carer resigns or a provision is closed voluntarily and they are no longer registered with the relevant statutory body (such as Ofsted).
+CREQB - Carer(s) requests placement end due to child’s behaviour
+This code would be used where because of the child’s behaviour the placement has broken down or disrupted, and the carer has asked for the placement to end and the child to be moved to another placement. There may be some planning involved and a short period of time may pass but this is not a planned move.
+CREQO - Carer(s) requests placement end other than due to child’s behaviour
+These codes would be used where it was intended that the placement was a short or long term arrangement but has broken down or disrupted and the carer [foster carer, residential unit or connected person] has asked for the child to be moved to another placement. There may be some planning involved and a short period of time may pass but this is not a planned move.
+CHILD - Child requests placement end
+This code would be used where it was intended that the placement was a short- or long-term arrangement but has broken down or disrupted and the child has asked to move to another placement. There may be some planning involved and a short period of time may pass but this is not a planned move.
+LAREQ - Responsible/area authority requests placement end
+This code would be used where it was intended that the placement was a short- or long-term placement but the responsible authority has decided that the placement no longer meets the child’s needs. There may be some planning involved and a short period of time may pass but this is not a planned move. There will be circumstances where the child is at risk of harm and this would be coded as an allegation or standards of care concern. Where the placement no longer meets a child’s need but there is no immediate risk – this code would be used.
+PLACE - Change in the status of placement only
+This code would be used where there is a change of status for the placement, but the child remains with the same carer and there is no change to the care plan. Examples include a foster carer moving to a new house, a foster carer working for a local authority becomes managed by an independent fostering agency, a placement for adoption transferring to a regional adoption agency, or a child in residential accommodation moving under the same provider. Here the ‘reason for new episode’ code will indicate that the child is still living with the same carer.
+OTHER - Other
+Any other reason not captured above. Please note that ’Other’ should only be used in exceptional circumstances."
+CLAP013A,ssd_cla_placement,looked_after|placement,,nvarchar,48,clap_person_id,Person Unique ID,,,Local,liquid_logic|mosaic,liquid_logic : clap_person_id|mosaic : clap_person_id,liquid_logic : ssd_cla_placement|mosaic : ssd_cla_placement,,,,,Person's ID generated in CMS Database
+CLAR001A,ssd_cla_reviews,looked_after|review,,nvarchar,48,clar_cla_review_id,Review ID,,,Local,liquid_logic|mosaic,liquid_logic : clar_cla_review_id|mosaic : clar_cla_review_id,liquid_logic : ssd_cla_reviews|mosaic : ssd_cla_reviews,Yes,Yes,Yes,,Row identifier for the ssd_cla_reviews table
+CLAR011A,ssd_cla_reviews,looked_after|review,,nvarchar,48,clar_cla_id,CLA ID,ssd_cla_episodes.clae_cla_id,,Local,liquid_logic|mosaic,liquid_logic : clar_cla_id|mosaic : clar_cla_id,liquid_logic : ssd_cla_reviews|mosaic : ssd_cla_reviews,,,,,"System identifier for the whole period of care, encompassing all episodes included within that period of care."
+CLAR003A,ssd_cla_reviews,looked_after|review,,datetime,NULL,clar_cla_review_due_date,CLA Review Due Date,,,Local,liquid_logic|mosaic,liquid_logic : clar_cla_review_due_date|mosaic : clar_cla_review_due_date,liquid_logic : ssd_cla_reviews|mosaic : ssd_cla_reviews,,,,,Date the CLA review was due
+CLAR004A,ssd_cla_reviews,looked_after|review,,datetime,NULL,clar_cla_review_date,CLA Review Date,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : clar_cla_review_date|mosaic : clar_cla_review_date,liquid_logic : ssd_cla_reviews|mosaic : ssd_cla_reviews,,,,,Actual date of the Review conference
+CLAR012A,ssd_cla_reviews,looked_after|review,,nchar,1,clar_cla_review_cancelled,,,,Local,,,,,,,,Flag showing if the review was Cancelled. Y/N
+CLAR007A,ssd_cla_reviews,looked_after|review,,nvarchar,100,clar_cla_review_participation,Participation code,,,SSDA903,liquid_logic|mosaic,liquid_logic : clar_cla_review_participation|mosaic : clar_cla_review_participation,liquid_logic : ssd_cla_reviews|mosaic : ssd_cla_reviews,,,,,"The Child/ Young Person's method of participation in each review.
+PN0 - Child aged under 4 at the time of the review
+PN1 - Child physically attends and speaks for him or herself (Attendance).
+PN2 - Child physically attends and an advocate speaks on his or her behalf. (Attendance views represented by advocate or Independent Reviewing Officer (IRO))
+PN3 - Child attends and conveys his or her view symbolically (non-verbally) (Attendance symbols)
+PN4 - Child physically attends but does not speak for him or herself, does not convey his or her view symbolically (non-verbally) and does not ask an advocate to speak for him or her (Attendance without contribution)
+PN5 - Child does not attend physically but briefs an advocate to speak for him or her (Views represented by advocate or independent reviewing officer (IRO) through texting, written format, phone, audio/video, viewpoint)
+PN6 - Child does not attend but conveys his or her feelings to the review by a facilitative medium (Texting the chair, written format, phone, audio/video, viewpoint)
+PN7 - Child does not attend nor are his or her views conveyed to the review"
+CLAV001A,ssd_cla_visits,looked_after|visit,,nvarchar,48,clav_cla_visit_id,Visit ID,,,Local,liquid_logic|mosaic,liquid_logic : clav_cla_visit_id|mosaic : clav_cla_visit_id,liquid_logic : ssd_cla_visits|mosaic : ssd_cla_visits,,,Yes,,Row identifier for the ssd_cla_visits table
+CLAV007A,ssd_cla_visits,looked_after|visit,,nvarchar,48,clav_cla_id,,,,Local,,,,,,,,"System identifier for the whole period of care, encompassing all episodes included within that period of care."
+CLAV008A,ssd_cla_visits,looked_after|visit,,nvarchar,48,clav_person_id,Person ID,ssd_cla_episodes.clae_person_id,,Local,liquid_logic|mosaic,,,,,,,Person's ID generated in CMS Database
+CLAV003A,ssd_cla_visits,looked_after|visit,,datetime,NULL,clav_cla_visit_date,Date of Visit,,,AnnexA,liquid_logic|mosaic,liquid_logic : clav_cla_visit_date|mosaic : clav_cla_visit_date,liquid_logic : ssd_cla_visits|mosaic : ssd_cla_visits,,,,,Actual date of Visit
+CLAV004A,ssd_cla_visits,looked_after|visit,,nchar,1,clav_cla_visit_seen,Child Seen,,,Local,liquid_logic|mosaic,liquid_logic : clav_cla_visit_seen|mosaic : clav_cla_visit_seen,liquid_logic : ssd_cla_visits|mosaic : ssd_cla_visits,,,,,Was the child seen during this visit? Y/N
+CLAV005A,ssd_cla_visits,looked_after|visit,,nchar,1,clav_cla_visit_seen_alone,Child Seen Alone,,,Local,liquid_logic|mosaic,liquid_logic : clav_cla_visit_seen_alone|mosaic : clav_cla_visit_seen_alone,liquid_logic : ssd_cla_visits|mosaic : ssd_cla_visits,,,,,Was the child seen alone during this visit? Y/N
+LAPP001A,ssd_cla_previous_permanence,looked_after|permanence,,nvarchar,48,lapp_table_id,Previous Permanence ID,,,Local,liquid_logic|mosaic,liquid_logic : lapp_table_id|mosaic : lapp_table_id,liquid_logic : ssd_cla_previous_permanence|mosaic : ssd_cla_previous_permanence,,,Yes,,"Row identifier for the ssd_previous_permanence table
+"
+LAPP002A,ssd_cla_previous_permanence,looked_after|permanence,,nvarchar,48,lapp_person_id,Person Unique ID,ssd_cla_episodes.clae_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : lapp_person_id|mosaic : lapp_person_id,liquid_logic : ssd_cla_previous_permanence|mosaic : ssd_cla_previous_permanence,Yes,,,,Person's ID generated in CMS Database
+LAPP003A,ssd_cla_previous_permanence,looked_after|permanence,,nvarchar,100,lapp_previous_permanence_order_date,Date of Previous Permanence Order,,,SSDA903,liquid_logic|mosaic,liquid_logic : lapp_previous_permanence_order_date|mosaic : lapp_previous_permanence_order_date,liquid_logic : ssd_cla_previous_permanence|mosaic : ssd_cla_previous_permanence,,,,,"Date of the previous permanence order, if known. In line with the SSDA903 guidance, if the exact date is unknown, the month and year are recorded in the form zz/MM/YYYY, using zz as the day, for example for May 2020 with the exact date being unknown enter zz/05/2020.
+If the month is unknown, the year is recorded in the form zz/zz/YYYY, for example, where the year of 2021 only is known enter zz/zz/2021. If no information is known about the date of the order, the date is recorded as zz/zz/zzzz."
+LAPP004A,ssd_cla_previous_permanence,looked_after|permanence,,nvarchar,200,lapp_previous_permanence_option,Previous Permanence Option,,,SSDA903,liquid_logic|mosaic,liquid_logic : lapp_previous_permanence_option|mosaic : lapp_previous_permanence_option,liquid_logic : ssd_cla_previous_permanence|mosaic : ssd_cla_previous_permanence,,,,,"This should be completed for all children who start to be looked-after.
+Information is collected for children who previously ceased to be looked-after due to the granting of an adoption order, a special guardianship order, residence order (until 22 April 2014) or a child arrangement order. 
+Code set
+P1 - Adoption
+P2 - Special guardianship order (SGO)
+P3 - Residence order (RO) or child arrangements order (CAO) which sets out with whom the child is to live.
+P4 - Unknown
+Z1 - Child has not previously had a permanence option
+P4 should be used when it is not known to the local authority whether the child had a previous permanence option. This information can be updated if information comes to light at any stage in an episode of care. Do not include any adoptions/SGO/ROs/CAOs previously granted where the child was not previously looked-after."
+LAPP005A,ssd_cla_previous_permanence,looked_after|permanence,,nvarchar,100,lapp_previous_permanence_la,Previous Permanence Arranged LA,,,SSDA903,liquid_logic|mosaic,liquid_logic : lapp_previous_permanence_la|mosaic : lapp_previous_permanence_la,liquid_logic : ssd_cla_previous_permanence|mosaic : ssd_cla_previous_permanence,,,,,The name of the local authority who arranged the previous permanence option.
+LACP001A,ssd_cla_care_plan,looked_after|care_plan,,nvarchar,48,lacp_table_id,Care Plan Table ID,,,Local,liquid_logic|mosaic,liquid_logic : lacp_table_id|mosaic : lacp_table_id,liquid_logic : ssd_cla_care_plan|mosaic : ssd_cla_care_plan,,,Yes,,Row identifier for the ssd_cla_care_plan table
+LACP007A,ssd_cla_care_plan,looked_after|care_plan,,nvarchar,48,lacp_person_id,Person ID,ssd_cla_episodes.clae_person_id,,Local,liquid_logic|mosaic,liquid_logic : lacp_person_id|mosaic : lacp_person_id,liquid_logic : ssd_cla_care_plan|mosaic : ssd_cla_care_plan,Yes,,,,Person's ID generated in CMS Database
+LACP004A,ssd_cla_care_plan,looked_after|care_plan,,datetime,NULL,lacp_cla_care_plan_start_date,Care Plan start Date,,,Local,liquid_logic|mosaic,liquid_logic : lacp_cla_care_plan_start_date|mosaic : lacp_cla_care_plan_start_date,liquid_logic : ssd_cla_care_plan|mosaic : ssd_cla_care_plan,,,,,Date the care plan was effective from
+LACP005A,ssd_cla_care_plan,looked_after|care_plan,,datetime,NULL,lacp_cla_care_plan_end_date,Care Plan end date,,,Local,liquid_logic|mosaic,,liquid_logic : ssd_cla_care_plan|mosaic : ssd_cla_care_plan,,,,,Date the care plan was effective to
+LACP003A,ssd_cla_care_plan,looked_after|care_plan,,nvarchar,1000,lacp_cla_care_plan_json,What is the chosen/ permanence plan for this child/ young person?,,,AnnexA,liquid_logic|mosaic,liquid_logic : lacp_cla_care_plan_json|mosaic : lacp_cla_care_plan_json,liquid_logic : ssd_cla_care_plan|mosaic : ssd_cla_care_plan,,,,,"The current permanence plan for the child. Combined dictionary/ json type containing one or more of the following, where there is value recorded:
+REMAINSUP - Remaining with birth family supported by shared care/short term breaks
+RETURN1M - Return to birth family within one month
+RETURN6M - Return to birth family within six months
+RETURNEV - Eventual return to birth family (record number of months below)
+LTRELFR - Long term placement with relatives/friends
+LTFOST18 - Long term placement with foster carers (intended to last until 18, no return home envisaged)
+RESPLMT - Residential placement until independence
+SUPPLIV - Supported living in the community (with a view to independence)
+ADOPTION - Adoption
+OTHERPLN - Other Plan
+Where the child does not have a permanence plan agreed (such as recently entered care) please leave blank. More than one box might be ticked if parallel planning is being pursued"
+CSDQ001A,ssd_sdq_scores,looked_after|sdq,,nvarchar,48,csdq_table_id,SDQ ID,,,Local,liquid_logic|mosaic,liquid_logic : csdq_table_id|mosaic : csdq_table_id,liquid_logic : ssd_sdq_scores|mosaic : ssd_sdq_scores,Yes,Yes,Yes,,Row identifier for the ssd_sdq_scores table
+CSDQ002A,ssd_sdq_scores,looked_after|sdq,,nvarchar,48,csdq_person_id,Person Unique ID,ssd_cla_episodes.clae_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : csdq_person_id|mosaic : csdq_person_id,liquid_logic : ssd_sdq_scores|mosaic : ssd_sdq_scores,Yes,,,,Person's ID generated in CMS Database
+CSDQ003A,ssd_sdq_scores,looked_after|sdq,,datetime,NULL,csdq_sdq_completed_date,SDQ Completed Date,,,Local,liquid_logic|mosaic,liquid_logic : csdq_sdq_completed_date|mosaic : csdq_sdq_completed_date,liquid_logic : ssd_sdq_scores|mosaic : ssd_sdq_scores,,,,,Date of completion of Strength and Difficulties Questionnaire (SDQ)
+CSDQ004A,ssd_sdq_scores,looked_after|sdq,,nvarchar,100,csdq_sdq_reason,SDQ Reason,,,SSDA903,liquid_logic|mosaic,liquid_logic : csdq_sdq_reason|mosaic : csdq_sdq_reason,liquid_logic : ssd_sdq_scores|mosaic : ssd_sdq_scores,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+If it is not possible to collect the SDQ score for a looked-after child, then a reason should be recorded using the codes below.
+Code set
+SDQ1 - No form returned as child was aged under 4 or over 16 at date of latest assessment
+SDQ2 - Carer(s) refused to complete and return questionnaire
+SDQ3 - Not possible to complete the questionnaire due to severity of the child’s disability
+SDQ4 - Other
+SDQ5 - Child or young person refuses to allow a strengths and difficulties questionnaire (SDQ) to be completed"
+CSDQ005A,ssd_sdq_scores,looked_after|sdq,,nvarchar,100,csdq_sdq_score,SDQ Score,,,SSDA903,liquid_logic|mosaic,liquid_logic : csdq_sdq_score|mosaic : csdq_sdq_score,liquid_logic : ssd_sdq_scores|mosaic : ssd_sdq_scores,,,,,"A single score (0–40), or a reason for the score not being returned is required for each child looked-after continuously for at least 12 months aged 4–16 on the date of the last assessment."
+MISS001A,ssd_missing,looked_after|missing,,nvarchar,48,miss_table_id,Missing Episode Table ID,,,Local,liquid_logic|mosaic,liquid_logic : miss_table_id|mosaic : miss_table_id,liquid_logic : ssd_missing|mosaic : ssd_missing,Yes,Yes,Yes,,Row identifier for the ssd_missing table
+MISS002A,ssd_missing,looked_after|missing,,nvarchar,48,miss_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic,liquid_logic : miss_person_id|mosaic : miss_person_id,liquid_logic : ssd_missing|mosaic : ssd_missing,,,,,Person's ID generated in CMS Database
+MISS003A,ssd_missing,looked_after|missing,,datetime,NULL,miss_missing_episode_start_date,Missing Episode Start,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : miss_missing_episode_start_date|mosaic : miss_missing_episode_start_date,liquid_logic : ssd_missing|mosaic : ssd_missing,,,,,"The missing episode start date. This should be completed for both missing episodes and episodes where the child was away from placement without authorisation. It should be the date the child left his or her normal placement or the date the child was last seen by a responsible adult (whichever was the latest). For this purpose, a responsible adult is either the child’s carer, or a professional directly associated with the child’s welfare or education (like a doctor, school-teacher or social worker).
+Any UASC that go missing before being accommodated for 24 hours for data collection purposes should still be recorded as missing with a start date as the date in which they left his or her normal placement or the date the child was last seen by a responsible adult (whichever was the latest). For this purpose, a responsible adult is either the child’s carer, or a professional directly associated with the child’s welfare or education (like a doctor, school-teacher, home office official or social worker).
+Unresolved cases should remain open and until the child’s 18th birthday, at which point the case should be closed using the appropriate reason code. Records must not be closed before this point."
+MISS004A,ssd_missing,looked_after|missing,,nvarchar,100,miss_missing_episode_type,Episode Type (Missing/ Absent),,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : miss_missing_episode_type|mosaic : miss_missing_episode_type,liquid_logic : ssd_missing|mosaic : ssd_missing,,,,,"Record each episode where a child was ‘missing’ or ‘away from placement without authorisation’ according to the following definitions:
+• Missing - Missing from care: a looked-after child who is not at their placement or the place they are expected to be (for example school) and their whereabouts is not known
+• Away - Away from placement without authorisation: a looked-after child whose whereabouts is known but who is not at their placement or place they are expected to be and the carer has concerns or the incident has been notified to the local authority or the police.
+Any children missing from care or away from placement without authorisation for any length of time should be recorded."
+MISS005A,ssd_missing,looked_after|missing,,datetime,NULL,miss_missing_episode_end_date,Missing Episode End,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : miss_missing_episode_end_date|mosaic : miss_missing_episode_end_date,liquid_logic : ssd_missing|mosaic : ssd_missing,,,,,The missing episode end date. This should be completed for both missing episodes and episodes where the child was away from placement without authorisation. It should be the date that the child was found (where whereabouts are unknown) or the date that the child returned to his/her normal placement (where whereabouts known).
+MISS006A,ssd_missing,looked_after|missing,,nvarchar,2,miss_missing_rhi_offered,RHI Offered,,,AnnexA,liquid_logic|mosaic,liquid_logic : miss_missing_rhi_offered|mosaic : miss_missing_rhi_offered,liquid_logic : ssd_missing|mosaic : ssd_missing,,,,,Records whether the child was offered a Return Interview after their missing episode. Y/N/NA/NULL
+MISS007A,ssd_missing,looked_after|missing,,nvarchar,2,miss_missing_rhi_accepted,RHI Accepted,,,AnnexA,liquid_logic|mosaic,liquid_logic : miss_missing_rhi_accepted|mosaic : miss_missing_rhi_accepted,liquid_logic : ssd_missing|mosaic : ssd_missing,,,,,Records whether the child accepted the Return Interview offered after their missing episode. Y/N/NA/NULL
+CLEA001A,ssd_care_leavers,care_leavers,,nvarchar,48,clea_table_id,Care Leaver Table ID,,,Local,liquid_logic|mosaic,liquid_logic : clea_table_id|mosaic : clea_table_id,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,Yes,Yes,Yes,,Row identifier for the ssd_care_leavers table
+CLEA002A,ssd_care_leavers,care_leavers,,nvarchar,48,clea_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : clea_person_id|mosaic : clea_person_id,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,Yes,,,,Person's ID generated in CMS Database
+CLEA003A,ssd_care_leavers,care_leavers,,nvarchar,100,clea_care_leaver_eligibility,Eligibility Status/ Category,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : clea_care_leaver_eligibility|mosaic : clea_care_leaver_eligibility,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,,,,,"The current Care Leaver Eligibility Status of the Child/ Young Person. 
+Code set 
+Relevant 
+Former Relevant 
+Eligible 
+Qualifying 
+No Current Eligibility 
+
+A relevant child is: 
+• a young person aged 16 or 17 
+• is no longer looked-after 
+• before last ceasing to be looked-after, was an ‘eligible child’ (see definition below) 
+OR 
+• a young person aged 16 or 17 
+• not subject to a care order 
+• detained, or in hospital on their 16th birthday 
+• immediately before being detained or admitted to hospital had been looked-after for at least 13 weeks which began after they reached age 14. 
+A former relevant child is one who is: 
+• aged 18 or above, 
+AND EITHER 
+• has been a relevant child and would be one if he were under 18, OR 
+• immediately before he ceased to be looked-after at age 18, was an eligible child. 
+The definition of eligible children is given below- relevant and former relevant children will have been an eligible child in the past.  
+An eligible child is: 
+• a young person aged 16 or 17 
+• who is looked-after 
+• and has been looked-after for at least 13 weeks which began after they reached the age of 14 
+and ended after they reached the age of 16. 
+A qualifying Care Leaver is: 
+• aged between 16 and 25 
+• who was looked after by children’s services on, or after, their 16th birthday and no longer looked after 
+• and spent less than 13 weeks in care since 14th birthday, i.e. do not fulfill criteria for eligible or relevant child "
+CLEA004A,ssd_care_leavers,care_leavers,,nvarchar,100,clea_care_leaver_in_touch,In Touch Category,,,SSDA903|RIIA,liquid_logic|mosaic,liquid_logic : clea_care_leaver_in_touch|mosaic : clea_care_leaver_in_touch,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,,,,,"Is the local authority in touch with this young person? 
+Code set 
+YES  -  Yes - in touch 
+NO  -  No – not in touch 
+DIED  -  Died after leaving care 
+REFU  -  Young person refuses contact 
+NREQ  -  Young person no longer requires children’s social care services 
+RHOM  - Young person returned to live with parents or someone with parental responsibility for a continuous period of 6 months or more "
+CLEA005A,ssd_care_leavers,care_leavers,,datetime,NULL,clea_care_leaver_latest_contact,Latest Date of Contact,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : clea_care_leaver_latest_contact|mosaic : clea_care_leaver_latest_contact,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,,,,,"This should be the latest date of PA contact with the young person, it is left blank if the LA is not in touch with the care leaver."
+CLEA006A,ssd_care_leavers,care_leavers,,nvarchar,100,clea_care_leaver_accommodation,Accommodation,,,SSDA903|RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : clea_care_leaver_accommodation|mosaic : clea_care_leaver_accommodation,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,,,,,"The type of accommodation that the young person is living in on or around their 17th, 18th, 19th, 20th or 21st birthday, or the accommodation the young person is living in at the time of their latest contact during the year if they are aged 22-to-25-years-old. 
+Code set 
+B - With parent(s) or relative(s) 
+C - Community home or other form of residential care such as an National Health Service (NHS) establishment 
+D - Semi-independent, transitional accommodation (like a supported hostel, trainer flats); self-contained accommodation with specialist personal assistance support (for example, for young people with disabilities, pregnant young women and single parents); and self-contained accommodation with floating support 
+E - Supported lodgings (accommodation, usually in a family home, where adult(s) in the “host family” provide formal advice and support) 
+G - Gone abroad 
+H - Deported 
+K - Ordinary lodgings, without formal support 
+R - Residence not known 
+S - No fixed abode / homeless 
+T - Foyers and similar supported accommodation which combines the accommodation with opportunities for education, training or employment 
+U - Independent living, for example independent tenancy of flat, house or bedsit, including local authority or housing association tenancy, or accommodation provided by a college or university. Includes flat sharing 
+V - Emergency accommodation (like a night shelter, direct access or emergency hostel) 
+W - Bed and breakfast 
+X - In custody 
+Y - Other accommodation 
+Z - With former foster carer(s) - where the young person has been fostered and on turning 18 continues to remain with the same carer(s) who had fostered them immediately prior to their reaching legal adulthood, and where the plan for their care involves their remaining with this former foster family for the future. This code should not be used for 17-year-old care leavers. If the foster carer is also a relative this code should be used rather than ‘B - with parents or relatives’. "
+CLEA007A,ssd_care_leavers,care_leavers,,nvarchar,100,clea_care_leaver_accom_suitable,Suitability of Accommodation,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : clea_care_leaver_accom_suitable|mosaic : clea_care_leaver_accom_suitable,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,,,,,"Is the accommodation considered suitable? Accommodation is to be regarded as suitable if it provides safe, secure and affordable provision for young people. Accommodation that clearly exposes the person to risk of harm or social exclusion by reason of its location or other factors should be coded as ‘unsuitable’. 
+Code set 
+1 - Accommodation is considered suitable
+2 - Accommodation is considered unsuitable "
+CLEA008A,ssd_care_leavers,care_leavers,,nvarchar,100,clea_care_leaver_activity,Activity Status,,,SSDA903|RIIA|AnnexA,liquid_logic|mosaic,liquid_logic : clea_care_leaver_activity|mosaic : clea_care_leaver_activity,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,,,,,"For care leavers aged 17 to 21 years, the young person's main activity status on or around their birthday if the LA was in touch with them, or if the LA was not in touch with them but was certain of their activity on their birthday. For care leavers aged 22 to 25 years, this will be their main activity status at their last contact with the LA. 
+Code set 
+F1 - Young person engaged full time in higher education (for example studies beyond A level) 
+P1 - Young person engaged part time in higher education (for example studies beyond A level) 
+F2 - Young person engaged full time in education other than higher education 
+P2 - Young person engaged part time in education other than higher education 
+F4 - Young person engaged full time in an apprenticeship 
+P4 - Young person engaged part time in an apprenticeship 
+F5 - Young person engaged full time in training or employment (not apprenticeship) 
+P5 - Young person engaged part time in training or employment (not apprenticeship) 
+G4 - Young person not in education, employment or training because of illness or disability 
+G5 - Young person not in education, employment or training: other circumstances 
+G6 - Young person not in education, employment or training due to pregnancy or parenting 
+F3 - (superseded by F4/F5) Young person engaged full time in training or employment 
+P3 - (superseded by F4/F5) Young person engaged part time in training or employment "
+CLEA009A,ssd_care_leavers,care_leavers,,datetime,NULL,clea_pathway_plan_review_date,Latest Pathway Plan Review Date,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : clea_pathway_plan_review_date|mosaic : clea_pathway_plan_review_date,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,,,,,"This should be either the date the Pathway plan started, or the latest date the pathway plan was reviewed (if applicable); whichever is the most recent."
+CLEA010A,ssd_care_leavers,care_leavers,,nvarchar,100,clea_care_leaver_personal_advisor,Allocated Personal Advisor,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : clea_care_leaver_personal_advisor|mosaic : clea_care_leaver_personal_advisor,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,,,,,Allocated Personal Advisor for Care Leaver
+CLEA011A,ssd_care_leavers,care_leavers,,nvarchar,255,clea_care_leaver_allocated_team_name,Allocated Team,,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : clea_care_leaver_allocated_team_name|mosaic : clea_care_leaver_allocated_team_name,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,,,,,Allocated Team responsible for Care Leaver
+CLEA012A,ssd_care_leavers,care_leavers,,nvarchar,100,clea_care_leaver_worker_name,Allocated Worker ID,ssd_involvements.invo_professional_id,,AnnexA|RIIA,liquid_logic|mosaic,liquid_logic : clea_care_leaver_worker_name|mosaic : clea_care_leaver_worker_name,liquid_logic : ssd_care_leavers|mosaic : ssd_care_leavers,,,,,Allocated worker responsible for Care Leaver
+PERM001A,ssd_permanence,looked_after|permanence|adoption,,nvarchar,48,perm_table_id,permanence_table_id,,,Local,liquid_logic|mosaic,liquid_logic : perm_table_id|mosaic : perm_table_id,liquid_logic : ssd_permanence|mosaic : ssd_permanence,Yes,,Yes,,Row identifier for the ssd_permanence table
+PERM002A,ssd_permanence,looked_after|permanence|adoption,,nvarchar,48,perm_person_id,Person Unique ID,ssd_cla_episodes.clae_cla_episode_id,,Local,liquid_logic|mosaic,liquid_logic : perm_person_id|mosaic : perm_person_id,liquid_logic : ssd_permanence|mosaic : ssd_permanence,Yes,,,,Person's ID generated in CMS Database
+PERM022A,ssd_permanence,looked_after|permanence|adoption,,nvarchar,48,perm_cla_id,CLA Table ID,,,Local,liquid_logic|mosaic,liquid_logic : perm_cla_id|mosaic : perm_cla_id,,,,,,"System identifier for the whole period of care, encompassing all episodes within that period of care."
+PERM003A,ssd_permanence,looked_after|permanence|adoption,,datetime,NULL,perm_adm_decision_date,Date of ADM Decision ,,,SSDA903|ASGLB,liquid_logic|mosaic,liquid_logic : perm_adm_decision_date|mosaic : perm_adm_decision_date,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,"The date of the decision that the child should be placed for adoption. This is the date on which the local authority formally decides that a child should be placed for adoption, i.e. the date the agency decision maker takes the decision to endorse the proposed adoption plan for the child."
+PERM004A,ssd_permanence,looked_after|permanence|adoption,,datetime,NULL,perm_ffa_cp_decision_date,Date of FFA/ CP Decision,,,ASGLB|AnnexA,liquid_logic|mosaic,liquid_logic : perm_ffa_cp_decision_date|mosaic : perm_ffa_cp_decision_date,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,"Date of the decision that the child should be placed in a FFA or CP placement with a selected family, if applicable"
+PERM006A,ssd_permanence,looked_after|permanence|adoption,,datetime,NULL,perm_placement_order_date,Date of Placement/ Freeing Order,,,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,liquid_logic : perm_placement_order_date|mosaic : perm_placement_order_date,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,The date that a Placement order or Freeing order was granted. This can be ascertained from the date when a child's legal status has changed to E1 (Placement order granted) or D1 (Freeing order granted).
+PERM007A,ssd_permanence,looked_after|permanence|adoption,,datetime,NULL,perm_placed_for_adoption_date,Date Placed for Adoption,,,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,liquid_logic : perm_placed_for_adoption_date|mosaic : perm_placed_for_adoption_date,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,"The date that the child was placed for adoption with particular prospective adopters.. Or, if the child was placed with their foster carers or were in a FFA/concurrent planning placement, record the date this placement changed from a foster placement to an adoption placement. 
+This is the date that child goes to live with the prospective adopters who will adopt them. It does not mean that the child has been adopted."
+PERM008A,ssd_permanence,looked_after|permanence|adoption,,datetime,NULL,perm_matched_date,Date Matched to Prospective Adopters,,,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,liquid_logic : perm_matched_date|mosaic : perm_matched_date,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,"The date that the child was matched to particular prospective adopters or with dually approved foster carers/adopters for FFA. 
+This is the date on which the local authority formally decides that the child should be placed for adoption with the particular prospective adopters. If the child is adopted by the foster carer or relatives with whom he/she is already placed, the date of decision should be recorded here."
+PERM021A,ssd_permanence,looked_after|permanence|adoption,,nchar,1,perm_adopted_by_carer_flag,Adopted by carer flag,,,SSDA903|AnnexA,liquid_logic|mosaic,liquid_logic : perm_adopted_by_carer_flag|mosaic : perm_adopted_by_carer_flag,,,,,,Flag showing if the child was Adopted by their former carer. Y/N
+PERM009A,ssd_permanence,looked_after|permanence|adoption,,datetime,NULL,perm_placed_ffa_cp_date,Date Placed in FFA/ CP Placement ,,,AnnexA|ASGLB,liquid_logic|mosaic,liquid_logic : perm_placed_ffa_cp_date|mosaic : perm_placed_ffa_cp_date,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,Date the child was placed in a FFA or CP placement.
+PERM010A,ssd_permanence,looked_after|permanence|adoption,,datetime,NULL,perm_decision_reversed_date,Date of Decision that Child Should No Longer be Placed for Adoption,,,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,liquid_logic : perm_decision_reversed_date|mosaic : perm_decision_reversed_date,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,The date that the local authority formally decides that a child should no longer be placed for adoption
+PERM011A,ssd_permanence,looked_after|permanence|adoption,,datetime,NULL,perm_placed_foster_carer_date,Date originally placed with foster carer(s) (if adopted by foster carer/s),,,AnnexA|ASGLB,liquid_logic|mosaic,liquid_logic : perm_placed_foster_carer_date|mosaic : perm_placed_foster_carer_date,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Date the child was originally placed with their foster carer(s) (only if the child was adopted by their foster carer(s))"
+PERM012A,ssd_permanence,looked_after|permanence|adoption,,nchar,1,perm_part_of_sibling_group,Is the child a part of a sibling group?,,,ASGLB,liquid_logic|mosaic,liquid_logic : perm_part_of_sibling_group|mosaic : perm_part_of_sibling_group,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,"Is the child a part of a sibling group
+Code set
+0 - No 
+1 - Yes"
+PERM013A,ssd_permanence,looked_after|permanence|adoption,,int,2,perm_siblings_placed_together,"Number of children placed, or planned to be placed, for adoption together as sibling group INCLUDING this child",,,ASGLB,liquid_logic|mosaic,liquid_logic : perm_siblings_placed_together|mosaic : perm_siblings_placed_together,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,"Number of children placed, or planned to be placed, for adoption together as sibling group INCLUDING this child"
+PERM014A,ssd_permanence,looked_after|permanence|adoption,,int,2,perm_siblings_placed_apart,"Number of siblings placed, or planned to be placed, for adoption separately from the child",,,ASGLB,liquid_logic|mosaic,liquid_logic : perm_siblings_placed_apart|mosaic : perm_siblings_placed_apart,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,"Number of siblings placed, or planned to be placed, for adoption separately from the child"
+PERM015A,ssd_permanence,looked_after|permanence|adoption,,nvarchar,48,perm_placement_provider_urn,URN of the placement provider agency,,,Local,liquid_logic|mosaic,liquid_logic : perm_placement_provider_urn|mosaic : perm_placement_provider_urn,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,URN of the placement provider agency
+PERM016A,ssd_permanence,looked_after|permanence|adoption,,nvarchar,100,perm_decision_reversed_reason,Reason No Longer Placed for Adoption,,,SSDA903|AnnexA|ASGLB,liquid_logic|mosaic,liquid_logic : perm_decision_reversed_reason|mosaic : perm_decision_reversed_reason,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,"Reason why the child is no longer considered for adoption 
+Code set
+RD1 - The child’s needs changed subsequent to the decision
+RD2 - The Court did not make a placement order
+RD3 - Prospective adopters could not be found
+RD4 - Any other reason"
+PERM017A,ssd_permanence,looked_after|permanence,,datetime,NULL,perm_permanence_order_date,Date of Order ,,,AnnexA|ASGLB,liquid_logic|mosaic,liquid_logic : perm_permanence_order_date|mosaic : perm_permanence_order_date,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,Date permanence order granted -  this is the CLA Placement End Date
+PERM018A,ssd_permanence,looked_after|permanence,,nvarchar,100,perm_permanence_order_type,Type of Order,,,ASGLB,liquid_logic|mosaic,liquid_logic : perm_permanence_order_type|mosaic : perm_permanence_order_type,liquid_logic : ssd_permanence|mosaic : ssd_permanence,,,,,"Type of Permanence order granted 
+- Adoption 
+- Special Guardianship  
+- Child Arrangements Order/ Residence Order"
+PERM023A,ssd_permanence,looked_after|permanence|adoption,,nvarchar,100,perm_adoption_worker_name,Adoption social worker,,,Local,liquid_logic|mosaic,,,,,,,Adoption Social Worker
+PERM025A,ssd_permanence,looked_after|permanence|adoption,,nvarchar,48,perm_adopter_sex,Sex of Adopter,,,SSDA903,,,,,,,,"The sex of the adopter/s/ prospective adopter/s. 
+Code set 
+F1    - Single Female 
+FF    - Female couple
+M1  - Single Male
+MF   - Male/Female couple
+MM - Male couple"
+PERM026A,ssd_permanence,looked_after|permanence|adoption,,nvarchar,100,perm_adopter_legal_status,Legal status of adopter,,,SSDA903,,,,,,,,"The Legal Status of the adopter/s/ prospective adopter/s. 
+Code set
+L0   - Single Adopter
+L11 - Different gender married couple
+L12 - Same gender married couple
+L2   - Civil partnership couple
+L3   - Different gender unmarried couple
+L4   - Same gender couple not married or in a civil partnership"
+PERM027A,ssd_permanence,looked_after|permanence|adoption,,nvarchar,3,perm_number_of_adopters,Number of adopters. As A(1),,,SSDA903,,,,,,,,Number of Adopters/ Prospective Adopters
+INVO005A,ssd_involvements,workforce,,nvarchar,48,invo_involvements_id,Involvements table row ID,,,Local,liquid_logic|mosaic,liquid_logic : invo_involvements_id|mosaic : invo_involvements_id,,,,,,Row identifier for the ssd_involvements table
+INVO006A,ssd_involvements,workforce,,nvarchar,48,invo_professional_id,Worker ID,ssd_professionals.prof_professional_id,,Local,liquid_logic|mosaic,,,,,,,ID for linking to ssd_professionals table
+INVO007A,ssd_involvements,workforce,,nvarchar,200,invo_professional_role_id,Worker role e.g. Allocated Case Worker,,,Local,liquid_logic|mosaic,,,,,,,Role of the professional/ team working with the child/ young person
+INVO009A,ssd_involvements,workforce,,nvarchar,1000,invo_professional_team,Worker Team,,,AnnexA,liquid_logic|mosaic,,,,,,,Name of the Team working with the child/ young person
+INVO002A,ssd_involvements,workforce,,datetime,NULL,invo_involvement_start_date,Social worker episode start date,,,RIIA,liquid_logic|azeus,liquid_logic : invo_involvement_start_date|mosaic : invo_involvement_start_date,liquid_logic : ssd_involvements|mosaic : ssd_involvements,,,,,Start Date for team/ worker involvement
+INVO003A,ssd_involvements,workforce,,datetime,NULL,invo_involvement_end_date,Social worker episode end date,,,RIIA,liquid_logic|azeus,liquid_logic : invo_involvement_end_date|mosaic : invo_involvement_end_date,liquid_logic : ssd_involvements|mosaic : ssd_involvements,,,,,End Date for team/ worker involvement
+INVO004A,ssd_involvements,workforce,,nvarchar,200,invo_worker_change_reason,Reason for worker change,,,RIIA,liquid_logic|azeus,liquid_logic : invo_worker_change_reason|mosaic : invo_worker_change_reason,liquid_logic : ssd_involvements|mosaic : ssd_involvements,,,,,"Reason for change of Social Worker 
+Code set 
+MANAGE - Managing Caseloads 
+FCONTA   - First contact or re-referral 
+LEFTRL     - Previous social worker left role 
+ORGRST  - New social worker assigned following organisational restructure 
+TSPROC   - New social worker assigned following child transfer due to standard process 
+ABSENC  - Absence cover or return from absence  
+CHCHAN - Child requested change from previous social worker 
+PCCHAN - Parent/carer requested change from previous social worker 
+SWDIED - Previous Social Worker died 
+OTHERS - Other reason "
+INVO011A,ssd_involvements,workforce,,nvarchar,48,invo_person_id,Person Unique ID,,,Local,,,,,,,,
+INVO010A,ssd_involvements,workforce,,nvarchar,48,invo_referral_id,Referral ID,,,Local,liquid_logic|mosaic,,,,,,,ID for linking to CIN Referral Episode
+PROF001A,ssd_professionals,workforce,,nvarchar,48,prof_professional_id,Professionals table row ID,,,Local,liquid_logic,liquid_logic : prof_professional_id|mosaic : prof_professional_id,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,Yes,,Row identifier for the ssd_professionals table
+PROF010A,ssd_professionals,workforce,,nvarchar,48,prof_staff_id,Staff Identifier,,,Local,liquid_logic|mosaic|azeus,,,,,,,System ID generated in CMS Database
+PROF013A,ssd_professionals,workforce,,nvarchar,300,prof_professional_name,Staff name,,,AnnexA,liquid_logic|mosaic|azeus,,,,,,,Professional's Name
+PROF002A,ssd_professionals,workforce,,nvarchar,48,prof_social_worker_registration_no,Social worker ID - Social Work England (SWE) registration number- if available,,,Local,liquid_logic|mosaic|azeus,liquid_logic : prof_social_worker_registration_no|mosaic : prof_social_worker_registration_no,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,,,This is the child and family social worker Social Work England (SWE) number (formerly HCPC code). For social workers this will start ‘SW’. This data item should be in the format ‘AAnnnnnn’ and is up to 12 digits.
+PROF007A,ssd_professionals,workforce,,nvarchar,500,prof_professional_job_title,Worker job title e.g. Social Worker,,,CSCWF|RIIA,liquid_logic|mosaic,liquid_logic : prof_professional_job_title|mosaic : prof_professional_job_title,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,,,"Professional Job title, e.g. Social Worker, Keyworker, GP etc."
+PROF008A,ssd_professionals,workforce,,int,5,prof_professional_caseload,Number of cases held on previous 30th Sept,,,CSCWF|RIIA,liquid_logic|mosaic,liquid_logic : prof_professional_caseload|mosaic : prof_professional_caseload,liquid_logic : ssd_professionals|mosaic : ssd_professionals,,,,,(currently 'PLACEHOLDER_DATA' pending further development) 
+PROF012A,ssd_professionals,workforce,,nvarchar,100,prof_professional_department,Worker Department e.g. 'Youth Support Team West',,,Local,liquid_logic|mosaic,liquid_logic : prof_professional_department|mosaic : prof_professional_department,,,,,,Professional's team/ organisation
+PROF011A,ssd_professionals,workforce,,float,4,prof_full_time_equivalency,Full Time Equivalency,,,Local,liquid_logic|mosaic,liquid_logic : prof_full_time_equivalency|mosaic : prof_full_time_equivalency,,,,,,Worker FTE
+PROF014A,ssd_professionals,workforce,,NCHAR,1,prof_agency_worker_flag,Flag for whether the worker is agency,,,Local,,liquid_logic : prof_agency_worker_flag|mosaic : prof_agency_worker_flag,,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Y/N flag indicating if worker is an Agency worker"
+SEND001A,ssd_send,identity|send,,nvarchar,48,send_table_id,send_table_id,,,1aNotInCMS|RIIA,liquid_logic,liquid_logic : send_table_id|mosaic : send_table_id,liquid_logic : ssd_send|mosaic : ssd_send,Yes,Yes,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Row identifier for the ssd_send table"
+SEND002A,ssd_send,identity|send,,nvarchar,48,send_upn,UPN,,,1aNotInCMS|RIIA|SEN2,liquid_logic,liquid_logic : send_upn|mosaic : send_upn,liquid_logic : ssd_send|mosaic : ssd_send,Yes,Yes,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+The Child's Unique Pupil Number"
+SEND003A,ssd_send,identity|send,,nvarchar,48,send_uln,ULN,,,1aNotInCMS|RIIA|SEN2,liquid_logic,liquid_logic : send_uln|mosaic : send_uln,liquid_logic : ssd_send|mosaic : ssd_send,,,,,(currently 'PLACEHOLDER_DATA' pending further development) The young person’s unique learner number (ULN) as used in the Individualised Learner Record.
+SEND004A,ssd_send,identity|send,,nvarchar,6,send_upn_unknown,UPN and ULN unknown,,,1aNotInCMS|RIIA|SEN2,liquid_logic,liquid_logic : send_upn_unknown|mosaic : send_upn_unknown,liquid_logic : ssd_send|mosaic : ssd_send,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Where no identifier is available, please record one of the following options:
+-UN1   Child is aged under 6 years old and is not yet assigned a UPN
+-UN2   Child has never attended a state-funded school in England and has not been assigned a UPN
+-UN3   Child is educated outside of England and has not been assigned a UPN
+-UN5   Sources collating UPNs reflect discrepancy/ies for the child’s name and/or surname and/or date of birth therefore prevent reliable matching (for example duplicated UPN)
+-UN8   Person is new to LA and the UPN or ULN is not yet known
+-UN9   Young person has never attended a state-funded school or further education setting in England and has not been assigned a UPN or ULN
+-UN10  Request for assessment resulted in no further action before UPN or ULN known"
+SEND005A,ssd_send,identity|send,,nvarchar,48,send_person_id,Person Unique ID,ssd_person.pers_person_id,,1aNotInCMS|RIIA,liquid_logic,liquid_logic : send_person_id|mosaic : send_person_id,liquid_logic : ssd_send|mosaic : ssd_send,Yes,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Person's ID generated in CMS Database"
+EHCR001A,ssd_ehcp_requests,send|ehcp_request,,nvarchar,48,ehcr_ehcp_request_id,Request ID,,,1aNotInCMS|RIIA,liquid_logic,liquid_logic : ehcr_ehcp_request_id|mosaic : ehcr_ehcp_request_id,liquid_logic : ssd_ehcp_requests|mosaic : ssd_ehcp_requests,Yes,Yes,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+EHCP request record unique ID from system or auto-generated as part of export."
+EHCR002A,ssd_ehcp_requests,identity|send|ehcp_request,,nvarchar,48,ehcr_send_table_id,send_table_id,ssd_send.send_table_id,,1aNotInCMS,liquid_logic,liquid_logic : ehcr_send_table_id|mosaic : ehcr_send_table_id,liquid_logic : ssd_ehcp_requests|mosaic : ssd_ehcp_requests,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+ID for linking to ssd_send table"
+EHCR003A,ssd_ehcp_requests,send|ehcp_request,,datetime,NULL,ehcr_ehcp_req_date,Received Date,,,1aNotInCMS|SEN2|RIIA|SEN2,liquid_logic,liquid_logic : ehcr_ehcp_req_date|mosaic : ehcr_ehcp_req_date,liquid_logic : ssd_ehcp_requests|mosaic : ssd_ehcp_requests,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+The date the request for an EHC assessment was received. This will be the date used as the start of the 20-week period."
+EHCR004A,ssd_ehcp_requests,send|ehcp_request,,datetime,NULL,ehcr_ehcp_req_outcome_date,Request Outcome Date,,,1aNotInCMS|SEN2|RIIA|SEN2,liquid_logic,liquid_logic : ehcr_ehcp_req_outcome_date|mosaic : ehcr_ehcp_req_outcome_date,liquid_logic : ssd_ehcp_requests|mosaic : ssd_ehcp_requests,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please enter the date the requestor(s) was informed of the decision about whether the local authority agrees to the request for an assessment. 
+If the request was withdrawn or ceased before decision (W), if the decision is yet to be made (A) or is historical (H) then no date is required."
+EHCR005A,ssd_ehcp_requests,send|ehcp_request,,nvarchar,100,ehcr_ehcp_req_outcome,Request Outcome,,,1aNotInCMS|SEN2|RIIA|SEN2,liquid_logic,liquid_logic : ehcr_ehcp_req_outcome|mosaic : ehcr_ehcp_req_outcome,liquid_logic : ssd_ehcp_requests|mosaic : ssd_ehcp_requests,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+This item records whether or not the initial request proceeded to the assessment stage: 
+Y - LA proceeded with an assessment 
+N - LA decided not to proceed with an assessment 
+A - Decision yet to be made 
+W – Request withdrawn or ceased before decision to assess was made 
+H – Historical – Decision to assess was made before the latest collection period 
+If a local authority decides not to proceed with an assessment and this decision is subsequently changed for any reason the original request outcome and request outcome date should not be changed. If the change follows from mediation or tribunal the appropriate mediation and tribunal indicators (items 2.5 and 2.6) should be selected for the request. 
+W may include where the person moves out of the local authority area, leaves education or training, or if the child or young person dies. 
+When A, W or H is selected, no further information is required in this module."
+EHCA001A,ssd_ehcp_assessment,send|ehcp_request|ehcp_assessment,,nvarchar,48,ehca_ehcp_assessment_id,Assessment ID,,,1aNotInCMS|RIIA,liquid_logic,liquid_logic : ehca_ehcp_assessment_id|mosaic : ehca_ehcp_assessment_id,liquid_logic : ssd_ehcp_assessment|mosaic : ssd_ehcp_assessment,Yes,Yes,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+EHCP assessment record unique ID from system or auto-generated as part of export. 
+This module collects information on the decision to issue a plan. Where a decision has been made to issue a plan, the detail about the placement named on the EHC plan should be recorded in Module 4. It is possible that multiple assessments may be recorded for a single person. For example, if it was decided not to issue a plan previously and a new assessment has been agreed following a new request.
+If a child or young person transfers into the local authority’s area during the assessment process before an EHC plan has been issued there is no right of transfer of decisions made by the originating local authority. Under good practice local authorities may decide to share information but the importing local authority must make its own decisions on whether to assess and whether to issue a plan.
+Where a person with an existing EHC plan transfers into the local authority’s area (item 5.1) the assessment should be recorded as historical by the importing local authority, even if the EHC plan start date is within the collection year."
+EHCA002A,ssd_ehcp_assessment,send|ehcp_request|ehcp_assessment,,nvarchar,48,ehca_ehcp_request_id,Request ID,ssd_ehcp_requests.ehcr_ehcp_request_id,,1aNotInCMS,liquid_logic,liquid_logic : ehca_ehcp_request_id|mosaic : ehca_ehcp_request_id,liquid_logic : ssd_ehcp_assessment|mosaic : ssd_ehcp_assessment,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+EHCP request record unique ID from system or auto-generated as part of export."
+EHCA003A,ssd_ehcp_assessment,send|ehcp_request|ehcp_assessment,,datetime,NULL,ehca_ehcp_assessment_outcome_date,Assessment Outcome Date,,,1aNotInCMS|SEN2|RIIA|SEN2,liquid_logic,liquid_logic : ehca_ehcp_assessment_outcome_date|mosaic : ehca_ehcp_assessment_outcome_date,liquid_logic : ssd_ehcp_assessment|mosaic : ssd_ehcp_assessment,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+The assessment outcome date is required where EAM004A is equal to ‘Y’ or ‘N’, either record: 
+-Date on which EHC plan was issued, or 
+-Date on which person was notified of decision not to issue a plan 
+If a decision to issue has been made but no plan has been issued, please leave blank. "
+EHCA004A,ssd_ehcp_assessment,send|ehcp_request|ehcp_assessment,,nvarchar,100,ehca_ehcp_assessment_outcome,Assessment Outcome,,,1aNotInCMS|SEN2|RIIA|SEN2,liquid_logic,liquid_logic : ehca_ehcp_assessment_outcome|mosaic : ehca_ehcp_assessment_outcome,liquid_logic : ssd_ehcp_assessment|mosaic : ssd_ehcp_assessment,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Assessment outcome - decision to issue EHC plan: 
+-Y    It was decided an EHC plan would be issued 
+-N   It was decided an EHC plan would not be issued 
+-A   Decision has not yet been made 
+-W  Request withdrawn or ceased before decision whether to issue was made 
+-H   Historical – Decision to issue was made before the latest collection period 
+If a local authority decides not to issue an EHC plan and this decision is subsequently changed by the local authority for any reason the original assessment outcome and assessment outcome date should not be changed. If the change follows from mediation or tribunal the appropriate mediation and tribunal indicators should be selected for the assessment. 
+W may include where the person moves out of the local authority area, leaves education or training or if the child or young person dies. 
+Where A or W is selected, no further information is required in this or subsequent modules. The 20-week timeliness measure will not apply in cases where a plan has not yet been issued.
+For an active plan, where the decision to issue was made before the latest collection period (H - Historical) information is still required on the plan itself."
+EHCA005A,ssd_ehcp_assessment,send|ehcp_request|ehcp_assessment,,nvarchar,100,ehca_ehcp_assessment_exceptions,Assessment 20-week time limit exceptions apply,,,1aNotInCMS|SEN2|RIIA|SEN2,liquid_logic,liquid_logic : ehcp_asmt_outcome|mosaic : ehcp_asmt_outcome,liquid_logic : ssd_ehcp_assessment|mosaic : ssd_ehcp_assessment,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Assessment 20-week time limit exceptions apply? 
+1 – Yes, exceptions apply 
+0 – No, exceptions do not apply"
+EHCN001A,ssd_ehcp_named_plan,send|ehcp_request|ehcp_assessment,,nvarchar,48,ehcn_named_plan_id,Named Plan ID,,,1aNotInCMS,liquid_logic,liquid_logic : ehcn_named_plan_id|mosaic : ehcn_named_plan_id,liquid_logic : ssd_ehcp_named_plan|mosaic : ssd_ehcp_named_plan,Yes,Yes,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+EHCP named plan unique ID from system or auto-generated as part of export.
+This module collects information on the content of the EHC plan, i.e. what is in Section I. It should be completed for all existing active EHC plans.
+It is possible that multiple plans may be recorded for a single person. For example, if an EHC plan has previously ceased and a further plan has later been issued following a new needs assessment. Changes may occur to this section from one year to the next for the same person, for example where an establishment named on the EHC plan is changed."
+EHCN002A,ssd_ehcp_named_plan,send|ehcp_request|ehcp_assessment,,nvarchar,48,ehcn_ehcp_asmt_id,Assessment ID,ssd_ehcp_assessment.ehca_ehcp_asmt_id,,1aNotInCMS,liquid_logic,liquid_logic : ehcn_ehcp_asmt_id|mosaic : ehcn_ehcp_asmt_id,liquid_logic : ssd_ehcp_named_plan|mosaic : ssd_ehcp_named_plan,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+EHCP assessment record unique ID from system or auto-generated as part of export."
+EHCN003A,ssd_ehcp_named_plan,send|ehcp_request|ehcp_assessment,,datetime,NULL,ehcn_named_plan_start_date,Start Date,,,1aNotInCMS|SEN2,liquid_logic,liquid_logic : ehcn_named_plan_start_date|mosaic : ehcn_named_plan_start_date,liquid_logic : ssd_ehcp_named_plan|mosaic : ssd_ehcp_named_plan,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Date of current EHC plan."
+EHCN004A,ssd_ehcp_named_plan,send|ehcp_request|ehcp_assessment,,datetime,NULL,ehcn_named_plan_ceased_date,Cease Date,,,1aNotInCMS|SEN2,liquid_logic,liquid_logic : ehcn_named_plan_ceased_date|mosaic : ehcn_named_plan_ceased_date,liquid_logic : ssd_ehcp_named_plan|mosaic : ssd_ehcp_named_plan,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please provide the date the EHC plan ended or the date the EHC plan was transferred to another local authority. Do not record the date of the decision to cease. Local authorities must continue to maintain the EHC plan until the time has passed for bringing an appeal or, when an appeal has been registered, until it has been concluded."
+EHCN005A,ssd_ehcp_named_plan,send|ehcp_request|ehcp_assessment,,nvarchar,100,ehcn_named_plan_ceased_reason,Cease Reason,,,1aNotInCMS|SEN2,liquid_logic,liquid_logic : ehcn_named_plan_ceased_reason|mosaic : ehcn_named_plan_ceased_reason,liquid_logic : ssd_ehcp_named_plan|mosaic : ssd_ehcp_named_plan,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please provide the reason the EHC plan ended from the list below 
+1 – Reached maximum age (this is the end of the academic year during which the young person turned 25) 
+2 – Ongoing educational or training needs being met without an EHC plan 
+3 – Moved on to higher education 
+4 – Moved on to paid employment, excluding apprenticeships 
+5 – Transferred to another LA 
+6 – Young person no longer wishes to engage in education or training 
+7 – Child or young person has moved outside England 
+8 – Child or young person deceased 
+9 – Other "
+EHCP001A,ssd_ehcp_active_plans,send|ehcp_request|ehcp,,nvarchar,48,ehcp_active_ehcp_id,Plan ID,,,1aNotInCMS,liquid_logic,liquid_logic : ehcp_active_ehcp_id|mosaic : ehcp_active_ehcp_id,liquid_logic : ssd_ehcp_active_plans|mosaic : ssd_ehcp_active_plans,Yes,Yes,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+EHCP active plan unique ID from system or auto-generated as part of export."
+EHCP002A,ssd_ehcp_active_plans,send|ehcp_request|ehcp,,nvarchar,48,ehcp_ehcp_request_id,Request ID,ssd_ehcp_requests.ehcr_ehcp_request_id,,1aNotInCMS,liquid_logic,liquid_logic : ehcp_ehcp_request_id|mosaic : ehcp_ehcp_request_id,liquid_logic : ssd_ehcp_active_plans|mosaic : ssd_ehcp_active_plans,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+EHCP request record unique ID from system or auto-generated as part of export."
+EHCP003A,ssd_ehcp_active_plans,send|ehcp_request|ehcp,,datetime,NULL,ehcp_active_ehcp_last_review_date,Last Review,,,1aNotInCMS|SEN2,liquid_logic,liquid_logic : ehcp_active_ehcp_last_review_date|mosaic : ehcp_active_ehcp_last_review_date,liquid_logic : ssd_ehcp_active_plans|mosaic : ssd_ehcp_active_plans,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please enter the date when the local authority wrote to the parent or young person with the notification of the decision as to whether to retain, cease or amend the plan following the annual review meeting. Note that this date will not be the same as the date of the review meeting."
+SENN001A,ssd_sen_need,send|ehcp_request|ehcp|need,,nvarchar,48,senn_table_id,SEN Need Table ID,,,1aNotInCMS,liquid_logic,liquid_logic : senn_table_id|mosaic : senn_table_id,liquid_logic : ssd_sen_need|mosaic : ssd_sen_need,Yes,Yes,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+SEN need record unique ID from system or auto-generated as part of export."
+SENN002A,ssd_sen_need,send|ehcp_request|ehcp|need,,nvarchar,48,senn_active_ehcp_id,Plan ID,ssd_ehcp_active_plans.ehcp_active_ehcp_id,,1aNotInCMS,liquid_logic,liquid_logic : senn_active_ehcp_id|mosaic : senn_active_ehcp_id,liquid_logic : ssd_sen_need|mosaic : ssd_sen_need,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+EHCP active plan unique ID from system or auto-generated as part of export."
+SENN003A,ssd_sen_need,send|ehcp_request|ehcp|need,,nvarchar,100,senn_active_ehcp_need_type,SEN Type,,,1aNotInCMS|SEN2,liquid_logic,liquid_logic : senn_active_ehcp_need_type|mosaic : senn_active_ehcp_need_type,liquid_logic : ssd_sen_need|mosaic : ssd_sen_need,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please record the nature of the person’s special educational need. These options are consistent with those collected within the spring term school census. Where multiple types of need are recorded and ranked, the primary type of need should be ranked 1 under Type of need rank, and if applicable a secondary type of need should be ranked 2. 
+-SPLD  Specific learning difficulty 
+-MLD   Moderate learning difficulty 
+-SLD    Severe learning difficulty 
+-PMLD Profound and multiple learning difficulty 
+-SEMH Social, emotional and mental health 
+-SLCN  Speech, language and communication needs 
+-HI      Hearing impairment 
+-VI      Vision impairment 
+-MSI   Multi-sensory impairment 
+-PD     Physical disability 
+-ASD   Autistic spectrum disorder 
+-OTH   Other difficulty "
+SENN004A,ssd_sen_need,send|ehcp_request|ehcp|need,,nchar,1,senn_active_ehcp_need_rank,SEN Type Rank,,,1aNotInCMS|SEN2,liquid_logic,liquid_logic : senn_active_ehcp_need_rank|mosaic : senn_active_ehcp_need_rank,liquid_logic : ssd_sen_need|mosaic : ssd_sen_need,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+If only one type of need is recorded, this should be recorded as rank 1. If multiple types of need are recorded, then the primary type of need should be recorded as rank 1 and the secondary type of need should be recorded as rank 2. Up to two types of need can be recorded."
+PREP024A,ssd_pre_proceedings,pre_proceedings,,nvarchar,48,prep_table_id,Pre-proceedings table row ID,,,1bSpecified,liquid_logic|mosaic,liquid_logic : prep_table_id|mosaic : prep_table_id,,,,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Row identifier for the ssd_pre_proceedings table"
+PREP001A,ssd_pre_proceedings,pre_proceedings,,nvarchar,48,prep_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : prep_person_id|mosaic : prep_person_id,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,Yes,Yes,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Person's ID generated in CMS Database"
+PREP002A,ssd_pre_proceedings,pre_proceedings,,nvarchar,48,prep_plo_family_id,PLO Family ID,,,1bSpecified,liquid_logic|mosaic,liquid_logic : prep_plo_family_id|mosaic : prep_plo_family_id,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,Yes,Yes,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Unique Identifier number for each family group - a family group is described as a group of children linked by parents all starting and ceasing pre or care proceedings at the same time"
+PREP003A,ssd_pre_proceedings,pre_proceedings,,datetime,NULL,prep_pre_pro_decision_date,Date decision made to enter Pre Proceedings,,,1bSpecified,liquid_logic|mosaic,liquid_logic : prep_pre_pro_decision_date|mosaic : prep_pre_pro_decision_date,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+This is the date of legal meeting / panel that agreed to commence pre-proceedings. The date should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a four digit number."
+PREP004A,ssd_pre_proceedings,pre_proceedings,,datetime,NULL,prep_initial_pre_pro_meeting_date,Date of Initial Pre Proceedings Meeting,,,1bSpecified,liquid_logic|mosaic,liquid_logic : prep_initial_pre_pro_meeting_date|mosaic : prep_initial_pre_pro_meeting_date,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+This is the first pre-proceedings meeting following the legal meeting / panel that agreed to commence pre-proceedings. The date should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a four digit number."
+PREP005A,ssd_pre_proceedings,pre_proceedings,,nvarchar,100,prep_pre_pro_outcome,What is the Outcome of Pre-Proceedings,,,1bSpecified,liquid_logic|mosaic,liquid_logic : prep_pre_pro_outcome|mosaic : prep_pre_pro_outcome,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please select: 
+Decision to Issue Care Proceedings / 
+Decision to step down 
+If still in pre-proceedings, please leave blank. "
+PREP006A,ssd_pre_proceedings,pre_proceedings,,datetime,NULL,prep_agree_stepdown_issue_date,Date Agreed to Step down/issue,,,1bSpecified,liquid_logic|mosaic,liquid_logic : prep_agree_stepdown_issue_date|mosaic : prep_agree_stepdown_issue_date,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"[Guidance text replicated from related stat-return field(s). Thus may not be entirely applicable to this data item within the SSD. A review of item/field guidance notes towards the SSD is in progress.]This is the date of legal meeting / panel that agreed to end pre-proceedings to either step down or issue care proceedings. The date should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a four digit number."
+PREP007A,ssd_pre_proceedings,pre_proceedings,,int,4,prep_cp_plans_referral_period,How many times has the child been subject to a Child Protection Plan during this referral period?,,,1bSpecified,liquid_logic|mosaic,liquid_logic : prep_cp_plans_referral_period|mosaic : prep_cp_plans_referral_period,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please provide a numeric value for the number of the times the child has been the subject of a Child Protection Plan during this referral period. If none, please put 0."
+PREP008A,ssd_pre_proceedings,pre_proceedings,,nvarchar,100,prep_legal_gateway_outcome,What was the outcome of legal gateway / panel / meeting after panel?,,,1bSpecified,liquid_logic|mosaic,liquid_logic : prep_legal_gateway_outcome|mosaic : prep_legal_gateway_outcome,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please select one of these options: 
+A – Continue with current plan 
+B – Start pre-proceedings 
+C – Issue care proceedings 
+D – Unknown "
+PREP009A,ssd_pre_proceedings,pre_proceedings,,int,4,prep_prev_pre_proc_child,How many previous periods of pre-proceedings have there been in the child’s lifetime?,,,1bSpecified,liquid_logic|mosaic,liquid_logic : prep_prev_pre_proc_child|mosaic : prep_prev_pre_proc_child,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please provide a numeric value. If there have not been any previous periods, please put 0."
+PREP010A,ssd_pre_proceedings,pre_proceedings,,int,4,prep_prev_care_proc_child,How many previous periods of care proceedings have there been in the child’s lifetime?,,,1bSpecified,liquid_logic|mosaic,liquid_logic : prep_prev_care_proc_child|mosaic : prep_prev_care_proc_child,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please provide a numeric value. If there have not been any previous periods, please put 0."
+PREP011A,ssd_pre_proceedings,pre_proceedings,,datetime,NULL,prep_pre_pro_letter_date,What is the date that the pre-proceedings letter and plan was sent to parents?,,,1bSpecified,liquid_logic,liquid_logic : prep_pre_pro_letter_date|mosaic : prep_pre_pro_letter_date,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+If the case has not been in pre-proceedings, please leave blank. 
+Please use the UK date format: DD/MM/YYYY "
+PREP012A,ssd_pre_proceedings,pre_proceedings,,datetime,NULL,prep_care_pro_letter_date,What is the date that the letter to issue care proceedings was sent to parents?,,,1bSpecified,liquid_logic,liquid_logic : prep_care_pro_letter_date|mosaic : prep_care_pro_letter_date,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+If care proceedings have not been issued, please leave blank.  
+Please use the UK date format DD/MM/YYYY"
+PREP013A,ssd_pre_proceedings,pre_proceedings,,int,4,prep_pre_pro_meetings_num,How many review pre-proceeding meetings have been held with parents following the initial meeting?,,,1bSpecified,liquid_logic,liquid_logic : prep_pre_pro_meetings_num|mosaic : prep_pre_pro_meetings_num,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please give a numeric value for the number of meetings that took place with parents, excluding the initial meeting."
+PREP014A,ssd_pre_proceedings,pre_proceedings,,nchar,1,prep_pre_pro_parents_legal_rep,Did parents have legal representation during pre-proceedings?,,,1bSpecified,liquid_logic,liquid_logic : prep_pre_pro_parents_legal_rep|mosaic : prep_pre_pro_parents_legal_rep,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,(currently 'PLACEHOLDER_DATA' pending further development) Please select Yes / No / Unknown
+PREP015A,ssd_pre_proceedings,pre_proceedings,,nchar,2,prep_parents_legal_rep_point_of_issue,Did parents have legal representation at the point of issue?,,,1bSpecified,liquid_logic,liquid_logic : prep_parents_legal_rep_point_of_issue|mosaic : prep_parents_legal_rep_point_of_issue,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please select Yes / No / Unknown / Not in care proceedings"
+PREP016A,ssd_pre_proceedings,pre_proceedings,,nvarchar,48,prep_court_reference,"If in Care Proceedings, what is the Court reference number?",,,1bSpecified,liquid_logic,liquid_logic : prep_court_reference|mosaic : prep_court_reference,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+This is the Court number which is given to a family group when care proceedings are issued. This may be stored on the case management system or held in legal files.
+If the case is not in care proceedings, please leave blank."
+PREP017A,ssd_pre_proceedings,pre_proceedings,,int,4,prep_care_proc_court_hearings,How many Court hearings have taken place whilst in care proceedings?,,,1bSpecified,liquid_logic,liquid_logic : prep_care_proc_court_hearings|mosaic : prep_care_proc_court_hearings,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+This includes the initial IRH and final hearing. Please give a numeric value.
+If case is not in care proceedings, please leave blank."
+PREP018A,ssd_pre_proceedings,pre_proceedings,,nchar,1,prep_care_proc_short_notice,Were Care Proceedings issued on a short notice application?,,,1bSpecified,liquid_logic,liquid_logic : prep_care_proc_short_notice|mosaic : prep_care_proc_short_notice,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please select Yes / No / Unknown / Not in care proceedings.
+A short notice application is an urgent application for the court to hear the case within the next 2 – 5 days."
+PREP019A,ssd_pre_proceedings,pre_proceedings,,nvarchar,100,prep_proc_short_notice_reason,What was the reason for any short notice applications?,,,1bSpecified,liquid_logic,liquid_logic : prep_proc_short_notice_reason|mosaic : prep_proc_short_notice_reason,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please choose the main reason from this list:
+(A) Applications under the Children Act 1989 where without such an order a child’s immediate safety would be compromised, including where there is an immediate threat of child abduction.
+(B) Applications for Emergency Protection Orders where the criteria for such or order is met.
+(c) Other
+If a short notice application has not taken place, please select 'No short notice applications'.
+A short notice application is an urgent application for the court to hear the case within the next 2 – 5 days."
+PREP020A,ssd_pre_proceedings,pre_proceedings,,nchar,1,prep_la_inital_plan_approved,Was the LA’s initial plan approved at the initial hearing?,,,1bSpecified,liquid_logic,liquid_logic : prep_la_inital_plan_approved|mosaic : prep_la_inital_plan_approved,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please select Yes / No / Unknown"
+PREP021A,ssd_pre_proceedings,pre_proceedings,,nvarchar,100,prep_la_initial_care_plan,What was the LA’s initial care plan for the child at the initial hearing?,,,1bSpecified,liquid_logic,liquid_logic : prep_la_initial_care_plan|mosaic : prep_la_initial_care_plan,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please choose one option from this list:
+A – Interim / Care Order
+B – Interim / Care Order – Placement with parents
+C – Adoption
+D – Interim / Supervision Order
+E – Special Guardianship Order
+F – Private Law Order
+G – Other
+If case is not in care proceedings, please select 'Not in care proceedings'
+Please note ‘Care order – placement with parents’ means that the public care order was granted but that the child remained in their parent’s care, rather than in another placement."
+PREP022A,ssd_pre_proceedings,pre_proceedings,,nchar,1,prep_la_final_plan_approved,Was the LA’s final plan approved at the final hearing?,,,1bSpecified,liquid_logic,liquid_logic : prep_la_final_plan_approved|mosaic : prep_la_final_plan_approved,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please select Yes / No / Unknown"
+PREP023A,ssd_pre_proceedings,pre_proceedings,,nvarchar,100,prep_la_final_care_plan,What was the LA’s final care plan for the child at the final hearing?,,,1bSpecified,liquid_logic,liquid_logic : prep_la_final_care_plan|mosaic : prep_la_final_care_plan,liquid_logic : ssd_pre_proceedings|mosaic : ssd_pre_proceedings,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Please choose one option from this list:
+
+A – Care Order 
+B – Care Order – Placement with parents 
+C – Adoption 
+D – Supervision Order 
+E – Special Guardianship Order 
+F – Private Law Order 
+G – Other 
+H – Not yet at final hearing - still in care proceedings 
+If not yet at the final hearing, please select ""Not yet at final hearing - still in care proceedings'. This will indicate that the case is still active in care proceedings."
+VOCH007A,ssd_voice_of_child,voice_of_child,,nvarchar,48,voch_table_id,Voice of the Child table row ID,,,1bDraft,liquid_logic|mosaic,,,,,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Row identifier for the ssd_voice_of_child table"
+VOCH001A,ssd_voice_of_child,voice_of_child,,nvarchar,48,voch_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : la_person_id|mosaic : la_person_id,liquid_logic : ssd_voice_of_child|mosaic : ssd_voice_of_child,Yes,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Person's ID generated in CMS Database "
+VOCH002A,ssd_voice_of_child,voice_of_child,,nchar,1,voch_explained_worries,Has someone explained to you why people are worried for your family in a way that you can understand?,,,1bDraft,liquid_logic|mosaic,liquid_logic : voch_explained_worries|mosaic : voch_explained_worries,liquid_logic : ssd_voice_of_child|mosaic : ssd_voice_of_child,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Child answer from questionnaire "
+VOCH003A,ssd_voice_of_child,voice_of_child,,nchar,1,voch_story_help_understand,Does your story with words and pictures help you to understand what has happened in your family?,,,1bDraft,liquid_logic|mosaic,liquid_logic : voch_story_help_understand|mosaic : voch_story_help_understand,liquid_logic : ssd_voice_of_child|mosaic : ssd_voice_of_child,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Child answer from questionnaire "
+VOCH004A,ssd_voice_of_child,voice_of_child,,nchar,1,voch_agree_worker,Do you agree with what your worker says needs to happen to keep you safe?,,,1bDraft,liquid_logic|mosaic,liquid_logic : voch_agree_worker|mosaic : voch_agree_worker,liquid_logic : ssd_voice_of_child|mosaic : ssd_voice_of_child,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Child answer from questionnaire "
+VOCH005A,ssd_voice_of_child,voice_of_child,,nchar,1,voch_plan_safe,Do you think the plan tells everyone what they need to do to keep you safe?,,,1bDraft,liquid_logic|mosaic,liquid_logic : voch_plan_safe|mosaic : voch_plan_safe,liquid_logic : ssd_voice_of_child|mosaic : ssd_voice_of_child,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Child answer from questionnaire "
+VOCH006A,ssd_voice_of_child,voice_of_child,,nchar,1,voch_tablet_help_explain,Did writing/ drawing on the tablet help you to explain what you were thinking and what you wanted to happen?,,,1bDraft,liquid_logic|mosaic,liquid_logic : voch_tablet_help_explain|mosaic : voch_tablet_help_explain,liquid_logic : ssd_voice_of_child|mosaic : ssd_voice_of_child,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Child answer from questionnaire "
+LINK001A,ssd_linked_identifiers,linked_identifiers,,nvarchar,48,link_table_id,Link table row ID,,,1aNotInCMS,liquid_logic|mosaic,liquid_logic : link_table_id|mosaic : link_table_id,liquid_logic : ssd_linked_identifiers|mosaic : ssd_linked_identifiers,,,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Row identifier for the ssd_linked_identifiers table "
+LINK002A,ssd_linked_identifiers,linked_identifiers,,nvarchar,48,link_person_id,Person Unique ID,ssd_person.pers_person_id,,Local,liquid_logic|mosaic|eclipse|caredirector|azeus,liquid_logic : link_person_id|mosaic : link_person_id,liquid_logic : ssd_linked_identifiers|mosaic : ssd_linked_identifiers,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Person's ID generated in CMS Database"
+LINK003A,ssd_linked_identifiers,linked_identifiers,,nvarchar,100,link_identifier_type,"['Case Number', 'Unique Pupil Number', NHS Number', 'Home Office Registration', National Insurance Number', 'YOT Number', Court Case Number', RAA ID', 'Incident ID']",,,1aNotInCMS,liquid_logic|mosaic,liquid_logic : link_identifier_type|mosaic : link_identifier_type,liquid_logic : ssd_linked_identifiers|mosaic : ssd_linked_identifiers,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Linked Identifier Type e.g. ['Case Number', 'Unique Pupil Number', NHS Number', 'Home Office Registration', National Insurance Number', 'YOT Number', Court Case Number', RAA ID', 'Incident ID'] "
+LINK004A,ssd_linked_identifiers,linked_identifiers,,nvarchar,100,link_identifier_value,Identifier or reference code,,,1aNotInCMS,liquid_logic|mosaic,liquid_logic : link_identifier_value|mosaic : link_identifier_value,liquid_logic : ssd_linked_identifiers|mosaic : ssd_linked_identifiers,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Identifier value"
+LINK005A,ssd_linked_identifiers,linked_identifiers,,datetime,NULL,link_valid_from_date,Date the identifier is known/valid from,,,1aNotInCMS,liquid_logic|mosaic,liquid_logic : link_valid_from_date|mosaic : link_valid_from_date,liquid_logic : ssd_linked_identifiers|mosaic : ssd_linked_identifiers,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Date the identifier is known/valid from "
+LINK006A,ssd_linked_identifiers,linked_identifiers,,datetime,NULL,link_valid_to_date,Date the identifier ceases to be known/valid,,,1aNotInCMS,liquid_logic|mosaic,liquid_logic : link_valid_to_date|mosaic : link_valid_to_date,liquid_logic : ssd_linked_identifiers|mosaic : ssd_linked_identifiers,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Date the identifier ceases to be known/valid "
+S251001A,ssd_s251_finance,finance,,nvarchar,48,s251_table_id,s251 table row ID,,,1aDraft,liquid_logic|mosaic,liquid_logic : s251_table_id|mosaic : s251_table_id,liquid_logic : ssd_s251_finance|mosaic : ssd_s251_finance,,,Yes,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+Row identifier for the ssd_s251_finance table "
+S251002A,ssd_s251_finance,finance,,nvarchar,48,s251_cla_placement_id,CLA Placement ID,ssd_cla_placement.clap_cla_placement_id,,1aDraft,liquid_logic|mosaic,liquid_logic : s251_cla_placement_id|mosaic : s251_cla_placement_id,liquid_logic : ssd_s251_finance|mosaic : ssd_s251_finance,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+ID for linking to CLA Placement "
+S251003A,ssd_s251_finance,finance,,nvarchar,48,s251_placeholder_1,Placeholder field,,,1aDraft,liquid_logic|mosaic,liquid_logic : s251_placeholder_1|mosaic : s251_placeholder_1,liquid_logic : ssd_s251_finance|mosaic : ssd_s251_finance,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+No guidance available yet "
+S251004A,ssd_s251_finance,finance,,nvarchar,48,s251_placeholder_2,Placeholder field,,,1aDraft,liquid_logic|mosaic,liquid_logic : s251_placeholder_2|mosaic : s251_placeholder_2,liquid_logic : ssd_s251_finance|mosaic : ssd_s251_finance,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+No guidance available yet "
+S251005A,ssd_s251_finance,finance,,nvarchar,48,s251_placeholder_3,Placeholder field,,,1aDraft,liquid_logic|mosaic,liquid_logic : s251_placeholder_3|mosaic : s251_placeholder_3,liquid_logic : ssd_s251_finance|mosaic : ssd_s251_finance,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+No guidance available yet "
+S251006A,ssd_s251_finance,finance,,nvarchar,48,s251_placeholder_4,Placeholder field,,,1aDraft,liquid_logic|mosaic,liquid_logic : s251_placeholder_4|mosaic : s251_placeholder_4,liquid_logic : ssd_s251_finance|mosaic : ssd_s251_finance,,,,,"(currently 'PLACEHOLDER_DATA' pending further development) 
+No guidance available yet "
