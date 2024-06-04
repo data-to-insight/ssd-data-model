@@ -382,8 +382,8 @@ SELECT
 	/*PW Note - Have used Team and Worker that Referral was assinged to as per Annex A guidance
 					However in Blackpool, all Contact/Referral WorkflowSteps are processed by the 'Front Door' (Request for Support Hub) with generic worker 'Referral Coordinator'
 					Therefore Current / Latest Worker may provide better information (as with Annex A Lists 6-8).  This is the approach used in Blackpool*/
-	ce.cine_referral_team_name					AS AllocatedTeam,
-    ce.cine_referral_worker_name				AS AllocatedWorker
+	ce.cine_referral_team					AS AllocatedTeam,
+    ce.cine_referral_worker_id				AS AllocatedWorker
 
 INTO #AA_3_referrals
 
@@ -510,8 +510,8 @@ SELECT
 	END													AS CSCSupportRequired,	/*PW - will depend on each Local Authority's interpretation of cina_assessment_outcome_nfa*/
 
     -- Step type (SEE ALSO CONTACTS)
-    a.cina_assessment_team_name							AS AllocatedTeam,
-    a.cina_assessment_worker_name						AS AllocatedWorker
+    a.cina_assessment_team							AS AllocatedTeam,
+    a.cina_assessment_worker_id						AS AllocatedWorker
 
 INTO #AA_4_assessments
 
@@ -647,11 +647,11 @@ SELECT
 	
    -- [TESTING]
     -- taking from s47 object in case the child has a Section 47 enquiry that <doesn't> lead to an ICPC
-    s47e.s47e_s47_completed_by_team_name			AS AllocatedTeam,
-    s47e.s47e_s47_completed_by_worker_name			AS AllocatedWorker
+    s47e.s47e_s47_completed_by_team			AS AllocatedTeam,
+    s47e.s47e_s47_completed_by_worker_id			AS AllocatedWorker
     -- -- the alternative exists as 
-    -- icpc.icpc_icpc_team_name						AS AllocatedTeam,        
-    -- icpc.icpc_icpc_worker_name					AS AllocatedWorker
+    -- icpc.icpc_icpc_team						AS AllocatedTeam,        
+    -- icpc.icpc_icpc_worker_id					AS AllocatedWorker
  
 
 INTO #AA_5_s47_enquiries 
@@ -1012,8 +1012,8 @@ FROM
 				cine.cine_person_id PersonID,
 				cine.cine_referral_id CINReferralID,
 
-				-- cine.cine_referral_team_name -- [TESTING] Swap to this field
-				-- cine.cine_referral_worker_name -- [TESTING] Swap to this field
+				-- cine.cine_referral_team      -- [TESTING] Swap to this field
+				-- cine.cine_referral_worker_id -- [TESTING] Swap to this field
 
 				inv.invo_professional_team Team, -- 
 				pro.prof_professional_name WorkerName,
@@ -1926,7 +1926,7 @@ SELECT
 		ELSE 'b) No'
 	END															AS HasDisability,
 
-    clea.clea_care_leaver_allocated_team_name					AS AllocatedTeam, -- [TESTING]
+    clea.clea_care_leaver_allocated_team					    AS AllocatedTeam,   -- [TESTING]
 	pro.prof_professional_name									AS AllocatedWorker, -- [TESTING]
 	clea.clea_care_leaver_personal_advisor						AS AllocatedPersonalAdvisor,
 
@@ -2013,8 +2013,7 @@ LEFT JOIN
 	) AS uasc ON p.pers_person_id = uasc.immi_person_id
 
 LEFT JOIN
--- [TESTING] field is renamed to _name, but is actually the ID field? 
-	ssd_professionals pro on clea.clea_care_leaver_worker_name = pro.prof_professional_id
+	ssd_professionals pro on clea.clea_care_leaver_worker_id = pro.prof_professional_id
 
 
 -- [TESTING]

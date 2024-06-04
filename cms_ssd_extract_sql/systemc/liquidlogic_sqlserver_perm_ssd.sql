@@ -27,7 +27,7 @@ Status:     [B]acklog,          -- To do|for review but not current priority
             [D]ev,              -- Currently being developed 
             [T]est,             -- Dev work being tested/run time script tests
             [DT]ataTesting,     -- Sense checking of extract data ongoing
-            [AR]waitingReview,   -- Hand-over to SSD project team for review
+            [AR]waitingReview,  -- Hand-over to SSD project team for review
             [R]elease,          -- Ready for wider release and secondary data testing
             [Bl]ocked,          -- Data is not held in CMS/accessible, or other stoppage reason
             [P]laceholder       -- Data not held by any LA, new data, - Future structure added as placeholder
@@ -52,8 +52,6 @@ Currently in [REVIEW]
 /* Development set up */
 
 -- Point to correct DB
--- USE HDM;
--- GO
 USE HDM_Local;
 GO
 
@@ -69,6 +67,48 @@ DECLARE @StartTime DATETIME, @EndTime DATETIME;
 SET @StartTime = GETDATE(); -- Record the start time
 /* END [TESTING] 
 */
+
+
+
+/* Drop all ssd_development schema constraints & tables */
+-- This is to pre-emptively avoid any run-time conflicts from left-behind FK constraints
+-- This entire block is NOT part of the public SSD extract
+
+DECLARE @sql NVARCHAR(MAX) = N'';
+
+-- Generate commands to drop FK constraints
+SELECT @sql += '
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = ' + QUOTENAME(fk.name, '''') + ')
+BEGIN
+    ALTER TABLE ' + QUOTENAME(SCHEMA_NAME(fk.schema_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) + ' DROP CONSTRAINT ' + QUOTENAME(fk.name) + ';
+END;
+'
+FROM sys.foreign_keys AS fk
+INNER JOIN sys.tables AS t ON fk.parent_object_id = t.object_id
+INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+WHERE s.name = N'ssd_development';
+
+-- Execute drop FK
+EXEC sp_executesql @sql;
+
+-- Clear the SQL variable
+SET @sql = N'';
+
+-- Generate DROP TABLE for each table in the schema
+SELECT @sql += '
+IF OBJECT_ID(''' + s.name + '.' + t.name + ''', ''U'') IS NOT NULL
+BEGIN
+    DROP TABLE ' + QUOTENAME(s.name) + '.' + QUOTENAME(t.name) + ';
+END;
+'
+FROM sys.tables AS t
+INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+WHERE s.name = N'ssd_development';
+
+-- Execute drop tables
+EXEC sp_executesql @sql;
+/* END Drop all ssd_development schema constraints */
+
 
 /* ********************************************************************************************************** */
 /* SSD extract set up */
@@ -3354,8 +3394,8 @@ CREATE TABLE ssd_development.ssd_missing (
     miss_missing_episode_start_date DATETIME,                   -- metadata={"item_ref":"MISS003A"}
     miss_missing_episode_type       NVARCHAR(100),              -- metadata={"item_ref":"MISS004A"}
     miss_missing_episode_end_date   DATETIME,                   -- metadata={"item_ref":"MISS005A"}
-    miss_missing_rhi_offered        NCHAR(1),                   -- metadata={"item_ref":"MISS006A"}                
-    miss_missing_rhi_accepted       NCHAR(1)                    -- metadata={"item_ref":"MISS007A"}
+    miss_missing_rhi_offered        NVARCHAR(2),                -- metadata={"item_ref":"MISS006A", "expected_data":["N","Y","NA", NULL]}                
+    miss_missing_rhi_accepted       NVARCHAR(2)                 -- metadata={"item_ref":"MISS007A"}
 );
 
 
@@ -3376,15 +3416,20 @@ SELECT
     fmp.MISSING_STATUS                  AS miss_missing_episode_type,
     fmp.END_DTTM                        AS miss_missing_episode_end_date,
     CASE 
-        WHEN fmp.RETURN_INTERVIEW_OFFERED = 'Yes' THEN 'Y'
-        WHEN fmp.RETURN_INTERVIEW_OFFERED = 'No' THEN 'N'
+        WHEN UPPER(fmp.RETURN_INTERVIEW_OFFERED) = 'YES' THEN 'Y'
+        WHEN UPPER(fmp.RETURN_INTERVIEW_OFFERED) = 'NO' THEN 'N'
+        WHEN UPPER(fmp.RETURN_INTERVIEW_OFFERED) = 'NA' THEN 'NA'
+        WHEN fmp.RETURN_INTERVIEW_OFFERED = '' THEN NULL
         ELSE NULL
-    END                                 AS miss_missing_rhi_offered,
+    END AS miss_missing_rhi_offered,
     CASE 
-        WHEN fmp.RETURN_INTERVIEW_ACCEPTED = 'Yes' THEN 'Y'
-        WHEN fmp.RETURN_INTERVIEW_ACCEPTED = 'No' THEN 'N'
+        WHEN UPPER(fmp.RETURN_INTERVIEW_ACCEPTED) = 'YES' THEN 'Y'
+        WHEN UPPER(fmp.RETURN_INTERVIEW_ACCEPTED) = 'NO' THEN 'N'
+        WHEN UPPER(fmp.RETURN_INTERVIEW_ACCEPTED) = 'NA' THEN 'NA'
+        WHEN fmp.RETURN_INTERVIEW_ACCEPTED = '' THEN NULL
         ELSE NULL
-    END                                 AS miss_missing_rhi_accepted
+    END AS miss_missing_rhi_accepted
+
 FROM 
     Child_Social.FACT_MISSING_PERSON AS fmp
 

@@ -16,8 +16,8 @@ directories = [
 ]
 
 
-variable_name = 'perm_adoption_worker'                  # var name to search
-variable_stem = 'perm_'                  # stem to search 
+variable_name = 'perm_entered_care_date'                  # var name to search
+variable_stem = ''                  # stem to search 
 variable_suffix = ''           # suffix to search
 search_file_type = '.sql'           # or .py or .txt 
 
