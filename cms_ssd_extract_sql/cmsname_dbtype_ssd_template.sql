@@ -761,7 +761,7 @@ CREATE TABLE ssd_development.ssd_early_help_episodes (
     earl_episode_reason         NVARCHAR(MAX),              -- metadata={"item_ref":"EARL005A"}
     earl_episode_end_reason     NVARCHAR(MAX),              -- metadata={"item_ref":"EARL006A"}
     earl_episode_organisation   NVARCHAR(MAX),              -- metadata={"item_ref":"EARL007A"}
-    earl_episode_worker_name    NVARCHAR(100)               -- metadata={"item_ref":"EARL008A"}
+    earl_episode_worker_id      NVARCHAR(100)               -- metadata={"item_ref":"EARL008A"}
 );
  
  
@@ -774,7 +774,7 @@ INSERT INTO ssd_early_help_episodes (
     earl_episode_reason,
     earl_episode_end_reason,
     earl_episode_organisation,
-    earl_episode_worker_name                    
+    earl_episode_worker_id                   
 )
  
 
@@ -845,8 +845,8 @@ CREATE TABLE ssd_development.ssd_cin_episodes
     cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A"}
     cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
     cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
-    cine_referral_team_name         NVARCHAR(255),  -- metadata={"item_ref":"CINE008A"}
-    cine_referral_worker_name       NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
+    cine_referral_team              NVARCHAR(255),  -- metadata={"item_ref":"CINE008A"}
+    cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
 );
  
 -- Insert data
@@ -862,8 +862,8 @@ INSERT INTO ssd_cin_episodes
     cine_referral_nfa,
     cine_close_reason,
     cine_close_date,
-    cine_referral_team_name,
-    cine_referral_worker_name
+    cine_referral_team,
+    cine_referral_worker_id
 )
 
 
@@ -934,8 +934,8 @@ CREATE TABLE ssd_development.ssd_cin_assessments
     cina_assessment_auth_date       DATETIME,                   -- metadata={"item_ref":"CINA005A"}             
     cina_assessment_outcome_json    NVARCHAR(1000),             -- metadata={"item_ref":"CINA006A"}           
     cina_assessment_outcome_nfa     NCHAR(1),                   -- metadata={"item_ref":"CINA009A"}
-    cina_assessment_team_name       NVARCHAR(255),              -- metadata={"item_ref":"CINA007A"}
-    cina_assessment_worker_name     NVARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
+    cina_assessment_team            NVARCHAR(255),              -- metadata={"item_ref":"CINA007A"}
+    cina_assessment_worker_id       NVARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
 );
 
 
@@ -951,8 +951,8 @@ INSERT INTO ssd_cin_assessments
     cina_assessment_auth_date,      
     cina_assessment_outcome_json,
     cina_assessment_outcome_nfa,
-    cina_assessment_team_name,
-    cina_assessment_worker_name
+    cina_assessment_team,
+    cina_assessment_worker_id
 )
 
 
@@ -1087,8 +1087,8 @@ CREATE TABLE ssd_development.ssd_cin_plans (
     cinp_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINP002A"}
     cinp_cin_plan_start_date    DATETIME,                   -- metadata={"item_ref":"CINP003A"}
     cinp_cin_plan_end_date      DATETIME,                   -- metadata={"item_ref":"CINP004A"}
-    cinp_cin_plan_team_name     NVARCHAR(255),              -- metadata={"item_ref":"CINP005A"}
-    cinp_cin_plan_worker_name   NVARCHAR(100),              -- metadata={"item_ref":"CINP006A"}
+    cinp_cin_plan_team          NVARCHAR(255),              -- metadata={"item_ref":"CINP005A"}
+    cinp_cin_plan_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"CINP006A"}
 );
  
 -- Insert data
@@ -1098,8 +1098,8 @@ INSERT INTO ssd_cin_plans (
     cinp_person_id,
     cinp_cin_plan_start_date,
     cinp_cin_plan_end_date,
-    cinp_cin_plan_team_name,
-    cinp_cin_plan_worker_name
+    cinp_cin_plan_team,
+    cinp_cin_plan_worker_id
 )
 
 
@@ -1246,8 +1246,8 @@ CREATE TABLE ssd_development.ssd_s47_enquiry (
     s47e_s47_end_date                   DATETIME,                   -- metadata={"item_ref":"S47E005A"}
     s47e_s47_nfa                        NCHAR(1),                   -- metadata={"item_ref":"S47E006A"}
     s47e_s47_outcome_json               NVARCHAR(1000),             -- metadata={"item_ref":"S47E007A"}
-    s47e_s47_completed_by_team_name     NVARCHAR(255),              -- metadata={"item_ref":"S47E009A"}
-    s47e_s47_completed_by_worker_name   NVARCHAR(100),              -- metadata={"item_ref":"S47E008A"}
+    s47e_s47_completed_by_team          NVARCHAR(255),              -- metadata={"item_ref":"S47E009A"}
+    s47e_s47_completed_by_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"S47E008A"}
 );
 
 -- insert data
@@ -1259,8 +1259,8 @@ INSERT INTO ssd_s47_enquiry(
     s47e_s47_end_date,
     s47e_s47_nfa,
     s47e_s47_outcome_json,
-    s47e_s47_completed_by_team_name,
-    s47e_s47_completed_by_worker_name
+    s47e_s47_completed_by_team,
+    s47e_s47_completed_by_worker_id
 )
 
 
@@ -1325,8 +1325,8 @@ CREATE TABLE ssd_development.ssd_initial_cp_conference (
     icpc_icpc_date              DATETIME,                   -- metadata={"item_ref":"ICPC005A"}
     icpc_icpc_outcome_cp_flag   NCHAR(1),                   -- metadata={"item_ref":"ICPC013A"}
     icpc_icpc_outcome_json      NVARCHAR(1000),             -- metadata={"item_ref":"ICPC006A"}
-    icpc_icpc_team_name         NVARCHAR(255),              -- metadata={"item_ref":"ICPC007A"}
-    icpc_icpc_worker_name       NVARCHAR(100),              -- metadata={"item_ref":"ICPC008A"}
+    icpc_icpc_team              NVARCHAR(255),              -- metadata={"item_ref":"ICPC007A"}
+    icpc_icpc_worker_id         NVARCHAR(100),              -- metadata={"item_ref":"ICPC008A"}
 );
  
  
@@ -1343,8 +1343,8 @@ INSERT INTO ssd_initial_cp_conference(
     icpc_icpc_date,
     icpc_icpc_outcome_cp_flag,
     icpc_icpc_outcome_json,
-    icpc_icpc_team_name,
-    icpc_icpc_worker_name
+    icpc_icpc_team,
+    icpc_icpc_worker_id
 )
  
 
@@ -2645,8 +2645,8 @@ CREATE TABLE ssd_development.ssd_care_leavers
     clea_care_leaver_activity               NVARCHAR(100),              -- metadata={"item_ref":"CLEA008A"}
     clea_pathway_plan_review_date           DATETIME,                   -- metadata={"item_ref":"CLEA009A"}
     clea_care_leaver_personal_advisor       NVARCHAR(100),              -- metadata={"item_ref":"CLEA010A"}
-    clea_care_leaver_allocated_team_name    NVARCHAR(255),              -- metadata={"item_ref":"CLEA011A"}
-    clea_care_leaver_worker_name            NVARCHAR(100)               -- metadata={"item_ref":"CLEA012A"}
+    clea_care_leaver_allocated_team         NVARCHAR(255),              -- metadata={"item_ref":"CLEA011A"}
+    clea_care_leaver_worker_id              NVARCHAR(100)               -- metadata={"item_ref":"CLEA012A"}
 );
   
 -- Insert data
@@ -2662,8 +2662,8 @@ INSERT INTO ssd_care_leavers
     clea_care_leaver_activity,
     clea_pathway_plan_review_date,
     clea_care_leaver_personal_advisor,                  
-    clea_care_leaver_allocated_team_name,
-    clea_care_leaver_worker_name            
+    clea_care_leaver_allocated_team,
+    clea_care_leaver_worker_id           
 )
  
 
@@ -2748,7 +2748,7 @@ CREATE TABLE ssd_development.ssd_permanence (
     perm_decision_reversed_reason   NVARCHAR(100),              -- metadata={"item_ref":"PERM016A"}
     perm_permanence_order_date      DATETIME,                   -- metadata={"item_ref":"PERM017A"}              
     perm_permanence_order_type      NVARCHAR(100),              -- metadata={"item_ref":"PERM018A"}        
-    perm_adoption_worker_name       NVARCHAR(100)               -- metadata={"item_ref":"PERM023A"}
+    perm_adoption_worker_id         NVARCHAR(100)               -- metadata={"item_ref":"PERM023A"}
     
 );
 
@@ -2776,7 +2776,7 @@ INSERT INTO ssd_permanence (
     perm_decision_reversed_reason,
     perm_permanence_order_date,
     perm_permanence_order_type,
-    perm_adoption_worker_name
+    perm_adoption_worker_id
 )  
 
 
