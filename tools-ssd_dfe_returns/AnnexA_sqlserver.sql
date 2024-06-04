@@ -66,7 +66,6 @@ Description:
             each child in the contact.""
 
 Author: D2I
-Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
@@ -184,7 +183,6 @@ Description:
             coordinated through the local authority."
 
 Author: D2I
-Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
@@ -285,9 +283,9 @@ Description:
             multiple referrals."
 
 Author: D2I
-Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
+Version: 1.1
+            1.0 get worker name and team name from dept and prof tables 040624 RH
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming. 
 Status: [R]elease
@@ -382,8 +380,10 @@ SELECT
 	/*PW Note - Have used Team and Worker that Referral was assinged to as per Annex A guidance
 					However in Blackpool, all Contact/Referral WorkflowSteps are processed by the 'Front Door' (Request for Support Hub) with generic worker 'Referral Coordinator'
 					Therefore Current / Latest Worker may provide better information (as with Annex A Lists 6-8).  This is the approach used in Blackpool*/
-	ce.cine_referral_team					AS AllocatedTeam,
-    ce.cine_referral_worker_id				AS AllocatedWorker
+	-- ce.cine_referral_team					AS AllocatedTeam,
+    -- ce.cine_referral_worker_id				AS AllocatedWorker
+    dept.dept_team_name                             AS AllocatedTeam,
+    pro.prof_professional_name                      AS AllocatedWorker
 
 INTO #AA_3_referrals
 
@@ -409,8 +409,11 @@ LEFT JOIN
             cine_person_id
     ) AS sub ON ce.cine_person_id = sub.cine_person_id
 
--- LEFT JOIN -- Removed as can access worker name on cin_episodes object
---     #ssd_professionals pro ON ce.cine_referral_worker_id = pro.prof_professional_id
+-- obtain professional & team names
+LEFT JOIN
+    ssd_department dept ON ce.cine_referral_team = dept.dept_team_id
+LEFT JOIN
+    ssd_professionals pro ON ce.cine_referral_worker_id = pro.prof_professional_id
 
 WHERE
     ce.cine_referral_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
@@ -428,9 +431,9 @@ Report Name: Ofsted List 4 - Assessments YYYY
 Description: 
             "Young people and children with assessments in previous six months"
 Author: D2I
-Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
+Version: 1.1
+            1.0 get worker name and team name from dept and prof tables 040624 RH
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.5 Further edits of source obj referencing, Fixed to working state
             0.3: Removed old obj/item naming. 
@@ -510,8 +513,10 @@ SELECT
 	END													AS CSCSupportRequired,	/*PW - will depend on each Local Authority's interpretation of cina_assessment_outcome_nfa*/
 
     -- Step type (SEE ALSO CONTACTS)
-    a.cina_assessment_team							AS AllocatedTeam,
-    a.cina_assessment_worker_id						AS AllocatedWorker
+    -- a.cina_assessment_team							AS AllocatedTeam,
+    -- a.cina_assessment_worker_id						AS AllocatedWorker
+    dept.dept_team_name                             AS AllocatedTeam,
+    pro.prof_professional_name                      AS AllocatedWorker
 
 INTO #AA_4_assessments
 
@@ -532,8 +537,12 @@ LEFT JOIN   -- ensure we get all records even if there's no matching disability
 			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 	) AS d ON p.pers_person_id = d.disa_person_id
 
--- LEFT JOIN -- Removed as worker name available on ssd_cin_assessments
---     #ssd_professionals pro ON a.cina_assessment_worker_id = pro.prof_professional_id
+
+-- obtain professional & team names
+LEFT JOIN
+    ssd_department dept ON a.cina_assessment_team = dept.dept_team_id
+LEFT JOIN
+    ssd_professionals pro ON a.cina_assessment_worker_id = pro.prof_professional_id
 
 WHERE
     --a.cina_assessment_start_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());	/*Original criteria - Assessments starting in last 6 months*/
@@ -556,9 +565,9 @@ Description:
             the period, please provide one row for each enquiry."
 
 Author: D2I
-Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
+Version: 1.1
+            1.0 get worker name and team name from dept and prof tables 040624 RH
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming. 
 Status: [R]elease
@@ -647,8 +656,8 @@ SELECT
 	
    -- [TESTING]
     -- taking from s47 object in case the child has a Section 47 enquiry that <doesn't> lead to an ICPC
-    s47e.s47e_s47_completed_by_team			AS AllocatedTeam,
-    s47e.s47e_s47_completed_by_worker_id			AS AllocatedWorker
+    dept.dept_team_name                             AS AllocatedTeam
+    pro.prof_professional_name                      AS AllocatedWorker -- was s47e.s47e_s47_completed_by_worker_id AS AllocatedWorker
     -- -- the alternative exists as 
     -- icpc.icpc_icpc_team						AS AllocatedTeam,        
     -- icpc.icpc_icpc_worker_id					AS AllocatedWorker
@@ -721,6 +730,14 @@ LEFT JOIN
 	) AS agg_icpc ON s47e.s47e_person_id = agg_icpc.s47e_person_id
 		AND agg_icpc.Rnk = 1
 
+
+-- obtain professional & team names
+LEFT JOIN
+    ssd_professionals pro ON s47e.s47e_s47_completed_by_worker_id = pro.prof_professional_id
+
+LEFT JOIN
+    ssd_department dept ON s47e.s47e_s47_completed_by_team = dept.dept_team_id
+
 WHERE
 	-- S47 open in last 6 months (includes those starting more that 6 months ago that were completed in last 6 months)
 	COALESCE(s47e.s47e_s47_end_date,'99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());	
@@ -742,7 +759,6 @@ Description:
             the subject of a referral."
 
 Author: D2I
-Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
@@ -1058,7 +1074,6 @@ Description:
             a child protection plan in the six months before the inspection."
  
 Author: D2I
-Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.9 JH excluded temporary OLA plans
@@ -1327,7 +1342,6 @@ Description:
             before the inspection."
  
 Author: D2I
-Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
             0.9: PW/Blackpool major edits/reworked PW 030324
@@ -1857,9 +1871,9 @@ Description:
             Eligible children"
 
 Author: D2I
-Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
+Version: 1.1
+            1.0 get worker name and team name from dept and prof tables 040624 RH
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming. 
 Status: [R]elease
@@ -1926,9 +1940,9 @@ SELECT
 		ELSE 'b) No'
 	END															AS HasDisability,
 
-    clea.clea_care_leaver_allocated_team					    AS AllocatedTeam,   -- [TESTING]
-	pro.prof_professional_name									AS AllocatedWorker, -- [TESTING]
-	clea.clea_care_leaver_personal_advisor						AS AllocatedPersonalAdvisor,
+    clea.clea_care_leaver_allocated_team					    AS AllocatedTeam,           -- [TESTING]
+	pro.prof_professional_name									AS AllocatedWorker,         -- [TESTING]
+    pro_advisor.prof_professional_name                          AS AllocatedPersonalAdvisor -- [TESTING] was clea.clea_care_leaver_personal_advisor	AS AllocatedPersonalAdvisor,
 
 	CASE
 		WHEN clea.clea_care_leaver_eligibility in ('Relevant','Relevant child') then 'a) Relevant child'
@@ -2012,9 +2026,12 @@ LEFT JOIN
 			--AND COALESCE(uasc.immi_immigration_status_end_date,'99991231') >= DATEADD(MONTH, -12 , GETDATE())	/*PW - Row commented out as giving error 'Arithmetic overflow error converting expression to data type datetime' (possibly because no records have end date)*/
 	) AS uasc ON p.pers_person_id = uasc.immi_person_id
 
+-- obtain professional & team names
 LEFT JOIN
 	ssd_professionals pro on clea.clea_care_leaver_worker_id = pro.prof_professional_id
 
+LEFT JOIN
+    ssd_professionals pro_advisor ON clea.clea_care_leaver_personal_advisor = pro_advisor.prof_professional_id
 
 -- [TESTING]
 select * from #AA_9_care_leavers;
@@ -2032,7 +2049,6 @@ Description:
             decision reversed during the 12 months."
 
 Author: D2I
-Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
@@ -2165,7 +2181,6 @@ Description:
             have had contact with the local authority adoption agency"
 
 Author: D2I
-Last Modified Date: 030324 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 			0.9 PW/Blackpool major edits/reworked PW 030324
