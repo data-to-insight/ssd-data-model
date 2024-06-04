@@ -26,8 +26,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_requests
     - mosaic:ssd_ehcp_requests
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) EHCP request
-      record unique ID from system or auto-generated as part of export.
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      EHCP request record unique ID from system or auto-generated as part of export.'
   - name: ehcr_send_table_id
     description: send_table_id
     item_ref: EHCR002A
@@ -47,8 +48,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_requests
     - mosaic:ssd_ehcp_requests
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) ID for linking
-      to ssd_send table
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      ID for linking to ssd_send table'
   - name: ehcr_ehcp_req_date
     description: Received Date
     item_ref: EHCR003A
@@ -69,9 +71,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_requests
     - mosaic:ssd_ehcp_requests
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) The date
-      the request for an EHC assessment was received. This will be the date used as
-      the start of the 20-week period.
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      The date the request for an EHC assessment was received. This will be the date
+      used as the start of the 20-week period.'
   - name: ehcr_ehcp_req_outcome_date
     description: Request Outcome Date
     item_ref: EHCR004A
@@ -92,11 +95,13 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_requests
     - mosaic:ssd_ehcp_requests
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Please enter
-      the date the requestor(s) was informed of the decision about whether the local
-      authority agrees to the request for an assessment. If the request was withdrawn
-      or ceased before decision (W), if the decision is yet to be made (A) or is historical
-      (H) then no date is required.
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Please enter the date the requestor(s) was informed of the decision about whether
+      the local authority agrees to the request for an assessment.
+
+      If the request was withdrawn or ceased before decision (W), if the decision
+      is yet to be made (A) or is historical (H) then no date is required.'
   - name: ehcr_ehcp_req_outcome
     description: Request Outcome
     item_ref: EHCR005A
@@ -117,16 +122,16 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_requests
     - mosaic:ssd_ehcp_requests
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) This item\
-      \ records whether or not the initial request proceeded to the assessment stage:\
-      \ Y - LA proceeded with an assessment N - LA decided not to proceed with an\
-      \ assessment A - Decision yet to be made W \u2013 Request withdrawn or ceased\
-      \ before decision to assess was made H \u2013 Historical \u2013 Decision to\
-      \ assess was made before the latest collection period If a local authority decides\
-      \ not to proceed with an assessment and this decision is subsequently changed\
-      \ for any reason the original request outcome and request outcome date should\
-      \ not be changed. If the change follows from mediation or tribunal the appropriate\
-      \ mediation and tribunal indicators (items 2.5 and 2.6) should be selected for\
-      \ the request. W may include where the person moves out of the local authority\
-      \ area, leaves education or training, or if the child or young person dies.\
-      \ When A, W or H is selected, no further information is required in this module."
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nThis item\
+      \ records whether or not the initial request proceeded to the assessment stage:\n\
+      Y - LA proceeded with an assessment\nN - LA decided not to proceed with an assessment\n\
+      A - Decision yet to be made\nW \u2013 Request withdrawn or ceased before decision\
+      \ to assess was made\nH \u2013 Historical \u2013 Decision to assess was made\
+      \ before the latest collection period\nIf a local authority decides not to proceed\
+      \ with an assessment and this decision is subsequently changed for any reason\
+      \ the original request outcome and request outcome date should not be changed.\
+      \ If the change follows from mediation or tribunal the appropriate mediation\
+      \ and tribunal indicators (items 2.5 and 2.6) should be selected for the request.\n\
+      W may include where the person moves out of the local authority area, leaves\
+      \ education or training, or if the child or young person dies.\nWhen A, W or\
+      \ H is selected, no further information is required in this module."

@@ -159,12 +159,13 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: The date that the child was placed for adoption with particular prospective
+    guidance: 'The date that the child was placed for adoption with particular prospective
       adopters.. Or, if the child was placed with their foster carers or were in a
       FFA/concurrent planning placement, record the date this placement changed from
-      a foster placement to an adoption placement. This is the date that child goes
-      to live with the prospective adopters who will adopt them. It does not mean
-      that the child has been adopted.
+      a foster placement to an adoption placement.
+
+      This is the date that child goes to live with the prospective adopters who will
+      adopt them. It does not mean that the child has been adopted.'
   - name: perm_matched_date
     description: Date Matched to Prospective Adopters
     item_ref: PERM008A
@@ -186,12 +187,13 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: The date that the child was matched to particular prospective adopters
-      or with dually approved foster carers/adopters for FFA. This is the date on
-      which the local authority formally decides that the child should be placed for
-      adoption with the particular prospective adopters. If the child is adopted by
-      the foster carer or relatives with whom he/she is already placed, the date of
-      decision should be recorded here.
+    guidance: 'The date that the child was matched to particular prospective adopters
+      or with dually approved foster carers/adopters for FFA.
+
+      This is the date on which the local authority formally decides that the child
+      should be placed for adoption with the particular prospective adopters. If the
+      child is adopted by the foster carer or relatives with whom he/she is already
+      placed, the date of decision should be recorded here.'
   - name: perm_adopted_by_carer_flag
     description: Adopted by carer flag
     item_ref: PERM021A
@@ -275,9 +277,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Date the
-      child was originally placed with their foster carer(s) (only if the child was
-      adopted by their foster carer(s))
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Date the child was originally placed with their foster carer(s) (only if the
+      child was adopted by their foster carer(s))'
   - name: perm_part_of_sibling_group
     description: Is the child a part of a sibling group?
     item_ref: PERM012A
@@ -301,7 +304,9 @@ nodes:
 
       Code set
 
-      0 - No 1 - Yes'
+      0 - No
+
+      1 - Yes'
   - name: perm_siblings_placed_together
     description: Number of children placed, or planned to be placed, for adoption
       together as sibling group INCLUDING this child
@@ -387,7 +392,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: "Reason why the child is no longer considered for adoption Code set\n\
+    guidance: "Reason why the child is no longer considered for adoption\nCode set\n\
       RD1 - The child\u2019s needs changed subsequent to the decision\nRD2 - The Court\
       \ did not make a placement order\nRD3 - Prospective adopters could not be found\n\
       RD4 - Any other reason"
@@ -429,12 +434,16 @@ nodes:
     cms_table:
     - liquid_logic:ssd_permanence
     - mosaic:ssd_permanence
-    guidance: Type of Permanence order granted - Adoption - Special Guardianship -
-      Child Arrangements Order/ Residence Order
-  - name: perm_adoption_worker_name
+    guidance: 'Type of Permanence order granted
+
+      - Adoption
+
+      - Special Guardianship - Child Arrangements Order/ Residence Order'
+  - name: perm_adoption_worker_id
     description: Adoption social worker
     item_ref: PERM023A
     type: nvarchar
+    foreign_key: ssd_professionals.prof_professional_id
     categories:
     - looked_after
     - permanence
@@ -455,8 +464,13 @@ nodes:
     - adoption
     returns:
     - SSDA903
-    guidance: 'The sex of the adopter/s/ prospective adopter/s. Code set F1 - Single
-      Female FF - Female couple
+    guidance: 'The sex of the adopter/s/ prospective adopter/s.
+
+      Code set
+
+      F1 - Single Female
+
+      FF - Female couple
 
       M1 - Single Male
 
@@ -473,7 +487,9 @@ nodes:
     - adoption
     returns:
     - SSDA903
-    guidance: 'The Legal Status of the adopter/s/ prospective adopter/s. Code set
+    guidance: 'The Legal Status of the adopter/s/ prospective adopter/s.
+
+      Code set
 
       L0 - Single Adopter
 

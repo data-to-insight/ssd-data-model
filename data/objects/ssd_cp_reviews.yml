@@ -188,8 +188,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cp_reviews
     - mosaic:ssd_cp_reviews
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development) The Child/
-      Young Person''s method of participation at review. Code set
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      The Child/ Young Person''s method of participation at review.
+
+      Code set
 
       PN0 - Child aged under 4 at the time of the review
 

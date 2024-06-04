@@ -94,7 +94,7 @@ nodes:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
     guidance: "CIN Primary Need Code. This code indicates the main reason why a child\
-      \ started to receive services. The categories are designed only to identify\
+      \ started to receive services.\nThe categories are designed only to identify\
       \ what kind of pressures are placed on social services. They have no diagnostic\
       \ value with regard to the children themselves and must not be used to determine\
       \ what type of service the child should receive.\nIf there is difficulty choosing\
@@ -293,10 +293,11 @@ nodes:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
     guidance: Date the Referral is effective to, i.e. Case Closure Date
-  - name: cine_referral_team_name
+  - name: cine_referral_team
     description: CIN Referral Completed by Team
     item_ref: CINE008A
     type: nvarchar
+    foreign_key: ssd_department.dept_team_id
     categories:
     - child_in_need
     - referral
@@ -313,11 +314,11 @@ nodes:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
     guidance: Team responsible for completing the initial Referral
-  - name: cine_referral_worker_name
+  - name: cine_referral_worker_id
     description: CIN Referral Completed by Worker Name
     item_ref: CINE009A
     type: nvarchar
-    foreign_key: ssd_involvements.invo_professional_id
+    foreign_key: ssd_professionals.prof_professional_id
     categories:
     - child_in_need
     - referral

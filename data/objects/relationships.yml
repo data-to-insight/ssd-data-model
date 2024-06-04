@@ -110,30 +110,90 @@ relationships:
   child_object: ssd_linked_identifiers
   child_key: link_person_id
   relation: 1:M
-- parent_object: ssd_involvements
-  parent_key: invo_professional_id
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
   child_object: ssd_early_help_episodes
-  child_key: earl_episode_worker_name
+  child_key: earl_episode_worker_id
   relation: 1:M
-- parent_object: ssd_involvements
-  parent_key: invo_professional_id
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
   child_object: ssd_cin_episodes
-  child_key: cine_referral_worker_name
+  child_key: cine_referral_worker_id
   relation: 1:M
-- parent_object: ssd_involvements
-  parent_key: invo_professional_id
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
   child_object: ssd_cin_assessments
-  child_key: cina_assessment_worker_name
+  child_key: cina_assessment_worker_id
   relation: 1:M
-- parent_object: ssd_involvements
-  parent_key: invo_professional_id
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
   child_object: ssd_cin_plans
-  child_key: cinp_cin_plan_worker_name
+  child_key: cinp_cin_plan_worker_id
   relation: 1:M
-- parent_object: ssd_involvements
-  parent_key: invo_professional_id
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
+  child_object: ssd_s47_enquiry
+  child_key: s47e_s47_completed_by_worker_id
+  relation: 1:M
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
+  child_object: ssd_initial_cp_conference
+  child_key: icpc_icpc_worker_id
+  relation: 1:M
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
   child_object: ssd_care_leavers
-  child_key: clea_care_leaver_worker_name
+  child_key: clea_care_leaver_worker_id
+  relation: 1:M
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
+  child_object: ssd_permanence
+  child_key: perm_adoption_worker_id
+  relation: 1:M
+- parent_object: ssd_professionals
+  parent_key: prof_professional_id
+  child_object: ssd_involvements
+  child_key: invo_professional_id
+  relation: 1:M
+- parent_object: ssd_department
+  parent_key: dept_team_id
+  child_object: ssd_cin_episodes
+  child_key: cine_referral_team
+  relation: 1:M
+- parent_object: ssd_department
+  parent_key: dept_team_id
+  child_object: ssd_cin_assessments
+  child_key: cina_assessment_team
+  relation: 1:M
+- parent_object: ssd_department
+  parent_key: dept_team_id
+  child_object: ssd_cin_plans
+  child_key: cinp_cin_plan_team
+  relation: 1:M
+- parent_object: ssd_department
+  parent_key: dept_team_id
+  child_object: ssd_s47_enquiry
+  child_key: s47e_s47_completed_by_team
+  relation: 1:M
+- parent_object: ssd_department
+  parent_key: dept_team_id
+  child_object: ssd_initial_cp_conference
+  child_key: icpc_icpc_team
+  relation: 1:M
+- parent_object: ssd_department
+  parent_key: dept_team_id
+  child_object: ssd_care_leavers
+  child_key: clea_care_leaver_allocated_team
+  relation: 1:M
+- parent_object: ssd_department
+  parent_key: dept_team_id
+  child_object: ssd_involvements
+  child_key: invo_professional_team
+  relation: 1:M
+- parent_object: ssd_department
+  parent_key: dept_team_id
+  child_object: ssd_department
+  child_key: dept_team_parent_id
   relation: 1:M
 - parent_object: ssd_cin_episodes
   parent_key: cine_referral_id
@@ -249,11 +309,6 @@ relationships:
   parent_key: clae_cla_episode_id
   child_object: ssd_permanence
   child_key: perm_person_id
-  relation: 1:M
-- parent_object: ssd_professionals
-  parent_key: prof_professional_id
-  child_object: ssd_involvements
-  child_key: invo_professional_id
   relation: 1:M
 - parent_object: ssd_send
   parent_key: send_table_id

@@ -175,10 +175,11 @@ nodes:
       - TOTAL_NO_OF_OUTCOMES
 
       - COMMENTS'
-  - name: s47e_s47_completed_by_worker_name
+  - name: s47e_s47_completed_by_worker_id
     description: S47 Enquiries completed by worker
     item_ref: S47E008A
     type: nvarchar
+    foreign_key: ssd_professionals.prof_professional_id
     categories:
     - s47_enquiry
     - child_protection
@@ -191,10 +192,11 @@ nodes:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
     guidance: Section 47 Enquiry completed by Worker
-  - name: s47e_s47_completed_by_team_name
+  - name: s47e_s47_completed_by_team
     description: S47 Enquiries completed by team
     item_ref: S47E009A
     type: nvarchar
+    foreign_key: ssd_department.dept_team_id
     categories:
     - s47_enquiry
     - child_protection

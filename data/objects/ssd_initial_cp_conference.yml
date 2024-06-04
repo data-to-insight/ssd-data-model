@@ -146,8 +146,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
-    guidance: The date that is 15 working days after the strategy discussion at which
-      section 47 enquiries were initiated.
+    guidance: 'The date that is 15 working days after the strategy discussion at which
+      section 47
+
+      enquiries were initiated.'
   - name: icpc_icpc_date
     description: Date of Initial CP Conference
     item_ref: ICPC005A
@@ -219,10 +221,11 @@ nodes:
       - TOTAL_NO_OF_OUTCOMES
 
       - COMMENTS'
-  - name: icpc_icpc_team_name
+  - name: icpc_icpc_team
     description: ICPC Completed by Team
     item_ref: ICPC007A
     type: nvarchar
+    foreign_key: ssd_department.dept_team_id
     categories:
     - initial_cp_conference
     - child_protection
@@ -239,10 +242,11 @@ nodes:
     - liquid_logic:ssd_initial_cp_conference
     - mosaic:ssd_initial_cp_conference
     guidance: Team responsible for organising ICPC
-  - name: icpc_icpc_worker_name
+  - name: icpc_icpc_worker_id
     description: ICPC Completed by Worker
     item_ref: ICPC008A
     type: nvarchar
+    foreign_key: ssd_professionals.prof_professional_id
     categories:
     - initial_cp_conference
     - child_protection

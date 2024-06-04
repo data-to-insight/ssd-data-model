@@ -90,7 +90,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_sdq_scores
     - mosaic:ssd_sdq_scores
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) If it is\
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nIf it is\
       \ not possible to collect the SDQ score for a looked-after child, then a reason\
       \ should be recorded using the codes below.\nCode set\nSDQ1 - No form returned\
       \ as child was aged under 4 or over 16 at date of latest assessment\nSDQ2 -\

@@ -1,0 +1,53 @@
+---
+nodes:
+- name: ssd_department
+  fields:
+  - name: dept_team_id
+    description: null
+    item_ref: DEPT1001A
+    type: nvarchar
+    categories:
+    - workforce
+    cms:
+    - liquid_logic
+    - mosaic
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      No guidance available yet'
+  - name: dept_team_name
+    description: null
+    item_ref: DEPT1002A
+    type: nvarchar
+    categories:
+    - workforce
+    cms:
+    - liquid_logic
+    - mosaic
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      No guidance available yet'
+  - name: dept_team_parent_id
+    description: null
+    item_ref: DEPT1003A
+    type: nvarchar
+    foreign_key: ssd_department.dept_team_id
+    categories:
+    - workforce
+    cms:
+    - liquid_logic
+    - mosaic
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      No guidance available yet'
+  - name: dept_team_parent_name
+    description: null
+    item_ref: DEPT1004A
+    type: nvarchar
+    categories:
+    - workforce
+    cms:
+    - liquid_logic
+    - mosaic
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      No guidance available yet'

@@ -211,10 +211,11 @@ nodes:
     - mosaic:ssd_cin_assessments
     guidance: Standalone field showing whether or not the Assessment resulted in No
       Further Action.
-  - name: cina_assessment_team_name
+  - name: cina_assessment_team
     description: Assessment Completed by Team
     item_ref: CINA007A
     type: nvarchar
+    foreign_key: ssd_department.dept_team_id
     categories:
     - child_in_need
     - assessment
@@ -231,11 +232,11 @@ nodes:
     - liquid_logic:ssd_cin_assessments
     - mosaic:ssd_cin_assessments
     guidance: Team responsible for completing the Assessment
-  - name: cina_assessment_worker_name
+  - name: cina_assessment_worker_id
     description: Assessment Completed by Worker name
     item_ref: CINA008A
     type: nvarchar
-    foreign_key: ssd_involvements.invo_professional_id
+    foreign_key: ssd_professionals.prof_professional_id
     categories:
     - child_in_need
     - assessment

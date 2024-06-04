@@ -136,10 +136,11 @@ nodes:
       \ can have one, more than one or no CIN plan(s) \u2013 but can only have one\
       \ at a time.\nCIN plans do not include other plans such as leaving care support\
       \ or adoption support."
-  - name: cinp_cin_plan_team_name
+  - name: cinp_cin_plan_team
     description: CIN Plan Allocated Team
     item_ref: CINP005A
     type: nvarchar
+    foreign_key: ssd_department.dept_team_id
     categories:
     - child_in_need
     - cin_plan
@@ -156,11 +157,11 @@ nodes:
     - liquid_logic:ssd_cin_plans
     - mosaic:ssd_cin_plans
     guidance: Team responsible for CIN Plan
-  - name: cinp_cin_plan_worker_name
+  - name: cinp_cin_plan_worker_id
     description: CIN Plan Worker Name
     item_ref: CINP006A
     type: nvarchar
-    foreign_key: ssd_involvements.invo_professional_id
+    foreign_key: ssd_professionals.prof_professional_id
     categories:
     - child_in_need
     - cin_plan

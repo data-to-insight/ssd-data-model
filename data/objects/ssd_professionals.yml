@@ -148,5 +148,6 @@ nodes:
     cms_field:
     - liquid_logic:prof_agency_worker_flag
     - mosaic:prof_agency_worker_flag
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Y/N flag
-      indicating if worker is an Agency worker
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Y/N flag indicating if worker is an Agency worker'

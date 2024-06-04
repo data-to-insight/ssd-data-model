@@ -95,7 +95,7 @@ nodes:
       \ at the same time\nU - Change of legal status and change of placement (but\
       \ same carer(s)) at the same time Use Code S where a child is starting to be\
       \ looked-after for the first time, or had previously ceased to be looked-after,\
-      \ and is now starting to be looked-after again. Also use code S when recording\
+      \ and is now starting to be looked-after again.\nAlso use code S when recording\
       \ agreements to provide short-term placements (legal status V4), and for individual\
       \ breaks under such an agreement, if these are being recorded separately (legal\
       \ status V3).\nUse Code L where there is a change of legal status, but the placement\
@@ -115,7 +115,7 @@ nodes:
       \ of the setting changes or the provider type changes (for example, a foster\
       \ carer moves from an IFA to the local authority provider, or a placement for\
       \ adoption transferring to a regional adoption agency, or an unregulated independent\
-      \ or semi independent setting registering with Ofsted).\nIn both scenarios,\
+      \ or\nsemi independent setting registering with Ofsted).\nIn both scenarios,\
       \ the child has remained with the same carer, but for some other reason, a new\
       \ placement is required on the SSDA903.\nUse Code B where both legal status\
       \ and placement change, with a change of carer, on the same day. The two changes\
@@ -157,9 +157,9 @@ nodes:
       s disabilities, illness or intrinsic condition\nN3 - Parental illness or disability\n\
       Child whose main need for children\u2019s social care services arises because\
       \ the capacity of their parent(s) or carer(s) to care for them is impaired by\
-      \ disability, illness, mental illness, or addictions\nN4 - Family in acute stress\
-      \ Child whose needs arise from living in a family going through a temporary\
-      \ crisis such that parenting capacity is diminished and some of the children\u2019\
+      \ disability, illness, mental illness, or addictions\nN4 - Family in acute stress\n\
+      Child whose needs arise from living in a family going through a temporary crisis\
+      \ such that parenting capacity is diminished and some of the children\u2019\
       s needs are not being adequately met\nN5 - Family dysfunction\nChild whose needs\
       \ arise mainly out of their living with a family where the parenting capacity\
       \ is chronically inadequate\nN6 - Socially unacceptable behaviour\nChild and\
@@ -280,8 +280,8 @@ nodes:
       \ asylum seeking child whose age has been disputed \u2013 this code should be\
       \ used if the episode of care ended because the age was disputed, an assessment\
       \ revealed the child was 18 or over and the young person was not transferred\
-      \ to residential care and did not move into independent living arrangements.\
-      \ E16 - Moved abroad \u2013 use this code if the child left care because they\
+      \ to residential care and did not move into independent living arrangements.\n\
+      E16 - Moved abroad \u2013 use this code if the child left care because they\
       \ moved to another country, including when a child is deported.\nE17 - Aged\
       \ 18 (or over) and remained with current carers (inc under staying put arrangements)\
       \ \u2013 use this code whenever the young person has ceased care and remains\

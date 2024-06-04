@@ -17,8 +17,9 @@ nodes:
     cms_field:
     - liquid_logic:prep_table_id
     - mosaic:prep_table_id
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Row identifier
-      for the ssd_pre_proceedings table
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Row identifier for the ssd_pre_proceedings table'
   - name: prep_person_id
     description: Person Unique ID
     item_ref: PREP001A
@@ -45,8 +46,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Person's
-      ID generated in CMS Database
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Person''s ID generated in CMS Database'
   - name: prep_plo_family_id
     description: PLO Family ID
     item_ref: PREP002A
@@ -70,10 +72,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Unique Identifier
-      number for each family group - a family group is described as a group of children
-      linked by parents all starting and ceasing pre or care proceedings at the same
-      time
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Unique Identifier number for each family group - a family group is described
+      as a group of children linked by parents all starting and ceasing pre or care
+      proceedings at the same time'
     metadata:
       release: In review|pending
       change_id: SSD-0001
@@ -98,10 +101,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) This is the
-      date of legal meeting / panel that agreed to commence pre-proceedings. The date
-      should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a four digit
-      number.
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      This is the date of legal meeting / panel that agreed to commence pre-proceedings.
+      The date should be recorded in a DD/MM/YYYY format, i.e. day/month/year as a
+      four digit number.'
     metadata:
       release: In review|pending
       change_id: SSD-0002
@@ -126,10 +130,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) This is the
-      first pre-proceedings meeting following the legal meeting / panel that agreed
-      to commence pre-proceedings. The date should be recorded in a DD/MM/YYYY format,
-      i.e. day/month/year as a four digit number.
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      This is the first pre-proceedings meeting following the legal meeting / panel
+      that agreed to commence pre-proceedings. The date should be recorded in a DD/MM/YYYY
+      format, i.e. day/month/year as a four digit number.'
     metadata:
       release: In review|pending
       change_id: SSD-0003
@@ -154,9 +159,15 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development) Please
-      select: Decision to Issue Care Proceedings / Decision to step down If still
-      in pre-proceedings, please leave blank.'
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Please select:
+
+      Decision to Issue Care Proceedings /
+
+      Decision to step down
+
+      If still in pre-proceedings, please leave blank.'
     metadata:
       release: In review|pending
       change_id: SSD-0004
@@ -212,9 +223,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Please provide
-      a numeric value for the number of the times the child has been the subject of
-      a Child Protection Plan during this referral period. If none, please put 0.
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Please provide a numeric value for the number of the times the child has been
+      the subject of a Child Protection Plan during this referral period. If none,
+      please put 0.'
     metadata:
       release: In review|pending
       change_id: SSD-0006
@@ -239,9 +252,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Please select\
-      \ one of these options: A \u2013 Continue with current plan B \u2013 Start pre-proceedings\
-      \ C \u2013 Issue care proceedings D \u2013 Unknown"
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nPlease\
+      \ select one of these options:\nA \u2013 Continue with current plan\nB \u2013\
+      \ Start pre-proceedings\nC \u2013 Issue care proceedings\nD \u2013 Unknown"
     metadata:
       release: In review|pending
       change_id: SSD-0007
@@ -267,8 +280,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Please provide
-      a numeric value. If there have not been any previous periods, please put 0.
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Please provide a numeric value. If there have not been any previous periods,
+      please put 0.'
     metadata:
       release: In review|pending
       change_id: SSD-0008
@@ -294,8 +309,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Please provide
-      a numeric value. If there have not been any previous periods, please put 0.
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Please provide a numeric value. If there have not been any previous periods,
+      please put 0.'
     metadata:
       release: In review|pending
       change_id: SSD-0009
@@ -320,9 +337,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development) If the
-      case has not been in pre-proceedings, please leave blank. Please use the UK
-      date format: DD/MM/YYYY'
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      If the case has not been in pre-proceedings, please leave blank.
+
+      Please use the UK date format: DD/MM/YYYY'
     metadata:
       release: In review|pending
       change_id: SSD-0010
@@ -347,8 +366,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) If care proceedings
-      have not been issued, please leave blank. Please use the UK date format DD/MM/YYYY
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      If care proceedings have not been issued, please leave blank. Please use the
+      UK date format DD/MM/YYYY'
     metadata:
       release: In review|pending
       change_id: SSD-0011
@@ -373,9 +394,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Please give
-      a numeric value for the number of meetings that took place with parents, excluding
-      the initial meeting.
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Please give a numeric value for the number of meetings that took place with
+      parents, excluding the initial meeting.'
     metadata:
       release: In review|pending
       change_id: SSD-0012
@@ -424,8 +446,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Please select
-      Yes / No / Unknown / Not in care proceedings
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Please select Yes / No / Unknown / Not in care proceedings'
     metadata:
       release: In review|pending
       change_id: SSD-0014
@@ -449,9 +472,11 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development) This is
-      the Court number which is given to a family group when care proceedings are
-      issued. This may be stored on the case management system or held in legal files.
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      This is the Court number which is given to a family group when care proceedings
+      are issued. This may be stored on the case management system or held in legal
+      files.
 
       If the case is not in care proceedings, please leave blank.'
     metadata:
@@ -477,8 +502,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development) This includes
-      the initial IRH and final hearing. Please give a numeric value.
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      This includes the initial IRH and final hearing. Please give a numeric value.
 
       If case is not in care proceedings, please leave blank.'
     metadata:
@@ -504,8 +530,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Please select\
-      \ Yes / No / Unknown / Not in care proceedings.\nA short notice application\
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nPlease\
+      \ select Yes / No / Unknown / Not in care proceedings.\nA short notice application\
       \ is an urgent application for the court to hear the case within the next 2\
       \ \u2013 5 days."
     metadata:
@@ -531,14 +557,15 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Please choose\
-      \ the main reason from this list:\n(A) Applications under the Children Act 1989\
-      \ where without such an order a child\u2019s immediate safety would be compromised,\
-      \ including where there is an immediate threat of child abduction.\n(B) Applications\
-      \ for Emergency Protection Orders where the criteria for such or order is met.\n\
-      (c) Other\nIf a short notice application has not taken place, please select\
-      \ 'No short notice applications'.\nA short notice application is an urgent application\
-      \ for the court to hear the case within the next 2 \u2013 5 days."
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nPlease\
+      \ choose the main reason from this list:\n(A) Applications under the Children\
+      \ Act 1989 where without such an order a child\u2019s immediate safety would\
+      \ be compromised, including where there is an immediate threat of child abduction.\n\
+      (B) Applications for Emergency Protection Orders where the criteria for such\
+      \ or order is met.\n(c) Other\nIf a short notice application has not taken place,\
+      \ please select 'No short notice applications'.\nA short notice application\
+      \ is an urgent application for the court to hear the case within the next 2\
+      \ \u2013 5 days."
     metadata:
       release: In review|pending
       change_id: SSD-0018
@@ -562,8 +589,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Please select
-      Yes / No / Unknown
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Please select Yes / No / Unknown'
     metadata:
       release: In review|pending
       change_id: SSD-0019
@@ -588,14 +616,14 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Please choose\
-      \ one option from this list:\nA \u2013 Interim / Care Order\nB \u2013 Interim\
-      \ / Care Order \u2013 Placement with parents\nC \u2013 Adoption\nD \u2013 Interim\
-      \ / Supervision Order\nE \u2013 Special Guardianship Order\nF \u2013 Private\
-      \ Law Order\nG \u2013 Other\nIf case is not in care proceedings, please select\
-      \ 'Not in care proceedings'\nPlease note \u2018Care order \u2013 placement with\
-      \ parents\u2019 means that the public care order was granted but that the child\
-      \ remained in their parent\u2019s care, rather than in another placement."
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nPlease\
+      \ choose one option from this list:\nA \u2013 Interim / Care Order\nB \u2013\
+      \ Interim / Care Order \u2013 Placement with parents\nC \u2013 Adoption\nD \u2013\
+      \ Interim / Supervision Order\nE \u2013 Special Guardianship Order\nF \u2013\
+      \ Private Law Order\nG \u2013 Other\nIf case is not in care proceedings, please\
+      \ select 'Not in care proceedings'\nPlease note \u2018Care order \u2013 placement\
+      \ with parents\u2019 means that the public care order was granted but that the\
+      \ child remained in their parent\u2019s care, rather than in another placement."
     metadata:
       release: In review|pending
       change_id: SSD-0020
@@ -619,8 +647,9 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Please select
-      Yes / No / Unknown
+    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
+
+      Please select Yes / No / Unknown'
     metadata:
       release: In review|pending
       change_id: SSD-0021
@@ -645,13 +674,13 @@ nodes:
     cms_table:
     - liquid_logic:ssd_pre_proceedings
     - mosaic:ssd_pre_proceedings
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Please choose\
-      \ one option from this list: A \u2013 Care Order B \u2013 Care Order \u2013\
-      \ Placement with parents C \u2013 Adoption D \u2013 Supervision Order E \u2013\
-      \ Special Guardianship Order F \u2013 Private Law Order G \u2013 Other H \u2013\
-      \ Not yet at final hearing - still in care proceedings If not yet at the final\
-      \ hearing, please select \"Not yet at final hearing - still in care proceedings'.\
-      \ This will indicate that the case is still active in care proceedings."
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nPlease\
+      \ choose one option from this list: A \u2013 Care Order\nB \u2013 Care Order\
+      \ \u2013 Placement with parents\nC \u2013 Adoption\nD \u2013 Supervision Order\n\
+      E \u2013 Special Guardianship Order\nF \u2013 Private Law Order\nG \u2013 Other\n\
+      H \u2013 Not yet at final hearing - still in care proceedings\nIf not yet at\
+      \ the final hearing, please select \"Not yet at final hearing - still in care\
+      \ proceedings'. This will indicate that the case is still active in care proceedings."
     metadata:
       release: In review|pending
       change_id: SSD-0022
