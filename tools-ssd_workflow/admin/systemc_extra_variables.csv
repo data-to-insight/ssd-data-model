@@ -1,4 +1,6 @@
 Extra Variables Not in Spec
-item_status
 cine_cin_primary_need_code
+item_status
+cinp_cin_plan_team_name
 item_ref
+cinp_cin_plan_worker_name

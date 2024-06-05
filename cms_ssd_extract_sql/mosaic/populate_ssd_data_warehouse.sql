@@ -1938,7 +1938,7 @@ Dependencies:
 		--
 		create table ##ssd_professionals (
 			prof_table_id							varchar(48),
-			prof_professional_id					varchar(48),
+			prof_staff_id							varchar(48),
 			prof_social_worker_registration_no		varchar(48),
 			prof_agency_worker_flag					varchar(100),
 			prof_professional_job_title				varchar(500),
@@ -1949,7 +1949,7 @@ Dependencies:
 		--
 		insert into ##ssd_professionals (
 			prof_table_id,
-			prof_professional_id,
+			prof_staff_id,
 			prof_social_worker_registration_no,
 			prof_agency_worker_flag,
 			prof_professional_job_title,
@@ -1959,7 +1959,7 @@ Dependencies:
 		)
 		select
 			null prof_table_id,
-			wkr.WORKER_ID prof_professional_id,
+			wkr.WORKER_ID prof_staff_id,
 			null prof_social_worker_registration_no,
 			null prof_agency_worker_flag,
 			null prof_professional_job_title,
@@ -6694,7 +6694,7 @@ begin try
         send_person_id      nvarchar(48),
         send_upn            nvarchar(48),
         send_uln            nvarchar(48),
-        upn_unknown         nvarchar(48)
+        send_upn_unknown    nvarchar(48)
     )
     --
     return 0

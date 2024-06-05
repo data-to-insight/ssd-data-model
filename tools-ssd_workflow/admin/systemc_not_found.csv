@@ -1,2 +1,6 @@
 item_ref,field_name
 CINE010A,cine_cin_primary_need
+DEPT1001A,dept_team_id
+DEPT1002A,dept_team_name
+DEPT1003A,dept_team_parent_id
+DEPT1004A,dept_team_parent_name
