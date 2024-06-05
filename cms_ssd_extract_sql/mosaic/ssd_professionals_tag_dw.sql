@@ -1,6 +1,7 @@
 select
 	null prof_professional_id,
 	wkr.WORKER_ID prof_staff_id, -- [REVIEW]
+	null prof_professional_name, -- [REVIEW]
 	null prof_social_worker_registration_no,
 	null prof_agency_worker_flag,
 	null prof_professional_job_title,

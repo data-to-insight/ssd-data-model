@@ -1,6 +1,7 @@
 select
 	null prof_professional_id,
 	wkr.WORKER_ID prof_staff_id, -- [REVIEW]
+	null prof_professional_name, -- [REVIEW]
 	(
 		select
 			sw_no.REFERENCE

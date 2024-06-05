@@ -24,11 +24,12 @@ CREATE TABLE #t
 (
     prof_table_id INT /*Information not held as a separate field as Worker ID is unique*/,
     prof_staff_id INT,
+	prof_professional_name VARCHAR(300), -- [REVIEW]
     --FIRST_NAMES VARCHAR(50),
     --LAST_NAMES VARCHAR(50),
     prof_social_worker_registration_no VARCHAR(20),
     prof_agency_worker_flag VARCHAR(10) /*Field removed from SSDS*/,
-    prof_professional_job_title VARCHAR(100),
+    prof_professional_job_title VARCHAR(500),
     prof_professional_caseload INT DEFAULT 0,
     prof_professional_department VARCHAR(100),
     prof_full_time_equivalency DEC (10,2) /*Information not held in Mosaic; held in HR System (I-Trent)*/
@@ -38,6 +39,7 @@ INSERT #t
 (
     prof_table_id,
     prof_staff_id,
+	prof_professional_name, -- [REVIEW] Used null as placholder until source field is identified
     --FIRST_NAMES,
     --LAST_NAMES,
     prof_social_worker_registration_no,
@@ -50,6 +52,7 @@ INSERT #t
 SELECT
     d.prof_table_id,
     d.prof_staff_id,
+	d.prof_professional_name, -- [REVIEW]
     --d.FIRST_NAMES,
     --d.LAST_NAMES,
     d.prof_social_worker_registration_no,
@@ -63,6 +66,7 @@ FROM
     SELECT
         NULL prof_table_id /*Information not held as a separate field as Worker ID is unique*/,
         a.ID prof_staff_id,
+		NULL prof_professional_name, --[REVIEW] Used null as placholder until source field is identified
         a.FIRST_NAMES,
         a.LAST_NAMES,
         COALESCE(b.HCPCIdentifier, 'XX' + CAST(a.id as VARCHAR)) prof_social_worker_registration_no,
@@ -163,6 +167,7 @@ INNER JOIN
 SELECT
     t.prof_table_id,
     t.prof_staff_id,
+	t.prof_professional_name, -- [REVIEW]
     --t.FIRST_NAMES,
     --t.LAST_NAMES,
     t.prof_social_worker_registration_no,
