@@ -93,7 +93,7 @@ select
             dbo.days_add(ssd_cp_reviews.previous_conference_actual_date,183)
     end cppr_cp_review_due,
 	ssd_cp_reviews.CP_CONFERENCE_ACTUAL_DATE cppr_cp_review_date,
-	ssd_cp_reviews.review_outcome cppr_cp_review_outcome,
+	ssd_cp_reviews.review_outcome cppr_cp_review_outcome_continue_cp,
 	ssd_cp_reviews.quorate cppr_cp_review_quorate,
 	ssd_cp_reviews.review_participation cppr_cp_review_participation
 from

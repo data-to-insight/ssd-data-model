@@ -10,7 +10,7 @@ select
 	cla.PLACEMENT_COUNTY clap_cla_placement_la,
 	cla.PROVIDER_NAME clap_cla_placement_provider,
 	cla.PLACEMENT_POSTCODE clap_cla_placement_postcode,
-	cla.PLACEMENT_END clap_cla_placement_end,
+	cla.PLACEMENT_END clap_cla_placement_end_date,
 	cla.REASON_FOR_PLACEMENT_CHANGE clap_cla_placement_change_reason
 from
 	SCF.Children_In_Care cla

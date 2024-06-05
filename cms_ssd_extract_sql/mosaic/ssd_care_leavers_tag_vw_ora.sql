@@ -323,7 +323,7 @@ select
 					and
 					info1.DATE_OF_SITUATION <= &p_snapshot_date
 			)
-	) clea_care_leaver_accomm_suitable,
+	) clea_care_leaver_accom_suitable,
 	(
 		select
 			info.activity_status

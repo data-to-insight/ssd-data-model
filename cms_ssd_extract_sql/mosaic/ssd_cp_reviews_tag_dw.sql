@@ -212,7 +212,7 @@ select
 	r.registration_id cppr_cp_plan_id,
 	r.due_date cppr_cp_review_due,
 	r.actual_date cppr_cp_review_date,
-	r.review_outcome cppr_cp_review_outcome,
+	r.review_outcome cppr_cp_review_outcome_continue_cp,
 	r.quorate cppr_cp_review_quorate,
 	r.review_participation cppr_cp_review_participation
 from

@@ -2217,7 +2217,7 @@ CREATE TABLE ssd_development.ssd_cla_episodes (
     clae_cla_placement_id           NVARCHAR(48),               -- metadata={"item_ref":"CLAE013A"} 
     clae_cla_episode_start_date     DATETIME,                   -- metadata={"item_ref":"CLAE003A"}
     clae_cla_episode_start_reason   NVARCHAR(100),              -- metadata={"item_ref":"CLAE004A"}
-    clae_cla_primary_need           NVARCHAR(3),                -- metadata={"item_ref":"CLAE009A", "info":"Expecting codes N0-N9"} 
+    clae_cla_primary_need_code      NVARCHAR(3),                -- metadata={"item_ref":"CLAE009A", "info":"Expecting codes N0-N9"} 
     clae_cla_episode_ceased         DATETIME,                   -- metadata={"item_ref":"CLAE005A"}
     clae_cla_episode_ceased_reason  NVARCHAR(255),              -- metadata={"item_ref":"CLAE006A"}
     clae_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAE010A"}
@@ -2233,7 +2233,7 @@ INSERT INTO ssd_cla_episodes (
     clae_cla_placement_id,
     clae_cla_episode_start_date,
     clae_cla_episode_start_reason,
-    clae_cla_primary_need,
+    clae_cla_primary_need_code,
     clae_cla_episode_ceased,
     clae_cla_episode_ceased_reason,
     clae_cla_id,
@@ -2247,7 +2247,7 @@ SELECT
     fce.DIM_PERSON_ID                       AS clae_person_id,
     fce.CARE_START_DATE                     AS clae_cla_episode_start_date,
     fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
-    fce.CIN_903_CODE                        AS clae_cla_primary_need,
+    fce.CIN_903_CODE                        AS clae_cla_primary_need_code,
     fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
     fce.CARE_REASON_END_DESC                AS clae_cla_episode_ceased_reason,
     fc.FACT_CLA_ID                          AS clae_cla_id,                    

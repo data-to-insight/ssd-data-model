@@ -13,7 +13,7 @@ select
 			sug.PERSON_ID = ref.PERSON_ID
 			and
 			ref.REFERRAL_DATE between sug.START_DATE and dbo.future(sug.END_DATE)
-	) cine_cin_primary_need,
+	) cine_cin_primary_need_code,
 	ref.SOURCE_OF_REFERRAL cine_referral_source,
 	case
 		when ref.NFA_DATE is null then

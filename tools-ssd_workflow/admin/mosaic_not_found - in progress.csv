@@ -1,11 +1,13 @@
 item_ref,field_name
 PERS014A,pers_legacy_id
 FAMI003A,fami_table_id
-CINE010A,cine_cin_primary_need
+CINP003A,cinp_cin_plan_start_date [done] _date added
+CINP004A,cinp_cin_plan_end_date [done] _date added
 CINV007A,cinv_person_id
 CPPL011A,cppl_cp_plan_ola
 CPPV008A,cppv_person_id
 CPPR009A,cppr_cp_review_meeting_id
+CPPR005A,cppr_cp_review_outcome_continue_cp [done] [spec change not identified - passed on] 
 CLAC004A,clac_cla_conviction_offence
 CLAI005A,clai_immunisations_status_date
 CLAP013A,clap_person_id
@@ -14,8 +16,11 @@ LACP001A,lacp_table_id
 LACP003A,lacp_cla_care_plan_json
 CSDQ001A,csdq_table_id
 CLEA001A,clea_table_id
+CLEA007A,clea_care_leaver_accom_suitable [done] typo
 PERM001A,perm_table_id
 INVO011A,invo_person_id
+PROF013A,prof_professional_name [done] added
+SEND004A,send_upn_unknown [done] typo
 DEPT1001A,dept_team_id
 DEPT1002A,dept_team_name
 DEPT1003A,dept_team_parent_id

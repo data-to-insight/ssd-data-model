@@ -5,7 +5,7 @@ select
 	cl.IN_TOUCH_ON_BIRTHDAY clea_care_leaver_in_touch,
 	cl.LATEST_CONTACT_DATE clea_care_leaver_latest_contact,
 	cl.ACCOMMODATION_DESCRIPTION clea_care_leaver_accommodation,
-	cl.ACCOMMODATION_SUITABLE clea_care_leaver_accomm_suitable,
+	cl.ACCOMMODATION_SUITABLE clea_care_leaver_accom_suitable,
 	cl.ACTIVITY_DESCRIPTION clea_care_leaver_activity,
 	cl.LATEST_PATHWAY_PLAN_DATE clea_pathway_plan_review_date,
 	cl.PERSONAL_ADVISOR clea_care_leaver_personal_advisor,

@@ -4172,7 +4172,7 @@ Dependencies:
 			cppr_cp_plan_id							numeric(9),
 			cppr_cp_review_due						datetime,
 			cppr_cp_review_date						datetime,
-			cppr_cp_review_outcome					varchar(1000),
+			cppr_cp_review_outcome_continue_cp		varchar(1000), -- [REVIEW]
 			cppr_cp_review_quorate					varchar(64),
 			cppr_cp_review_participation			varchar(16)
 		)
@@ -4186,7 +4186,7 @@ Dependencies:
 			cppr_cp_plan_id							numeric(9),
 			cppr_cp_review_due						datetime,
 			cppr_cp_review_date						datetime,
-			cppr_cp_review_outcome					varchar(1000),
+			cppr_cp_review_outcome_continue_cp		varchar(1000),
 			cppr_cp_review_quorate					varchar(64),
 			cppr_cp_review_participation			varchar(16),
 			previous_conference_workflow_step_id	numeric(9),
@@ -4271,7 +4271,7 @@ Dependencies:
 			person_id,
 			cppr_cp_plan_id,
 			cppr_cp_review_date,
-			cppr_cp_review_outcome,
+			cppr_cp_review_outcome_continue_cp,
 			cppr_cp_review_quorate,
 			cppr_cp_review_participation
 		)
@@ -4372,7 +4372,7 @@ Dependencies:
 			cppr_cp_plan_id,
 			cppr_cp_review_due,
 			cppr_cp_review_date,
-			cppr_cp_review_outcome,
+			cppr_cp_review_outcome_continue_cp,
 			cppr_cp_review_quorate,
 			cppr_cp_review_participation
 		)
@@ -4381,7 +4381,7 @@ Dependencies:
 			rev.cppr_cp_plan_id,
 			rev.cppr_cp_review_due,
 			rev.cppr_cp_review_date,
-			rev.cppr_cp_review_outcome,
+			rev.cppr_cp_review_outcome_continue_cp,
 			rev.cppr_cp_review_quorate,
 			rev.cppr_cp_review_participation
 		from
@@ -5231,7 +5231,7 @@ Dependencies:
 			clae_person_id							varchar(48),
 			clae_cla_episode_start					datetime,
 			clae_episode_start_reason				varchar(100),
-			clae_cla_primary_need					varchar(100),
+			clae_cla_primary_need_code				varchar(100),
 			clae_cla_id								varchar(48),
 			clae_referral_id						varchar(48),
 			clae_cla_last_iro_contact_date			datetime,
@@ -5245,7 +5245,7 @@ Dependencies:
 			clae_person_id,
 			clae_cla_episode_start,
 			clae_episode_start_reason,
-			clae_cla_primary_need,
+			clae_cla_primary_need_code,
 			clae_cla_id,
 			clae_referral_id,
 			clae_cla_last_iro_contact_date,
@@ -5279,7 +5279,7 @@ Dependencies:
 							else 'B'
 					end 					
 			end clae_cla_episode_start_reason,
-			pla.CATEGORY_OF_NEED clae_cla_primary_need,
+			pla.CATEGORY_OF_NEED clae_cla_primary_need_code,
 			cla.PERIOD_OF_CARE_ID clae_cla_id,
 			(
 				select
@@ -5435,7 +5435,7 @@ Dependencies:
 			cine_referral_id						int,
 			cine_person_id							varchar(48),
 			cine_referral_date						datetime,
-			cine_cin_primary_need					varchar(16),
+			cine_cin_primary_need_code				varchar(16),
 			cine_referral_source_code				varchar(48),
 			cine_referral_source_desc				varchar(255),
 			cine_referral_outcome_json				varchar(500),
@@ -5451,7 +5451,7 @@ Dependencies:
 			cine_referral_id,
 			cine_person_id,
 			cine_referral_date,
-			cine_cin_primary_need,
+			cine_cin_primary_need_code,
 			cine_referral_source_code,
 			cine_referral_source_desc,
 			cine_referral_outcome_json,
@@ -5476,7 +5476,7 @@ Dependencies:
 					sug.PERSON_ID = ref.PERSON_ID
 					and
 					ref.REFERRAL_DATE between sug.START_DATE and dbo.future(sug.END_DATE)
-			) cine_cin_primary_need,
+			) cine_cin_primary_need_code,
 			ref.SOURCE_OF_REFERRAL cine_referral_source_code,
 			(
 				select
@@ -5971,7 +5971,7 @@ Dependencies:
 			clea_care_leaver_in_touch				varchar(100),
 			clea_care_leaver_latest_contact			datetime,
 			clea_care_leaver_accommodation			varchar(100),
-			clea_care_leaver_accomm_suitable		varchar(100),
+			clea_care_leaver_accom_suitable			varchar(100),
 			clea_care_leaver_activity				varchar(100),
 			clea_pathway_plan_review_date			datetime,
 			clea_care_leaver_personal_advisor		varchar(100),
@@ -6212,7 +6212,7 @@ Dependencies:
 			clea_care_leaver_in_touch,
 			clea_care_leaver_latest_contact,
 			clea_care_leaver_accommodation,
-			clea_care_leaver_accomm_suitable,
+			clea_care_leaver_accom_suitable,
 			clea_care_leaver_activity,
 			clea_pathway_plan_review_date,
 			clea_care_leaver_personal_advisor,
@@ -6298,7 +6298,7 @@ Dependencies:
 							and
 							info1.DATE_OF_SITUATION <= @snapshot_date
 					)
-			) clea_care_leaver_accomm_suitable,
+			) clea_care_leaver_accom_suitable,
 			(
 				select
 					info.activity_status
