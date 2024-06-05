@@ -7,7 +7,7 @@ select
 			per.date_of_birth
 	end pers_dob,
 	per.NHS_ID pers_common_child_id,
-	per.UPN_ID pers_upn,
+	-- per.UPN_ID pers_upn, -- [depreciated] [REVIEW]
 	null pers_upn_unknown,
 	null pers_send_flag,
 	case

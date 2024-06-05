@@ -9,7 +9,7 @@ DECLARE
 
 /*Form Data*/
 Select
-a.FormID sdq_sdq_id,
+a.FormID sdq_sdq_id, -- [REVIEW] should this be csdq_sdq_id - which has subsequently changed to csdq_table_id 
 a.PersonID sdq_person_id,
 CAST(a.DateOfAssessment as date) sdq_sdq_completed_date,
 NULL sdq_sdq_reason,

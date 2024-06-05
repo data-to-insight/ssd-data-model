@@ -109,7 +109,7 @@ where
 --
 select 
 	sub.immi_person_id,
-	sub.immi_Immigration_status_id,
+	sub.immi_immigration_status_id,
 	sub.immi_immigration_status,
 	cast(sub.immi_immigration_status_start_date as date) immi_immigration_status_start_date,
 	cast(sub.immi_immigration_status_end_date as date) immi_immigration_status_end_date
@@ -117,7 +117,7 @@ from
 	(
 	select 
 		sgs.subject_compound_id immi_person_id,
-		dbo.append2(f.form_id, '.', sgs.subject_compound_id) immi_Immigration_status_id,
+		dbo.append2(f.form_id, '.', sgs.subject_compound_id) immi_immigration_status_id,
 		lkp.text_answer immi_immigration_status,
 		d1.date_answer immi_immigration_status_start_date,
 		d2.date_answer immi_immigration_status_end_date,

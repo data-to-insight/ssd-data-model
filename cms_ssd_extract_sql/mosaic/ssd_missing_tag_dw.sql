@@ -1,7 +1,7 @@
  select 
-	stp.workflow_step_id misw_table_id,
-	sgs.SUBJECT_COMPOUND_ID misw_person_id,
-	stp.started_on miss_missing_episode_start,
+	stp.workflow_step_id miss_table_id,
+	sgs.SUBJECT_COMPOUND_ID miss_person_id,
+	stp.started_on miss_missing_episode_start_date,
 	(
 		select
 			--Should be only one per episode, but max() just in case

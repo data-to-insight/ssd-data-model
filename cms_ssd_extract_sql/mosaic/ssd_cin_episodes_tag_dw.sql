@@ -21,7 +21,7 @@ select
 		else
 			'Y'
 	end cin_referral_nfa,
-	ref.CLOSURE_REASON cine_clos_reason,
+	ref.CLOSURE_REASON cine_close_reason,
 	stp.RESPONSIBLE_TEAM_ID cine_referral_team,
 	stp.ASSIGNEE_ID cine_referral_worker_id
 from

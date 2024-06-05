@@ -776,7 +776,7 @@ Dependencies:
 			lacp_cla_care_plan_id				varchar(48),
 			lacp_cla_care_plan_start_date		datetime,
 			lacp_cla_care_plan_end_date			datetime,
-			lacp_cla_care_plan					varchar(100),				
+			lacp_cla_care_plan_json				varchar(100),			-- [REVIEW] changed from lacp_ cla_ care_ plan 	(spaced here to avoiding name being picked up by other processes)
 			lacp_person_id						varchar(48)
 		)
 		--
@@ -823,7 +823,7 @@ Dependencies:
 			lacp_cla_care_plan_id,
 			lacp_cla_care_plan_start_date,
 			lacp_cla_care_plan_end_date,
-			lacp_cla_care_plan,
+			lacp_cla_care_plan_json,
 			lacp_person_id
 		)
 		select
@@ -848,7 +848,7 @@ Dependencies:
 						else 
 							cfa.subject_person_id
 					end = sgs.SUBJECT_COMPOUND_ID
-			) lacp_cla_care_plan,
+			) lacp_cla_care_plan_json,
 			sgs.SUBJECT_COMPOUND_ID lacp_person_id
 		from
 			dm_workflow_steps stp
@@ -1033,14 +1033,14 @@ Dependencies:
 		--
 		insert into ##ssd_immigration_status (
 			immi_person_id,
-			immi_Immigration_status_id,
+			immi_immigration_status_id,
 			immi_immigration_status,
 			immi_immigration_status_start_date,
 			immi_immigration_status_end_date
 		)
 		select 
 			sub.immi_person_id,
-			sub.immi_Immigration_status_id,
+			sub.immi_immigration_status_id,
 			sub.immi_immigration_status,
 			dbo.no_time(sub.immi_immigration_status_start_date) immi_immigration_status_start_date,
 			dbo.no_time(sub.immi_immigration_status_end_date) immi_immigration_status_end_date
@@ -1048,7 +1048,7 @@ Dependencies:
 			(
 				select 
 					sgs.subject_compound_id immi_person_id,
-					dbo.append2(f.form_id, '.', sgs.subject_compound_id) immi_Immigration_status_id,
+					dbo.append2(f.form_id, '.', sgs.subject_compound_id) immi_immigration_status_id,
 					lkp.text_answer immi_immigration_status,
 					d1.date_answer immi_immigration_status_start_date,
 					d2.date_answer immi_immigration_status_end_date,
@@ -1150,7 +1150,7 @@ Dependencies:
 			DROP TABLE ##ssd_cp_visits
 		--
 		create table ##ssd_cp_visits (
-			cppv_visit_id					varchar(48),
+			cppv_cp_visit_id				varchar(48),
 			cppv_cp_plan_id					varchar(48),
 			cppv_cp_visit_id				varchar(48),
 			cppv_cp_visit_date				datetime,
@@ -1183,7 +1183,7 @@ Dependencies:
 			('child_seen')
 		--
 		insert into ##ssd_cp_visits (
-			cppv_visit_id,
+			cppv_cp_visit_id,
 			cppv_cp_plan_id,
 			cppv_cp_visit_id,
 			cppv_cp_visit_date,
@@ -1192,7 +1192,7 @@ Dependencies:
 			cppv_cp_visit_bedroom
 		)
 		select
-			null cppv_visit_id,
+			null cppv_cp_visit_id,
 			(
 				select
 					max(cpp.registration_id)
@@ -1777,7 +1777,7 @@ Dependencies:
 			addr_address_type			varchar(48),
 			addr_address_start_date		datetime,
 			addr_address_end_date		datetime,
-			addr_postcode				varchar(15)
+			addr_address_postcode				varchar(15)
 		)
 		--
 		insert into ##ssd_address (
@@ -1794,9 +1794,9 @@ Dependencies:
 			addr.ADDRESS addr_address_json,
 			addr.PERSON_ID addr_person_id,
 			addr.ADDRESS_TYPE addr_address_type,
-			addr.START_DATE addr_start_date,
-			addr.END_DATE addr_end_date,
-			addr.POST_CODE addr_postcode
+			addr.START_DATE addr_address_start_date,
+			addr.END_DATE addr_address_end_date,
+			addr.POST_CODE addr_address_postcode
 		from
 			dm_ADDRESSES addr
 		--
@@ -1850,7 +1850,7 @@ Dependencies:
 			DROP TABLE ##ssd_sdq_scores
 		--
 		create table ##ssd_sdq_scores (
-			csdq_sdq_id					varchar(48),
+			csdq_table_id				varchar(48), -- [REVIEW] was csdq_sdq_id
 			csdq_person_id				varchar(48),
 			csdq_sdq_completed_date		datetime,
 			csdq_sdq_reason				varchar(100),
@@ -1858,14 +1858,14 @@ Dependencies:
 		)
 		--
 		insert into ##ssd_sdq_scores (
-			csdq_sdq_id,
+			csdq_table_id,
 			csdq_person_id,
 			csdq_sdq_completed_date,
 			csdq_sdq_reason,
 			csdq_sdq_score
 		)
 		select
-			hlth.HEALTH_ID csdq_sdq_id,
+			hlth.HEALTH_ID csdq_table_id,
 			hlth.PERSON_ID csdq_person_id,
 			hlth.HEALTH_ASSESSMENT_DATE csdq_sdq_completed_date,
 			hlth.SDQ_REASON csdq_sdq_reason,
@@ -2415,9 +2415,9 @@ Dependencies:
 			pers_ethnicity					varchar(48),
 			pers_dob						datetime,
 			pers_common_child_id			varchar(48),
-			pers_upn						varchar(48),
+			-- pers_upn						varchar(48), -- [depreciated] [REVIEW]
 			pers_upn_unknown				varchar(20),
-			pers_send						varchar(1),
+			pers_send_flag					varchar(1),
 			pers_expected_dob				datetime,
 			pers_death_date					datetime,
 			pers_is_mother					varchar(1),
@@ -2431,9 +2431,9 @@ Dependencies:
 			pers_ethnicity,
 			pers_dob,
 			pers_common_child_id,
-			pers_upn,
+			-- pers_upn,
 			pers_upn_unknown,
-			pers_send,
+			pers_send_flag,
 			pers_expected_dob,
 			pers_death_date,
 			pers_is_mother,
@@ -2478,9 +2478,9 @@ Dependencies:
 					per.DATE_OF_BIRTH
 			end pers_dob,
 			per.nhs_id pers_common_child_id,
-			per.UPN_ID pers_upn,
+			-- per.UPN_ID pers_upn, -- [depreciated] [REVIEW]
 			null pers_upn_unknown,
-			null pers_send,
+			null pers_send_flag,
 			case
 				when per.DATE_OF_BIRTH > dbo.today() then
 					per.DATE_OF_BIRTH
@@ -3403,8 +3403,8 @@ Dependencies:
 			miss_missing_rhi_accepted
 		)
 		 select 
-			stp.workflow_step_id misw_table_id,
-			sgs.SUBJECT_COMPOUND_ID misw_person_id,
+			stp.workflow_step_id miss_table_id,
+			sgs.SUBJECT_COMPOUND_ID miss_person_id,
 			stp.started_on miss_missing_episode_start_date,
 			(
 				select
@@ -3537,7 +3537,7 @@ Dependencies:
 			DROP TABLE ##ssd_linked_identifiers
 		--
 		create table ##ssd_linked_identifiers (
-			link_link_id				varchar(48),
+			link_table_id				varchar(48), -- [REVIEW] 
 			link_person_id				varchar(48),
 			link_identifier_type		varchar(20),
 			link_identifier_value		varchar(20),
@@ -3546,7 +3546,7 @@ Dependencies:
 		)
 		--
 		insert into ##ssd_linked_identifiers (
-			link_link_id,
+			link_table_id,
 			link_person_id,
 			link_identifier_type,
 			link_identifier_value,
@@ -3554,7 +3554,7 @@ Dependencies:
 			link_valid_to_date
 		)
 		select
-			pref.REFERENCE_ID link_link_id,
+			pref.REFERENCE_ID link_table_id,
 			pref.PERSON_ID link_person_id,
 			pref.REFERENCE_TYPE link_identifier_type,
 			pref.REFERENCE link_identifier_value,
@@ -4445,7 +4445,7 @@ Dependencies:
 		create table ##ssd_cp_plans (
 			cppl_cp_plan_id						varchar(48),
 			cppl_referral_id					varchar(48),
-			cppl_initial_cp_conference_id		varchar(48),
+			cppl_icpc_id						varchar(48),
 			cppl_person_id						varchar(48),
 			cppl_cp_plan_start_date				datetime,
 			cppl_cp_plan_end_date				datetime,
@@ -4456,7 +4456,7 @@ Dependencies:
 		insert into ##ssd_cp_plans (
 			cppl_cp_plan_id,
 			cppl_referral_id,
-			cppl_initial_cp_conference_id,
+			cppl_icpc_id,
 			cppl_person_id,
 			cppl_cp_plan_start_date,
 			cppl_cp_plan_end_date,
@@ -4477,7 +4477,7 @@ Dependencies:
 					and
 					dbo.future(ref.CLOSURE_DATE)>= cpp.REGISTRATION_START_DATE
 			) cppl_referral_id,
-			cpp.REGISTRATION_STEP_ID cppl_initial_cp_conference_id,
+			cpp.REGISTRATION_STEP_ID cppl_icpc_id,
 			cpp.PERSON_ID cppl_person_id,
 			cpp.REGISTRATION_START_DATE cppl_cp_plan_start_date,
 			cpp.DEREGISTRATION_DATE cppl_cp_plan_end_date,
@@ -4952,7 +4952,7 @@ Dependencies:
 					then dateadd(dd,91,x.date_of_prev_review)
 				else 
 					dateadd(dd,183,x.date_of_prev_review)
-			end clar_cla_due_date,	
+			end clar_cla_review_due_date,	
 			null clar_cla_review_date,
 			null clar_cla_review_participation,
 			x.period_of_care_id clar_cla_id,
@@ -5229,8 +5229,8 @@ Dependencies:
 		create table ##ssd_cla_episodes (
 			clae_cla_episode_id						varchar(48),
 			clae_person_id							varchar(48),
-			clae_cla_episode_start					datetime,
-			clae_episode_start_reason				varchar(100),
+			clae_cla_episode_start_date				datetime,
+			clae_cla_episode_start_reason			varchar(100),
 			clae_cla_primary_need_code				varchar(100),
 			clae_cla_id								varchar(48),
 			clae_referral_id						varchar(48),
@@ -5238,13 +5238,13 @@ Dependencies:
 			clae_cla_episode_ceased					datetime,
 			clae_cla_placement_id					varchar(48),
 			clae_entered_care_date					datetime,
-			clae_cla_episode_cease_reason			varchar(255)
+			clae_cla_episode_ceased_reason			varchar(255)
 		)
 		insert into ##ssd_cla_episodes (
 			clae_cla_episode_id,
 			clae_person_id,
-			clae_cla_episode_start,
-			clae_episode_start_reason,
+			clae_cla_episode_start_date,
+			clae_cla_episode_start_reason,
 			clae_cla_primary_need_code,
 			clae_cla_id,
 			clae_referral_id,
@@ -5252,7 +5252,7 @@ Dependencies:
 			clae_cla_episode_ceased,
 			clae_cla_placement_id,
 			clae_entered_care_date,
-			clae_cla_episode_cease_reason
+			clae_cla_episode_ceased_reason
 		)
 		select
 			dbo.to_weighted_start(cla.START_DATE,cla.PERSON_ID) clae_cla_episode_id,
@@ -5321,7 +5321,7 @@ Dependencies:
 			cla.END_DATE clae_cla_episode_ceased,
 			cla.placement_id clae_cla_placement_id,
 			poc.start_date clae_entered_care_date,
-			pla.REASON_EPISODE_CEASED clae_cla_episode_cease_reason
+			pla.REASON_EPISODE_CEASED clae_cla_episode_ceased_reason
 		from
 			dm_cla_summaries cla
 		inner join dm_PERIODS_OF_CARE poc

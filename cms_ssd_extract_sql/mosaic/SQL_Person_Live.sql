@@ -15,7 +15,7 @@ pg.GENDER_CODE pers_gender,
 e.CIN_ETHNICITY_DESCRIPTION pers_ethnicity,
 CAST(DATE_OF_BIRTH as date) pers_dob,
 r1.REFERENCE pers_common_child_id,
-r2.REFERENCE pers_upn,
+-- r2.REFERENCE pers_upn, -- [depreciated] [REVIEW]
 NULL pers_upn_unknown,
 NULL pers_send_flag,	/*PW - Information held in Education System*/
 p.AGE_ESTIMATED pers_expected_dob,

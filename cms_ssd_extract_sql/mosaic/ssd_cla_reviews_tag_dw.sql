@@ -104,7 +104,7 @@ select
 			then dateadd(dd,91,x.date_of_prev_review)
 		else 
 			dateadd(dd,183,x.date_of_prev_review)
-	end clar_cla_due_date,	
+	end clar_cla_review_due_date,	
 	x.LAC_REVIEW_DATE clar_cla_review_date,
 	x.participation_type clar_cla_review_participation,
 	x.period_of_care_id clar_cla_id,
@@ -213,7 +213,7 @@ select
 			then dateadd(dd,91,x.date_of_prev_review)
 		else 
 			dateadd(dd,183,x.date_of_prev_review)
-	end clar_cla_due_date,	
+	end clar_cla_review_due_date,	
 	null clar_cla_review_date,
 	null clar_cla_review_participation,
 	x.period_of_care_id clar_cla_id,

@@ -16,7 +16,7 @@ directories = [
 ]
 
 
-variable_name = 'clap_cla_placement_end'                  # var name to search
+variable_name = 'post_code'                  # var name to search
 variable_stem = ''                  # stem to search 
 variable_suffix = ''           # suffix to search
 search_file_type = '.sql'           # or .py or .txt 

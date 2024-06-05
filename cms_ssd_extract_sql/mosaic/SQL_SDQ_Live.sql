@@ -9,7 +9,7 @@ DECLARE
 
 /*Form Data*/
 Select
-a.FORM_ID sdq_sdq_id,
+a.FORM_ID sdq_sdq_id, -- [REVIEW] should this be csdq_sdq_id - which has subsequently changed to csdq_table_id 
 sg.ONLY_SUBJECT_COMPOUND_ID sdq_person_id,
 CAST(fda.DATE_ANSWER as date) sdq_sdq_completed_date,
 NULL sdq_sdq_reason,

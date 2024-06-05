@@ -1,6 +1,6 @@
 select
 	rev.WORKFLOW_STEP_ID cppr_cp_review_id,
-	rev.person_id cppr_cp_person_id,
+	rev.person_id cppr_person_id,
 	(
 		select
 			max(cpp.registration_id)

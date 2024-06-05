@@ -14,7 +14,7 @@ p.pGender pers_gender,
 COALESCE(ec.CINCode,'NOBT') pers_ethnicity,
 p.PDoB pers_dob,
 p.PNHSNumber pers_common_child_id,
-p.PUniquePupilNumber pers_upn,
+-- p.PUniquePupilNumber pers_upn, -- [depreciated] [REVIEW]
 NULL pers_upn_unknown,
 CASE when ehcp.PersonID is not null then 'Y' END pers_send_flag,
 p.PDoBEstimated pers_expected_dob,

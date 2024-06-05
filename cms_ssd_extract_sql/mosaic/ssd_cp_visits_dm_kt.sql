@@ -158,7 +158,7 @@ where
 		)
 --
 select
-	sub.cppv_visit_id,
+	sub.cppv_cp_visit_id,
 	(
 	select 
 		reg.registration_id
@@ -189,7 +189,7 @@ from
 	(
 	select 
 		stp.person_id,
-		dbo.append2(stp.workflow_step_id, '.', stp.person_id) cppv_visit_id,
+		-- dbo.append2(stp.workflow_step_id, '.', stp.person_id) cppv_visit_id, -- [REVIEW] replaced by below... re-test and remove this line
 		dbo.append2(stp.workflow_step_id, '.', stp.person_id) cppv_cp_visit_id,
 		coalesce(
 			(

@@ -171,7 +171,7 @@ select
 	sub.lacp_cla_care_plan_id
 	,sub.lacp_cla_care_plan_start_date
 	,sub.lacp_cla_care_plan_end_date
-	,sub.lacp_cla_care_plan
+	,sub.lacp_cla_care_plan_json
 	,sub.lacp_person_id
 from 
 	(
@@ -188,7 +188,7 @@ from
 			lkp.workflow_step_id = o.lacp_cla_care_plan_id
 			and
 			lkp.person_id = o.person_id
-		) lacp_cla_care_plan
+		) lacp_cla_care_plan_json
 		,(
 		select min(o1.closing_step_date) 
 		from output o1
