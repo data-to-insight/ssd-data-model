@@ -1937,7 +1937,7 @@ Dependencies:
 			DROP TABLE ##ssd_professionals
 		--
 		create table ##ssd_professionals (
-			prof_table_id							varchar(48),
+			prof_professional_id					varchar(48),
 			prof_staff_id							varchar(48),
 			prof_social_worker_registration_no		varchar(48),
 			prof_agency_worker_flag					varchar(100),
@@ -1948,7 +1948,7 @@ Dependencies:
 		)
 		--
 		insert into ##ssd_professionals (
-			prof_table_id,
+			prof_professional_id,
 			prof_staff_id,
 			prof_social_worker_registration_no,
 			prof_agency_worker_flag,
@@ -1958,7 +1958,7 @@ Dependencies:
 			prof_full_time_equivalency
 		)
 		select
-			null prof_table_id,
+			null prof_professional_id,
 			wkr.WORKER_ID prof_staff_id,
 			null prof_social_worker_registration_no,
 			null prof_agency_worker_flag,

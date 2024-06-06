@@ -4,7 +4,7 @@ BEGIN
 END
 CREATE TABLE #t
 (
-    prof_table_id INT /*Information not held as a separate field as Worker ID is unique*/, -- [REVIEW] Change to prof_profesional_id?
+    prof_professional_id INT /*Information not held as a separate field as Worker ID is unique*/, -- [REVIEW] Change to prof_ profesional_ id?
     prof_staff_id INT,
 	prof_professional_name VARCHAR(300), -- [REVIEW] Used null as placholder until source field is identified
     --FIRST_NAMES VARCHAR(50),
@@ -19,7 +19,7 @@ CREATE TABLE #t
 
 INSERT #t
 (
-    prof_table_id, -- [REVIEW] Change to prof_profesional_id?
+    prof_professional_id, -- [REVIEW] Change to prof_ profesional_ id?
     prof_staff_id,
 	prof_professional_name, -- [REVIEW] 
     --FIRST_NAMES,
@@ -31,7 +31,7 @@ INSERT #t
     prof_full_time_equivalency
 )
 SELECT
-    d.prof_table_id,
+    d.prof_professional_id,
     d.prof_staff_id,
 	d.prof_professional_name, --[REVIEW] Used null as placholder until source field is identified
     --d.FIRST_NAMES,
@@ -44,7 +44,7 @@ SELECT
 FROM
 (
     SELECT
-        NULL prof_table_id /*Information not held as a separate field as Worker ID is unique*/,
+        NULL prof_professional_id /*Information not held as a separate field as Worker ID is unique*/,
         a.ID prof_staff_id,
 		NULL prof_professional_name, --[REVIEW] Used null as placholder until source field is identified
         --a.FIRST_NAMES,
@@ -132,7 +132,7 @@ INNER JOIN
 
 /*Output Data*/
 SELECT
-    t.prof_table_id,
+    t.prof_professional_id,
     t.prof_staff_id,
 	t.prof_professional_name,
     --t.FIRST_NAMES,
