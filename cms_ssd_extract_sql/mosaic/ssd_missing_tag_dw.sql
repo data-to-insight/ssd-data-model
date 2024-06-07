@@ -22,7 +22,7 @@
 			and
 			case when ffa.subject_person_id <= 0 then sgs.SUBJECT_COMPOUND_ID else ffa.subject_person_id end = sgs.SUBJECT_COMPOUND_ID
 	) miss_missing_episode_type,
-	stp.completed_on miss_missing_episode_end,
+	stp.completed_on miss_missing_episode_end_date,
 	(
 		select
 			max(
