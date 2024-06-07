@@ -1,5 +1,5 @@
 select
-	dbo.to_weighted_start(ffa.date_answer,ffa.form_id) lapp_previous_permanence_id,
+	dbo.to_weighted_start(ffa.date_answer,ffa.form_id) lapp_table_id, -- [REVIEW] -- re-purposed from lapp_ previous_ permanence_ id
 	sgs.SUBJECT_COMPOUND_ID lapp_person_id,
 	ffa.date_answer lapp_previous_permanence_order_date,
 	(

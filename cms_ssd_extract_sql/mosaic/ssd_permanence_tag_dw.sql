@@ -384,7 +384,7 @@ with adoption_journeys as (
 		) x		
 )
 select
-	'ADP' + '.' + cast(aj.bid_workflow_step_id as varchar(9)) perm_permanence_id,
+	'ADP' + '.' + cast(aj.bid_workflow_step_id as varchar(9)) perm_table_id,
 	aj.person_id perm_person_id,
 	aj.adoption_journey_start perm_adm_decision_date,
 	aj.date_of_ffa_cp_decision perm_ffa_cp_decision_date,
@@ -434,19 +434,18 @@ select
 	aj.reason_adoption_no_longer_plan perm_decision_reversed_reason,
 	aj.date_of_adoption perm_permanence_order_date,
 	aj.placement_type_at_adoption perm_permanence_order_type,
-	null perm_guardian_status,
-	null perm_guardian_age,
 	null perm_adopted_by_carer_flag,
 	aj.PERIOD_OF_CARE_ID perm_cla_id,
-	null perm_adoption_worker_id, -- [REVIEW][_name]
-	null perm_allocated_worker
+	null perm_adoption_worker_id
+	-- , -- [REVIEW] depreciated
+	-- null perm_allocated_worker
 from
 	adoption_journeys aj
 inner join dm_persons per
 on per.PERSON_ID = aj.person_id
 union all
 select 
-	'SGO' + '.' + cast(nleg.LEGAL_STATUS_ID as varchar(9)) perm_permanence_id,
+	'SGO' + '.' + cast(nleg.LEGAL_STATUS_ID as varchar(9)) perm_table_id,
 	nleg.PERSON_ID perm_person_id,
 	null perm_adm_decision_date,
 	null perm_ffa_cp_decision_date,
@@ -476,12 +475,11 @@ select
 	null perm_decision_reversed_reason,
 	null perm_permanence_order_date,
 	null perm_permanence_order_type,
-	null perm_guardian_status,
-	null perm_guardian_age,
 	null perm_adopted_by_carer_flag,
 	poc.period_of_care_id perm_cla_id,
-	null perm_adoption_worker_id, -- [REVIEW][_name]
-	null perm_allocated_worker -- depreciated field
+	null perm_adoption_worker_id
+	-- , -- [REVIEW]
+	-- null perm_allocated_worker -- [REVIEW] depreciated
 from 
 	DM_NON_LA_LEGAL_STATUSES nleg
 inner join DM_NON_LA_LEGAL_STATUS_TYPES ntyp

@@ -1,6 +1,6 @@
 select
 	pla.PLACEMENT_ID clap_cla_placement_id,
-	null clap_cla_episode_id, --a placement can fall in multiple CLA episodes.  Should this be period of care id?
+	-- null clap_cla_episode_id, --a placement can fall in multiple CLA episodes.  Should this be period of care id? -- [REVIEW] depreciated
 	pla.START_DATE clap_cla_placement_start_date,
 	pla.PLACEMENT_TYPE clap_cla_placement_type,
 	pla.split_number,

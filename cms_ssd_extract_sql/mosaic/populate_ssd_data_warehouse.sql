@@ -638,7 +638,6 @@ Dependencies:
 			DROP TABLE ##ssd_cla_visits
 		--
 		create table ##ssd_cla_visits (
-			clav_casenote_id				varchar(48),
 			clav_cla_id						varchar(48),
 			clav_cla_visit_id				varchar(48),
 			clav_cla_visit_date				datetime,
@@ -664,7 +663,6 @@ Dependencies:
 			('child_seen')
 		--
 		insert into ##ssd_cla_visits (
-			clav_casenote_id,
 			clav_cla_id,
 			clav_cla_visit_id,
 			clav_cla_visit_date,
@@ -673,7 +671,6 @@ Dependencies:
 			clav_person_id
 		)
 		select
-			null clav_casenote_id,
 			(
 				select
 					poc.PERIOD_OF_CARE_ID
@@ -1525,9 +1522,10 @@ Dependencies:
 			DROP TABLE ##ssd_cla_immunisations
 		--
 		create table ##ssd_cla_immunisations (
-			-- clai_immunisations_id			varchar(48), -- [REVIEW] depreciated 310524 
+			--clai_table_id					varchar(48), -- [REVIEW] re-purposed from -- clai_immunisations_id
 			clai_person_id					varchar(48),
 			clai_immunisations_status		varchar(1)
+			-- clai_immunisations_status_date datetime -- [REVIEW] is currently missing added here for ref
 		)
 		--
 		declare @immunisation_workflow_step_types table (
@@ -1599,19 +1597,19 @@ Dependencies:
 				)
 		--
 		insert into ##ssd_cla_immunisations (
-			-- clai_immunisations_id, -- [REVIEW] depreciated 310524 
+			--clai_table_id, -- [REVIEW] depreciated 310524 re-purposed from -- clai_immunisations_id
 			clai_person_id,
 			clai_immunisations_status
 		)
 		select 
-    		-- sub.clai_immunisations_id,   -- [REVIEW] depreciated 310524 
+    		--sub.clai_table_id, -- [REVIEW] depreciated 310524 re-purposed from -- clai_immunisations_id
 			sub.clai_person_id,
 			sub.clai_immunisations_status
 		from 
 			(
 			select 
 				sgs.subject_compound_id clai_person_id,
-				-- dbo.append2(stp.workflow_step_id, '.', sgs.subject_compound_id) clai_immunisations_id, [REVIEW] depreciated 310524 
+				--dbo.append2(stp.workflow_step_id, '.', sgs.subject_compound_id) clai_table_id, -- [REVIEW] depreciated 310524 
 
 				case
 					when exists (
@@ -2056,7 +2054,7 @@ Dependencies:
 			DROP TABLE ##ssd_cla_previous_permanence
 		--
 		create table ##ssd_cla_previous_permanence (
-			lapp_previous_permanence_id				varchar(48),
+			lapp_table_id							varchar(48), -- [REVIEW] -- re-purposed from lapp_ previous_ permanence_ id
 			lapp_person_id							varchar(48),
 			lapp_previous_permanence_order_date		varchar(10),
 			lapp_previous_permanence_option			varchar(100),
@@ -2064,14 +2062,14 @@ Dependencies:
 		)
 		--
 		insert into ##ssd_cla_previous_permanence (
-			lapp_previous_permanence_id,
+			lapp_table_id,
 			lapp_person_id,
 			lapp_previous_permanence_order_date,
 			lapp_previous_permanence_option,
 			lapp_previous_permanence_la
 		)
 		select
-			dbo.to_weighted_start(ffa.date_answer,ffa.form_id) lapp_previous_permanence_id,
+			dbo.to_weighted_start(ffa.date_answer,ffa.form_id) lapp_table_id,
 			sgs.SUBJECT_COMPOUND_ID lapp_person_id,
 			dbo.unmake_date(ffa.date_answer) lapp_previous_permanence_order_date,
 			(
@@ -2583,7 +2581,7 @@ Dependencies:
 			DROP TABLE ##ssd_permanence
 		--
 		create table ##ssd_permanence (
-			perm_permanence_id					varchar(48),
+			perm_table_id						varchar(48), -- [REVIEW] -- re-purposed from perm_permanence_id
 			perm_person_id						varchar(48),
 			perm_adm_decision_date				datetime,
 			perm_ffa_cp_decision_date			datetime,
@@ -2600,15 +2598,14 @@ Dependencies:
 			perm_decision_reversed_reason		varchar(100),
 			perm_permanence_order_date			datetime,
 			perm_permanence_order_type			varchar(100),
-			perm_guardian_status				varchar(100),
-			perm_guardian_age					varchar(100),
 			perm_adopted_by_carer_flag			varchar(1),
 			perm_cla_id							varchar(48),
 			perm_adoption_worker_id				varchar(48),
 			perm_adopter_sex					varchar(48),
 			perm_adopter_legal_status			varchar(100),
-			perm_number_of_adopters				varchar(3),
-			perm_allocated_worker				varchar(48)
+			perm_number_of_adopters				varchar(3)
+			--, -- [REVIEW] depreciated
+			--perm_allocated_worker				varchar(48)
 		)
 		--
 		declare @ffa_cp_decision_date_question_user_codes table (
@@ -3008,7 +3005,7 @@ Dependencies:
 		)
 		--
 		insert into ##ssd_permanence (
-			perm_permanence_id,
+			perm_table_id,
 			perm_person_id,
 			perm_adm_decision_date,
 			perm_ffa_cp_decision_date,
@@ -3025,18 +3022,17 @@ Dependencies:
 			perm_decision_reversed_reason,
 			perm_permanence_order_date,
 			perm_permanence_order_type,
-			perm_guardian_status,
-			perm_guardian_age,
 			perm_adopted_by_carer_flag,
 			perm_cla_id,
 			perm_adoption_worker_id,
 			perm_adopter_sex,
 			perm_adopter_legal_status,
-			perm_number_of_adopters,
-			perm_allocated_worker
+			perm_number_of_adopters
+			-- , -- [REVIEW] depreciated
+			-- perm_allocated_worker
 		)
 		select
-			'ADP' + '.' + cast(aj.bid_workflow_step_id as varchar(9)) perm_permanence_id,
+			'ADP' + '.' + cast(aj.bid_workflow_step_id as varchar(9)) perm_table_id,
 			aj.person_id perm_person_id,
 			aj.adoption_journey_start perm_adm_decision_date,
 			aj.date_of_ffa_cp_decision perm_ffa_cp_decision_date,
@@ -3178,22 +3174,21 @@ Dependencies:
 			aj.reason_adoption_no_longer_plan perm_decision_reversed_reason,
 			aj.date_of_adoption perm_permanence_order_date,
 			aj.placement_type_at_adoption perm_permanence_order_type,
-			null perm_guardian_status,
-			null perm_guardian_age,
 			null perm_adopted_by_carer_flag,
 			aj.PERIOD_OF_CARE_ID perm_cla_id,
 			null perm_adoption_worker_id,
 			null perm_adopter_sex,
 			null perm_adopter_legal_status,
-			null perm_number_of_adopters,
-			null perm_allocated_worker
+			null perm_number_of_adopters
+			--, -- [REVIEW] depreciated
+			--null perm_allocated_worker
 		from
 			adoption_journeys aj
 		inner join dm_persons per
 		on per.PERSON_ID = aj.person_id
 		union all
 		select 
-			'SGO' + '.' + cast(nleg.LEGAL_STATUS_ID as varchar(9)) perm_permanence_id,
+			'SGO' + '.' + cast(nleg.LEGAL_STATUS_ID as varchar(9)) perm_table_id,
 			nleg.PERSON_ID perm_person_id,
 			null perm_adm_decision_date,
 			null perm_ffa_cp_decision_date,
@@ -3223,15 +3218,14 @@ Dependencies:
 			null perm_decision_reversed_reason,
 			null perm_permanence_order_date,
 			null perm_permanence_order_type,
-			null perm_guardian_status,
-			null perm_guardian_age,
 			null perm_adopted_by_carer_flag,
 			poc.period_of_care_id perm_cla_id,
 			null perm_adoption_worker_id,
 			null perm_adopter_sex,
 			null perm_adopter_legal_status,
-			null perm_number_of_adopters,
-			null perm_allocated_worker
+			null perm_number_of_adopters
+			-- , -- [REVIEW] depreciated
+			-- null perm_allocated_worker
 		from 
 			dm_NON_LA_LEGAL_STATUSES nleg
 		inner join dm_NON_LA_LEGAL_STATUS_TYPES ntyp
@@ -5965,7 +5959,7 @@ Dependencies:
 			DROP TABLE ##ssd_care_leavers;
 		--
 		create table #ssd_care_leavers (
-			clea_care_leaver_id						varchar(48),
+			clea_table_id							varchar(48), -- [REVIEW]
 			clea_person_id							varchar(48),
 			clea_care_leaver_eligibility			varchar(100),
 			clea_care_leaver_in_touch				varchar(100),
@@ -6206,7 +6200,7 @@ Dependencies:
 		--
 		--Populate the table
 		insert into #ssd_care_leavers (
-			clea_care_leaver_id,
+			clea_table_id,
 			clea_person_id,
 			clea_care_leaver_eligibility,
 			clea_care_leaver_in_touch,
@@ -6220,7 +6214,7 @@ Dependencies:
 			clea_care_leaver_worker_id
 		)
 		select
-			null clea_care_leaver_id,
+			null clea_table_id, -- [REVIEW]
 			clc.person_id clea_person_id,
 			clc.eligibility clea_care_leaver_eligibility,
 			(

@@ -245,7 +245,7 @@ care_leaver_status_info as (
 )
 --
 select
-	null clea_care_leaver_id,
+	null clea_table_id, -- [REVIEW]
 	clc.person_id clea_person_id,
 	clc.eligibility clea_care_leaver_eligibility,
 	(

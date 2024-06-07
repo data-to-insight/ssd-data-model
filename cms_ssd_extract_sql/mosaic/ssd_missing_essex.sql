@@ -89,7 +89,7 @@ create index lkp_answers_idx on #lookup_answers (workflow_step_id, person_id, qu
 create index date_answers_idx on #date_answers (workflow_step_id, person_id, question_user_code);
 --
 select
-	miss.WORKFLOW_STEP_ID miss_missing_episode_id,
+	miss.WORKFLOW_STEP_ID miss_table_id, -- [REVIEW] was/re-purposed from miss_ missing_ episode_ id
 	(
 		select
 			max(replace(replace(replace(convert(varchar, cla.episode_start_date, 120), '-', ''), ' ', ''), ':', '') + '.' + replicate('0', 9 - len(cast(cla.person_id as varchar(9)))) + cast(cla.person_id as varchar(9)))

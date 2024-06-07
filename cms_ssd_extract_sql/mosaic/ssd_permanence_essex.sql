@@ -26,7 +26,7 @@ SELECT
             AND
             cla.poc_start = c.poc_start
     ) perm_cla_id,
-    c.worker_name perm_adoption_worker_id -- [REVIEW][_name]
+    c.worker_name perm_adoption_worker_id -- [REVIEW]
 FROM
     SCF.ALB_Children c
 

@@ -1,5 +1,5 @@
 select
-	cl.PERSON_ID clea_care_leaver_id,
+	cl.PERSON_ID clea_table_id, -- [REVIEW]
 	cl.PERSON_ID clea_person_id,
 	cl.ELIGIBILITY_STATUS,
 	cl.IN_TOUCH_ON_BIRTHDAY clea_care_leaver_in_touch,
