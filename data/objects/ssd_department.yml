@@ -8,6 +8,8 @@ nodes:
     type: nvarchar
     categories:
     - workforce
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -20,6 +22,8 @@ nodes:
     type: nvarchar
     categories:
     - workforce
+    returns:
+    - Local,AnnexA
     cms:
     - liquid_logic
     - mosaic
@@ -33,6 +37,8 @@ nodes:
     foreign_key: ssd_department.dept_team_id
     categories:
     - workforce
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic
@@ -45,6 +51,8 @@ nodes:
     type: nvarchar
     categories:
     - workforce
+    returns:
+    - Local
     cms:
     - liquid_logic
     - mosaic

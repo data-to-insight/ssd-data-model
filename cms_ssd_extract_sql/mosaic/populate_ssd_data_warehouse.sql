@@ -1785,7 +1785,7 @@ Dependencies:
 			addr_address_type,
 			addr_address_start_date,
 			addr_address_end_date,
-			addr_postcode
+			addr_address_postcode
 		)
 		select
 			addr.REF_ADDRESSES_PEOPLE_ID addr_table_id,
@@ -2581,7 +2581,7 @@ Dependencies:
 			DROP TABLE ##ssd_permanence
 		--
 		create table ##ssd_permanence (
-			perm_table_id						varchar(48), -- [REVIEW] -- re-purposed from perm_permanence_id
+			perm_table_id						varchar(48), -- [REVIEW] -- re-purposed from perm_ permanence_ id
 			perm_person_id						varchar(48),
 			perm_adm_decision_date				datetime,
 			perm_ffa_cp_decision_date			datetime,

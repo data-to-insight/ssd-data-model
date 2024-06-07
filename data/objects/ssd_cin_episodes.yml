@@ -73,7 +73,7 @@ nodes:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
     guidance: Date the Referral is effective from
-  - name: cine_cin_primary_need
+  - name: cine_cin_primary_need_code
     description: CIN Primary Need Code
     item_ref: CINE010A
     type: nvarchar

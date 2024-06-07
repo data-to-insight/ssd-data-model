@@ -126,7 +126,7 @@ nodes:
       \ carer. The two changes do not need to be simultaneous or consequent one upon\
       \ the other. The code simply reflects that there was a change in placement and\
       \ a change in legal status, for whatever reason, on the same day."
-  - name: clae_cla_primary_need
+  - name: clae_cla_primary_need_code
     description: CIN Primary Need Code
     item_ref: CLAE009A
     type: nvarchar

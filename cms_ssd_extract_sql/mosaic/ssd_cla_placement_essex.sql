@@ -1,7 +1,7 @@
 select
 	distinct
 	cla.placement_id clap_cla_placement_id,
-	-- cla.EPISODE_ID clap_cla_episode_id, -- [REVIEW] depreciated
+	-- cla.EPISODE_ID clap_ cla_ episode_ id, -- [REVIEW] depreciated
 	cla.PLACEMENT_START clap_cla_placement_start_date,
 	cla.PLACEMENT_TYPE_CODE cla_cla_placement_type,
 	cla.OFSTED_URN clap_cla_placement_urn,
