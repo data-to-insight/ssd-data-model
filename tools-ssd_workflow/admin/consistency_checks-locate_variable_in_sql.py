@@ -16,7 +16,7 @@ directories = [
 ]
 
 
-variable_name = 'ehcn_named_plan_ceased_date'                  # var name to search
+variable_name = 'earl_episode_worker_id'                  # var name to search
 variable_stem = ''                  # stem to search 
 variable_suffix = ''           # suffix to search
 search_file_type = '.sql'           # or .py or .txt 

@@ -3705,7 +3705,7 @@ Dependencies:
 			invo_involvements_id			varchar(48),
 			invo_professional_id			varchar(48),
 			invo_professional_role_id		varchar(48),
-			invo_professional_team			varchar(200),
+			invo_professional_team			varchar(255),
 			invo_referral_id				varchar(48),
 			invo_involvement_start_date		datetime,
 			invo_involvement_end_date		datetime,
