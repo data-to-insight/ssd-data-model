@@ -2934,7 +2934,7 @@ CREATE TABLE ssd_development.ssd_involvements (
     invo_involvements_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"INVO005A"}
     invo_professional_id        NVARCHAR(48),               -- metadata={"item_ref":"INVO006A"}
     invo_professional_role_id   NVARCHAR(200),              -- metadata={"item_ref":"INVO007A"}
-    invo_professional_team      NVARCHAR(1000),             -- metadata={"item_ref":"INVO009A"}
+    invo_professional_team      NVARCHAR(255),              -- metadata={"item_ref":"INVO009A", "info":"This is a truncated field at 255"}
     invo_person_id              NVARCHAR(48),               -- metadata={"item_ref":"INVO011A"}
     invo_involvement_start_date DATETIME,                   -- metadata={"item_ref":"INVO002A"}
     invo_involvement_end_date   DATETIME,                   -- metadata={"item_ref":"INVO003A"}
@@ -2959,12 +2959,12 @@ INSERT INTO ssd_involvements (
 -- EXTRACT SELECT
 
 
-WHERE EXISTS
-    (
-    SELECT 1
-    FROM ssd_person p
-    WHERE p.pers_person_id = fi.DIM_PERSON_ID
-    );
+-- WHERE EXISTS
+--     (
+--     SELECT 1
+--     FROM ssd_person p
+--     WHERE p.pers_person_id = fi.DIM_PERSON_ID
+--     );
 
 
 

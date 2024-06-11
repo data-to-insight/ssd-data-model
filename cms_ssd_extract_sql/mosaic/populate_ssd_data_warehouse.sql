@@ -3515,7 +3515,17 @@ Version: 1.0
 
 Status: AwaitingReview
 
-Remarks:
+Remarks: The list of allowed identifier_type codes are:
+            ['Case Number', 
+            'Unique Pupil Number', 
+            'NHS Number', 
+            'Home Office Registration', 
+            'National Insurance Number', 
+            'YOT Number', 
+            'Court Case Number', 
+            'RAA ID', 
+            'Incident ID']
+            To have any further codes agreed into the standard, issue a change request
 
 Dependencies:
 
@@ -6425,70 +6435,6 @@ go
 
 
 
---[REVIEW] added RH 290424
-if object_id('tempdb..##populate_ssd_linked_identifiers') is not null
-    drop procedure ##populate_ssd_linked_identifiers
-go
---
-create procedure ##populate_ssd_linked_identifiers
-begin
-/*
-=============================================================================
-Object Name: ssd_linked_identifiers
-Description: 
-Author: D2I
-Version: 1.0
-Status: AwaitingReview
-Remarks: The list of allowed identifier_type codes are:
-            ['Case Number', 
-            'Unique Pupil Number', 
-            'NHS Number', 
-            'Home Office Registration', 
-            'National Insurance Number', 
-            'YOT Number', 
-            'Court Case Number', 
-            'RAA ID', 
-            'Incident ID']
-            To have any further codes agreed into the standard, issue a change request
-Dependencies: 
-- Yet to be defined
-=============================================================================
-*/
-begin try
-    --set nocount on
-    --
-    IF OBJECT_ID('tempdb..##ssd_linked_identifiers') IS NOT NULL
-        DROP TABLE ##ssd_linked_identifiers
-    --
-    create table ##ssd_linked_identifiers (
-        link_table_id           nvarchar(48) primary key default NEWID(),
-        link_person_id          nvarchar(48),
-        link_identifier_type    nvarchar(100),
-        link_identifier_value   nvarchar(100),
-        link_valid_from_date    datetime,
-        link_valid_to_date      datetime
-    )
-    --
-    return 0
-end try
-begin catch
-    -- Record error details in log
-    declare @v_error_number        int,
-            @v_error_message    nvarchar(4000)
-    select
-        @v_error_number = error_number(),
-        @v_error_message = error_message()
-    --
-    return @v_error_number
-end catch
-go
---
-
-
-
-
-
-
 -- [REVIEW] added RH 290424
 if object_id('tempdb..##populate_ssd_s251_finance') is not null
 	drop procedure ##populate_ssd_s251_finance
@@ -6951,6 +6897,55 @@ end catch
 go
 --
 
+--[REVIEW] added RH 100624
+if object_id('tempdb..##populate_ssd_department') is not null
+    drop procedure ##populate_ssd_department
+go
+--
+create procedure ##populate_ssd_department
+begin
+/*
+=============================================================================
+Object Name: ssd_department
+Description: In progress/To be developed
+Author: D2I
+Version: 0.1
+Status: Development
+Remarks: New object - source data to be confirmed
+Dependencies:
+- Yet to be defined
+-
+=============================================================================
+*/
+begin try
+    --set nocount on
+    --
+    IF OBJECT_ID('tempdb..##ssd_department') IS NOT NULL
+        DROP TABLE ##ssd_department
+    --
+    create table ##ssd_department (
+		dept_team_id                 	NVARCHAR(48) primary key,
+		dept_team_name               	NVARCHAR(255),
+		dept_team_parent_id   			NVARCHAR(48),
+		dept_team_parent_name 			NVARCHAR(255)
+	)
+    --
+    return 0
+end try
+begin catch
+    -- Record error details in log
+    declare @v_error_number        int,
+            @v_error_message    nvarchar(4000)
+    select
+        @v_error_number = error_number(),
+        @v_error_message = error_message()
+    --
+    return @v_error_number
+end catch
+go
+--
+
+
 
 
 --
@@ -6992,6 +6987,7 @@ begin
 
 	-- end placeholder tables
 
+	exec ##ssd_department;			-- NEW/Development [REVIEW] added RH 100624 (source data not yet set up)
 
 	exec ##populate_ssd_care_leavers;
 	exec ##populate_ssd_assessment_factors @start_date, @end_date;
@@ -7007,7 +7003,7 @@ begin
 	exec ##populate_ssd_initial_cp_conference @start_date, @end_date;
 	exec ##populate_ssd_involvements @start_date, @end_date;
 	exec ##populate_ssd_legal_status @start_date, @end_date;
-	exec ##populate_ssd_linked_identifiers; -- AwaitingReview
+	exec ##populate_ssd_linked_identifiers; 
 	exec ##populate_ssd_missing @start_date, @end_date;
 	exec ##populate_ssd_mother;
 	exec ##populate_ssd_permanence;

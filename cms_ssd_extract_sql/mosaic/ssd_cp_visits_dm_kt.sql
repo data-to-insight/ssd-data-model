@@ -189,7 +189,7 @@ from
 	(
 	select 
 		stp.person_id,
-		-- dbo.append2(stp.workflow_step_id, '.', stp.person_id) cppv_visit_id, -- [REVIEW] replaced by below... re-test and remove this line
+		-- dbo.append2(stp.workflow_step_id, '.', stp.person_id) cppv_ visit_ id, -- [REVIEW] replaced by below... re-test and remove this line
 		dbo.append2(stp.workflow_step_id, '.', stp.person_id) cppv_cp_visit_id,
 		coalesce(
 			(

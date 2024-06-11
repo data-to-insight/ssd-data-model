@@ -2905,15 +2905,13 @@ WHERE
     AND
     ffa.ANSWER IS NOT NULL
  
-
-
 -- Create structure
 CREATE TABLE ssd_development.ssd_cla_previous_permanence (
-    lapp_table_id                       NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LAPP001A"}
-    lapp_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"LAPP002A"}
-    lapp_previous_permanence_option     NVARCHAR(200),              -- metadata={"item_ref":"LAPP004A"}
-    lapp_previous_permanence_la         NVARCHAR(100),              -- metadata={"item_ref":"LAPP005A"}
-    lapp_previous_permanence_order_date NVARCHAR(100)               -- metadata={"item_ref":"LAPP003A", "info": "must remain NVARCHAR"}
+    lapp_table_id                               NVARCHAR(48) PRIMARY KEY,
+    lapp_person_id                              NVARCHAR(48),
+    lapp_previous_permanence_option             NVARCHAR(200),
+    lapp_previous_permanence_la                 NVARCHAR(100),
+    lapp_previous_permanence_order_date         NVARCHAR(10)
 );
  
 -- Insert data
@@ -2923,50 +2921,52 @@ INSERT INTO ssd_cla_previous_permanence (
                lapp_previous_permanence_option,
                lapp_previous_permanence_la,
                lapp_previous_permanence_order_date
+
            )
 SELECT
     tmp_ffa.FACT_FORM_ID AS lapp_table_id,
     ff.DIM_PERSON_ID AS lapp_person_id,
-    COALESCE(MAX(ISNULL(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN tmp_ffa.ANSWER END, '')), NULL) AS lapp_previous_permanence_option,
-    COALESCE(MAX(ISNULL(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG' THEN tmp_ffa.ANSWER END, '')), NULL) AS lapp_previous_permanence_la,
+    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_option,
+    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG'        THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_la,
     CASE 
-        WHEN PATINDEX('%[^0-9]%', ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '')) = 0 AND 
-             CAST(ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '') AS INT) BETWEEN 1 AND 31 THEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '') 
+        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END)) = 0 AND 
+             CAST(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END) AS INT) BETWEEN 1 AND 31 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END) 
         ELSE 'zz' 
     END + '/' + 
+ -- Adjusted CASE statement for ORDERMONTH to convert month names to numbers
     CASE 
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('January', 'Jan')  THEN '01'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('February', 'Feb') THEN '02'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('March', 'Mar')    THEN '03'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('April', 'Apr')    THEN '04'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('May')             THEN '05'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('June', 'Jun')     THEN '06'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('July', 'Jul')     THEN '07'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('August', 'Aug')   THEN '08'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('September', 'Sep') THEN '09'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('October', 'Oct')  THEN '10'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('November', 'Nov') THEN '11'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('December', 'Dec') THEN '12'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('January', 'Jan')  THEN '01'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('February', 'Feb') THEN '02'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('March', 'Mar')    THEN '03'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('April', 'Apr')    THEN '04'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('May')             THEN '05'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('June', 'Jun')     THEN '06'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('July', 'Jul')     THEN '07'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('August', 'Aug')   THEN '08'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('September', 'Sep') THEN '09'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('October', 'Oct')  THEN '10'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('November', 'Nov') THEN '11'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('December', 'Dec') THEN '12'
         ELSE 'zz' -- also handles 'unknown' string
     END + '/' + 
     CASE 
-        WHEN PATINDEX('%[^0-9]%', ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END), '')) = 0 THEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END), '') 
+        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END)) = 0 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END) 
         ELSE 'zzzz' 
     END
     AS lapp_previous_permanence_order_date
+
 FROM
     #ssd_TMP_PRE_previous_permanence tmp_ffa
 JOIN
     Child_Social.FACT_FORMS ff ON tmp_ffa.FACT_FORM_ID = ff.FACT_FORM_ID
-
  
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = ff.DIM_PERSON_ID
-    )
- 
+    ) 
 GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
+
  
 -- -- Add constraint(s)
 -- ALTER TABLE ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
@@ -3036,9 +3036,9 @@ LatestResponses AS (
     SELECT  -- Now add the answered_date (only indirectly of use here/cross referencing)
         mrqr.DIM_PERSON_ID,
         mrqr.ANSWER_NO,
-        mrqr.MaxFormID AS FACT_FORM_ID,
+        mrqr.MaxFormID      AS FACT_FORM_ID,
         ffa.ANSWER,
-        ffa.ANSWERED_DTTM AS LatestResponseDate
+        ffa.ANSWERED_DTTM   AS LatestResponseDate
     FROM
         MostRecentQuestionResponse mrqr
     JOIN
@@ -3104,7 +3104,6 @@ SELECT
  
 FROM
     Child_Social.FACT_CARE_PLANS AS fcp
- 
  
 WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A';
  
@@ -4001,10 +4000,16 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_involvements
 Description:
 Author: D2I
-Version: 1.0
+Version: 1.1
+            1.0: Trancated professional_team field IF comment data populates 110624 RH
             0.9: added person_id and changed source of professional_team 090424 JH
 Status: [R]elease
-Remarks:
+Remarks: Regarding the increased size/len on invo_professional_team
+            The (truncated)COMMENTS field is only used if:
+                WORKER_HISTORY_DEPARTMENT_DESC is NULL.
+                DEPARTMENT_NAME is NULL.
+                GROUP_NAME is NULL.
+                COMMENTS contains the keyword %WORKER% or %ALLOC%.
 Dependencies:
 - ssd_professionals
 - FACT_INVOLVEMENTS
@@ -4024,7 +4029,7 @@ CREATE TABLE ssd_development.ssd_involvements (
     invo_involvements_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"INVO005A"}
     invo_professional_id        NVARCHAR(48),               -- metadata={"item_ref":"INVO006A"}
     invo_professional_role_id   NVARCHAR(200),              -- metadata={"item_ref":"INVO007A"}
-    invo_professional_team      NVARCHAR(1000),             -- metadata={"item_ref":"INVO009A"}
+    invo_professional_team      NVARCHAR(255),              -- metadata={"item_ref":"INVO009A", "info":"This is a truncated field at 255"}
     invo_person_id              NVARCHAR(48),               -- metadata={"item_ref":"INVO011A"}
     invo_involvement_start_date DATETIME,                   -- metadata={"item_ref":"INVO002A"}
     invo_involvement_end_date   DATETIME,                   -- metadata={"item_ref":"INVO003A"}
@@ -4049,16 +4054,18 @@ SELECT
     fi.DIM_WORKER_ID                              AS invo_professional_id,
     fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
     -- use first non-NULL value for prof team, in order of : i)dept, ii)grp, or iii)relevant comment
-    COALESCE(
+    LEFT(
+        COALESCE(
         fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC,   -- prev/relevant dept name if available
         fi.DIM_DEPARTMENT_NAME,                   -- otherwise, use existing dept name
         fi.DIM_GROUP_NAME,                        -- then, use wider grp name if the above are NULL
 
-        CASE -- if still NULL, refer into comments data
+        CASE -- if still NULL, refer into comments data but only when...
             WHEN fi.COMMENTS LIKE '%WORKER%' OR fi.COMMENTS LIKE '%ALLOC%' -- refer to comments for specific keywords
             THEN fi.COMMENTS 
         END -- if fi.COMMENTS is NULL, results in NULL
-    )                                              AS invo_professional_team,
+    ), 255)                                       AS invo_professional_team,
+
     fi.DIM_PERSON_ID                              AS invo_person_id,
     fi.START_DTTM                                 AS invo_involvement_start_date,
     fi.END_DTTM                                   AS invo_involvement_end_date,

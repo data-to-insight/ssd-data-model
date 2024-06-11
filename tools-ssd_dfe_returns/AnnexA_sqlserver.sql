@@ -117,7 +117,9 @@ SELECT
         WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
         ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
     END                                                 AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
+    --FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
+    CONVERT(VARCHAR, p.pers_dob, 103)           AS DateOfBirth, -- [TESTING] Review export formats and Excel date handling #DtoI-1731
+
 
 	DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
 			CASE 
@@ -127,7 +129,9 @@ SELECT
 			END									AS Age,
 
     /* List additional AA fields */
-    FORMAT(c.cont_contact_date, 'dd/MM/yyyy')  AS DateOfContact,
+    --FORMAT(c.cont_contact_date, 'dd/MM/yyyy')  AS DateOfContact,
+    CONVERT(VARCHAR, c.cont_contact_date, 103)   AS DateOfContact, -- [TESTING] Review export formats and Excel date handling #DtoI-1731
+
 	CASE
 		WHEN c.cont_contact_source_code = '1A' THEN 'a) 1A: Individual'
 		WHEN c.cont_contact_source_code = '1B' THEN 'b) 1B: Individual'
@@ -617,8 +621,8 @@ SELECT
         WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
         WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
         ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
-    END                                                 AS Ethnicity,
-    FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
+    END                                         AS Ethnicity,
+    FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth, -- [TESTING] Review export formats and Excel date handling #DtoI-1731
 
     DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
             CASE 

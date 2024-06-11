@@ -12,11 +12,11 @@ chmod +x locate_variables_in_files.py
 # Multiple directories support
 directories = [
     'cms_ssd_extract_sql/mosaic/',              # Mosaic scripts
-    'cms_ssd_extract_sql/systemc_liquidlogic/'  # Liquid Logic scripts
+    'cms_ssd_extract_sql/systemc/'  # Liquid Logic scripts
 ]
 
 
-variable_name = 'miss_missing_episode_end'                  # var name to search
+variable_name = 'ehcn_named_plan_ceased_date'                  # var name to search
 variable_stem = ''                  # stem to search 
 variable_suffix = ''           # suffix to search
 search_file_type = '.sql'           # or .py or .txt 
