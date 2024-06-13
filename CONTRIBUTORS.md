@@ -14,12 +14,12 @@ We are particularly grateful to our steering group, made up of colleagues from:
 
 We also extend thanks to our wider circle of contributing LAs, especially those which endorsed our project bid, or later assisted with developing or testing our research and technical products: 
 
+**East Sussex County Council**
 **Knowlsey Council**
 **Blackpool Council**
 **City of Wolverhampton Council**
 **Dorset Council**
 **East Riding of Yorkshire Council**
-**East Sussex County Council**
 **London Innovation and Improvement Alliance**
 **Manchester City Council**
 **Newham Council** 

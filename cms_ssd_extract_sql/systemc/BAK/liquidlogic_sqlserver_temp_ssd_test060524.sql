@@ -74,7 +74,7 @@ SET @StartTime = GETDATE(); -- Record the start time
 /* SSD extract set up */
 
 -- ssd extract time-frame (YRS)
-DECLARE @ssd_timeframe_years INT = 6;
+DECLARE @ssd_timeframe_years INT = 1;
 DECLARE @ssd_sub1_range_years INT = 1;
 
 -- store date on which CASELOAD count required. Currently : Most recent past Sept30th
@@ -1252,7 +1252,8 @@ WHERE
                                   '12A', '13A', '14A', '15A', '16A', '17A', '18A', '18B', 
                                   '18C', '19A', '19B', '19C', 
                                   '20', '21', 
-                                  '22A', '23A', '24A');
+                                  '22A', '23A', '24A')
+    AND LOWER(ffa.ANSWER) = 'yes';
 
 
 
@@ -1271,56 +1272,13 @@ INSERT INTO #ssd_assessment_factors (
                cinf_assessment_factors_json
            )
 
+           
 SELECT 
     fsa.EXTERNAL_ID     AS cinf_table_id, 
     fsa.FACT_FORM_ID    AS cinf_assessment_id,
     (
         SELECT 
-            -- 
-            CASE WHEN tmp_af.ANSWER_NO = '1A'  THEN tmp_af.ANSWER END AS '1A',
-            CASE WHEN tmp_af.ANSWER_NO = '1B'  THEN tmp_af.ANSWER END AS '1B',
-            CASE WHEN tmp_af.ANSWER_NO = '1C'  THEN tmp_af.ANSWER END AS '1C',
-            CASE WHEN tmp_af.ANSWER_NO = '2A'  THEN tmp_af.ANSWER END AS '2A',
-            CASE WHEN tmp_af.ANSWER_NO = '2B'  THEN tmp_af.ANSWER END AS '2B',
-            CASE WHEN tmp_af.ANSWER_NO = '2C'  THEN tmp_af.ANSWER END AS '2C',
-            CASE WHEN tmp_af.ANSWER_NO = '3A'  THEN tmp_af.ANSWER END AS '3A',
-            CASE WHEN tmp_af.ANSWER_NO = '3B'  THEN tmp_af.ANSWER END AS '3B',
-            CASE WHEN tmp_af.ANSWER_NO = '3C'  THEN tmp_af.ANSWER END AS '3C',
-            CASE WHEN tmp_af.ANSWER_NO = '4A'  THEN tmp_af.ANSWER END AS '4A',
-            CASE WHEN tmp_af.ANSWER_NO = '4B'  THEN tmp_af.ANSWER END AS '4B',
-            CASE WHEN tmp_af.ANSWER_NO = '4C'  THEN tmp_af.ANSWER END AS '4C',
-            CASE WHEN tmp_af.ANSWER_NO = '5A'  THEN tmp_af.ANSWER END AS '5A',
-            CASE WHEN tmp_af.ANSWER_NO = '5B'  THEN tmp_af.ANSWER END AS '5B',
-            CASE WHEN tmp_af.ANSWER_NO = '5C'  THEN tmp_af.ANSWER END AS '5C',
-            CASE WHEN tmp_af.ANSWER_NO = '6A'  THEN tmp_af.ANSWER END AS '6A',
-            CASE WHEN tmp_af.ANSWER_NO = '6B'  THEN tmp_af.ANSWER END AS '6B',
-            CASE WHEN tmp_af.ANSWER_NO = '6C'  THEN tmp_af.ANSWER END AS '6C',
-            CASE WHEN tmp_af.ANSWER_NO = '7A'  THEN tmp_af.ANSWER END AS '7A',
-            CASE WHEN tmp_af.ANSWER_NO = '8B'  THEN tmp_af.ANSWER END AS '8B',
-            CASE WHEN tmp_af.ANSWER_NO = '8C'  THEN tmp_af.ANSWER END AS '8C',
-            CASE WHEN tmp_af.ANSWER_NO = '8D'  THEN tmp_af.ANSWER END AS '8D',
-            CASE WHEN tmp_af.ANSWER_NO = '8E'  THEN tmp_af.ANSWER END AS '8E',
-            CASE WHEN tmp_af.ANSWER_NO = '8F'  THEN tmp_af.ANSWER END AS '8F',
-            CASE WHEN tmp_af.ANSWER_NO = '9A'  THEN tmp_af.ANSWER END AS '9A',
-            CASE WHEN tmp_af.ANSWER_NO = '10A' THEN tmp_af.ANSWER END AS '10A',
-            CASE WHEN tmp_af.ANSWER_NO = '11A' THEN tmp_af.ANSWER END AS '11A',
-            CASE WHEN tmp_af.ANSWER_NO = '12A' THEN tmp_af.ANSWER END AS '12A',
-            CASE WHEN tmp_af.ANSWER_NO = '13A' THEN tmp_af.ANSWER END AS '13A',
-            CASE WHEN tmp_af.ANSWER_NO = '14A' THEN tmp_af.ANSWER END AS '14A',
-            CASE WHEN tmp_af.ANSWER_NO = '15A' THEN tmp_af.ANSWER END AS '15A',
-            CASE WHEN tmp_af.ANSWER_NO = '16A' THEN tmp_af.ANSWER END AS '16A',
-            CASE WHEN tmp_af.ANSWER_NO = '17A' THEN tmp_af.ANSWER END AS '17A',
-            CASE WHEN tmp_af.ANSWER_NO = '18A' THEN tmp_af.ANSWER END AS '18A',
-            CASE WHEN tmp_af.ANSWER_NO = '18B' THEN tmp_af.ANSWER END AS '18B',
-            CASE WHEN tmp_af.ANSWER_NO = '18C' THEN tmp_af.ANSWER END AS '18C',
-            CASE WHEN tmp_af.ANSWER_NO = '19A' THEN tmp_af.ANSWER END AS '19A',
-            CASE WHEN tmp_af.ANSWER_NO = '19B' THEN tmp_af.ANSWER END AS '19B',
-            CASE WHEN tmp_af.ANSWER_NO = '19C' THEN tmp_af.ANSWER END AS '19C',
-            CASE WHEN tmp_af.ANSWER_NO = '20'  THEN tmp_af.ANSWER END AS '20',
-            CASE WHEN tmp_af.ANSWER_NO = '21'  THEN tmp_af.ANSWER END AS '21',
-            CASE WHEN tmp_af.ANSWER_NO = '22A' THEN tmp_af.ANSWER END AS '22A',
-            CASE WHEN tmp_af.ANSWER_NO = '23A' THEN tmp_af.ANSWER END AS '23A',
-            CASE WHEN tmp_af.ANSWER_NO = '24A' THEN tmp_af.ANSWER END AS '24A'
+            tmp_af.ANSWER_NO AS [Key], tmp_af.ANSWER AS [Value]
         FROM 
             #ssd_TMP_PRE_assessment_factors tmp_af
         WHERE 
@@ -3467,7 +3425,7 @@ IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_
 -- Create structure
 CREATE TABLE #ssd_care_leavers
 (
-    clea_table_id                           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLEA001A"}
+    clea_table_id                           NVARCHAR(48),               -- metadata={"item_ref":"CLEA001A"}
     clea_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"CLEA002A"}
     clea_care_leaver_eligibility            NVARCHAR(100),              -- metadata={"item_ref":"CLEA003A"}
     clea_care_leaver_in_touch               NVARCHAR(100),              -- metadata={"item_ref":"CLEA004A"}
