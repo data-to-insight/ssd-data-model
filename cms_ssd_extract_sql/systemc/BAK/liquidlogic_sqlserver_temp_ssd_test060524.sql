@@ -1278,12 +1278,11 @@ SELECT
     fsa.FACT_FORM_ID    AS cinf_assessment_id,
     (
         SELECT 
-            tmp_af.ANSWER_NO AS [Key], tmp_af.ANSWER AS [Value]
+            STRING_AGG(tmp_af.ANSWER_NO, ',') WITHIN GROUP (ORDER BY tmp_af.ANSWER_NO)
         FROM 
             #ssd_TMP_PRE_assessment_factors tmp_af
         WHERE 
             tmp_af.FACT_FORM_ID = fsa.FACT_FORM_ID
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS cinf_assessment_factors_json
 FROM 
     Child_Social.FACT_SINGLE_ASSESSMENT fsa

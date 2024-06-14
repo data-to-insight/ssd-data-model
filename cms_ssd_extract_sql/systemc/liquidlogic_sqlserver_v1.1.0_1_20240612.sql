@@ -1281,22 +1281,18 @@ SELECT
     ffa.ANSWER_NO,
     ffa.ANSWER
 INTO #ssd_TMP_PRE_assessment_factors
-
 FROM 
     Child_Social.FACT_FORM_ANSWERS ffa
 WHERE 
     ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC = 'FAMILY ASSESSMENT'
     AND ffa.ANSWER_NO IN ('1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C', 
-                                  '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', 
-                                  '7A', '8B', '8C', '8D', '8E', '8F', '9A', '10A', '11A', 
-                                  '12A', '13A', '14A', '15A', '16A', '17A', '18A', '18B', 
-                                  '18C', '19A', '19B', '19C', 
-                                  '20', '21', 
-                                  '22A', '23A', '24A')
+                          '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', 
+                          '7A', '8B', '8C', '8D', '8E', '8F', '9A', '10A', '11A', 
+                          '12A', '13A', '14A', '15A', '16A', '17A', '18A', '18B', 
+                          '18C', '19A', '19B', '19C', 
+                          '20', '21', 
+                          '22A', '23A', '24A')
     AND LOWER(ffa.ANSWER) = 'yes';
-
-
-
 
 -- Create structure
 CREATE TABLE #ssd_assessment_factors (
@@ -1311,24 +1307,22 @@ INSERT INTO #ssd_assessment_factors (
                cinf_assessment_id, 
                cinf_assessment_factors_json
            )
-
-           
 SELECT 
     fsa.EXTERNAL_ID     AS cinf_table_id, 
     fsa.FACT_FORM_ID    AS cinf_assessment_id,
     (
         SELECT 
-            tmp_af.ANSWER_NO AS [Key], tmp_af.ANSWER AS [Value]
+            STRING_AGG(tmp_af.ANSWER_NO, ',') WITHIN GROUP (ORDER BY tmp_af.ANSWER_NO)
         FROM 
             #ssd_TMP_PRE_assessment_factors tmp_af
         WHERE 
             tmp_af.FACT_FORM_ID = fsa.FACT_FORM_ID
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS cinf_assessment_factors_json
 FROM 
     Child_Social.FACT_SINGLE_ASSESSMENT fsa
 WHERE 
     fsa.EXTERNAL_ID <> -1;
+
 
 
 -- -- Add constraint(s)
@@ -4075,7 +4069,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_linked_identifiers
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.1
+            1.0: added source data for UPN+FORMER_UPN 140624 RH
+            
 Status: [R]elease
 Remarks: The list of allowed identifier_type codes are:
             ['Case Number', 
@@ -4112,17 +4108,57 @@ CREATE TABLE ssd_development.ssd_linked_identifiers (
     link_valid_to_date          DATETIME                                    -- metadata={"item_ref":"LINK006A"}
 );
 
--- -- Insert placeholder data [TESTING]
--- INSERT INTO ssd_linked_identifiers (
---     -- row id ommitted as ID generated (link_table_id)
---     link_person_id,
---     link_identifier_type,
---     link_identifier_value,
---     link_valid_from_date,
---     link_valid_to_date
--- )
--- VALUES
---     ('SSD_PH', 'SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01');
+-- Insert data for 
+-- link_identifier_type "FORMER_UPN"
+INSERT INTO ssd_development.ssd_linked_identifiers (
+    link_person_id, 
+    link_identifier_type,
+    link_identifier_value,
+    link_valid_from_date, 
+    link_valid_to_date
+)
+SELECT
+    cs.dim_person_id AS link_person_id,
+    'Former Unique Pupil Number' AS link_identifier_type,
+    cs.former_upn AS link_identifier_value,
+    NULL AS link_valid_from_date,        -- NULL for valid_from_date
+    NULL AS link_valid_to_date           -- NULL for valid_to_date
+FROM
+    Child_Social.dim_person cs
+WHERE
+    cs.former_upn IS NOT NULL AND
+    EXISTS (
+        SELECT 1
+        FROM ssd_person sp
+        WHERE sp.pers_person_id = cs.dim_person_id
+    );
+
+-- Insert data for 
+-- link_identifier_type "UPN"
+INSERT INTO ssd_development.ssd_linked_identifiers (
+    link_person_id, 
+    link_identifier_type,
+    link_identifier_value,
+    link_valid_from_date, 
+    link_valid_to_date
+)
+SELECT
+    cs.dim_person_id AS link_person_id,
+    'Unique Pupil Number' AS link_identifier_type,
+    cs.upn AS link_identifier_value,
+    NULL AS link_valid_from_date,        -- NULL for valid_from_date
+    NULL AS link_valid_to_date           -- NULL for valid_to_date
+FROM
+    Child_Social.dim_person cs
+LEFT JOIN
+    Education.dim_person ed ON cs.dim_person_id = ed.dim_person_id
+WHERE
+    cs.upn IS NOT NULL AND
+    EXISTS (
+        SELECT 1
+        FROM ssd_person sp
+        WHERE sp.pers_person_id = cs.dim_person_id
+    );
 
 
 -- -- Create constraint(s)
@@ -4463,16 +4499,32 @@ CREATE TABLE ssd_development.ssd_send (
     send_upn_unknown    NVARCHAR(6)                 -- metadata={"item_ref":"SEND004A"}
     );
 
--- -- Insert placeholder data
--- INSERT INTO ssd_send (
---     send_table_id,
---     send_person_id, 
---     send_upn,
---     send_uln,
---     send_upn_unknown
-
--- )
--- VALUES ('SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH');
+-- Insert data for link_identifier_type "FORMER_UPN"
+INSERT INTO ssd_development.ssd_send (
+    send_table_id,
+    send_person_id, 
+    send_upn,
+    send_uln,
+    send_upn_unknown
+)
+SELECT
+    NEWID() AS send_table_id,          -- generate unique id
+    cs.dim_person_id AS send_person_id,
+    cs.upn AS send_upn,
+    ed.uln AS send_uln,                
+    'SSD_PH' AS send_upn_unknown      
+FROM
+    HDM_Local.Child_Social.dim_person cs
+LEFT JOIN
+    -- we have to switch to Education schema in order to obtain this
+    HDM_Local.Education.dim_person ed ON cs.dim_person_id = ed.dim_person_id
+WHERE
+    EXISTS (
+        SELECT 1
+        FROM ssd_person sp
+        WHERE sp.pers_person_id = cs.dim_person_id
+    );
+ 
  
 
 -- -- Add constraint(s)

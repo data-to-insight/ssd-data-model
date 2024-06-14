@@ -1,4 +1,23 @@
 -- v3 re-jig, based on entire structure spec. 
+
+WITH SplitFactors AS (
+    SELECT
+        cina.cina_assessment_id,
+        LEFT(cina.cinf_assessment_factors_json, CHARINDEX(',', cina.cinf_assessment_factors_json + ',') - 1) AS Factor,
+        STUFF(cina.cinf_assessment_factors_json, 1, CHARINDEX(',', cina.cinf_assessment_factors_json + ','), '') AS RemainingFactors
+    FROM
+        #ssd_cin_assessments cina
+    UNION ALL
+    SELECT
+        cina.cina_assessment_id,
+        LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) AS Factor,
+        STUFF(RemainingFactors, 1, CHARINDEX(',', RemainingFactors + ','), '') AS RemainingFactors
+    FROM
+        SplitFactors
+    WHERE
+        RemainingFactors <> ''
+)
+
 SELECT
     (   /* Header */
         SELECT
@@ -69,7 +88,7 @@ SELECT
                                     CONVERT(VARCHAR(10), cina.cina_assessment_start_date, 23) AS 'AssessmentActualStartDate' -- N00159 
                                     ,'PlaceholderStr' AS 'AssessmentInternalReviewDate' -- N00161
                                     ,'PlaceholderStr' AS 'AssessmentAuthorisationDate'  -- N00160
-                                    ,(
+                                    ,( -- Replaced with the below to take up revised factors data formating
                                         SELECT
                                             cinf.cinf_assessment_factors_json AS 'AssessmentFactors' -- N00181
                                         FROM
@@ -78,6 +97,16 @@ SELECT
                                             cinf.cinf_assessment_id = cina.cina_assessment_id
                                         FOR XML PATH('FactorsIdentifiedAtAssessment'), TYPE
                                     )
+                                    
+                                    -- ,(  -- Get upacked Factors data from CTE
+                                    --     SELECT
+                                    --         Factor AS 'AssessmentFactors'
+                                    --     FROM
+                                    --         SplitFactors
+                                    --     WHERE
+                                    --         SplitFactors.cina_assessment_id = cina.cina_assessment_id
+                                    --     FOR XML PATH('AssessmentFactors'), TYPE
+                                    -- )
                                 FROM
                                     #ssd_cin_assessments cina
                                 WHERE
@@ -123,10 +152,10 @@ SELECT
                             (   /* Section47 */ 
                                 /* Each <CINdetails> group contains 0..n <Section47> groups */
                                 SELECT
-                                    CONVERT(VARCHAR(10), s47.s47e_s47_start_date, 23) AS 'S47ActualStartDate' -- N00148
-                                    ,icpc.icpc_icpc_target_date AS 'InitialCPCtarget' -- N00109
-                                    ,icpc.icpc_icpc_date AS 'DateOfInitialCPC' -- N00110
-                                    ,icpc.icpc_icpc_outcome_cp_flag AS 'ICPCnotRequired' -- N00111
+                                    CONVERT(VARCHAR(10), s47.s47e_s47_start_date, 23) AS 'S47ActualStartDate'   -- N00148
+                                    ,icpc.icpc_icpc_target_date AS 'InitialCPCtarget'                           -- N00109
+                                    ,icpc.icpc_icpc_date AS 'DateOfInitialCPC'                                  -- N00110
+                                    ,icpc.icpc_icpc_outcome_cp_flag AS 'ICPCnotRequired'                        -- N00111
                                 FROM
                                     #ssd_s47_enquiry s47
                                 JOIN
