@@ -28,6 +28,24 @@ WITH SplitFactors AS (
         AND LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) <> ''
 )
 
+WITH SplitFactors AS (
+    SELECT
+        cinf.cinf_assessment_id,
+        CAST(LEFT(cinf.cinf_assessment_factors_json, CHARINDEX(',', cinf.cinf_assessment_factors_json + ',') - 1) AS NVARCHAR(10)) AS Factor,
+        CAST(STUFF(cinf.cinf_assessment_factors_json, 1, CHARINDEX(',', cinf.cinf_assessment_factors_json + ','), '') AS NVARCHAR(1000)) AS RemainingFactors
+    FROM
+        #ssd_assessment_factors cinf
+    UNION ALL
+    SELECT
+        cinf_assessment_id,
+        CAST(LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) AS NVARCHAR(10)) AS Factor,
+        CAST(STUFF(RemainingFactors, 1, CHARINDEX(',', RemainingFactors + ','), '') AS NVARCHAR(1000)) AS RemainingFactors
+    FROM
+        SplitFactors
+    WHERE
+        RemainingFactors <> ''
+        AND LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) <> ''
+)
 SELECT
     (   /* Header */
         SELECT
@@ -47,16 +65,8 @@ SELECT
                     ,'001' AS 'SerialNo'                -- N00606
                     ,CONVERT(VARCHAR(19), GETDATE(), 126) AS 'DateTime' -- N00609
                 FOR XML PATH('Source'), TYPE
-            ),
-            (   /* Content */
-                SELECT
-                    (   /* CBDSLevels */
-                        SELECT
-                            'Child' AS 'CBDSLevel' -- N00608
-                        FOR XML PATH('CBDSLevels'), TYPE
-                    )
-                FOR XML PATH('Content'), TYPE
             )
+        FOR XML PATH(''), TYPE
     ) AS Header,
     (   /* Children */
         SELECT
@@ -66,7 +76,6 @@ SELECT
                         SELECT
                             pers_legacy_id AS 'LAchildID'                    -- N00097
                             ,pers_common_child_id AS 'UPN'                   -- N00001
-
                             ,(  -- obtain any former upns from linked_identifiers table
                                 SELECT TOP 1
                                     link_identifier_value
@@ -76,10 +85,8 @@ SELECT
                                     link_person_id = p.pers_person_id
                                     AND link_identifier_type = 'Former Unique Pupil Number' -- Will only match if Str identifier has followed ssd standard
                                 ORDER BY
-                                    -- ensure we only get the most recent one in case
                                     link_valid_from_date DESC
                             ) AS 'FormerUPN'                                 -- N00002
-
                             ,pers_upn_unknown AS 'UPNunknown'                -- N00135
                             ,CONVERT(VARCHAR(10), pers_dob, 23) AS 'PersonBirthDate' -- N00066
                             ,CONVERT(VARCHAR(10), pers_expected_dob, 23) AS 'ExpectedPersonBirthDate' -- N00098
@@ -196,10 +203,11 @@ SELECT
                 FROM 
                     #ssd_person p
                 FOR XML PATH('Child'), TYPE
-            ) 
-        FOR XML PATH('Children'), TYPE
+            )
+        FOR XML PATH(''), TYPE
     ) AS Children
 FOR XML PATH('Message');
+
 
 
 
@@ -538,29 +546,49 @@ FOR XML PATH('Message');
 
 /* Still to do */
 -- CBDS No	XML element
--- N00002	<FormerUPN> [TESTING]
--- N00135	<UPNunknown> [TESTING]
+-- N00002	<FormerUPN> 
+-- N00135	<UPNunknown> 
 
--- N00103	<ReasonForClosure>              [TESTING] is this cine_close_reason
+-- N00103	<ReasonForClosure>              is this cine_close_reason
 -- N00110	<DateOfInitialCPC>
--- N00159	<AssessmentActualStartDate>     [TESTING]
--- N00161	<AssessmentInternalReviewDate>  [TESTING]
--- N00160	<AssessmentAuthorisationDate>   [TESTING]
--- N00181	<AssessmentFactors>             [TESTING]
--- N00689	<CINPlanStartDate>              [TESTING]
--- N00690	<CINPlanEndDate>                [TESTING]
+-- N00159	<AssessmentActualStartDate>     
+-- N00161	<AssessmentInternalReviewDate>  
+-- N00160	<AssessmentAuthorisationDate>   
+-- N00181	<AssessmentFactors>             
+-- N00689	<CINPlanStartDate>              
+-- N00690	<CINPlanEndDate>                
 -- N00148	<S47ActualStartDate>            s47e_s47_start_date 
 -- N00109	<InitialCPCtarget>              icpc_icpc_date ?  via icpc_referral_id 
 -- N00111	<ICPCnotRequired>               icpc_icpc_outcome_cp_flag ? 
--- N00105	<CPPstartDate>                  [TESTING] is this ssd_cin_plans.cinp_cin_plan_start_date ? via cinp_referral_id
--- N00115	<CPPendDate>                    [TESTING] is this cinp_cin_plan_end_date
--- N00113	<InitialCategoryOfAbuse>        [TESTING]
--- N00114	<LatestCategoryOfAbuse>         [TESTING]
+-- N00105	<CPPstartDate>                  is this ssd_cin_plans.cinp_cin_plan_start_date ? via cinp_referral_id
+-- N00115	<CPPendDate>                    is this cinp_cin_plan_end_date
+-- N00113	<InitialCategoryOfAbuse>        
+-- N00114	<LatestCategoryOfAbuse>         
 -- N00106	<NumberOfPreviousCPP>           Not sure how to generate this
 -- N00116	<CPPreviewDate>                 ssd_cp_reviews.cppr_cp_review_date via ssd_cp_reviews.cppr_cp_plan_id
 
 
-
+-- /* Still to do */
+-- -- CBDS No	XML element
+-- N00002 <FormerUPN>                          - Already in the code
+-- N00135 <UPNunknown>                         - Already in the code
+-- N00103 <ReasonForClosure>                   - Already in the code (maps to cine_close_reason)
+-- N00110 <DateOfInitialCPC>                   - Already in the code
+-- N00159 <AssessmentActualStartDate>          - Already in the code
+-- N00161 <AssessmentInternalReviewDate>       - Already in the code (Placeholder)
+-- N00160 <AssessmentAuthorisationDate>        - Already in the code (Placeholder)
+-- N00181 <AssessmentFactors>                  - Already in the code
+-- N00689 <CINPlanStartDate>                   - Already in the code
+-- N00690 <CINPlanEndDate>                     - Already in the code
+-- N00148 <S47ActualStartDate>                 - Already in the code (maps to s47e_s47_start_date)
+-- N00109 <InitialCPCtarget>                   - Already in the code (maps to icpc_icpc_target_date)
+-- N00111 <ICPCnotRequired>                    - Already in the code (maps to icpc_icpc_outcome_cp_flag)
+-- N00105 <CPPstartDate>                       - Already in the code (maps to cppl_cp_plan_start_date)
+-- N00115 <CPPendDate>                         - Already in the code (maps to cppl_cp_plan_end_date)
+-- N00113 <InitialCategoryOfAbuse>             - Already in the code
+-- N00114 <LatestCategoryOfAbuse>              - Already in the code
+-- N00106 <NumberOfPreviousCPP>                - [Still to do] Not sure how to generate this
+-- N00116 <CPPreviewDate>                      - Already in the code (maps to cppr_cp_review_date)
 
 
 
