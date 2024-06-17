@@ -1,21 +1,31 @@
--- v3 re-jig, based on entire structure spec. 
 
 WITH SplitFactors AS (
     SELECT
-        cina.cina_assessment_id,
-        LEFT(cina.cinf_assessment_factors_json, CHARINDEX(',', cina.cinf_assessment_factors_json + ',') - 1) AS Factor,
-        STUFF(cina.cinf_assessment_factors_json, 1, CHARINDEX(',', cina.cinf_assessment_factors_json + ','), '') AS RemainingFactors
+        cinf.cinf_assessment_id,
+        -- extract first factor from the CSV string + CAST NVARCHAR(10) (avoiding mismatched types btw recursive part of the CTE)
+        -- allow isolating the first factor for further processing
+        CAST(LEFT(ISNULL(cinf.cinf_assessment_factors_json, ''), CHARINDEX(',', ISNULL(cinf.cinf_assessment_factors_json, '') + ',') - 1) AS NVARCHAR(10)) AS Factor,
+
+        -- remove first factor from the CSV string and cast the remaining string as NVARCHAR(1000) (max of 100 2char codes)
+        -- allow recursive processing of remaining factors in next iterations
+        CAST(STUFF(ISNULL(cinf.cinf_assessment_factors_json, ''), 1, CHARINDEX(',', ISNULL(cinf.cinf_assessment_factors_json, '') + ','), '') AS NVARCHAR(1000)) AS RemainingFactors
     FROM
-        #ssd_cin_assessments cina
+        #ssd_assessment_factors cinf
+    WHERE
+        ISNULL(cinf.cinf_assessment_factors_json, '') <> '' -- Expected data format is 0.n factors as csv
     UNION ALL
     SELECT
-        cina.cina_assessment_id,
-        LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) AS Factor,
-        STUFF(RemainingFactors, 1, CHARINDEX(',', RemainingFactors + ','), '') AS RemainingFactors
+    -- recursively split remaining CSV values into individual factors
+    -- process until all factors extracted and included in the result set
+        cinf_assessment_id,
+        CAST(LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) AS NVARCHAR(10)) AS Factor,                 -- find position of the first comma
+        CAST(STUFF(RemainingFactors, 1, CHARINDEX(',', RemainingFactors + ','), '') AS NVARCHAR(1000)) AS RemainingFactors  -- extracts substring from start of RemainingFactors 
+                                                                                                                            -- up to the pos of first comma minus 1 char (to exclude the comma itself)
     FROM
         SplitFactors
     WHERE
         RemainingFactors <> ''
+        AND LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) <> ''
 )
 
 SELECT
@@ -37,8 +47,16 @@ SELECT
                     ,'001' AS 'SerialNo'                -- N00606
                     ,CONVERT(VARCHAR(19), GETDATE(), 126) AS 'DateTime' -- N00609
                 FOR XML PATH('Source'), TYPE
+            ),
+            (   /* Content */
+                SELECT
+                    (   /* CBDSLevels */
+                        SELECT
+                            'Child' AS 'CBDSLevel' -- N00608
+                        FOR XML PATH('CBDSLevels'), TYPE
+                    )
+                FOR XML PATH('Content'), TYPE
             )
-        FOR XML PATH('Header'), TYPE
     ) AS Header,
     (   /* Children */
         SELECT
@@ -48,7 +66,20 @@ SELECT
                         SELECT
                             pers_legacy_id AS 'LAchildID'                    -- N00097
                             ,pers_common_child_id AS 'UPN'                   -- N00001
-                            ,'PlaceholderStr' AS 'FormerUPN'                 -- N00002
+
+                            ,(  -- obtain any former upns from linked_identifiers table
+                                SELECT TOP 1
+                                    link_identifier_value
+                                FROM
+                                    #ssd_linked_identifiers
+                                WHERE
+                                    link_person_id = p.pers_person_id
+                                    AND link_identifier_type = 'Former Unique Pupil Number' -- Will only match if Str identifier has followed ssd standard
+                                ORDER BY
+                                    -- ensure we only get the most recent one in case
+                                    link_valid_from_date DESC
+                            ) AS 'FormerUPN'                                 -- N00002
+
                             ,pers_upn_unknown AS 'UPNunknown'                -- N00135
                             ,CONVERT(VARCHAR(10), pers_dob, 23) AS 'PersonBirthDate' -- N00066
                             ,CONVERT(VARCHAR(10), pers_expected_dob, 23) AS 'ExpectedPersonBirthDate' -- N00098
@@ -88,25 +119,17 @@ SELECT
                                     CONVERT(VARCHAR(10), cina.cina_assessment_start_date, 23) AS 'AssessmentActualStartDate' -- N00159 
                                     ,'PlaceholderStr' AS 'AssessmentInternalReviewDate' -- N00161
                                     ,'PlaceholderStr' AS 'AssessmentAuthorisationDate'  -- N00160
-                                    ,( -- Replaced with the below to take up revised factors data formating
+
+                                    ,(  -- Get unpacked Factors data from CTE
                                         SELECT
-                                            cinf.cinf_assessment_factors_json AS 'AssessmentFactors' -- N00181
+                                            Factor AS 'AssessmentFactors'
                                         FROM
-                                            #ssd_assessment_factors cinf
+                                            SplitFactors sf
                                         WHERE
-                                            cinf.cinf_assessment_id = cina.cina_assessment_id
-                                        FOR XML PATH('FactorsIdentifiedAtAssessment'), TYPE
+                                            sf.cinf_assessment_id = cina.cina_assessment_id
+                                            AND sf.Factor <> '' -- Further to CTE handling, to ensure no empty Str elements
+                                        FOR XML PATH('AssessmentFactors'), TYPE
                                     )
-                                    
-                                    -- ,(  -- Get upacked Factors data from CTE
-                                    --     SELECT
-                                    --         Factor AS 'AssessmentFactors'
-                                    --     FROM
-                                    --         SplitFactors
-                                    --     WHERE
-                                    --         SplitFactors.cina_assessment_id = cina.cina_assessment_id
-                                    --     FOR XML PATH('AssessmentFactors'), TYPE
-                                    -- )
                                 FROM
                                     #ssd_cin_assessments cina
                                 WHERE
@@ -173,9 +196,11 @@ SELECT
                 FROM 
                     #ssd_person p
                 FOR XML PATH('Child'), TYPE
-            ) AS Children
-    )
+            ) 
+        FOR XML PATH('Children'), TYPE
+    ) AS Children
 FOR XML PATH('Message');
+
 
 
 

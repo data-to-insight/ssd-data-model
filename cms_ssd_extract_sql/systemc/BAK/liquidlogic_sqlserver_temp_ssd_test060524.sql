@@ -129,7 +129,17 @@ CREATE TABLE #ssd_person (
     pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
     pers_nationality        NVARCHAR(48)                -- metadata={"item_ref":"PERS012A"} 
 );
- 
+
+
+-- Insert data
+WITH SingleFact AS (
+    SELECT
+        dim_person_id,
+        no_upn_code,
+        ROW_NUMBER() OVER (PARTITION BY dim_person_id ORDER BY (SELECT NULL)) AS rn
+    FROM
+        Child_Social.fact_903_data
+)
 -- Insert data
 INSERT INTO #ssd_person (
     pers_legacy_id,
@@ -157,7 +167,7 @@ SELECT
         ELSE NULL 
     END,                                                --  or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
-    'SSD_PH',                                           -- [PLACEHOLDER] as f903.NO_UPN_CODE table refresh populated only in reporting period
+    COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
     p.EHM_SEN_FLAG,
     CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
@@ -177,10 +187,16 @@ SELECT
 FROM
     Child_Social.DIM_PERSON AS p
  
--- Removed only to allow [TESTING][PLACEHOLDER]  as 903 table refresh only in reporting period
--- LEFT JOIN
---     Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
- 
+-- [TESTING][PLACEHOLDER] Note: 903 table refresh only in reporting period
+LEFT JOIN
+    -- This sub query/CTE is only to obtain the no_upn_code alone. 
+    -- unfortunately no other location for this raw data than the 903 table
+    (SELECT dim_person_id, no_upn_code
+     FROM SingleFact -- CTE 
+     WHERE rn = 1) AS f903 
+ON 
+    p.DIM_PERSON_ID = f903.dim_person_id
+
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
     AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
@@ -4027,7 +4043,9 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_linked_identifiers
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.1
+            1.0: added source data for UPN+FORMER_UPN 140624 RH
+            
 Status: [R]elease
 Remarks: The list of allowed identifier_type codes are:
             ['Case Number', 
@@ -4064,22 +4082,67 @@ CREATE TABLE #ssd_linked_identifiers (
     link_valid_to_date          DATETIME                                    -- metadata={"item_ref":"LINK006A"}
 );
 
--- -- Insert placeholder data [TESTING]
--- INSERT INTO #ssd_linked_identifiers (
---     -- row id ommitted as ID generated (link_table_id)
---     link_person_id,
---     link_identifier_type,
---     link_identifier_value,
---     link_valid_from_date,
---     link_valid_to_date
--- )
--- VALUES
---     ('SSD_PH', 'SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01');
+
+
+
+-- [TESTING]
+-- Insert data for 
+-- link_identifier_type "FORMER_UPN"
+INSERT INTO #ssd_linked_identifiers (
+    link_person_id, 
+    link_identifier_type,
+    link_identifier_value,
+    link_valid_from_date, 
+    link_valid_to_date
+)
+SELECT
+    cs.dim_person_id                    AS link_person_id,
+    'Former Unique Pupil Number'        AS link_identifier_type,
+    cs.former_upn                       AS link_identifier_value,
+    NULL                                AS link_valid_from_date,        -- NULL for valid_from_date
+    NULL                                AS link_valid_to_date           -- NULL for valid_to_date
+FROM
+    Child_Social.dim_person cs
+WHERE
+    cs.former_upn IS NOT NULL AND
+    EXISTS (
+        SELECT 1
+        FROM #ssd_person sp
+        WHERE sp.pers_person_id = cs.dim_person_id
+    );
+
+-- Insert data for 
+-- link_identifier_type "UPN"
+INSERT INTO #ssd_linked_identifiers (
+    link_person_id, 
+    link_identifier_type,
+    link_identifier_value,
+    link_valid_from_date, 
+    link_valid_to_date
+)
+SELECT
+    cs.dim_person_id AS link_person_id,
+    'Unique Pupil Number'               AS link_identifier_type,
+    cs.upn                              AS link_identifier_value,
+    NULL                                AS link_valid_from_date,        -- NULL for valid_from_date
+    NULL                                AS link_valid_to_date           -- NULL for valid_to_date
+FROM
+    Child_Social.dim_person cs
+LEFT JOIN
+    Education.dim_person ed ON cs.dim_person_id = ed.dim_person_id
+WHERE
+    cs.upn IS NOT NULL AND
+    EXISTS (
+        SELECT 1
+        FROM #ssd_person sp
+        WHERE sp.pers_person_id = cs.dim_person_id
+    );
+
 
 
 -- -- Create constraint(s)
--- ALTER TABLE #ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
--- FOREIGN KEY (link_person_id) REFERENCES #ssd_person(pers_person_id);
+-- ALTER TABLE ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
+-- FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_link_person_id        ON #ssd_linked_identifiers(link_person_id);
@@ -4094,6 +4157,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_link_valid_to_date    ON #ssd_linked_identifie
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
 PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 

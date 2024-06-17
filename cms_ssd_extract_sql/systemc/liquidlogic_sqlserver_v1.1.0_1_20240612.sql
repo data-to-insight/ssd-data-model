@@ -169,7 +169,18 @@ CREATE TABLE ssd_development.ssd_person (
     pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
     pers_nationality        NVARCHAR(48)                -- metadata={"item_ref":"PERS012A"} 
 );
- 
+
+
+-- CTE to get a no_upn_code 
+-- (assumption here is that all codes will be the same/current)
+WITH SingleFact AS (
+    SELECT
+        dim_person_id,
+        no_upn_code,
+        ROW_NUMBER() OVER (PARTITION BY dim_person_id ORDER BY (SELECT NULL)) AS rn
+    FROM
+        Child_Social.fact_903_data
+)
 -- Insert data
 INSERT INTO ssd_person (
     pers_legacy_id,
@@ -197,7 +208,7 @@ SELECT
         ELSE NULL 
     END,                                                --  or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
-    'SSD_PH',                                           -- [PLACEHOLDER] as f903.NO_UPN_CODE table refresh populated only in reporting period
+    COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
     p.EHM_SEN_FLAG,
     CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
@@ -217,10 +228,15 @@ SELECT
 FROM
     Child_Social.DIM_PERSON AS p
  
--- Removed only to allow [TESTING][PLACEHOLDER]  as 903 table refresh only in reporting period
--- LEFT JOIN
---     Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
- 
+-- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period
+LEFT JOIN
+    -- There is no other location for this data unfortunately. 
+    (SELECT DISTINCT ON (dim_person_id) dim_person_id, no_upn_code
+     FROM Child_Social.fact_903_data
+     ORDER BY dim_person_id, no_upn_code) AS f903 
+ON 
+    p.DIM_PERSON_ID = f903.dim_person_id
+
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
     AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
@@ -2032,7 +2048,7 @@ IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_cp_reviews;
 IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
   
  
--/workspaces/ssd-data-model/docs/admin- Create structure
+-- Create structure
 CREATE TABLE ssd_development.ssd_cp_reviews
 (
     cppr_cp_review_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPR001A"}
@@ -4108,6 +4124,10 @@ CREATE TABLE ssd_development.ssd_linked_identifiers (
     link_valid_to_date          DATETIME                                    -- metadata={"item_ref":"LINK006A"}
 );
 
+
+
+
+-- [TESTING]
 -- Insert data for 
 -- link_identifier_type "FORMER_UPN"
 INSERT INTO ssd_development.ssd_linked_identifiers (
@@ -4118,11 +4138,11 @@ INSERT INTO ssd_development.ssd_linked_identifiers (
     link_valid_to_date
 )
 SELECT
-    cs.dim_person_id AS link_person_id,
-    'Former Unique Pupil Number' AS link_identifier_type,
-    cs.former_upn AS link_identifier_value,
-    NULL AS link_valid_from_date,        -- NULL for valid_from_date
-    NULL AS link_valid_to_date           -- NULL for valid_to_date
+    cs.dim_person_id                    AS link_person_id,
+    'Former Unique Pupil Number'        AS link_identifier_type,
+    cs.former_upn                       AS link_identifier_value,
+    NULL                                AS link_valid_from_date,        -- NULL for valid_from_date
+    NULL                                AS link_valid_to_date           -- NULL for valid_to_date
 FROM
     Child_Social.dim_person cs
 WHERE
@@ -4144,10 +4164,10 @@ INSERT INTO ssd_development.ssd_linked_identifiers (
 )
 SELECT
     cs.dim_person_id AS link_person_id,
-    'Unique Pupil Number' AS link_identifier_type,
-    cs.upn AS link_identifier_value,
-    NULL AS link_valid_from_date,        -- NULL for valid_from_date
-    NULL AS link_valid_to_date           -- NULL for valid_to_date
+    'Unique Pupil Number'               AS link_identifier_type,
+    cs.upn                              AS link_identifier_value,
+    NULL                                AS link_valid_from_date,        -- NULL for valid_from_date
+    NULL                                AS link_valid_to_date           -- NULL for valid_to_date
 FROM
     Child_Social.dim_person cs
 LEFT JOIN
@@ -4159,6 +4179,7 @@ WHERE
         FROM ssd_person sp
         WHERE sp.pers_person_id = cs.dim_person_id
     );
+
 
 
 -- -- Create constraint(s)
