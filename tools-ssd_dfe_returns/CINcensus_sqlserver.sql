@@ -1,5 +1,7 @@
 
 WITH SplitFactors AS (
+    -- the SSD stores the assessment factors as a csv list within cinf_assessment_factors
+    -- to access vals, within server compatibility constraints (set as low as 100-110), and SQL ver<2016 we need the following
     SELECT
         cinf.cinf_assessment_id,
         -- extract first factor from the CSV string + CAST NVARCHAR(10) (avoiding mismatched types btw recursive part of the CTE)
@@ -28,24 +30,10 @@ WITH SplitFactors AS (
         AND LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) <> ''
 )
 
-WITH SplitFactors AS (
-    SELECT
-        cinf.cinf_assessment_id,
-        CAST(LEFT(cinf.cinf_assessment_factors_json, CHARINDEX(',', cinf.cinf_assessment_factors_json + ',') - 1) AS NVARCHAR(10)) AS Factor,
-        CAST(STUFF(cinf.cinf_assessment_factors_json, 1, CHARINDEX(',', cinf.cinf_assessment_factors_json + ','), '') AS NVARCHAR(1000)) AS RemainingFactors
-    FROM
-        #ssd_assessment_factors cinf
-    UNION ALL
-    SELECT
-        cinf_assessment_id,
-        CAST(LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) AS NVARCHAR(10)) AS Factor,
-        CAST(STUFF(RemainingFactors, 1, CHARINDEX(',', RemainingFactors + ','), '') AS NVARCHAR(1000)) AS RemainingFactors
-    FROM
-        SplitFactors
-    WHERE
-        RemainingFactors <> ''
-        AND LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) <> ''
-)
+SELECT
+    '<?xml version="1.0" encoding="utf-8"?>' AS [XMLDeclaration] -- XML vers, encoding for XML parsing
+UNION ALL
+
 SELECT
     (   /* Header */
         SELECT
@@ -65,20 +53,29 @@ SELECT
                     ,'001' AS 'SerialNo'                -- N00606
                     ,CONVERT(VARCHAR(19), GETDATE(), 126) AS 'DateTime' -- N00609
                 FOR XML PATH('Source'), TYPE
-            )
-        FOR XML PATH(''), TYPE
-    ) AS Header,
+                ),
+                (   /* Content */
+                    SELECT
+                        (   /* CBDSLevels */
+                            SELECT
+                                'Child' AS 'CBDSLevel'  -- CBDSLevels details
+                            FOR XML PATH('CBDSLevels'), TYPE
+                        )
+                    FOR XML PATH('Content'), TYPE
+                )
+            FOR XML PATH(''), TYPE
+        ) AS Header,
     (   /* Children */
         SELECT
             (   /* Child */
                 SELECT
                     (   /* ChildIdentifiers */
                         SELECT
-                            pers_legacy_id AS 'LAchildID'                    -- N00097
+                            REPLACE(REPLACE(pers_legacy_id AS 'LAchildID', CHAR(10), ''), CHAR(9), '') AS 'UPN'   -- N00097  rem newline char (\n) |  tab char (\t)
                             ,pers_common_child_id AS 'UPN'                   -- N00001
                             ,(  -- obtain any former upns from linked_identifiers table
                                 SELECT TOP 1
-                                    link_identifier_value
+                                    REPLACE(REPLACE(link_identifier_value, CHAR(10), ''), CHAR(9), '')
                                 FROM
                                     #ssd_linked_identifiers
                                 WHERE

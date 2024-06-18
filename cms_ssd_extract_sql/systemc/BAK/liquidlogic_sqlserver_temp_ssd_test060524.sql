@@ -1289,12 +1289,13 @@ INSERT INTO #ssd_assessment_factors (
            )
 
            
+-- SQL Server 2017 or later, uses STRING_AGG
 SELECT 
     fsa.EXTERNAL_ID     AS cinf_table_id, 
     fsa.FACT_FORM_ID    AS cinf_assessment_id,
     (
         SELECT 
-            STRING_AGG(tmp_af.ANSWER_NO, ',') WITHIN GROUP (ORDER BY tmp_af.ANSWER_NO)
+            STRING_AGG(tmp_af.ANSWER_NO, ',')
         FROM 
             #ssd_TMP_PRE_assessment_factors tmp_af
         WHERE 
@@ -1304,6 +1305,7 @@ FROM
     Child_Social.FACT_SINGLE_ASSESSMENT fsa
 WHERE 
     fsa.EXTERNAL_ID <> -1;
+
 
 
 -- -- Add constraint(s)

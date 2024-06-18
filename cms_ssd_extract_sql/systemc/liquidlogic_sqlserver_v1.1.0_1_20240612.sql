@@ -1323,12 +1323,14 @@ INSERT INTO #ssd_assessment_factors (
                cinf_assessment_id, 
                cinf_assessment_factors_json
            )
+
+-- SQL Server 2017 or later, uses STRING_AGG
 SELECT 
     fsa.EXTERNAL_ID     AS cinf_table_id, 
     fsa.FACT_FORM_ID    AS cinf_assessment_id,
     (
         SELECT 
-            STRING_AGG(tmp_af.ANSWER_NO, ',') WITHIN GROUP (ORDER BY tmp_af.ANSWER_NO)
+            STRING_AGG(tmp_af.ANSWER_NO, ',')
         FROM 
             #ssd_TMP_PRE_assessment_factors tmp_af
         WHERE 
@@ -1338,6 +1340,24 @@ FROM
     Child_Social.FACT_SINGLE_ASSESSMENT fsa
 WHERE 
     fsa.EXTERNAL_ID <> -1;
+
+
+-- -- SQL Server Pre-2017, alternative approach using FOR XML PATH
+-- SELECT 
+--     fsa.EXTERNAL_ID     AS cinf_table_id, 
+--     fsa.FACT_FORM_ID    AS cinf_assessment_id,
+--     (
+--         SELECT 
+--             STUFF((SELECT ',' + tmp_af.ANSWER_NO
+--                    FROM #ssd_TMP_PRE_assessment_factors tmp_af
+--                    WHERE tmp_af.FACT_FORM_ID = fsa.FACT_FORM_ID
+--                    FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '')
+--     ) AS cinf_assessment_factors_json
+-- FROM 
+--     Child_Social.FACT_SINGLE_ASSESSMENT fsa
+-- WHERE 
+--     fsa.EXTERNAL_ID <> -1;
+
 
 
 
