@@ -1,5 +1,11 @@
+/*
+D2I Dev notes: 
+CiN extract set by default to run against tembdb schema #tables. 
+To run this on _perm persistant tables or within the ESCC SSD Dev schema,
+change all query table refs from #ssd_ to ssd_development.ssd_
+*/
 
--- open cin episode (referral) as at the report date or an open/ closed referral in the past (reporting period) 
+-- open CiN episode (referral) as at the report date or an open/ closed referral in the past (reporting period) 
 
 WITH SplitFactors AS (
     -- the SSD stores the assessment factors as a csv list within cinf_assessment_factors

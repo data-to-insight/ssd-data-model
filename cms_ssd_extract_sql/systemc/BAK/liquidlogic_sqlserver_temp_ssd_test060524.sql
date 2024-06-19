@@ -713,8 +713,8 @@ AND EXISTS
 
 
 
-ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_no_self_parenting -- Ensure person cannot be their own mother
-CHECK (moth_person_id <> moth_childs_person_id);
+-- ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_no_self_parenting -- Ensure person cannot be their own mother
+-- CHECK (moth_person_id <> moth_childs_person_id);
 
 
 -- Create index(es)
