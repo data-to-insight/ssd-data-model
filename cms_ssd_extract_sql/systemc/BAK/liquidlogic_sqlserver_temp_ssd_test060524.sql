@@ -70,6 +70,46 @@ SET @StartTime = GETDATE(); -- Record the start time
 
 
 
+/* Drop all ssd_development schema constraints & tables */
+-- This is to pre-emptively avoid any run-time conflicts from left-behind FK constraints
+-- This entire block is NOT part of the public SSD extract
+
+DECLARE @sql NVARCHAR(MAX) = N'';
+
+-- Generate commands to drop FK constraints
+SELECT @sql += '
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = ' + QUOTENAME(fk.name, '''') + ')
+BEGIN
+    ALTER TABLE ' + QUOTENAME(SCHEMA_NAME(fk.schema_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) + ' DROP CONSTRAINT ' + QUOTENAME(fk.name) + ';
+END;
+'
+FROM sys.foreign_keys AS fk
+INNER JOIN sys.tables AS t ON fk.parent_object_id = t.object_id
+INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+WHERE s.name = N'ssd_development';
+
+-- Execute drop FK
+EXEC sp_executesql @sql;
+
+-- Clear the SQL variable
+SET @sql = N'';
+
+-- Generate DROP TABLE for each table in the schema
+SELECT @sql += '
+IF OBJECT_ID(''' + s.name + '.' + t.name + ''', ''U'') IS NOT NULL
+BEGIN
+    DROP TABLE ' + QUOTENAME(s.name) + '.' + QUOTENAME(t.name) + ';
+END;
+'
+FROM sys.tables AS t
+INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+WHERE s.name = N'ssd_development';
+
+-- Execute drop tables
+EXEC sp_executesql @sql;
+/* END Drop all ssd_development schema constraints */
+
+
 /* ********************************************************************************************************** */
 /* SSD extract set up */
 

@@ -1553,7 +1553,7 @@ LEFT JOIN
         SELECT
             clae.clae_person_id PersonID,
             clae.clae_cla_episode_start_date CLAEpiStart,    /*PW - included as used in join later on to get Worker and Team*/
-            clae.clae_cla_primary_need CategoryOfNeed,
+            clae.clae_cla_primary_need_code CategoryOfNeed,
             clae.clae_cla_episode_ceased DateEpisodeCeased,
             clae.clae_cla_episode_ceased_reason ReasonEpisodeCeased,
             clae.clae_cla_last_iro_contact_date LatestIROVisit,
