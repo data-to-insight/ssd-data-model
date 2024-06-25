@@ -2,57 +2,94 @@
 D2I Dev notes: 
 CiN extract 
 - 1) set by default to run against tembdb schema #tables. 
-- 2) to run this on _perm persistant tables e.g. ESCC SSD Dev schema, search+_replacement all table refs "#ssd_" to "ssd_development.ssd_"
-*/
+- 2) to run this on _perm persistant tables e.g. ESCC SSD Dev schema, search+_replacement all table refs 
+    "#ssd_" to "ssd_development.ssd_" except those tables that are marked as _TMP_ pre-processing tables
 
 -- CiN extract logic (in progress)
 -- open CiN episode (referral) as at the report date or an open/ closed referral in the past (reporting period) 
 -- https://assets.publishing.service.gov.uk/media/636a5cf3e90e076191f300d6/Children_in_need_census_2023_to_2024.pdf
 -- data on all cases and episodes for the period from 1 April 2023 to 31 March 2024
 
-
--- WITH SplitFactors AS (
---     -- the SSD stores the assessment factors as a csv list within cinf_assessment_factors
---     -- to access vals, within server compatibility constraints (set as low as 100-110), and SQL ver<2016 we need the following
---     SELECT
---         cinf.cinf_assessment_id,
---         -- extract first factor from the CSV string + CAST NVARCHAR(10) (avoiding mismatched types btw recursive part of the CTE)
---         -- allow isolating the first factor for further processing
---         CAST(LEFT(ISNULL(cinf.cinf_assessment_factors_json, ''), CHARINDEX(',', ISNULL(cinf.cinf_assessment_factors_json, '') + ',') - 1) AS NVARCHAR(10)) AS Factor,
-
---         -- remove first factor from the CSV string and cast the remaining string as NVARCHAR(1000) (max of 100 2char codes)
---         -- allow recursive processing of remaining factors in next iterations
---         CAST(STUFF(ISNULL(cinf.cinf_assessment_factors_json, ''), 1, CHARINDEX(',', ISNULL(cinf.cinf_assessment_factors_json, '') + ','), '') AS NVARCHAR(1000)) AS RemainingFactors
---     FROM
---         #ssd_assessment_factors cinf
---     WHERE
---         ISNULL(cinf.cinf_assessment_factors_json, '') <> '' -- Expected data format is 0.n factors as csv
---     UNION ALL
---     SELECT
---     -- recursively split remaining CSV values into individual factors
---     -- process until all factors extracted and included in the result set
---         cinf_assessment_id,
---         CAST(LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) AS NVARCHAR(10)) AS Factor,                 -- find position of the first comma
---         CAST(STUFF(RemainingFactors, 1, CHARINDEX(',', RemainingFactors + ','), '') AS NVARCHAR(1000)) AS RemainingFactors  -- extracts substring from start of RemainingFactors 
---                                                                                                                             -- up to the pos of first comma minus 1 char (to exclude the comma itself)
---     FROM
---         SplitFactors
---     WHERE
---         RemainingFactors <> ''
---         AND LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) <> ''
--- )
+Expected ssd_assessment_factors.cinf_assessment_factors field format is JSON ARRAY [ ] 
+This in line with notes in ssd_assessment_factors definition "Opt2 flattened Key json structure"
+cinf_table_id	cinf_assessment_id	cinf_assessment_factors_json
+1000011	        1086942	            ["2B", "4B", "2C", "4C"]
+1000017	        1087182	            ["21"]
+*/
 
 
-WITH SplitFactors AS (
-    SELECT
+-- Drop TMP Pre-processing table if it exists
+IF OBJECT_ID('tempdb..#split_factors_TMP') IS NOT NULL DROP TABLE #split_factors_TMP;
+
+-- structure for parsed assessment factors
+CREATE TABLE #split_factors_TMP (
+    cinf_assessment_id NVARCHAR(48),
+    Factor NVARCHAR(50)
+);
+-- Split concatenated factors into individual rows
+WITH InitialCTE AS (
+    SELECT 
         cinf_assessment_id,
-        key AS Factor
-    FROM
-        ssd_cin_assessments cina,
-        json_each_text(cina.assessment_factors_json) AS factors(key, value)
-    WHERE
-        value = 'Yes'
+
+        -- cleans the JSON string by removing square brackets, double quotes, and extra spaces, replaces commas with spaces
+        -- cleaned string then used to generate a list of factors as a single space-separated string
+        LTRIM(RTRIM(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(cinf_assessment_factors_json, '[', ''), ']', ''), '"', ''), ' ', ''), ',', ','), ' ', ''))) AS FactorList
+    FROM 
+        ssd_assessment_factors
+), RecursiveCTE AS (
+    SELECT 
+        cinf_assessment_id,
+
+        -- extract 1st factor from FactorList string by finding substring -before- the 1st comma
+        SUBSTRING(FactorList, 1, CHARINDEX(',', FactorList + ',') - 1) AS Factor,
+
+        -- rem the extracted factor and trim spaces to get remaining factors from the FactorList string
+        LTRIM(RTRIM(SUBSTRING(FactorList, CHARINDEX(',', FactorList + ',') + 1, LEN(FactorList)))) AS RemainingFactors
+    FROM 
+        InitialCTE
+    WHERE 
+        LEN(FactorList) > 0
+
+    UNION ALL
+
+    SELECT 
+        -- combines the results from the initial CTE and the recursive CTE
+        -- one factor at a time and updates the RemainingFactors string
+        cinf_assessment_id,
+        SUBSTRING(RemainingFactors, 1, CHARINDEX(',', RemainingFactors + ',') - 1) AS Factor,
+        LTRIM(RTRIM(SUBSTRING(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') + 1, LEN(RemainingFactors)))) AS RemainingFactors
+    FROM 
+        RecursiveCTE
+    WHERE 
+        -- until all factors are processed | RemainingFactors string is empty
+        LEN(RemainingFactors) > 0
 )
+
+-- insert results into TMP split factors table
+INSERT INTO #split_factors_TMP (cinf_assessment_id, Factor)
+SELECT 
+    cinf_assessment_id,
+    Factor
+FROM 
+    RecursiveCTE
+WHERE 
+    Factor IS NOT NULL AND Factor <> '';
+
+-- check split factors table
+-- SELECT * FROM #split_factors;
+/* Sample output
+cinf_assessment_id	Factor
+1000215	            2B
+1000215	            3A
+1000215	            3B
+1000215	            2A
+1000215	            4A
+1000215	            15A
+1000215	            5A
+1000217	            5A
+*/
+
+
 
 -- '<?xml version="1.0" encoding="utf-8"?>' -- XML vers, encoding for XML parsing
 SELECT
@@ -98,7 +135,7 @@ SELECT
                                 SELECT TOP 1
                                     REPLACE(REPLACE(link_identifier_value, CHAR(10), ''), CHAR(9), '')
                                 FROM
-                                    #ssd_linked_identifiers
+                                    ssd_linked_identifiers
                                 WHERE
                                     link_person_id = p.pers_person_id
                                     AND link_identifier_type = 'Former Unique Pupil Number' -- Will only match if Str identifier input using SSD guidance/standard
@@ -123,7 +160,7 @@ SELECT
                                 SELECT
                                     disa_disability_code                                        AS 'Disability'                      -- N00099
                                 FROM 
-                                    #ssd_disability
+                                    ssd_disability
                                 WHERE
                                     disa_person_id = p.pers_person_id
                                 FOR XML PATH('Disabilities'), TYPE
@@ -138,52 +175,25 @@ SELECT
                             ,cine.cine_referral_nfa                                             AS 'ReferralNFA'                    -- N00112
                             ,cine_close_date                                                    AS 'CINclosureDate'                 -- N00102
                             ,cine_close_reason                                                  AS 'ReasonForClosure'               -- N00103
-
-                            -- [TESTING] on non-double nesting of <assessmentFactors> See replacement below
-                            -- ,(   /* Assessments */
-                            --     /* Each <CINDetails> group contains 0…n <Assessments> groups */
-                            --     SELECT
-                            --         CONVERT(VARCHAR(10), cina.cina_assessment_start_date, 23)   AS 'AssessmentActualStartDate'      -- N00159 
-                            --         ,'PlaceholderStr'                                           AS 'AssessmentInternalReviewDate'   -- N00161
-                            --         ,'PlaceholderStr'                                           AS 'AssessmentAuthorisationDate'    -- N00160
-
-                            --         ,(  -- Get unpacked Factors data from CTE
-                            --             SELECT
-                            --                 Factor                                              AS 'AssessmentFactors'              -- N00181
-                            --             FROM
-                            --                 SplitFactors sf
-                            --             WHERE
-                            --                 sf.cinf_assessment_id = cina.cina_assessment_id
-                            --                 AND sf.Factor <> '' -- Further to CTE handling, to ensure no empty Str elements
-                            --             FOR XML PATH('AssessmentFactors'), TYPE
-                            --         )
-                            --     FROM
-                            --         #ssd_cin_assessments cina
-                            --     WHERE
-                            --         cina.cina_referral_id = cine.cine_referral_id
-                            --     FOR XML PATH('Assessments'), TYPE
-                            -- ),
-
-                            -- [TESTING] on non-double nesting of <assessmentFactors>
                             , (   /* Assessments */
                                 /* Each <CINDetails> group contains 0…n <Assessments> groups */
                                 SELECT
-                                    CONVERT(VARCHAR(10), cina.cina_assessment_start_date, 23)   AS 'AssessmentActualStartDate'      -- N00159 
-                                    ,'PlaceholderStr'                                           AS 'AssessmentInternalReviewDate'   -- N00161
-                                    ,'PlaceholderStr'                                           AS 'AssessmentAuthorisationDate'    -- N00160
+                                    CONVERT(VARCHAR(10), cina.cina_assessment_start_date, 23)   AS 'AssessmentActualStartDate',     -- N00159 
+                                    'PlaceholderStr'                                            AS 'AssessmentInternalReviewDate',  -- N00161
+                                    'PlaceholderStr'                                            AS 'AssessmentAuthorisationDate',   -- N00160
 
-                                    ,(
+                                    (
                                         SELECT
-                                            Factor AS 'AssessmentFactors' -- N00181
+                                            sf.Factor                                           AS 'AssessmentFactors'              -- N00181
                                         FROM
-                                            SplitFactors sf
+                                            #split_factors_TMP sf
                                         WHERE
                                             sf.cinf_assessment_id = cina.cina_assessment_id
-                                            AND sf.Factor <> '' -- Further to CTE handling, to ensure no empty Str elements
+                                            AND sf.Factor IS NOT NULL  -- Ensure no empty elements
                                         FOR XML PATH(''), TYPE
-                                    )
+                                    ) 
                                 FROM
-                                    #ssd_cin_assessments cina
+                                    ssd_cin_assessments cina
                                 WHERE
                                     cina.cina_referral_id = cine.cine_referral_id
                                 FOR XML PATH('Assessments'), TYPE
@@ -194,7 +204,7 @@ SELECT
                                     CONVERT(VARCHAR(10), cinp.cinp_cin_plan_start_date, 23)     AS 'CINPlanStartDate'           -- N00689
                                     ,CONVERT(VARCHAR(10), cinp.cinp_cin_plan_end_date, 23)      AS 'CINPlanEndDate'             -- N00690
                                 FROM
-                                    #ssd_cin_plans cinp
+                                    ssd_cin_plans cinp
                                 WHERE
                                     cinp.cinp_referral_id = cine.cine_referral_id
                                 FOR XML PATH('CINPlanDates'), TYPE
@@ -222,7 +232,7 @@ SELECT
                             --             FOR XML PATH('CPPreviews'), TYPE
                             --         )
                             --     FROM
-                            --         #ssd_cp_plans cppl
+                            --         ssd_cp_plans cppl
                             --     WHERE
                             --         cppl.cppl_referral_id = cine.cine_referral_id
                             --     FOR XML PATH('ChildProtectionPlans'), TYPE
@@ -238,7 +248,7 @@ SELECT
                                     ,cppl.cppl_cp_plan_latest_category                          AS 'LatestCategoryOfAbuse'      -- N00114
                                     ,(  /* Count of previous child protection plans */
                                         SELECT COUNT(*)
-                                        FROM #ssd_cp_plans prev_cppl
+                                        FROM ssd_cp_plans prev_cppl
                                         WHERE prev_cppl.cppl_person_id = p.pers_person_id
                                     )                                                           AS 'NumberOfPreviousCPP'        -- N00106
                                     ,(  /* CPPreviews */ 
@@ -247,13 +257,13 @@ SELECT
                                         SELECT
                                             CONVERT(VARCHAR(10), cppr.cppr_cp_review_date, 23)  AS 'CPPreviewDate'              -- N00116
                                         FROM
-                                            #ssd_cp_reviews cppr
+                                            ssd_cp_reviews cppr
                                         WHERE
                                             cppr.cppr_cp_plan_id = cppl.cppl_cp_plan_id 
                                         FOR XML PATH('CPPreviews'), TYPE
                                     )
                                 FROM
-                                    #ssd_cp_plans cppl
+                                    ssd_cp_plans cppl
                                 WHERE
                                     cppl.cppl_referral_id = cine.cine_referral_id
                                 FOR XML PATH('ChildProtectionPlans'), TYPE
@@ -266,26 +276,26 @@ SELECT
                                     ,icpc.icpc_icpc_date                                        AS 'DateOfInitialCPC'           -- N00110
                                     ,icpc.icpc_icpc_outcome_cp_flag                             AS 'ICPCnotRequired'            -- N00111
                                 FROM
-                                    #ssd_s47_enquiry s47
+                                    ssd_s47_enquiry s47
                                 JOIN
-                                    #ssd_initial_cp_conference icpc ON s47.s47e_s47_enquiry_id = icpc.icpc_s47_enquiry_id
+                                    ssd_initial_cp_conference icpc ON s47.s47e_s47_enquiry_id = icpc.icpc_s47_enquiry_id
                                 WHERE
                                     s47.s47e_referral_id = cine.cine_referral_id
                                     AND icpc.icpc_icpc_outcome_cp_flag = 'N'
                                 FOR XML PATH('Section47'), TYPE
                             )
                         FROM
-                            #ssd_cin_episodes cine
+                            ssd_cin_episodes cine
                         WHERE
                             cine.cine_person_id = p.pers_person_id
                         FOR XML PATH('CINdetails'), TYPE
                     )
                 FROM 
-                    #ssd_person p
+                    ssd_person p
                 WHERE
                     EXISTS (
                         SELECT 1
-                        FROM #ssd_cin_episodes cine
+                        FROM ssd_cin_episodes cine
                         WHERE cine.cine_person_id = p.pers_person_id
                         AND (
                             cine.cine_close_date IS NULL
