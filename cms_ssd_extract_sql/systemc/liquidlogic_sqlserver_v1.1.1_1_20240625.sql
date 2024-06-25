@@ -709,6 +709,7 @@ AND EXISTS
 ALTER TABLE ssd_mother ADD CONSTRAINT FK_moth_to_person 
 FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
 
+-- -- [TESTING] deployment issues remain
 -- ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
 -- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
 
@@ -1276,10 +1277,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_assessment_factors
 Description: 
 Author: D2I
-Version: 1.0
+Version: 1.1
+            1.0: New alternative structure for assessment_factors_json 250624 RH
 Status: [R]elease
 Remarks: This object referrences some large source tables- Instances of 45m+. 
 Dependencies: 
+- #ssd_TMP_PRE_assessment_factors (as staged pre-processing)
 - ssd_cin_assessments
 - FACT_SINGLE_ASSESSMENT
 - FACT_FORM_ANSWERS
@@ -1334,13 +1337,35 @@ INSERT INTO ssd_assessment_factors (
                cinf_assessment_id, 
                cinf_assessment_factors_json
            )
+
+-- -- Opt1: 
+-- -- flattened Key-Value pair json structure {"1A": "Yes","2B": "No","3A": "Yes", ...}           
+-- SELECT 
+--     fsa.EXTERNAL_ID AS cinf_table_id,
+--     fsa.FACT_FORM_ID AS cinf_assessment_id,
+--     (
+--         SELECT 
+--             -- create flattened Key-Value pair json structure {"1A": "Yes","2B": "No","3A": "Yes", ...}
+--             '{' + STRING_AGG('"' + tmp_af.ANSWER_NO + '": "' + tmp_af.ANSWER + '"', ', ') + '}' 
+--         FROM 
+--             #ssd_TMP_PRE_assessment_factors tmp_af
+--         WHERE 
+--             tmp_af.FACT_FORM_ID = fsa.FACT_FORM_ID
+--     ) AS cinf_assessment_factors_json
+-- FROM 
+--     Child_Social.FACT_SINGLE_ASSESSMENT fsa
+-- WHERE 
+--     fsa.EXTERNAL_ID <> -1;
+
+
+-- -- Opt2: 
+-- -- flattened Key json structure ["1A","2B","3A", ...]           
 SELECT 
     fsa.EXTERNAL_ID AS cinf_table_id,
     fsa.FACT_FORM_ID AS cinf_assessment_id,
     (
         SELECT 
-            -- create flattened Key-Value pair json structure {"1A": "Yes","2B": "No","3A": "Yes", ...}
-            '{' + STRING_AGG('"' + tmp_af.ANSWER_NO + '": "' + tmp_af.ANSWER + '"', ', ') + '}' 
+            '[' + STRING_AGG('"' + tmp_af.ANSWER_NO + '"', ', ') + ']' 
         FROM 
             #ssd_TMP_PRE_assessment_factors tmp_af
         WHERE 
@@ -1350,6 +1375,7 @@ FROM
     Child_Social.FACT_SINGLE_ASSESSMENT fsa
 WHERE 
     fsa.EXTERNAL_ID <> -1;
+
 
 
 
