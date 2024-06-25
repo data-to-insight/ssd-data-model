@@ -1196,6 +1196,8 @@ INSERT INTO #ssd_assessment_factors (
                cinf_assessment_factors_json
            )
 
+-- array structure opt1 (initial release)
+-- See below for alternative approach consideration
 SELECT 
     fsa.EXTERNAL_ID     AS cinf_table_id, 
     fsa.FACT_FORM_ID    AS cinf_assessment_id,
@@ -1256,6 +1258,47 @@ FROM
     Child_Social.FACT_SINGLE_ASSESSMENT fsa
 WHERE 
     fsa.EXTERNAL_ID <> -1;
+
+
+
+
+-- -- array structure opt2 (revised release in relation to D2I ticket #DtoI-1770 https://trello.com/c/aHWZDEU6)
+-- -- SQL Server 2017 or later, uses STRING_AGG
+-- SELECT 
+--     fsa.EXTERNAL_ID     AS cinf_table_id, 
+--     fsa.FACT_FORM_ID    AS cinf_assessment_id,
+--     (
+--         SELECT 
+--             STRING_AGG(tmp_af.ANSWER_NO, ',')
+--         FROM 
+--             #ssd_TMP_PRE_assessment_factors tmp_af
+--         WHERE 
+--             tmp_af.FACT_FORM_ID = fsa.FACT_FORM_ID
+--     ) AS cinf_assessment_factors_json
+-- FROM 
+--     Child_Social.FACT_SINGLE_ASSESSMENT fsa
+-- WHERE 
+--     fsa.EXTERNAL_ID <> -1;
+
+-- -- array structure opt2 (revised release in relation to D2I ticket #DtoI-1770 https://trello.com/c/aHWZDEU6)
+-- -- SQL Server Pre-2017, alternative approach using FOR XML PATH
+-- SELECT 
+--     fsa.EXTERNAL_ID     AS cinf_table_id, 
+--     fsa.FACT_FORM_ID    AS cinf_assessment_id,
+--     (
+--         SELECT 
+--             STUFF((SELECT ',' + tmp_af.ANSWER_NO
+--                    FROM #ssd_TMP_PRE_assessment_factors tmp_af
+--                    WHERE tmp_af.FACT_FORM_ID = fsa.FACT_FORM_ID
+--                    FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '')
+--     ) AS cinf_assessment_factors_json
+-- FROM 
+--     Child_Social.FACT_SINGLE_ASSESSMENT fsa
+-- WHERE 
+--     fsa.EXTERNAL_ID <> -1;
+
+
+
 
 
 -- -- Add constraint(s)

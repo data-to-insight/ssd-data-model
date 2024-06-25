@@ -1,43 +1,58 @@
 /*
 D2I Dev notes: 
-CiN extract set by default to run against tembdb schema #tables. 
-To run this on _perm persistant tables or within the ESCC SSD Dev schema,
-change all query table refs from #ssd_ to ssd_development.ssd_
+CiN extract 
+- 1) set by default to run against tembdb schema #tables. 
+- 2) to run this on _perm persistant tables e.g. ESCC SSD Dev schema, search+_replacement all table refs "#ssd_" to "ssd_development.ssd_"
 */
 
+-- CiN extract logic (in progress)
 -- open CiN episode (referral) as at the report date or an open/ closed referral in the past (reporting period) 
+-- https://assets.publishing.service.gov.uk/media/636a5cf3e90e076191f300d6/Children_in_need_census_2023_to_2024.pdf
+-- data on all cases and episodes for the period from 1 April 2023 to 31 March 2024
+
+
+-- WITH SplitFactors AS (
+--     -- the SSD stores the assessment factors as a csv list within cinf_assessment_factors
+--     -- to access vals, within server compatibility constraints (set as low as 100-110), and SQL ver<2016 we need the following
+--     SELECT
+--         cinf.cinf_assessment_id,
+--         -- extract first factor from the CSV string + CAST NVARCHAR(10) (avoiding mismatched types btw recursive part of the CTE)
+--         -- allow isolating the first factor for further processing
+--         CAST(LEFT(ISNULL(cinf.cinf_assessment_factors_json, ''), CHARINDEX(',', ISNULL(cinf.cinf_assessment_factors_json, '') + ',') - 1) AS NVARCHAR(10)) AS Factor,
+
+--         -- remove first factor from the CSV string and cast the remaining string as NVARCHAR(1000) (max of 100 2char codes)
+--         -- allow recursive processing of remaining factors in next iterations
+--         CAST(STUFF(ISNULL(cinf.cinf_assessment_factors_json, ''), 1, CHARINDEX(',', ISNULL(cinf.cinf_assessment_factors_json, '') + ','), '') AS NVARCHAR(1000)) AS RemainingFactors
+--     FROM
+--         #ssd_assessment_factors cinf
+--     WHERE
+--         ISNULL(cinf.cinf_assessment_factors_json, '') <> '' -- Expected data format is 0.n factors as csv
+--     UNION ALL
+--     SELECT
+--     -- recursively split remaining CSV values into individual factors
+--     -- process until all factors extracted and included in the result set
+--         cinf_assessment_id,
+--         CAST(LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) AS NVARCHAR(10)) AS Factor,                 -- find position of the first comma
+--         CAST(STUFF(RemainingFactors, 1, CHARINDEX(',', RemainingFactors + ','), '') AS NVARCHAR(1000)) AS RemainingFactors  -- extracts substring from start of RemainingFactors 
+--                                                                                                                             -- up to the pos of first comma minus 1 char (to exclude the comma itself)
+--     FROM
+--         SplitFactors
+--     WHERE
+--         RemainingFactors <> ''
+--         AND LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) <> ''
+-- )
+
 
 WITH SplitFactors AS (
-    -- the SSD stores the assessment factors as a csv list within cinf_assessment_factors
-    -- to access vals, within server compatibility constraints (set as low as 100-110), and SQL ver<2016 we need the following
     SELECT
-        cinf.cinf_assessment_id,
-        -- extract first factor from the CSV string + CAST NVARCHAR(10) (avoiding mismatched types btw recursive part of the CTE)
-        -- allow isolating the first factor for further processing
-        CAST(LEFT(ISNULL(cinf.cinf_assessment_factors_json, ''), CHARINDEX(',', ISNULL(cinf.cinf_assessment_factors_json, '') + ',') - 1) AS NVARCHAR(10)) AS Factor,
-
-        -- remove first factor from the CSV string and cast the remaining string as NVARCHAR(1000) (max of 100 2char codes)
-        -- allow recursive processing of remaining factors in next iterations
-        CAST(STUFF(ISNULL(cinf.cinf_assessment_factors_json, ''), 1, CHARINDEX(',', ISNULL(cinf.cinf_assessment_factors_json, '') + ','), '') AS NVARCHAR(1000)) AS RemainingFactors
-    FROM
-        #ssd_assessment_factors cinf
-    WHERE
-        ISNULL(cinf.cinf_assessment_factors_json, '') <> '' -- Expected data format is 0.n factors as csv
-    UNION ALL
-    SELECT
-    -- recursively split remaining CSV values into individual factors
-    -- process until all factors extracted and included in the result set
         cinf_assessment_id,
-        CAST(LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) AS NVARCHAR(10)) AS Factor,                 -- find position of the first comma
-        CAST(STUFF(RemainingFactors, 1, CHARINDEX(',', RemainingFactors + ','), '') AS NVARCHAR(1000)) AS RemainingFactors  -- extracts substring from start of RemainingFactors 
-                                                                                                                            -- up to the pos of first comma minus 1 char (to exclude the comma itself)
+        key AS Factor
     FROM
-        SplitFactors
+        ssd_cin_assessments cina,
+        json_each_text(cina.assessment_factors_json) AS factors(key, value)
     WHERE
-        RemainingFactors <> ''
-        AND LEFT(RemainingFactors, CHARINDEX(',', RemainingFactors + ',') - 1) <> ''
+        value = 'Yes'
 )
-
 
 -- '<?xml version="1.0" encoding="utf-8"?>' -- XML vers, encoding for XML parsing
 SELECT
@@ -123,6 +138,8 @@ SELECT
                             ,cine.cine_referral_nfa                                             AS 'ReferralNFA'                    -- N00112
                             ,cine_close_date                                                    AS 'CINclosureDate'                 -- N00102
                             ,cine_close_reason                                                  AS 'ReasonForClosure'               -- N00103
+
+                            -- [TESTING] on non-double nesting of <assessmentFactors> See replacement below
                             -- ,(   /* Assessments */
                             --     /* Each <CINDetails> group contains 0…n <Assessments> groups */
                             --     SELECT
@@ -146,6 +163,7 @@ SELECT
                             --         cina.cina_referral_id = cine.cine_referral_id
                             --     FOR XML PATH('Assessments'), TYPE
                             -- ),
+
                             -- [TESTING] on non-double nesting of <assessmentFactors>
                             , (   /* Assessments */
                                 /* Each <CINDetails> group contains 0…n <Assessments> groups */
@@ -156,7 +174,7 @@ SELECT
 
                                     ,(
                                         SELECT
-                                            Factor AS 'AssessmentFactors'                      -- N00181
+                                            Factor AS 'AssessmentFactors' -- N00181
                                         FROM
                                             SplitFactors sf
                                         WHERE
@@ -181,6 +199,9 @@ SELECT
                                     cinp.cinp_referral_id = cine.cine_referral_id
                                 FOR XML PATH('CINPlanDates'), TYPE
                             ),
+
+                            -- [TESTING] on NumberOfPreviousCPP See replacement below
+
                             -- (   /* ChildProtectionPlans */ 
                             --     /* Each <CINdetails> group contains 0..n <ChildProtectionPlans> groups */
                             --     SELECT
@@ -206,6 +227,7 @@ SELECT
                             --         cppl.cppl_referral_id = cine.cine_referral_id
                             --     FOR XML PATH('ChildProtectionPlans'), TYPE
                             -- ),
+
                             -- [TESTING] on NumberOfPreviousCPP
                             (   /* ChildProtectionPlans */ 
                                 /* Each <CINdetails> group contains 0..n <ChildProtectionPlans> groups */
@@ -271,8 +293,6 @@ SELECT
                             OR cine.cine_close_date >= DATEADD(YEAR, -1, GETDATE())
                         )
                     )               
-
-
                 FOR XML PATH('Child'), TYPE
             )
         FOR XML PATH(''), TYPE
@@ -313,6 +333,42 @@ FOR XML PATH('Message');
 
 
 /* needed objects 
+
+-- Create structure
+CREATE TABLE ssd_development.ssd_person (
+    pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
+    pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}   
+    pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A"} 
+    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"T", "expected_data":["unknown","NULL", "F", "U", "M", "I"]}       
+    pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"} 
+    pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
+    pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
+    pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A", "info":"SEN2 guidance suggests size(4)", "expected_data":["UN1-10"]}                                 
+    pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A", "item_status":"P"} 
+    pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}                  
+    pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"} 
+    pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
+    pers_nationality        NVARCHAR(48)                -- metadata={"item_ref":"PERS012A"} 
+);
+
+
+-- Create structure
+CREATE TABLE ssd_development.ssd_cin_episodes
+(
+    cine_referral_id                INT,            -- metadata={"item_ref":"CINE001A"}
+    cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
+    cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
+    cine_cin_primary_need_code      NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
+    cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
+    cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
+    cine_referral_outcome_json      NVARCHAR(500),  -- metadata={"item_ref":"CINE005A"}
+    cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A"}
+    cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
+    cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
+    cine_referral_team              NVARCHAR(255),  -- metadata={"item_ref":"CINE008A"}
+    cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
+);
+
 -- Create the structure
 CREATE TABLE ssd_development.ssd_disability
 (
@@ -338,6 +394,7 @@ CREATE TABLE ssd_development.ssd_cin_episodes
     cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
 );
  
+
 -- Create structure
 CREATE TABLE ssd_development.ssd_cin_assessments
 (
@@ -360,6 +417,7 @@ CREATE TABLE ssd_development.ssd_assessment_factors (
     cinf_assessment_id              NVARCHAR(48),                   -- metadata={"item_ref":"CINF001A"}
     cinf_assessment_factors_json    NVARCHAR(1000)                  -- metadata={"item_ref":"CINF002A"}
 );
+
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_cp_plans (
@@ -405,6 +463,7 @@ CREATE TABLE ssd_development.ssd_s47_enquiry (
     s47e_s47_completed_by_team          NVARCHAR(255),              -- metadata={"item_ref":"S47E009A"}
     s47e_s47_completed_by_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"S47E008A"}
 );
+
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_cin_plans (

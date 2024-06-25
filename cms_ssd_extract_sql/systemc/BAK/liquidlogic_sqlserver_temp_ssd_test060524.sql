@@ -1297,22 +1297,25 @@ SELECT
     ffa.ANSWER_NO,
     ffa.ANSWER
 INTO #ssd_TMP_PRE_assessment_factors
-
 FROM 
     Child_Social.FACT_FORM_ANSWERS ffa
 WHERE 
     ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC = 'FAMILY ASSESSMENT'
-    AND ffa.ANSWER_NO IN ('1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C', 
-                                  '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', 
-                                  '7A', '8B', '8C', '8D', '8E', '8F', '9A', '10A', '11A', 
-                                  '12A', '13A', '14A', '15A', '16A', '17A', '18A', '18B', 
-                                  '18C', '19A', '19B', '19C', 
-                                  '20', '21', 
-                                  '22A', '23A', '24A')
-    AND LOWER(ffa.ANSWER) = 'yes';
-
-
-
+    AND ffa.ANSWER_NO IN ('1A', '1B', '1C'
+    , '2A', '2B', '2C', '3A', '3B', '3C', 
+                          '4A', '4B', '4C'
+                          ,'5A', '5B', '5C'
+                          ,'6A', '6B', '6C'
+                          ,'7A'
+                          ,'8B', '8C', '8D', '8E', '8F'
+                          ,'9A', '10A', '11A'
+                          ,'12A', '13A', '14A', '15A', '16A', '17A'
+                          ,'18A', '18B', '18C'
+                          ,'19A', '19B', '19C'
+                          ,'20', '21'
+                          ,'22A', '23A', '24A')
+    AND LOWER(ffa.ANSWER) = 'yes' -- filter, adds redundancy into resultant field but allows later expansion
+    AND fsa.FACT_FORM_ID <> -1;
 
 -- Create structure
 CREATE TABLE #ssd_assessment_factors (
@@ -1321,21 +1324,19 @@ CREATE TABLE #ssd_assessment_factors (
     cinf_assessment_factors_json    NVARCHAR(1000)                  -- metadata={"item_ref":"CINF002A"}
 );
 
--- Insert data
+-- Insert data into the final table
 INSERT INTO #ssd_assessment_factors (
                cinf_table_id, 
                cinf_assessment_id, 
                cinf_assessment_factors_json
            )
-
-           
--- SQL Server 2017 or later, uses STRING_AGG
 SELECT 
-    fsa.EXTERNAL_ID     AS cinf_table_id, 
-    fsa.FACT_FORM_ID    AS cinf_assessment_id,
+    fsa.EXTERNAL_ID AS cinf_table_id,
+    fsa.FACT_FORM_ID AS cinf_assessment_id,
     (
         SELECT 
-            STRING_AGG(tmp_af.ANSWER_NO, ',')
+            -- create flattened Key-Value pair json structure {"1A": "Yes","2B": "No","3A": "Yes", ...}
+            '{' + STRING_AGG('"' + tmp_af.ANSWER_NO + '": "' + tmp_af.ANSWER + '"', ', ') + '}' 
         FROM 
             #ssd_TMP_PRE_assessment_factors tmp_af
         WHERE 
@@ -1345,6 +1346,14 @@ FROM
     Child_Social.FACT_SINGLE_ASSESSMENT fsa
 WHERE 
     fsa.EXTERNAL_ID <> -1;
+
+-- Removing rows where fact_form appears, but no responses where recorded or NULLs resulting in empty { }
+-- inc; logic to here rather than query pre|post-processing, for visibility/post-live review
+DELETE FROM #ssd_assessment_factors
+WHERE cinf_assessment_factors_json IS NULL
+   OR cinf_assessment_factors_json = '{}';
+
+-- select * from #ssd_assessment_factors;
 
 
 

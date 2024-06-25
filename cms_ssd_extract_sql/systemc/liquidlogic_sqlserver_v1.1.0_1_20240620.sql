@@ -129,7 +129,7 @@ Description: Person/child details. This the most connected table in the SSD.
 Author: D2I
 Version: 1.0
             0.2: upn _unknown size change in line with DfE to 4 160524 RH
-            0.1 Additional inclusion criteria added to capture care leavers 120324 JH
+            0.1: Additional inclusion criteria added to capture care leavers 120324 JH
 Status: [R]elease
 Remarks:    
             Note: Due to part reliance on 903 table, be aware that if 903 not populated pre-ssd run, 
@@ -173,12 +173,13 @@ CREATE TABLE ssd_development.ssd_person (
 
 -- CTE to get a no_upn_code 
 -- (assumption here is that all codes will be the same/current)
-WITH SingleFact AS (
-    SELECT
-        dim_person_id,
+WITH f903_data_CTE AS (
+    SELECT 
+        -- get the most recent no_upn_code if exists
+        dim_person_id, 
         no_upn_code,
-        ROW_NUMBER() OVER (PARTITION BY dim_person_id ORDER BY (SELECT NULL)) AS rn
-    FROM
+        ROW_NUMBER() OVER (PARTITION BY dim_person_id ORDER BY no_upn_code DESC) AS rn
+    FROM 
         Child_Social.fact_903_data
 )
 -- Insert data
@@ -229,11 +230,16 @@ FROM
     Child_Social.DIM_PERSON AS p
  
 -- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period
-LEFT JOIN
-    -- There is no other location for this data unfortunately. 
-    (SELECT DISTINCT ON (dim_person_id) dim_person_id, no_upn_code
-     FROM Child_Social.fact_903_data
-     ORDER BY dim_person_id, no_upn_code) AS f903 
+LEFT JOIN (
+    -- There appears no other location for this data unfortunately 
+    SELECT 
+        dim_person_id, 
+        no_upn_code
+    FROM 
+        f903_data_CTE
+    WHERE 
+        rn = 1
+) AS f903 
 ON 
     p.DIM_PERSON_ID = f903.dim_person_id
 
@@ -703,8 +709,8 @@ AND EXISTS
 ALTER TABLE ssd_mother ADD CONSTRAINT FK_moth_to_person 
 FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
 
-ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
-FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
+-- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- DEV NOTES [TESTING]
 -- Msg 547, Level 16, State 0, Line 617
@@ -1291,6 +1297,14 @@ IF OBJECT_ID('tempdb..#ssd_assessment_factors') IS NOT NULL DROP TABLE #ssd_asse
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
 
 
+
+-- Create structure
+CREATE TABLE ssd_development.ssd_assessment_factors (
+    cinf_table_id                   NVARCHAR(48) PRIMARY KEY,       -- metadata={"item_ref":"CINF003A"}
+    cinf_assessment_id              NVARCHAR(48),                   -- metadata={"item_ref":"CINF001A"}
+    cinf_assessment_factors_json    NVARCHAR(1000)                  -- metadata={"item_ref":"CINF002A"}
+);
+
 -- Create TMP structure with filtered answers
 SELECT 
     ffa.FACT_FORM_ID,
@@ -1301,36 +1315,32 @@ FROM
     Child_Social.FACT_FORM_ANSWERS ffa
 WHERE 
     ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC = 'FAMILY ASSESSMENT'
-    AND ffa.ANSWER_NO IN ('1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C', 
-                          '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', 
-                          '7A', '8B', '8C', '8D', '8E', '8F', '9A', '10A', '11A', 
-                          '12A', '13A', '14A', '15A', '16A', '17A', '18A', '18B', 
-                          '18C', '19A', '19B', '19C', 
-                          '20', '21', 
-                          '22A', '23A', '24A')
-    AND LOWER(ffa.ANSWER) = 'yes';
-
--- Create structure
-CREATE TABLE #ssd_assessment_factors (
-    cinf_table_id                   NVARCHAR(48) PRIMARY KEY,       -- metadata={"item_ref":"CINF003A"}
-    cinf_assessment_id              NVARCHAR(48),                   -- metadata={"item_ref":"CINF001A"}
-    cinf_assessment_factors_json    NVARCHAR(1000)                  -- metadata={"item_ref":"CINF002A"}
-);
-
--- Insert data
-INSERT INTO #ssd_assessment_factors (
+    AND ffa.ANSWER_NO IN (  '1A', '1B', '1C'
+                            ,'2A', '2B', '2C', '3A', '3B', '3C'
+                            ,'4A', '4B', '4C'
+                            ,'5A', '5B', '5C'
+                            ,'6A', '6B', '6C'
+                            ,'7A'
+                            ,'8B', '8C', '8D', '8E', '8F'
+                            ,'9A', '10A', '11A','12A', '13A', '14A', '15A', '16A', '17A'
+                            ,'18A', '18B', '18C'
+                            ,'19A', '19B', '19C'
+                            ,'20', '21'
+                            ,'22A', '23A', '24A')
+    AND LOWER(ffa.ANSWER) = 'yes'; -- filter, adds redundancy into resultant field but allows later expansion
+-- Insert data into the final table
+INSERT INTO ssd_assessment_factors (
                cinf_table_id, 
                cinf_assessment_id, 
                cinf_assessment_factors_json
            )
-
--- SQL Server 2017 or later, uses STRING_AGG
 SELECT 
-    fsa.EXTERNAL_ID     AS cinf_table_id, 
-    fsa.FACT_FORM_ID    AS cinf_assessment_id,
+    fsa.EXTERNAL_ID AS cinf_table_id,
+    fsa.FACT_FORM_ID AS cinf_assessment_id,
     (
         SELECT 
-            STRING_AGG(tmp_af.ANSWER_NO, ',')
+            -- create flattened Key-Value pair json structure {"1A": "Yes","2B": "No","3A": "Yes", ...}
+            '{' + STRING_AGG('"' + tmp_af.ANSWER_NO + '": "' + tmp_af.ANSWER + '"', ', ') + '}' 
         FROM 
             #ssd_TMP_PRE_assessment_factors tmp_af
         WHERE 
@@ -1340,23 +1350,6 @@ FROM
     Child_Social.FACT_SINGLE_ASSESSMENT fsa
 WHERE 
     fsa.EXTERNAL_ID <> -1;
-
-
--- -- SQL Server Pre-2017, alternative approach using FOR XML PATH
--- SELECT 
---     fsa.EXTERNAL_ID     AS cinf_table_id, 
---     fsa.FACT_FORM_ID    AS cinf_assessment_id,
---     (
---         SELECT 
---             STUFF((SELECT ',' + tmp_af.ANSWER_NO
---                    FROM #ssd_TMP_PRE_assessment_factors tmp_af
---                    WHERE tmp_af.FACT_FORM_ID = fsa.FACT_FORM_ID
---                    FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '')
---     ) AS cinf_assessment_factors_json
--- FROM 
---     Child_Social.FACT_SINGLE_ASSESSMENT fsa
--- WHERE 
---     fsa.EXTERNAL_ID <> -1;
 
 
 
@@ -2914,46 +2907,44 @@ INSERT INTO ssd_cla_previous_permanence (
 SELECT
     tmp_ffa.FACT_FORM_ID AS lapp_table_id,
     ff.DIM_PERSON_ID AS lapp_person_id,
-    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_option,
-    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG'        THEN tmp_ffa.ANSWER END), NULL) AS lapp_previous_permanence_la,
+    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN ISNULL(tmp_ffa.ANSWER, '') END), '') AS lapp_previous_permanence_option,
+    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG' THEN ISNULL(tmp_ffa.ANSWER, '') END), '') AS lapp_previous_permanence_la,
     CASE 
-        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END)) = 0 AND 
-             CAST(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END) AS INT) BETWEEN 1 AND 31 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END) 
+        WHEN PATINDEX('%[^0-9]%', ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '')) = 0 AND 
+             CAST(ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '0') AS INT) BETWEEN 1 AND 31 THEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '') 
         ELSE 'zz' 
     END + '/' + 
- -- Adjusted CASE statement for ORDERMONTH to convert month names to numbers
     CASE 
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('January', 'Jan')  THEN '01'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('February', 'Feb') THEN '02'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('March', 'Mar')    THEN '03'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('April', 'Apr')    THEN '04'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('May')             THEN '05'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('June', 'Jun')     THEN '06'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('July', 'Jul')     THEN '07'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('August', 'Aug')   THEN '08'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('September', 'Sep') THEN '09'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('October', 'Oct')  THEN '10'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('November', 'Nov') THEN '11'
-        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END) IN ('December', 'Dec') THEN '12'
-        ELSE 'zz' -- also handles 'unknown' string
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('January', 'Jan')  THEN '01'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('February', 'Feb') THEN '02'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('March', 'Mar')    THEN '03'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('April', 'Apr')    THEN '04'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('May')             THEN '05'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('June', 'Jun')     THEN '06'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('July', 'Jul')     THEN '07'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('August', 'Aug')   THEN '08'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('September', 'Sep') THEN '09'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('October', 'Oct')  THEN '10'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('November', 'Nov') THEN '11'
+        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('December', 'Dec') THEN '12'
+        ELSE 'zz' 
     END + '/' + 
     CASE 
-        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END)) = 0 THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END) 
+        WHEN PATINDEX('%[^0-9]%', ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END), '')) = 0 THEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END), '') 
         ELSE 'zzzz' 
     END
     AS lapp_previous_permanence_order_date
-
 FROM
     #ssd_TMP_PRE_previous_permanence tmp_ffa
 JOIN
     Child_Social.FACT_FORMS ff ON tmp_ffa.FACT_FORM_ID = ff.FACT_FORM_ID
- 
-AND EXISTS ( -- only ssd relevant records
+AND EXISTS (
     SELECT 1
-    FROM #ssd_person p
+    FROM ssd_person p
     WHERE p.pers_person_id = ff.DIM_PERSON_ID
-    ) 
+)
 GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
+
 
  
 -- -- Add constraint(s)
