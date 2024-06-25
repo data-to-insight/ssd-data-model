@@ -1330,7 +1330,11 @@ WHERE
                             ,'19A', '19B', '19C'
                             ,'20', '21'
                             ,'22A', '23A', '24A')
-    AND LOWER(ffa.ANSWER) = 'yes'; -- filter, adds redundancy into resultant field but allows later expansion
+    -- filters:                        
+    AND LOWER(ffa.ANSWER) = 'yes'   -- expected [Yes/No/NULL], adds redundancy into resultant field but allows later expansion
+    AND ffa.FACT_FORM_ID <> -1;     -- possible admin data present
+
+
 -- Insert data into the final table
 INSERT INTO ssd_assessment_factors (
                cinf_table_id, 
