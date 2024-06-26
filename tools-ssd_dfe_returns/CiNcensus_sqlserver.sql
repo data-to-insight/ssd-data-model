@@ -20,6 +20,16 @@ cinf_table_id	cinf_assessment_id	cinf_assessment_factors_json
 
 
 
+--[Start_of_Census_Year], a constant value for this census of 2023-04-01
+--[Period_of_Census],  a constant value for this census of 22023-04-01 to 2024-03-31
+
+-- end of the census year as April 1st of the current year
+DECLARE @End_of_Census_Year DATE = CAST(CAST(YEAR(GETDATE()) AS VARCHAR) + '-04-01' AS DATE);
+
+-- Calc start of the census year (one year minus one day earlier)
+DECLARE @Start_of_Census_Year DATE = DATEADD(DAY, -1, DATEADD(YEAR, -1, @End_of_Census_Year));
+
+
 -- Drop TMP Pre-processing table if it exists
 IF OBJECT_ID('tempdb..#split_factors_TMP') IS NOT NULL DROP TABLE #split_factors_TMP;
 
@@ -302,7 +312,9 @@ SELECT
                         AND (
                             cine.cine_close_date IS NULL
                             OR cine.cine_close_date = ''
-                            OR cine.cine_close_date >= DATEADD(YEAR, -1, GETDATE())
+                            OR (cine.cine_close_date >= @Start_of_Census_Year 
+                            AND cine.cine_close_date < @End_of_Census_Year)
+
                         )
                     )               
                 FOR XML PATH('Child'), TYPE
