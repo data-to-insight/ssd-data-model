@@ -24,10 +24,10 @@ cinf_table_id	cinf_assessment_id	cinf_assessment_factors_json
 --[Period_of_Census],  a constant value for this census of 22023-04-01 to 2024-03-31
 
 -- end of the census year as April 1st of the current year
-DECLARE @End_of_Census_Year DATE = CAST(CAST(YEAR(GETDATE()) AS VARCHAR) + '-04-01' AS DATE);
+DECLARE @End_of_Census_Date DATE = CAST(CAST(YEAR(GETDATE()) AS VARCHAR) + '-04-01' AS DATE);
 
 -- Calc start of the census year (one year minus one day earlier)
-DECLARE @Start_of_Census_Year DATE = DATEADD(DAY, -1, DATEADD(YEAR, -1, @End_of_Census_Year));
+DECLARE @Start_of_Census_Date DATE = DATEADD(DAY, -1, DATEADD(YEAR, -1, @End_of_Census_Year));
 
 
 -- Drop TMP Pre-processing table if it exists
@@ -110,8 +110,8 @@ SELECT
             (   /* CollectionDetails */
                 SELECT
                     'CIN' AS 'Collection'               -- N00600
-                    ,'2025' AS 'Year'                   -- N00602
-                    ,'2025-03-31' AS 'ReferenceDate'    -- N00603 "2025-03-31" or CONVERT(VARCHAR(10), GETDATE(), 23) ?
+                    ,YEAR(@End_of_Census_Date)      AS 'Year'               -- N00602
+                    ,@Start_of_Census_Date          AS 'ReferenceDate'      -- N00603 "2025-03-31" or CONVERT(VARCHAR(10), GETDATE(), 23) ?
                 FOR XML PATH(''), TYPE
             ) AS CollectionDetails,
             (   /* Source */
@@ -312,8 +312,8 @@ SELECT
                         AND (
                             cine.cine_close_date IS NULL
                             OR cine.cine_close_date = ''
-                            OR (cine.cine_close_date >= @Start_of_Census_Year 
-                            AND cine.cine_close_date < @End_of_Census_Year)
+                            OR (cine.cine_close_date >= @Start_of_Census_Date 
+                            AND cine.cine_close_date < @End_of_Census_Date)
 
                         )
                     )               
