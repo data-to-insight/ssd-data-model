@@ -149,30 +149,12 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- check exists & drop
-IF OBJECT_ID('ssd_person') IS NOT NULL DROP TABLE ssd_person;
-IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
-
-
--- Create structure
-CREATE TABLE ssd_development.ssd_person (
-    pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
-    pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}   
-    pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A"} 
-    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"T", "expected_data":["unknown","NULL", "F", "U", "M", "I"]}       
-    pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"} 
-    pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
-    pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
-    pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A", "info":"SEN2 guidance suggests size(4)", "expected_data":["UN1-10"]}                                 
-    pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A", "item_status":"P"} 
-    pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}                  
-    pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"} 
-    pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
-    pers_nationality        NVARCHAR(48)                -- metadata={"item_ref":"PERS012A"} 
-);
+IF OBJECT_ID('ssd_development.ssd_person', 'V') IS NOT NULL DROP VIEW ssd_development.ssd_person;
 
 
 -- CTE to get a no_upn_code 
 -- (assumption here is that all codes will be the same/current)
+CREATE VIEW ssd_development.ssd_person AS
 WITH f903_data_CTE AS (
     SELECT 
         -- get the most recent no_upn_code if exists
@@ -182,40 +164,24 @@ WITH f903_data_CTE AS (
     FROM 
         Child_Social.fact_903_data
 )
--- Insert data
-INSERT INTO ssd_person (
-    pers_legacy_id,
-    pers_person_id,
-    pers_sex,
-    pers_gender,
-    pers_ethnicity,
-    pers_dob,
-    pers_common_child_id,                               
-    pers_upn_unknown,                                  
-    pers_send_flag,
-    pers_expected_dob,
-    pers_death_date,
-    pers_is_mother,
-    pers_nationality
-)
 SELECT
-    p.LEGACY_ID,
-    p.DIM_PERSON_ID,
-    p.GENDER_MAIN_CODE,
-    p.NHS_NUMBER,                                       
-    p.ETHNICITY_MAIN_CODE,
+    p.LEGACY_ID AS pers_legacy_id,
+    p.DIM_PERSON_ID AS pers_person_id,
+    p.GENDER_MAIN_CODE AS pers_sex,
+    p.NHS_NUMBER AS pers_gender,
+    p.ETHNICITY_MAIN_CODE AS pers_ethnicity,
     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL 
-    END,                                                --  or NULL
+    END AS pers_dob,                                                -- or NULL
     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
-    COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
-    p.EHM_SEN_FLAG,
+    COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS pers_upn_unknown, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
+    p.EHM_SEN_FLAG AS pers_send_flag,
     CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
         ELSE NULL 
-    END,                                                --  or NULL
-    p.DEATH_DTTM,
+    END AS pers_expected_dob,                                                -- or NULL
+    p.DEATH_DTTM AS pers_death_date,
     CASE
         WHEN p.GENDER_MAIN_CODE <> 'M' AND              -- Assumption that if male is not mother
              EXISTS (SELECT 1 FROM Child_Social.FACT_PERSON_RELATION fpr
@@ -223,13 +189,10 @@ SELECT
                            fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI')  -- check for child relation only
         THEN 'Y'
         ELSE NULL -- No child relation found
-    END,
-    p.NATNL_CODE
-   
+    END AS pers_is_mother,
+    p.NATNL_CODE AS pers_nationality
 FROM
     Child_Social.DIM_PERSON AS p
- 
--- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period
 LEFT JOIN (
     -- There appears no other location for this data unfortunately 
     SELECT 
@@ -242,39 +205,37 @@ LEFT JOIN (
 ) AS f903 
 ON 
     p.DIM_PERSON_ID = f903.dim_person_id
-
 WHERE                                                       -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
-    AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
+    AND p.DIM_PERSON_ID >= 1                                    -- Erroneous rows with -1 seen
     -- [TESTING] AND f903.YEAR_TO_DATE = 'Y'                    -- 903 table includes children looked after in previous year and year to date,
                                                                 -- this filters for those current in the current year to date to avoid duplicates
-   
-AND (                                                       -- Filter irrelevant rows by timeframe
-    EXISTS (
-        -- contact in last x@yrs
-        SELECT 1 FROM Child_Social.FACT_CONTACTS fc
-        WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
-        AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
-    )
-    OR EXISTS (
-        -- new or ongoing/active/unclosed referral in last x@yrs
-        SELECT 1 FROM Child_Social.FACT_REFERRALS fr
-        WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
-        AND (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) OR fr.REFRL_END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) OR fr.REFRL_END_DTTM IS NULL)
-    )
-    OR EXISTS (
-        -- care leaver contact in last x@yrs
-        SELECT 1 FROM Child_Social.FACT_CLA_CARE_LEAVERS fccl
-        WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
-        AND fccl.IN_TOUCH_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
-    )
-    OR EXISTS (
-        -- care leaver eligibility exists
-        SELECT 1 FROM Child_Social.DIM_CLA_ELIGIBILITY dce
-        WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
-        AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
-    )
-);
+    AND (                                                       -- Filter irrelevant rows by timeframe
+        EXISTS (
+            -- contact in last x@yrs
+            SELECT 1 FROM Child_Social.FACT_CONTACTS fc
+            WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
+            AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+        )
+        OR EXISTS (
+            -- new or ongoing/active/unclosed referral in last x@yrs
+            SELECT 1 FROM Child_Social.FACT_REFERRALS fr
+            WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
+            AND (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) OR fr.REFRL_END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) OR fr.REFRL_END_DTTM IS NULL)
+        )
+        OR EXISTS (
+            -- care leaver contact in last x@yrs
+            SELECT 1 FROM Child_Social.FACT_CLA_CARE_LEAVERS fccl
+            WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
+            AND fccl.IN_TOUCH_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+        )
+        OR EXISTS (
+            -- care leaver eligibility exists
+            SELECT 1 FROM Child_Social.DIM_CLA_ELIGIBILITY dce
+            WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
+            AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
+        )
+    );
 
  
 -- Create index(es)
@@ -332,53 +293,33 @@ Dependencies:
 SET @TableName = N'ssd_family';
 PRINT 'Creating table: ' + @TableName;
 
-
 -- check exists & drop
-IF OBJECT_ID('ssd_family') IS NOT NULL DROP TABLE ssd_family;
-IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
+IF OBJECT_ID('ssd_development.ssd_family', 'V') IS NOT NULL DROP VIEW ssd_development.ssd_family;
 
-
--- Create structure
-CREATE TABLE ssd_development.ssd_family (
-    fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"FAMI003A"} 
-    fami_family_id  NVARCHAR(48),               -- metadata={"item_ref":"FAMI001A"}
-    fami_person_id  NVARCHAR(48)                -- metadata={"item_ref":"FAMI002A"}
-);
-
--- Insert data 
-INSERT INTO ssd_family (
-    fami_table_id, 
-    fami_family_id, 
-    fami_person_id
-    )
+-- Create the (schema-bound) view
+CREATE VIEW ssd_development.ssd_family
+-- WITH SCHEMABINDING
+AS
 SELECT 
-    fc.EXTERNAL_ID                          AS fami_table_id,
-    fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID      AS fami_family_id,
-    fc.DIM_PERSON_ID                        AS fami_person_id
-
-FROM Child_Social.FACT_CONTACTS AS fc
-
-
-WHERE EXISTS 
-    ( -- only ssd relevant records
-    SELECT 1 
-    FROM ssd_person p
-    WHERE p.pers_person_id = fc.DIM_PERSON_ID
+    fc.EXTERNAL_ID AS fami_table_id,
+    fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID AS fami_family_id,
+    fc.DIM_PERSON_ID AS fami_person_id
+FROM 
+    dbo.Child_Social_FACT_CONTACTS AS fc
+WHERE 
+    EXISTS 
+    (
+        SELECT 1 
+        FROM dbo.ssd_person AS p
+        WHERE p.pers_person_id = fc.DIM_PERSON_ID
     );
 
 
--- Create constraint(s)
-ALTER TABLE ssd_family ADD CONSTRAINT FK_family_person
-FOREIGN KEY (fami_person_id) REFERENCES ssd_person(pers_person_id);
+-- Create a unique clustered index on the view
+CREATE UNIQUE CLUSTERED INDEX idx_ssd_family_unique ON ssd_development.ssd_family (fami_table_id);
+CREATE NONCLUSTERED INDEX idx_family_person_id ON ssd_development.ssd_family (fami_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id ON ssd_development.ssd_family (fami_family_id);
 
--- DEV NOTES [TESTING]
--- Msg 3728, Level 16, State 1, Line 1
--- 'FK_family_person' is not a constraint.Could not drop constraint. See previous errors.
-
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_family_person_id              ON ssd_family(fami_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id     ON ssd_family(fami_family_id);
 
 
 
@@ -406,33 +347,13 @@ SET @TableName = N'ssd_address';
 PRINT 'Creating table: ' + @TableName;
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_address') IS NOT NULL DROP TABLE ssd_address;
-IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
+-- check exists & drop
+IF OBJECT_ID('ssd_development.ssd_address', 'V') IS NOT NULL DROP VIEW ssd_development.ssd_address;
 
-
--- Create structure
-CREATE TABLE ssd_development.ssd_address (
-    addr_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"ADDR007A"}
-    addr_person_id          NVARCHAR(48),               -- metadata={"item_ref":"ADDR002A"} 
-    addr_address_type       NVARCHAR(48),               -- metadata={"item_ref":"ADDR003A"}
-    addr_address_start_date DATETIME,                   -- metadata={"item_ref":"ADDR004A"}
-    addr_address_end_date   DATETIME,                   -- metadata={"item_ref":"ADDR005A"}
-    addr_address_postcode   NVARCHAR(15),               -- metadata={"item_ref":"ADDR006A"}
-    addr_address_json       NVARCHAR(1000)              -- metadata={"item_ref":"ADDR001A"}
-);
-
-
--- insert data
-INSERT INTO ssd_address (
-    addr_table_id, 
-    addr_person_id, 
-    addr_address_type, 
-    addr_address_start_date, 
-    addr_address_end_date, 
-    addr_address_postcode, 
-    addr_address_json
-)
+-- Create the (schema-bound) view
+CREATE VIEW ssd_development.ssd_address
+-- WITH SCHEMABINDING
+AS
 SELECT 
     pa.DIM_PERSON_ADDRESS_ID,
     pa.DIM_PERSON_ID, 
@@ -469,17 +390,14 @@ WHERE EXISTS
     WHERE p.pers_person_id = pa.DIM_PERSON_ID
     );
 
--- Create constraint(s)
-ALTER TABLE ssd_address ADD CONSTRAINT FK_address_person
-FOREIGN KEY (addr_person_id) REFERENCES ssd_person(pers_person_id);
+-- create unique clustered index(es)
+CREATE UNIQUE CLUSTERED INDEX idx_ssd_address_unique ON ssd_development.ssd_address (addr_person_address_id);
 
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_address_person        ON ssd_address(addr_person_id);
-CREATE NONCLUSTERED INDEX idx_address_start         ON ssd_address(addr_address_start_date);
-CREATE NONCLUSTERED INDEX idx_address_end           ON ssd_address(addr_address_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_address_postcode  ON ssd_address(addr_address_postcode);
-
+-- create non-clustered index(es)
+CREATE NONCLUSTERED INDEX idx_address_person ON ssd_development.ssd_address (addr_person_id);
+CREATE NONCLUSTERED INDEX idx_address_start ON ssd_development.ssd_address (addr_address_start_date);
+CREATE NONCLUSTERED INDEX idx_address_end ON ssd_development.ssd_address (addr_address_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_address_postcode ON ssd_development.ssd_address (addr_address_postcode);
 
 
 -- [TESTING] Increment /print progress
@@ -508,49 +426,33 @@ Dependencies:
 SET @TableName = N'ssd_disability';
 PRINT 'Creating table: ' + @TableName;
 
-
 -- Check if exists & drop
-IF OBJECT_ID('ssd_disability') IS NOT NULL DROP TABLE ssd_disability;
-IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
+IF OBJECT_ID('ssd_development.ssd_disability', 'V') IS NOT NULL
+    DROP VIEW ssd_development.ssd_disability;
 
--- Create the structure
-CREATE TABLE ssd_development.ssd_disability
-(
-    disa_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"DISA003A"}
-    disa_person_id          NVARCHAR(48) NOT NULL,      -- metadata={"item_ref":"DISA001A"}
-    disa_disability_code    NVARCHAR(48) NOT NULL       -- metadata={"item_ref":"DISA002A"}
-);
-
-
--- Insert data
-INSERT INTO ssd_disability (
-    disa_table_id,  
-    disa_person_id, 
-    disa_disability_code
-)
+-- Create the schema-bound view
+CREATE VIEW ssd_development.ssd_disability
+-- WITH SCHEMABINDING
+AS
 SELECT 
-    fd.FACT_DISABILITY_ID       AS disa_table_id, 
-    fd.DIM_PERSON_ID            AS disa_person_id, 
-    fd.DIM_LOOKUP_DISAB_CODE    AS disa_disability_code
+    fd.FACT_DISABILITY_ID AS disa_table_id, 
+    fd.DIM_PERSON_ID AS disa_person_id, 
+    fd.DIM_LOOKUP_DISAB_CODE AS disa_disability_code
 FROM 
-    Child_Social.FACT_DISABILITY AS fd
-
+    Child_Social_FACT_DISABILITY AS fd
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM ssd_person AS p
     WHERE p.pers_person_id = fd.DIM_PERSON_ID
     );
 
+-- create unique clustered index(es)
+CREATE UNIQUE CLUSTERED INDEX idx_ssd_disability_unique ON ssd_development.ssd_disability(disa_table_id);
 
--- Create constraint(s)
-ALTER TABLE ssd_disability ADD CONSTRAINT FK_disability_person 
-FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
-    
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_disability_person_id ON ssd_disability(disa_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_disability_code ON ssd_disability(disa_disability_code);
-
+-- create non-clustered index(es)
+CREATE NONCLUSTERED INDEX idx_disability_person_id ON ssd_development.ssd_disability(disa_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_disability_code ON ssd_development.ssd_disability(disa_disability_code);
 
 
 
@@ -570,7 +472,7 @@ Description:
 Author: D2I
 Version: 1.0
             0.9 rem ims.DIM_LOOKUP_IMMGR_STATUS_DESC rpld with _CODE 270324 JH 
-Status: [R]elease
+Status: [T]esting
 Remarks: Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
             increased field size to 100
 Dependencies:
@@ -581,57 +483,39 @@ Dependencies:
 -- [TESTING] Create marker
 SET @TableName = N'ssd_immigration_status';
 PRINT 'Creating table: ' + @TableName;
- 
- 
--- Check if exists & drop
-IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_status;
-IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
 
--- Create structure
-CREATE TABLE ssd_development.ssd_immigration_status (
-    immi_immigration_status_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"IMMI005A"}
-    immi_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"IMMI001A"}
-    immi_immigration_status_start_date  DATETIME,                   -- metadata={"item_ref":"IMMI003A"}
-    immi_immigration_status_end_date    DATETIME,                   -- metadata={"item_ref":"IMMI004A"}
-    immi_immigration_status             NVARCHAR(100)               -- metadata={"item_ref":"IMMI002A"}
-);
- 
- 
--- insert data
-INSERT INTO ssd_immigration_status (
-    immi_immigration_status_id,
-    immi_person_id,
-    immi_immigration_status_start_date,
-    immi_immigration_status_end_date,
-    immi_immigration_status
-)
+ -- Check if exists & drop
+IF OBJECT_ID('ssd_development.ssd_immigration_status', 'V') IS NOT NULL
+    DROP VIEW ssd_development.ssd_immigration_status;
+
+-- Create the schema-bound view
+CREATE VIEW ssd_development.ssd_immigration_status
+WITH SCHEMABINDING
+AS
 SELECT
-    ims.FACT_IMMIGRATION_STATUS_ID,
-    ims.DIM_PERSON_ID,
-    ims.START_DTTM,
-    ims.END_DTTM,
-    ims.DIM_LOOKUP_IMMGR_STATUS_DESC
+    ims.FACT_IMMIGRATION_STATUS_ID AS immi_immigration_status_id,
+    ims.DIM_PERSON_ID AS immi_person_id,
+    ims.START_DTTM AS immi_immigration_status_start_date,
+    ims.END_DTTM AS immi_immigration_status_end_date,
+    ims.DIM_LOOKUP_IMMGR_STATUS_DESC AS immi_immigration_status
 FROM
-    Child_Social.FACT_IMMIGRATION_STATUS AS ims
- 
+    Child_Social_FACT_IMMIGRATION_STATUS AS ims
 WHERE
     EXISTS
     ( -- only ssd relevant records
         SELECT 1
-        FROM ssd_person p
+        FROM ssd_person AS p
         WHERE p.pers_person_id = ims.DIM_PERSON_ID
     );
 
+-- create unique clustered index(es)
+CREATE UNIQUE CLUSTERED INDEX idx_ssd_immigration_status_unique ON ssd_development.ssd_immigration_status(immi_immigration_status_id);
 
--- Create constraint(s)
-ALTER TABLE ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
-FOREIGN KEY (immi_person_id) REFERENCES ssd_person(pers_person_id);
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON ssd_immigration_status(immi_person_id);
-CREATE NONCLUSTERED INDEX idx_immigration_status_start ON ssd_immigration_status(immi_immigration_status_start_date);
-CREATE NONCLUSTERED INDEX idx_immigration_status_end ON ssd_immigration_status(immi_immigration_status_end_date);
+-- create non-clustered index(es)
+CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON ssd_development.ssd_immigration_status(immi_person_id);
+CREATE NONCLUSTERED INDEX idx_immigration_status_start ON ssd_development.ssd_immigration_status(immi_immigration_status_start_date);
+CREATE NONCLUSTERED INDEX idx_immigration_status_end ON ssd_development.ssd_immigration_status(immi_immigration_status_end_date);
 
 
 
@@ -662,71 +546,39 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_mother', 'U') IS NOT NULL DROP TABLE ssd_mother;
-IF OBJECT_ID('tempdb..#ssd_mother') IS NOT NULL DROP TABLE #ssd_mother;
+IF OBJECT_ID('ssd_development.ssd_mother', 'V') IS NOT NULL DROP VIEW ssd_development.ssd_mother;
 
-
--- Create structure
-CREATE TABLE ssd_development.ssd_mother (
-    moth_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"MOTH004A"}
-    moth_person_id          NVARCHAR(48),               -- metadata={"item_ref":"MOTH002A"}
-    moth_childs_person_id   NVARCHAR(48),               -- metadata={"item_ref":"MOTH001A"}
-    moth_childs_dob         DATETIME                    -- metadata={"item_ref":"MOTH003A"}
-);
- 
--- Insert data
-INSERT INTO ssd_mother (
-    moth_table_id,
-    moth_person_id,
-    moth_childs_person_id,
-    moth_childs_dob
-)
+-- Create the schema-bound view
+CREATE VIEW ssd_development.ssd_mother
+WITH SCHEMABINDING
+AS
 SELECT
-    fpr.FACT_PERSON_RELATION_ID         AS moth_table_id,
-    fpr.DIM_PERSON_ID                   AS moth_person_id,
-    fpr.DIM_RELATED_PERSON_ID           AS moth_childs_person_id,
-    fpr.DIM_RELATED_PERSON_DOB          AS moth_childs_dob
- 
+    fpr.FACT_PERSON_RELATION_ID AS moth_table_id,
+    fpr.DIM_PERSON_ID AS moth_person_id,
+    fpr.DIM_RELATED_PERSON_ID AS moth_childs_person_id,
+    fpr.DIM_RELATED_PERSON_DOB AS moth_childs_dob
 FROM
     Child_Social.FACT_PERSON_RELATION AS fpr
 JOIN
     Child_Social.DIM_PERSON AS p ON fpr.DIM_PERSON_ID = p.DIM_PERSON_ID
 WHERE
     p.GENDER_MAIN_CODE <> 'M'
-    AND
-    fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI' -- only interested in parent/child relations
-    AND
-    fpr.END_DTTM IS NULL
- 
-AND EXISTS
+    AND fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI' -- only interested in parent/child relations
+    AND fpr.END_DTTM IS NULL
+    AND EXISTS
     ( -- only ssd relevant records
-    SELECT 1
-    FROM ssd_person p
-    WHERE p.pers_person_id = fpr.DIM_PERSON_ID
+        SELECT 1
+        FROM ssd_person p
+        WHERE p.pers_person_id = fpr.DIM_PERSON_ID
     );
- 
--- Add constraint(s)
-ALTER TABLE ssd_mother ADD CONSTRAINT FK_moth_to_person 
-FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
 
--- -- [TESTING] deployment issues remain
--- ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
--- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
+-- create unique clustered index(es)
+CREATE UNIQUE CLUSTERED INDEX idx_ssd_mother_unique ON ssd_development.ssd_mother(moth_table_id);
 
--- DEV NOTES [TESTING]
--- Msg 547, Level 16, State 0, Line 617
--- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_child_to_person". 
--- The conflict occurred in database "HDM_Local", table "ssd_development.ssd_person", column 'pers_person_id'.
-
--- -- [TESTING]
--- ALTER TABLE ssd_mother ADD CONSTRAINT CHK_no_self_parenting -- Ensure person cannot be their own mother
--- CHECK (moth_person_id <> moth_childs_person_id);
-
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON ssd_mother(moth_childs_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON ssd_mother(moth_childs_dob);
+-- create non-clustered index(es)
+CREATE NONCLUSTERED INDEX idx_mother_person_id ON ssd_development.ssd_mother(moth_person_id);
+CREATE NONCLUSTERED INDEX idx_mother_childs_person_id ON ssd_development.ssd_mother(moth_childs_person_id);
+CREATE NONCLUSTERED INDEX idx_mother_childs_dob ON ssd_development.ssd_mother(moth_childs_dob);
 
 
 

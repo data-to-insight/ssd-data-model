@@ -18,6 +18,8 @@ cinf_table_id	cinf_assessment_id	cinf_assessment_factors_json
 */
 
 
+
+
 -- Drop TMP Pre-processing table if it exists
 IF OBJECT_ID('tempdb..#split_factors_TMP') IS NOT NULL DROP TABLE #split_factors_TMP;
 
@@ -31,7 +33,7 @@ WITH InitialCTE AS (
     SELECT 
         cinf_assessment_id,
 
-        -- cleans the JSON string by removing square brackets, double quotes, and extra spaces, replaces commas with spaces
+        -- cleans the JSON string by removing [] brackets, double quotes, and extra spaces, replaces commas with spaces
         -- cleaned string then used to generate a list of factors as a single space-separated string
         LTRIM(RTRIM(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(cinf_assessment_factors_json, '[', ''), ']', ''), '"', ''), ' ', ''), ',', ','), ' ', ''))) AS FactorList
     FROM 
