@@ -27,7 +27,7 @@ cinf_table_id	cinf_assessment_id	cinf_assessment_factors_json
 DECLARE @End_of_Census_Date DATE = CAST(CAST(YEAR(GETDATE()) AS VARCHAR) + '-04-01' AS DATE);
 
 -- Calc start of the census year (one year minus one day earlier)
-DECLARE @Start_of_Census_Date DATE = DATEADD(DAY, -1, DATEADD(YEAR, -1, @End_of_Census_Year));
+DECLARE @Start_of_Census_Date DATE = DATEADD(DAY, -1, DATEADD(YEAR, -1, @End_of_Census_Date));
 
 
 -- Drop TMP Pre-processing table if it exists
