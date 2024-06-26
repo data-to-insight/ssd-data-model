@@ -4515,6 +4515,65 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
         */
 
 /* 
+=============================================================================
+Object Name: ssd_version
+Description: maintain SSD versioning meta data
+Author: D2I
+Version: 1.0
+Status: [R]elease
+Remarks: Provides analysts using the SSD the needed meta data to ensure
+            field|structure consistency across LAs when needed. 
+Dependencies: 
+- None
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_version';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_ssd_version', 'U') IS NOT NULL DROP TABLE ssd_version;
+IF OBJECT_ID('tempdb..#ssd_version', 'U') IS NOT NULL DROP TABLE #ssd_version;
+
+
+-- create versioning information object
+CREATE TABLE ssd_version (
+    version_id          INT PRIMARY KEY IDENTITY(1,1),  -- unique id for version entry
+    version_number      NVARCHAR(50) NOT NULL,          -- version num (e.g., "1.0.0")
+    release_date        DATE NOT NULL,                  -- Ddate of version release
+    description         NVARCHAR(255),                  -- brief description of version
+    is_current          BIT NOT NULL DEFAULT 0,         -- flag to indicate if this is the current version
+    created_at          DATETIME DEFAULT GETDATE(),     -- timestamp of record was created
+    created_by          NVARCHAR(50)                    -- which user created the record
+);
+
+-- Insert versioning log data
+INSERT INTO ssd_version (version_number, release_date, description, is_current, created_by)
+VALUES 
+    ('1.0.0', '2023-01-01', 'Initial Phase 1 Live release', 0, 'admin'),
+    ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 1, 'admin');
+
+-- set previous current-version flag to !=current, before adding new current version
+UPDATE ssd_version SET is_current = 0 WHERE is_current = 1;
+
+-- insert new current version
+INSERT INTO ssd_version (version_number, release_date, description, is_current, created_by)
+VALUES 
+    ('1.1.2', GETDATE(), 'ssd_version added and minor patch fixes', 1, 'admin');
+
+-- -- Select statement to view the current version
+-- SELECT * 
+-- FROM ssd_version 
+-- WHERE is_current = 1;
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
 
 
 
