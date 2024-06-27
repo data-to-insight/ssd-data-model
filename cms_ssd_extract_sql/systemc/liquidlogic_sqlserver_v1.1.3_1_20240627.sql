@@ -51,8 +51,8 @@ Currently in [REVIEW]
 
 /* Development set up */
 
--- Point to correct DB
-USE HDM_Local;
+-- Point to correct DB/TABLE_CATALOG if required
+USE HDM_Local; 
 GO
 
 
@@ -137,9 +137,8 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_version', 'U') IS NOT NULL DROP TABLE ssd_version;
+IF OBJECT_ID('ssd_development.ssd_version', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_version;
 IF OBJECT_ID('tempdb..#ssd_version', 'U') IS NOT NULL DROP TABLE #ssd_version;
-
 
 -- create versioning information object
 CREATE TABLE ssd_development.ssd_version (
@@ -150,20 +149,22 @@ CREATE TABLE ssd_development.ssd_version (
     is_current          BIT NOT NULL DEFAULT 0,         -- flag to indicate if this is the current version
     created_at          DATETIME DEFAULT GETDATE(),     -- timestamp when record was created
     created_by          NVARCHAR(10),                   -- which user created the record
-    impact_notes        NVARCHAR(255)                   -- additional notes on the impact of the release
+    impact_description  NVARCHAR(255)                   -- additional notes on the impact of the release
 );
 
 -- ensure any previous current-version flag is set to 0 (not current), before adding new current version
-UPDATE ssd_version SET is_current = 0 WHERE is_current = 1;
+UPDATE ssd_development.ssd_version SET is_current = 0 WHERE is_current = 1;
 
 -- insert & update current version (using MAJOR.MINOR.PATCH)
-INSERT INTO ssd_version 
-    (version_number, release_date, description, is_current, created_by, impact_notes)
+INSERT INTO ssd_development.ssd_version 
+    (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     ('1.1.3', GETDATE(), 'Revised filtering on ssd_person', 1, 'admin', 'Check IS_CLIENT flag first');
 
+
+
 -- historic versioning log data
-INSERT INTO ssd_version (version_number, release_date, description, is_current, created_by, impact_notes)
+INSERT INTO ssd_development.ssd_version (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     ('1.0.0', '2023-01-01', 'Initial alpha release (Phase 1 end)', 0, 'admin', ''),
     ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 0, 'admin', 'Revised JSON Array structure implemented for CiN'),
