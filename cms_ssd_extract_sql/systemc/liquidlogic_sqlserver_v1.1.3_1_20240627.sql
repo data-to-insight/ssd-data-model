@@ -70,44 +70,43 @@ SET @StartTime = GETDATE(); -- Record the start time
 
 
 
--- /* Drop all ssd_development schema constraints & tables */
--- -- This is to pre-emptively avoid any run-time conflicts from left-behind FK constraints
--- -- This entire block is NOT part of the public SSD extract
+/* Drop all ssd_development schema constraints & tables */
+-- This is to pre-emptively avoid any run-time conflicts from left-behind FK constraints
 
--- DECLARE @sql NVARCHAR(MAX) = N'';
+DECLARE @sql NVARCHAR(MAX) = N'';
 
--- -- Generate commands to drop FK constraints
--- SELECT @sql += '
--- IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = ' + QUOTENAME(fk.name, '''') + ')
--- BEGIN
---     ALTER TABLE ' + QUOTENAME(SCHEMA_NAME(fk.schema_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) + ' DROP CONSTRAINT ' + QUOTENAME(fk.name) + ';
--- END;
--- '
--- FROM sys.foreign_keys AS fk
--- INNER JOIN sys.tables AS t ON fk.parent_object_id = t.object_id
--- INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
--- WHERE s.name = N'ssd_development';
+-- generate DROP FK commands
+SELECT @sql += '
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = ' + QUOTENAME(fk.name, '''') + ')
+BEGIN
+    ALTER TABLE ' + QUOTENAME(SCHEMA_NAME(fk.schema_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) + ' DROP CONSTRAINT ' + QUOTENAME(fk.name) + ';
+END;
+'
+FROM sys.foreign_keys AS fk
+INNER JOIN sys.tables AS t ON fk.parent_object_id = t.object_id
+INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+WHERE s.name = N'ssd_development';
 
--- -- Execute drop FK
--- EXEC sp_executesql @sql;
+-- execute drop FK
+EXEC sp_executesql @sql;
 
--- -- Clear the SQL variable
--- SET @sql = N'';
+-- Clear the SQL variable
+SET @sql = N'';
 
--- -- Generate DROP TABLE for each table in the schema
--- SELECT @sql += '
--- IF OBJECT_ID(''' + s.name + '.' + t.name + ''', ''U'') IS NOT NULL
--- BEGIN
---     DROP TABLE ' + QUOTENAME(s.name) + '.' + QUOTENAME(t.name) + ';
--- END;
--- '
--- FROM sys.tables AS t
--- INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
--- WHERE s.name = N'ssd_development';
+-- generate DROP TABLE for each table in the schema
+SELECT @sql += '
+IF OBJECT_ID(''' + s.name + '.' + t.name + ''', ''U'') IS NOT NULL
+BEGIN
+    DROP TABLE ' + QUOTENAME(s.name) + '.' + QUOTENAME(t.name) + ';
+END;
+'
+FROM sys.tables AS t
+INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+WHERE s.name = N'ssd_development';
 
--- -- Execute drop tables
--- EXEC sp_executesql @sql;
--- /* END Drop all ssd_development schema constraints */
+-- Execute drop tables
+EXEC sp_executesql @sql;
+/* END Drop all ssd_development schema constraints */
 
 
 /* ********************************************************************************************************** */
@@ -120,6 +119,69 @@ DECLARE @ssd_sub1_range_years INT = 1;
 -- store date on which CASELOAD count required. Currently : Most recent past Sept30th
 DECLARE @LastSept30th DATE; 
 
+/* 
+=============================================================================
+Object Name: ssd_version
+Description: maintain SSD versioning meta data
+Author: D2I
+Version: 1.0
+Status: [R]elease
+Remarks: SSD extract metadata enabling version consistency across LAs. 
+Dependencies: 
+- None
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_version';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_version', 'U') IS NOT NULL DROP TABLE ssd_version;
+IF OBJECT_ID('tempdb..#ssd_version', 'U') IS NOT NULL DROP TABLE #ssd_version;
+
+
+-- create versioning information object
+CREATE TABLE ssd_development.ssd_version (
+    version_id          INT PRIMARY KEY IDENTITY(1,1),  -- unique id for version entry
+    version_number      NVARCHAR(20) NOT NULL,          -- version num (e.g., "1.0.0")
+    release_date        DATE NOT NULL,                  -- Ddate of version release
+    description         NVARCHAR(255),                  -- brief description of version
+    is_current          BIT NOT NULL DEFAULT 0,         -- flag to indicate if this is the current version
+    created_at          DATETIME DEFAULT GETDATE(),     -- timestamp of record was created
+    created_by          NVARCHAR(10)                    -- which user created the record
+);
+
+
+-- ensure any previous current-version flag is set to 0(not current), before adding new current version
+UPDATE ssd_version SET is_current = 0 WHERE is_current = 1;
+
+
+-- insert & update current version (using MAJOR.MINOR.PATCH)
+INSERT INTO ssd_version 
+    (version_number,    release_date,   description, is_current, created_by)
+VALUES 
+    ('1.1.3',           GETDATE(),      'Revised filtering on ssd_person', 1, 'admin');
+
+
+-- historic versioning log data
+INSERT INTO ssd_version (version_number, release_date, description, is_current, created_by)
+VALUES 
+    ('1.0.0', '2023-01-01', 'Initial Phase 1 Live release', 0, 'admin'),
+    ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 0, 'admin'),
+    ('1.1.2', '2024-06-26', 'ssd_version obj added and minor patch fixes', 0, 'admin');
+
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+/* ********************************************************************************************************** */
+/* SSD main extract start */
 
 
 /*
@@ -231,7 +293,7 @@ FROM
  
 -- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period
 LEFT JOIN (
-    -- There appears no other location for this data unfortunately 
+    -- There appears no other accessible location for UPN data
     SELECT 
         dim_person_id, 
         no_upn_code
@@ -243,13 +305,19 @@ LEFT JOIN (
 ON 
     p.DIM_PERSON_ID = f903.dim_person_id
 
-WHERE                                                       -- Filter invalid rows
+WHERE p.IS_CLIENT = 'Y'
+ 
+-- Removed only to allow [TESTING][PLACEHOLDER]  as 903 table refresh only in reporting period
+-- LEFT JOIN
+--     Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
+ 
+OR                                                     -- Filter invalid rows
     p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
-    AND p.DIM_PERSON_ID >= 1                                    -- Erronous rows with -1 seen
+    AND p.DIM_PERSON_ID <> '-1'                                 -- Erronous rows with -1 seen
     -- [TESTING] AND f903.YEAR_TO_DATE = 'Y'                    -- 903 table includes children looked after in previous year and year to date,
                                                                 -- this filters for those current in the current year to date to avoid duplicates
    
-AND (                                                       -- Filter irrelevant rows by timeframe
+AND (                                                  -- Filter irrelevant rows by timeframe
     EXISTS (
         -- contact in last x@yrs
         SELECT 1 FROM Child_Social.FACT_CONTACTS fc
@@ -260,7 +328,11 @@ AND (                                                       -- Filter irrelevant
         -- new or ongoing/active/unclosed referral in last x@yrs
         SELECT 1 FROM Child_Social.FACT_REFERRALS fr
         WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
-        AND (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) OR fr.REFRL_END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) OR fr.REFRL_END_DTTM IS NULL)
+        AND (
+            fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
+        OR  fr.REFRL_END_DTTM   >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
+        OR  fr.REFRL_END_DTTM IS NULL
+        )
     )
     OR EXISTS (
         -- care leaver contact in last x@yrs
@@ -274,7 +346,12 @@ AND (                                                       -- Filter irrelevant
         WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
         AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
     )
-);
+    OR EXISTS (
+        -- active involvement
+        SELECT 1 FROM Child_Social.FACT_INVOLVEMENTS fi
+        WHERE fi.DIM_PERSON_ID = p.DIM_PERSON_ID
+        AND fi.[IS_ALLOCATED_CW_FLAG] ='Y' AND fi.END_DTTM is null
+    )    );
 
  
 -- Create index(es)
@@ -4514,64 +4591,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
         
         */
 
-/* 
-=============================================================================
-Object Name: ssd_version
-Description: maintain SSD versioning meta data
-Author: D2I
-Version: 1.0
-Status: [R]elease
-Remarks: Provides analysts using the SSD the needed meta data to ensure
-            field|structure consistency across LAs when needed. 
-Dependencies: 
-- None
-=============================================================================
-*/
--- [TESTING] Create marker
-SET @TableName = N'ssd_version';
-PRINT 'Creating table: ' + @TableName;
 
-
--- Check if exists, & drop
-IF OBJECT_ID('ssd_ssd_version', 'U') IS NOT NULL DROP TABLE ssd_version;
-IF OBJECT_ID('tempdb..#ssd_version', 'U') IS NOT NULL DROP TABLE #ssd_version;
-
-
--- create versioning information object
-CREATE TABLE ssd_version (
-    version_id          INT PRIMARY KEY IDENTITY(1,1),  -- unique id for version entry
-    version_number      NVARCHAR(50) NOT NULL,          -- version num (e.g., "1.0.0")
-    release_date        DATE NOT NULL,                  -- Ddate of version release
-    description         NVARCHAR(255),                  -- brief description of version
-    is_current          BIT NOT NULL DEFAULT 0,         -- flag to indicate if this is the current version
-    created_at          DATETIME DEFAULT GETDATE(),     -- timestamp of record was created
-    created_by          NVARCHAR(50)                    -- which user created the record
-);
-
--- Insert versioning log data
-INSERT INTO ssd_version (version_number, release_date, description, is_current, created_by)
-VALUES 
-    ('1.0.0', '2023-01-01', 'Initial Phase 1 Live release', 0, 'admin'),
-    ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 1, 'admin');
-
--- set previous current-version flag to !=current, before adding new current version
-UPDATE ssd_version SET is_current = 0 WHERE is_current = 1;
-
--- insert new current version
-INSERT INTO ssd_version (version_number, release_date, description, is_current, created_by)
-VALUES 
-    ('1.1.2', GETDATE(), 'ssd_version added and minor patch fixes', 1, 'admin');
-
--- -- Select statement to view the current version
--- SELECT * 
--- FROM ssd_version 
--- WHERE is_current = 1;
-
-
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
-PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
@@ -4930,6 +4950,8 @@ CREATE TABLE ssd_development.ssd_ehcp_active_plans (
 
 
 
+-- output for ref most recent/current ssd version and last update
+SELECT * FROM ssd_version WHERE is_current = 1;
 
 
 
