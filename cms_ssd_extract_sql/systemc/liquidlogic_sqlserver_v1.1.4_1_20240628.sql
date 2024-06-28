@@ -53,6 +53,8 @@ Currently in [REVIEW]
 
 -- Point to correct DB/TABLE_CATALOG if required
 USE HDM_Local; 
+-- ALTER USER user_name WITH DEFAULT_SCHEMA = ssd_development; -- Commented due to permissions issues
+
 GO
 
 
@@ -142,8 +144,7 @@ IF OBJECT_ID('tempdb..#ssd_version', 'U') IS NOT NULL DROP TABLE #ssd_version;
 
 -- create versioning information object
 CREATE TABLE ssd_development.ssd_version (
-    version_id          INT PRIMARY KEY IDENTITY(1,1),  -- unique id for version entry
-    version_number      NVARCHAR(20) NOT NULL,          -- version num (e.g., "1.0.0")
+    version_number      NVARCHAR(10) NOT NULL,          -- version num (e.g., "1.0.0")
     release_date        DATE NOT NULL,                  -- date of version release
     description         NVARCHAR(100),                  -- brief description of version
     is_current          BIT NOT NULL DEFAULT 0,         -- flag to indicate if this is the current version
@@ -155,11 +156,12 @@ CREATE TABLE ssd_development.ssd_version (
 -- ensure any previous current-version flag is set to 0 (not current), before adding new current version
 UPDATE ssd_development.ssd_version SET is_current = 0 WHERE is_current = 1;
 
+
 -- insert & update current version (using MAJOR.MINOR.PATCH)
 INSERT INTO ssd_development.ssd_version 
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
-    ('1.1.3', GETDATE(), 'Revised filtering on ssd_person', 1, 'admin', 'Check IS_CLIENT flag first');
+    ('1.1.4', GETDATE(), 'ssd_department obj added', 1, 'admin', 'Increased seperation btw professionals and depts enabling history');
 
 
 
@@ -169,6 +171,7 @@ VALUES
     ('1.0.0', '2023-01-01', 'Initial alpha release (Phase 1 end)', 0, 'admin', ''),
     ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 0, 'admin', 'Revised JSON Array structure implemented for CiN'),
     ('1.1.2', '2024-06-26', 'ssd_version obj added and minor patch fixes', 0, 'admin', 'Provide mech for extract ver visibility');
+    ('1.1.3', '2024-06-27', 'Revised filtering on ssd_person', 0, 'admin', 'Check IS_CLIENT flag first');
 
 
 -- [TESTING] Increment /print progress
@@ -303,53 +306,43 @@ LEFT JOIN (
 ON 
     p.DIM_PERSON_ID = f903.dim_person_id
 
-WHERE p.IS_CLIENT = 'Y'
- 
--- Removed only to allow [TESTING][PLACEHOLDER]  as 903 table refresh only in reporting period
--- LEFT JOIN
---     Child_Social.FACT_903_DATA f903 ON p.DIM_PERSON_ID = f903.DIM_PERSON_ID
- 
-OR                                                     -- Filter invalid rows
-    p.DIM_PERSON_ID IS NOT NULL                                 -- Unlikely, but in case
-    AND p.DIM_PERSON_ID <> '-1'                                 -- Erronous rows with -1 seen
-    -- [TESTING] AND f903.YEAR_TO_DATE = 'Y'                    -- 903 table includes children looked after in previous year and year to date,
-                                                                -- this filters for those current in the current year to date to avoid duplicates
-   
-AND (                                                  -- Filter irrelevant rows by timeframe
-    EXISTS (
-        -- contact in last x@yrs
-        SELECT 1 FROM Child_Social.FACT_CONTACTS fc
-        WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
-        AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
-    )
-    OR EXISTS (
-        -- new or ongoing/active/unclosed referral in last x@yrs
-        SELECT 1 FROM Child_Social.FACT_REFERRALS fr
-        WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
+WHERE (p.IS_CLIENT = 'Y'
+    OR (p.DIM_PERSON_ID IS NOT NULL
+        AND p.DIM_PERSON_ID <> '-1'
         AND (
-            fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
-        OR  fr.REFRL_END_DTTM   >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
-        OR  fr.REFRL_END_DTTM IS NULL
+            EXISTS (
+                SELECT 1 FROM Child_Social.FACT_CONTACTS fc
+                WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
+                AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+            )
+            OR EXISTS (
+                SELECT 1 FROM Child_Social.FACT_REFERRALS fr
+                WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
+                AND (
+                    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
+                    OR fr.REFRL_END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
+                    OR fr.REFRL_END_DTTM IS NULL
+                )
+            )
+            OR EXISTS (
+                SELECT 1 FROM Child_Social.FACT_CLA_CARE_LEAVERS fccl
+                WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
+                AND fccl.IN_TOUCH_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+            )
+            OR EXISTS (
+                SELECT 1 FROM Child_Social.DIM_CLA_ELIGIBILITY dce
+                WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
+                AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
+            )
+            OR EXISTS (
+                SELECT 1 FROM Child_Social.FACT_INVOLVEMENTS fi
+                WHERE fi.DIM_PERSON_ID = p.DIM_PERSON_ID
+                AND fi.[IS_ALLOCATED_CW_FLAG] = 'Y'
+                AND fi.END_DTTM IS NULL
+            )
         )
     )
-    OR EXISTS (
-        -- care leaver contact in last x@yrs
-        SELECT 1 FROM Child_Social.FACT_CLA_CARE_LEAVERS fccl
-        WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
-        AND fccl.IN_TOUCH_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
-    )
-    OR EXISTS (
-        -- care leaver eligibility exists
-        SELECT 1 FROM Child_Social.DIM_CLA_ELIGIBILITY dce
-        WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
-        AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
-    )
-    OR EXISTS (
-        -- active involvement
-        SELECT 1 FROM Child_Social.FACT_INVOLVEMENTS fi
-        WHERE fi.DIM_PERSON_ID = p.DIM_PERSON_ID
-        AND fi.[IS_ALLOCATED_CW_FLAG] ='Y' AND fi.END_DTTM is null
-    )    );
+);
 
  
 -- Create index(es)
@@ -4072,6 +4065,68 @@ CREATE NONCLUSTERED INDEX idx_prof_staff_id                 ON ssd_professionals
 CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON ssd_professionals(prof_social_worker_registration_no);
 
 
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
+
+
+/* 
+=============================================================================
+Object Name: ssd_department
+Description: 
+Author: D2I
+Version: 1.0
+Status: [T]est
+Remarks: 
+Dependencies: 
+-
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_department';
+PRINT 'Creating table: ' + @TableName;
+
+
+-- Check if exists & drop
+IF OBJECT_ID('ssd_department', 'U') IS NOT NULL DROP TABLE ssd_department;
+IF OBJECT_ID('tempdb..#ssd_department', 'U') IS NOT NULL DROP TABLE #ssd_department;
+
+-- Create structure
+CREATE TABLE ssd_development.ssd_department (
+    dept_team_id           NVARCHAR(48),  -- metadata={"item_ref":"DEPT1001A"}
+    dept_team_name         NVARCHAR(255), -- metadata={"item_ref":"DEPT1002A"}
+    dept_team_parent_id    NVARCHAR(48),  -- metadata={"item_ref":"DEPT1003A"}, references ssd_department.dept_team_id
+    dept_team_parent_name  NVARCHAR(255)  -- metadata={"item_ref":"DEPT1004A"}
+);
+
+-- Insert data
+INSERT INTO ssd_department (
+    dept_team_id,
+    dept_team_name,
+    dept_team_parent_id,
+    dept_team_parent_name
+)
+SELECT 
+    DIM_DEPARTMENT.dim_department_id AS dept_team_id,
+    DIM_DEPARTMENT.name AS dept_team_name,
+    DIM_DEPARTMENT.dept_id AS dept_team_parent_id,
+    DIM_DEPARTMENT.DEPT_TYPE_DESCRIPTION AS dept_team_parent_name
+FROM Child_Social.DIM_DEPARTMENT;
+
+-- Dev note: Can the data be reduced by matching back to objects to ensure only in-use dept data is retrieved
+
+
+
+-- -- Add constraint(s)
+-- ALTER TABLE ssd_department ADD CONSTRAINT FK_dept_team_parent_id 
+-- FOREIGN KEY (dept_team_parent_id) REFERENCES ssd_department(dept_team_id);
+
+-- Create index(es)
+CREATE INDEX idx_dept_team_id ON ssd_department (dept_team_id);
 
 
 -- [TESTING] Increment /print progress

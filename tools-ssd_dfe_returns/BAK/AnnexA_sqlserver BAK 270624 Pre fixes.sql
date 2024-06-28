@@ -37,13 +37,15 @@ Currently in [REVIEW]
 - 
 ********************************************************************************************************** */
 
--- LA specific vars
-USE HDM_local;
+-- Point to correct DB/TABLE_CATALOG if required
+USE HDM_Local; 
 GO
 
--- Set reporting period in months
+-- Set reporting period in Mths
 DECLARE @AA_ReportingPeriod INT;
-SET @AA_ReportingPeriod = 6; -- Months
+SET @AA_ReportingPeriod = 6; -- Mths
+
+
 
 /*
 ****************************************
@@ -52,20 +54,21 @@ SSD AnnexA Returns Queries || SQL Server
 */
 
 -- Note: Script is currently set to point to #TMP SSD table names. Remove # prefix as 
--- required if running from persistent table version. 
+-- required if running from persistant table version. 
 
-/*
+
+/* 
 =============================================================================
 Report Name: Ofsted List 1 - Contacts YYYY
 Description: 
             "All contacts received in the six months before the date of inspection. 
             Where a contact refers to multiple children, include an entry for 
-            each child in the contact."
+            each child in the contact.""
 
 Author: D2I
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
-            0.9 PW/Blackpool major edits/reworked PW 030324
+			0.9 PW/Blackpool major edits/reworked PW 030324
             0.4: contact_source_desc added
             0.3: apply revised obj/item naming. 
 Status: [R]elease
@@ -81,15 +84,16 @@ Dependencies:
 IF OBJECT_ID('ssd_development.AA_1_contacts') IS NOT NULL DROP TABLE ssd_development.AA_1_contacts;
 IF OBJECT_ID('tempdb..#AA_1_contacts') IS NOT NULL DROP TABLE #AA_1_contacts;
 
+
 SELECT
     /* Common AA fields */
-    p.pers_person_id AS ChildUniqueID,
+    p.pers_person_id							AS ChildUniqueID,
     CASE
-        WHEN p.pers_sex = 'M' THEN 'a) Male'
-        WHEN p.pers_sex = 'F' THEN 'b) Female'
-        WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-        WHEN p.pers_sex = 'I' THEN 'd) Neither'
-    END AS Gender,
+		WHEN p.pers_sex = 'M' THEN 'a) Male'
+		WHEN p.pers_sex = 'F' THEN 'b) Female'
+		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+	END											AS Gender,
     CASE
         WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
         WHEN p.pers_ethnicity IN ('WIRI', 'A2') THEN 'b) WIRI'
@@ -112,47 +116,49 @@ SELECT
         WHEN p.pers_ethnicity IN ('REFU', 'E3') THEN 's) REFU'
         WHEN p.pers_ethnicity IN ('NOBT', 'E4') THEN 't) NOBT'
         WHEN p.pers_ethnicity IN ('UNKNOWN', 'E5') THEN 'u) UNKNOWN'
-        ELSE 'u) UNKNOWN' -- 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'
-    END AS Ethnicity,
-    -- FORMAT(p.pers_dob, 'dd/MM/yyyy') AS DateOfBirth,
-    CONVERT(VARCHAR, p.pers_dob, 103) AS DateOfBirth, -- [TESTING] Review export formats and Excel date handling #DtoI-1731
+        ELSE 'u) UNKNOWN' /*PW - 'Catch All' for any other Ethnicities not in above list; updated to 'u) UNKNOWN'*/
+    END                                                 AS Ethnicity,
+    --FORMAT(p.pers_dob, 'dd/MM/yyyy')			AS DateOfBirth,
+    CONVERT(VARCHAR, p.pers_dob, 103)           AS DateOfBirth, -- [TESTING] Review export formats and Excel date handling #DtoI-1731
 
-    DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
-        CASE 
-            WHEN GETDATE() < DATEADD(YEAR, DATEDIFF(YEAR, p.pers_dob, GETDATE()), p.pers_dob)
-            THEN 1
-            ELSE 0
-        END AS Age,
+
+	DATEDIFF(YEAR, p.pers_dob, GETDATE()) - 
+			CASE 
+				WHEN GETDATE() < DATEADD(YEAR,DATEDIFF(YEAR,p.pers_dob,GETDATE()), p.pers_dob)
+				THEN 1
+				ELSE 0
+			END									AS Age,
 
     /* List additional AA fields */
-    -- FORMAT(c.cont_contact_date, 'dd/MM/yyyy') AS DateOfContact,
-    CONVERT(VARCHAR, c.cont_contact_date, 103) AS DateOfContact, -- [TESTING] Review export formats and Excel date handling #DtoI-1731
+    --FORMAT(c.cont_contact_date, 'dd/MM/yyyy')  AS DateOfContact,
+    CONVERT(VARCHAR, c.cont_contact_date, 103)   AS DateOfContact, -- [TESTING] Review export formats and Excel date handling #DtoI-1731
 
-    CASE
-        WHEN c.cont_contact_source_code = '1A' THEN 'a) 1A: Individual'
-        WHEN c.cont_contact_source_code = '1B' THEN 'b) 1B: Individual'
-        WHEN c.cont_contact_source_code = '1C' THEN 'c) 1C: Individual'
-        WHEN c.cont_contact_source_code = '1D' THEN 'd) 1D: Individual'
-        WHEN c.cont_contact_source_code = '2A' THEN 'e) 2A: Schools'
-        WHEN c.cont_contact_source_code = '2B' THEN 'f) 2B: Education services'
-        WHEN c.cont_contact_source_code = '3A' THEN 'g) 3A: Health services'
-        WHEN c.cont_contact_source_code = '3B' THEN 'h) 3B: Health services'
-        WHEN c.cont_contact_source_code = '3C' THEN 'i) 3C: Health services'
-        WHEN c.cont_contact_source_code = '3D' THEN 'j) 3D: Health services'
-        WHEN c.cont_contact_source_code = '3E' THEN 'k) 3E: Health services'
-        WHEN c.cont_contact_source_code = '3F' THEN 'l) 3F: Health services'
-        WHEN c.cont_contact_source_code = '4' THEN 'm) 4: Housing'
-        WHEN c.cont_contact_source_code = '5A' THEN 'n) 5A: LA services'
-        WHEN c.cont_contact_source_code = '5B' THEN 'o) 5B: LA services'
-        WHEN c.cont_contact_source_code = '5C' THEN 'p) 5C: LA services'
-        WHEN c.cont_contact_source_code = '5D' THEN 'p1) 5D: LA services'
-        WHEN c.cont_contact_source_code = '6' THEN 'q) 6: Police'
-        WHEN c.cont_contact_source_code = '7' THEN 'r) 7: Other legal agency'
-        WHEN c.cont_contact_source_code = '8' THEN 's) 8: Other'
-        WHEN c.cont_contact_source_code = '9' THEN 't) 9: Anonymous'
-        WHEN c.cont_contact_source_code = '10' THEN 'u) 10: Unknown'
-        ELSE 'u) 10: Unknown' -- 'Catch All' for any other Contact/Referral Sources not in above list
-    END AS ContactSource
+	CASE
+		WHEN c.cont_contact_source_code = '1A' THEN 'a) 1A: Individual'
+		WHEN c.cont_contact_source_code = '1B' THEN 'b) 1B: Individual'
+		WHEN c.cont_contact_source_code = '1C' THEN 'c) 1C: Individual'
+		WHEN c.cont_contact_source_code = '1D' THEN 'd) 1D: Individual'
+		WHEN c.cont_contact_source_code = '2A' THEN 'e) 2A: Schools'
+		WHEN c.cont_contact_source_code = '2B' THEN 'f) 2B: Education services'
+		WHEN c.cont_contact_source_code = '3A' THEN 'g) 3A: Health services'
+		WHEN c.cont_contact_source_code = '3B' THEN 'h) 3B: Health services'
+		WHEN c.cont_contact_source_code = '3C' THEN 'i) 3C: Health services'
+		WHEN c.cont_contact_source_code = '3D' THEN 'j) 3D: Health services'
+		WHEN c.cont_contact_source_code = '3E' THEN 'k) 3E: Health services'
+		WHEN c.cont_contact_source_code = '3F' THEN 'l) 3F: Health services'
+		WHEN c.cont_contact_source_code = '4' THEN 'm) 4: Housing'
+		WHEN c.cont_contact_source_code = '5A' THEN 'n) 5A: LA services'
+		WHEN c.cont_contact_source_code = '5B' THEN 'o) 5B: LA services'
+		WHEN c.cont_contact_source_code = '5C' THEN 'p) 5C: LA services'
+		WHEN c.cont_contact_source_code = '5D' THEN 'p1) 5D: LA services'
+		WHEN c.cont_contact_source_code = '6' THEN 'q) 6: Police'
+		WHEN c.cont_contact_source_code = '7' THEN 'r) 7: Other legal agency'
+		WHEN c.cont_contact_source_code = '8' THEN 's) 8: Other'
+		WHEN c.cont_contact_source_code = '9' THEN 't) 9: Anonymous'
+		WHEN c.cont_contact_source_code = '10' THEN 'u) 10: Unknown'
+		ELSE 'u) 10: Unknown' --'Catch All' for any other Contact/Referral Sources not in above list
+	END											AS ContactSource
+
 
 INTO ssd_development.AA_1_contacts
 
@@ -165,8 +171,10 @@ LEFT JOIN
 WHERE
     c.cont_contact_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
 
+
+
 -- [TESTING]
-SELECT * FROM ssd_development.AA_1_contacts;
+select * from ssd_development.AA_1_contacts;
 
 
 
@@ -730,6 +738,7 @@ LEFT JOIN
 			s47e.s47e_person_id, s47e.s47e_s47_enquiry_id, s47e.s47e_s47_start_date
 	) AS agg_icpc ON s47e.s47e_person_id = agg_icpc.s47e_person_id
 		AND agg_icpc.Rnk = 1
+
 
 -- obtain professional & team names
 LEFT JOIN
@@ -1872,7 +1881,7 @@ SELECT
 
     clea.clea_care_leaver_allocated_team					    AS AllocatedTeam,           -- [TESTING]
 	pro.prof_professional_name									AS AllocatedWorker,         -- [TESTING]
-    pro_advisor.prof_professional_name                          AS AllocatedPersonalAdvisor, -- [TESTING] was clea.clea_care_leaver_personal_advisor	AS AllocatedPersonalAdvisor,
+    pro_advisor.prof_professional_name                          AS AllocatedPersonalAdvisor -- [TESTING] was clea.clea_care_leaver_personal_advisor	AS AllocatedPersonalAdvisor,
 
 	CASE
 		WHEN clea.clea_care_leaver_eligibility in ('Relevant','Relevant child') then 'a) Relevant child'
@@ -2178,11 +2187,14 @@ SELECT
     '01/01/1900'                                                    AS ApplicationApprDate, -- Date application approved
     FORMAT(perm.perm_matched_date, 'dd/MM/yyyy')                    AS MatchedDate,         -- Date adopter matched with child(ren)
     FORMAT(perm.perm_placed_for_adoption_date, 'dd/MM/yyyy')        AS PlacedDate,          -- Date child/children placed with adopter(s)
-    perm.perm_siblings_placed_together                              AS NumSiblingsPlaced,   -- No. of children placed
+    FORMAT(perm.perm_siblings_placed_together                       AS NumSiblingsPlaced,   -- No. of children placed
     FORMAT(perm.perm_permanence_order_date, 'dd/MM/yyyy')           AS AdoptionOrderDate,   -- Date of Adoption Order
     FORMAT(perm.perm_decision_reversed_date, 'dd/MM/yyyy')          AS AdoptionLeaveDate,   -- Date of leaving adoption process
-    perm.perm_decision_reversed_reason                              AS AdoptingLeaveReason  -- Reason for leaving adoption process
+    FORMAT(perm.perm_decision_reversed_reason                       AS AdoptingLeaveReason  -- Reason for leaving adoption process
     
+    
+
+
 INTO ssd_development.AA_11_adopters
 
 FROM
@@ -2209,4 +2221,3 @@ WHERE
 
     -- [TESTING]
 select * from ssd_development.AA_11_adopters;
-
