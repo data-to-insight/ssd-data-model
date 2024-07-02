@@ -4,6 +4,7 @@ import pandas as pd
 # Used for analysis/testing of ssd_person filters for example, and over different db clients for comparison like output. 
 
 # Load the main data and unique IDs CSV files
+# unique_ids is used as the complete list of ids to build the matrix around. 
 unique_ids = pd.read_csv('/workspaces/ssd-data-model/tools-ssd_workflow/admin/personID_checks/ssd_person_escc_unique_id_list.csv')
 main_data = pd.read_csv('/workspaces/ssd-data-model/tools-ssd_workflow/admin/personID_checks/ssd_person_escc_person_id_data.csv')
 

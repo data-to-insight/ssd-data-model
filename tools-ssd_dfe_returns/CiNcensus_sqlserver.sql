@@ -120,7 +120,7 @@ SELECT
                     ,'845' AS 'LEA'                     -- N00216
                     ,'Local Authority' AS 'SoftwareCode' -- N00605
                     ,'ver 3.1.21' AS 'Release'          -- N00607
-                    ,'001' AS 'SerialNo'                -- N00606
+                    ,'040' AS 'SerialNo'                -- N00606
                     ,CONVERT(VARCHAR(19), GETDATE(), 120) AS 'DateTime' -- N00609 120==YYYY-MM-DD HH:MM:SS
                 FOR XML PATH(''), TYPE
             ) AS Source,
@@ -143,7 +143,7 @@ SELECT
                         SELECT
                             REPLACE(REPLACE(pers_legacy_id, CHAR(10), ''), CHAR(9), '')         AS 'LAchildID'                          -- N00097  rem newline char (\n) |  tab char (\t)
                             ,pers_common_child_id                                               AS 'UPN'                                -- N00001
-                            ,(  -- obtain any former upns from linked_identifiers table
+                            ,(  -- obtain former upn from linked_identifiers table
                                 SELECT TOP 1
                                     REPLACE(REPLACE(link_identifier_value, CHAR(10), ''), CHAR(9), '')
                                 FROM

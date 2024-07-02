@@ -170,7 +170,7 @@ INSERT INTO ssd_development.ssd_version (version_number, release_date, descripti
 VALUES 
     ('1.0.0', '2023-01-01', 'Initial alpha release (Phase 1 end)', 0, 'admin', ''),
     ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 0, 'admin', 'Revised JSON Array structure implemented for CiN'),
-    ('1.1.2', '2024-06-26', 'ssd_version obj added and minor patch fixes', 0, 'admin', 'Provide mech for extract ver visibility');
+    ('1.1.2', '2024-06-26', 'ssd_version obj added and minor patch fixes', 0, 'admin', 'Provide mech for extract ver visibility'),
     ('1.1.3', '2024-06-27', 'Revised filtering on ssd_person', 0, 'admin', 'Check IS_CLIENT flag first');
 
 
@@ -1409,28 +1409,7 @@ INSERT INTO ssd_assessment_factors (
                cinf_assessment_factors_json
            )
 
--- -- Opt1: 
--- -- create field structure of flattened Key-Value pair json structure 
--- -- {"1A": "Yes","2B": "No","3A": "Yes", ...}           
--- SELECT 
---     fsa.EXTERNAL_ID AS cinf_table_id,
---     fsa.FACT_FORM_ID AS cinf_assessment_id,
---     (
---         SELECT 
---             -- create flattened Key-Value pair json structure {"1A": "Yes","2B": "No","3A": "Yes", ...}
---             '{' + STRING_AGG('"' + tmp_af.ANSWER_NO + '": "' + tmp_af.ANSWER + '"', ', ') + '}' 
---         FROM 
---             #ssd_TMP_PRE_assessment_factors tmp_af
---         WHERE 
---             tmp_af.FACT_FORM_ID = fsa.FACT_FORM_ID
---     ) AS cinf_assessment_factors_json
--- FROM 
---     Child_Social.FACT_SINGLE_ASSESSMENT fsa
--- WHERE 
---     fsa.EXTERNAL_ID <> -1;
-
-
--- -- Opt2: 
+-- -- Opt1: (current implementation for backward compatibility)
 -- -- create field structure of flattened Key only json-like array structure 
 -- -- ["1A","2B","3A", ...]           
 SELECT 
@@ -1450,6 +1429,25 @@ FROM
 WHERE 
     fsa.EXTERNAL_ID <> -1;
 
+-- -- Opt2: (commented implementation ready for forward compatibility)
+-- -- create field structure of flattened Key-Value pair json structure 
+-- -- {"1A": "Yes","2B": "No","3A": "Yes", ...}           
+-- SELECT 
+--     fsa.EXTERNAL_ID AS cinf_table_id,
+--     fsa.FACT_FORM_ID AS cinf_assessment_id,
+--     (
+--         SELECT 
+--             -- create flattened Key-Value pair json structure {"1A": "Yes","2B": "No","3A": "Yes", ...}
+--             '{' + STRING_AGG('"' + tmp_af.ANSWER_NO + '": "' + tmp_af.ANSWER + '"', ', ') + '}' 
+--         FROM 
+--             #ssd_TMP_PRE_assessment_factors tmp_af
+--         WHERE 
+--             tmp_af.FACT_FORM_ID = fsa.FACT_FORM_ID
+--     ) AS cinf_assessment_factors_json
+-- FROM 
+--     Child_Social.FACT_SINGLE_ASSESSMENT fsa
+-- WHERE 
+--     fsa.EXTERNAL_ID <> -1;
 
 
 
@@ -4060,11 +4058,10 @@ LEFT JOIN (
 
 -- Add constraint(s)
 
+
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_prof_staff_id                 ON ssd_professionals (prof_staff_id);
 CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON ssd_professionals(prof_social_worker_registration_no);
-
-
 
 
 -- [TESTING] Increment /print progress
@@ -4111,11 +4108,12 @@ INSERT INTO ssd_department (
     dept_team_parent_name
 )
 SELECT 
-    DIM_DEPARTMENT.dim_department_id AS dept_team_id,
-    DIM_DEPARTMENT.name AS dept_team_name,
-    DIM_DEPARTMENT.dept_id AS dept_team_parent_id,
-    DIM_DEPARTMENT.DEPT_TYPE_DESCRIPTION AS dept_team_parent_name
-FROM Child_Social.DIM_DEPARTMENT;
+    dpt.dim_department_id       AS dept_team_id,
+    dpt.name                    AS dept_team_name,
+    dpt.dept_id                 AS dept_team_parent_id,
+    dpt.DEPT_TYPE_DESCRIPTION   AS dept_team_parent_name
+FROM Child_Social.DIM_DEPARTMENT dpt
+WHERE dpt.dim_department_id <> -1;
 
 -- Dev note: Can the data be reduced by matching back to objects to ensure only in-use dept data is retrieved
 
@@ -4336,7 +4334,7 @@ INSERT INTO ssd_development.ssd_linked_identifiers (
     link_valid_to_date
 )
 SELECT
-    cs.dim_person_id AS link_person_id,
+    cs.dim_person_id                    AS link_person_id,
     'Unique Pupil Number'               AS link_identifier_type,
     cs.upn                              AS link_identifier_value,
     NULL                                AS link_valid_from_date,        -- NULL for valid_from_date
