@@ -115,7 +115,7 @@ EXEC sp_executesql @sql;
 /* SSD extract set up */
 
 -- ssd extract time-frame (YRS)
-DECLARE @ssd_timeframe_years INT = 1;
+DECLARE @ssd_timeframe_years INT = 6;
 DECLARE @ssd_sub1_range_years INT = 1;
 
 -- store date on which CASELOAD count required. Currently : Most recent past Sept30th

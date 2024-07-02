@@ -53,7 +53,7 @@ Currently in [REVIEW]
 
 -- Point to correct DB/TABLE_CATALOG if required
 USE HDM_Local; 
--- ALTER USER user_name WITH DEFAULT_SCHEMA = ssd_development; -- Commented due to permissions issues
+-- ALTER USER user_name WITH DEFAULT_SCHEMA = #ssd_development; -- Commented due to permissions issues
 
 GO
 
@@ -72,7 +72,7 @@ SET @StartTime = GETDATE(); -- Record the start time
 
 
 
-/* Drop all ssd_development schema constraints & tables */
+/* Drop all #ssd_development schema constraints & tables */
 -- This is to pre-emptively avoid any run-time conflicts from left-behind FK constraints
 
 DECLARE @sql NVARCHAR(MAX) = N'';
@@ -108,7 +108,7 @@ WHERE s.name = N'ssd_development';
 
 -- Execute drop tables
 EXEC sp_executesql @sql;
-/* END Drop all ssd_development schema constraints */
+/* END Drop all #ssd_development schema constraints */
 
 
 /* ********************************************************************************************************** */
@@ -123,7 +123,7 @@ DECLARE @LastSept30th DATE;
 
 /* 
 =============================================================================
-Object Name: ssd_version
+Object Name: #ssd_version
 Description: maintain SSD versioning meta data
 Author: D2I
 Version: 1.0
@@ -171,7 +171,7 @@ VALUES
     ('1.0.0', '2023-01-01', 'Initial alpha release (Phase 1 end)', 0, 'admin', ''),
     ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 0, 'admin', 'Revised JSON Array structure implemented for CiN'),
     ('1.1.2', '2024-06-26', 'ssd_version obj added and minor patch fixes', 0, 'admin', 'Provide mech for extract ver visibility'),
-    ('1.1.3', '2024-06-27', 'Revised filtering on ssd_person', 0, 'admin', 'Check IS_CLIENT flag first');
+    ('1.1.3', '2024-06-27', 'Revised filtering on #ssd_person', 0, 'admin', 'Check IS_CLIENT flag first');
 
 
 -- [TESTING] Increment /print progress
@@ -187,7 +187,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_person
+Object Name: #ssd_person
 Description: Person/child details. This the most connected table in the SSD.
 Author: D2I
 Version: 1.0
@@ -212,7 +212,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- check exists & drop
-IF OBJECT_ID('ssd_person') IS NOT NULL DROP TABLE ssd_person;
+IF OBJECT_ID('ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 
@@ -246,7 +246,7 @@ WITH f903_data_CTE AS (
         Child_Social.fact_903_data
 )
 -- Insert data
-INSERT INTO ssd_person (
+INSERT INTO #ssd_person (
     pers_legacy_id,
     pers_person_id,
     pers_sex,
@@ -346,9 +346,9 @@ WHERE (p.IS_CLIENT = 'Y'
 
  
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob               ON ssd_person(pers_dob);
-CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id   ON ssd_person(pers_common_child_id);
-CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender       ON ssd_person(pers_ethnicity, pers_gender);
+CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob               ON #ssd_person(pers_dob);
+CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id   ON #ssd_person(pers_common_child_id);
+CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender       ON #ssd_person(pers_ethnicity, pers_gender);
 
 
 
@@ -385,12 +385,12 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_family
+Object Name: #ssd_family
 Description: Contains the family connections for each person
 Author: D2I
 Version: 1.0
 Status: [R]elease
-Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
+Remarks: Part of early help system. Restrict to records related to x@yrs of #ssd_person
 Dependencies: 
 - FACT_CONTACTS
 - ssd.ssd_person
@@ -402,7 +402,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- check exists & drop
-IF OBJECT_ID('ssd_family') IS NOT NULL DROP TABLE ssd_family;
+IF OBJECT_ID('ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
 
@@ -414,7 +414,7 @@ CREATE TABLE #ssd_family (
 );
 
 -- Insert data 
-INSERT INTO ssd_family (
+INSERT INTO #ssd_family (
     fami_table_id, 
     fami_family_id, 
     fami_person_id
@@ -430,14 +430,14 @@ FROM Child_Social.FACT_CONTACTS AS fc
 WHERE EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fc.DIM_PERSON_ID
     );
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_family ADD CONSTRAINT FK_family_person
-FOREIGN KEY (fami_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_family ADD CONSTRAINT FK_family_person
+FOREIGN KEY (fami_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- DEV NOTES [TESTING]
 -- Msg 3728, Level 16, State 1, Line 1
@@ -445,8 +445,8 @@ FOREIGN KEY (fami_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_family_person_id              ON ssd_family(fami_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id     ON ssd_family(fami_family_id);
+CREATE NONCLUSTERED INDEX idx_family_person_id              ON #ssd_family(fami_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id     ON #ssd_family(fami_family_id);
 
 
 
@@ -458,14 +458,14 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_address
+Object Name: #ssd_address
 Description: Contains full address details for every person 
 Author: D2I
 Version: 1.0
 Status: [R]elease
 Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 Dependencies: 
-- ssd_person
+- #ssd_person
 - DIM_PERSON_ADDRESS
 =============================================================================
 */
@@ -475,7 +475,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_address') IS NOT NULL DROP TABLE ssd_address;
+IF OBJECT_ID('ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
 
@@ -492,7 +492,7 @@ CREATE TABLE #ssd_address (
 
 
 -- insert data
-INSERT INTO ssd_address (
+INSERT INTO #ssd_address (
     addr_table_id, 
     addr_person_id, 
     addr_address_type, 
@@ -533,20 +533,20 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = pa.DIM_PERSON_ID
     );
 
 -- Create constraint(s)
-ALTER TABLE ssd_address ADD CONSTRAINT FK_address_person
-FOREIGN KEY (addr_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_address ADD CONSTRAINT FK_address_person
+FOREIGN KEY (addr_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_address_person        ON ssd_address(addr_person_id);
-CREATE NONCLUSTERED INDEX idx_address_start         ON ssd_address(addr_address_start_date);
-CREATE NONCLUSTERED INDEX idx_address_end           ON ssd_address(addr_address_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_address_postcode  ON ssd_address(addr_address_postcode);
+CREATE NONCLUSTERED INDEX idx_address_person        ON #ssd_address(addr_person_id);
+CREATE NONCLUSTERED INDEX idx_address_start         ON #ssd_address(addr_address_start_date);
+CREATE NONCLUSTERED INDEX idx_address_end           ON #ssd_address(addr_address_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_address_postcode  ON #ssd_address(addr_address_postcode);
 
 
 
@@ -560,7 +560,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_disability
+Object Name: #ssd_disability
 Description: Contains the Y/N flag for persons with disability
 Author: D2I
 Version: 1.0
@@ -568,7 +568,7 @@ Version: 1.0
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_DISABILITY
 =============================================================================
 */
@@ -578,7 +578,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_disability') IS NOT NULL DROP TABLE ssd_disability;
+IF OBJECT_ID('ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 
 -- Create the structure
@@ -591,7 +591,7 @@ CREATE TABLE #ssd_disability
 
 
 -- Insert data
-INSERT INTO ssd_disability (
+INSERT INTO #ssd_disability (
     disa_table_id,  
     disa_person_id, 
     disa_disability_code
@@ -606,18 +606,18 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fd.DIM_PERSON_ID
     );
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_disability ADD CONSTRAINT FK_disability_person 
-FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_disability ADD CONSTRAINT FK_disability_person 
+FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
     
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_disability_person_id ON ssd_disability(disa_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_disability_code ON ssd_disability(disa_disability_code);
+CREATE NONCLUSTERED INDEX idx_disability_person_id ON #ssd_disability(disa_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_disability_code ON #ssd_disability(disa_disability_code);
 
 
 
@@ -633,7 +633,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_immigration_status (UASC)
+Object Name: #ssd_immigration_status (UASC)
 Description:
 Author: D2I
 Version: 1.0
@@ -642,7 +642,7 @@ Status: [R]elease
 Remarks: Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
             increased field size to 100
 Dependencies:
-- ssd_person
+- #ssd_person
 - FACT_IMMIGRATION_STATUS
 =============================================================================
 */
@@ -652,7 +652,7 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_status;
+IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
 
@@ -667,7 +667,7 @@ CREATE TABLE #ssd_immigration_status (
  
  
 -- insert data
-INSERT INTO ssd_immigration_status (
+INSERT INTO #ssd_immigration_status (
     immi_immigration_status_id,
     immi_person_id,
     immi_immigration_status_start_date,
@@ -687,19 +687,19 @@ WHERE
     EXISTS
     ( -- only ssd relevant records
         SELECT 1
-        FROM ssd_person p
+        FROM #ssd_person p
         WHERE p.pers_person_id = ims.DIM_PERSON_ID
     );
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
-FOREIGN KEY (immi_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
+FOREIGN KEY (immi_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON ssd_immigration_status(immi_person_id);
-CREATE NONCLUSTERED INDEX idx_immigration_status_start ON ssd_immigration_status(immi_immigration_status_start_date);
-CREATE NONCLUSTERED INDEX idx_immigration_status_end ON ssd_immigration_status(immi_immigration_status_end_date);
+CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
+CREATE NONCLUSTERED INDEX idx_immigration_status_start ON #ssd_immigration_status(immi_immigration_status_start_date);
+CREATE NONCLUSTERED INDEX idx_immigration_status_end ON #ssd_immigration_status(immi_immigration_status_end_date);
 
 
 
@@ -712,7 +712,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_mother
+Object Name: #ssd_mother
 Description: Contains parent-child relations between mother-child 
 Author: D2I
 Version: 1.0
@@ -720,7 +720,7 @@ Version: 1.0
 Status: [R]elease
 Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_PERSON_RELATION
 =============================================================================
 */
@@ -730,7 +730,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_mother', 'U') IS NOT NULL DROP TABLE ssd_mother;
+IF OBJECT_ID('ssd_mother', 'U') IS NOT NULL DROP TABLE #ssd_mother;
 IF OBJECT_ID('tempdb..#ssd_mother') IS NOT NULL DROP TABLE #ssd_mother;
 
 
@@ -743,7 +743,7 @@ CREATE TABLE #ssd_mother (
 );
  
 -- Insert data
-INSERT INTO ssd_mother (
+INSERT INTO #ssd_mother (
     moth_table_id,
     moth_person_id,
     moth_childs_person_id,
@@ -769,17 +769,17 @@ WHERE
 AND EXISTS
     ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fpr.DIM_PERSON_ID
     );
  
 -- Add constraint(s)
-ALTER TABLE ssd_mother ADD CONSTRAINT FK_moth_to_person 
-FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_mother ADD CONSTRAINT FK_moth_to_person 
+FOREIGN KEY (moth_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- -- [TESTING] deployment issues remain
--- ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
--- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_mother ADD CONSTRAINT FK_child_to_person 
+-- FOREIGN KEY (moth_childs_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- DEV NOTES [TESTING]
 -- Msg 547, Level 16, State 0, Line 617
@@ -787,14 +787,14 @@ FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
 -- The conflict occurred in database "HDM_Local", table "#ssd_person", column 'pers_person_id'.
 
 -- -- [TESTING]
--- ALTER TABLE ssd_mother ADD CONSTRAINT CHK_no_self_parenting -- Ensure person cannot be their own mother
+-- ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_no_self_parenting -- Ensure person cannot be their own mother
 -- CHECK (moth_person_id <> moth_childs_person_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON ssd_mother(moth_childs_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON ssd_mother(moth_childs_dob);
+CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON #ssd_mother(moth_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON #ssd_mother(moth_childs_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON #ssd_mother(moth_childs_dob);
 
 
 
@@ -807,14 +807,14 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_legal_status
+Object Name: #ssd_legal_status
 Description: 
 Author: D2I
 Version: 1.0
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_LEGAL_STATUS
 =============================================================================
 */
@@ -824,7 +824,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_legal_status') IS NOT NULL DROP TABLE ssd_legal_status;
+IF OBJECT_ID('ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
 IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
 
 -- Create structure
@@ -837,7 +837,7 @@ CREATE TABLE #ssd_legal_status (
 );
  
 -- Insert data
-INSERT INTO ssd_legal_status (
+INSERT INTO #ssd_legal_status (
     lega_legal_status_id,
     lega_person_id,
     lega_legal_status,
@@ -856,20 +856,20 @@ FROM
 WHERE EXISTS
     ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fls.DIM_PERSON_ID
     );
  
 -- Create constraint(s)
-ALTER TABLE ssd_legal_status ADD CONSTRAINT FK_legal_status_person
-FOREIGN KEY (lega_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_legal_status ADD CONSTRAINT FK_legal_status_person
+FOREIGN KEY (lega_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id ON ssd_legal_status(lega_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status ON ssd_legal_status(lega_legal_status);
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start ON ssd_legal_status(lega_legal_status_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end ON ssd_legal_status(lega_legal_status_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id ON #ssd_legal_status(lega_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status ON #ssd_legal_status(lega_legal_status);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start ON #ssd_legal_status(lega_legal_status_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end ON #ssd_legal_status(lega_legal_status_end_date);
 
 
 
@@ -883,7 +883,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_contacts
+Object Name: #ssd_contacts
 Description: 
 Author: D2I
 Version: 1.0
@@ -894,7 +894,7 @@ Remarks:Inclusion in contacts might differ between LAs.
         Baseline definition:
         Contains safeguarding and referral to early help data.
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_CONTACTS
 =============================================================================
 */
@@ -904,7 +904,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_contacts') IS NOT NULL DROP TABLE ssd_contacts;
+IF OBJECT_ID('ssd_contacts') IS NOT NULL DROP TABLE #ssd_contacts;
 IF OBJECT_ID('tempdb..#ssd_contacts') IS NOT NULL DROP TABLE #ssd_contacts;
 
 
@@ -919,7 +919,7 @@ CREATE TABLE #ssd_contacts (
 );
 
 -- Insert data
-INSERT INTO ssd_contacts (
+INSERT INTO #ssd_contacts (
     cont_contact_id, 
     cont_person_id, 
     cont_contact_date,
@@ -953,19 +953,19 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fc.DIM_PERSON_ID
     );
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_contacts ADD CONSTRAINT FK_contact_person 
-FOREIGN KEY (cont_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_contacts ADD CONSTRAINT FK_contact_person 
+FOREIGN KEY (cont_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_contact_person_id ON ssd_contacts(cont_person_id);
-CREATE NONCLUSTERED INDEX idx_contact_date ON ssd_contacts(cont_contact_date);
-CREATE NONCLUSTERED INDEX idx_contact_source_code ON ssd_contacts(cont_contact_source_code);
+CREATE NONCLUSTERED INDEX idx_contact_person_id ON #ssd_contacts(cont_person_id);
+CREATE NONCLUSTERED INDEX idx_contact_date ON #ssd_contacts(cont_contact_date);
+CREATE NONCLUSTERED INDEX idx_contact_source_code ON #ssd_contacts(cont_contact_source_code);
 
 
 
@@ -981,7 +981,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_early_help_episodes
+Object Name: #ssd_early_help_episodes
 Description: 
 Author: D2I
 Version: 1.2
@@ -989,7 +989,7 @@ Version: 1.2
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_CAF_EPISODE
 =============================================================================
 */
@@ -999,7 +999,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_early_help_episodes') IS NOT NULL DROP TABLE ssd_early_help_episodes;
+IF OBJECT_ID('ssd_early_help_episodes') IS NOT NULL DROP TABLE #ssd_early_help_episodes;
 IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL DROP TABLE #ssd_early_help_episodes;
 
 
@@ -1017,7 +1017,7 @@ CREATE TABLE #ssd_early_help_episodes (
  
  
 -- Insert data
-INSERT INTO ssd_early_help_episodes (
+INSERT INTO #ssd_early_help_episodes (
     earl_episode_id,
     earl_person_id,
     earl_episode_start_date,
@@ -1043,20 +1043,20 @@ FROM
 WHERE EXISTS
     ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = cafe.DIM_PERSON_ID
     );
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
-FOREIGN KEY (earl_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
+FOREIGN KEY (earl_person_id) REFERENCES #ssd_person(pers_person_id);
 
  
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
-CREATE NONCLUSTERED INDEX idx_early_help_start_date ON ssd_early_help_episodes(earl_episode_start_date);
-CREATE NONCLUSTERED INDEX idx_early_help_end_date ON ssd_early_help_episodes(earl_episode_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
+CREATE NONCLUSTERED INDEX idx_early_help_start_date ON #ssd_early_help_episodes(earl_episode_start_date);
+CREATE NONCLUSTERED INDEX idx_early_help_end_date ON #ssd_early_help_episodes(earl_episode_end_date);
 
 
 
@@ -1070,7 +1070,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_cin_episodes
+Object Name: #ssd_cin_episodes
 Description: 
 Author: D2I
 Version: 1.2
@@ -1091,7 +1091,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cin_episodes') IS NOT NULL DROP TABLE ssd_cin_episodes;
+IF OBJECT_ID('ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
 -- Create structure
@@ -1112,7 +1112,7 @@ CREATE TABLE #ssd_cin_episodes
 );
  
 -- Insert data
-INSERT INTO ssd_cin_episodes
+INSERT INTO #ssd_cin_episodes
 (
     cine_referral_id,
     cine_person_id,
@@ -1163,14 +1163,14 @@ AND
     ;
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
--- FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
+-- FOREIGN KEY (cine_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id    ON ssd_cin_episodes(cine_person_id);
-CREATE NONCLUSTERED INDEX idx_cin_referral_date             ON ssd_cin_episodes(cine_referral_date);
-CREATE NONCLUSTERED INDEX idx_cin_close_date                ON ssd_cin_episodes(cine_close_date);
+CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id    ON #ssd_cin_episodes(cine_person_id);
+CREATE NONCLUSTERED INDEX idx_cin_referral_date             ON #ssd_cin_episodes(cine_referral_date);
+CREATE NONCLUSTERED INDEX idx_cin_close_date                ON #ssd_cin_episodes(cine_close_date);
 
 
 
@@ -1186,7 +1186,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_cin_assessments
+Object Name: #ssd_cin_assessments
 Description: 
 Author: D2I
 Version: 1.2
@@ -1197,7 +1197,7 @@ Version: 1.2
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_SINGLE_ASSESSMENT
 - FACT_FORMS
 - FACT_FORM_ANSWERS
@@ -1209,7 +1209,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop 
-IF OBJECT_ID('ssd_cin_assessments') IS NOT NULL DROP TABLE ssd_cin_assessments;
+IF OBJECT_ID('ssd_cin_assessments') IS NOT NULL DROP TABLE #ssd_cin_assessments;
 IF OBJECT_ID('tempdb..#ssd_cin_assessments') IS NOT NULL DROP TABLE #ssd_cin_assessments;
 
 
@@ -1231,7 +1231,7 @@ CREATE TABLE #ssd_cin_assessments
 -- CTE for the EXISTS
 WITH RelevantPersons AS (
     SELECT p.pers_person_id
-    FROM ssd_person p
+    FROM #ssd_person p
 ),
  
 -- CTE for the JOIN
@@ -1256,7 +1256,7 @@ AggregatedFormAnswers AS (
 ) 
  
 -- Insert data
-INSERT INTO ssd_cin_assessments
+INSERT INTO #ssd_cin_assessments
 (
     cina_assessment_id,
     cina_person_id,
@@ -1319,14 +1319,14 @@ AND EXISTS (
 );
 
 -- Create constraint(s)
-ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
-FOREIGN KEY (cina_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
+FOREIGN KEY (cina_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cin_assessments_person_id ON ssd_cin_assessments(cina_person_id);
-CREATE NONCLUSTERED INDEX idx_cina_assessment_start_date ON ssd_cin_assessments(cina_assessment_start_date);
-CREATE NONCLUSTERED INDEX idx_cina_assessment_auth_date ON ssd_cin_assessments(cina_assessment_auth_date);
-CREATE NONCLUSTERED INDEX idx_cina_referral_id ON ssd_cin_assessments(cina_referral_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cin_assessments_person_id ON #ssd_cin_assessments(cina_person_id);
+CREATE NONCLUSTERED INDEX idx_cina_assessment_start_date ON #ssd_cin_assessments(cina_assessment_start_date);
+CREATE NONCLUSTERED INDEX idx_cina_assessment_auth_date ON #ssd_cin_assessments(cina_assessment_auth_date);
+CREATE NONCLUSTERED INDEX idx_cina_referral_id ON #ssd_cin_assessments(cina_referral_id);
 
 
 
@@ -1341,7 +1341,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_assessment_factors
+Object Name: #ssd_assessment_factors
 Description: 
 Author: D2I
 Version: 1.1
@@ -1350,7 +1350,7 @@ Status: [R]elease
 Remarks: This object referrences some large source tables- Instances of 45m+. 
 Dependencies: 
 - #ssd_TMP_PRE_assessment_factors (as staged pre-processing)
-- ssd_cin_assessments
+- #ssd_cin_assessments
 - FACT_SINGLE_ASSESSMENT
 - FACT_FORM_ANSWERS
 =============================================================================
@@ -1361,7 +1361,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_assessment_factors') IS NOT NULL DROP TABLE ssd_assessment_factors;
+IF OBJECT_ID('ssd_assessment_factors') IS NOT NULL DROP TABLE #ssd_assessment_factors;
 IF OBJECT_ID('tempdb..#ssd_assessment_factors') IS NOT NULL DROP TABLE #ssd_assessment_factors;
 
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
@@ -1403,7 +1403,7 @@ WHERE
 
 
 -- Insert data into the final table
-INSERT INTO ssd_assessment_factors (
+INSERT INTO #ssd_assessment_factors (
                cinf_table_id, 
                cinf_assessment_id, 
                cinf_assessment_factors_json
@@ -1453,8 +1453,8 @@ WHERE
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
--- FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_cin_assessments(cina_assessment_id);
+-- ALTER TABLE #ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
+-- FOREIGN KEY (cinf_assessment_id) REFERENCES #ssd_cin_assessments(cina_assessment_id);
 
 -- DEV NOTES [TESTING]:
 -- Msg 547, Level 16, State 0, Line 1255
@@ -1463,7 +1463,7 @@ WHERE
 -- Total execution time: 00:00:55.236
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_cinf_assessment_id ON ssd_assessment_factors(cinf_assessment_id);
+CREATE NONCLUSTERED INDEX idx_cinf_assessment_id ON #ssd_assessment_factors(cinf_assessment_id);
 
 
 -- Drop tmp/pre-processing structure(s)
@@ -1485,7 +1485,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_cin_plans
+Object Name: #ssd_cin_plans
 Description: 
 Author: D2I
 Version: 1.2
@@ -1495,7 +1495,7 @@ Version: 1.2
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_CARE_PLANS
 - FACT_CARE_PLAN_SUMMARY
 =============================================================================
@@ -1505,7 +1505,7 @@ SET @TableName = N'ssd_cin_plans';
 PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cin_plans', 'U') IS NOT NULL DROP TABLE ssd_cin_plans;
+IF OBJECT_ID('ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plans;
 IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plans;
 
 
@@ -1521,7 +1521,7 @@ CREATE TABLE #ssd_cin_plans (
 );
  
 -- Insert data
-INSERT INTO ssd_cin_plans (
+INSERT INTO #ssd_cin_plans (
     cinp_cin_plan_id,
     cinp_referral_id,
     cinp_person_id,
@@ -1568,7 +1568,7 @@ AND EXISTS
 (
     -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = cps.DIM_PERSON_ID
 )
  
@@ -1581,14 +1581,14 @@ GROUP BY
     ;
 
 -- Create constraint(s)
-ALTER TABLE ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
-FOREIGN KEY (cinp_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
+FOREIGN KEY (cinp_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cin_plans_person_id ON ssd_cin_plans(cinp_person_id);
-CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_start_date ON ssd_cin_plans(cinp_cin_plan_start_date);
-CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_end_date ON ssd_cin_plans(cinp_cin_plan_end_date);
-CREATE NONCLUSTERED INDEX idx_cinp_referral_id ON ssd_cin_plans(cinp_referral_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cin_plans_person_id ON #ssd_cin_plans(cinp_person_id);
+CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_start_date ON #ssd_cin_plans(cinp_cin_plan_start_date);
+CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_end_date ON #ssd_cin_plans(cinp_cin_plan_end_date);
+CREATE NONCLUSTERED INDEX idx_cinp_referral_id ON #ssd_cin_plans(cinp_referral_id);
 
 
 
@@ -1601,7 +1601,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_cin_visits
+Object Name: #ssd_cin_visits
 Description:
 Author: D2I
 Version: 1.0
@@ -1609,9 +1609,9 @@ Status: [R]elease
 Remarks:    Source table can be very large! Avoid any unfiltered queries.
             Notes: Does this need to be filtered by only visits in their current Referral episode?
                     however for some this ==2 weeks, others==~17 years
-                --> when run for records in ssd_person c.64k records 29s runtime
+                --> when run for records in #ssd_person c.64k records 29s runtime
 Dependencies:
-- ssd_person
+- #ssd_person
 - FACT_CASENOTES
 =============================================================================
 */
@@ -1621,7 +1621,7 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_cin_visits') IS NOT NULL DROP TABLE ssd_cin_visits;
+IF OBJECT_ID('ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
 IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
  
 -- Create structure
@@ -1636,7 +1636,7 @@ CREATE TABLE #ssd_cin_visits
 );
  
 -- Insert data
-INSERT INTO ssd_cin_visits
+INSERT INTO #ssd_cin_visits
 (
     cinv_cin_visit_id,                  
     cinv_person_id,
@@ -1661,17 +1661,17 @@ WHERE
  
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = cn.DIM_PERSON_ID
     );
  
 -- Create constraint(s)
-ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_person
-FOREIGN KEY (cinv_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE #ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_person
+FOREIGN KEY (cinv_person_id) REFERENCES #ssd_person(pers_person_id);
  
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_cinv_person_id ON ssd_cin_visits(cinv_person_id);
-CREATE NONCLUSTERED INDEX idx_cinv_cin_visit_date ON ssd_cin_visits(cinv_cin_visit_date);
+CREATE NONCLUSTERED INDEX idx_cinv_person_id ON #ssd_cin_visits(cinv_person_id);
+CREATE NONCLUSTERED INDEX idx_cinv_cin_visit_date ON #ssd_cin_visits(cinv_cin_visit_date);
 
 
 
@@ -1687,7 +1687,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_s47_enquiry
+Object Name: #ssd_s47_enquiry
 Description: 
 Author: D2I
 Version: 1.2
@@ -1695,7 +1695,7 @@ Version: 1.2
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_S47
 - FACT_CP_CONFERENCE
 =============================================================================
@@ -1707,7 +1707,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_s47_enquiry;
+IF OBJECT_ID('ssd_s47_enquiry') IS NOT NULL DROP TABLE #ssd_s47_enquiry;
 IF OBJECT_ID('tempdb..#ssd_s47_enquiry') IS NOT NULL DROP TABLE #ssd_s47_enquiry;
 
 -- Create structure 
@@ -1724,7 +1724,7 @@ CREATE TABLE #ssd_s47_enquiry (
 );
 
 -- insert data
-INSERT INTO ssd_s47_enquiry(
+INSERT INTO #ssd_s47_enquiry(
     s47e_s47_enquiry_id,
     s47e_referral_id,
     s47e_person_id,
@@ -1763,8 +1763,8 @@ FROM
     Child_Social.FACT_S47 AS s47;
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
--- FOREIGN KEY (s47e_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
+-- FOREIGN KEY (s47e_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- -- DEV NOTES: [TESTING]
 -- -- Msg 547, Level 16, State 0, Line 1558
@@ -1772,10 +1772,10 @@ FROM
 -- -- The conflict occurred in database "HDM_Local", table "#ssd_person", column 'pers_person_id'.
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_person_id     ON ssd_s47_enquiry(s47e_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_start_date    ON ssd_s47_enquiry(s47e_s47_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_end_date      ON ssd_s47_enquiry(s47e_s47_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_referral_id   ON ssd_s47_enquiry(s47e_referral_id);
+CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_person_id     ON #ssd_s47_enquiry(s47e_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_start_date    ON #ssd_s47_enquiry(s47e_s47_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_end_date      ON #ssd_s47_enquiry(s47e_s47_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_referral_id   ON #ssd_s47_enquiry(s47e_referral_id);
 
 
 
@@ -1802,7 +1802,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_initial_cp_conference
+Object Name: #ssd_initial_cp_conference
 Description:
 Author: D2I
 Version: 1.2
@@ -1823,7 +1823,7 @@ SET @TableName = N'ssd_initial_cp_conference';
 PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_initial_cp_conference;
+IF OBJECT_ID('ssd_initial_cp_conference') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
 IF OBJECT_ID('tempdb..#ssd_initial_cp_conference') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
  
 
@@ -1846,7 +1846,7 @@ CREATE TABLE #ssd_initial_cp_conference (
  
  
 -- insert data
-INSERT INTO ssd_initial_cp_conference(
+INSERT INTO #ssd_initial_cp_conference(
     icpc_icpc_id,
     icpc_icpc_meeting_id,
     icpc_s47_enquiry_id,
@@ -1901,21 +1901,21 @@ WHERE
 
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_s47_enquiry_id
--- FOREIGN KEY (icpc_s47_enquiry_id) REFERENCES ssd_s47_enquiry(s47e_s47_enquiry_id);
+-- ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_s47_enquiry_id
+-- FOREIGN KEY (icpc_s47_enquiry_id) REFERENCES #ssd_s47_enquiry(s47e_s47_enquiry_id);
 
--- ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_person_id
--- FOREIGN KEY (icpc_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_person_id
+-- FOREIGN KEY (icpc_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_referral_id
--- FOREIGN KEY (icpc_referral_id) REFERENCES ssd_cin_episodes(cine_referral_id);
+-- ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_referral_id
+-- FOREIGN KEY (icpc_referral_id) REFERENCES #ssd_cin_episodes(cine_referral_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_icpc_person_id        ON ssd_initial_cp_conference(icpc_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_icpc_s47_enquiry_id   ON ssd_initial_cp_conference(icpc_s47_enquiry_id);
-CREATE NONCLUSTERED INDEX idx_ssd_icpc_referral_id      ON ssd_initial_cp_conference(icpc_referral_id);
-CREATE NONCLUSTERED INDEX idx_ssd_icpc_icpc_date        ON ssd_initial_cp_conference(icpc_icpc_date);
+CREATE NONCLUSTERED INDEX idx_ssd_icpc_person_id        ON #ssd_initial_cp_conference(icpc_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_icpc_s47_enquiry_id   ON #ssd_initial_cp_conference(icpc_s47_enquiry_id);
+CREATE NONCLUSTERED INDEX idx_ssd_icpc_referral_id      ON #ssd_initial_cp_conference(icpc_referral_id);
+CREATE NONCLUSTERED INDEX idx_ssd_icpc_icpc_date        ON #ssd_initial_cp_conference(icpc_icpc_date);
 
 
 
@@ -1929,7 +1929,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_cp_plans
+Object Name: #ssd_cp_plans
 Description:
 Author: D2I
 Version: 1.0
@@ -1940,8 +1940,8 @@ Version: 1.0
 Status: [R]elease
 Remarks:
 Dependencies:
-- ssd_person
-- ssd_initial_cp_conference
+- #ssd_person
+- #ssd_initial_cp_conference
 - FACT_CP_PLAN
 =============================================================================
 */
@@ -1952,7 +1952,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop 
-IF OBJECT_ID('ssd_cp_plans') IS NOT NULL DROP TABLE ssd_cp_plans;
+IF OBJECT_ID('ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
 IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
 
 -- Create structure
@@ -1970,7 +1970,7 @@ CREATE TABLE #ssd_cp_plans (
  
  
 -- Insert data
-INSERT INTO ssd_cp_plans (
+INSERT INTO #ssd_cp_plans (
     cppl_cp_plan_id,
     cppl_referral_id,
     cppl_icpc_id,
@@ -1998,24 +1998,24 @@ FROM
  
 WHERE EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = cpp.DIM_PERSON_ID
     );
 
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_cppl_person_id
--- FOREIGN KEY (cppl_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_person_id
+-- FOREIGN KEY (cppl_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_cppl_icpc_id
--- FOREIGN KEY (cppl_icpc_id) REFERENCES ssd_initial_cp_conference(icpc_icpc_id);
+-- ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_icpc_id
+-- FOREIGN KEY (cppl_icpc_id) REFERENCES #ssd_initial_cp_conference(icpc_icpc_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_person_id ON ssd_cp_plans(cppl_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_icpc_id ON ssd_cp_plans(cppl_icpc_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_referral_id ON ssd_cp_plans(cppl_referral_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_start_date ON ssd_cp_plans(cppl_cp_plan_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_end_date ON ssd_cp_plans(cppl_cp_plan_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_person_id ON #ssd_cp_plans(cppl_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_icpc_id ON #ssd_cp_plans(cppl_icpc_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_referral_id ON #ssd_cp_plans(cppl_referral_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_start_date ON #ssd_cp_plans(cppl_cp_plan_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_end_date ON #ssd_cp_plans(cppl_cp_plan_end_date);
 
 
 
@@ -2031,7 +2031,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_cp_visits
+Object Name: #ssd_cp_visits
 Description:
 Author: D2I
 Version: 1.0
@@ -2044,7 +2044,7 @@ Remarks: Not all CP Visit Casenotes have a link back to the CP Visit -
 Dependencies:
 - FACT_CASENOTES
 - FACT_CP_VISIT
-- ssd_person
+- #ssd_person
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -2054,7 +2054,7 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cp_visits') IS NOT NULL DROP TABLE ssd_cp_visits;
+IF OBJECT_ID('ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
 IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
   
  
@@ -2070,7 +2070,7 @@ CREATE TABLE #ssd_cp_visits (
 );
  
 -- Insert data
-INSERT INTO ssd_cp_visits
+INSERT INTO #ssd_cp_visits
 (
     cppv_cp_visit_id,
     cppv_person_id,
@@ -2104,8 +2104,8 @@ WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC'); -- Ref. ( 'STVC','STVCPCOVID
 
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
--- FOREIGN KEY (cppv_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
+-- ALTER TABLE #ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
+-- FOREIGN KEY (cppv_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
 
 -- -- DEV NOTES: [TESTING]
 -- -- Msg 547, Level 16, State 0, Line 105
@@ -2113,9 +2113,9 @@ WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC'); -- Ref. ( 'STVC','STVCPCOVID
 -- -- The conflict occurred in database "HDM_Local", table "#ssd_cp_plans", column 'cppl_cp_plan_id'.
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cppv_person_id        ON ssd_cp_visits(cppv_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_plan_id       ON ssd_cp_visits(cppv_cp_plan_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_visit_date    ON ssd_cp_visits(cppv_cp_visit_date);
+CREATE NONCLUSTERED INDEX idx_ssd_cppv_person_id        ON #ssd_cp_visits(cppv_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_plan_id       ON #ssd_cp_visits(cppv_cp_plan_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_visit_date    ON #ssd_cp_visits(cppv_cp_visit_date);
 
 
 
@@ -2128,7 +2128,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_cp_reviews
+Object Name: #ssd_cp_reviews
 Description:
 Author: D2I
 Version: 1.0
@@ -2138,11 +2138,11 @@ Remarks:    cppr_cp_review_participation - ON HOLD/Not included in SSD Ver/Itera
             Resolved issue with linking to Quoracy information. Added fm.FACT_MEETING_ID
             so users can identify conferences including multiple children. Reviews held
             pre-LCS implementation don't have a CP_PLAN_ID recorded so have added
-            cpr.DIM_PERSON_ID for linking reviews to the ssd_cp_plans object.
+            cpr.DIM_PERSON_ID for linking reviews to the #ssd_cp_plans object.
             Re-named cppr_cp_review_outcome_continue_cp for clarity.
 Dependencies:
-- ssd_person
-- ssd_cp_plans
+- #ssd_person
+- #ssd_cp_plans
 - FACT_CP_REVIEW
 - FACT_MEETINGS
 - FACT_MEETING_SUBJECTS
@@ -2155,7 +2155,7 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if table exists, & drop
-IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_cp_reviews;
+IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
 IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
   
  
@@ -2174,7 +2174,7 @@ CREATE TABLE #ssd_cp_reviews
 );
  
 -- Insert data
-INSERT INTO ssd_cp_reviews
+INSERT INTO #ssd_cp_reviews
 (
     cppr_cp_review_id,
     cppr_cp_plan_id,
@@ -2220,7 +2220,7 @@ LEFT JOIN
  
 WHERE EXISTS ( -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = cpr.DIM_PERSON_ID
 )
 GROUP BY cpr.FACT_CP_REVIEW_ID,
@@ -2236,16 +2236,16 @@ GROUP BY cpr.FACT_CP_REVIEW_ID,
     ffa.ANSWER;
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
--- FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
+-- ALTER TABLE #ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
+-- FOREIGN KEY (cppr_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cppr_person_id ON ssd_cp_reviews(cppr_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_plan_id ON ssd_cp_reviews(cppr_cp_plan_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_due ON ssd_cp_reviews(cppr_cp_review_due);
-CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_date ON ssd_cp_reviews(cppr_cp_review_date);
-CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_meeting_id ON ssd_cp_reviews(cppr_cp_review_meeting_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cppr_person_id ON #ssd_cp_reviews(cppr_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_plan_id ON #ssd_cp_reviews(cppr_cp_plan_id);
+CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_due ON #ssd_cp_reviews(cppr_cp_review_due);
+CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_date ON #ssd_cp_reviews(cppr_cp_review_date);
+CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_meeting_id ON #ssd_cp_reviews(cppr_cp_review_meeting_id);
 
 
 
@@ -2261,7 +2261,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_cla_episodes
+Object Name: #ssd_cla_episodes
 Description: 
 Author: D2I
 Version: 1.1
@@ -2271,8 +2271,8 @@ Version: 1.1
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_involvements
-- ssd_person
+- #ssd_involvements
+- #ssd_person
 - FACT_CLA
 - FACT_REFERRALS
 - FACT_CARE_EPISODES
@@ -2285,7 +2285,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if table exists, & drop
-IF OBJECT_ID('ssd_cla_episodes') IS NOT NULL DROP TABLE ssd_cla_episodes;
+IF OBJECT_ID('ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episodes;
 IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episodes;
 
  
@@ -2306,7 +2306,7 @@ CREATE TABLE #ssd_cla_episodes (
 );
  
 -- Insert data
-INSERT INTO ssd_cla_episodes (
+INSERT INTO #ssd_cla_episodes (
     clae_cla_episode_id,
     clae_person_id,
     clae_cla_placement_id,
@@ -2353,7 +2353,7 @@ LEFT JOIN
 
 WHERE EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fce.DIM_PERSON_ID
     )
  
@@ -2372,19 +2372,19 @@ GROUP BY
     cn.DIM_PERSON_ID;
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_person 
--- FOREIGN KEY (clae_person_id) REFERENCES ssd_person (pers_person_id);
+-- ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_to_person 
+-- FOREIGN KEY (clae_person_id) REFERENCES #ssd_person (pers_person_id);
 
--- ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_cla_placement_id
--- FOREIGN KEY (clae_cla_placement_id) REFERENCES ssd_cla_placements (clap_cla_placement_id);
+-- ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_cla_placement_id
+-- FOREIGN KEY (clae_cla_placement_id) REFERENCES #ssd_cla_placements (clap_cla_placement_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_clae_person_id ON ssd_cla_episodes(clae_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_start_date ON ssd_cla_episodes(clae_cla_episode_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_ceased ON ssd_cla_episodes(clae_cla_episode_ceased);
-CREATE NONCLUSTERED INDEX idx_ssd_clae_referral_id ON ssd_cla_episodes(clae_referral_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clae_cla_last_iro_contact_date ON ssd_cla_episodes(clae_cla_last_iro_contact_date);
-CREATE NONCLUSTERED INDEX idx_clae_cla_placement_id ON ssd_cla_episodes(clae_cla_placement_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clae_person_id ON #ssd_cla_episodes(clae_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_start_date ON #ssd_cla_episodes(clae_cla_episode_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_ceased ON #ssd_cla_episodes(clae_cla_episode_ceased);
+CREATE NONCLUSTERED INDEX idx_ssd_clae_referral_id ON #ssd_cla_episodes(clae_referral_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clae_cla_last_iro_contact_date ON #ssd_cla_episodes(clae_cla_last_iro_contact_date);
+CREATE NONCLUSTERED INDEX idx_clae_cla_placement_id ON #ssd_cla_episodes(clae_cla_placement_id);
 
 
 
@@ -2397,14 +2397,14 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_cla_convictions
+Object Name: #ssd_cla_convictions
 Description: 
 Author: D2I
 Version: 1.0
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_OFFENCE
 =============================================================================
 */
@@ -2414,7 +2414,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE ssd_cla_convictions;
+IF OBJECT_ID('ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cla_convictions;
 IF OBJECT_ID('tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cla_convictions;
 
 
@@ -2427,7 +2427,7 @@ CREATE TABLE #ssd_cla_convictions (
 );
 
 -- insert data
-INSERT INTO ssd_cla_convictions (
+INSERT INTO #ssd_cla_convictions (
     clac_cla_conviction_id, 
     clac_person_id, 
     clac_cla_conviction_date, 
@@ -2444,19 +2444,19 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fo.DIM_PERSON_ID
     );
 
 
 -- -- add constraint(s)
--- ALTER TABLE ssd_cla_convictions ADD CONSTRAINT FK_clac_to_clae 
--- FOREIGN KEY (clac_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
+-- ALTER TABLE #ssd_cla_convictions ADD CONSTRAINT FK_clac_to_clae 
+-- FOREIGN KEY (clac_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_clac_person_id ON ssd_cla_convictions(clac_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clac_conviction_date ON ssd_cla_convictions(clac_cla_conviction_date);
+CREATE NONCLUSTERED INDEX idx_ssd_clac_person_id ON #ssd_cla_convictions(clac_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clac_conviction_date ON #ssd_cla_convictions(clac_cla_conviction_date);
 
 
 
@@ -2470,7 +2470,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_cla_health
+Object Name: #ssd_cla_health
 Description:
 Author: D2I
 Version: 1.0
@@ -2479,7 +2479,7 @@ Remarks: 1.5 JH updated source for clah_health_check_type to resolve blanks.
             Updated to use DIM_LOOKUP_EXAM_STATUS_DESC as opposed to _CODE
             to inprove readability.
 Dependencies:
-- ssd_person
+- #ssd_person
 - FACT_HEALTH_CHECK
 =============================================================================
 */
@@ -2489,7 +2489,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_cla_health;
+IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE #ssd_cla_health;
 IF OBJECT_ID('tempdb..#ssd_cla_health', 'U') IS NOT NULL DROP TABLE #ssd_cla_health;
 
 -- create structure
@@ -2502,7 +2502,7 @@ CREATE TABLE #ssd_cla_health (
 );
  
 -- insert data
-INSERT INTO ssd_cla_health (
+INSERT INTO #ssd_cla_health (
     clah_health_check_id,
     clah_person_id,
     clah_health_check_type,
@@ -2522,19 +2522,19 @@ FROM
  
 WHERE EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fhc.DIM_PERSON_ID
     );
 
 
 -- -- add constraint(s)
--- ALTER TABLE ssd_cla_health ADD CONSTRAINT FK_clah_to_clae 
--- FOREIGN KEY (clah_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
+-- ALTER TABLE #ssd_cla_health ADD CONSTRAINT FK_clah_to_clae 
+-- FOREIGN KEY (clah_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clah_person_id ON ssd_cla_health (clah_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_date ON ssd_cla_health(clah_health_check_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_status ON ssd_cla_health(clah_health_check_status);
+CREATE NONCLUSTERED INDEX idx_clah_person_id ON #ssd_cla_health (clah_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_date ON #ssd_cla_health(clah_health_check_date);
+CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_status ON #ssd_cla_health(clah_health_check_status);
 
 
 
@@ -2552,7 +2552,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_cla_immunisations
+Object Name: #ssd_cla_immunisations
 Description: 
 Author: D2I
 Version: 1.0
@@ -2560,7 +2560,7 @@ Version: 1.0
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_CLA
 - FACT_903_DATA [Depreciated]
 =============================================================================
@@ -2571,7 +2571,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_immunisations') IS NOT NULL DROP TABLE ssd_cla_immunisations;
+IF OBJECT_ID('ssd_cla_immunisations') IS NOT NULL DROP TABLE #ssd_cla_immunisations;
 IF OBJECT_ID('tempdb..#ssd_cla_immunisations') IS NOT NULL DROP TABLE #ssd_cla_immunisations;
 
 -- Create structure
@@ -2595,12 +2595,12 @@ CREATE TABLE #ssd_cla_immunisations (
     WHERE
         EXISTS ( -- only ssd relevant records be considered for ranking
             SELECT 1 
-            FROM ssd_person p
+            FROM #ssd_person p
             WHERE p.pers_person_id = fcla.DIM_PERSON_ID
         )
 )
 -- Insert data (only most recent/rn==1 records)
-INSERT INTO ssd_cla_immunisations (
+INSERT INTO #ssd_cla_immunisations (
     clai_person_id,
     clai_immunisations_status,
     clai_immunisations_status_date
@@ -2615,12 +2615,12 @@ WHERE
     rn = 1; -- pull needed record based on rank==1/most recent record for each DIM_PERSON_ID
 
 -- -- add constraint(s)
--- ALTER TABLE ssd_cla_immunisations ADD CONSTRAINT FK_ssd_cla_immunisations_person
--- FOREIGN KEY (clai_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_cla_immunisations ADD CONSTRAINT FK_ssd_cla_immunisations_person
+-- FOREIGN KEY (clai_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_clai_person_id ON ssd_cla_immunisations(clai_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clai_immunisations_status ON ssd_cla_immunisations(clai_immunisations_status);
+CREATE NONCLUSTERED INDEX idx_ssd_clai_person_id ON #ssd_cla_immunisations(clai_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clai_immunisations_status ON #ssd_cla_immunisations(clai_immunisations_status);
 
 
 
@@ -2636,14 +2636,14 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_cla_substance_misuse
+Object Name: #ssd_cla_substance_misuse
 Description: 
 Author: D2I
 Version: 1.0
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_SUBSTANCE_MISUSE
 =============================================================================
 */
@@ -2653,7 +2653,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_substance_misuse') IS NOT NULL DROP TABLE ssd_cla_substance_misuse;
+IF OBJECT_ID('ssd_cla_substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_substance_misuse;
 IF OBJECT_ID('tempdb..#ssd_cla_substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_substance_misuse;
 
 -- Create structure 
@@ -2666,7 +2666,7 @@ CREATE TABLE #ssd_cla_substance_misuse (
 );
 
 -- Insert data
-INSERT INTO ssd_cla_substance_misuse (
+INSERT INTO #ssd_cla_substance_misuse (
     clas_substance_misuse_id,
     clas_person_id,
     clas_substance_misuse_date,
@@ -2685,18 +2685,18 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fSM.DIM_PERSON_ID
     );
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_substance_misuse ADD CONSTRAINT FK_ssd_cla_substance_misuse_clas_person_id 
--- FOREIGN KEY (clas_person_id) REFERENCES ssd_cla_episodes (clae_person_id);
+-- ALTER TABLE #ssd_cla_substance_misuse ADD CONSTRAINT FK_ssd_cla_substance_misuse_clas_person_id 
+-- FOREIGN KEY (clas_person_id) REFERENCES #ssd_cla_episodes (clae_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clas_person_id ON ssd_cla_substance_misuse (clas_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clas_substance_misuse_date ON ssd_cla_substance_misuse(clas_substance_misuse_date);
+CREATE NONCLUSTERED INDEX idx_clas_person_id ON #ssd_cla_substance_misuse (clas_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clas_substance_misuse_date ON #ssd_cla_substance_misuse(clas_substance_misuse_date);
 
 
 
@@ -2711,7 +2711,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_cla_placement
+Object Name: #ssd_cla_placement
 Description: 
 Author: D2I
 Version: 1.0 
@@ -2720,7 +2720,7 @@ Version: 1.0
 Status: [R]elease
 Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_CLA_PLACEMENT
 - FACT_CARE_EPISODES
 =============================================================================
@@ -2731,7 +2731,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_placement', 'U') IS NOT NULL DROP TABLE ssd_cla_placement;
+IF OBJECT_ID('ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_placement;
 IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_placement;
   
 -- Create structure
@@ -2750,7 +2750,7 @@ CREATE TABLE #ssd_cla_placement (
 );
  
 -- Insert data
-INSERT INTO ssd_cla_placement (
+INSERT INTO #ssd_cla_placement (
     clap_cla_placement_id,
     clap_cla_id,
     clap_person_id,
@@ -2800,16 +2800,16 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
--- FOREIGN KEY (clap_cla_id) REFERENCES ssd_cla_episodes(clae_cla_id);
+-- ALTER TABLE #ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
+-- FOREIGN KEY (clap_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clap_cla_placement_urn ON ssd_cla_placement (clap_cla_placement_urn);
-CREATE NONCLUSTERED INDEX idx_ssd_clap_cla_id ON ssd_cla_placement(clap_cla_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_start_date ON ssd_cla_placement(clap_cla_placement_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_end_date ON ssd_cla_placement(clap_cla_placement_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_postcode ON ssd_cla_placement(clap_cla_placement_postcode);
-CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_type ON ssd_cla_placement(clap_cla_placement_type);
+CREATE NONCLUSTERED INDEX idx_clap_cla_placement_urn ON #ssd_cla_placement (clap_cla_placement_urn);
+CREATE NONCLUSTERED INDEX idx_ssd_clap_cla_id ON #ssd_cla_placement(clap_cla_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_start_date ON #ssd_cla_placement(clap_cla_placement_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_end_date ON #ssd_cla_placement(clap_cla_placement_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_postcode ON #ssd_cla_placement(clap_cla_placement_postcode);
+CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_type ON #ssd_cla_placement(clap_cla_placement_type);
 
 
 
@@ -2826,7 +2826,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_cla_reviews
+Object Name: #ssd_cla_reviews
 Description: 
 Author: D2I
 Version: 1.0
@@ -2835,7 +2835,7 @@ Version: 1.0
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_cla_episodes
+- #ssd_cla_episodes
 - FACT_CLA_REVIEW
 - FACT_MEETING_SUBJECTS 
 - FACT_MEETINGS
@@ -2848,7 +2848,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE ssd_cla_reviews;
+IF OBJECT_ID('ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE #ssd_cla_reviews;
 IF OBJECT_ID('tempdb..#ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE #ssd_cla_reviews;
   
 -- Create structure
@@ -2862,7 +2862,7 @@ CREATE TABLE #ssd_cla_reviews (
     );
  
 -- Insert data
-INSERT INTO ssd_cla_reviews (
+INSERT INTO #ssd_cla_reviews (
     clar_cla_review_id,
     clar_cla_id,
     clar_cla_review_due_date,
@@ -2904,7 +2904,7 @@ WHERE  ff.DIM_LOOKUP_FORM_TYPE_ID_CODE NOT IN ('1391', '1195', '1377', '1540', '
  
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fcr.DIM_PERSON_ID
     )
  
@@ -2920,13 +2920,13 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
     ;
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_reviews ADD CONSTRAINT FK_clar_to_clae 
--- FOREIGN KEY (clar_cla_id) REFERENCES ssd_cla_episodes(clae_cla_id);
+-- ALTER TABLE #ssd_cla_reviews ADD CONSTRAINT FK_clar_to_clae 
+-- FOREIGN KEY (clar_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_clar_cla_id ON ssd_cla_reviews(clar_cla_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clar_review_due_date ON ssd_cla_reviews(clar_cla_review_due_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clar_review_date ON ssd_cla_reviews(clar_cla_review_date);
+CREATE NONCLUSTERED INDEX idx_ssd_clar_cla_id ON #ssd_cla_reviews(clar_cla_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clar_review_due_date ON #ssd_cla_reviews(clar_cla_review_due_date);
+CREATE NONCLUSTERED INDEX idx_ssd_clar_review_date ON #ssd_cla_reviews(clar_cla_review_date);
 
 
 
@@ -2941,7 +2941,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_cla_previous_permanence
+Object Name: #ssd_cla_previous_permanence
 Description:
 Author: D2I
 Version: 1.1 
@@ -2951,7 +2951,7 @@ Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley.
         1.5 JH tmp table was not being referenced, updated query and reduced running
         time considerably, also filtered out rows where ANSWER IS NULL
 Dependencies:
-- ssd_person
+- #ssd_person
 - FACT_903_DATA [depreciated]
 - FACT_FORMS
 - FACT_FORM_ANSWERS
@@ -2962,7 +2962,7 @@ SET @TableName = N'ssd_cla_previous_permanence';
 PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_previous_permanence') IS NOT NULL DROP TABLE ssd_cla_previous_permanence;
+IF OBJECT_ID('ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
 IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
 
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_previous_permanence') IS NOT NULL DROP TABLE #ssd_TMP_PRE_previous_permanence;
@@ -2994,7 +2994,7 @@ CREATE TABLE #ssd_cla_previous_permanence (
 );
  
 -- Insert data
-INSERT INTO ssd_cla_previous_permanence (
+INSERT INTO #ssd_cla_previous_permanence (
                lapp_table_id,
                lapp_person_id,
                lapp_previous_permanence_option,
@@ -3038,7 +3038,7 @@ JOIN
     Child_Social.FACT_FORMS ff ON tmp_ffa.FACT_FORM_ID = ff.FACT_FORM_ID
 AND EXISTS (
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = ff.DIM_PERSON_ID
 )
 GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
@@ -3046,13 +3046,13 @@ GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 
  
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
--- FOREIGN KEY (lapp_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
+-- ALTER TABLE #ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
+-- FOREIGN KEY (lapp_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 
 -- create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_lapp_person_id ON ssd_cla_previous_permanence(lapp_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_lapp_previous_permanence_option ON ssd_cla_previous_permanence(lapp_previous_permanence_option);
+CREATE NONCLUSTERED INDEX idx_ssd_lapp_person_id ON #ssd_cla_previous_permanence(lapp_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_lapp_previous_permanence_option ON #ssd_cla_previous_permanence(lapp_previous_permanence_option);
 
 
 
@@ -3067,7 +3067,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_cla_care_plan
+Object Name: #ssd_cla_care_plan
 Description:
 Author: D2I
 Version: 1.1
@@ -3088,7 +3088,7 @@ SET @TableName = N'ssd_cla_care_plan';
 PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_cla_care_plan;
+IF OBJECT_ID('ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_cla_care_plan;
 IF OBJECT_ID('tempdb..#ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_cla_care_plan;
 
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_cla_care_plan') IS NOT NULL DROP TABLE #ssd_TMP_PRE_cla_care_plan;
@@ -3145,7 +3145,7 @@ CREATE TABLE #ssd_cla_care_plan (
 );
  
 -- Insert data
-INSERT INTO ssd_cla_care_plan (
+INSERT INTO #ssd_cla_care_plan (
     lacp_table_id,
     lacp_person_id,
     lacp_cla_care_plan_start_date,
@@ -3186,13 +3186,13 @@ WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A';
  
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_care_plan ADD CONSTRAINT FK_lacp_person_id
--- FOREIGN KEY (lacp_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
+-- ALTER TABLE #ssd_cla_care_plan ADD CONSTRAINT FK_lacp_person_id
+-- FOREIGN KEY (lacp_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
  
 -- create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_lacp_person_id ON ssd_cla_care_plan(lacp_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_start_date ON ssd_cla_care_plan(lacp_cla_care_plan_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_end_date ON ssd_cla_care_plan(lacp_cla_care_plan_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_lacp_person_id ON #ssd_cla_care_plan(lacp_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_start_date ON #ssd_cla_care_plan(lacp_cla_care_plan_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_end_date ON #ssd_cla_care_plan(lacp_cla_care_plan_end_date);
 
 
 
@@ -3206,7 +3206,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_cla_visits
+Object Name: #ssd_cla_visits
 Description:
 Author: D2I
 Version: 1.0!
@@ -3227,7 +3227,7 @@ SET @TableName = N'ssd_cla_visits';
 PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_visits', 'U') IS NOT NULL DROP TABLE ssd_cla_visits;
+IF OBJECT_ID('ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_visits;
 IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_visits;
 
 
@@ -3242,7 +3242,7 @@ CREATE TABLE #ssd_cla_visits (
 );
  
 -- Insert data
-INSERT INTO ssd_cla_visits (
+INSERT INTO #ssd_cla_visits (
     clav_cla_visit_id,
     clav_cla_id,
     clav_person_id,
@@ -3273,20 +3273,20 @@ WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVL')
  
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = clav.DIM_PERSON_ID
     );
 
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
--- FOREIGN KEY (clav_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
+-- ALTER TABLE #ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
+-- FOREIGN KEY (clav_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 -- create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_clav_person_id ON ssd_cla_visits(clav_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clav_visit_date ON ssd_cla_visits(clav_cla_visit_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clav_cla_id ON ssd_cla_visits(clav_cla_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clav_person_id ON #ssd_cla_visits(clav_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clav_visit_date ON #ssd_cla_visits(clav_cla_visit_date);
+CREATE NONCLUSTERED INDEX idx_ssd_clav_cla_id ON #ssd_cla_visits(clav_cla_id);
 
 
 
@@ -3301,7 +3301,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_sdq_scores
+Object Name: #ssd_sdq_scores
 Description:
 Author: D2I
 Version: 1.0
@@ -3311,7 +3311,7 @@ Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
         Added placeholder for csdq_sdq_reason
         Removed PRIMARY KEY stipulation for csdq_table_id
 Dependencies:
-- ssd_person
+- #ssd_person
 - FACT_FORMS
 - FACT_FORM_ANSWERS
 =============================================================================
@@ -3372,7 +3372,7 @@ JOIN
     AND ffa.ANSWER IS NOT NULL
 WHERE EXISTS (
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = ff.DIM_PERSON_ID
 );
 
@@ -3390,7 +3390,7 @@ WHERE EXISTS (
     FROM #ssd_sdq_scores
 )
 
--- delete all records from the ssd_sdq_scores table where row number(rn) > 1
+-- delete all records from the #ssd_sdq_scores table where row number(rn) > 1
 -- i.e. keep only the most recent
 DELETE FROM #ssd_sdq_scores
 WHERE csdq_table_id IN (
@@ -3421,8 +3421,8 @@ WHERE csdq_table_id IN (
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
--- FOREIGN KEY (csdq_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
+-- FOREIGN KEY (csdq_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- DEV NOTES [TESTING]
 -- Msg 2627, Level 14, State 1, Line 3129
@@ -3431,7 +3431,7 @@ WHERE csdq_table_id IN (
 
 
 -- create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_csdq_person_id ON ssd_sdq_scores(csdq_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_csdq_person_id ON #ssd_sdq_scores(csdq_person_id);
 
 
 
@@ -3447,7 +3447,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_missing
+Object Name: #ssd_missing
 Description: 
 Author: D2I
 Version: 1.1
@@ -3456,7 +3456,7 @@ Version: 1.1
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_MISSING_PERSON
 =============================================================================
 */
@@ -3466,7 +3466,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_missing', 'U') IS NOT NULL DROP TABLE ssd_missing;
+IF OBJECT_ID('ssd_missing', 'U') IS NOT NULL DROP TABLE #ssd_missing;
 IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL DROP TABLE #ssd_missing;
 
 -- Create structure
@@ -3482,7 +3482,7 @@ CREATE TABLE #ssd_missing (
 
 
 -- Insert data 
-INSERT INTO ssd_missing (
+INSERT INTO #ssd_missing (
     miss_table_id,
     miss_person_id,
     miss_missing_episode_start_date,
@@ -3518,21 +3518,21 @@ FROM
 WHERE EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fmp.DIM_PERSON_ID
     );
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_missing ADD CONSTRAINT FK_missing_to_person
--- FOREIGN KEY (miss_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_missing ADD CONSTRAINT FK_missing_to_person
+-- FOREIGN KEY (miss_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_miss_person_id        ON ssd_missing(miss_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_start    ON ssd_missing(miss_missing_episode_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_end      ON ssd_missing(miss_missing_episode_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_offered      ON ssd_missing(miss_missing_rhi_offered);
-CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_accepted     ON ssd_missing(miss_missing_rhi_accepted);
+CREATE NONCLUSTERED INDEX idx_ssd_miss_person_id        ON #ssd_missing(miss_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_start    ON #ssd_missing(miss_missing_episode_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_end      ON #ssd_missing(miss_missing_episode_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_offered      ON #ssd_missing(miss_missing_rhi_offered);
+CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_accepted     ON #ssd_missing(miss_missing_rhi_accepted);
 
 
 
@@ -3549,7 +3549,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_care_leavers
+Object Name: #ssd_care_leavers
 Description:
 Author: D2I
 Version: 1.2
@@ -3559,15 +3559,15 @@ Version: 1.2
             0.2: switch field _worker)nm and _team_nm around as in wrong order RH
             0.1: worker/p.a id field changed to descriptive name towards AA reporting JH
 Status: [R]elease
-Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
-            Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
+Remarks:    Dev: Note that <multiple> refs to #ssd_person need changing when porting code to tempdb.. versions.
+            Dev: Ensure index on #ssd_person.pers_person_id is intact to ensure performance on <FROM #ssd_person> references in the CTEs(added for performance)
             Dev: Revised V3/4 to aid performance on large involvements table aggr
 Dependencies:
 - FACT_INVOLVEMENTS
 - FACT_CLA_CARE_LEAVERS
 - DIM_CLA_ELIGIBILITY
 - FACT_CARE_PLANS
-- ssd_person
+- #ssd_person
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -3576,7 +3576,7 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_care_leavers', 'U') IS NOT NULL DROP TABLE ssd_care_leavers;
+IF OBJECT_ID('ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
 IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
  
  
@@ -3638,7 +3638,7 @@ WITH InvolvementHistoryCTE AS (
 )
  
 -- Insert data
-INSERT INTO ssd_care_leavers
+INSERT INTO #ssd_care_leavers
 (
     clea_table_id,
     clea_person_id,
@@ -3693,7 +3693,7 @@ LEFT JOIN InvolvementHistoryCTE AS ih ON dce.DIM_PERSON_ID = ih.DIM_PERSON_ID   
  
 WHERE EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = dce.DIM_PERSON_ID
     )
  
@@ -3715,14 +3715,14 @@ GROUP BY
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
--- FOREIGN KEY (clea_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
+-- FOREIGN KEY (clea_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clea_person_id                        ON ssd_care_leavers(clea_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clea_care_leaver_latest_contact   ON ssd_care_leavers(clea_care_leaver_latest_contact);
-CREATE NONCLUSTERED INDEX idx_ssd_clea_pathway_plan_review_date     ON ssd_care_leavers(clea_pathway_plan_review_date);
+CREATE NONCLUSTERED INDEX idx_clea_person_id                        ON #ssd_care_leavers(clea_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_clea_care_leaver_latest_contact   ON #ssd_care_leavers(clea_care_leaver_latest_contact);
+CREATE NONCLUSTERED INDEX idx_ssd_clea_pathway_plan_review_date     ON #ssd_care_leavers(clea_pathway_plan_review_date);
 
 
 
@@ -3737,7 +3737,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_permanence
+Object Name: #ssd_permanence
 Description: 
 Author: D2I
 Version: 1.2
@@ -3755,7 +3755,7 @@ Remarks:
         DEV: Some fields need spec checking for datatypes e.g. perm_adopted_by_carer_flag and others
 
 Dependencies: 
-- ssd_person
+- #ssd_person
 - FACT_ADOPTION
 - FACT_CLA_PLACEMENT
 - FACT_LEGAL_STATUS
@@ -3770,7 +3770,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_permanence', 'U') IS NOT NULL DROP TABLE ssd_permanence;
+IF OBJECT_ID('ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
 IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
 
 -- Create structure
@@ -3869,14 +3869,14 @@ WITH RankedPermanenceData AS (
         -- -- Exclusion block commented for further [TESTING] 
         -- AND EXISTS ( -- ssd records only
         --     SELECT 1
-        --     FROM ssd_person p
+        --     FROM #ssd_person p
         --     WHERE p.pers_person_id = fce.DIM_PERSON_ID
         -- )
 
 )
 
 -- Insert data
-INSERT INTO ssd_permanence (
+INSERT INTO #ssd_permanence (
     perm_table_id,
     perm_person_id,
     perm_cla_id,
@@ -3933,21 +3933,21 @@ WHERE rn = 1
 AND EXISTS
     ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = perm_person_id
     );
 
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_permanence ADD CONSTRAINT FK_perm_person_id
--- FOREIGN KEY (perm_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
+-- ALTER TABLE #ssd_permanence ADD CONSTRAINT FK_perm_person_id
+-- FOREIGN KEY (perm_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id            ON ssd_permanence(perm_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date    ON ssd_permanence(perm_adm_decision_date);
-CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date           ON ssd_permanence(perm_permanence_order_date);
+CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id            ON #ssd_permanence(perm_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date    ON #ssd_permanence(perm_adm_decision_date);
+CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date           ON #ssd_permanence(perm_permanence_order_date);
 
 
 
@@ -3961,7 +3961,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_professionals
+Object Name: #ssd_professionals
 Description: 
 Author: D2I
 Version: 1.1
@@ -3974,7 +3974,7 @@ Dependencies:
 - @LastSept30th
 - DIM_WORKER
 - FACT_REFERRALS
-- ssd_cin_episodes (if counting caseloads within SSD timeframe)
+- #ssd_cin_episodes (if counting caseloads within SSD timeframe)
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -3983,7 +3983,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_professionals', 'U') IS NOT NULL DROP TABLE ssd_professionals;
+IF OBJECT_ID('ssd_professionals', 'U') IS NOT NULL DROP TABLE #ssd_professionals;
 IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL DROP TABLE #ssd_professionals;
 
 
@@ -4013,7 +4013,7 @@ CREATE TABLE #ssd_professionals (
 
 
 -- Insert data
-INSERT INTO ssd_professionals (
+INSERT INTO #ssd_professionals (
     prof_professional_id, 
     prof_staff_id, 
     prof_professional_name,
@@ -4060,8 +4060,8 @@ LEFT JOIN (
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_prof_staff_id                 ON ssd_professionals (prof_staff_id);
-CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON ssd_professionals(prof_social_worker_registration_no);
+CREATE NONCLUSTERED INDEX idx_prof_staff_id                 ON #ssd_professionals (prof_staff_id);
+CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON #ssd_professionals(prof_social_worker_registration_no);
 
 
 -- [TESTING] Increment /print progress
@@ -4073,7 +4073,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_department
+Object Name: #ssd_department
 Description: 
 Author: D2I
 Version: 1.0
@@ -4089,19 +4089,19 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_department', 'U') IS NOT NULL DROP TABLE ssd_department;
+IF OBJECT_ID('ssd_department', 'U') IS NOT NULL DROP TABLE #ssd_department;
 IF OBJECT_ID('tempdb..#ssd_department', 'U') IS NOT NULL DROP TABLE #ssd_department;
 
 -- Create structure
 CREATE TABLE #ssd_department (
     dept_team_id           NVARCHAR(48),  -- metadata={"item_ref":"DEPT1001A"}
     dept_team_name         NVARCHAR(255), -- metadata={"item_ref":"DEPT1002A"}
-    dept_team_parent_id    NVARCHAR(48),  -- metadata={"item_ref":"DEPT1003A"}, references ssd_department.dept_team_id
+    dept_team_parent_id    NVARCHAR(48),  -- metadata={"item_ref":"DEPT1003A"}, references #ssd_department.dept_team_id
     dept_team_parent_name  NVARCHAR(255)  -- metadata={"item_ref":"DEPT1004A"}
 );
 
 -- Insert data
-INSERT INTO ssd_department (
+INSERT INTO #ssd_department (
     dept_team_id,
     dept_team_name,
     dept_team_parent_id,
@@ -4120,11 +4120,11 @@ WHERE dpt.dim_department_id <> -1;
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_department ADD CONSTRAINT FK_dept_team_parent_id 
--- FOREIGN KEY (dept_team_parent_id) REFERENCES ssd_department(dept_team_id);
+-- ALTER TABLE #ssd_department ADD CONSTRAINT FK_dept_team_parent_id 
+-- FOREIGN KEY (dept_team_parent_id) REFERENCES #ssd_department(dept_team_id);
 
 -- Create index(es)
-CREATE INDEX idx_dept_team_id ON ssd_department (dept_team_id);
+CREATE INDEX idx_dept_team_id ON #ssd_department (dept_team_id);
 
 
 -- [TESTING] Increment /print progress
@@ -4136,7 +4136,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_involvements
+Object Name: #ssd_involvements
 Description:
 Author: D2I
 Version: 1.1
@@ -4150,7 +4150,7 @@ Remarks: Regarding the increased size/len on invo_professional_team
                 GROUP_NAME is NULL.
                 COMMENTS contains the keyword %WORKER% or %ALLOC%.
 Dependencies:
-- ssd_professionals
+- #ssd_professionals
 - FACT_INVOLVEMENTS
 =============================================================================
 */
@@ -4160,7 +4160,7 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_involvements', 'U') IS NOT NULL DROP TABLE ssd_involvements;
+IF OBJECT_ID('ssd_involvements', 'U') IS NOT NULL DROP TABLE #ssd_involvements;
 IF OBJECT_ID('tempdb..#ssd_involvements', 'U') IS NOT NULL DROP TABLE #ssd_involvements;
  
 -- Create structure
@@ -4177,7 +4177,7 @@ CREATE TABLE #ssd_involvements (
 );
  
 -- Insert data
-INSERT INTO ssd_involvements (
+INSERT INTO #ssd_involvements (
     invo_involvements_id,
     invo_professional_id,
     invo_professional_role_id,
@@ -4215,7 +4215,7 @@ FROM
 WHERE EXISTS
     (
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = fi.DIM_PERSON_ID
     );
 
@@ -4223,20 +4223,20 @@ WHERE EXISTS
 
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
--- FOREIGN KEY (invo_professional_id) REFERENCES ssd_professionals (prof_professional_id);
+-- ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
+-- FOREIGN KEY (invo_professional_id) REFERENCES #ssd_professionals (prof_professional_id);
 
--- ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional_role 
--- FOREIGN KEY (invo_professional_role_id) REFERENCES ssd_professionals (prof_social_worker_registration_no);
+-- ALTER TABLE #ssd_involvements ADD CONSTRAINT FK_invo_to_professional_role 
+-- FOREIGN KEY (invo_professional_role_id) REFERENCES #ssd_professionals (prof_social_worker_registration_no);
 
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_invo_person_id            ON ssd_involvements (invo_person_id);
-CREATE NONCLUSTERED INDEX idx_invo_professional_role_id ON ssd_involvements (invo_professional_role_id);
-CREATE NONCLUSTERED INDEX idx_ssd_invo_start_date       ON ssd_involvements(invo_involvement_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_invo_end_date         ON ssd_involvements(invo_involvement_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id      ON ssd_involvements(invo_referral_id);
+CREATE NONCLUSTERED INDEX idx_invo_person_id            ON #ssd_involvements (invo_person_id);
+CREATE NONCLUSTERED INDEX idx_invo_professional_role_id ON #ssd_involvements (invo_professional_role_id);
+CREATE NONCLUSTERED INDEX idx_ssd_invo_start_date       ON #ssd_involvements(invo_involvement_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_invo_end_date         ON #ssd_involvements(invo_involvement_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id      ON #ssd_involvements(invo_referral_id);
 
 
 
@@ -4253,7 +4253,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_linked_identifiers
+Object Name: #ssd_linked_identifiers
 Description: 
 Author: D2I
 Version: 1.1
@@ -4282,7 +4282,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop 
-IF OBJECT_ID('ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_linked_identifiers;
+IF OBJECT_ID('ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
 IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
 
 -- Create structure
@@ -4320,7 +4320,7 @@ WHERE
     cs.former_upn IS NOT NULL AND
     EXISTS (
         SELECT 1
-        FROM ssd_person sp
+        FROM #ssd_person sp
         WHERE sp.pers_person_id = cs.dim_person_id
     );
 
@@ -4347,20 +4347,20 @@ WHERE
     cs.upn IS NOT NULL AND
     EXISTS (
         SELECT 1
-        FROM ssd_person sp
+        FROM #ssd_person sp
         WHERE sp.pers_person_id = cs.dim_person_id
     );
 
 
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
--- FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
+-- FOREIGN KEY (link_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_link_person_id        ON ssd_linked_identifiers(link_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_link_valid_from_date  ON ssd_linked_identifiers(link_valid_from_date);
-CREATE NONCLUSTERED INDEX idx_ssd_link_valid_to_date    ON ssd_linked_identifiers(link_valid_to_date);
+CREATE NONCLUSTERED INDEX idx_ssd_link_person_id        ON #ssd_linked_identifiers(link_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_link_valid_from_date  ON #ssd_linked_identifiers(link_valid_from_date);
+CREATE NONCLUSTERED INDEX idx_ssd_link_valid_to_date    ON #ssd_linked_identifiers(link_valid_to_date);
 
 
 
@@ -4385,7 +4385,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_s251_finance
+Object Name: #ssd_s251_finance
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 1.0
@@ -4402,7 +4402,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop 
-IF OBJECT_ID('ssd_s251_finance', 'U') IS NOT NULL DROP TABLE ssd_s251_finance;
+IF OBJECT_ID('ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_finance;
 IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_finance;
 
 -- Create structure
@@ -4416,7 +4416,7 @@ CREATE TABLE #ssd_s251_finance (
 );
 
 -- -- Insert placeholder data [TESTING]
--- INSERT INTO ssd_s251_finance (
+-- INSERT INTO #ssd_s251_finance (
 --     -- row id ommitted as ID generated (s251_table_id,)
 --     s251_cla_placement_id,
 --     s251_placeholder_1,
@@ -4428,11 +4428,11 @@ CREATE TABLE #ssd_s251_finance (
 --     ('SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH');
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
--- FOREIGN KEY (s251_cla_placement_id) REFERENCES ssd_cla_placement(clap_cla_placement_id);
+-- ALTER TABLE #ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
+-- FOREIGN KEY (s251_cla_placement_id) REFERENCES #ssd_cla_placement(clap_cla_placement_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_s251_cla_placement_id ON ssd_s251_finance(s251_cla_placement_id);
+CREATE NONCLUSTERED INDEX idx_ssd_s251_cla_placement_id ON #ssd_s251_finance(s251_cla_placement_id);
 
 
 
@@ -4448,7 +4448,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_voice_of_child
+Object Name: #ssd_voice_of_child
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 1.0
@@ -4464,7 +4464,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop 
-IF OBJECT_ID('ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE ssd_voice_of_child;
+IF OBJECT_ID('ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voice_of_child;
 IF OBJECT_ID('tempdb..#ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voice_of_child;
 
 -- Create structure
@@ -4479,7 +4479,7 @@ CREATE TABLE #ssd_voice_of_child (
 );
 
 -- -- Insert placeholder data [TESTING]
--- INSERT INTO ssd_voice_of_child (
+-- INSERT INTO #ssd_voice_of_child (
 --     -- row id ommitted as ID generated (voch_table_id,)
 --     voch_person_id,
 --     voch_explained_worries,
@@ -4496,17 +4496,17 @@ CREATE TABLE #ssd_voice_of_child (
 -- WHERE EXISTS 
 --  ( -- only ssd relevant records
 --     SELECT 1 
---     FROM ssd_person p
---     WHERE p.pers_person_id = ssd_voice_of_child.DIM_PERSON_ID
+--     FROM #ssd_person p
+--     WHERE p.pers_person_id = #ssd_voice_of_child.DIM_PERSON_ID
 --     );
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
--- FOREIGN KEY (voch_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
+-- FOREIGN KEY (voch_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_voice_of_child_voch_person_id ON ssd_voice_of_child(voch_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_voice_of_child_voch_person_id ON #ssd_voice_of_child(voch_person_id);
 
 
 
@@ -4521,7 +4521,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_pre_proceedings
+Object Name: #ssd_pre_proceedings
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 1.0
@@ -4529,7 +4529,7 @@ Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
-- ssd_person
+- #ssd_person
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -4538,7 +4538,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE ssd_pre_proceedings;
+IF OBJECT_ID('ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pre_proceedings;
 IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pre_proceedings;
 
 -- Create structure
@@ -4570,7 +4570,7 @@ CREATE TABLE #ssd_pre_proceedings (
 );
 
 -- -- Insert placeholder data
--- INSERT INTO ssd_pre_proceedings (
+-- INSERT INTO #ssd_pre_proceedings (
 --     -- row id ommitted as ID generated (prep_table_id,)
 --     prep_person_id,
 --     prep_plo_family_id,
@@ -4614,18 +4614,18 @@ CREATE TABLE #ssd_pre_proceedings (
 -- WHERE EXISTS 
 -- ( -- only ssd relevant records
 --     SELECT 1 
---     FROM ssd_person p
---     WHERE p.pers_person_id = ssd_pre_proceedings.DIM_PERSON_ID
+--     FROM #ssd_person p
+--     WHERE p.pers_person_id = #ssd_pre_proceedings.DIM_PERSON_ID
 --     );
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
--- FOREIGN KEY (prep_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
+-- FOREIGN KEY (prep_person_id) REFERENCES #ssd_person(pers_person_id);
 
 -- Create index(es)
-CREATE NONCLUSTERED INDEX idx_prep_person_id                ON ssd_pre_proceedings (prep_person_id);
-CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date    ON ssd_pre_proceedings (prep_pre_pro_decision_date);
-CREATE NONCLUSTERED INDEX idx_prep_legal_gateway_outcome    ON ssd_pre_proceedings (prep_legal_gateway_outcome);
+CREATE NONCLUSTERED INDEX idx_prep_person_id                ON #ssd_pre_proceedings (prep_person_id);
+CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date    ON #ssd_pre_proceedings (prep_pre_pro_decision_date);
+CREATE NONCLUSTERED INDEX idx_prep_legal_gateway_outcome    ON #ssd_pre_proceedings (prep_legal_gateway_outcome);
 
 
 
@@ -4658,7 +4658,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_send
+Object Name: #ssd_send
 Description: 
 Author: D2I
 Version: 1.0
@@ -4667,7 +4667,7 @@ Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - FACT_903_DATA
-- ssd_person
+- #ssd_person
 - Education.DIM_PERSON
 =============================================================================
 */
@@ -4678,7 +4678,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_send') IS NOT NULL DROP TABLE ssd_send;
+IF OBJECT_ID('ssd_send') IS NOT NULL DROP TABLE #ssd_send;
 IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL DROP TABLE #ssd_send;
 
 -- Create structure 
@@ -4712,15 +4712,15 @@ LEFT JOIN
 WHERE
     EXISTS (
         SELECT 1
-        FROM ssd_person sp
+        FROM #ssd_person sp
         WHERE sp.pers_person_id = cs.dim_person_id
     );
  
  
 
 -- -- Add constraint(s)
--- ALTER TABLE ssd_send ADD CONSTRAINT FK_send_to_person 
--- FOREIGN KEY (send_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE #ssd_send ADD CONSTRAINT FK_send_to_person 
+-- FOREIGN KEY (send_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
 -- [TESTING] Increment /print progress
@@ -4733,7 +4733,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /*
 =============================================================================
-Object Name: ssd_sen_need
+Object Name: #ssd_sen_need
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 0.1
@@ -4741,7 +4741,7 @@ Status: [P]laceholder
 Remarks:
 Dependencies:
 - Yet to be defined
-- ssd_person
+- #ssd_person
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -4750,7 +4750,7 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_sen_need', 'U') IS NOT NULL DROP TABLE ssd_sen_need  ;
+IF OBJECT_ID('ssd_sen_need', 'U') IS NOT NULL DROP TABLE #ssd_sen_need  ;
 IF OBJECT_ID('tempdb..#ssd_sen_need', 'U') IS NOT NULL DROP TABLE #ssd_sen_need  ;
  
  
@@ -4763,14 +4763,14 @@ CREATE TABLE #ssd_sen_need (
 );
  
 -- -- Create constraint(s)
--- ALTER TABLE ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
--- FOREIGN KEY (senn_active_ehcp_id) REFERENCES ssd_ehcp_active_plans(pers_person_id);
+-- ALTER TABLE #ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
+-- FOREIGN KEY (senn_active_ehcp_id) REFERENCES #ssd_ehcp_active_plans(pers_person_id);
 
 -- Create index(es)
 
 
 -- -- Insert placeholder data
--- INSERT INTO ssd_sen_need (senn_table_id, senn_active_ehcp_id, senn_active_ehcp_need_type, senn_active_ehcp_need_rank)
+-- INSERT INTO #ssd_sen_need (senn_table_id, senn_active_ehcp_id, senn_active_ehcp_need_type, senn_active_ehcp_need_rank)
 -- VALUES ('SSD_PH', 'SSD_PH', 'SSD_PH', '0');
  
  
@@ -4786,7 +4786,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_ehcp_requests 
+Object Name: #ssd_ehcp_requests 
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 0.1
@@ -4794,7 +4794,7 @@ Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
-- ssd_person
+- #ssd_person
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -4803,7 +4803,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE ssd_ehcp_requests ;
+IF OBJECT_ID('ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_requests ;
 IF OBJECT_ID('tempdb..#ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_requests ;
 
 
@@ -4818,15 +4818,15 @@ CREATE TABLE #ssd_ehcp_requests (
 
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
--- FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_send(send_table_id);
+-- ALTER TABLE #ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
+-- FOREIGN KEY (ehcr_send_table_id) REFERENCES #ssd_send(send_table_id);
 
 -- Create index(es)
 
 
 
 -- -- Insert placeholder data
--- INSERT INTO ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
+-- INSERT INTO #ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01', 'SSD_PH');
 
 
@@ -4840,7 +4840,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_ehcp_assessment
+Object Name: #ssd_ehcp_assessment
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 0.1
@@ -4848,7 +4848,7 @@ Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
-- ssd_person
+- #ssd_person
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -4857,11 +4857,11 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE ssd_ehcp_assessment ;
+IF OBJECT_ID('ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_assessment ;
 IF OBJECT_ID('tempdb..#ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_assessment ;
 
 
--- Create ssd_ehcp_assessment table
+-- Create #ssd_ehcp_assessment table
 CREATE TABLE #ssd_ehcp_assessment (
     ehca_ehcp_assessment_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCA001A"}
     ehca_ehcp_request_id                    NVARCHAR(48),               -- metadata={"item_ref":"EHCA002A"}
@@ -4872,15 +4872,15 @@ CREATE TABLE #ssd_ehcp_assessment (
 
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_ehcp_assessment ADD CONSTRAINT FK_ehcp_assessment_requests
--- FOREIGN KEY (ehca_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+-- ALTER TABLE #ssd_ehcp_assessment ADD CONSTRAINT FK_ehcp_assessment_requests
+-- FOREIGN KEY (ehca_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
 
 -- Create index(es)
 
 
 
 -- -- Insert placeholder data
--- INSERT INTO ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
+-- INSERT INTO #ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', 'SSD_PH', 'SSD_PH');
 
 
@@ -4899,7 +4899,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_ehcp_named_plan 
+Object Name: #ssd_ehcp_named_plan 
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 0.1
@@ -4907,7 +4907,7 @@ Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
-- ssd_person
+- #ssd_person
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -4916,7 +4916,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE ssd_ehcp_named_plan;
+IF OBJECT_ID('ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_named_plan;
 IF OBJECT_ID('tempdb..#ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_named_plan;
 
 -- Create structure
@@ -4932,15 +4932,15 @@ CREATE TABLE #ssd_ehcp_named_plan (
 
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_ehcp_named_plan ADD CONSTRAINT FK_ehcp_named_plan_assessment
--- FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES ssd_ehcp_assessment(ehca_ehcp_assessment_id);
+-- ALTER TABLE #ssd_ehcp_named_plan ADD CONSTRAINT FK_ehcp_named_plan_assessment
+-- FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES #ssd_ehcp_assessment(ehca_ehcp_assessment_id);
 
 -- Create index(es)
 
 
 
 -- -- Insert placeholder data
--- INSERT INTO ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_ceased_date, ehcn_named_plan_ceased_reason)
+-- INSERT INTO #ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_ceased_date, ehcn_named_plan_ceased_reason)
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01', 'SSD_PH');
 
 
@@ -4954,7 +4954,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 /* 
 =============================================================================
-Object Name: ssd_ehcp_active_plans
+Object Name: #ssd_ehcp_active_plans
 Description: Placeholder structure as source data not common|confirmed
 Author: D2I
 Version: 0.1
@@ -4962,7 +4962,7 @@ Status: [P]laceholder
 Remarks: 
 Dependencies: 
 - Yet to be defined
-- ssd_person
+- #ssd_person
 =============================================================================
 */
 -- [TESTING] Create marker
@@ -4971,7 +4971,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE ssd_ehcp_active_plans  ;
+IF OBJECT_ID('ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_active_plans  ;
 IF OBJECT_ID('tempdb..#ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_active_plans  ;
 
 -- Create structure
@@ -4983,12 +4983,12 @@ CREATE TABLE #ssd_ehcp_active_plans (
 
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
--- FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+-- ALTER TABLE #ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
+-- FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
 
 
 -- -- Insert placeholder data
--- INSERT INTO ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
+-- INSERT INTO #ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01');
 
 
@@ -5002,7 +5002,7 @@ CREATE TABLE #ssd_ehcp_active_plans (
 
 
 -- output for ref most recent/current ssd version and last update
-SELECT * FROM ssd_version WHERE is_current = 1;
+SELECT * FROM #ssd_version WHERE is_current = 1;
 
 
 
@@ -5041,10 +5041,10 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 -- Remarks: 
 -- Dependencies: 
 -- - FACT_INVOLVEMENTS
--- - ssd_person
+-- - #ssd_person
 -- =============================================================================
 -- */
--- ALTER TABLE ssd_person
+-- ALTER TABLE #ssd_person
 -- ADD involvement_history_json NVARCHAR(4000),  -- Adjust data type as needed
 --     involvement_type_story NVARCHAR(1000);  -- Adjust data type as needed
 
@@ -5102,7 +5102,7 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 --     -- end of comment block 3
 
 --     AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
---         SELECT 1 FROM ssd_person p
+--         SELECT 1 FROM #ssd_person p
 --         WHERE p.pers_person_id = fi.DIM_PERSON_ID
 --     )
 
@@ -5121,7 +5121,7 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 --             WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
 
 --             AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
---                 SELECT 1 FROM ssd_person p
+--                 SELECT 1 FROM #ssd_person p
 --                 WHERE p.pers_person_id = fi3.DIM_PERSON_ID
 --             )
 
@@ -5133,7 +5133,7 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
     
 --     WHERE 
 --         EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
---             SELECT 1 FROM ssd_person p
+--             SELECT 1 FROM #ssd_person p
 --             WHERE p.pers_person_id = fi.DIM_PERSON_ID
 --         )
 --     GROUP BY 
@@ -5146,6 +5146,6 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 -- SET
 --     p.involvement_history_json = ih.involvement_history,
 --     p.involvement_type_story = CONCAT('[', its.InvolvementTypeStory, ']')
--- FROM ssd_person p
+-- FROM #ssd_person p
 -- LEFT JOIN InvolvementHistoryCTE ih ON p.pers_person_id = ih.DIM_PERSON_ID
 -- LEFT JOIN InvolvementTypeStoryCTE its ON p.pers_person_id = its.DIM_PERSON_ID;
