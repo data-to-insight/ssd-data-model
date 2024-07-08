@@ -161,7 +161,8 @@ UPDATE ssd_development.ssd_version SET is_current = 0 WHERE is_current = 1;
 INSERT INTO ssd_development.ssd_version 
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
-    ('1.1.5', GETDATE(), 'ssd_person involvements history', 1, 'admin', 'Improved consistency on _json fields, clean-up involvements_history_json');
+    ('1.1.4', GETDATE(), 'ssd_department obj added', 1, 'admin', 'Increased seperation btw professionals and depts enabling history');
+
 
 
 -- historic versioning log data
@@ -170,8 +171,7 @@ VALUES
     ('1.0.0', '2023-01-01', 'Initial alpha release (Phase 1 end)', 0, 'admin', ''),
     ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 0, 'admin', 'Revised JSON Array structure implemented for CiN'),
     ('1.1.2', '2024-06-26', 'ssd_version obj added and minor patch fixes', 0, 'admin', 'Provide mech for extract ver visibility'),
-    ('1.1.3', '2024-06-27', 'Revised filtering on ssd_person', 0, 'admin', 'Check IS_CLIENT flag first'),
-    ('1.1.4', '2024-07-01', 'ssd_department obj added', 0, 'admin', 'Increased seperation btw professionals and depts enabling history');
+    ('1.1.3', '2024-06-27', 'Revised filtering on ssd_person', 0, 'admin', 'Check IS_CLIENT flag first');
 
 
 -- [TESTING] Increment /print progress
@@ -190,8 +190,7 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_person
 Description: Person/child details. This the most connected table in the SSD.
 Author: D2I
-Version: 1.1
-            1.0: fixes to where filter in-line with existing cincplac reorting 040724 JH
+Version: 1.0
             0.2: upn _unknown size change in line with DfE to 4 160524 RH
             0.1: Additional inclusion criteria added to capture care leavers 120324 JH
 Status: [R]elease
@@ -307,20 +306,17 @@ LEFT JOIN (
 ON 
     p.DIM_PERSON_ID = f903.dim_person_id
 
-WHERE 
-    p.DIM_PERSON_ID IS NOT NULL
-    AND p.DIM_PERSON_ID <> -1
-    AND (p.IS_CLIENT = 'Y'
-        OR (
+WHERE (p.IS_CLIENT = 'Y'
+    OR (p.DIM_PERSON_ID IS NOT NULL
+        AND p.DIM_PERSON_ID <> '-1'
+        AND (
             EXISTS (
-                SELECT 1 
-                FROM Child_Social.FACT_CONTACTS fc
+                SELECT 1 FROM Child_Social.FACT_CONTACTS fc
                 WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
                 AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
             )
             OR EXISTS (
-                SELECT 1 
-                FROM Child_Social.FACT_REFERRALS fr
+                SELECT 1 FROM Child_Social.FACT_REFERRALS fr
                 WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
                 AND (
                     fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
@@ -340,15 +336,14 @@ WHERE
             )
             OR EXISTS (
                 SELECT 1 FROM Child_Social.FACT_INVOLVEMENTS fi
-                WHERE (fi.DIM_PERSON_ID = p.DIM_PERSON_ID
-                AND (fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE 'KA%' --Key Agencies (External)
-				OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL OR fi.IS_ALLOCATED_CW_FLAG = 'Y')
-				AND START_DTTM > '2009-12-04 00:54:49.947' -- was trying to cut off from 2010 but when I changed the date it threw up an erro
-				AND DIM_WORKER_ID <> '-1' 
-                AND (fi.END_DTTM IS NULL OR fi.END_DTTM > GETDATE()))
+                WHERE fi.DIM_PERSON_ID = p.DIM_PERSON_ID
+                AND fi.[IS_ALLOCATED_CW_FLAG] = 'Y'
+                AND fi.END_DTTM IS NULL
             )
         )
-    );
+    )
+);
+
  
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob               ON ssd_person(pers_dob);
@@ -519,20 +514,18 @@ SELECT
         ELSE REPLACE(pa.POSTCODE, ' ', '')                                                              -- remove all spaces for consistency
     END AS CleanedPostcode,
     (
-    SELECT 
-        -- SSD standard 
-        -- all keys in structure regardless of data presence
-        ISNULL(pa.ROOM_NO, '')    AS ROOM, 
-        ISNULL(pa.FLOOR_NO, '')   AS FLOOR, 
-        ISNULL(pa.FLAT_NO, '')    AS FLAT, 
-        ISNULL(pa.BUILDING, '')   AS BUILDING, 
-        ISNULL(pa.HOUSE_NO, '')   AS HOUSE, 
-        ISNULL(pa.STREET, '')     AS STREET, 
-        ISNULL(pa.TOWN, '')       AS TOWN,
-        ISNULL(pa.UPRN, '')       AS UPRN,
-        ISNULL(pa.EASTING, '')    AS EASTING,
-        ISNULL(pa.NORTHING, '')   AS NORTHING
-    FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        SELECT 
+            NULLIF(pa.ROOM_NO, '')    AS "ROOM", 
+            NULLIF(pa.FLOOR_NO, '')   AS "FLOOR", 
+            NULLIF(pa.FLAT_NO, '')    AS "FLAT", 
+            NULLIF(pa.BUILDING, '')   AS "BUILDING", 
+            NULLIF(pa.HOUSE_NO, '')   AS "HOUSE", 
+            NULLIF(pa.STREET, '')     AS "STREET", 
+            NULLIF(pa.TOWN, '')       AS "TOWN",
+            NULLIF(pa.UPRN, '')       AS "UPRN",
+            NULLIF(pa.EASTING, '')    AS "EASTING",
+            NULLIF(pa.NORTHING, '')   AS "NORTHING"
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
     ) AS addr_address_json
 FROM 
     Child_Social.DIM_PERSON_ADDRESS AS pa
@@ -942,20 +935,18 @@ SELECT
     fc.DIM_LOOKUP_CONT_SORC_ID_DESC,
     (   -- Create JSON string for outcomes
         SELECT 
-            -- SSD standard 
-            -- all keys in structure regardless of data presence
-            ISNULL(fc.OUTCOME_NEW_REFERRAL_FLAG, '')         AS NEW_REFERRAL_FLAG,
-            ISNULL(fc.OUTCOME_EXISTING_REFERRAL_FLAG, '')    AS EXISTING_REFERRAL_FLAG,
-            ISNULL(fc.OUTCOME_CP_ENQUIRY_FLAG, '')           AS CP_ENQUIRY_FLAG,
-            ISNULL(fc.OUTCOME_NFA_FLAG, '')                  AS NFA_FLAG,
-            ISNULL(fc.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '')  AS NON_AGENCY_ADOPTION_FLAG,
-            ISNULL(fc.OUTCOME_PRIVATE_FOSTERING_FLAG, '')    AS PRIVATE_FOSTERING_FLAG,
-            ISNULL(fc.OUTCOME_ADVICE_FLAG, '')               AS ADVICE_FLAG,
-            ISNULL(fc.OUTCOME_MISSING_FLAG, '')              AS MISSING_FLAG,
-            ISNULL(fc.OUTCOME_OLA_CP_FLAG, '')               AS OLA_CP_FLAG,
-            ISNULL(fc.OTHER_OUTCOMES_EXIST_FLAG, '')         AS OTHER_OUTCOMES_EXIST_FLAG
+            NULLIF(fc.OUTCOME_NEW_REFERRAL_FLAG, '')           AS "NEW_REFERRAL_FLAG",
+            NULLIF(fc.OUTCOME_EXISTING_REFERRAL_FLAG, '')      AS "EXISTING_REFERRAL_FLAG",
+            NULLIF(fc.OUTCOME_CP_ENQUIRY_FLAG, '')             AS "CP_ENQUIRY_FLAG",
+            NULLIF(fc.OUTCOME_NFA_FLAG, '')                    AS "NFA_FLAG",
+            NULLIF(fc.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '')    AS "NON_AGENCY_ADOPTION_FLAG",
+            NULLIF(fc.OUTCOME_PRIVATE_FOSTERING_FLAG, '')      AS "PRIVATE_FOSTERING_FLAG",
+            NULLIF(fc.OUTCOME_ADVICE_FLAG, '')                 AS "ADVICE_FLAG",
+            NULLIF(fc.OUTCOME_MISSING_FLAG, '')                AS "MISSING_FLAG",
+            NULLIF(fc.OUTCOME_OLA_CP_FLAG, '')                 AS "OLA_CP_FLAG",
+            NULLIF(fc.OTHER_OUTCOMES_EXIST_FLAG, '')           AS "OTHER_OUTCOMES_EXIST_FLAG"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        ) AS cont_contact_outcome_json
+    ) AS cont_contact_outcome_json
 FROM 
     Child_Social.FACT_CONTACTS AS fc
     
@@ -1145,20 +1136,18 @@ SELECT
     fr.DIM_LOOKUP_CONT_SORC_ID_DESC,
     (
         SELECT
-            -- SSD standard 
-            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
-            ISNULL(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS SINGLE_ASSESSMENT_FLAG,
-            ISNULL(fr.OUTCOME_NFA_FLAG, '')                 AS NFA_FLAG,
-            ISNULL(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS STRATEGY_DISCUSSION_FLAG,
-            ISNULL(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS CLA_REQUEST_FLAG,
-            ISNULL(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS NON_AGENCY_ADOPTION_FLAG,
-            ISNULL(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS PRIVATE_FOSTERING_FLAG,
-            ISNULL(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS CP_TRANSFER_IN_FLAG,
-            ISNULL(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS CP_CONFERENCE_FLAG,
-            ISNULL(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS CARE_LEAVER_FLAG,
-            ISNULL(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS OTHER_OUTCOMES_EXIST_FLAG
+            NULLIF(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS "SINGLE_ASSESSMENT_FLAG",
+            NULLIF(fr.OUTCOME_NFA_FLAG, '')                 AS "NFA_FLAG",
+            NULLIF(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS "STRATEGY_DISCUSSION_FLAG",
+            NULLIF(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS "CLA_REQUEST_FLAG",
+            NULLIF(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS "NON_AGENCY_ADOPTION_FLAG",
+            NULLIF(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS "PRIVATE_FOSTERING_FLAG",
+            NULLIF(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS "CP_TRANSFER_IN_FLAG",
+            NULLIF(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS "CP_CONFERENCE_FLAG",
+            NULLIF(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS "CARE_LEAVER_FLAG",
+            NULLIF(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS "OTHER_OUTCOMES_EXIST_FLAG"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        ) AS cine_referral_outcome_json,
+    ) AS cine_referral_outcome_json,
     fr.OUTCOME_NFA_FLAG,
     fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
     fr.REFRL_END_DTTM,
@@ -1173,9 +1162,9 @@ AND
     DIM_PERSON_ID <> -1;  -- Exclude rows with '-1'
     ;
 
--- Create constraint(s)
-ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
-FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
+-- -- Create constraint(s)
+-- ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
+-- FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 -- Create index(es)
@@ -1293,24 +1282,22 @@ SELECT
     afa.AssessmentAuthorisedDate,
     (
         SELECT
-            -- SSD standard 
-            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
-            ISNULL(fa.OUTCOME_NFA_FLAG, '')                     AS NFA_FLAG,
-            ISNULL(fa.OUTCOME_NFA_S47_END_FLAG, '')             AS NFA_S47_END_FLAG,
-            ISNULL(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '')     AS STRATEGY_DISCUSSION_FLAG,
-            ISNULL(fa.OUTCOME_CLA_REQUEST_FLAG, '')             AS CLA_REQUEST_FLAG,
-            ISNULL(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '')       AS PRIVATE_FOSTERING_FLAG,
-            ISNULL(fa.OUTCOME_LEGAL_ACTION_FLAG, '')            AS LEGAL_ACTION_FLAG,
-            ISNULL(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '')        AS PROV_OF_SERVICES_FLAG,
-            ISNULL(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '')         AS PROV_OF_SB_CARE_FLAG,
-            ISNULL(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '')   AS SPECIALIST_ASSESSMENT_FLAG,
-            ISNULL(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '') AS REFERRAL_TO_OTHER_AGENCY_FLAG,
-            ISNULL(fa.OUTCOME_OTHER_ACTIONS_FLAG, '')           AS OTHER_ACTIONS_FLAG,
-            ISNULL(fa.OTHER_OUTCOMES_EXIST_FLAG, '')            AS OTHER_OUTCOMES_EXIST_FLAG,
-            ISNULL(fa.TOTAL_NO_OF_OUTCOMES, '')                 AS TOTAL_NO_OF_OUTCOMES,
-            ISNULL(fa.OUTCOME_COMMENTS, '')                     AS COMMENTS -- dictates a larger _json size
+            NULLIF(ISNULL(fa.OUTCOME_NFA_FLAG, ''), '')                     AS "NFA_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_NFA_S47_END_FLAG, ''), '')             AS "NFA_S47_END_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, ''), '')     AS "STRATEGY_DISCUSSION_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_CLA_REQUEST_FLAG, ''), '')             AS "CLA_REQUEST_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, ''), '')       AS "PRIVATE_FOSTERING_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_LEGAL_ACTION_FLAG, ''), '')            AS "LEGAL_ACTION_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_PROV_OF_SERVICES_FLAG, ''), '')        AS "PROV_OF_SERVICES_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, ''), '')         AS "PROV_OF_SB_CARE_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, ''), '')   AS "SPECIALIST_ASSESSMENT_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, ''), '') AS "REFERRAL_TO_OTHER_AGENCY_FLAG",
+            NULLIF(ISNULL(fa.OUTCOME_OTHER_ACTIONS_FLAG, ''), '')           AS "OTHER_ACTIONS_FLAG",
+            NULLIF(ISNULL(fa.OTHER_OUTCOMES_EXIST_FLAG, ''), '')            AS "OTHER_OUTCOMES_EXIST_FLAG",
+            NULLIF(ISNULL(fa.TOTAL_NO_OF_OUTCOMES, ''), '')                 AS "TOTAL_NO_OF_OUTCOMES",
+            NULLIF(ISNULL(fa.OUTCOME_COMMENTS, ''), '')                     AS "COMMENTS" -- dictates a larger _json size
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        ) AS cina_assessment_outcome_json,
+    ) AS cina_assessment_outcome_json,
     fa.OUTCOME_NFA_FLAG                                         AS cina_assessment_outcome_nfa,
     fa.COMPLETED_BY_DEPT_ID                                     AS cina_assessment_team,        -- fa.COMPLETED_BY_DEPT_NAME also available
     fa.COMPLETED_BY_USER_STAFF_ID                               AS cina_assessment_worker_id    -- fa.COMPLETED_BY_USER_NAME also available
@@ -1430,10 +1417,6 @@ SELECT
     fsa.FACT_FORM_ID AS cinf_assessment_id,
     (
         SELECT 
-            -- SSD standard (modified)
-            -- This field differs from main standard _json structure in that because the data is pre-filtered
-            -- and extract method (Opt1) neccessitates a non-standard format within a forward-compatible structure
-
         -- Concat ANSWER_NO values into JSON array structure ["1A","2B","3A", ...], wrap in [ ]
             '[' + STRING_AGG('"' + tmp_af.ANSWER_NO + '"', ', ') + ']' 
         FROM 
@@ -1761,41 +1744,41 @@ SELECT
     s47.OUTCOME_NFA_FLAG,
     (
         SELECT 
-            -- SSD standard 
-            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
-            ISNULL(s47.OUTCOME_NFA_FLAG, '')                   AS NFA_FLAG,
-            ISNULL(s47.OUTCOME_LEGAL_ACTION_FLAG, '')          AS LEGAL_ACTION_FLAG,
-            ISNULL(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '')      AS PROV_OF_SERVICES_FLAG,
-            ISNULL(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '')       AS PROV_OF_SB_CARE_FLAG,
-            ISNULL(s47.OUTCOME_CP_CONFERENCE_FLAG, '')         AS CP_CONFERENCE_FLAG,
-            ISNULL(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '')   AS NFA_CONTINUE_SINGLE_FLAG,
-            ISNULL(s47.OUTCOME_MONITOR_FLAG, '')               AS MONITOR_FLAG,
-            ISNULL(s47.OTHER_OUTCOMES_EXIST_FLAG, '')          AS OTHER_OUTCOMES_EXIST_FLAG,
-            ISNULL(s47.TOTAL_NO_OF_OUTCOMES, '')               AS TOTAL_NO_OF_OUTCOMES,
-            ISNULL(s47.OUTCOME_COMMENTS, '')                   AS OUTCOME_COMMENTS
+            NULLIF(s47.OUTCOME_NFA_FLAG, '')                   AS "NFA_FLAG",
+            NULLIF(s47.OUTCOME_LEGAL_ACTION_FLAG, '')          AS "LEGAL_ACTION_FLAG",
+            NULLIF(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '')      AS "PROV_OF_SERVICES_FLAG",
+            NULLIF(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '')       AS "PROV_OF_SB_CARE_FLAG",
+            NULLIF(s47.OUTCOME_CP_CONFERENCE_FLAG, '')         AS "CP_CONFERENCE_FLAG",
+            NULLIF(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '')   AS "NFA_CONTINUE_SINGLE_FLAG",
+            NULLIF(s47.OUTCOME_MONITOR_FLAG, '')               AS "MONITOR_FLAG",
+            NULLIF(s47.OTHER_OUTCOMES_EXIST_FLAG, '')          AS "OTHER_OUTCOMES_EXIST_FLAG",
+            NULLIF(s47.TOTAL_NO_OF_OUTCOMES, '')               AS "TOTAL_NO_OF_OUTCOMES",
+            NULLIF(s47.OUTCOME_COMMENTS, '')                   AS "OUTCOME_COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        )                                                      AS s47e_s47_outcome_json,
+    ) AS s47e_s47_outcome_json,
     s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
     s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker_id
 
 FROM 
-    Child_Social.FACT_S47 AS s47
+    Child_Social.FACT_S47 AS s47;
 
-WHERE EXISTS ( -- only ssd relevant records
-    SELECT 1
-    FROM ssd_person p
-    WHERE p.pers_person_id = s47.DIM_PERSON_ID
-    ) ;
+-- -- Create constraint(s)
+-- ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
+-- FOREIGN KEY (s47e_person_id) REFERENCES ssd_person(pers_person_id);
 
--- Create constraint(s)
-ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
-FOREIGN KEY (s47e_person_id) REFERENCES ssd_person(pers_person_id);
+-- -- DEV NOTES: [TESTING]
+-- -- Msg 547, Level 16, State 0, Line 1558
+-- -- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_s47_person". 
+-- -- The conflict occurred in database "HDM_Local", table "ssd_development.ssd_person", column 'pers_person_id'.
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_person_id     ON ssd_s47_enquiry(s47e_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_start_date    ON ssd_s47_enquiry(s47e_s47_start_date);
 CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_end_date      ON ssd_s47_enquiry(s47e_s47_end_date);
 CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_referral_id   ON ssd_s47_enquiry(s47e_referral_id);
+
+
+
 
 
 /* Removed 22/11/23
@@ -1892,18 +1875,16 @@ SELECT
     fcpc.OUTCOME_CP_FLAG,
     (
         SELECT
-            -- SSD standard 
-            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
-            ISNULL(fcpc.OUTCOME_NFA_FLAG, '')                       AS NFA_FLAG,
-            ISNULL(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS REFERRAL_TO_OTHER_AGENCY_FLAG,
-            ISNULL(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS SINGLE_ASSESSMENT_FLAG,
-            ISNULL(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS PROV_OF_SERVICES_FLAG,
-            ISNULL(fcpc.OUTCOME_CP_FLAG, '')                        AS CP_FLAG,
-            ISNULL(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')              AS OTHER_OUTCOMES_EXIST_FLAG,
-            ISNULL(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS TOTAL_NO_OF_OUTCOMES,
-            ISNULL(fcpc.OUTCOME_COMMENTS, '')                       AS COMMENTS
+            NULLIF(fcpc.OUTCOME_NFA_FLAG, '')                       AS "NFA_FLAG",
+            NULLIF(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS "REFERRAL_TO_OTHER_AGENCY_FLAG",
+            NULLIF(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS "SINGLE_ASSESSMENT_FLAG",
+            NULLIF(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS "PROV_OF_SERVICES_FLAG",
+            NULLIF(fcpc.OUTCOME_CP_FLAG, '')                        AS "CP_FLAG",
+            NULLIF(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')              AS "OTHER_OUTCOMES_EXIST_FLAG",
+            NULLIF(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS "TOTAL_NO_OF_OUTCOMES",
+            NULLIF(fcpc.OUTCOME_COMMENTS, '')                       AS "COMMENTS"
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        )                                                           AS icpc_icpc_outcome_json,
+    )                                                               AS icpc_icpc_outcome_json,
     fcpc.ORGANISED_BY_DEPT_ID                                       AS icpc_icpc_team,          -- was fcpc.ORGANISED_BY_DEPT_NAME 
     fcpc.ORGANISED_BY_USER_STAFF_ID                                 AS icpc_icpc_worker_id      -- was fcpc.ORGANISED_BY_USER_NAME
  
@@ -1918,18 +1899,13 @@ LEFT JOIN
 WHERE
     fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
 
-AND EXISTS ( -- only ssd relevant records
-    SELECT 1
-    FROM ssd_person p
-    WHERE p.pers_person_id = fcpc.DIM_PERSON_ID
-    ) ;
 
 -- -- Create constraint(s)
 -- ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_s47_enquiry_id
 -- FOREIGN KEY (icpc_s47_enquiry_id) REFERENCES ssd_s47_enquiry(s47e_s47_enquiry_id);
 
-ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_person_id
-FOREIGN KEY (icpc_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_person_id
+-- FOREIGN KEY (icpc_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_referral_id
 -- FOREIGN KEY (icpc_referral_id) REFERENCES ssd_cin_episodes(cine_referral_id);
@@ -3183,8 +3159,6 @@ SELECT
     fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
     (
         SELECT  -- Combined _json field with 'ICP' responses
-            -- SSD standard 
-            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN tmp_cpl.ANSWER END, '')), NULL) AS REMAINSUP,
             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN1M,
             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN6M,
@@ -4322,12 +4296,9 @@ CREATE TABLE ssd_development.ssd_linked_identifiers (
 );
 
 
--- Notes: 
--- By default this object is supplied empty in readiness for manual user input. 
--- Those inserting data must refer to the SSD specification for the standard SSD identifier_types
 
--- Example entry 1
 
+-- [TESTING]
 -- Insert data for 
 -- link_identifier_type "FORMER_UPN"
 INSERT INTO ssd_development.ssd_linked_identifiers (
@@ -4352,8 +4323,6 @@ WHERE
         FROM ssd_person sp
         WHERE sp.pers_person_id = cs.dim_person_id
     );
-
--- Example entry 2
 
 -- Insert data for 
 -- link_identifier_type "UPN"
@@ -4383,8 +4352,10 @@ WHERE
     );
 
 
+
 -- -- Create constraint(s)
-ALTER TABLE ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
+-- FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_link_person_id        ON ssd_linked_identifiers(link_person_id);
@@ -5060,122 +5031,121 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 
 
 
-/* 
-=============================================================================
-MOD Name: involvements history, involvements type history
-Description: 
-Author: D2I
-Version: 0.2
-            0.1: involvement_history_json size change from 4000 to max fix trunc err 040724 RH
-Status: [DT]ataTesting
-Remarks: 
-Dependencies: 
-- FACT_INVOLVEMENTS
-- ssd_person
-=============================================================================
-*/
-ALTER TABLE ssd_development.ssd_person
-ADD pers_involvement_history_json NVARCHAR(max),  -- Adjust data type as needed
-    pers_involvement_type_story NVARCHAR(1000);   -- Adjust data type as needed
+-- /* 
+-- =============================================================================
+-- MOD Name: involvements history, involvements type history
+-- Description: 
+-- Author: D2I
+-- Version: 0.1
+-- Status: [DT]ataTesting
+-- Remarks: 
+-- Dependencies: 
+-- - FACT_INVOLVEMENTS
+-- - ssd_person
+-- =============================================================================
+-- */
+-- ALTER TABLE ssd_person
+-- ADD involvement_history_json NVARCHAR(4000),  -- Adjust data type as needed
+--     involvement_type_story NVARCHAR(1000);  -- Adjust data type as needed
 
-Go -- Need to ensure the above is completed prior to onward processing
 
--- CTE for involvement history incl. worker data
-WITH InvolvementHistoryCTE AS (
-    SELECT 
-        fi.DIM_PERSON_ID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
-        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
+-- -- CTE for involvement history incl. worker data
+-- WITH InvolvementHistoryCTE AS (
+--     SELECT 
+--         fi.DIM_PERSON_ID,
+--         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
+--         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
+--         MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
 
-        JSON_QUERY((
-            -- structure of the main|complete invovements history json 
-            SELECT 
-                ISNULL(fi2.FACT_INVOLVEMENTS_ID, '')              AS INVOLVEMENT_ID,
-                ISNULL(fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '')  AS INVOLVEMENT_TYPE_CODE,
-                ISNULL(fi2.START_DTTM, '')                        AS START_DATE, 
-                ISNULL(fi2.END_DTTM, '')                          AS END_DATE, 
-                ISNULL(fi2.DIM_WORKER_ID, '')                     AS WORKER_ID, 
-                ISNULL(fi2.DIM_DEPARTMENT_ID, '')                 AS DEPARTMENT_ID
-            FROM 
-                Child_Social.FACT_INVOLVEMENTS fi2
-            WHERE 
-                fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
+--         JSON_QUERY((
+--             -- structure of the main|complete invovements history json 
+--             SELECT 
+--                 fi2.FACT_INVOLVEMENTS_ID                AS 'involvement_id',
+--                 fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE    AS 'involvement_type_code',
+--                 fi2.START_DTTM                          AS 'start_date', 
+--                 fi2.END_DTTM                            AS 'end_date', 
+--                 fi2.DIM_WORKER_ID                       AS 'worker_id', 
+--                 fi2.DIM_DEPARTMENT_ID                   AS 'department_id'
+--             FROM 
+--                 Child_Social.FACT_INVOLVEMENTS fi2
+--             WHERE 
+--                 fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
 
-            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-            -- rem WITHOUT_ARRAY_WRAPPER if restricting FULL contact history in _json (involvement_history_json)
-        )) AS involvement_history
-    FROM (
+--             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--             -- Comment/replace this block(1 of 3)replace the above line with: FOR JSON PATH to enable FULL contact history in _json (involvement_history_json)
+--             -- FOR JSON PATH
+--             -- end of comment block 1
+--         )) AS involvement_history
+--     FROM (
 
-        -- commented out to enable FULL contact history in _json (involvement_history_json). Re-enable if wanting only most recent/1
-        SELECT *,
-            -- ROW_NUMBER() OVER (
-            --     PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
-            --     ORDER BY FACT_INVOLVEMENTS_ID DESC
-            -- ) AS rn,
-            -- only applied if the following fi.rn = 1 is uncommented
+--         -- Comment this block(2 of 3) to enable FULL contact history in _json (involvement_history_json)
+--         SELECT *,
+--             ROW_NUMBER() OVER (
+--                 PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
+--                 ORDER BY FACT_INVOLVEMENTS_ID DESC
+--             ) AS rn,
+--             -- end of comment block 2
 
-            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
-        FROM Child_Social.FACT_INVOLVEMENTS
-        WHERE 
-            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
-            -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
-            AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-            AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-            AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
-                                                -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
-    ) fi
+--             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
+--         FROM Child_Social.FACT_INVOLVEMENTS
+--         WHERE 
+--             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
+--             -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
+--             AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+--             AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+--             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
+--                                                 -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
+--     ) fi
 
-WHERE 
-    -- -- Commented out to enable FULL contact history in _json (involvement_history_json). Re-enable if wanting only most recent/1
-    -- fi.rn = 1
-    -- AND
+--     -- Comment this block(3 of 3) to enable FULL contact history in _json (involvement_history_json)
+--     WHERE fi.rn = 1
+--     -- end of comment block 3
 
-    EXISTS (    -- Remove filter IF wishing to extract records beyond scope of SSD timeframe
-        SELECT 1 FROM ssd_development.ssd_person p
-        WHERE p.pers_person_id = fi.DIM_PERSON_ID
-    )
+--     AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+--         SELECT 1 FROM ssd_person p
+--         WHERE p.pers_person_id = fi.DIM_PERSON_ID
+--     )
 
-    GROUP BY 
-        fi.DIM_PERSON_ID
-),
--- CTE for involvement type story
-InvolvementTypeStoryCTE AS (
-    SELECT 
-        fi.DIM_PERSON_ID,
-        STUFF((
-            -- Concat involvement type codes into string
-            -- cannot use STRING AGG as appears to not work (Needs v2017+)
-            SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
-            FROM Child_Social.FACT_INVOLVEMENTS fi3
-            WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
+--     GROUP BY 
+--         fi.DIM_PERSON_ID
+-- ),
+-- -- CTE for involvement type story
+-- InvolvementTypeStoryCTE AS (
+--     SELECT 
+--         fi.DIM_PERSON_ID,
+--         STUFF((
+--             -- Concat involvement type codes into string
+--             -- cannot use STRING AGG as appears to not work (Needs v2017+)
+--             SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
+--             FROM Child_Social.FACT_INVOLVEMENTS fi3
+--             WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
 
-            AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-                SELECT 1 FROM ssd_development.ssd_person p
-                WHERE p.pers_person_id = fi3.DIM_PERSON_ID
-            )
+--             AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+--                 SELECT 1 FROM ssd_person p
+--                 WHERE p.pers_person_id = fi3.DIM_PERSON_ID
+--             )
 
-            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
-            FOR XML PATH('')
-        ), 1, 1, '') AS InvolvementTypeStory
-    FROM 
-        Child_Social.FACT_INVOLVEMENTS fi
+--             ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
+--             FOR XML PATH('')
+--         ), 1, 1, '') AS InvolvementTypeStory
+--     FROM 
+--         Child_Social.FACT_INVOLVEMENTS fi
     
-    WHERE 
-        EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-            SELECT 1 FROM ssd_person p
-            WHERE p.pers_person_id = fi.DIM_PERSON_ID
-        )
-    GROUP BY 
-        fi.DIM_PERSON_ID
-)
+--     WHERE 
+--         EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+--             SELECT 1 FROM ssd_person p
+--             WHERE p.pers_person_id = fi.DIM_PERSON_ID
+--         )
+--     GROUP BY 
+--         fi.DIM_PERSON_ID
+-- )
 
 
--- Update
-UPDATE p
-SET
-    p.pers_involvement_history_json = ih.involvement_history,
-    p.pers_involvement_type_story = CONCAT('[', its.InvolvementTypeStory, ']')
-FROM ssd_development.ssd_person p
-LEFT JOIN InvolvementHistoryCTE ih ON p.pers_person_id = ih.DIM_PERSON_ID
-LEFT JOIN InvolvementTypeStoryCTE its ON p.pers_person_id = its.DIM_PERSON_ID;
+-- -- Update
+-- UPDATE p
+-- SET
+--     p.involvement_history_json = ih.involvement_history,
+--     p.involvement_type_story = CONCAT('[', its.InvolvementTypeStory, ']')
+-- FROM ssd_person p
+-- LEFT JOIN InvolvementHistoryCTE ih ON p.pers_person_id = ih.DIM_PERSON_ID
+-- LEFT JOIN InvolvementTypeStoryCTE its ON p.pers_person_id = its.DIM_PERSON_ID;

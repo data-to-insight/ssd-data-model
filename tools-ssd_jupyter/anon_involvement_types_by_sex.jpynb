@@ -1,0 +1,143 @@
+## Example tools/code for generating potential analysis/visuals
+
+# Example 1
+# involvement type history by Sex for ssd_persons
+# Dependencies: ssd_persons (with MOD1 - involvement_history_json)
+# Runs in a jupyter notebook or colab notebook
+# All data shown is fake/sample. Data can alternatively be pulled direct from SSD if python/jupyter is available locally in your LA
+
+import pandas as pd
+import json
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+# fake data
+# covers approx 6yr sample SSD time frame
+data = {
+    'pers_person_id': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+    'Sex': ['M', 'F', 'M', 'F', 'M', 'F', 'U', 'M', 'F', 'M', 'F', 'U', 'M', 'F'],
+    'involvement_type_story': [
+        '["CSO","SEC","CW","LLSWM"]',
+        '["CW","LLSWM"]',
+        '["CSO","LLSWM"]',
+        '["CW","SEC"]',
+        '["CW","LLSWM","CSO"]',
+        '["LLSWM","SEC"]',
+        '["CW","SEC"]',
+        '["CW","LLSWM"]',
+        '["CSO","CW"]',
+        '["LLSWM","SEC","CSO"]',
+        '["CW","LLSWM"]',
+        '["SEC","CSO"]',
+        '["LLSWM","CW"]',
+        '["CW","SEC"]'
+    ],
+    'involvement_history_json': [
+        '[{"INVOLVEMENT_ID": 146, "INVOLVEMENT_TYPE_CODE": "CSO", "START_DATE": "2018-06-01T00:00:00", "END_DATE": null, "WORKER_ID": 283, "DEPARTMENT_ID": -1}, {"INVOLVEMENT_ID": 146, "INVOLVEMENT_TYPE_CODE": "SEC", "START_DATE": "2018-06-15T00:00:00", "END_DATE": null, "WORKER_ID": 623, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 199, "INVOLVEMENT_TYPE_CODE": "CW", "START_DATE": "2019-01-25T00:00:00", "END_DATE": null, "WORKER_ID": 623, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 199, "INVOLVEMENT_TYPE_CODE": "LLSWM", "START_DATE": "2019-03-25T00:00:00", "END_DATE": null, "WORKER_ID": 283, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 199, "INVOLVEMENT_TYPE_CODE": "CW", "START_DATE": "2020-01-01T00:00:00", "END_DATE": "2020-06-01T00:00:00", "WORKER_ID": 623, "DEPARTMENT_ID": -1}, {"INVOLVEMENT_ID": 199, "INVOLVEMENT_TYPE_CODE": "SEC", "START_DATE": "2020-02-01T00:00:00", "END_DATE": "2020-05-01T00:00:00", "WORKER_ID": 622, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 200, "INVOLVEMENT_TYPE_CODE": "CW", "START_DATE": "2021-01-15T00:00:00", "END_DATE": "2021-06-15T00:00:00", "WORKER_ID": 624, "DEPARTMENT_ID": -1}, {"INVOLVEMENT_ID": 201, "INVOLVEMENT_TYPE_CODE": "LLSWM", "START_DATE": "2021-07-01T00:00:00", "END_DATE": null, "WORKER_ID": 284, "DEPARTMENT_ID": -1}, {"INVOLVEMENT_ID": 202, "INVOLVEMENT_TYPE_CODE": "CSO", "START_DATE": "2021-08-01T00:00:00", "END_DATE": null, "WORKER_ID": 284, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 203, "INVOLVEMENT_TYPE_CODE": "LLSWM", "START_DATE": "2019-06-05T00:00:00", "END_DATE": "2019-12-05T00:00:00", "WORKER_ID": 283, "DEPARTMENT_ID": -1}, {"INVOLVEMENT_ID": 204, "INVOLVEMENT_TYPE_CODE": "SEC", "START_DATE": "2020-01-10T00:00:00", "END_DATE": null, "WORKER_ID": 623, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 205, "INVOLVEMENT_TYPE_CODE": "CW", "START_DATE": "2021-01-01T00:00:00", "END_DATE": "2021-05-01T00:00:00", "WORKER_ID": 624, "DEPARTMENT_ID": -1}, {"INVOLVEMENT_ID": 206, "INVOLVEMENT_TYPE_CODE": "SEC", "START_DATE": "2021-06-01T00:00:00", "END_DATE": "2021-10-01T00:00:00", "WORKER_ID": 622, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 207, "INVOLVEMENT_TYPE_CODE": "CW", "START_DATE": "2021-02-20T00:00:00", "END_DATE": "2021-07-20T00:00:00", "WORKER_ID": 623, "DEPARTMENT_ID": -1}, {"INVOLVEMENT_ID": 208, "INVOLVEMENT_TYPE_CODE": "LLSWM", "START_DATE": "2021-08-01T00:00:00", "END_DATE": null, "WORKER_ID": 284, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 209, "INVOLVEMENT_TYPE_CODE": "CSO", "START_DATE": "2022-03-15T00:00:00", "END_DATE": "2022-09-15T00:00:00", "WORKER_ID": 283, "DEPARTMENT_ID": -1}, {"INVOLVEMENT_ID": 210, "INVOLVEMENT_TYPE_CODE": "CW", "START_DATE": "2022-10-01T00:00:00", "END_DATE": null, "WORKER_ID": 623, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 211, "INVOLVEMENT_TYPE_CODE": "LLSWM", "START_DATE": "2023-04-01T00:00:00", "END_DATE": "2023-09-01T00:00:00", "WORKER_ID": 284, "DEPARTMENT_ID": -1}, {"INVOLVEMENT_ID": 212, "INVOLVEMENT_TYPE_CODE": "SEC", "START_DATE": "2023-10-01T00:00:00", "END_DATE": null, "WORKER_ID": 622, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 213, "INVOLVEMENT_TYPE_CODE": "CW", "START_DATE": "2024-01-15T00:00:00", "END_DATE": "2024-06-15T00:00:00", "WORKER_ID": 624, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 214, "INVOLVEMENT_TYPE_CODE": "SEC", "START_DATE": "2024-07-01T00:00:00", "END_DATE": "2024-12-01T00:00:00", "WORKER_ID": 622, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 215, "INVOLVEMENT_TYPE_CODE": "LLSWM", "START_DATE": "2018-07-05T00:00:00", "END_DATE": null, "WORKER_ID": 284, "DEPARTMENT_ID": -1}, {"INVOLVEMENT_ID": 216, "INVOLVEMENT_TYPE_CODE": "CW", "START_DATE": "2018-08-01T00:00:00", "END_DATE": null, "WORKER_ID": 623, "DEPARTMENT_ID": -1}]',
+        '[{"INVOLVEMENT_ID": 217, "INVOLVEMENT_TYPE_CODE": "SEC", "START_DATE": "2018-08-01T00:00:00", "END_DATE": "2018-12-01T00:00:00", "WORKER_ID": 622, "DEPARTMENT_ID": -1}, {"INVOLVEMENT_ID": 218, "INVOLVEMENT_TYPE_CODE": "CW", "START_DATE": "2019-01-01T00:00:00", "END_DATE": "2019-06-01T00:00:00", "WORKER_ID": 623, "DEPARTMENT_ID": -1}]'
+    ]
+}
+df = pd.DataFrame(data)
+
+# Convert JSON str to lists of dicts
+df['involvement_history_json'] = df['involvement_history_json'].apply(json.loads)
+
+# normalise JSON column
+involvement_df_list = []
+for record in df['involvement_history_json']:
+    involvement_df_list.append(pd.json_normalize(record))
+
+# concat involvement DataFrame
+involvement_df = pd.concat(involvement_df_list, ignore_index=True)
+
+# Add person ID and Sex to each row in the involvement DataFrame
+person_ids = df['pers_person_id'].repeat(df['involvement_history_json'].str.len()).reset_index(drop=True)
+sexes = df['Sex'].repeat(df['involvement_history_json'].str.len()).reset_index(drop=True)
+involvement_df['pers_person_id'] = person_ids
+involvement_df['Sex'] = sexes
+
+# Merge with the original DataFrame
+result_df = pd.merge(df[['pers_person_id', 'Sex', 'involvement_type_story']], involvement_df, on='pers_person_id', how='right', suffixes=('', '_y'))
+
+# Rem any dupl cols if exist
+if 'Sex_y' in result_df.columns:
+    result_df.drop(columns=['Sex_y'], inplace=True)
+
+# date cols to datetime
+result_df['START_DATE'] = pd.to_datetime(result_df['START_DATE'], errors='coerce')
+result_df['END_DATE'] = pd.to_datetime(result_df['END_DATE'], errors='coerce')
+
+# explode involvement_type_story into multiple rows & clean up
+result_df['involvement_type_story'] = result_df['involvement_type_story'].apply(json.loads)
+expanded_df = result_df.explode('involvement_type_story')
+
+# give sequence num to each involvement type for the same person
+expanded_df['sequence'] = expanded_df.groupby('pers_person_id').cumcount()
+
+# gen' unique IDs for each involvement entry
+expanded_df['unique_id'] = expanded_df.apply(lambda row: f"{row['pers_person_id']}_{row['sequence']}", axis=1)
+
+# Correctly assign involvement_type_story to involvement_type_code
+expanded_df['INVOLVEMENT_TYPE_CODE'] = expanded_df['involvement_type_story']
+
+# make sure 'Sex' column is backfilled
+expanded_df['Sex'] = expanded_df['Sex'].fillna(method='ffill')
+
+# get earliest and latest START_DATE
+start_date_earliest = expanded_df['START_DATE'].min().strftime('%d/%m/%Y')
+start_date_latest = expanded_df['START_DATE'].max().strftime('%d/%m/%Y')
+
+
+def plot_gantt_by_involvement_type(df, involvement_type, start_date_earliest, start_date_latest):
+    fig, ax = plt.subplots(figsize=(14, 8))  # Adjusted figsize for individual charts
+
+    colors = {'M': 'blue', 'F': 'pink', 'U': 'grey'}
+
+    for sex, group in df.groupby('Sex'):
+        for i, row in group.iterrows():
+            end_date = row['END_DATE'] if pd.notnull(row['END_DATE']) else row['START_DATE'] + pd.Timedelta(days=10)
+            ax.barh(row['Sex'], 
+                    (end_date - row['START_DATE']).days, 
+                    left=row['START_DATE'], 
+                    color=colors[sex], 
+                    edgecolor='black',
+                    label=sex if i == group.index[0] else "")
+
+    # x-axis dates with 6-month interval
+    ax.xaxis_date()
+    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=6))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m/%Y'))
+    plt.xticks(rotation=45)
+
+    # y-axis labels to Sex
+    ax.set_yticks(df['Sex'].unique())
+    ax.set_yticklabels(df['Sex'].unique())
+
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Sex')
+    ax.set_title(f'Involvement History for {involvement_type} in the period {start_date_earliest} to {start_date_latest} by Sex')
+
+    # Remove dup legends
+    handles, labels = ax.get_legend_handles_labels()
+    unique_labels = dict(zip(labels, handles))
+    ax.legend(unique_labels.values(), unique_labels.keys(), loc='best')
+
+ 
+    plt.tight_layout()
+    plt.show()
+
+# Plot for each involvement type
+for involvement_type, group_df in expanded_df.groupby('INVOLVEMENT_TYPE_CODE'):
+    plot_gantt_by_involvement_type(group_df, involvement_type, start_date_earliest, start_date_latest)
