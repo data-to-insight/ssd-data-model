@@ -92,10 +92,10 @@ WHERE s.name = N'ssd_development';
 -- execute drop FK
 EXEC sp_executesql @sql;
 
--- Clear the SQL variable
+-- Clear SQL var
 SET @sql = N'';
 
--- generate DROP TABLE for each table in the schema
+-- generate DROP TABLE for each table in schema
 SELECT @sql += '
 IF OBJECT_ID(''' + s.name + '.' + t.name + ''', ''U'') IS NOT NULL
 BEGIN
@@ -4065,6 +4065,8 @@ Status: [R]elease
 Remarks: 
 Dependencies: 
 - @LastSept30th
+- @TimeframeStartDate
+- @ssd_timeframe_years
 - DIM_WORKER
 - FACT_REFERRALS
 - ssd_cin_episodes (if counting caseloads within SSD timeframe)
@@ -4102,7 +4104,6 @@ CREATE TABLE ssd_development.ssd_professionals (
     prof_professional_department        NVARCHAR(100),              -- metadata={"item_ref":"PROF012A"}
     prof_full_time_equivalency          FLOAT                       -- metadata={"item_ref":"PROF011A"}
 );
-
 
 
 -- Insert data
@@ -4212,7 +4213,8 @@ SELECT
 FROM Child_Social.DIM_DEPARTMENT dpt
 WHERE dpt.dim_department_id <> -1;
 
--- Dev note: Can the data be reduced by matching back to objects to ensure only in-use dept data is retrieved
+-- Dev note: 
+-- Can dept data be reduced by matching back to objects to ensure only in-use dept data is retrieved
 
 
 
@@ -4317,16 +4319,10 @@ WHERE EXISTS
     );
 
 
-
-
--- Add constraint(s)
-ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
-FOREIGN KEY (invo_professional_id) REFERENCES ssd_professionals (prof_professional_id);
-
--- [TESTING]
--- ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional_role 
--- FOREIGN KEY (invo_professional_role_id) REFERENCES ssd_professionals (prof_social_worker_registration_no);
-
+-- [TESTING] #DtoI-1769
+-- -- Add constraint(s)
+-- ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
+-- FOREIGN KEY (invo_professional_id) REFERENCES ssd_professionals (prof_professional_id);
 
 
 -- Create index(es)
@@ -5122,6 +5118,13 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 /* ********************************************************************************************************** */
 
 
+/* Start
+
+        SSD Object Contraints
+
+        */
+
+
 -- Create constraint(s)
 ALTER TABLE ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
 FOREIGN KEY (senn_active_ehcp_id) REFERENCES ssd_ehcp_active_plans(ehcp_active_ehcp_id);
@@ -5141,6 +5144,105 @@ FOREIGN KEY (ehca_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_reques
 -- Create constraint(s)
 ALTER TABLE ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
 FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_send(send_table_id);
+
+
+
+/* Start
+
+        SSD Extract Logging
+        */
+
+-- Declare row count var
+DECLARE @row_count INT;
+DECLARE @table_name NVARCHAR(128);
+
+-- Table names
+DECLARE table_cursor CURSOR FOR
+SELECT 'ssd_address' UNION ALL
+SELECT 'ssd_assessment_factors' UNION ALL
+SELECT 'ssd_care_leavers' UNION ALL
+SELECT 'ssd_cin_assessments' UNION ALL
+SELECT 'ssd_cin_episodes' UNION ALL
+SELECT 'ssd_cin_plans' UNION ALL
+SELECT 'ssd_cin_visits' UNION ALL
+SELECT 'ssd_cla_care_plan' UNION ALL
+SELECT 'ssd_cla_convictions' UNION ALL
+SELECT 'ssd_cla_episodes' UNION ALL
+SELECT 'ssd_cla_health' UNION ALL
+SELECT 'ssd_cla_immunisations' UNION ALL
+SELECT 'ssd_cla_placement' UNION ALL
+SELECT 'ssd_cla_previous_permanence' UNION ALL
+SELECT 'ssd_cla_reviews' UNION ALL
+SELECT 'ssd_cla_substance_misuse' UNION ALL
+SELECT 'ssd_cla_visits' UNION ALL
+SELECT 'ssd_contacts' UNION ALL
+SELECT 'ssd_cp_plans' UNION ALL
+SELECT 'ssd_cp_reviews' UNION ALL
+SELECT 'ssd_cp_visits' UNION ALL
+SELECT 'ssd_department' UNION ALL
+SELECT 'ssd_disability' UNION ALL
+SELECT 'ssd_early_help_episodes' UNION ALL
+SELECT 'ssd_ehcp_active_plans' UNION ALL
+SELECT 'ssd_ehcp_assessment' UNION ALL
+SELECT 'ssd_ehcp_named_plan' UNION ALL
+SELECT 'ssd_ehcp_requests' UNION ALL
+SELECT 'ssd_family' UNION ALL
+SELECT 'ssd_immigration_status' UNION ALL
+SELECT 'ssd_initial_cp_conference' UNION ALL
+SELECT 'ssd_involvements' UNION ALL
+SELECT 'ssd_legal_status' UNION ALL
+SELECT 'ssd_linked_identifiers' UNION ALL
+SELECT 'ssd_missing' UNION ALL
+SELECT 'ssd_mother' UNION ALL
+SELECT 'ssd_permanence' UNION ALL
+SELECT 'ssd_person' UNION ALL
+SELECT 'ssd_pre_proceedings' UNION ALL
+SELECT 'ssd_professionals' UNION ALL
+SELECT 'ssd_s251_finance' UNION ALL
+SELECT 'ssd_s47_enquiry' UNION ALL
+SELECT 'ssd_sdq_scores' UNION ALL
+SELECT 'ssd_sen_need' UNION ALL
+SELECT 'ssd_send' UNION ALL
+SELECT 'ssd_version' UNION ALL
+SELECT 'ssd_voice_of_child';
+
+-- cursor
+OPEN table_cursor;
+
+-- Fetch next table name
+FETCH NEXT FROM table_cursor INTO @table_name;
+
+-- Loop table names
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    BEGIN TRY
+        -- dynamic SQL to get row count
+        SET @sql = N'SELECT @row_count = COUNT(*) FROM ' + @table_name;
+        EXEC sp_executesql @sql, N'@row_count INT OUTPUT', @row_count OUTPUT;
+        
+        -- Insert log entry
+        INSERT INTO ssd_table_creation_log (table_name, creation_status, rows_inserted)
+        VALUES (@table_name, 'Success', @row_count);
+    END TRY
+    BEGIN CATCH
+        -- Log error
+        INSERT INTO ssd_table_creation_log (table_name, creation_status, rows_inserted)
+        VALUES (@table_name, ERROR_MESSAGE(), 0);
+    END CATCH;
+
+    -- Fetch next table name
+    FETCH NEXT FROM table_cursor INTO @table_name;
+END;
+
+-- Close/deallocate cursor
+CLOSE table_cursor;
+DEALLOCATE table_cursor;
+SET @sql = N'';
+
+
+
+
+
 
 
 /* Start
