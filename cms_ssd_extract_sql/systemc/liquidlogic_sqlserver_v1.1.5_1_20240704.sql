@@ -5152,9 +5152,38 @@ FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_send(send_table_id);
         SSD Extract Logging
         */
 
+
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_table_creation_log', 'U') IS NOT NULL DROP TABLE ssd_table_creation_log ;
+IF OBJECT_ID('tempdb..#ssd_table_creation_log', 'U') IS NOT NULL DROP TABLE #ssd_table_creation_log  ;
+
+
+-- Create logging table: table objects
+CREATE TABLE ssd_development.ssd_table_creation_log (
+    table_name      NVARCHAR(300) PRIMARY KEY,
+    status          NVARCHAR(50),
+    rows_inserted   INT,
+    log_timestamp   DATETIME DEFAULT GETDATE()
+);
+
+-- Check if exists, & drop
+IF OBJECT_ID('ssd_constraint_log ', 'U') IS NOT NULL DROP TABLE ssd_constraint_log  ;
+IF OBJECT_ID('tempdb..#ssd_constraint_log ', 'U') IS NOT NULL DROP TABLE #ssd_constraint_log   ;
+
+
+-- Create logging table: constraints
+CREATE TABLE ssd_development.ssd_constraint_log (
+    constraint_name NVARCHAR(128),
+    table_name      NVARCHAR(300),
+    status          NVARCHAR(50),
+    log_timestamp   DATETIME DEFAULT GETDATE()
+);
+
+
 -- Declare row count var
 DECLARE @row_count INT;
-DECLARE @table_name NVARCHAR(128);
+--DECLARE @sql NVARCHAR(MAX);
+DECLARE @table_name NVARCHAR(300);
 
 -- Table names
 DECLARE table_cursor CURSOR FOR
@@ -5206,7 +5235,7 @@ SELECT 'ssd_send' UNION ALL
 SELECT 'ssd_version' UNION ALL
 SELECT 'ssd_voice_of_child';
 
--- cursor
+-- Open cursor
 OPEN table_cursor;
 
 -- Fetch next table name
@@ -5216,27 +5245,28 @@ FETCH NEXT FROM table_cursor INTO @table_name;
 WHILE @@FETCH_STATUS = 0
 BEGIN
     BEGIN TRY
-        -- dynamic SQL to get row count
-        SET @sql = N'SELECT @row_count = COUNT(*) FROM ' + @table_name;
-        EXEC sp_executesql @sql, N'@row_count INT OUTPUT', @row_count OUTPUT;
+        -- dynamic SQL get row count + schema name
+        SET @sql = N'SELECT @row_count = COUNT(*) FROM ssd_development.' + @table_name;
+        EXEC sp_executesql @sql, N'@row_ count INT OUTPUT', @row_count OUTPUT;
         
-        -- Insert log entry
-        INSERT INTO ssd_table_creation_log (table_name, creation_status, rows_inserted)
-        VALUES (@table_name, 'Success', @row_count);
+        -- Insert log entry+ schema name
+        INSERT INTO ssd_development.ssd_table_creation_log (table_name, status, rows_inserted)
+        VALUES ('ssd_development.' + @table_name, 'Success', @row_count);
     END TRY
     BEGIN CATCH
-        -- Log error
-        INSERT INTO ssd_table_creation_log (table_name, creation_status, rows_inserted)
-        VALUES (@table_name, ERROR_MESSAGE(), 0);
+        -- Log err+ schema name
+        INSERT INTO ssd_development.ssd_table_creation_log (table_name, status, rows_inserted)
+        VALUES ('ssd_development.' + @table_name, ERROR_MESSAGE(), 0);
     END CATCH;
 
     -- Fetch next table name
     FETCH NEXT FROM table_cursor INTO @table_name;
 END;
 
--- Close/deallocate cursor
+-- Close and deallocate cursor
 CLOSE table_cursor;
 DEALLOCATE table_cursor;
+
 SET @sql = N'';
 
 
