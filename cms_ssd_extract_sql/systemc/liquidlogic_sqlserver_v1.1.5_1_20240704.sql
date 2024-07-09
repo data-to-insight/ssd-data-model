@@ -171,7 +171,7 @@ VALUES
     ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 0, 'admin', 'Revised JSON Array structure implemented for CiN'),
     ('1.1.2', '2024-06-26', 'ssd_version obj added and minor patch fixes', 0, 'admin', 'Provide mech for extract ver visibility'),
     ('1.1.3', '2024-06-27', 'Revised filtering on ssd_person', 0, 'admin', 'Check IS_CLIENT flag first'),
-    ('1.1.4', '2024-07-01', 'ssd_department obj added', 0, 'admin', 'Increased seperation btw professionals and depts enabling history');
+    ('1.1.4', '2024-07-01', 'ssd_department obj added', 0, 'admin', 'Increased seperation btw professionals and depts enabling history'),
     ('1.1.5', '2024-07-09', 'ssd_person involvements history', 0, 'admin', 'Improved consistency on _json fields, clean-up involvements_history_json');
 
 
@@ -4056,7 +4056,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_professionals
 Description: 
 Author: D2I
-Version: 1.1
+Version: 1.2
+            1.1: staff_id field clean-up, removal of dirty|admin values 090724 RH
             1.0: #DtoI-1743 caseload count revised to be within ssd timeframe 170524 RH
             0.9: prof_professional_id now becomes staff_id 090424 JH
             0.8: prof _table_ id(prof _system_ id) becomes prof _professional_ id 090424 JH
@@ -4119,7 +4120,7 @@ INSERT INTO ssd_professionals (
 
 SELECT 
     dw.DIM_WORKER_ID                        AS prof_professional_id,
-    dw.STAFF_ID                             AS prof_staff_id,
+    TRIM(dw.STAFF_ID)                       AS prof_staff_id,                       -- Note that this is trimmed for non-printing chars
     CONCAT(dw.SURNAME, ' ', dw.FORENAME)    AS prof_professional_name,              -- used also as Allocated Worker|Assigned Worker
     dw.WORKER_ID_CODE                       AS prof_social_worker_registration_no,
     ''                                      AS prof_agency_worker_flag,             -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
@@ -4143,7 +4144,11 @@ LEFT JOIN (
         REFRL_START_DTTM >= @TimeframeStartDate  -- ssd timeframe constraint
     GROUP BY 
         DIM_WORKER_ID
-) AS rc ON dw.DIM_WORKER_ID = rc.DIM_WORKER_ID;
+) AS rc ON dw.DIM_WORKER_ID = rc.DIM_WORKER_ID
+WHERE 
+    dw.DIM_WORKER_ID <> -1
+    AND TRIM(dw.STAFF_ID) IS NOT NULL           -- in theory would not occur
+    AND LOWER(TRIM(dw.STAFF_ID)) <> 'unknown';  -- data seen in some LAs
 
 
 
@@ -4314,10 +4319,11 @@ WHERE EXISTS
 
 
 
--- -- Add constraint(s)
--- ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
--- FOREIGN KEY (invo_professional_id) REFERENCES ssd_professionals (prof_professional_id);
+-- Add constraint(s)
+ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
+FOREIGN KEY (invo_professional_id) REFERENCES ssd_professionals (prof_professional_id);
 
+-- [TESTING]
 -- ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional_role 
 -- FOREIGN KEY (invo_professional_role_id) REFERENCES ssd_professionals (prof_social_worker_registration_no);
 
@@ -4450,7 +4456,8 @@ WHERE
 
 
 -- -- Create constraint(s)
-ALTER TABLE ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
+FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_link_person_id        ON ssd_linked_identifiers(link_person_id);
@@ -4596,8 +4603,8 @@ CREATE TABLE ssd_development.ssd_voice_of_child (
 --     );
 
 -- -- Create constraint(s)
--- ALTER TABLE ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
--- FOREIGN KEY (voch_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
+FOREIGN KEY (voch_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 -- Create index(es)
@@ -4859,8 +4866,8 @@ CREATE TABLE ssd_development.ssd_sen_need (
  
 
 -- Create constraint(s)
-ALTER TABLE ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
-FOREIGN KEY (senn_active_ehcp_id) REFERENCES ssd_ehcp_active_plans(ehcp_active_ehcp_id);
+-- Applied post-object creation/end of extract 
+
 
 -- Create index(es)
 
@@ -4914,8 +4921,8 @@ CREATE TABLE ssd_development.ssd_ehcp_requests (
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
-FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_send(send_table_id);
+-- Applied post-object creation/end of extract 
+
 
 -- Create index(es)
 
@@ -4967,9 +4974,8 @@ CREATE TABLE ssd_development.ssd_ehcp_assessment (
 );
 
 
--- -- Create constraint(s)
--- ALTER TABLE ssd_ehcp_assessment ADD CONSTRAINT FK_ehcp_assessment_requests
--- FOREIGN KEY (ehca_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+-- Create constraint(s)
+-- Applied post-object creation/end of extract 
 
 -- Create index(es)
 
@@ -5027,9 +5033,8 @@ CREATE TABLE ssd_development.ssd_ehcp_named_plan (
 
 
 
--- -- Create constraint(s)
--- ALTER TABLE ssd_ehcp_named_plan ADD CONSTRAINT FK_ehcp_named_plan_assessment
--- FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES ssd_ehcp_assessment(ehca_ehcp_assessment_id);
+-- Create constraint(s)
+-- Applied post-object creation/end of extract 
 
 -- Create index(es)
 
@@ -5079,9 +5084,7 @@ CREATE TABLE ssd_development.ssd_ehcp_active_plans (
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
-FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
-
+-- Applied post-object creation/end of extract 
 
 -- -- Insert placeholder data
 -- INSERT INTO ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
@@ -5118,6 +5121,26 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 
 /* ********************************************************************************************************** */
 
+
+-- Create constraint(s)
+ALTER TABLE ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
+FOREIGN KEY (senn_active_ehcp_id) REFERENCES ssd_ehcp_active_plans(ehcp_active_ehcp_id);
+
+-- Create constraint(s)
+ALTER TABLE ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
+FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+
+-- Create constraint(s)
+ALTER TABLE ssd_ehcp_named_plan ADD CONSTRAINT FK_ehcp_named_plan_assessment
+FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES ssd_ehcp_assessment(ehca_ehcp_assessment_id);
+
+-- Create constraint(s)
+ALTER TABLE ssd_ehcp_assessment ADD CONSTRAINT FK_ehcp_assessment_requests
+FOREIGN KEY (ehca_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+
+-- Create constraint(s)
+ALTER TABLE ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
+FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_send(send_table_id);
 
 
 /* Start
