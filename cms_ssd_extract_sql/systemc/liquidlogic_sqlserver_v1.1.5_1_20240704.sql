@@ -161,7 +161,7 @@ UPDATE ssd_development.ssd_version SET is_current = 0 WHERE is_current = 1;
 INSERT INTO ssd_development.ssd_version 
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
-    ('1.1.5', GETDATE(), 'ssd_person involvements history', 1, 'admin', 'Improved consistency on _json fields, clean-up involvements_history_json');
+    ('1.1.6', GETDATE(), 'FK fixes for #DtoI-1769', 1, 'admin', 'non-unique/FK issues addressed: #DtoI-1769, #DtoI-1601');
 
 
 -- historic versioning log data
@@ -172,6 +172,7 @@ VALUES
     ('1.1.2', '2024-06-26', 'ssd_version obj added and minor patch fixes', 0, 'admin', 'Provide mech for extract ver visibility'),
     ('1.1.3', '2024-06-27', 'Revised filtering on ssd_person', 0, 'admin', 'Check IS_CLIENT flag first'),
     ('1.1.4', '2024-07-01', 'ssd_department obj added', 0, 'admin', 'Increased seperation btw professionals and depts enabling history');
+    ('1.1.5', '2024-07-09', 'ssd_person involvements history', 0, 'admin', 'Improved consistency on _json fields, clean-up involvements_history_json');
 
 
 -- [TESTING] Increment /print progress
@@ -264,7 +265,7 @@ INSERT INTO ssd_person (
 )
 SELECT
     p.LEGACY_ID,
-    p.DIM_PERSON_ID,
+    CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),              -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
     p.GENDER_MAIN_CODE,
     p.NHS_NUMBER,                                       
     p.ETHNICITY_MAIN_CODE,
@@ -293,9 +294,9 @@ SELECT
 FROM
     Child_Social.DIM_PERSON AS p
  
--- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period
+-- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period?
 LEFT JOIN (
-    -- There appears no other accessible location for UPN data
+    -- no other accessible location for UPN data
     SELECT 
         dim_person_id, 
         no_upn_code
@@ -788,12 +789,7 @@ FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
 -- ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
 -- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
 
--- DEV NOTES [TESTING]
--- Msg 547, Level 16, State 0, Line 617
--- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_child_to_person". 
--- The conflict occurred in database "HDM_Local", table "ssd_development.ssd_person", column 'pers_person_id'.
-
--- -- [TESTING]
+-- -- [TESTING] Comment this out for ESCC until further notice
 -- ALTER TABLE ssd_mother ADD CONSTRAINT CHK_no_self_parenting -- Ensure person cannot be their own mother
 -- CHECK (moth_person_id <> moth_childs_person_id);
 
@@ -1357,7 +1353,8 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 Object Name: ssd_assessment_factors
 Description: 
 Author: D2I
-Version: 1.1
+Version: 1.2
+            1.1: ensure only factors with associated cina_assessment_id #DtoI-1769 090724 RH
             1.0: New alternative structure for assessment_factors_json 250624 RH
 Status: [R]elease
 Remarks: This object referrences some large source tables- Instances of 45m+. 
@@ -1444,7 +1441,9 @@ SELECT
 FROM 
     Child_Social.FACT_SINGLE_ASSESSMENT fsa
 WHERE 
-    fsa.EXTERNAL_ID <> -1;
+    fsa.EXTERNAL_ID <> -1
+    AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_cin_assessments);
+
 
 -- -- Opt2: (commented implementation ready for forward compatibility)
 -- -- create field structure of flattened Key-Value pair json structure 
@@ -1464,20 +1463,14 @@ WHERE
 -- FROM 
 --     Child_Social.FACT_SINGLE_ASSESSMENT fsa
 -- WHERE 
---     fsa.EXTERNAL_ID <> -1;
+--     fsa.EXTERNAL_ID <> -1
+--      AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_cin_assessments);
 
 
+-- Add constraint(s) #DtoI-1769
+ALTER TABLE ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
+FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_cin_assessments(cina_assessment_id);
 
-
--- -- Add constraint(s)
--- ALTER TABLE ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
--- FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_cin_assessments(cina_assessment_id);
-
--- DEV NOTES [TESTING]:
--- Msg 547, Level 16, State 0, Line 1255
--- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_cinf_assessment_id". 
--- The conflict occurred in database "HDM_Local", table "ssd_development.ssd_cin_assessments", column 'cina_assessment_id'.
--- Total execution time: 00:00:55.236
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_cinf_assessment_id ON ssd_assessment_factors(cinf_assessment_id);
@@ -1485,11 +1478,6 @@ CREATE NONCLUSTERED INDEX idx_cinf_assessment_id ON ssd_assessment_factors(cinf_
 
 -- Drop tmp/pre-processing structure(s)
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
-
-
-/* issues with join [TESTING]
--- The multi-part identifier "cpd.DIM_OUTCM_CREATE_BY_DEPT_ID" could not be bound. */
-
 
 
 
@@ -2328,7 +2316,54 @@ CREATE TABLE ssd_development.ssd_cla_episodes (
     clae_cla_last_iro_contact_date  DATETIME,                   -- metadata={"item_ref":"CLAE012A"} 
     clae_entered_care_date          DATETIME                    -- metadata={"item_ref":"CLAE014A"}
 );
- 
+
+
+
+-- CTE to filter records
+-- approach taken over the [TESTING] version below as (SQL server)execution plan
+-- potentially affecting how the EXISTS filter against ssd_person is applied
+WITH FilteredData AS (
+    SELECT
+        fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
+        fce.FACT_CLA_PLACEMENT_ID               AS clae_cla_placement_id,
+        CAST(fce.DIM_PERSON_ID AS NVARCHAR(48)) AS clae_person_id,
+        fce.CARE_START_DATE                     AS clae_cla_episode_start_date,
+        fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
+        fce.CIN_903_CODE                        AS clae_cla_primary_need_code,
+        fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
+        fce.CARE_REASON_END_DESC                AS clae_cla_episode_ceased_reason,
+        fc.FACT_CLA_ID                          AS clae_cla_id,                    
+        fc.FACT_REFERRAL_ID                     AS clae_referral_id,
+        (SELECT MAX(ISNULL(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+            AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+            THEN cn.EVENT_DTTM END, '1900-01-01')))                                                      
+                                                AS clae_cla_last_iro_contact_date,
+        fc.START_DTTM                           AS clae_entered_care_date
+    FROM
+        Child_Social.FACT_CARE_EPISODES AS fce
+    JOIN
+        Child_Social.FACT_CLA AS fc ON fce.FACT_CLA_ID = fc.FACT_CLA_ID
+    LEFT JOIN
+        Child_Social.FACT_CASENOTES cn ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+
+    WHERE
+        -- casting as source data remains as INT
+        CAST(fce.DIM_PERSON_ID AS NVARCHAR(48)) IN (SELECT pers_person_id FROM ssd_person)
+
+    GROUP BY
+        fce.FACT_CARE_EPISODES_ID,
+        fce.DIM_PERSON_ID,
+        fce.FACT_CLA_PLACEMENT_ID,
+        fce.CARE_START_DATE,
+        fce.CARE_REASON_DESC,
+        fce.CIN_903_CODE,
+        fce.CARE_END_DATE,
+        fce.CARE_REASON_END_DESC,
+        fc.FACT_CLA_ID,                    
+        fc.FACT_REFERRAL_ID,
+        fc.START_DTTM,
+        cn.DIM_PERSON_ID
+)
 -- Insert data
 INSERT INTO ssd_cla_episodes (
     clae_cla_episode_id,
@@ -2345,59 +2380,90 @@ INSERT INTO ssd_cla_episodes (
     clae_entered_care_date 
 )
 SELECT
-    fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
-    fce.FACT_CLA_PLACEMENT_ID               AS clae_cla_placement_id,
-    fce.DIM_PERSON_ID                       AS clae_person_id,
-    fce.CARE_START_DATE                     AS clae_cla_episode_start_date,
-    fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
-    fce.CIN_903_CODE                        AS clae_cla_primary_need_code,
-    fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
-    fce.CARE_REASON_END_DESC                AS clae_cla_episode_ceased_reason,
-    fc.FACT_CLA_ID                          AS clae_cla_id,                    
-    fc.FACT_REFERRAL_ID                     AS clae_referral_id,
-        -- (SELECT MAX(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
-        -- --AND cn.DIM_CREATED_BY_DEPT_ID IN (5956,727)
-        -- AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
-        -- THEN ISNULL(cn.EVENT_DTTM, '1900-01-01') END))                                                      
-        --                                  AS clae_cla_last_iro_contact_date,
-        (SELECT MAX(ISNULL(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID -- [REVIEW] 310524 RH
-        AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
-        THEN cn.EVENT_DTTM END, '1900-01-01')))                                                      
-                                            AS clae_cla_last_iro_contact_date,
-    fc.START_DTTM                           AS clae_entered_care_date -- [REVIEW][TESTING] Added RH 060324
-
- 
+    clae_cla_episode_id,
+    clae_person_id,
+    clae_cla_placement_id,
+    clae_cla_episode_start_date,
+    clae_cla_episode_start_reason,
+    clae_cla_primary_need_code,
+    clae_cla_episode_ceased,
+    clae_cla_episode_ceased_reason,
+    clae_cla_id,
+    clae_referral_id,
+    clae_cla_last_iro_contact_date,
+    clae_entered_care_date
 FROM
-    Child_Social.FACT_CARE_EPISODES AS fce
-JOIN
-    Child_Social.FACT_CLA AS fc ON fce.FACT_CLA_ID = fc.FACT_CLA_ID
- 
-LEFT JOIN
-    Child_Social.FACT_CASENOTES cn               ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+    FilteredData;
 
-WHERE EXISTS ( -- only ssd relevant records
-    SELECT 1
-    FROM ssd_person p
-    WHERE p.pers_person_id = fce.DIM_PERSON_ID
-    )
- 
-GROUP BY
-    fce.FACT_CARE_EPISODES_ID,
-    fce.DIM_PERSON_ID,
-    fce.FACT_CLA_PLACEMENT_ID,
-    fce.CARE_START_DATE,
-    fce.CARE_REASON_DESC,
-    fce.CIN_903_CODE,
-    fce.CARE_END_DATE,
-    fce.CARE_REASON_END_DESC,
-    fc.FACT_CLA_ID,                    
-    fc.FACT_REFERRAL_ID,
-    fc.START_DTTM,
-    cn.DIM_PERSON_ID;
 
--- -- Add constraint(s)
--- ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_person 
--- FOREIGN KEY (clae_person_id) REFERENCES ssd_person (pers_person_id);
+-- -- [TESTING]
+-- -- Insert data
+-- INSERT INTO ssd_cla_episodes (
+--     clae_cla_episode_id,
+--     clae_person_id,
+--     clae_cla_placement_id,
+--     clae_cla_episode_start_date,
+--     clae_cla_episode_start_reason,
+--     clae_cla_primary_need_code,
+--     clae_cla_episode_ceased,
+--     clae_cla_episode_ceased_reason,
+--     clae_cla_id,
+--     clae_referral_id,
+--     clae_cla_last_iro_contact_date,
+--     clae_entered_care_date 
+-- )
+-- SELECT
+--     fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
+--     fce.FACT_CLA_PLACEMENT_ID               AS clae_cla_placement_id,
+--     fce.DIM_PERSON_ID                       AS clae_person_id,
+--     fce.CARE_START_DATE                     AS clae_cla_episode_start_date,
+--     fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
+--     fce.CIN_903_CODE                        AS clae_cla_primary_need_code,
+--     fce.CARE_END_DATE                       AS clae_cla_episode_ceased,
+--     fce.CARE_REASON_END_DESC                AS clae_cla_episode_ceased_reason,
+--     fc.FACT_CLA_ID                          AS clae_cla_id,                    
+--     fc.FACT_REFERRAL_ID                     AS clae_referral_id,
+--     (SELECT MAX(ISNULL(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+--         AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+--         THEN cn.EVENT_DTTM END, '1900-01-01')))                                                      
+--                                             AS clae_cla_last_iro_contact_date,
+--     fc.START_DTTM                           AS clae_entered_care_date
+-- FROM
+--     Child_Social.FACT_CARE_EPISODES AS fce
+-- JOIN
+--     Child_Social.FACT_CLA AS fc ON fce.FACT_CLA_ID = fc.FACT_CLA_ID
+-- LEFT JOIN
+--     Child_Social.FACT_CASENOTES cn ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
+    
+-- WHERE EXISTS (
+--     SELECT 1
+--     FROM ssd_person p
+--     WHERE p.pers_person_id = CAST(fce.DIM_PERSON_ID AS NVARCHAR(48))
+-- )
+-- -- WHERE
+-- --     fce.DIM_PERSON_ID IN (SELECT pers_person_id FROM ssd_person)
+
+-- GROUP BY
+--     fce.FACT_CARE_EPISODES_ID,
+--     fce.DIM_PERSON_ID,
+--     fce.FACT_CLA_PLACEMENT_ID,
+--     fce.CARE_START_DATE,
+--     fce.CARE_REASON_DESC,
+--     fce.CIN_903_CODE,
+--     fce.CARE_END_DATE,
+--     fce.CARE_REASON_END_DESC,
+--     fc.FACT_CLA_ID,                    
+--     fc.FACT_REFERRAL_ID,
+--     fc.START_DTTM,
+--     cn.DIM_PERSON_ID;
+
+-- -- [TESTING]
+-- SELECT DISTINCT clae_person_id FROM ssd_cla_episodes WHERE clae_person_id NOT IN (SELECT pers_person_id FROM ssd_person);
+
+
+-- Add constraint(s) #DtoI-1769
+ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_to_person 
+FOREIGN KEY (clae_person_id) REFERENCES ssd_person (pers_person_id);
 
 -- ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_clae_cla_placement_id
 -- FOREIGN KEY (clae_cla_placement_id) REFERENCES ssd_cla_placements (clap_cla_placement_id);
@@ -3549,9 +3615,9 @@ WHERE EXISTS
     );
 
 
--- -- Add constraint(s)
--- ALTER TABLE ssd_missing ADD CONSTRAINT FK_missing_to_person
--- FOREIGN KEY (miss_person_id) REFERENCES ssd_person(pers_person_id);
+-- Add constraint(s)
+ALTER TABLE ssd_missing ADD CONSTRAINT FK_missing_to_person
+FOREIGN KEY (miss_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_miss_person_id        ON ssd_missing(miss_person_id);
@@ -4456,9 +4522,9 @@ CREATE TABLE ssd_development.ssd_s251_finance (
 -- VALUES
 --     ('SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH');
 
--- -- Create constraint(s)
--- ALTER TABLE ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
--- FOREIGN KEY (s251_cla_placement_id) REFERENCES ssd_cla_placement(clap_cla_placement_id);
+-- Create constraint(s)
+ALTER TABLE ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
+FOREIGN KEY (s251_cla_placement_id) REFERENCES ssd_cla_placement(clap_cla_placement_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_s251_cla_placement_id ON ssd_s251_finance(s251_cla_placement_id);
@@ -4647,9 +4713,9 @@ CREATE TABLE ssd_development.ssd_pre_proceedings (
 --     WHERE p.pers_person_id = ssd_pre_proceedings.DIM_PERSON_ID
 --     );
 
--- -- Create constraint(s)
--- ALTER TABLE ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
--- FOREIGN KEY (prep_person_id) REFERENCES ssd_person(pers_person_id);
+-- Create constraint(s) #DtoI-1769
+ALTER TABLE ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
+FOREIGN KEY (prep_person_id) REFERENCES ssd_person(pers_person_id);
 
 -- Create index(es)
 CREATE NONCLUSTERED INDEX idx_prep_person_id                ON ssd_pre_proceedings (prep_person_id);
@@ -4747,9 +4813,9 @@ WHERE
  
  
 
--- -- Add constraint(s)
--- ALTER TABLE ssd_send ADD CONSTRAINT FK_send_to_person 
--- FOREIGN KEY (send_person_id) REFERENCES ssd_person(pers_person_id);
+-- Add constraint(s) -- #DtoI-1769
+ALTER TABLE ssd_send ADD CONSTRAINT FK_send_to_person 
+FOREIGN KEY (send_person_id) REFERENCES ssd_person(pers_person_id);
 
 
 -- [TESTING] Increment /print progress
@@ -4791,9 +4857,10 @@ CREATE TABLE ssd_development.ssd_sen_need (
     senn_active_ehcp_need_rank      NCHAR(1)                    -- metadata={"item_ref":"SENN004A"}
 );
  
--- -- Create constraint(s)
--- ALTER TABLE ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
--- FOREIGN KEY (senn_active_ehcp_id) REFERENCES ssd_ehcp_active_plans(pers_person_id);
+
+-- Create constraint(s)
+ALTER TABLE ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
+FOREIGN KEY (senn_active_ehcp_id) REFERENCES ssd_ehcp_active_plans(ehcp_active_ehcp_id);
 
 -- Create index(es)
 
@@ -4846,9 +4913,9 @@ CREATE TABLE ssd_development.ssd_ehcp_requests (
 );
 
 
--- -- Create constraint(s)
--- ALTER TABLE ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
--- FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_send(send_table_id);
+-- Create constraint(s)
+ALTER TABLE ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
+FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_send(send_table_id);
 
 -- Create index(es)
 
@@ -5011,14 +5078,20 @@ CREATE TABLE ssd_development.ssd_ehcp_active_plans (
 );
 
 
--- -- Create constraint(s)
--- ALTER TABLE ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
--- FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
+-- Create constraint(s)
+ALTER TABLE ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
+FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
 
 
 -- -- Insert placeholder data
 -- INSERT INTO ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01');
+
+
+-- [TESTING] Increment /print progress
+SET @TestProgress = @TestProgress + 1;
+PRINT 'Table created: ' + @TableName;
+PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
@@ -5074,6 +5147,10 @@ Dependencies:
 - ssd_person
 =============================================================================
 */
+-- [TESTING] Create marker
+SET @TableName = N' Involvement History';
+PRINT 'Adding MOD: ' + @TableName;
+
 ALTER TABLE ssd_development.ssd_person
 ADD pers_involvement_history_json NVARCHAR(max),  -- Adjust data type as needed
     pers_involvement_type_story NVARCHAR(1000);   -- Adjust data type as needed

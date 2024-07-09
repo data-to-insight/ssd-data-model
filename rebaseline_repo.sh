@@ -1,16 +1,21 @@
 # Ensure permissions set on this script : chmod +x rebaseline_repo.sh
 
+#
+# Resets this git repo with new/flattened commit history and last update comment
+# Warning: Running this script removes all history! 
+# Change details: ..."v1.0 SSD Live - in-line with desired baseline details
+#
 
 
-#Backup the Current Repository
+#Backup the current repository
 git clone --mirror https://github.com/data-to-insight/ssd-data-model https://github.com/data-to-insight/ssd-data-model-backup.git
 
-#Clone the Repository Locally
+#Clone the repository locally
 git clone https://github.com/data-to-insight/ssd-data-model
 cd ssd-data-model
 
 
-#Create a Temporary Branch Pointing to the Current HEAD
+#Create a temporary branch pointing to the current HEAD
 git checkout --orphan temp_branch
 
 # Force branch overwrite of main
@@ -18,7 +23,7 @@ git checkout --orphan temp_branch
 # git push origin +feat/Extract_SQL:main
 
 
-#Add and Commit All Current Files as the new "initial commit" 
+#Add and commit all current Files as the new "initial commit" 
 git add -A
 git commit -am "v1.0 SSD Live"
 
