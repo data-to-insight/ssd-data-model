@@ -3274,13 +3274,19 @@ SELECT
 FROM
     Child_Social.FACT_CARE_PLANS AS fcp
  
-WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A';
+WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
+    AND EXISTS (
+        SELECT 1
+        FROM ssd_development.ssd_person p
+        WHERE p.pers_person_id = fcp.DIM_PERSON_ID
+    );
+ 
+-- Add constraint(s)
+ALTER TABLE ssd_development.ssd_cla_care_plan ADD CONSTRAINT FK_lacp_person_id
+FOREIGN KEY (lacp_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
  
 
--- -- Add constraint(s)
--- ALTER TABLE ssd_cla_care_plan ADD CONSTRAINT FK_lacp_person_id
--- FOREIGN KEY (lacp_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
- 
+
 -- create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_lacp_person_id ON ssd_cla_care_plan(lacp_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_start_date ON ssd_cla_care_plan(lacp_cla_care_plan_start_date);
@@ -4120,10 +4126,10 @@ INSERT INTO ssd_professionals (
 )
 
 SELECT 
-    dw.DIM_WORKER_ID                        AS prof_professional_id,
+    dw.DIM_WORKER_ID                        AS prof_professional_id,                -- system based ID for workers
     TRIM(dw.STAFF_ID)                       AS prof_staff_id,                       -- Note that this is trimmed for non-printing chars
     CONCAT(dw.SURNAME, ' ', dw.FORENAME)    AS prof_professional_name,              -- used also as Allocated Worker|Assigned Worker
-    dw.WORKER_ID_CODE                       AS prof_social_worker_registration_no,
+    dw.WORKER_ID_CODE                       AS prof_social_worker_registration_no,  -- Not tied to WORKER_ID, this is the social work reg number IF entered
     ''                                      AS prof_agency_worker_flag,             -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
     dw.JOB_TITLE                            AS prof_professional_job_title,
     ISNULL(rc.OpenCases, 0)                 AS prof_professional_caseload,          -- 0 when no open cases on given date.
@@ -4319,7 +4325,7 @@ WHERE EXISTS
     );
 
 
--- [TESTING] #DtoI-1769
+-- -- [TESTING] #DtoI-1769
 -- -- Add constraint(s)
 -- ALTER TABLE ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
 -- FOREIGN KEY (invo_professional_id) REFERENCES ssd_professionals (prof_professional_id);
