@@ -1097,7 +1097,7 @@ IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episod
 -- Create structure
 CREATE TABLE #ssd_cin_episodes
 (
-    cine_referral_id                INT,            -- metadata={"item_ref":"CINE001A"}
+    cine_referral_id                INT PRIMARY KEY NOT NULL,-- metadata={"item_ref":"CINE001A"}
     cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
     cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
     cine_cin_primary_need_code      NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
@@ -4006,7 +4006,11 @@ INSERT INTO #ssd_involvements (
 )
 SELECT
     fi.FACT_INVOLVEMENTS_ID                       AS invo_involvements_id,
-    fi.DIM_WORKER_ID                              AS invo_professional_id,
+    CASE 
+        -- replace admin -1 values for when no worker associated
+        WHEN fi.DIM_WORKER_ID = '-1' THEN NULL
+        ELSE fi.DIM_WORKER_ID 
+    END                                           AS invo_professional_id,
     fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
     -- use first non-NULL value for prof team, in order of : i)dept, ii)grp, or iii)relevant comment
     LEFT(

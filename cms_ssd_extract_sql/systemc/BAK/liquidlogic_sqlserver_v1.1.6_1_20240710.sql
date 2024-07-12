@@ -214,7 +214,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- check exists & drop
-IF OBJECT_ID('ssd_person') IS NOT NULL DROP TABLE ssd_person;
+IF OBJECT_ID('ssd_development.ssd_person') IS NOT NULL DROP TABLE ssd_development.ssd_person;
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
 
@@ -351,10 +351,10 @@ WHERE
         )
     );
  
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob               ON ssd_person(pers_dob);
-CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id   ON ssd_person(pers_common_child_id);
-CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender       ON ssd_person(pers_ethnicity, pers_gender);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob               ON ssd_development.ssd_person(pers_dob);
+CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id   ON ssd_development.ssd_person(pers_common_child_id);
+CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender       ON ssd_development.ssd_person(pers_ethnicity, pers_gender);
 
 
 
@@ -385,10 +385,6 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 --3 (Uncertainty re access SEN)
 -- Has a record in send - Child_Social.FACT_SEN, DIM_LOOKUP_SEN, DIM_LOOKUP_SEN_TYPE ? 
 
---4 (Uncertainty re relevance)
--- Is child of a mother in ssd_person, but not self-subject of referral. 
-
-
 
 
 
@@ -412,7 +408,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- check exists & drop
-IF OBJECT_ID('ssd_family') IS NOT NULL DROP TABLE ssd_family;
+IF OBJECT_ID('ssd_development.ssd_family') IS NOT NULL DROP TABLE ssd_development.ssd_family;
 IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
 
@@ -446,17 +442,17 @@ WHERE EXISTS
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_family ADD CONSTRAINT FK_family_person
-FOREIGN KEY (fami_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_development.ssd_family ADD CONSTRAINT FK_family_person
+FOREIGN KEY (fami_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- DEV NOTES [TESTING]
 -- Msg 3728, Level 16, State 1, Line 1
 -- 'FK_family_person' is not a constraint.Could not drop constraint. See previous errors.
 
 
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_family_person_id              ON ssd_family(fami_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id     ON ssd_family(fami_family_id);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_family_person_id              ON ssd_development.ssd_family(fami_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id     ON ssd_development.ssd_family(fami_family_id);
 
 
 
@@ -485,7 +481,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_address') IS NOT NULL DROP TABLE ssd_address;
+IF OBJECT_ID('ssd_development.ssd_address') IS NOT NULL DROP TABLE ssd_development.ssd_address;
 IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
 
 
@@ -550,15 +546,15 @@ WHERE EXISTS
     );
 
 -- Create constraint(s)
-ALTER TABLE ssd_address ADD CONSTRAINT FK_address_person
-FOREIGN KEY (addr_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_development.ssd_address ADD CONSTRAINT FK_address_person
+FOREIGN KEY (addr_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_address_person        ON ssd_address(addr_person_id);
-CREATE NONCLUSTERED INDEX idx_address_start         ON ssd_address(addr_address_start_date);
-CREATE NONCLUSTERED INDEX idx_address_end           ON ssd_address(addr_address_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_address_postcode  ON ssd_address(addr_address_postcode);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_address_person        ON ssd_development.ssd_address(addr_person_id);
+CREATE NONCLUSTERED INDEX idx_address_start         ON ssd_development.ssd_address(addr_address_start_date);
+CREATE NONCLUSTERED INDEX idx_address_end           ON ssd_development.ssd_address(addr_address_end_date);
+CREATE NONCLUSTERED INDEX idx_ssd_address_postcode  ON ssd_development.ssd_address(addr_address_postcode);
 
 
 
@@ -590,7 +586,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_disability') IS NOT NULL DROP TABLE ssd_disability;
+IF OBJECT_ID('ssd_development.ssd_disability') IS NOT NULL DROP TABLE ssd_development.ssd_disability;
 IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
 
 -- Create the structure
@@ -624,12 +620,12 @@ WHERE EXISTS
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_disability ADD CONSTRAINT FK_disability_person 
-FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_development.ssd_disability ADD CONSTRAINT FK_disability_person 
+FOREIGN KEY (disa_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
     
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_disability_person_id ON ssd_disability(disa_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_disability_code ON ssd_disability(disa_disability_code);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_disability_person_id ON ssd_development.ssd_disability(disa_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_disability_code ON ssd_development.ssd_disability(disa_disability_code);
 
 
 
@@ -664,7 +660,7 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_status;
+IF OBJECT_ID('ssd_development.ssd_immigration_status') IS NOT NULL DROP TABLE ssd_development.ssd_immigration_status;
 IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
 
@@ -705,13 +701,13 @@ WHERE
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
-FOREIGN KEY (immi_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_development.ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
+FOREIGN KEY (immi_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON ssd_immigration_status(immi_person_id);
-CREATE NONCLUSTERED INDEX idx_immigration_status_start ON ssd_immigration_status(immi_immigration_status_start_date);
-CREATE NONCLUSTERED INDEX idx_immigration_status_end ON ssd_immigration_status(immi_immigration_status_end_date);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON ssd_development.ssd_immigration_status(immi_person_id);
+CREATE NONCLUSTERED INDEX idx_immigration_status_start          ON ssd_development.ssd_immigration_status(immi_immigration_status_start_date);
+CREATE NONCLUSTERED INDEX idx_immigration_status_end            ON ssd_development.ssd_immigration_status(immi_immigration_status_end_date);
 
 
 
@@ -742,7 +738,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_mother', 'U') IS NOT NULL DROP TABLE ssd_mother;
+IF OBJECT_ID('ssd_development.ssd_mother', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_mother;
 IF OBJECT_ID('tempdb..#ssd_mother') IS NOT NULL DROP TABLE #ssd_mother;
 
 
@@ -786,22 +782,22 @@ AND EXISTS
     );
  
 -- Add constraint(s)
-ALTER TABLE ssd_mother ADD CONSTRAINT FK_moth_to_person 
-FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_development.ssd_mother ADD CONSTRAINT FK_moth_to_person 
+FOREIGN KEY (moth_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- [TESTING] deployment issues remain
--- ALTER TABLE ssd_mother ADD CONSTRAINT FK_child_to_person 
--- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
+-- ALTER TABLE ssd_development.ssd_mother ADD CONSTRAINT FK_child_to_person 
+-- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- [TESTING] Comment this out for ESCC until further notice
--- ALTER TABLE ssd_mother ADD CONSTRAINT CHK_no_self_parenting -- Ensure person cannot be their own mother
+-- ALTER TABLE ssd_development.ssd_mother ADD CONSTRAINT CHK_no_self_parenting -- Ensure person cannot be their own mother
 -- CHECK (moth_person_id <> moth_childs_person_id);
 
 
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON ssd_mother(moth_childs_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON ssd_mother(moth_childs_dob);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON ssd_development.ssd_mother(moth_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON ssd_development.ssd_mother(moth_childs_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON ssd_development.ssd_mother(moth_childs_dob);
 
 
 
@@ -831,7 +827,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_legal_status') IS NOT NULL DROP TABLE ssd_legal_status;
+IF OBJECT_ID('ssd_development.ssd_legal_status') IS NOT NULL DROP TABLE ssd_development.ssd_legal_status;
 IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
 
 -- Create structure
@@ -868,15 +864,15 @@ WHERE EXISTS
     );
  
 -- Create constraint(s)
-ALTER TABLE ssd_legal_status ADD CONSTRAINT FK_legal_status_person
-FOREIGN KEY (lega_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_development.ssd_legal_status ADD CONSTRAINT FK_legal_status_person
+FOREIGN KEY (lega_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id ON ssd_legal_status(lega_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status ON ssd_legal_status(lega_legal_status);
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start ON ssd_legal_status(lega_legal_status_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end ON ssd_legal_status(lega_legal_status_end_date);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id   ON ssd_development.ssd_legal_status(lega_person_id);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status                  ON ssd_development.ssd_legal_status(lega_legal_status);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start            ON ssd_development.ssd_legal_status(lega_legal_status_start_date);
+CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end              ON ssd_development.ssd_legal_status(lega_legal_status_end_date);
 
 
 
@@ -911,7 +907,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_contacts') IS NOT NULL DROP TABLE ssd_contacts;
+IF OBJECT_ID('ssd_development.ssd_contacts') IS NOT NULL DROP TABLE ssd_development.ssd_contacts;
 IF OBJECT_ID('tempdb..#ssd_contacts') IS NOT NULL DROP TABLE #ssd_contacts;
 
 
@@ -968,13 +964,13 @@ WHERE EXISTS
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_contacts ADD CONSTRAINT FK_contact_person 
-FOREIGN KEY (cont_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_development.ssd_contacts ADD CONSTRAINT FK_contact_person 
+FOREIGN KEY (cont_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_contact_person_id ON ssd_contacts(cont_person_id);
-CREATE NONCLUSTERED INDEX idx_contact_date ON ssd_contacts(cont_contact_date);
-CREATE NONCLUSTERED INDEX idx_contact_source_code ON ssd_contacts(cont_contact_source_code);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_contact_person_id     ON ssd_development.ssd_contacts(cont_person_id);
+CREATE NONCLUSTERED INDEX idx_contact_date          ON ssd_development.ssd_contacts(cont_contact_date);
+CREATE NONCLUSTERED INDEX idx_contact_source_code   ON ssd_development.ssd_contacts(cont_contact_source_code);
 
 
 
@@ -1008,7 +1004,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_early_help_episodes') IS NOT NULL DROP TABLE ssd_early_help_episodes;
+IF OBJECT_ID('ssd_development.ssd_early_help_episodes') IS NOT NULL DROP TABLE ssd_development.ssd_early_help_episodes;
 IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL DROP TABLE #ssd_early_help_episodes;
 
 
@@ -1058,14 +1054,14 @@ WHERE EXISTS
 
 
 -- Create constraint(s)
-ALTER TABLE ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
-FOREIGN KEY (earl_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_development.ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
+FOREIGN KEY (earl_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
  
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id ON ssd_early_help_episodes(earl_person_id);
-CREATE NONCLUSTERED INDEX idx_early_help_start_date ON ssd_early_help_episodes(earl_episode_start_date);
-CREATE NONCLUSTERED INDEX idx_early_help_end_date ON ssd_early_help_episodes(earl_episode_end_date);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id ON ssd_development.ssd_early_help_episodes(earl_person_id);
+CREATE NONCLUSTERED INDEX idx_early_help_start_date             ON ssd_development.ssd_early_help_episodes(earl_episode_start_date);
+CREATE NONCLUSTERED INDEX idx_early_help_end_date               ON ssd_development.ssd_early_help_episodes(earl_episode_end_date);
 
 
 
@@ -1100,13 +1096,13 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cin_episodes') IS NOT NULL DROP TABLE ssd_cin_episodes;
+IF OBJECT_ID('ssd_development.ssd_cin_episodes') IS NOT NULL DROP TABLE ssd_development.ssd_cin_episodes;
 IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
 -- Create structure
 CREATE TABLE ssd_development.ssd_cin_episodes
 (
-    cine_referral_id                INT,            -- metadata={"item_ref":"CINE001A"}
+    cine_referral_id                NVARCHAR(48) PRIMARY KEY NOT NULL,-- metadata={"item_ref":"CINE001A"}
     cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
     cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
     cine_cin_primary_need_code      NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
@@ -1170,18 +1166,26 @@ FROM
 WHERE
     fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
 AND
-    DIM_PERSON_ID <> -1;  -- Exclude rows with '-1'
-    ;
+    DIM_PERSON_ID <> -1  -- Exclude rows with -1
+
+AND EXISTS
+    ( -- only ssd relevant records
+    SELECT 1
+    FROM ssd_development.ssd_person p
+    WHERE p.pers_person_id = fr.DIM_PERSON_ID
+    );
+
+    
 
 -- Create constraint(s)
-ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
-FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_development.ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
+FOREIGN KEY (cine_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id    ON ssd_cin_episodes(cine_person_id);
-CREATE NONCLUSTERED INDEX idx_cin_referral_date             ON ssd_cin_episodes(cine_referral_date);
-CREATE NONCLUSTERED INDEX idx_cin_close_date                ON ssd_cin_episodes(cine_close_date);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id    ON ssd_development.ssd_cin_episodes(cine_person_id);
+CREATE NONCLUSTERED INDEX idx_cin_referral_date             ON ssd_development.ssd_cin_episodes(cine_referral_date);
+CREATE NONCLUSTERED INDEX idx_cin_close_date                ON ssd_development.ssd_cin_episodes(cine_close_date);
 
 
 
@@ -1220,7 +1224,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop 
-IF OBJECT_ID('ssd_cin_assessments') IS NOT NULL DROP TABLE ssd_cin_assessments;
+IF OBJECT_ID('ssd_development.ssd_cin_assessments') IS NOT NULL DROP TABLE ssd_development.ssd_cin_assessments;
 IF OBJECT_ID('tempdb..#ssd_cin_assessments') IS NOT NULL DROP TABLE #ssd_cin_assessments;
 
 
@@ -1332,14 +1336,14 @@ AND EXISTS (
 );
 
 -- Create constraint(s)
-ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
-FOREIGN KEY (cina_person_id) REFERENCES ssd_person(pers_person_id);
+ALTER TABLE ssd_development.ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
+FOREIGN KEY (cina_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cin_assessments_person_id ON ssd_cin_assessments(cina_person_id);
-CREATE NONCLUSTERED INDEX idx_cina_assessment_start_date ON ssd_cin_assessments(cina_assessment_start_date);
-CREATE NONCLUSTERED INDEX idx_cina_assessment_auth_date ON ssd_cin_assessments(cina_assessment_auth_date);
-CREATE NONCLUSTERED INDEX idx_cina_referral_id ON ssd_cin_assessments(cina_referral_id);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_ssd_cin_assessments_person_id ON ssd_development.ssd_cin_assessments(cina_person_id);
+CREATE NONCLUSTERED INDEX idx_cina_assessment_start_date    ON ssd_development.ssd_cin_assessments(cina_assessment_start_date);
+CREATE NONCLUSTERED INDEX idx_cina_assessment_auth_date     ON ssd_development.ssd_cin_assessments(cina_assessment_auth_date);
+CREATE NONCLUSTERED INDEX idx_cina_referral_id              ON ssd_development.ssd_cin_assessments(cina_referral_id);
 
 
 
@@ -1375,7 +1379,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_assessment_factors') IS NOT NULL DROP TABLE ssd_assessment_factors;
+IF OBJECT_ID('ssd_development.ssd_assessment_factors') IS NOT NULL DROP TABLE ssd_development.ssd_assessment_factors;
 IF OBJECT_ID('tempdb..#ssd_assessment_factors') IS NOT NULL DROP TABLE #ssd_assessment_factors;
 
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
@@ -1476,7 +1480,7 @@ ALTER TABLE ssd_development.ssd_assessment_factors ADD CONSTRAINT FK_cinf_assess
 FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_development.ssd_cin_assessments(cina_assessment_id);
 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_cinf_assessment_id ON ssd_development.ssd_assessment_factors(cinf_assessment_id);
 
 
@@ -1514,7 +1518,7 @@ SET @TableName = N'ssd_cin_plans';
 PRINT 'Creating table: ' + @TableName;
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cin_plans', 'U') IS NOT NULL DROP TABLE ssd_cin_plans;
+IF OBJECT_ID('ssd_development.ssd_cin_plans', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cin_plans;
 IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plans;
 
 
@@ -1593,11 +1597,11 @@ GROUP BY
 ALTER TABLE ssd_development.ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
 FOREIGN KEY (cinp_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cin_plans_person_id ON ssd_development.ssd_cin_plans(cinp_person_id);
-CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_start_date ON ssd_development.ssd_cin_plans(cinp_cin_plan_start_date);
-CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_end_date ON ssd_development.ssd_cin_plans(cinp_cin_plan_end_date);
-CREATE NONCLUSTERED INDEX idx_cinp_referral_id ON ssd_development.ssd_cin_plans(cinp_referral_id);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_ssd_cin_plans_person_id   ON ssd_development.ssd_cin_plans(cinp_person_id);
+CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_start_date  ON ssd_development.ssd_cin_plans(cinp_cin_plan_start_date);
+CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_end_date    ON ssd_development.ssd_cin_plans(cinp_cin_plan_end_date);
+CREATE NONCLUSTERED INDEX idx_cinp_referral_id          ON ssd_development.ssd_cin_plans(cinp_referral_id);
 
 
 
@@ -1630,7 +1634,7 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_cin_visits') IS NOT NULL DROP TABLE ssd_cin_visits;
+IF OBJECT_ID('ssd_development.ssd_cin_visits') IS NOT NULL DROP TABLE ssd_development.ssd_cin_visits;
 IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
  
 -- Create structure
@@ -1678,9 +1682,9 @@ AND EXISTS ( -- only ssd relevant records
 ALTER TABLE ssd_development.ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_person
 FOREIGN KEY (cinv_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
  
--- Create additional non-PK index(es)
-CREATE NONCLUSTERED INDEX idx_cinv_person_id ON ssd_development.ssd_cin_visits(cinv_person_id);
-CREATE NONCLUSTERED INDEX idx_cinv_cin_visit_date ON ssd_development.ssd_cin_visits(cinv_cin_visit_date);
+-- Create index(es)
+CREATE NONCLUSTERED INDEX idx_cinv_person_id        ON ssd_development.ssd_cin_visits(cinv_person_id);
+CREATE NONCLUSTERED INDEX idx_cinv_cin_visit_date   ON ssd_development.ssd_cin_visits(cinv_cin_visit_date);
 
 
 
@@ -1716,7 +1720,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_s47_enquiry;
+IF OBJECT_ID('ssd_development.ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_development.ssd_s47_enquiry;
 IF OBJECT_ID('tempdb..#ssd_s47_enquiry') IS NOT NULL DROP TABLE #ssd_s47_enquiry;
 
 -- Create structure 
@@ -1783,7 +1787,7 @@ WHERE EXISTS ( -- only ssd relevant records
 ALTER TABLE ssd_development.ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
 FOREIGN KEY (s47e_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_person_id     ON ssd_development.ssd_s47_enquiry(s47e_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_start_date    ON ssd_development.ssd_s47_enquiry(s47e_s47_start_date);
 CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_end_date      ON ssd_development.ssd_s47_enquiry(s47e_s47_end_date);
@@ -1832,7 +1836,7 @@ SET @TableName = N'ssd_initial_cp_conference';
 PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_initial_cp_conference;
+IF OBJECT_ID('ssd_development.ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_development.ssd_initial_cp_conference;
 IF OBJECT_ID('tempdb..#ssd_initial_cp_conference') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
  
 
@@ -1874,7 +1878,10 @@ INSERT INTO ssd_development.ssd_initial_cp_conference(
 SELECT
     fcpc.FACT_CP_CONFERENCE_ID,
     fcpc.FACT_MEETING_ID,
-    fcpc.FACT_S47_ID,
+    CASE 
+        WHEN fcpc.FACT_S47_ID IN ('-1', -1) THEN NULL
+        ELSE fcpc.FACT_S47_ID 
+    END AS icpc_s47_enquiry_id,
     fcpc.DIM_PERSON_ID,
     fcpp.FACT_CP_PLAN_ID,
     fcpc.FACT_REFERRAL_ID,
@@ -1916,18 +1923,16 @@ AND EXISTS ( -- only ssd relevant records
     WHERE p.pers_person_id = fcpc.DIM_PERSON_ID
     ) ;
 
--- -- Create constraint(s)
--- ALTER TABLE ssd_development.ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_s47_enquiry_id
--- FOREIGN KEY (icpc_s47_enquiry_id) REFERENCES ssd_development.ssd_s47_enquiry(s47e_s47_enquiry_id);
 
 ALTER TABLE ssd_development.ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_person_id
 FOREIGN KEY (icpc_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
+-- -- [TESTING]
 -- ALTER TABLE ssd_development.ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_referral_id
 -- FOREIGN KEY (icpc_referral_id) REFERENCES ssd_development.ssd_cin_episodes(cine_referral_id);
 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_icpc_person_id        ON ssd_development.ssd_initial_cp_conference(icpc_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_icpc_s47_enquiry_id   ON ssd_development.ssd_initial_cp_conference(icpc_s47_enquiry_id);
 CREATE NONCLUSTERED INDEX idx_ssd_icpc_referral_id      ON ssd_development.ssd_initial_cp_conference(icpc_referral_id);
@@ -1968,7 +1973,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop 
-IF OBJECT_ID('ssd_cp_plans') IS NOT NULL DROP TABLE ssd_cp_plans;
+IF OBJECT_ID('ssd_development.ssd_cp_plans') IS NOT NULL DROP TABLE ssd_development.ssd_cp_plans;
 IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
 
 -- Create structure
@@ -2026,7 +2031,7 @@ WHERE EXISTS ( -- only ssd relevant records
 -- ALTER TABLE ssd_development.ssd_cp_plans ADD CONSTRAINT FK_cppl_icpc_id
 -- FOREIGN KEY (cppl_icpc_id) REFERENCES ssd_development.ssd_initial_cp_conference(icpc_icpc_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_person_id ON ssd_development.ssd_cp_plans(cppl_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_icpc_id ON ssd_development.ssd_cp_plans(cppl_icpc_id);
 CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_referral_id ON ssd_development.ssd_cp_plans(cppl_referral_id);
@@ -2070,7 +2075,7 @@ PRINT 'Creating table: ' + @TableName;
  
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cp_visits') IS NOT NULL DROP TABLE ssd_cp_visits;
+IF OBJECT_ID('ssd_development.ssd_cp_visits') IS NOT NULL DROP TABLE ssd_development.ssd_cp_visits;
 IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
   
  
@@ -2128,7 +2133,7 @@ WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC'); -- Ref. ( 'STVC','STVCPCOVID
 -- -- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_cppv_to_cppl". 
 -- -- The conflict occurred in database "HDM_Local", table "ssd_development.ssd_cp_plans", column 'cppl_cp_plan_id'.
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_cppv_person_id        ON ssd_development.ssd_cp_visits(cppv_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_plan_id       ON ssd_development.ssd_cp_visits(cppv_cp_plan_id);
 CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_visit_date    ON ssd_development.ssd_cp_visits(cppv_cp_visit_date);
@@ -2256,7 +2261,7 @@ GROUP BY cpr.FACT_CP_REVIEW_ID,
 -- FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_development.ssd_cp_plans(cppl_cp_plan_id);
 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_cppr_person_id ON ssd_development.ssd_cp_reviews(cppr_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_plan_id ON ssd_development.ssd_cp_reviews(cppr_cp_plan_id);
 CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_due ON ssd_development.ssd_cp_reviews(cppr_cp_review_due);
@@ -2301,7 +2306,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if table exists, & drop
-IF OBJECT_ID('ssd_cla_episodes') IS NOT NULL DROP TABLE ssd_cla_episodes;
+IF OBJECT_ID('ssd_development.ssd_cla_episodes') IS NOT NULL DROP TABLE ssd_development.ssd_cla_episodes;
 IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episodes;
 
  
@@ -2472,7 +2477,7 @@ FOREIGN KEY (clae_person_id) REFERENCES ssd_development.ssd_person (pers_person_
 -- ALTER TABLE ssd_development.ssd_cla_episodes ADD CONSTRAINT FK_clae_cla_placement_id
 -- FOREIGN KEY (clae_cla_placement_id) REFERENCES ssd_development.ssd_cla_placements (clap_cla_placement_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_clae_person_id ON ssd_development.ssd_cla_episodes(clae_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_start_date ON ssd_development.ssd_cla_episodes(clae_cla_episode_start_date);
 CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_ceased ON ssd_development.ssd_cla_episodes(clae_cla_episode_ceased);
@@ -2508,7 +2513,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE ssd_cla_convictions;
+IF OBJECT_ID('ssd_development.ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_convictions;
 IF OBJECT_ID('tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cla_convictions;
 
 
@@ -2548,7 +2553,7 @@ WHERE EXISTS
 -- FOREIGN KEY (clac_person_id) REFERENCES ssd_development.ssd_cla_episodes(clae_person_id);
 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_clac_person_id ON ssd_development.ssd_cla_convictions(clac_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_clac_conviction_date ON ssd_development.ssd_cla_convictions(clac_cla_conviction_date);
 
@@ -2583,7 +2588,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_cla_health;
+IF OBJECT_ID('ssd_development.ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_health;
 IF OBJECT_ID('tempdb..#ssd_cla_health', 'U') IS NOT NULL DROP TABLE #ssd_cla_health;
 
 -- create structure
@@ -2625,7 +2630,7 @@ WHERE EXISTS ( -- only ssd relevant records
 -- ALTER TABLE ssd_development.ssd_cla_health ADD CONSTRAINT FK_clah_to_clae 
 -- FOREIGN KEY (clah_person_id) REFERENCES ssd_development.ssd_cla_episodes(clae_person_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clah_person_id ON ssd_development.ssd_cla_health (clah_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_date ON ssd_development.ssd_cla_health(clah_health_check_date);
 CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_status ON ssd_development.ssd_cla_health(clah_health_check_status);
@@ -2712,7 +2717,7 @@ WHERE
 -- ALTER TABLE ssd_development.ssd_cla_immunisations ADD CONSTRAINT FK_ssd_cla_immunisations_person
 -- FOREIGN KEY (clai_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_clai_person_id ON ssd_development.ssd_cla_immunisations(clai_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_clai_immunisations_status ON ssd_development.ssd_cla_immunisations(clai_immunisations_status);
 
@@ -2788,7 +2793,7 @@ WHERE EXISTS
 -- ALTER TABLE ssd_development.ssd_cla_substance_misuse ADD CONSTRAINT FK_ssd_cla_substance_misuse_clas_person_id 
 -- FOREIGN KEY (clas_person_id) REFERENCES ssd_development.ssd_cla_episodes (clae_person_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clas_person_id ON ssd_development.ssd_cla_substance_misuse (clas_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_clas_substance_misuse_date ON ssd_development.ssd_cla_substance_misuse(clas_substance_misuse_date);
 
@@ -2897,7 +2902,7 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
 -- ALTER TABLE ssd_development.ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
 -- FOREIGN KEY (clap_cla_id) REFERENCES ssd_development.ssd_cla_episodes(clae_cla_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clap_cla_placement_urn ON ssd_development.ssd_cla_placement (clap_cla_placement_urn);
 CREATE NONCLUSTERED INDEX idx_ssd_clap_cla_id ON ssd_development.ssd_cla_placement(clap_cla_id);
 CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_start_date ON ssd_development.ssd_cla_placement(clap_cla_placement_start_date);
@@ -2942,7 +2947,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE ssd_cla_reviews;
+IF OBJECT_ID('ssd_development.ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_reviews;
 IF OBJECT_ID('tempdb..#ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE #ssd_cla_reviews;
   
 -- Create structure
@@ -3017,7 +3022,7 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
 -- ALTER TABLE ssd_development.ssd_cla_reviews ADD CONSTRAINT FK_clar_to_clae 
 -- FOREIGN KEY (clar_cla_id) REFERENCES ssd_development.ssd_cla_episodes(clae_cla_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_clar_cla_id ON ssd_development.ssd_cla_reviews(clar_cla_id);
 CREATE NONCLUSTERED INDEX idx_ssd_clar_review_due_date ON ssd_development.ssd_cla_reviews(clar_cla_review_due_date);
 CREATE NONCLUSTERED INDEX idx_ssd_clar_review_date ON ssd_development.ssd_cla_reviews(clar_cla_review_date);
@@ -3056,7 +3061,7 @@ SET @TableName = N'ssd_cla_previous_permanence';
 PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_previous_permanence') IS NOT NULL DROP TABLE ssd_development.ssd_cla_previous_permanence;
+IF OBJECT_ID('ssd_development.ssd_cla_previous_permanence') IS NOT NULL DROP TABLE ssd_development.ssd_cla_previous_permanence;
 IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
 
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_previous_permanence') IS NOT NULL DROP TABLE #ssd_TMP_PRE_previous_permanence;
@@ -3182,12 +3187,63 @@ SET @TableName = N'ssd_cla_care_plan';
 PRINT 'Creating table: ' + @TableName;
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_cla_care_plan;
+IF OBJECT_ID('ssd_development.ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_care_plan;
 IF OBJECT_ID('tempdb..#ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_cla_care_plan;
 
-IF OBJECT_ID('tempdb..#ssd_TMP_PRE_cla_care_plan') IS NOT NULL DROP TABLE #ssd_TMP_PRE_cla_care_plan;
+-- -- Drop the temporary table with explicit reference to tempdb
+-- IF OBJECT_ID('tempdb..#ssd_TMP_PRE_cla_care_plan') IS NOT NULL DROP TABLE tempdb..#ssd_TMP_PRE_cla_care_plan;
  
+-- WITH MostRecentQuestionResponse AS (
+--     SELECT  -- Return the most recent response for each question for each persons
+--         ff.DIM_PERSON_ID,
+--         ffa.ANSWER_NO,
+--         MAX(ffa.FACT_FORM_ID) AS MaxFormID
+--     FROM
+--         Child_Social.FACT_FORM_ANSWERS ffa
+--     JOIN
+--         Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID    -- obtain the relevant person_id
+--     WHERE
+--         ffa.ANSWER_NO    IN ('CPFUP1', 'CPFUP10', 'CPFUP2', 'CPFUP3', 'CPFUP4', 'CPFUP5', 'CPFUP6', 'CPFUP7', 'CPFUP8', 'CPFUP9')
+--     GROUP BY
+--         ff.DIM_PERSON_ID,
+--         ffa.ANSWER_NO
+-- ),
+-- LatestResponses AS (
+--     SELECT  -- Now add the answered_date (only indirectly of use here/cross referencing)
+--         mrqr.DIM_PERSON_ID,
+--         mrqr.ANSWER_NO,
+--         mrqr.MaxFormID      AS FACT_FORM_ID,
+--         ffa.ANSWER,
+--         ffa.ANSWERED_DTTM   AS LatestResponseDate
+--     FROM
+--         MostRecentQuestionResponse mrqr
+--     JOIN
+--         Child_Social.FACT_FORM_ANSWERS ffa ON mrqr.MaxFormID = ffa.FACT_FORM_ID AND mrqr.ANSWER_NO = ffa.ANSWER_NO
+-- )
  
+-- SELECT
+--     -- Add the now aggregated reponses into tmp table
+--     lr.FACT_FORM_ID,
+--     lr.DIM_PERSON_ID,
+--     lr.ANSWER_NO,
+--     lr.ANSWER,
+--     lr.LatestResponseDate
+-- INTO #ssd_TMP_PRE_cla_care_plan
+-- FROM
+--     LatestResponses lr
+-- ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
+ 
+
+-- persistent tmp/pre-processing table (this not part of core ssd, clean-up occurs later)
+-- replacing all commented above
+CREATE TABLE ssd_development.ssd_pre_cla_care_plan (
+    FACT_FORM_ID        NVARCHAR(48),
+    DIM_PERSON_ID       NVARCHAR(48),
+    ANSWER_NO           NVARCHAR(10),
+    ANSWER              NVARCHAR(255),
+    LatestResponseDate  DATETIME
+);
+
 WITH MostRecentQuestionResponse AS (
     SELECT  -- Return the most recent response for each question for each persons
         ff.DIM_PERSON_ID,
@@ -3216,18 +3272,23 @@ LatestResponses AS (
         Child_Social.FACT_FORM_ANSWERS ffa ON mrqr.MaxFormID = ffa.FACT_FORM_ID AND mrqr.ANSWER_NO = ffa.ANSWER_NO
 )
  
+INSERT INTO ssd_development.ssd_pre_cla_care_plan (
+    FACT_FORM_ID,
+    DIM_PERSON_ID,
+    ANSWER_NO,
+    ANSWER,
+    LatestResponseDate
+)
 SELECT
-    -- Add the now aggregated reponses into tmp table
     lr.FACT_FORM_ID,
     lr.DIM_PERSON_ID,
     lr.ANSWER_NO,
     lr.ANSWER,
     lr.LatestResponseDate
-INTO #ssd_TMP_PRE_cla_care_plan
 FROM
     LatestResponses lr
 ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
- 
+
  
 -- Create structure
 CREATE TABLE ssd_development.ssd_cla_care_plan (
@@ -3266,8 +3327,9 @@ SELECT
             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER END, '')), NULL) AS ADOPTION,
             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END, '')), NULL) AS OTHERPLN
         FROM
-            #ssd_TMP_PRE_cla_care_plan tmp_cpl
- 
+            -- #ssd_TMP_PRE_cla_care_plan tmp_cpl
+            ssd_development.ssd_pre_cla_care_plan tmp_cpl
+
         WHERE
             tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
  
@@ -3298,7 +3360,10 @@ CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_end_date ON ssd_development.ssd
 
 
 
+-- drop/wipe persistent tmp/pre-processing table ready for further use in update section
+TRUNCATE TABLE ssd_development.ssd_pre_cla_care_plan;
  
+
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
 PRINT 'Table created: ' + @TableName;
@@ -3629,7 +3694,7 @@ WHERE EXISTS
 ALTER TABLE ssd_development.ssd_missing ADD CONSTRAINT FK_missing_to_person
 FOREIGN KEY (miss_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_miss_person_id        ON ssd_development.ssd_missing(miss_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_start    ON ssd_development.ssd_missing(miss_missing_episode_start_date);
 CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_end      ON ssd_development.ssd_missing(miss_missing_episode_end_date);
@@ -3662,7 +3727,7 @@ Version: 1.2
             0.1: worker/p.a id field changed to descriptive name towards AA reporting JH
 Status: [R]elease
 Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
-            Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
+            Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_development.ssd_person> references in the CTEs(added for performance)
             Dev: Revised V3/4 to aid performance on large involvements table aggr
 Dependencies:
 - FACT_INVOLVEMENTS
@@ -3821,7 +3886,7 @@ GROUP BY
 -- FOREIGN KEY (clea_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_clea_person_id                        ON ssd_development.ssd_care_leavers(clea_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_clea_care_leaver_latest_contact   ON ssd_development.ssd_care_leavers(clea_care_leaver_latest_contact);
 CREATE NONCLUSTERED INDEX idx_ssd_clea_pathway_plan_review_date     ON ssd_development.ssd_care_leavers(clea_pathway_plan_review_date);
@@ -4046,7 +4111,7 @@ AND EXISTS
 -- FOREIGN KEY (perm_person_id) REFERENCES ssd_development.ssd_cla_episodes(clae_person_id);
 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id            ON ssd_development.ssd_permanence(perm_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date    ON ssd_development.ssd_permanence(perm_adm_decision_date);
 CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date           ON ssd_development.ssd_permanence(perm_permanence_order_date);
@@ -4167,7 +4232,7 @@ WHERE
 -- Add constraint(s)
 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_prof_staff_id                 ON ssd_development.ssd_professionals (prof_staff_id);
 CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON ssd_development.ssd_professionals(prof_social_worker_registration_no);
 
@@ -4232,7 +4297,7 @@ WHERE dpt.dim_department_id <> -1;
 -- ALTER TABLE ssd_development.ssd_department ADD CONSTRAINT FK_dept_team_parent_id 
 -- FOREIGN KEY (dept_team_parent_id) REFERENCES ssd_development.ssd_department(dept_team_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE INDEX idx_dept_team_id ON ssd_development.ssd_department (dept_team_id);
 
 
@@ -4299,7 +4364,11 @@ INSERT INTO ssd_development.ssd_involvements (
 )
 SELECT
     fi.FACT_INVOLVEMENTS_ID                       AS invo_involvements_id,
-    fi.DIM_WORKER_ID                              AS invo_professional_id,
+    CASE 
+        -- replace admin -1 values for when no worker associated
+        WHEN fi.DIM_WORKER_ID IN ('-1', -1) THEN NULL    -- THEN '' (alternative null replacement)
+        ELSE fi.DIM_WORKER_ID 
+    END                                           AS invo_professional_id,
     fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
     -- use first non-NULL value for prof team, in order of : i)dept, ii)grp, or iii)relevant comment
     LEFT(
@@ -4329,13 +4398,8 @@ WHERE EXISTS
     );
 
 
--- -- [TESTING] #DtoI-1769
--- -- Add constraint(s)
--- ALTER TABLE ssd_development.ssd_involvements ADD CONSTRAINT FK_invo_to_professional 
--- FOREIGN KEY (invo_professional_id) REFERENCES ssd_development.ssd_professionals (prof_professional_id);
 
-
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_invo_person_id            ON ssd_development.ssd_involvements (invo_person_id);
 CREATE NONCLUSTERED INDEX idx_invo_professional_role_id ON ssd_development.ssd_involvements (invo_professional_role_id);
 CREATE NONCLUSTERED INDEX idx_ssd_invo_start_date       ON ssd_development.ssd_involvements(invo_involvement_start_date);
@@ -4386,7 +4450,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop 
-IF OBJECT_ID('ssd_development.ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_linked_identifiers;
+IF OBJECT_ID('ssd_development.linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_linked_identifiers;
 IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
 
 -- Create structure
@@ -4465,7 +4529,7 @@ WHERE
 ALTER TABLE ssd_development.ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
 FOREIGN KEY (link_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_link_person_id        ON ssd_development.ssd_linked_identifiers(link_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_link_valid_from_date  ON ssd_development.ssd_linked_identifiers(link_valid_from_date);
 CREATE NONCLUSTERED INDEX idx_ssd_link_valid_to_date    ON ssd_development.ssd_linked_identifiers(link_valid_to_date);
@@ -4510,7 +4574,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop 
-IF OBJECT_ID('ssd_development.ssd_s251_finance', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_s251_finance;
+IF OBJECT_ID('ssd_development.s251_finance', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_s251_finance;
 IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_finance;
 
 -- Create structure
@@ -4539,7 +4603,7 @@ CREATE TABLE ssd_development.ssd_s251_finance (
 ALTER TABLE ssd_development.ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
 FOREIGN KEY (s251_cla_placement_id) REFERENCES ssd_development.ssd_cla_placement(clap_cla_placement_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_s251_cla_placement_id ON ssd_development.ssd_s251_finance(s251_cla_placement_id);
 
 
@@ -4572,7 +4636,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop 
-IF OBJECT_ID('ssd_development.ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_voice_of_child;
+IF OBJECT_ID('ssd_development.voice_of_child', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_voice_of_child;
 IF OBJECT_ID('tempdb..#ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voice_of_child;
 
 -- Create structure
@@ -4605,7 +4669,7 @@ CREATE TABLE ssd_development.ssd_voice_of_child (
 --  ( -- only ssd relevant records
 --     SELECT 1 
 --     FROM ssd_development.ssd_person p
---     WHERE p.pers_person_id = ssd_development.ssd_voice_of_child.DIM_PERSON_ID
+--     WHERE p.pers_person_id = ssd_voice_of_child.DIM_PERSON_ID
 --     );
 
 -- -- Create constraint(s)
@@ -4613,7 +4677,7 @@ ALTER TABLE ssd_development.ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person
 FOREIGN KEY (voch_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_ssd_voice_of_child_voch_person_id ON ssd_development.ssd_voice_of_child(voch_person_id);
 
 
@@ -4646,7 +4710,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_development.ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_pre_proceedings;
+IF OBJECT_ID('ssd_development.pre_proceedings', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_pre_proceedings;
 IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pre_proceedings;
 
 -- Create structure
@@ -4723,14 +4787,14 @@ CREATE TABLE ssd_development.ssd_pre_proceedings (
 -- ( -- only ssd relevant records
 --     SELECT 1 
 --     FROM ssd_development.ssd_person p
---     WHERE p.pers_person_id = ssd_development.ssd_pre_proceedings.DIM_PERSON_ID
+--     WHERE p.pers_person_id = ssd_pre_proceedings.DIM_PERSON_ID
 --     );
 
 -- Create constraint(s) #DtoI-1769
 ALTER TABLE ssd_development.ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
 FOREIGN KEY (prep_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
--- Create additional non-PK index(es)
+-- Create index(es)
 CREATE NONCLUSTERED INDEX idx_prep_person_id                ON ssd_development.ssd_pre_proceedings (prep_person_id);
 CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date    ON ssd_development.ssd_pre_proceedings (prep_pre_pro_decision_date);
 CREATE NONCLUSTERED INDEX idx_prep_legal_gateway_outcome    ON ssd_development.ssd_pre_proceedings (prep_legal_gateway_outcome);
@@ -4764,6 +4828,326 @@ PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
+/*
+=============================================================================
+Object Name: ssd_person NON-CORE UPDATE
+Version: 0.1
+Status: [DT]esting
+Remarks: Back-filling ssd_person table with non-core SSD records. 
+        This process appends ALL records from DIM_PERSON for further data testing
+Dependencies:
+- As ssd_person
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_person-ADDITIONAL_TESTING_DATA';
+PRINT 'Updating table: ' + @TableName;
+
+-- add ssd_flag col (seperate core and non-core records for testing)
+ALTER TABLE ssd_development.ssd_person ADD ssd_flag INT; -- [1== is filtered core record, 0==non-core record brought through as part of update]
+Go
+
+
+/* [TESTING] Re-declare vars after use of GO
+Set up (to be removed from live v2+)
+*/
+DECLARE @TestProgress INT = 0;
+DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder';
+
+-- Query run time vars
+DECLARE @StartTime DATETIME, @EndTime DATETIME;
+SET @StartTime = GETDATE(); -- Record the start time
+/* END [TESTING] 
+*/
+
+-- existing records set ssd_flag to 1 (core/filtered ssd records)
+UPDATE ssd_development.ssd_person SET ssd_flag = 1;
+
+
+-- Insert new records into ssd_person with ssd_flag set to 0
+WITH f903_data_CTE AS (
+    SELECT 
+        -- Get the most recent no_upn_code if exists
+        dim_person_id, 
+        no_upn_code,
+        ROW_NUMBER() OVER (PARTITION BY dim_person_id ORDER BY no_upn_code DESC) AS rn
+    FROM 
+        Child_Social.fact_903_data
+)
+
+INSERT INTO ssd_development.ssd_person (
+    pers_legacy_id,
+    pers_person_id,
+    pers_sex,
+    pers_gender,
+    pers_ethnicity,
+    pers_dob,
+    pers_common_child_id,                               
+    pers_upn_unknown,                                  
+    pers_send_flag,
+    pers_expected_dob,
+    pers_death_date,
+    pers_is_mother,
+    pers_nationality,
+    ssd_flag -- flag col used only for internal testing on person filter(s) [0,1]
+)
+SELECT
+    p.LEGACY_ID,
+    CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),              -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
+    p.GENDER_MAIN_CODE,
+    p.NHS_NUMBER,                                       
+    p.ETHNICITY_MAIN_CODE,
+    CASE WHEN (p.DOB_ESTIMATED) = 'N'              
+        THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
+        ELSE NULL 
+    END,                                                -- Or NULL
+    NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
+    COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
+    p.EHM_SEN_FLAG,
+    CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
+        THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
+        ELSE NULL 
+    END,                                                -- Or NULL
+    p.DEATH_DTTM,
+    CASE
+        WHEN p.GENDER_MAIN_CODE <> 'M' AND              -- Assumption that if male is not mother
+             EXISTS (SELECT 1 FROM Child_Social.FACT_PERSON_RELATION fpr
+                     WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND
+                           fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI')  -- Check for child relation only
+        THEN 'Y'
+        ELSE NULL -- No child relation found
+    END,
+    p.NATNL_CODE,
+    0 AS ssd_flag -- Set ssd_flag to 0 for new records
+   
+FROM
+    Child_Social.DIM_PERSON AS p
+ 
+LEFT JOIN (
+    -- No other accessible location for UPN data
+    SELECT 
+        dim_person_id, 
+        no_upn_code
+    FROM 
+        f903_data_CTE
+    WHERE 
+        rn = 1
+) AS f903 
+ON 
+    p.DIM_PERSON_ID = f903.dim_person_id
+
+-- Only select records that are not already in ssd_person 
+-- (these become our non-core 0 flag records)
+WHERE 
+    p.DIM_PERSON_ID IS NOT NULL
+    AND p.DIM_PERSON_ID <> -1
+    AND p.DIM_PERSON_ID NOT IN (SELECT pers_person_id FROM ssd_development.ssd_person);
+
+-- [TESTING] Increment /print progress
+PRINT 'Table UPDATED: ' + @TableName;
+
+
+
+/*
+=============================================================================
+Object Name: ssd_involvements NON-CORE UPDATE
+Version: 0.1
+Status: [DT]esting
+Remarks: Back-filling ssd_involvements table with non-core SSD records. 
+        This process appends ALL involvements records for further data testing
+Dependencies:
+- As ssd_involvements
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_involvements-ADDITIONAL_TESTING_DATA';
+PRINT 'Updating table: ' + @TableName;
+
+
+-- Clear all data from the table
+TRUNCATE TABLE ssd_development.ssd_involvements;
+
+
+-- Insert data into ssd_involvements
+INSERT INTO ssd_development.ssd_involvements (
+    invo_involvements_id,
+    invo_professional_id,
+    invo_professional_role_id,
+    invo_professional_team,
+    invo_person_id,
+    invo_involvement_start_date,
+    invo_involvement_end_date,
+    invo_worker_change_reason,
+    invo_referral_id
+)
+SELECT
+    fi.FACT_INVOLVEMENTS_ID                       AS invo_involvements_id,
+    CASE 
+        -- replace admin -1 values for when no worker associated
+        WHEN fi.DIM_WORKER_ID IN ('-1', -1) THEN NULL    -- THEN '' (alternative null replacement)
+        ELSE fi.DIM_WORKER_ID 
+    END                                           AS invo_professional_id,
+    fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
+    -- use first non-NULL value for prof team, in order of : i)dept, ii)grp, or iii)relevant comment
+    LEFT(
+        COALESCE(
+        fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC,   -- prev/relevant dept name if available
+        fi.DIM_DEPARTMENT_NAME,                   -- otherwise, use existing dept name
+        fi.DIM_GROUP_NAME,                        -- then, use wider grp name if the above are NULL
+
+        CASE -- if still NULL, refer into comments data but only when...
+            WHEN fi.COMMENTS LIKE '%WORKER%' OR fi.COMMENTS LIKE '%ALLOC%' -- refer to comments for specific keywords
+            THEN fi.COMMENTS 
+        END -- if fi.COMMENTS is NULL, results in NULL
+    ), 255)                                       AS invo_professional_team,
+
+    fi.DIM_PERSON_ID                              AS invo_person_id,
+    fi.START_DTTM                                 AS invo_involvement_start_date,
+    fi.END_DTTM                                   AS invo_involvement_end_date,
+    fi.DIM_LOOKUP_CWREASON_CODE                   AS invo_worker_change_reason,
+    fi.FACT_REFERRAL_ID                           AS invo_referral_id
+FROM
+    Child_Social.FACT_INVOLVEMENTS AS fi
+WHERE EXISTS
+    (
+    SELECT 1
+    FROM ssd_development.ssd_person p
+    WHERE p.pers_person_id = fi.DIM_PERSON_ID
+    );
+
+-- [TESTING] Increment /print progress
+PRINT 'Table UPDATED: ' + @TableName;
+
+
+
+/*
+=============================================================================
+Object Name: ssd_cla_care_plan NON-CORE UPDATE
+Version: 0.1
+Status: [DT]esting
+Remarks: Back-filling ssd_cla_care_plan table with non-core SSD records. 
+        This process appends ALL involvements records for further data testing
+Dependencies:
+- As ssd_cla_care_plan
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cla_care_plan-ADDITIONAL_TESTING_DATA';
+PRINT 'Updating table: ' + @TableName;
+
+
+-- Clear all data from the table
+TRUNCATE TABLE ssd_development.ssd_cla_care_plan;
+
+WITH MostRecentQuestionResponse AS (
+    SELECT  -- Return the most recent response for each question for each persons
+        ff.DIM_PERSON_ID,
+        ffa.ANSWER_NO,
+        MAX(ffa.FACT_FORM_ID) AS MaxFormID
+    FROM
+        Child_Social.FACT_FORM_ANSWERS ffa
+    JOIN
+        Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID    -- obtain the relevant person_id
+    WHERE
+        ffa.ANSWER_NO    IN ('CPFUP1', 'CPFUP10', 'CPFUP2', 'CPFUP3', 'CPFUP4', 'CPFUP5', 'CPFUP6', 'CPFUP7', 'CPFUP8', 'CPFUP9')
+    GROUP BY
+        ff.DIM_PERSON_ID,
+        ffa.ANSWER_NO
+),
+LatestResponses AS (
+    SELECT  -- Now add the answered_date (only indirectly of use here/cross referencing)
+        mrqr.DIM_PERSON_ID,
+        mrqr.ANSWER_NO,
+        mrqr.MaxFormID      AS FACT_FORM_ID,
+        ffa.ANSWER,
+        ffa.ANSWERED_DTTM   AS LatestResponseDate
+    FROM
+        MostRecentQuestionResponse mrqr
+    JOIN
+        Child_Social.FACT_FORM_ANSWERS ffa ON mrqr.MaxFormID = ffa.FACT_FORM_ID AND mrqr.ANSWER_NO = ffa.ANSWER_NO
+)
+
+-- this tmp/pre-processing table already exists as defined in core script section
+-- table is removed/clean-up after this update
+INSERT INTO ssd_development.ssd_pre_cla_care_plan (
+    FACT_FORM_ID,
+    DIM_PERSON_ID,
+    ANSWER_NO,
+    ANSWER,
+    LatestResponseDate
+)
+SELECT
+    lr.FACT_FORM_ID,
+    lr.DIM_PERSON_ID,
+    lr.ANSWER_NO,
+    lr.ANSWER,
+    lr.LatestResponseDate
+FROM
+    LatestResponses lr
+ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
+
+
+ 
+-- Insert data
+INSERT INTO ssd_development.ssd_cla_care_plan (
+    lacp_table_id,
+    lacp_person_id,
+    lacp_cla_care_plan_start_date,
+    lacp_cla_care_plan_end_date,
+    lacp_cla_care_plan_json
+)
+SELECT
+    fcp.FACT_CARE_PLAN_ID          AS lacp_table_id,
+    fcp.DIM_PERSON_ID              AS lacp_person_id,
+    fcp.START_DTTM                 AS lacp_cla_care_plan_start_date,
+    fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
+    (
+        SELECT  -- Combined _json field with 'ICP' responses
+            -- SSD standard 
+            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN tmp_cpl.ANSWER END, '')), NULL) AS REMAINSUP,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN1M,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN6M,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURNEV,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN tmp_cpl.ANSWER END, '')), NULL) AS LTRELFR,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN tmp_cpl.ANSWER END, '')), NULL) AS LTFOST18,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RESPLMT,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN tmp_cpl.ANSWER END, '')), NULL) AS SUPPLIV,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER END, '')), NULL) AS ADOPTION,
+            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END, '')), NULL) AS OTHERPLN
+        FROM
+            ssd_development.ssd_pre_cla_care_plan; tmp_cpl
+
+ 
+        WHERE
+            tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+ 
+        GROUP BY tmp_cpl.DIM_PERSON_ID
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+    ) AS lacp_cla_care_plan_json
+ 
+FROM
+    Child_Social.FACT_CARE_PLANS AS fcp
+ 
+WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
+    AND EXISTS (
+        SELECT 1
+        FROM ssd_development.ssd_person p
+        WHERE p.pers_person_id = fcp.DIM_PERSON_ID
+    );
+
+-- clean up tmp/pre-processing table
+DROP TABLE ssd_development.ssd_pre_cla_care_plan;
+ 
+
+
+-- [TESTING] Increment /print progress
+PRINT 'Table UPDATED: ' + @TableName;
+
+
+
+
+
 /* 
 =============================================================================
 Object Name: ssd_send
@@ -4786,7 +5170,7 @@ PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_development.ssd_send') IS NOT NULL DROP TABLE ssd_development.ssd_send;
+IF OBJECT_ID('ssd_development.send') IS NOT NULL DROP TABLE ssd_development.ssd_send;
 IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL DROP TABLE #ssd_send;
 
 -- Create structure 
@@ -4875,7 +5259,7 @@ CREATE TABLE ssd_development.ssd_sen_need (
 -- Applied post-object creation/end of extract 
 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 
 
 -- -- Insert placeholder data
@@ -4930,7 +5314,7 @@ CREATE TABLE ssd_development.ssd_ehcp_requests (
 -- Applied post-object creation/end of extract 
 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 
 
 
@@ -4970,7 +5354,7 @@ IF OBJECT_ID('ssd_development.ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE 
 IF OBJECT_ID('tempdb..#ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_assessment ;
 
 
--- Create structure
+-- Create ssd_ehcp_assessment table
 CREATE TABLE ssd_development.ssd_ehcp_assessment (
     ehca_ehcp_assessment_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCA001A"}
     ehca_ehcp_request_id                    NVARCHAR(48),               -- metadata={"item_ref":"EHCA002A"}
@@ -4983,7 +5367,7 @@ CREATE TABLE ssd_development.ssd_ehcp_assessment (
 -- Create constraint(s)
 -- Applied post-object creation/end of extract 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 
 
 
@@ -5042,7 +5426,7 @@ CREATE TABLE ssd_development.ssd_ehcp_named_plan (
 -- Create constraint(s)
 -- Applied post-object creation/end of extract 
 
--- Create additional non-PK index(es)
+-- Create index(es)
 
 
 
@@ -5164,7 +5548,7 @@ FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_development.ssd_send(send_table_
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_table_creation_log', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_table_creation_log ;
+IF OBJECT_ID('ssd_development.ssd_table_creation_log', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_table_creation_log ;
 IF OBJECT_ID('tempdb..#ssd_table_creation_log', 'U') IS NOT NULL DROP TABLE #ssd_table_creation_log  ;
 
 
@@ -5192,7 +5576,8 @@ CREATE TABLE ssd_development.ssd_constraint_log (
 
 -- Declare row count var
 DECLARE @row_count INT;
---DECLARE @sql NVARCHAR(MAX);
+DECLARE @sql NVARCHAR(MAX);
+DECLARE @sql NVARCHAR(MAX) = N'';
 DECLARE @table_name NVARCHAR(300);
 
 -- Table names
@@ -5393,8 +5778,7 @@ InvolvementTypeStoryCTE AS (
             WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
 
             AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-                SELECT 1 
-                FROM ssd_development.ssd_person p
+                SELECT 1 FROM ssd_development.ssd_person p
                 WHERE p.pers_person_id = fi3.DIM_PERSON_ID
             )
 
@@ -5406,8 +5790,7 @@ InvolvementTypeStoryCTE AS (
     
     WHERE 
         EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-            SELECT 1 
-            FROM ssd_development.ssd_person p
+            SELECT 1 FROM ssd_development.ssd_person p
             WHERE p.pers_person_id = fi.DIM_PERSON_ID
         )
     GROUP BY 
