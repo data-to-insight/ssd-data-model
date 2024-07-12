@@ -5555,8 +5555,8 @@ IF OBJECT_ID('tempdb..#ssd_table_creation_log', 'U') IS NOT NULL DROP TABLE #ssd
 
 -- Create logging table: table objects
 CREATE TABLE ssd_development.ssd_table_creation_log (
-    table_name      NVARCHAR(300) PRIMARY KEY,
-    status          NVARCHAR(50),
+    table_name      NVARCHAR(255) PRIMARY KEY,
+    status          NVARCHAR(500),  -- status code includes error output + schema.table_name
     rows_inserted   INT,
     log_timestamp   DATETIME DEFAULT GETDATE()
 );
@@ -5566,84 +5566,84 @@ IF OBJECT_ID('ssd_development.ssd_constraint_log ', 'U') IS NOT NULL DROP TABLE 
 IF OBJECT_ID('tempdb..#ssd_constraint_log ', 'U') IS NOT NULL DROP TABLE #ssd_constraint_log   ;
 
 
--- Create logging table: constraints
-CREATE TABLE ssd_development.ssd_constraint_log (
-    constraint_name NVARCHAR(128),
-    table_name      NVARCHAR(300),
-    status          NVARCHAR(50),
-    log_timestamp   DATETIME DEFAULT GETDATE()
-);
+-- Not currently in use
+-- -- Create logging table: constraints
+-- CREATE TABLE ssd_development.ssd_constraint_log (
+--     constraint_name NVARCHAR(255),
+--     table_name      NVARCHAR(255),
+--     status          NVARCHAR(500), -- status code includes error output + schema.table_name
+--     log_timestamp   DATETIME DEFAULT GETDATE()
+-- );
 
 
 -- Declare row count var
-DECLARE @row_count INT;
-DECLARE @sql NVARCHAR(MAX);
-DECLARE @sql NVARCHAR(MAX) = N'';
-DECLARE @table_name NVARCHAR(300);
+DECLARE @row_count  INT;
+DECLARE @sql        NVARCHAR(MAX) = N''; -- comment out if running|test partial script therefore ommitting in-line 'Go' points
+DECLARE @table_name NVARCHAR(255);
 
--- Table names
+-- Table names towards logging|error check cursor
 DECLARE table_cursor CURSOR FOR
-SELECT 'ssd_address' UNION ALL
-SELECT 'ssd_assessment_factors' UNION ALL
-SELECT 'ssd_care_leavers' UNION ALL
-SELECT 'ssd_cin_assessments' UNION ALL
-SELECT 'ssd_cin_episodes' UNION ALL
-SELECT 'ssd_cin_plans' UNION ALL
-SELECT 'ssd_cin_visits' UNION ALL
-SELECT 'ssd_cla_care_plan' UNION ALL
-SELECT 'ssd_cla_convictions' UNION ALL
-SELECT 'ssd_cla_episodes' UNION ALL
-SELECT 'ssd_cla_health' UNION ALL
-SELECT 'ssd_cla_immunisations' UNION ALL
-SELECT 'ssd_cla_placement' UNION ALL
+SELECT 'ssd_address'                 UNION ALL
+SELECT 'ssd_assessment_factors'      UNION ALL
+SELECT 'ssd_care_leavers'            UNION ALL
+SELECT 'ssd_cin_assessments'         UNION ALL
+SELECT 'ssd_cin_episodes'            UNION ALL
+SELECT 'ssd_cin_plans'               UNION ALL
+SELECT 'ssd_cin_visits'              UNION ALL
+SELECT 'ssd_cla_care_plan'           UNION ALL
+SELECT 'ssd_cla_convictions'         UNION ALL
+SELECT 'ssd_cla_episodes'            UNION ALL
+SELECT 'ssd_cla_health'              UNION ALL
+SELECT 'ssd_cla_immunisations'       UNION ALL
+SELECT 'ssd_cla_placement'           UNION ALL
 SELECT 'ssd_cla_previous_permanence' UNION ALL
-SELECT 'ssd_cla_reviews' UNION ALL
-SELECT 'ssd_cla_substance_misuse' UNION ALL
-SELECT 'ssd_cla_visits' UNION ALL
-SELECT 'ssd_contacts' UNION ALL
-SELECT 'ssd_cp_plans' UNION ALL
-SELECT 'ssd_cp_reviews' UNION ALL
-SELECT 'ssd_cp_visits' UNION ALL
-SELECT 'ssd_department' UNION ALL
-SELECT 'ssd_disability' UNION ALL
-SELECT 'ssd_early_help_episodes' UNION ALL
-SELECT 'ssd_ehcp_active_plans' UNION ALL
-SELECT 'ssd_ehcp_assessment' UNION ALL
-SELECT 'ssd_ehcp_named_plan' UNION ALL
-SELECT 'ssd_ehcp_requests' UNION ALL
-SELECT 'ssd_family' UNION ALL
-SELECT 'ssd_immigration_status' UNION ALL
-SELECT 'ssd_initial_cp_conference' UNION ALL
-SELECT 'ssd_involvements' UNION ALL
-SELECT 'ssd_legal_status' UNION ALL
-SELECT 'ssd_linked_identifiers' UNION ALL
-SELECT 'ssd_missing' UNION ALL
-SELECT 'ssd_mother' UNION ALL
-SELECT 'ssd_permanence' UNION ALL
-SELECT 'ssd_person' UNION ALL
-SELECT 'ssd_pre_proceedings' UNION ALL
-SELECT 'ssd_professionals' UNION ALL
-SELECT 'ssd_s251_finance' UNION ALL
-SELECT 'ssd_s47_enquiry' UNION ALL
-SELECT 'ssd_sdq_scores' UNION ALL
-SELECT 'ssd_sen_need' UNION ALL
-SELECT 'ssd_send' UNION ALL
-SELECT 'ssd_version' UNION ALL
-SELECT 'ssd_voice_of_child';
+SELECT 'ssd_cla_reviews'             UNION ALL
+SELECT 'ssd_cla_substance_misuse'    UNION ALL
+SELECT 'ssd_cla_visits'              UNION ALL
+SELECT 'ssd_contacts'                UNION ALL
+SELECT 'ssd_cp_plans'                UNION ALL
+SELECT 'ssd_cp_reviews'              UNION ALL
+SELECT 'ssd_cp_visits'               UNION ALL
+SELECT 'ssd_department'              UNION ALL
+SELECT 'ssd_disability'              UNION ALL
+SELECT 'ssd_early_help_episodes'     UNION ALL
+SELECT 'ssd_ehcp_active_plans'       UNION ALL
+SELECT 'ssd_ehcp_assessment'         UNION ALL
+SELECT 'ssd_ehcp_named_plan'         UNION ALL
+SELECT 'ssd_ehcp_requests'           UNION ALL
+SELECT 'ssd_family'                  UNION ALL
+SELECT 'ssd_immigration_status'      UNION ALL
+SELECT 'ssd_initial_cp_conference'   UNION ALL
+SELECT 'ssd_involvements'            UNION ALL
+SELECT 'ssd_legal_status'            UNION ALL
+SELECT 'ssd_linked_identifiers'      UNION ALL
+SELECT 'ssd_missing'                 UNION ALL
+SELECT 'ssd_mother'                  UNION ALL
+SELECT 'ssd_permanence'              UNION ALL
+SELECT 'ssd_person'                  UNION ALL
+SELECT 'ssd_pre_proceedings'         UNION ALL
+SELECT 'ssd_professionals'           UNION ALL
+SELECT 'ssd_s251_finance'            UNION ALL
+SELECT 'ssd_s47_enquiry'             UNION ALL
+SELECT 'ssd_sdq_scores'              UNION ALL
+SELECT 'ssd_sen_need'                UNION ALL
+SELECT 'ssd_send'                    UNION ALL
+SELECT 'ssd_voice_of_child'          UNION ALL
+SELECT 'ssd_version';               -- admin table
 
--- Open cursor
+
 OPEN table_cursor;
 
 -- Fetch next table name
 FETCH NEXT FROM table_cursor INTO @table_name;
 
--- Loop table names
+-- Loop table names listed above
 WHILE @@FETCH_STATUS = 0
 BEGIN
     BEGIN TRY
-        -- dynamic SQL get row count + schema name
+        -- get row count+ schema name
         SET @sql = N'SELECT @row_count = COUNT(*) FROM ssd_development.' + @table_name;
-        EXEC sp_executesql @sql, N'@row_ count INT OUTPUT', @row_count OUTPUT;
+        EXEC sp_executesql @sql, N'@row_count INT OUTPUT', @row_count OUTPUT;
         
         -- Insert log entry+ schema name
         INSERT INTO ssd_development.ssd_table_creation_log (table_name, status, rows_inserted)
@@ -5655,19 +5655,19 @@ BEGIN
         VALUES ('ssd_development.' + @table_name, ERROR_MESSAGE(), 0);
     END CATCH;
 
-    -- Fetch next table name
+    -- fetch next table name
     FETCH NEXT FROM table_cursor INTO @table_name;
 END;
 
--- Close and deallocate cursor
+-- close+deallocate cursor
 CLOSE table_cursor;
 DEALLOCATE table_cursor;
 
 SET @sql = N'';
 
 
-
-
+-- part of default extract test output
+select * from ssd_table_creation_log;
 
 
 
@@ -5707,6 +5707,7 @@ ADD pers_involvement_history_json NVARCHAR(max),  -- Adjust data type as needed
     pers_involvement_type_story NVARCHAR(1000);   -- Adjust data type as needed
 
 Go -- Need to ensure the above is completed prior to onward processing
+-- All variables now reset, ensure re-definition if testing below in isolation
 
 -- CTE for involvement history incl. worker data
 WITH InvolvementHistoryCTE AS (
