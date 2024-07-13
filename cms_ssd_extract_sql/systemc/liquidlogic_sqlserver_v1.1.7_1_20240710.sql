@@ -5117,7 +5117,7 @@ SELECT
             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER END, '')), NULL) AS ADOPTION,
             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END, '')), NULL) AS OTHERPLN
         FROM
-            ssd_development.ssd_pre_cla_care_plan; tmp_cpl
+            ssd_development.ssd_pre_cla_care_plan tmp_cpl
 
  
         WHERE
