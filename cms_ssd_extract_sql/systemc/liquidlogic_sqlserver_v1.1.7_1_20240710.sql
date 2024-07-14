@@ -173,7 +173,7 @@ VALUES
     ('1.1.3', '2024-06-27', 'Revised filtering on ssd_person', 0, 'admin', 'Check IS_CLIENT flag first'),
     ('1.1.4', '2024-07-01', 'ssd_department obj added', 0, 'admin', 'Increased seperation btw professionals and depts enabling history'),
     ('1.1.5', '2024-07-09', 'ssd_person involvements history', 0, 'admin', 'Improved consistency on _json fields, clean-up involvements_history_json'),
-    ('1.1.6', '2024-07-12', 'FK fixes for #DtoI-1769', 1, 'admin', 'non-unique/FK issues addressed: #DtoI-1769, #DtoI-1601');
+    ('1.1.6', '2024-07-12', 'FK fixes for #DtoI-1769', 0, 'admin', 'non-unique/FK issues addressed: #DtoI-1769, #DtoI-1601');
 
 
 -- [TESTING] Increment /print progress
@@ -5667,7 +5667,7 @@ SET @sql = N'';
 
 
 -- part of default extract test output
-select * from ssd_table_creation_log;
+select * from ssd_table_creation_log order by rows_inserted desc;
 
 
 
