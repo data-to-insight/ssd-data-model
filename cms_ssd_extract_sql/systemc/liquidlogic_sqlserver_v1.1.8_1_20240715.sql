@@ -5725,9 +5725,6 @@ SELECT * FROM ssd_development.ssd_table_creation_log ORDER BY rows_inserted DESC
 SET @sql = N'';
 
 
--- add to default extract test output
-select * from ssd_table_creation_log order by rows_inserted desc;
-
 
 
 /* Start
