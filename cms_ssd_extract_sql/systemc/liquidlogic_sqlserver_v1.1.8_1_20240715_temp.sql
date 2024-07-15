@@ -51,11 +51,17 @@ Currently in [REVIEW]
 
 /* Development set up */
 
+-- Run SSD into Temporary OR Persistent extract structure
+-- 
+DECLARE @Run_SSD_As_Temporary_Tables BIT;
+SET     @Run_SSD_As_Temporary_Tables = 1;  -- 1==Single use SSD extract uses tempdb..# | 2==Persistent SSD table set up
+
+
+
 -- Point to correct DB/TABLE_CATALOG if required
 USE HDM_Local; 
 -- ALTER USER user_name WITH DEFAULT_SCHEMA = ssd_development; -- Commented due to permissions issues
 
-GO
 
 
 /* [TESTING] 
@@ -72,55 +78,72 @@ SET @StartTime = GETDATE(); -- Record the start time
 
 
 
-/* Drop all ssd_development schema constraints & tables */
--- This is to pre-emptively avoid any run-time conflicts from left-behind FK constraints
 
-DECLARE @sql NVARCHAR(MAX) = N'';
-
--- generate DROP FK commands
-SELECT @sql += '
-IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = ' + QUOTENAME(fk.name, '''') + ')
+IF @Run_SSD_As_Temporary_Tables = 1
 BEGIN
-    ALTER TABLE ' + QUOTENAME(SCHEMA_NAME(fk.schema_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) + ' DROP CONSTRAINT ' + QUOTENAME(fk.name) + ';
-END;
-'
-FROM sys.foreign_keys AS fk
-INNER JOIN sys.tables AS t ON fk.parent_object_id = t.object_id
-INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
-WHERE s.name = N'ssd_development';
+    -- extracting into non-persistent temp tables
+    -- no constraint clean-up required
 
--- execute drop FK
-EXEC sp_executesql @sql;
-
--- Clear SQL var
-SET @sql = N'';
-
--- generate DROP TABLE for each table in schema
-SELECT @sql += '
-IF OBJECT_ID(''' + s.name + '.' + t.name + ''', ''U'') IS NOT NULL
+    PRINT 'Establishing SSD in temporary db namespace, prefixed as #ssd_' ;
+END
+ELSE
 BEGIN
-    DROP TABLE ' + QUOTENAME(s.name) + '.' + QUOTENAME(t.name) + ';
-END;
-'
-FROM sys.tables AS t
-INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
-WHERE s.name = N'ssd_development';
+    -- extracting into persistent|perm tables
+    -- therefore some potential clean-up need from any previous implementations
 
--- Execute drop tables
-EXEC sp_executesql @sql;
-/* END Drop all ssd_development schema constraints */
+    PRINT 'Establishing SSD as persistant tables, prefixed as ssd_' ;
+
+    /* START drop all ssd_development. schema constraints */
+    DECLARE @sql NVARCHAR(MAX) = N'';
+
+    -- pre-emptively avoid any run-time conflicts from left-behind FK constraints
+
+    -- generate DROP FK commands
+    SELECT @sql += '
+        IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = ' + QUOTENAME(fk.name, '''') + ')
+        BEGIN
+            ALTER TABLE ' + QUOTENAME(SCHEMA_NAME(fk.schema_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) + ' DROP CONSTRAINT ' + QUOTENAME(fk.name) + ';
+        END;'
+    FROM sys.foreign_keys AS fk
+    INNER JOIN sys.tables AS t ON fk.parent_object_id = t.object_id
+    INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+    WHERE s.name = N'ssd_development';
+
+    -- execute drop FK
+    EXEC sp_executesql @sql;
+
+    -- Clear SQL var
+    SET @sql = N'';
+
+    -- generate DROP TABLE for each table in schema
+    SELECT @sql += '
+    IF OBJECT_ID(''' + s.name + '.' + t.name + ''', ''U'') IS NOT NULL
+    BEGIN
+        DROP TABLE ' + QUOTENAME(s.name) + '.' + QUOTENAME(t.name) + ';
+    END;
+    '
+    FROM sys.tables AS t
+    INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+    WHERE s.name = N'ssd_development';
+
+    -- Execute drop tables
+    EXEC sp_executesql @sql;
+
+    /* END Drop all ssd_development. schema constraints */
+END
+
+
 
 
 /* ********************************************************************************************************** */
 /* SSD extract set up */
 
 -- ssd extract time-frame (YRS)
-DECLARE @ssd_timeframe_years    INT = 6;
-DECLARE @ssd_sub1_range_years   INT = 1;
+DECLARE @ssd_timeframe_years INT = 6;
+DECLARE @ssd_sub1_range_years INT = 1;
 
--- store relevant static/threshold dates that counts can be calculated from/to
-DECLARE @caseload_cutoff_date DATE; -- CASELOAD currently most recent previous Sept30th
--- DECLARE @xxxx_cutoff_date DATE;
+-- store date on which CASELOAD count required. Currently : Most recent past Sept30th
+DECLARE @LastSept30th DATE; 
 
 /* 
 =============================================================================
@@ -444,18 +467,20 @@ WHERE EXISTS
     );
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_family ADD CONSTRAINT FK_family_person
-FOREIGN KEY (fami_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_family ADD CONSTRAINT FK_family_person
+    FOREIGN KEY (fami_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- DEV NOTES [TESTING]
--- Msg 3728, Level 16, State 1, Line 1
--- 'FK_family_person' is not a constraint.Could not drop constraint. See previous errors.
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_family_person_id              ON #ssd_family(fami_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id     ON #ssd_family(fami_family_id);
+
+END
 
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_family_person_id              ON #ssd_family(fami_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id     ON #ssd_family(fami_family_id);
+
 
 
 
@@ -548,17 +573,19 @@ WHERE EXISTS
     WHERE p.pers_person_id = pa.DIM_PERSON_ID
     );
 
--- Create constraint(s)
-ALTER TABLE #ssd_address ADD CONSTRAINT FK_address_person
-FOREIGN KEY (addr_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_address ADD CONSTRAINT FK_address_person
+    FOREIGN KEY (addr_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_address_person        ON #ssd_address(addr_person_id);
-CREATE NONCLUSTERED INDEX idx_address_start         ON #ssd_address(addr_address_start_date);
-CREATE NONCLUSTERED INDEX idx_address_end           ON #ssd_address(addr_address_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_address_postcode  ON #ssd_address(addr_address_postcode);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_address_person        ON #ssd_address(addr_person_id);
+    CREATE NONCLUSTERED INDEX idx_address_start         ON #ssd_address(addr_address_start_date);
+    CREATE NONCLUSTERED INDEX idx_address_end           ON #ssd_address(addr_address_end_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_address_postcode  ON #ssd_address(addr_address_postcode);
+END
 
 
 -- [TESTING] Increment /print progress
@@ -621,15 +648,16 @@ WHERE EXISTS
     WHERE p.pers_person_id = fd.DIM_PERSON_ID
     );
 
-
--- Create constraint(s)
-ALTER TABLE #ssd_disability ADD CONSTRAINT FK_disability_person 
-FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
-    
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_disability_person_id ON #ssd_disability(disa_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_disability_code ON #ssd_disability(disa_disability_code);
-
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_disability ADD CONSTRAINT FK_disability_person 
+    FOREIGN KEY (disa_person_id) REFERENCES #ssd_person(pers_person_id);
+        
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_disability_person_id ON #ssd_disability(disa_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_disability_code ON #ssd_disability(disa_disability_code);
+END
 
 
 
@@ -703,15 +731,17 @@ WHERE
     );
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
-FOREIGN KEY (immi_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_immigration_status ADD CONSTRAINT FK_immigration_status_person
+    FOREIGN KEY (immi_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
-CREATE NONCLUSTERED INDEX idx_immigration_status_start          ON #ssd_immigration_status(immi_immigration_status_start_date);
-CREATE NONCLUSTERED INDEX idx_immigration_status_end            ON #ssd_immigration_status(immi_immigration_status_end_date);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_immigration_status_immi_person_id ON #ssd_immigration_status(immi_person_id);
+    CREATE NONCLUSTERED INDEX idx_immigration_status_start          ON #ssd_immigration_status(immi_immigration_status_start_date);
+    CREATE NONCLUSTERED INDEX idx_immigration_status_end            ON #ssd_immigration_status(immi_immigration_status_end_date);
+END
 
 
 -- [TESTING] Increment /print progress
@@ -783,25 +813,27 @@ AND EXISTS
     FROM #ssd_person p
     WHERE p.pers_person_id = fpr.DIM_PERSON_ID
     );
- 
--- Add constraint(s)
-ALTER TABLE #ssd_mother ADD CONSTRAINT FK_moth_to_person 
-FOREIGN KEY (moth_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- -- [TESTING] deployment issues remain
--- ALTER TABLE #ssd_mother ADD CONSTRAINT FK_child_to_person 
--- FOREIGN KEY (moth_childs_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Add constraint(s)
+    ALTER TABLE #ssd_mother ADD CONSTRAINT FK_moth_to_person 
+    FOREIGN KEY (moth_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- -- [TESTING] Comment this out for ESCC until further notice
--- ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_no_self_parenting -- Ensure person cannot be their own mother
--- CHECK (moth_person_id <> moth_childs_person_id);
+    -- -- [TESTING] deployment issues remain
+    -- ALTER TABLE #ssd_mother ADD CONSTRAINT FK_child_to_person 
+    -- FOREIGN KEY (moth_childs_person_id) REFERENCES #ssd_person(pers_person_id);
+
+    -- -- [TESTING] Comment this out for ESCC until further notice
+    -- ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_no_self_parenting -- Ensure person cannot be their own mother
+    -- CHECK (moth_person_id <> moth_childs_person_id);
 
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON #ssd_mother(moth_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON #ssd_mother(moth_childs_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON #ssd_mother(moth_childs_dob);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON #ssd_mother(moth_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON #ssd_mother(moth_childs_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON #ssd_mother(moth_childs_dob);
+END
 
 
 -- [TESTING] Increment /print progress
@@ -865,18 +897,20 @@ WHERE EXISTS
     FROM #ssd_person p
     WHERE p.pers_person_id = fls.DIM_PERSON_ID
     );
- 
--- Create constraint(s)
-ALTER TABLE #ssd_legal_status ADD CONSTRAINT FK_legal_status_person
-FOREIGN KEY (lega_person_id) REFERENCES #ssd_person(pers_person_id);
+
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_legal_status ADD CONSTRAINT FK_legal_status_person
+    FOREIGN KEY (lega_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id   ON #ssd_legal_status(lega_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status                  ON #ssd_legal_status(lega_legal_status);
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start            ON #ssd_legal_status(lega_legal_status_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end              ON #ssd_legal_status(lega_legal_status_end_date);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id   ON #ssd_legal_status(lega_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_legal_status                  ON #ssd_legal_status(lega_legal_status);
+    CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start            ON #ssd_legal_status(lega_legal_status_start_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end              ON #ssd_legal_status(lega_legal_status_end_date);
+END
 
 
 -- [TESTING] Increment /print progress
@@ -965,16 +999,17 @@ WHERE EXISTS
     WHERE p.pers_person_id = fc.DIM_PERSON_ID
     );
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_contacts ADD CONSTRAINT FK_contact_person 
+    FOREIGN KEY (cont_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- Create constraint(s)
-ALTER TABLE #ssd_contacts ADD CONSTRAINT FK_contact_person 
-FOREIGN KEY (cont_person_id) REFERENCES #ssd_person(pers_person_id);
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_contact_person_id     ON #ssd_contacts(cont_person_id);
-CREATE NONCLUSTERED INDEX idx_contact_date          ON #ssd_contacts(cont_contact_date);
-CREATE NONCLUSTERED INDEX idx_contact_source_code   ON #ssd_contacts(cont_contact_source_code);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_contact_person_id     ON #ssd_contacts(cont_person_id);
+    CREATE NONCLUSTERED INDEX idx_contact_date          ON #ssd_contacts(cont_contact_date);
+    CREATE NONCLUSTERED INDEX idx_contact_source_code   ON #ssd_contacts(cont_contact_source_code);
+END
 
 
 
@@ -1056,16 +1091,18 @@ WHERE EXISTS
     );
 
 
--- Create constraint(s)
-ALTER TABLE #ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
-FOREIGN KEY (earl_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_early_help_episodes ADD CONSTRAINT FK_earl_to_person 
+    FOREIGN KEY (earl_person_id) REFERENCES #ssd_person(pers_person_id);
 
- 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
-CREATE NONCLUSTERED INDEX idx_early_help_start_date             ON #ssd_early_help_episodes(earl_episode_start_date);
-CREATE NONCLUSTERED INDEX idx_early_help_end_date               ON #ssd_early_help_episodes(earl_episode_end_date);
-
+    
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id ON #ssd_early_help_episodes(earl_person_id);
+    CREATE NONCLUSTERED INDEX idx_early_help_start_date             ON #ssd_early_help_episodes(earl_episode_start_date);
+    CREATE NONCLUSTERED INDEX idx_early_help_end_date               ON #ssd_early_help_episodes(earl_episode_end_date);
+END
 
 
 
@@ -1179,18 +1216,18 @@ AND EXISTS
     );
 
     
-
--- Create constraint(s)
-ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
-FOREIGN KEY (cine_person_id) REFERENCES #ssd_person(pers_person_id);
-
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id    ON #ssd_cin_episodes(cine_person_id);
-CREATE NONCLUSTERED INDEX idx_cin_referral_date             ON #ssd_cin_episodes(cine_referral_date);
-CREATE NONCLUSTERED INDEX idx_cin_close_date                ON #ssd_cin_episodes(cine_close_date);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
+    FOREIGN KEY (cine_person_id) REFERENCES #ssd_person(pers_person_id);
 
 
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id    ON #ssd_cin_episodes(cine_person_id);
+    CREATE NONCLUSTERED INDEX idx_cin_referral_date             ON #ssd_cin_episodes(cine_referral_date);
+    CREATE NONCLUSTERED INDEX idx_cin_close_date                ON #ssd_cin_episodes(cine_close_date);
+END
 
 
 
@@ -1338,16 +1375,18 @@ AND EXISTS (
     WHERE p.pers_person_id = fa.DIM_PERSON_ID
 );
 
--- Create constraint(s)
-ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
-FOREIGN KEY (cina_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
+    FOREIGN KEY (cina_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cin_assessments_person_id ON #ssd_cin_assessments(cina_person_id);
-CREATE NONCLUSTERED INDEX idx_cina_assessment_start_date    ON #ssd_cin_assessments(cina_assessment_start_date);
-CREATE NONCLUSTERED INDEX idx_cina_assessment_auth_date     ON #ssd_cin_assessments(cina_assessment_auth_date);
-CREATE NONCLUSTERED INDEX idx_cina_referral_id              ON #ssd_cin_assessments(cina_referral_id);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_cin_assessments_person_id ON #ssd_cin_assessments(cina_person_id);
+    CREATE NONCLUSTERED INDEX idx_cina_assessment_start_date    ON #ssd_cin_assessments(cina_assessment_start_date);
+    CREATE NONCLUSTERED INDEX idx_cina_assessment_auth_date     ON #ssd_cin_assessments(cina_assessment_auth_date);
+    CREATE NONCLUSTERED INDEX idx_cina_referral_id              ON #ssd_cin_assessments(cina_referral_id);
+END
 
 
 
@@ -1478,14 +1517,16 @@ WHERE
 --      AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM #ssd_cin_assessments);
 
 
--- Add constraint(s) #DtoI-1769
-ALTER TABLE #ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
-FOREIGN KEY (cinf_assessment_id) REFERENCES #ssd_cin_assessments(cina_assessment_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Add constraint(s) #DtoI-1769
+    ALTER TABLE #ssd_assessment_factors ADD CONSTRAINT FK_cinf_assessment_id
+    FOREIGN KEY (cinf_assessment_id) REFERENCES #ssd_cin_assessments(cina_assessment_id);
 
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_cinf_assessment_id ON #ssd_assessment_factors(cinf_assessment_id);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_cinf_assessment_id ON #ssd_assessment_factors(cinf_assessment_id);
+END
 
 -- Drop tmp/pre-processing structure(s)
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
@@ -1596,16 +1637,18 @@ GROUP BY
     cps.END_DTTM
     ;
 
--- Create constraint(s)
-ALTER TABLE #ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
-FOREIGN KEY (cinp_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_cin_plans ADD CONSTRAINT FK_cinp_to_person 
+    FOREIGN KEY (cinp_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cin_plans_person_id   ON #ssd_cin_plans(cinp_person_id);
-CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_start_date  ON #ssd_cin_plans(cinp_cin_plan_start_date);
-CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_end_date    ON #ssd_cin_plans(cinp_cin_plan_end_date);
-CREATE NONCLUSTERED INDEX idx_cinp_referral_id          ON #ssd_cin_plans(cinp_referral_id);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_cin_plans_person_id   ON #ssd_cin_plans(cinp_person_id);
+    CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_start_date  ON #ssd_cin_plans(cinp_cin_plan_start_date);
+    CREATE NONCLUSTERED INDEX idx_cinp_cin_plan_end_date    ON #ssd_cin_plans(cinp_cin_plan_end_date);
+    CREATE NONCLUSTERED INDEX idx_cinp_referral_id          ON #ssd_cin_plans(cinp_referral_id);
+END
 
 
 -- [TESTING] Increment /print progress
@@ -1681,14 +1724,16 @@ AND EXISTS ( -- only ssd relevant records
     WHERE p.pers_person_id = cn.DIM_PERSON_ID
     );
  
--- Create constraint(s)
-ALTER TABLE #ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_person
-FOREIGN KEY (cinv_person_id) REFERENCES #ssd_person(pers_person_id);
- 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_cinv_person_id        ON #ssd_cin_visits(cinv_person_id);
-CREATE NONCLUSTERED INDEX idx_cinv_cin_visit_date   ON #ssd_cin_visits(cinv_cin_visit_date);
-
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_person
+    FOREIGN KEY (cinv_person_id) REFERENCES #ssd_person(pers_person_id);
+    
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_cinv_person_id        ON #ssd_cin_visits(cinv_person_id);
+    CREATE NONCLUSTERED INDEX idx_cinv_cin_visit_date   ON #ssd_cin_visits(cinv_cin_visit_date);
+END
 
 
 
@@ -1786,28 +1831,19 @@ WHERE EXISTS ( -- only ssd relevant records
     WHERE p.pers_person_id = s47.DIM_PERSON_ID
     ) ;
 
--- Create constraint(s)
-ALTER TABLE #ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
-FOREIGN KEY (s47e_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_s47_enquiry ADD CONSTRAINT FK_s47_person
+    FOREIGN KEY (s47e_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_person_id     ON #ssd_s47_enquiry(s47e_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_start_date    ON #ssd_s47_enquiry(s47e_s47_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_end_date      ON #ssd_s47_enquiry(s47e_s47_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_referral_id   ON #ssd_s47_enquiry(s47e_referral_id);
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_person_id     ON #ssd_s47_enquiry(s47e_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_start_date    ON #ssd_s47_enquiry(s47e_s47_start_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_end_date      ON #ssd_s47_enquiry(s47e_s47_end_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_referral_id   ON #ssd_s47_enquiry(s47e_referral_id);
+END
 
-
-/* Removed 22/11/23
-    CASE 
-        WHEN cpc.FACT_S47_ID IS NOT NULL 
-        THEN 'CP Plan Started'
-        ELSE 'CP Plan not Required'
-    END,
-&     
-LEFT JOIN 
-    Child_Social.FACT_CP_CONFERENCE as cpc ON s47.FACT_S47_ID = cpc.FACT_S47_ID;
-
-    */
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
@@ -1926,21 +1962,22 @@ AND EXISTS ( -- only ssd relevant records
     WHERE p.pers_person_id = fcpc.DIM_PERSON_ID
     ) ;
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_person_id
+    FOREIGN KEY (icpc_person_id) REFERENCES #ssd_person(pers_person_id);
 
-ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_person_id
-FOREIGN KEY (icpc_person_id) REFERENCES #ssd_person(pers_person_id);
-
--- -- [TESTING]
--- ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_referral_id
--- FOREIGN KEY (icpc_referral_id) REFERENCES #ssd_cin_episodes(cine_referral_id);
+    -- -- [TESTING]
+    -- ALTER TABLE #ssd_initial_cp_conference ADD CONSTRAINT FK_icpc_referral_id
+    -- FOREIGN KEY (icpc_referral_id) REFERENCES #ssd_cin_episodes(cine_referral_id);
 
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_icpc_person_id        ON #ssd_initial_cp_conference(icpc_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_icpc_s47_enquiry_id   ON #ssd_initial_cp_conference(icpc_s47_enquiry_id);
-CREATE NONCLUSTERED INDEX idx_ssd_icpc_referral_id      ON #ssd_initial_cp_conference(icpc_referral_id);
-CREATE NONCLUSTERED INDEX idx_ssd_icpc_icpc_date        ON #ssd_initial_cp_conference(icpc_icpc_date);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_icpc_person_id        ON #ssd_initial_cp_conference(icpc_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_icpc_s47_enquiry_id   ON #ssd_initial_cp_conference(icpc_s47_enquiry_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_icpc_referral_id      ON #ssd_initial_cp_conference(icpc_referral_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_icpc_icpc_date        ON #ssd_initial_cp_conference(icpc_icpc_date);
+END
 
 
 
@@ -2026,21 +2063,22 @@ WHERE EXISTS ( -- only ssd relevant records
     WHERE p.pers_person_id = cpp.DIM_PERSON_ID
     );
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Create constraint(s)
+    -- ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_person_id
+    -- FOREIGN KEY (cppl_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- -- Create constraint(s)
--- ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_person_id
--- FOREIGN KEY (cppl_person_id) REFERENCES #ssd_person(pers_person_id);
+    -- ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_icpc_id
+    -- FOREIGN KEY (cppl_icpc_id) REFERENCES #ssd_initial_cp_conference(icpc_icpc_id);
 
--- ALTER TABLE #ssd_cp_plans ADD CONSTRAINT FK_cppl_icpc_id
--- FOREIGN KEY (cppl_icpc_id) REFERENCES #ssd_initial_cp_conference(icpc_icpc_id);
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_person_id ON #ssd_cp_plans(cppl_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_icpc_id ON #ssd_cp_plans(cppl_icpc_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_referral_id ON #ssd_cp_plans(cppl_referral_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_start_date ON #ssd_cp_plans(cppl_cp_plan_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_end_date ON #ssd_cp_plans(cppl_cp_plan_end_date);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_person_id ON #ssd_cp_plans(cppl_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_icpc_id ON #ssd_cp_plans(cppl_icpc_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_referral_id ON #ssd_cp_plans(cppl_referral_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_start_date ON #ssd_cp_plans(cppl_cp_plan_start_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_end_date ON #ssd_cp_plans(cppl_cp_plan_end_date);
+END
 
 
 
@@ -2126,21 +2164,22 @@ LEFT JOIN
 WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC'); -- Ref. ( 'STVC','STVCPCOVID')
 
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Create constraint(s)
+    -- ALTER TABLE #ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
+    -- FOREIGN KEY (cppv_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
 
--- -- Create constraint(s)
--- ALTER TABLE #ssd_cp_visits ADD CONSTRAINT FK_cppv_to_cppl
--- FOREIGN KEY (cppv_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
+    -- -- DEV NOTES: [TESTING]
+    -- -- Msg 547, Level 16, State 0, Line 105
+    -- -- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_cppv_to_cppl". 
+    -- -- The conflict occurred in database "HDM_Local", table "#ssd_cp_plans", column 'cppl_cp_plan_id'.
 
--- -- DEV NOTES: [TESTING]
--- -- Msg 547, Level 16, State 0, Line 105
--- -- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_cppv_to_cppl". 
--- -- The conflict occurred in database "HDM_Local", table "#ssd_cp_plans", column 'cppl_cp_plan_id'.
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cppv_person_id        ON #ssd_cp_visits(cppv_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_plan_id       ON #ssd_cp_visits(cppv_cp_plan_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_visit_date    ON #ssd_cp_visits(cppv_cp_visit_date);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_cppv_person_id        ON #ssd_cp_visits(cppv_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_plan_id       ON #ssd_cp_visits(cppv_cp_plan_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_visit_date    ON #ssd_cp_visits(cppv_cp_visit_date);
+END
 
 
 
@@ -2259,18 +2298,22 @@ GROUP BY cpr.FACT_CP_REVIEW_ID,
     ffa.FACT_FORM_ID,
     ffa.ANSWER;
 
--- -- Add constraint(s)
--- ALTER TABLE #ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
--- FOREIGN KEY (cppr_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
 
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_cppr_person_id ON #ssd_cp_reviews(cppr_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_plan_id ON #ssd_cp_reviews(cppr_cp_plan_id);
-CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_due ON #ssd_cp_reviews(cppr_cp_review_due);
-CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_date ON #ssd_cp_reviews(cppr_cp_review_date);
-CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_meeting_id ON #ssd_cp_reviews(cppr_cp_review_meeting_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Add constraint(s)
+    -- ALTER TABLE #ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
+    -- FOREIGN KEY (cppr_cp_plan_id) REFERENCES #ssd_cp_plans(cppl_cp_plan_id);
 
+
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_cppr_person_id ON #ssd_cp_reviews(cppr_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_plan_id ON #ssd_cp_reviews(cppr_cp_plan_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_due ON #ssd_cp_reviews(cppr_cp_review_due);
+    CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_date ON #ssd_cp_reviews(cppr_cp_review_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_meeting_id ON #ssd_cp_reviews(cppr_cp_review_meeting_id);
+END
 
 
 
@@ -2473,21 +2516,23 @@ FROM
 -- SELECT DISTINCT clae_person_id FROM #ssd_cla_episodes WHERE clae_person_id NOT IN (SELECT pers_person_id FROM #ssd_person);
 
 
--- Add constraint(s) #DtoI-1769
-ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_to_person 
-FOREIGN KEY (clae_person_id) REFERENCES #ssd_person (pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Add constraint(s) #DtoI-1769
+    ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_to_person 
+    FOREIGN KEY (clae_person_id) REFERENCES #ssd_person (pers_person_id);
 
--- ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_cla_placement_id
--- FOREIGN KEY (clae_cla_placement_id) REFERENCES #ssd_cla_placements (clap_cla_placement_id);
+    -- ALTER TABLE #ssd_cla_episodes ADD CONSTRAINT FK_clae_cla_placement_id
+    -- FOREIGN KEY (clae_cla_placement_id) REFERENCES #ssd_cla_placements (clap_cla_placement_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_clae_person_id ON #ssd_cla_episodes(clae_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_start_date ON #ssd_cla_episodes(clae_cla_episode_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_ceased ON #ssd_cla_episodes(clae_cla_episode_ceased);
-CREATE NONCLUSTERED INDEX idx_ssd_clae_referral_id ON #ssd_cla_episodes(clae_referral_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clae_cla_last_iro_contact_date ON #ssd_cla_episodes(clae_cla_last_iro_contact_date);
-CREATE NONCLUSTERED INDEX idx_clae_cla_placement_id ON #ssd_cla_episodes(clae_cla_placement_id);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_clae_person_id ON #ssd_cla_episodes(clae_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_start_date ON #ssd_cla_episodes(clae_cla_episode_start_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_ceased ON #ssd_cla_episodes(clae_cla_episode_ceased);
+    CREATE NONCLUSTERED INDEX idx_ssd_clae_referral_id ON #ssd_cla_episodes(clae_referral_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_clae_cla_last_iro_contact_date ON #ssd_cla_episodes(clae_cla_last_iro_contact_date);
+    CREATE NONCLUSTERED INDEX idx_clae_cla_placement_id ON #ssd_cla_episodes(clae_cla_placement_id);
+END
 
 
 
@@ -2550,16 +2595,16 @@ WHERE EXISTS
     WHERE p.pers_person_id = fo.DIM_PERSON_ID
     );
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- add constraint(s)
+    -- ALTER TABLE #ssd_cla_convictions ADD CONSTRAINT FK_clac_to_clae 
+    -- FOREIGN KEY (clac_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
--- -- add constraint(s)
--- ALTER TABLE #ssd_cla_convictions ADD CONSTRAINT FK_clac_to_clae 
--- FOREIGN KEY (clac_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
-
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_clac_person_id ON #ssd_cla_convictions(clac_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clac_conviction_date ON #ssd_cla_convictions(clac_cla_conviction_date);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_clac_person_id ON #ssd_cla_convictions(clac_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_clac_conviction_date ON #ssd_cla_convictions(clac_cla_conviction_date);
+END
 
 
 
@@ -2628,16 +2673,17 @@ WHERE EXISTS ( -- only ssd relevant records
     WHERE p.pers_person_id = fhc.DIM_PERSON_ID
     );
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- add constraint(s)
+    -- ALTER TABLE #ssd_cla_health ADD CONSTRAINT FK_clah_to_clae 
+    -- FOREIGN KEY (clah_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
--- -- add constraint(s)
--- ALTER TABLE #ssd_cla_health ADD CONSTRAINT FK_clah_to_clae 
--- FOREIGN KEY (clah_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clah_person_id ON #ssd_cla_health (clah_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_date ON #ssd_cla_health(clah_health_check_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_status ON #ssd_cla_health(clah_health_check_status);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_clah_person_id ON #ssd_cla_health (clah_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_date ON #ssd_cla_health(clah_health_check_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_status ON #ssd_cla_health(clah_health_check_status);
+END
 
 
 
@@ -2716,14 +2762,16 @@ FROM
 WHERE
     rn = 1; -- pull needed record based on rank==1/most recent record for each DIM_PERSON_ID
 
--- -- add constraint(s)
--- ALTER TABLE #ssd_cla_immunisations ADD CONSTRAINT FK_ssd_cla_immunisations_person
--- FOREIGN KEY (clai_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- add constraint(s)
+    -- ALTER TABLE #ssd_cla_immunisations ADD CONSTRAINT FK_ssd_cla_immunisations_person
+    -- FOREIGN KEY (clai_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_clai_person_id ON #ssd_cla_immunisations(clai_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clai_immunisations_status ON #ssd_cla_immunisations(clai_immunisations_status);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_clai_person_id ON #ssd_cla_immunisations(clai_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_clai_immunisations_status ON #ssd_cla_immunisations(clai_immunisations_status);
+END
 
 
 
@@ -2792,14 +2840,16 @@ WHERE EXISTS
     );
 
 
--- -- Add constraint(s)
--- ALTER TABLE #ssd_cla_substance_misuse ADD CONSTRAINT FK_ssd_cla_substance_misuse_clas_person_id 
--- FOREIGN KEY (clas_person_id) REFERENCES #ssd_cla_episodes (clae_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Add constraint(s)
+    -- ALTER TABLE #ssd_cla_substance_misuse ADD CONSTRAINT FK_ssd_cla_substance_misuse_clas_person_id 
+    -- FOREIGN KEY (clas_person_id) REFERENCES #ssd_cla_episodes (clae_person_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clas_person_id ON #ssd_cla_substance_misuse (clas_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clas_substance_misuse_date ON #ssd_cla_substance_misuse(clas_substance_misuse_date);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_clas_person_id ON #ssd_cla_substance_misuse (clas_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_clas_substance_misuse_date ON #ssd_cla_substance_misuse(clas_substance_misuse_date);
+END
 
 
 
@@ -2901,18 +2951,20 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
 
--- -- Add constraint(s)
--- ALTER TABLE #ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
--- FOREIGN KEY (clap_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Add constraint(s)
+    -- ALTER TABLE #ssd_cla_placement ADD CONSTRAINT FK_clap_to_clae 
+    -- FOREIGN KEY (clap_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clap_cla_placement_urn ON #ssd_cla_placement (clap_cla_placement_urn);
-CREATE NONCLUSTERED INDEX idx_ssd_clap_cla_id ON #ssd_cla_placement(clap_cla_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_start_date ON #ssd_cla_placement(clap_cla_placement_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_end_date ON #ssd_cla_placement(clap_cla_placement_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_postcode ON #ssd_cla_placement(clap_cla_placement_postcode);
-CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_type ON #ssd_cla_placement(clap_cla_placement_type);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_clap_cla_placement_urn ON #ssd_cla_placement (clap_cla_placement_urn);
+    CREATE NONCLUSTERED INDEX idx_ssd_clap_cla_id ON #ssd_cla_placement(clap_cla_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_start_date ON #ssd_cla_placement(clap_cla_placement_start_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_end_date ON #ssd_cla_placement(clap_cla_placement_end_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_postcode ON #ssd_cla_placement(clap_cla_placement_postcode);
+    CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_type ON #ssd_cla_placement(clap_cla_placement_type);
+END
 
 
 
@@ -3021,15 +3073,18 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
     ff.DIM_LOOKUP_FORM_TYPE_ID_CODE
     ;
 
--- -- Add constraint(s)
--- ALTER TABLE #ssd_cla_reviews ADD CONSTRAINT FK_clar_to_clae 
--- FOREIGN KEY (clar_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_clar_cla_id ON #ssd_cla_reviews(clar_cla_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clar_review_due_date ON #ssd_cla_reviews(clar_cla_review_due_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clar_review_date ON #ssd_cla_reviews(clar_cla_review_date);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Add constraint(s)
+    -- ALTER TABLE #ssd_cla_reviews ADD CONSTRAINT FK_clar_to_clae 
+    -- FOREIGN KEY (clar_cla_id) REFERENCES #ssd_cla_episodes(clae_cla_id);
 
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_clar_cla_id ON #ssd_cla_reviews(clar_cla_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_clar_review_due_date ON #ssd_cla_reviews(clar_cla_review_due_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_clar_review_date ON #ssd_cla_reviews(clar_cla_review_date);
+END
 
 
 
@@ -3146,16 +3201,17 @@ AND EXISTS (
 GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 
 
- 
--- -- Add constraint(s)
--- ALTER TABLE #ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
--- FOREIGN KEY (lapp_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Add constraint(s)
+    -- ALTER TABLE #ssd_cla_previous_permanence ADD CONSTRAINT FK_lapp_person_id
+    -- FOREIGN KEY (lapp_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
 
--- create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_lapp_person_id ON #ssd_cla_previous_permanence(lapp_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_lapp_previous_permanence_option ON #ssd_cla_previous_permanence(lapp_previous_permanence_option);
-
+    -- create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_lapp_person_id ON #ssd_cla_previous_permanence(lapp_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_lapp_previous_permanence_option ON #ssd_cla_previous_permanence(lapp_previous_permanence_option);
+END
 
 
 
@@ -3350,17 +3406,18 @@ WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
         WHERE p.pers_person_id = fcp.DIM_PERSON_ID
     );
  
--- Add constraint(s)
-ALTER TABLE #ssd_cla_care_plan ADD CONSTRAINT FK_lacp_person_id
-FOREIGN KEY (lacp_person_id) REFERENCES #ssd_person(pers_person_id);
- 
 
-
--- create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_lacp_person_id ON #ssd_cla_care_plan(lacp_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_start_date ON #ssd_cla_care_plan(lacp_cla_care_plan_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_end_date ON #ssd_cla_care_plan(lacp_cla_care_plan_end_date);
-
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Add constraint(s)
+    ALTER TABLE #ssd_cla_care_plan ADD CONSTRAINT FK_lacp_person_id
+    FOREIGN KEY (lacp_person_id) REFERENCES #ssd_person(pers_person_id);
+    
+    -- create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_lacp_person_id ON #ssd_cla_care_plan(lacp_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_start_date ON #ssd_cla_care_plan(lacp_cla_care_plan_start_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_end_date ON #ssd_cla_care_plan(lacp_cla_care_plan_end_date);
+END
 
 
 -- drop/wipe persistent tmp/pre-processing table ready for further use in update section
@@ -3448,16 +3505,17 @@ AND EXISTS ( -- only ssd relevant records
     );
 
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Add constraint(s)
+    -- ALTER TABLE #ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
+    -- FOREIGN KEY (clav_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
--- -- Add constraint(s)
--- ALTER TABLE #ssd_cla_visits ADD CONSTRAINT FK_clav_person_id
--- FOREIGN KEY (clav_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
-
--- create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_clav_person_id ON #ssd_cla_visits(clav_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clav_visit_date ON #ssd_cla_visits(clav_cla_visit_date);
-CREATE NONCLUSTERED INDEX idx_ssd_clav_cla_id ON #ssd_cla_visits(clav_cla_id);
-
+    -- create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_clav_person_id ON #ssd_cla_visits(clav_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_clav_visit_date ON #ssd_cla_visits(clav_cla_visit_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_clav_cla_id ON #ssd_cla_visits(clav_cla_id);
+END
 
 
 
@@ -3590,19 +3648,21 @@ WHERE csdq_table_id IN (
 );
 
 
--- -- Add constraint(s)
--- ALTER TABLE #ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
--- FOREIGN KEY (csdq_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Add constraint(s)
+    -- ALTER TABLE #ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
+    -- FOREIGN KEY (csdq_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- DEV NOTES [TESTING]
--- Msg 2627, Level 14, State 1, Line 3129
--- Violation of PRIMARY KEY constraint 'PK__ssd_sdq___EACA4F0597284006'. 
--- Cannot insert duplicate key in object '#ssd_sdq_scores'. The duplicate key value is (2316504).
+    -- DEV NOTES [TESTING]
+    -- Msg 2627, Level 14, State 1, Line 3129
+    -- Violation of PRIMARY KEY constraint 'PK__ssd_sdq___EACA4F0597284006'. 
+    -- Cannot insert duplicate key in object '#ssd_sdq_scores'. The duplicate key value is (2316504).
 
 
--- create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_csdq_person_id ON #ssd_sdq_scores(csdq_person_id);
-
+    -- create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_csdq_person_id ON #ssd_sdq_scores(csdq_person_id);
+END
 
 
 
@@ -3692,18 +3752,19 @@ WHERE EXISTS
     WHERE p.pers_person_id = fmp.DIM_PERSON_ID
     );
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Add constraint(s)
+    ALTER TABLE #ssd_missing ADD CONSTRAINT FK_missing_to_person
+    FOREIGN KEY (miss_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- Add constraint(s)
-ALTER TABLE #ssd_missing ADD CONSTRAINT FK_missing_to_person
-FOREIGN KEY (miss_person_id) REFERENCES #ssd_person(pers_person_id);
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_miss_person_id        ON #ssd_missing(miss_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_start    ON #ssd_missing(miss_missing_episode_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_end      ON #ssd_missing(miss_missing_episode_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_offered      ON #ssd_missing(miss_missing_rhi_offered);
-CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_accepted     ON #ssd_missing(miss_missing_rhi_accepted);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_miss_person_id        ON #ssd_missing(miss_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_start    ON #ssd_missing(miss_missing_episode_start_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_end      ON #ssd_missing(miss_missing_episode_end_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_offered      ON #ssd_missing(miss_missing_rhi_offered);
+    CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_accepted     ON #ssd_missing(miss_missing_rhi_accepted);
+END
 
 
 
@@ -3884,16 +3945,17 @@ GROUP BY
     ;
 
 
--- -- Add constraint(s)
--- ALTER TABLE #ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
--- FOREIGN KEY (clea_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Add constraint(s)
+    -- ALTER TABLE #ssd_care_leavers ADD CONSTRAINT FK_care_leavers_person
+    -- FOREIGN KEY (clea_person_id) REFERENCES #ssd_person(pers_person_id);
 
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_clea_person_id                        ON #ssd_care_leavers(clea_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_clea_care_leaver_latest_contact   ON #ssd_care_leavers(clea_care_leaver_latest_contact);
-CREATE NONCLUSTERED INDEX idx_ssd_clea_pathway_plan_review_date     ON #ssd_care_leavers(clea_pathway_plan_review_date);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_clea_person_id                        ON #ssd_care_leavers(clea_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_clea_care_leaver_latest_contact   ON #ssd_care_leavers(clea_care_leaver_latest_contact);
+    CREATE NONCLUSTERED INDEX idx_ssd_clea_pathway_plan_review_date     ON #ssd_care_leavers(clea_pathway_plan_review_date);
+END
 
 
 
@@ -4108,17 +4170,17 @@ AND EXISTS
     );
 
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Add constraint(s)
+    -- ALTER TABLE #ssd_permanence ADD CONSTRAINT FK_perm_person_id
+    -- FOREIGN KEY (perm_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
 
--- -- Add constraint(s)
--- ALTER TABLE #ssd_permanence ADD CONSTRAINT FK_perm_person_id
--- FOREIGN KEY (perm_person_id) REFERENCES #ssd_cla_episodes(clae_person_id);
-
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id            ON #ssd_permanence(perm_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date    ON #ssd_permanence(perm_adm_decision_date);
-CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date           ON #ssd_permanence(perm_permanence_order_date);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id            ON #ssd_permanence(perm_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date    ON #ssd_permanence(perm_adm_decision_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date           ON #ssd_permanence(perm_permanence_order_date);
+END
 
 
 
@@ -4142,7 +4204,7 @@ Version: 1.2
 Status: [R]elease
 Remarks: 
 Dependencies: 
-- @caseload_cutoff_date
+- @LastSept30th
 - @TimeframeStartDate
 - @ssd_timeframe_years
 - DIM_WORKER
@@ -4160,14 +4222,14 @@ IF OBJECT_ID('#ssd_professionals', 'U') IS NOT NULL DROP TABLE #ssd_professional
 IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL DROP TABLE #ssd_professionals;
 
 
--- Determine/Define date on which CASELOAD count required (Currently: most recent previous September 30th)
-SET @caseload_cutoff_date = CASE 
+-- Determine/Define date on which CASELOAD count required (Currently: September 30th)
+SET @LastSept30th = CASE 
                         WHEN CONVERT(DATE, GETDATE()) > DATEFROMPARTS(YEAR(GETDATE()), 9, 30) 
                         THEN DATEFROMPARTS(YEAR(GETDATE()), 9, 30)
                         ELSE DATEFROMPARTS(YEAR(GETDATE()) - 1, 9, 30)
                     END;
 
-DECLARE @TimeframeStartDate DATE = DATEADD(YEAR, -@ssd_timeframe_years, @caseload_cutoff_date);
+DECLARE @TimeframeStartDate DATE = DATEADD(YEAR, -@ssd_timeframe_years, @LastSept30th);
 
 
 -- Create structure
@@ -4218,8 +4280,8 @@ LEFT JOIN (
     FROM 
         Child_Social.FACT_REFERRALS
     WHERE 
-        REFRL_START_DTTM <= @caseload_cutoff_date AND 
-        (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM >= @caseload_cutoff_date) AND
+        REFRL_START_DTTM <= @LastSept30th AND 
+        (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM >= @LastSept30th) AND
         REFRL_START_DTTM >= @TimeframeStartDate  -- ssd timeframe constraint
     GROUP BY 
         DIM_WORKER_ID
@@ -4231,13 +4293,14 @@ WHERE
 
 
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Add constraint(s)
 
--- Add constraint(s)
-
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_prof_staff_id                 ON #ssd_professionals (prof_staff_id);
-CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON #ssd_professionals(prof_social_worker_registration_no);
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_prof_staff_id                 ON #ssd_professionals (prof_staff_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON #ssd_professionals(prof_social_worker_registration_no);
+END
 
 
 -- [TESTING] Increment /print progress
@@ -4295,14 +4358,15 @@ WHERE dpt.dim_department_id <> -1;
 -- Can dept data be reduced by matching back to objects to ensure only in-use dept data is retrieved
 
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- -- Add constraint(s)
+    -- ALTER TABLE #ssd_department ADD CONSTRAINT FK_dept_team_parent_id 
+    -- FOREIGN KEY (dept_team_parent_id) REFERENCES #ssd_department(dept_team_id);
 
--- -- Add constraint(s)
--- ALTER TABLE #ssd_department ADD CONSTRAINT FK_dept_team_parent_id 
--- FOREIGN KEY (dept_team_parent_id) REFERENCES #ssd_department(dept_team_id);
-
--- Create index(es)
-CREATE INDEX idx_dept_team_id ON #ssd_department (dept_team_id);
-
+    -- Create index(es)
+    CREATE INDEX idx_dept_team_id ON #ssd_department (dept_team_id);
+END
 
 -- [TESTING] Increment /print progress
 SET @TestProgress = @TestProgress + 1;
@@ -4401,14 +4465,17 @@ WHERE EXISTS
     );
 
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Add constraint(s)
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_invo_person_id            ON #ssd_involvements (invo_person_id);
-CREATE NONCLUSTERED INDEX idx_invo_professional_role_id ON #ssd_involvements (invo_professional_role_id);
-CREATE NONCLUSTERED INDEX idx_ssd_invo_start_date       ON #ssd_involvements(invo_involvement_start_date);
-CREATE NONCLUSTERED INDEX idx_ssd_invo_end_date         ON #ssd_involvements(invo_involvement_end_date);
-CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id      ON #ssd_involvements(invo_referral_id);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_invo_person_id            ON #ssd_involvements (invo_person_id);
+    CREATE NONCLUSTERED INDEX idx_invo_professional_role_id ON #ssd_involvements (invo_professional_role_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_invo_start_date       ON #ssd_involvements(invo_involvement_start_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_invo_end_date         ON #ssd_involvements(invo_involvement_end_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id      ON #ssd_involvements(invo_referral_id);
+END
 
 
     
@@ -4528,15 +4595,17 @@ WHERE
     );
 
 
--- -- Create constraint(s)
-ALTER TABLE #ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
-FOREIGN KEY (link_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_linked_identifiers ADD CONSTRAINT FK_link_to_person 
+    FOREIGN KEY (link_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_link_person_id        ON #ssd_linked_identifiers(link_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_link_valid_from_date  ON #ssd_linked_identifiers(link_valid_from_date);
-CREATE NONCLUSTERED INDEX idx_ssd_link_valid_to_date    ON #ssd_linked_identifiers(link_valid_to_date);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_link_person_id        ON #ssd_linked_identifiers(link_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_link_valid_from_date  ON #ssd_linked_identifiers(link_valid_from_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_link_valid_to_date    ON #ssd_linked_identifiers(link_valid_to_date);
+END
 
 
 
@@ -4602,13 +4671,15 @@ CREATE TABLE #ssd_s251_finance (
 -- VALUES
 --     ('SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH');
 
--- Create constraint(s)
-ALTER TABLE #ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
-FOREIGN KEY (s251_cla_placement_id) REFERENCES #ssd_cla_placement(clap_cla_placement_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_s251_finance ADD CONSTRAINT FK_s251_to_cla_placement 
+    FOREIGN KEY (s251_cla_placement_id) REFERENCES #ssd_cla_placement(clap_cla_placement_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_s251_cla_placement_id ON #ssd_s251_finance(s251_cla_placement_id);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_s251_cla_placement_id ON #ssd_s251_finance(s251_cla_placement_id);
+END
 
 
 
@@ -4675,14 +4746,15 @@ CREATE TABLE #ssd_voice_of_child (
 --     WHERE p.pers_person_id = ssd_voice_of_child.DIM_PERSON_ID
 --     );
 
--- -- Create constraint(s)
-ALTER TABLE #ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
-FOREIGN KEY (voch_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_voice_of_child ADD CONSTRAINT FK_voch_to_person 
+    FOREIGN KEY (voch_person_id) REFERENCES #ssd_person(pers_person_id);
 
-
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_ssd_voice_of_child_voch_person_id ON #ssd_voice_of_child(voch_person_id);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_voice_of_child_voch_person_id ON #ssd_voice_of_child(voch_person_id);
+END
 
 
 
@@ -4793,15 +4865,17 @@ CREATE TABLE #ssd_pre_proceedings (
 --     WHERE p.pers_person_id = ssd_pre_proceedings.DIM_PERSON_ID
 --     );
 
--- Create constraint(s) #DtoI-1769
-ALTER TABLE #ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
-FOREIGN KEY (prep_person_id) REFERENCES #ssd_person(pers_person_id);
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s) #DtoI-1769
+    ALTER TABLE #ssd_pre_proceedings ADD CONSTRAINT FK_prep_to_person 
+    FOREIGN KEY (prep_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- Create index(es)
-CREATE NONCLUSTERED INDEX idx_prep_person_id                ON #ssd_pre_proceedings (prep_person_id);
-CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date    ON #ssd_pre_proceedings (prep_pre_pro_decision_date);
-CREATE NONCLUSTERED INDEX idx_prep_legal_gateway_outcome    ON #ssd_pre_proceedings (prep_legal_gateway_outcome);
-
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_prep_person_id                ON #ssd_pre_proceedings (prep_person_id);
+    CREATE NONCLUSTERED INDEX idx_prep_pre_pro_decision_date    ON #ssd_pre_proceedings (prep_pre_pro_decision_date);
+    CREATE NONCLUSTERED INDEX idx_prep_legal_gateway_outcome    ON #ssd_pre_proceedings (prep_legal_gateway_outcome);
+END
 
 
 -- [TESTING] Increment /print progress
@@ -4860,6 +4934,12 @@ DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder';
 -- Query run time vars
 DECLARE @StartTime DATETIME, @EndTime DATETIME;
 SET @StartTime = GETDATE(); -- Record the start time
+
+-- Run SSD into Temporary OR Persistent extract structure
+-- 
+DECLARE @Run_SSD_As_Temporary_Tables BIT;
+SET     @Run_SSD_As_Temporary_Tables = 1;  -- 1==Single use SSD extract uses tempdb..# | 2==Persistent SSD table set up
+
 /* END [TESTING] 
 */
 
@@ -5212,10 +5292,15 @@ WHERE
     );
  
  
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Add constraint(s) -- #DtoI-1769
+    ALTER TABLE #ssd_send ADD CONSTRAINT FK_send_to_person 
+    FOREIGN KEY (send_person_id) REFERENCES #ssd_person(pers_person_id);
 
--- Add constraint(s) -- #DtoI-1769
-ALTER TABLE #ssd_send ADD CONSTRAINT FK_send_to_person 
-FOREIGN KEY (send_person_id) REFERENCES #ssd_person(pers_person_id);
+    -- Create index(es)
+
+END
 
 
 -- [TESTING] Increment /print progress
@@ -5258,12 +5343,15 @@ CREATE TABLE #ssd_sen_need (
 );
  
 
--- Create constraint(s)
--- Applied post-object creation/end of extract 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+	PRINT '';
+    -- Create constraint(s)
+    -- Applied post-object creation/end of extract [TESTING]
+    
 
-
--- Create index(es)
-
+    -- Create index(es)
+END
 
 -- -- Insert placeholder data
 -- INSERT INTO #ssd_sen_need (senn_table_id, senn_active_ehcp_id, senn_active_ehcp_need_type, senn_active_ehcp_need_rank)
@@ -5313,12 +5401,15 @@ CREATE TABLE #ssd_ehcp_requests (
 );
 
 
--- Create constraint(s)
--- Applied post-object creation/end of extract 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+	PRINT '';
+    -- Create constraint(s)
+    -- Applied post-object creation/end of extract 
 
+    -- Create index(es)
 
--- Create index(es)
-
+END
 
 
 -- -- Insert placeholder data
@@ -5367,11 +5458,15 @@ CREATE TABLE #ssd_ehcp_assessment (
 );
 
 
--- Create constraint(s)
--- Applied post-object creation/end of extract 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+	PRINT '';
+    -- Create constraint(s)
+    -- Applied post-object creation/end of extract 
 
--- Create index(es)
+    -- Create index(es)
 
+END
 
 
 -- -- Insert placeholder data
@@ -5425,12 +5520,15 @@ CREATE TABLE #ssd_ehcp_named_plan (
 
 
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+	PRINT '';
+    -- Create constraint(s)
+    -- Applied post-object creation/end of extract 
 
--- Create constraint(s)
--- Applied post-object creation/end of extract 
+    -- Create index(es)
 
--- Create index(es)
-
+END
 
 
 -- -- Insert placeholder data
@@ -5475,9 +5573,16 @@ CREATE TABLE #ssd_ehcp_active_plans (
     ehcp_active_ehcp_last_review_date   DATETIME                    -- metadata={"item_ref":"EHCP003A"}
 );
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+	PRINT '';
+    -- Create constraint(s)
+    -- Applied post-object creation/end of extract 
 
--- Create constraint(s)
--- Applied post-object creation/end of extract 
+    -- Index(es)
+
+END
+
 
 -- -- Insert placeholder data
 -- INSERT INTO #ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
@@ -5521,27 +5626,28 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 
         */
 
+IF @Run_SSD_As_Temporary_Tables <> 1
+BEGIN
+    -- Create constraint(s)
+    ALTER TABLE #ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
+    FOREIGN KEY (senn_active_ehcp_id) REFERENCES #ssd_ehcp_active_plans(ehcp_active_ehcp_id);
 
--- Create constraint(s)
-ALTER TABLE #ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
-FOREIGN KEY (senn_active_ehcp_id) REFERENCES #ssd_ehcp_active_plans(ehcp_active_ehcp_id);
+    -- Create constraint(s)
+    ALTER TABLE #ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
+    FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
 
--- Create constraint(s)
-ALTER TABLE #ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
-FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
+    -- Create constraint(s)
+    ALTER TABLE #ssd_ehcp_named_plan ADD CONSTRAINT FK_ehcp_named_plan_assessment
+    FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES #ssd_ehcp_assessment(ehca_ehcp_assessment_id);
 
--- Create constraint(s)
-ALTER TABLE #ssd_ehcp_named_plan ADD CONSTRAINT FK_ehcp_named_plan_assessment
-FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES #ssd_ehcp_assessment(ehca_ehcp_assessment_id);
+    -- Create constraint(s)
+    ALTER TABLE #ssd_ehcp_assessment ADD CONSTRAINT FK_ehcp_assessment_requests
+    FOREIGN KEY (ehca_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
 
--- Create constraint(s)
-ALTER TABLE #ssd_ehcp_assessment ADD CONSTRAINT FK_ehcp_assessment_requests
-FOREIGN KEY (ehca_ehcp_request_id) REFERENCES #ssd_ehcp_requests(ehcr_ehcp_request_id);
-
--- Create constraint(s)
-ALTER TABLE #ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
-FOREIGN KEY (ehcr_send_table_id) REFERENCES #ssd_send(send_table_id);
-
+    -- Create constraint(s)
+    ALTER TABLE #ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
+    FOREIGN KEY (ehcr_send_table_id) REFERENCES #ssd_send(send_table_id);
+END
 
 
 /* Start
@@ -5595,53 +5701,53 @@ DECLARE @schema_name        NVARCHAR(255) = N'ssd_development'; -- Placehold sch
 
 -- towards logging|error check cursor
 DECLARE table_cursor CURSOR FOR
-SELECT 'ssd_address'                 UNION ALL
-SELECT 'ssd_assessment_factors'      UNION ALL
-SELECT 'ssd_care_leavers'            UNION ALL
-SELECT 'ssd_cin_assessments'         UNION ALL
-SELECT 'ssd_cin_episodes'            UNION ALL
-SELECT 'ssd_cin_plans'               UNION ALL
-SELECT 'ssd_cin_visits'              UNION ALL
-SELECT 'ssd_cla_care_plan'           UNION ALL
-SELECT 'ssd_cla_convictions'         UNION ALL
-SELECT 'ssd_cla_episodes'            UNION ALL
-SELECT 'ssd_cla_health'              UNION ALL
-SELECT 'ssd_cla_immunisations'       UNION ALL
-SELECT 'ssd_cla_placement'           UNION ALL
-SELECT 'ssd_cla_previous_permanence' UNION ALL
-SELECT 'ssd_cla_reviews'             UNION ALL
-SELECT 'ssd_cla_substance_misuse'    UNION ALL
-SELECT 'ssd_cla_visits'              UNION ALL
-SELECT 'ssd_contacts'                UNION ALL
-SELECT 'ssd_cp_plans'                UNION ALL
-SELECT 'ssd_cp_reviews'              UNION ALL
-SELECT 'ssd_cp_visits'               UNION ALL
-SELECT 'ssd_department'              UNION ALL
-SELECT 'ssd_disability'              UNION ALL
-SELECT 'ssd_early_help_episodes'     UNION ALL
-SELECT 'ssd_ehcp_active_plans'       UNION ALL
-SELECT 'ssd_ehcp_assessment'         UNION ALL
-SELECT 'ssd_ehcp_named_plan'         UNION ALL
-SELECT 'ssd_ehcp_requests'           UNION ALL
-SELECT 'ssd_family'                  UNION ALL
-SELECT 'ssd_immigration_status'      UNION ALL
-SELECT 'ssd_initial_cp_conference'   UNION ALL
-SELECT 'ssd_involvements'            UNION ALL
-SELECT 'ssd_legal_status'            UNION ALL
-SELECT 'ssd_linked_identifiers'      UNION ALL
-SELECT 'ssd_missing'                 UNION ALL
-SELECT 'ssd_mother'                  UNION ALL
-SELECT 'ssd_permanence'              UNION ALL
-SELECT 'ssd_person'                  UNION ALL
-SELECT 'ssd_pre_proceedings'         UNION ALL
-SELECT 'ssd_professionals'           UNION ALL
-SELECT 'ssd_s251_finance'            UNION ALL
-SELECT 'ssd_s47_enquiry'             UNION ALL
-SELECT 'ssd_sdq_scores'              UNION ALL
-SELECT 'ssd_sen_need'                UNION ALL
-SELECT 'ssd_send'                    UNION ALL
-SELECT 'ssd_voice_of_child'          UNION ALL
-SELECT 'ssd_version';                -- Admin table
+SELECT '#ssd_address'                 UNION ALL
+SELECT '#ssd_assessment_factors'      UNION ALL
+SELECT '#ssd_care_leavers'            UNION ALL
+SELECT '#ssd_cin_assessments'         UNION ALL
+SELECT '#ssd_cin_episodes'            UNION ALL
+SELECT '#ssd_cin_plans'               UNION ALL
+SELECT '#ssd_cin_visits'              UNION ALL
+SELECT '#ssd_cla_care_plan'           UNION ALL
+SELECT '#ssd_cla_convictions'         UNION ALL
+SELECT '#ssd_cla_episodes'            UNION ALL
+SELECT '#ssd_cla_health'              UNION ALL
+SELECT '#ssd_cla_immunisations'       UNION ALL
+SELECT '#ssd_cla_placement'           UNION ALL
+SELECT '#ssd_cla_previous_permanence' UNION ALL
+SELECT '#ssd_cla_reviews'             UNION ALL
+SELECT '#ssd_cla_substance_misuse'    UNION ALL
+SELECT '#ssd_cla_visits'              UNION ALL
+SELECT '#ssd_contacts'                UNION ALL
+SELECT '#ssd_cp_plans'                UNION ALL
+SELECT '#ssd_cp_reviews'              UNION ALL
+SELECT '#ssd_cp_visits'               UNION ALL
+SELECT '#ssd_department'              UNION ALL
+SELECT '#ssd_disability'              UNION ALL
+SELECT '#ssd_early_help_episodes'     UNION ALL
+SELECT '#ssd_ehcp_active_plans'       UNION ALL
+SELECT '#ssd_ehcp_assessment'         UNION ALL
+SELECT '#ssd_ehcp_named_plan'         UNION ALL
+SELECT '#ssd_ehcp_requests'           UNION ALL
+SELECT '#ssd_family'                  UNION ALL
+SELECT '#ssd_immigration_status'      UNION ALL
+SELECT '#ssd_initial_cp_conference'   UNION ALL
+SELECT '#ssd_involvements'            UNION ALL
+SELECT '#ssd_legal_status'            UNION ALL
+SELECT '#ssd_linked_identifiers'      UNION ALL
+SELECT '#ssd_missing'                 UNION ALL
+SELECT '#ssd_mother'                  UNION ALL
+SELECT '#ssd_permanence'              UNION ALL
+SELECT '#ssd_person'                  UNION ALL
+SELECT '#ssd_pre_proceedings'         UNION ALL
+SELECT '#ssd_professionals'           UNION ALL
+SELECT '#ssd_s251_finance'            UNION ALL
+SELECT '#ssd_s47_enquiry'             UNION ALL
+SELECT '#ssd_sdq_scores'              UNION ALL
+SELECT '#ssd_sen_need'                UNION ALL
+SELECT '#ssd_send'                    UNION ALL
+SELECT '#ssd_voice_of_child'          UNION ALL
+SELECT '#ssd_version';                -- Admin table
 
 OPEN table_cursor;
 
@@ -5720,150 +5826,10 @@ END;
 CLOSE table_cursor;
 DEALLOCATE table_cursor;
 
--- Select results
-SELECT * FROM #ssd_table_creation_log ORDER BY rows_inserted DESC;
-
 SET @sql = N'';
 
 
+-- Forming part of the extract admin results output
+SELECT * FROM #ssd_table_creation_log ORDER BY rows_inserted DESC;
 
 
-/* Start
-
-        Non-SDD Bespoke extract mods
-        
-        Examples of how to build on the ssd with bespoke additional fields. These can be 
-        refreshed|incl. within the rebuild script and rebuilt at the same time as the SSD
-        Changes should be limited to additional, non-destructive enhancements that do not
-        alter the core structure of the SSD. 
-        */
-
-
-
-
--- /* 
--- =============================================================================
--- MOD Name: involvements history, involvements type history
--- Description: 
--- Author: D2I
--- Version: 0.2
---             0.1: involvement_history_json size change from 4000 to max fix trunc err 040724 RH
--- Status: [DT]ataTesting
--- Remarks: The addition of these MOD columns is overhead heavy. This is <especially> noticable 
---          on larger dimension versions of ssd_person (i.e. > 40k).
---          Recommend that this MOD is switched off during any test runs|peak-time extract runs
--- Dependencies: 
--- - FACT_INVOLVEMENTS
--- - ssd_person
--- =============================================================================
--- */
--- -- [TESTING] Create marker
--- SET @TableName = N' Involvement History';
--- PRINT 'Adding MOD: ' + @TableName;
-
--- ALTER TABLE #ssd_person
--- ADD pers_involvement_history_json NVARCHAR(max),  -- Adjust data type as needed
---     pers_involvement_type_story NVARCHAR(1000);   -- Adjust data type as needed
-
--- Go -- ensure new cols ALTER TABLE completed prior to onward processing
--- -- All variables now reset, will require redeclaring if testing below in isolation
-
--- -- CTE for involvement history incl. worker data
--- WITH InvolvementHistoryCTE AS (
---     SELECT 
---         fi.DIM_PERSON_ID,
---         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
---         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
---         MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
-
---         JSON_QUERY((
---             -- structure of the main|complete invovements history json 
---             SELECT 
---                 ISNULL(fi2.FACT_INVOLVEMENTS_ID, '')              AS INVOLVEMENT_ID,
---                 ISNULL(fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '')  AS INVOLVEMENT_TYPE_CODE,
---                 ISNULL(fi2.START_DTTM, '')                        AS START_DATE, 
---                 ISNULL(fi2.END_DTTM, '')                          AS END_DATE, 
---                 ISNULL(fi2.DIM_WORKER_ID, '')                     AS WORKER_ID, 
---                 ISNULL(fi2.DIM_DEPARTMENT_ID, '')                 AS DEPARTMENT_ID
---             FROM 
---                 Child_Social.FACT_INVOLVEMENTS fi2
---             WHERE 
---                 fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
-
---             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
---             -- rem WITHOUT_ARRAY_WRAPPER if restricting FULL contact history in _json (involvement_history_json)
---         )) AS involvement_history
---     FROM (
-
---         -- commented out to enable FULL contact history in _json (involvement_history_json). Re-enable if wanting only most recent/1
---         SELECT *,
---             -- ROW_NUMBER() OVER (
---             --     PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
---             --     ORDER BY FACT_INVOLVEMENTS_ID DESC
---             -- ) AS rn,
---             -- only applied if the following fi.rn = 1 is uncommented
-
---             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
---         FROM Child_Social.FACT_INVOLVEMENTS
---         WHERE 
---             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
---             -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
---             AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
---             AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
---             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
---                                                 -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
---     ) fi
-
--- WHERE 
---     -- -- Commented out to enable FULL contact history in _json (involvement_history_json). Re-enable if wanting only most recent/1
---     -- fi.rn = 1
---     -- AND
-
---     EXISTS (    -- Remove filter IF wishing to extract records beyond scope of SSD timeframe
---         SELECT 1 FROM #ssd_person p
---         WHERE p.pers_person_id = fi.DIM_PERSON_ID
---     )
-
---     GROUP BY 
---         fi.DIM_PERSON_ID
--- ),
--- -- CTE for involvement type story
--- InvolvementTypeStoryCTE AS (
---     SELECT 
---         fi.DIM_PERSON_ID,
---         STUFF((
---             -- Concat involvement type codes into string
---             -- cannot use STRING AGG as appears to not work (Needs v2017+)
---             SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
---             FROM Child_Social.FACT_INVOLVEMENTS fi3
---             WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
-
---             AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
---                 SELECT 1 FROM #ssd_person p
---                 WHERE p.pers_person_id = fi3.DIM_PERSON_ID
---             )
-
---             ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
---             FOR XML PATH('')
---         ), 1, 1, '') AS InvolvementTypeStory
---     FROM 
---         Child_Social.FACT_INVOLVEMENTS fi
-    
---     WHERE 
---         EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
---             SELECT 1 FROM #ssd_person p
---             WHERE p.pers_person_id = fi.DIM_PERSON_ID
---         )
---     GROUP BY 
---         fi.DIM_PERSON_ID
--- )
-
-
--- -- Update
--- UPDATE p
--- SET
---     p.pers_involvement_history_json = ih.involvement_history,
---     p.pers_involvement_type_story = CONCAT('[', its.InvolvementTypeStory, ']')
--- FROM #ssd_person p
--- LEFT JOIN InvolvementHistoryCTE ih ON p.pers_person_id = ih.DIM_PERSON_ID
--- LEFT JOIN InvolvementTypeStoryCTE its ON p.pers_person_id = its.DIM_PERSON_ID;
