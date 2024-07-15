@@ -161,7 +161,7 @@ UPDATE ssd_development.ssd_version SET is_current = 0 WHERE is_current = 1;
 INSERT INTO ssd_development.ssd_version 
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
-    ('1.1.7', GETDATE(), 'Non-core ssd_person records added', 1, 'admin', 'Fix requ towards #DtoI-1802');
+    ('1.1.8', GETDATE(), 'admin table creation logging process defined', 1, 'admin', '');
 
 
 -- historic versioning log data
@@ -173,7 +173,8 @@ VALUES
     ('1.1.3', '2024-06-27', 'Revised filtering on ssd_person', 0, 'admin', 'Check IS_CLIENT flag first'),
     ('1.1.4', '2024-07-01', 'ssd_department obj added', 0, 'admin', 'Increased seperation btw professionals and depts enabling history'),
     ('1.1.5', '2024-07-09', 'ssd_person involvements history', 0, 'admin', 'Improved consistency on _json fields, clean-up involvements_history_json'),
-    ('1.1.6', '2024-07-12', 'FK fixes for #DtoI-1769', 0, 'admin', 'non-unique/FK issues addressed: #DtoI-1769, #DtoI-1601');
+    ('1.1.6', '2024-07-12', 'FK fixes for #DtoI-1769', 0, 'admin', 'non-unique/FK issues addressed: #DtoI-1769, #DtoI-1601'),
+    ('1.1.7', '2024-07-15', 'Non-core ssd_person records added', 0, 'admin', 'Fix requ towards #DtoI-1802');
 
 
 -- [TESTING] Increment /print progress
@@ -5549,39 +5550,49 @@ FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_development.ssd_send(send_table_
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_development.ssd_table_creation_log', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_table_creation_log ;
-IF OBJECT_ID('tempdb..#ssd_table_creation_log', 'U') IS NOT NULL DROP TABLE #ssd_table_creation_log  ;
+IF OBJECT_ID('ssd_development.ssd_table_creation_log', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_table_creation_log;
+IF OBJECT_ID('tempdb..#ssd_table_creation_log', 'U') IS NOT NULL DROP TABLE #ssd_table_creation_log;
 
-
--- Create logging table: table objects
+-- Create logging structure
 CREATE TABLE ssd_development.ssd_table_creation_log (
-    table_name      NVARCHAR(255) PRIMARY KEY,
-    status          NVARCHAR(500),  -- status code includes error output + schema.table_name
-    rows_inserted   INT,
-    log_timestamp   DATETIME DEFAULT GETDATE()
+    table_name           NVARCHAR(255),
+    schema_name          NVARCHAR(255),
+    status               NVARCHAR(50), -- status code includes error output + schema.table_name
+    rows_inserted        INT,
+    table_size_kb        INT,
+    has_pk      BIT,
+    has_fks     BIT,
+    index_count          INT,
+    creation_date        DATETIME DEFAULT GETDATE(),
+    additional_detail    NVARCHAR(MAX), -- on hold|future use, e.g. data quality issues detected
+    error_message        NVARCHAR(MAX)  -- on hold|future use, e.g. errors encountered during the process
 );
 
--- Check if exists, & drop
-IF OBJECT_ID('ssd_development.ssd_constraint_log ', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_constraint_log  ;
-IF OBJECT_ID('tempdb..#ssd_constraint_log ', 'U') IS NOT NULL DROP TABLE #ssd_constraint_log   ;
+GO -- need to force the above
 
+DECLARE @row_count          INT;
+DECLARE @table_size_kb      INT;
+DECLARE @has_pk             BIT;                -- 1|0 flag
+DECLARE @has_fks            BIT;                -- 1|0 flag
+DECLARE @index_count        INT;                -- count
+DECLARE @additional_detail  NVARCHAR(MAX);
+DECLARE @error_message      NVARCHAR(MAX);
+DECLARE @sql                NVARCHAR(MAX) = N''; -- Comment out if running|test partial script, therefore omitting in-line 'GO' points
+DECLARE @table_name         NVARCHAR(255);
+DECLARE @schema_name        NVARCHAR(255) = N'ssd_development'; -- Placehold schema name for all tables
 
--- Not currently in use
--- -- Create logging table: constraints
--- CREATE TABLE ssd_development.ssd_constraint_log (
---     constraint_name NVARCHAR(255),
---     table_name      NVARCHAR(255),
---     status          NVARCHAR(500), -- status code includes error output + schema.table_name
---     log_timestamp   DATETIME DEFAULT GETDATE()
--- );
+-- -- Refactored option for known schema
+-- -- Table names towards logging|error check cursor
+-- DECLARE table_cursor CURSOR FOR
+-- SELECT TABLE_SCHEMA + '.' + TABLE_NAME
+-- FROM INFORMATION_SCHEMA.TABLES
+-- WHERE TABLE_SCHEMA = 'ssd_development'
+-- AND TABLE_NAME LIKE 'ssd_%';
+-- OPEN table_cursor;
+-- -- Fetch next table name
+-- FETCH NEXT FROM table_cursor INTO @table_name;
 
-
--- Declare row count var
-DECLARE @row_count  INT;
-DECLARE @sql        NVARCHAR(MAX) = N''; -- comment out if running|test partial script therefore ommitting in-line 'Go' points
-DECLARE @table_name NVARCHAR(255);
-
--- Table names towards logging|error check cursor
+-- towards logging|error check cursor
 DECLARE table_cursor CURSOR FOR
 SELECT 'ssd_address'                 UNION ALL
 SELECT 'ssd_assessment_factors'      UNION ALL
@@ -5629,44 +5640,92 @@ SELECT 'ssd_sdq_scores'              UNION ALL
 SELECT 'ssd_sen_need'                UNION ALL
 SELECT 'ssd_send'                    UNION ALL
 SELECT 'ssd_voice_of_child'          UNION ALL
-SELECT 'ssd_version';               -- admin table
-
+SELECT 'ssd_version';                -- Admin table
 
 OPEN table_cursor;
 
--- Fetch next table name
+-- next table name from above list
 FETCH NEXT FROM table_cursor INTO @table_name;
 
--- Loop table names listed above
+-- iterate table names listed above
 WHILE @@FETCH_STATUS = 0
 BEGIN
     BEGIN TRY
-        -- get row count+ schema name
-        SET @sql = N'SELECT @row_count = COUNT(*) FROM ssd_development.' + @table_name;
+
+        -- Get row count
+        SET @sql = N'SELECT @row_count = COUNT(*) FROM ' + @schema_name + '.' + @table_name;
         EXEC sp_executesql @sql, N'@row_count INT OUTPUT', @row_count OUTPUT;
-        
-        -- Insert log entry+ schema name
-        INSERT INTO ssd_development.ssd_table_creation_log (table_name, status, rows_inserted)
-        VALUES ('ssd_development.' + @table_name, 'Success', @row_count);
+        --
+
+        -- Get table size in KB
+        SET @sql = N'SELECT @table_size_kb = SUM(reserved_page_count) * 8 FROM sys.dm_db_partition_stats WHERE object_id = OBJECT_ID(''' + @schema_name + '.' + @table_name + ''')';
+        EXEC sp_executesql @sql, N'@table_size_kb INT OUTPUT', @table_size_kb OUTPUT;
+        --
+
+        -- Check for primary key
+        SET @sql = N'
+            SELECT @has_pk = CASE WHEN EXISTS (
+                SELECT 1 
+                FROM sys.indexes i
+                WHERE i.is_primary_key = 1 AND i.object_id = OBJECT_ID(''' + @schema_name + '.' + @table_name + ''')
+            ) THEN 1 ELSE 0 END';
+        EXEC sp_executesql @sql, N'@has_pk BIT OUTPUT', @has_pk OUTPUT;
+        --
+
+        -- Check for foreign key(s)
+        SET @sql = N'
+            SELECT @has_fks = CASE WHEN EXISTS (
+                SELECT 1 
+                FROM sys.foreign_keys fk
+                WHERE fk.parent_object_id = OBJECT_ID(''' + @schema_name + '.' + @table_name + ''')
+            ) THEN 1 ELSE 0 END';
+        EXEC sp_executesql @sql, N'@has_fks BIT OUTPUT', @has_fks OUTPUT;
+        --
+
+        -- Get index count
+        SET @sql = N'
+            SELECT @index_count = COUNT(*)
+            FROM sys.indexes
+            WHERE object_id = OBJECT_ID(''' + @schema_name + '.' + @table_name + ''')';
+        EXEC sp_executesql @sql, N'@index_count INT OUTPUT', @index_count OUTPUT;
+
+
+        -- Insert log entry 
+        INSERT INTO ssd_development.ssd_table_creation_log (
+            table_name, 
+            schema_name, 
+            status, 
+            rows_inserted, 
+            table_size_kb, 
+            has_pk, 
+            has_fks, 
+            index_count, 
+            additional_detail
+            )
+        VALUES (@table_name, @schema_name, 'Success', @row_count, @table_size_kb, @has_pk, @has_fks, @index_count, NULL);
     END TRY
+
     BEGIN CATCH
-        -- Log err+ schema name
-        INSERT INTO ssd_development.ssd_table_creation_log (table_name, status, rows_inserted)
-        VALUES ('ssd_development.' + @table_name, ERROR_MESSAGE(), 0);
+        -- Log error 
+        SET @error_message = ERROR_MESSAGE();
+        INSERT INTO ssd_development.ssd_table_creation_log (table_name, schema_name, status, rows_inserted, table_size_kb, has_pk, has_fks, index_count, additional_detail, error_message)
+        VALUES (@table_name, @schema_name, 'Error', 0, NULL, 0, 0, 0, NULL, @error_message);
     END CATCH;
 
-    -- fetch next table name
+    -- Fetch next table name
     FETCH NEXT FROM table_cursor INTO @table_name;
 END;
 
--- close+deallocate cursor
 CLOSE table_cursor;
 DEALLOCATE table_cursor;
+
+-- Select results
+SELECT * FROM ssd_development.ssd_table_creation_log ORDER BY rows_inserted DESC;
 
 SET @sql = N'';
 
 
--- part of default extract test output
+-- add to default extract test output
 select * from ssd_table_creation_log order by rows_inserted desc;
 
 
