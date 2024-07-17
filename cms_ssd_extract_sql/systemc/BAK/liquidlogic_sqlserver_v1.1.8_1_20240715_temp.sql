@@ -4449,7 +4449,6 @@ SELECT
             THEN fi.COMMENTS 
         END -- if fi.COMMENTS is NULL, results in NULL
     ), 255)                                       AS invo_professional_team,
-
     fi.DIM_PERSON_ID                              AS invo_person_id,
     fi.START_DTTM                                 AS invo_involvement_start_date,
     fi.END_DTTM                                   AS invo_involvement_end_date,
