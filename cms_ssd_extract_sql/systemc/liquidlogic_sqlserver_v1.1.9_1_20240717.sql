@@ -187,7 +187,7 @@ UPDATE ssd_development.ssd_version_log SET is_current = 0 WHERE is_current = 1;
 INSERT INTO ssd_development.ssd_version_log 
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
-    ('1.1.8', GETDATE(), 'admin table creation logging process defined', 1, 'admin', '');
+    ('1.1.9', GETDATE(), 'Applied CAST(person_id) + minor fixes', 1, 'admin', 'impacts all tables using where exists');
 
 
 -- historic versioning log data
@@ -200,7 +200,8 @@ VALUES
     ('1.1.4', '2024-07-01', 'ssd_department obj added', 0, 'admin', 'Increased seperation btw professionals and depts enabling history'),
     ('1.1.5', '2024-07-09', 'ssd_person involvements history', 0, 'admin', 'Improved consistency on _json fields, clean-up involvements_history_json'),
     ('1.1.6', '2024-07-12', 'FK fixes for #DtoI-1769', 0, 'admin', 'non-unique/FK issues addressed: #DtoI-1769, #DtoI-1601'),
-    ('1.1.7', '2024-07-15', 'Non-core ssd_person records added', 0, 'admin', 'Fix requ towards #DtoI-1802');
+    ('1.1.7', '2024-07-15', 'Non-core ssd_person records added', 0, 'admin', 'Fix requ towards #DtoI-1802'),
+    ('1.1.8', '2024-07-17', 'admin table creation logging process defined', 0, 'admin', '');
 
 
 -- [TESTING] Increment /print progress
