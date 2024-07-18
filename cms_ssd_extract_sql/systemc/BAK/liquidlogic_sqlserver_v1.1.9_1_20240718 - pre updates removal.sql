@@ -71,7 +71,6 @@ USE HDM_Local;
 /* [TESTING] 
 Set up (to be removed from live v2+)
 */
-DECLARE @TestProgress INT = 0;
 DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder';
 
 -- Query run time vars
@@ -161,7 +160,6 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_version_log';
-PRINT 'Creating table: ' + @TableName;
 
 
 -- Check if exists, & drop
@@ -204,10 +202,8 @@ VALUES
     ('1.1.8', '2024-07-17', 'admin table creation logging process defined', 0, 'admin', '');
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
 
 
 
@@ -239,7 +235,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_person';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- check exists & drop
@@ -390,10 +386,9 @@ CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender       ON ssd_developme
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 /*SSD Person filter (notes): - Implemented*/
@@ -436,7 +431,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_family';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- check exists & drop
@@ -490,10 +485,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 /* 
@@ -511,7 +505,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_address';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -593,10 +587,9 @@ BEGIN
 END
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -617,7 +610,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_disability';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -666,10 +659,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -692,7 +684,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_immigration_status';
-PRINT 'Creating table: ' + @TableName;
+
  
  
 -- Check if exists & drop
@@ -749,10 +741,9 @@ BEGIN
 END
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -772,7 +763,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_mother';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -841,10 +832,9 @@ BEGIN
 END
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -863,7 +853,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_legal_status';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -917,10 +907,9 @@ BEGIN
 END
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -947,7 +936,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_contact';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -1025,10 +1014,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -1050,7 +1038,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_early_help_episodes';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -1118,10 +1106,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 /* 
@@ -1147,7 +1134,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cin_episodes';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -1225,6 +1212,7 @@ FROM
  
 WHERE
     fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+    
 AND
     DIM_PERSON_ID <> -1  -- Exclude rows with -1
 
@@ -1250,10 +1238,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -1279,7 +1266,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cin_assessments';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists, & drop 
@@ -1410,10 +1397,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -1436,7 +1422,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_assessment_factors';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -1551,10 +1537,9 @@ IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -1577,7 +1562,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cin_plans';
-PRINT 'Creating table: ' + @TableName;
+
 
 -- Check if exists & drop
 IF OBJECT_ID('ssd_development.ssd_cin_plans', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cin_plans;
@@ -1669,10 +1654,9 @@ BEGIN
 END
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -1694,7 +1678,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cin_visits';
-PRINT 'Creating table: ' + @TableName;
+
  
  
 -- Check if exists, & drop
@@ -1756,10 +1740,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -1781,7 +1764,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_s47_enquiry';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 
@@ -1863,10 +1846,9 @@ BEGIN
 END
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -1890,7 +1872,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_initial_cp_conference';
-PRINT 'Creating table: ' + @TableName;
+
  
 -- Check if exists & drop
 IF OBJECT_ID('ssd_development.ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_development.ssd_initial_cp_conference;
@@ -1999,10 +1981,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -2027,7 +2008,7 @@ Dependencies:
 
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cp_plans';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop 
@@ -2100,10 +2081,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -2129,7 +2109,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cp_visits';
-PRINT 'Creating table: ' + @TableName;
+
  
  
  
@@ -2201,10 +2181,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 /*
@@ -2232,7 +2211,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cp_reviews';
-PRINT 'Creating table: ' + @TableName;
+
  
  
 -- Check if table exists, & drop
@@ -2335,10 +2314,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -2365,7 +2343,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_episodes';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if table exists, & drop
@@ -2553,10 +2531,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 /* 
@@ -2574,7 +2551,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_convictions';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists, & drop
@@ -2625,10 +2602,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -2649,7 +2625,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_health';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists, & drop
@@ -2707,10 +2683,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -2732,7 +2707,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_immunisations';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -2793,10 +2768,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -2816,7 +2790,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_substance_misuse';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -2871,10 +2845,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -2896,7 +2869,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_placement';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -2987,10 +2960,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -3014,7 +2986,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_reviews';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 
@@ -3106,10 +3078,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -3133,7 +3104,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_previous_permanence';
-PRINT 'Creating table: ' + @TableName;
+
  
 -- Check if exists & drop
 IF OBJECT_ID('ssd_development.ssd_cla_previous_permanence') IS NOT NULL DROP TABLE ssd_development.ssd_cla_previous_permanence;
@@ -3233,10 +3204,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -3260,7 +3230,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_care_plan';
-PRINT 'Creating table: ' + @TableName;
+
  
 -- Check if exists & drop
 IF OBJECT_ID('ssd_development.ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_care_plan;
@@ -3447,10 +3417,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -3474,7 +3443,7 @@ Dependencies:
  
 -- [TESTING] Create marker
 SET @TableName = N'ssd_cla_visits';
-PRINT 'Creating table: ' + @TableName;
+
  
 -- Check if exists & drop
 IF OBJECT_ID('ssd_development.ssd_cla_visits', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_visits;
@@ -3543,10 +3512,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -3569,7 +3537,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_sdq_scores';
-PRINT 'Creating table: ' + @TableName;
+
  
  
  
@@ -3689,10 +3657,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -3715,7 +3682,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_missing';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -3793,10 +3760,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -3826,7 +3792,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_care_leavers';
-PRINT 'Creating table: ' + @TableName;
+
  
  
 -- Check if exists & drop
@@ -3982,10 +3948,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -4021,7 +3986,7 @@ Dependencies:
 
 -- [TESTING] Create marker
 SET @TableName = N'ssd_permanence';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -4207,10 +4172,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -4237,7 +4201,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_professionals';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -4326,10 +4290,9 @@ BEGIN
 END
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -4347,7 +4310,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_department';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists & drop
@@ -4391,10 +4354,9 @@ BEGIN
     CREATE INDEX idx_dept_team_id ON ssd_development.ssd_department (dept_team_id);
 END
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -4420,7 +4382,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_involvements';
-PRINT 'Creating table: ' + @TableName;
+
  
  
 -- Check if exists & drop
@@ -4504,10 +4466,9 @@ END
 
     
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -4540,7 +4501,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_linked_identifiers';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists, & drop 
@@ -4634,10 +4595,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -4665,7 +4625,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_s251_finance';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 
@@ -4707,10 +4667,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -4730,7 +4689,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_voice_of_child';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists, & drop 
@@ -4783,10 +4742,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -4806,7 +4764,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_pre_proceedings';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists, & drop
@@ -4903,10 +4861,9 @@ BEGIN
 END
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -4962,24 +4919,9 @@ Dependencies:
 SET @TableName = N'ssd_person-ADDITIONAL_TESTING_DATA';
 PRINT 'Updating table: ' + @TableName;
 
--- add ssd_flag col (seperate core and non-core records for testing)
--- ALTER TABLE ssd_development.ssd_person ADD ssd_flag INT; -- [1== is filtered core record, 0==non-core record brought through as part of update]
-
-
--- GO
--- /* [TESTING] Re-declare vars after use of GO
--- Set up (to be removed from live v2+)
--- */
--- DECLARE @TestProgress INT = 0;
--- DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder';
-
--- -- Query run time vars
--- DECLARE @StartTime DATETIME, @EndTime DATETIME;
--- SET @StartTime = GETDATE(); -- Record the start time
--- /* END [TESTING] 
--- */
-
-
+-- add ssd_flag column (identify core and non-core records for testing)
+-- ALTER TABLE ssd_development.ssd_person ADD ssd_flag INT; -- 1==filtered core record, via initial filtered insert 
+                                                            -- 0==non-core record brought through as part of update
 
 -- existing records set ssd_flag to 1 (core/filtered ssd records)
 -- UPDATE ssd_development.ssd_person SET ssd_flag = 1;
@@ -5064,7 +5006,7 @@ WHERE
     AND p.DIM_PERSON_ID <> -1
     AND p.DIM_PERSON_ID NOT IN (SELECT pers_person_id FROM ssd_development.ssd_person);
 
--- [TESTING] Increment /print progress
+-- [TESTING] Table added
 PRINT 'Table UPDATED: ' + @TableName;
 
 
@@ -5088,7 +5030,6 @@ PRINT 'Updating table: ' + @TableName;
 
 -- Clear all data from the table
 TRUNCATE TABLE ssd_development.ssd_involvements;
-SELECT COUNT(*) AS row_count FROM ssd_development.ssd_involvements; -- [TESTING] Ensure action completed
 
 -- Insert data into ssd_involvements
 INSERT INTO ssd_development.ssd_involvements (
@@ -5136,7 +5077,7 @@ WHERE EXISTS
     WHERE CAST(p.pers_person_id AS INT) = fi.DIM_PERSON_ID -- #DtoI-1799
     );
 
--- [TESTING] Increment /print progress
+-- [TESTING] Table added
 PRINT 'Table UPDATED: ' + @TableName;
 
 
@@ -5158,7 +5099,7 @@ PRINT 'Updating table: ' + @TableName;
 
 
 -- Clear all data from the table
-TRUNCATE TABLE ssd_development.ssd_pre_cla_care_plan; -- drop/wipe persistent tmp/pre-processing table
+TRUNCATE TABLE ssd_development.ssd_pre_cla_care_plan; -- wipe semi-persistent pre-processing table
 TRUNCATE TABLE ssd_development.ssd_cla_care_plan;
 
 WITH MostRecentQuestionResponse AS (
@@ -5264,7 +5205,7 @@ DROP TABLE ssd_development.ssd_pre_cla_care_plan;
  
 
 
--- [TESTING] Increment /print progress
+-- [TESTING] Table added
 PRINT 'Table UPDATED: ' + @TableName;
 
 
@@ -5288,7 +5229,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_send';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 
@@ -5343,10 +5284,9 @@ BEGIN
 END
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -5366,7 +5306,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_sen_need';
-PRINT 'Creating table: ' + @TableName;
+
  
  
 -- Check if exists, & drop
@@ -5399,10 +5339,9 @@ END
  
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
  
 
 
@@ -5422,7 +5361,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_ehcp_requests ';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists, & drop
@@ -5455,10 +5394,9 @@ END
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01', 'SSD_PH');
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -5478,7 +5416,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_ehcp_assessment';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists, & drop
@@ -5515,10 +5453,9 @@ END
 
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -5540,7 +5477,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_ehcp_named_plan';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists, & drop
@@ -5574,10 +5511,9 @@ END
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01', 'SSD_PH');
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -5597,7 +5533,7 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_ehcp_active_plans';
-PRINT 'Creating table: ' + @TableName;
+
 
 
 -- Check if exists, & drop
@@ -5627,10 +5563,9 @@ END
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01');
 
 
--- [TESTING] Increment /print progress
-SET @TestProgress = @TestProgress + 1;
+-- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
-PRINT 'Test Progress Counter: ' + CAST(@TestProgress AS NVARCHAR(10));
+
 
 
 
@@ -5688,6 +5623,7 @@ BEGIN
 END
 
 
+
 /* Start
 
         SSD Extract Logging
@@ -5718,24 +5654,74 @@ CREATE TABLE ssd_development.ssd_extract_log (
 
 -- GO
 
+-- Ensure all variables are declared correctly
 DECLARE @row_count          INT;
 DECLARE @table_size_kb      INT;
 DECLARE @has_pk             BIT;                -- 1|0 flag
 DECLARE @has_fks            BIT;                -- 1|0 flag
 DECLARE @index_count        INT;                -- count
-DECLARE @null_count         INT;                -- New: count of null values for each table
+DECLARE @null_count         INT;                -- count of null values
 DECLARE @pk_datatype        NVARCHAR(255);      -- New: datatype of the PK field
 DECLARE @duplicate_count    INT;                -- New: duplicate record count per table
 DECLARE @additional_detail  NVARCHAR(MAX);
 DECLARE @error_message      NVARCHAR(MAX);
 DECLARE @table_name         NVARCHAR(255);
-DECLARE @schema_name        NVARCHAR(255) = N'ssd_development'; -- Placehold schema name for all tables
+DECLARE @schema_name        NVARCHAR(255) = N'ssd_development'; -- Placeholder schema name for all tables
 DECLARE @sql                NVARCHAR(MAX) = N''; -- Comment out if running|test partial script, therefore omitting in-line 'GO' points
 
+-- Placeholder for table_cursor selection logic
+-- tables in the order they were created. 
+DECLARE table_cursor CURSOR FOR
+SELECT 'ssd_version_log'             UNION ALL -- Admin table
+SELECT 'ssd_person'                  UNION ALL
+SELECT 'ssd_family'                  UNION ALL
+SELECT 'ssd_address'                 UNION ALL
+SELECT 'ssd_disability'              UNION ALL
+SELECT 'ssd_immigration_status'      UNION ALL
+SELECT 'ssd_mother'                  UNION ALL
+SELECT 'ssd_legal_status'            UNION ALL
+SELECT 'ssd_contact'                 UNION ALL
+SELECT 'ssd_early_help_episodes'     UNION ALL
+SELECT 'ssd_cin_episodes'            UNION ALL
+SELECT 'ssd_cin_assessments'         UNION ALL
+SELECT 'ssd_assessment_factors'      UNION ALL
+SELECT 'ssd_cin_plans'               UNION ALL
+SELECT 'ssd_cin_visits'              UNION ALL
+SELECT 'ssd_s47_enquiry'             UNION ALL
+SELECT 'ssd_initial_cp_conference'   UNION ALL
+SELECT 'ssd_cp_plans'                UNION ALL
+SELECT 'ssd_cp_visits'               UNION ALL
+SELECT 'ssd_cp_reviews'              UNION ALL
+SELECT 'ssd_cla_episodes'            UNION ALL
+SELECT 'ssd_cla_convictions'         UNION ALL
+SELECT 'ssd_cla_health'              UNION ALL
+SELECT 'ssd_cla_immunisations'       UNION ALL
+SELECT 'ssd_cla_substance_misuse'    UNION ALL
+SELECT 'ssd_cla_placement'           UNION ALL
+SELECT 'ssd_cla_reviews'             UNION ALL
+SELECT 'ssd_cla_previous_permanence' UNION ALL
+SELECT 'ssd_cla_care_plan'           UNION ALL
+SELECT 'ssd_cla_visits'              UNION ALL
+SELECT 'ssd_sdq_scores'              UNION ALL
+SELECT 'ssd_missing'                 UNION ALL
+SELECT 'ssd_care_leavers'            UNION ALL
+SELECT 'ssd_permanence'              UNION ALL
+SELECT 'ssd_professionals'           UNION ALL
+SELECT 'ssd_department'              UNION ALL
+SELECT 'ssd_involvements'            UNION ALL
+SELECT 'ssd_linked_identifiers'      UNION ALL
+SELECT 'ssd_s251_finance'            UNION ALL
+SELECT 'ssd_voice_of_child'          UNION ALL
+SELECT 'ssd_pre_proceedings'         UNION ALL
+SELECT 'ssd_send'                    UNION ALL
+SELECT 'ssd_sen_need'                UNION ALL
+SELECT 'ssd_ehcp_requests'           UNION ALL
+SELECT 'ssd_ehcp_assessment'         UNION ALL
+SELECT 'ssd_ehcp_named_plan'         UNION ALL
+SELECT 'ssd_ehcp_active_plans';
 
 
-
--- -- Refactored option for known schema
+-- -- Refactored option for known schema [TESTING]
 -- -- Table names towards logging|error check cursor
 -- DECLARE table_cursor CURSOR FOR
 -- SELECT TABLE_SCHEMA + '.' + TABLE_NAME
@@ -5746,55 +5732,6 @@ DECLARE @sql                NVARCHAR(MAX) = N''; -- Comment out if running|test 
 -- -- Fetch next table name
 -- FETCH NEXT FROM table_cursor INTO @table_name;
 
--- towards logging|error check cursor
-DECLARE table_cursor CURSOR FOR
-SELECT 'ssd_address'                 UNION ALL
-SELECT 'ssd_assessment_factors'      UNION ALL
-SELECT 'ssd_care_leavers'            UNION ALL
-SELECT 'ssd_cin_assessments'         UNION ALL
-SELECT 'ssd_cin_episodes'            UNION ALL
-SELECT 'ssd_cin_plans'               UNION ALL
-SELECT 'ssd_cin_visits'              UNION ALL
-SELECT 'ssd_cla_care_plan'           UNION ALL
-SELECT 'ssd_cla_convictions'         UNION ALL
-SELECT 'ssd_cla_episodes'            UNION ALL
-SELECT 'ssd_cla_health'              UNION ALL
-SELECT 'ssd_cla_immunisations'       UNION ALL
-SELECT 'ssd_cla_placement'           UNION ALL
-SELECT 'ssd_cla_previous_permanence' UNION ALL
-SELECT 'ssd_cla_reviews'             UNION ALL
-SELECT 'ssd_cla_substance_misuse'    UNION ALL
-SELECT 'ssd_cla_visits'              UNION ALL
-SELECT 'ssd_contacts'                UNION ALL
-SELECT 'ssd_cp_plans'                UNION ALL
-SELECT 'ssd_cp_reviews'              UNION ALL
-SELECT 'ssd_cp_visits'               UNION ALL
-SELECT 'ssd_department'              UNION ALL
-SELECT 'ssd_disability'              UNION ALL
-SELECT 'ssd_early_help_episodes'     UNION ALL
-SELECT 'ssd_ehcp_active_plans'       UNION ALL
-SELECT 'ssd_ehcp_assessment'         UNION ALL
-SELECT 'ssd_ehcp_named_plan'         UNION ALL
-SELECT 'ssd_ehcp_requests'           UNION ALL
-SELECT 'ssd_family'                  UNION ALL
-SELECT 'ssd_immigration_status'      UNION ALL
-SELECT 'ssd_initial_cp_conference'   UNION ALL
-SELECT 'ssd_involvements'            UNION ALL
-SELECT 'ssd_legal_status'            UNION ALL
-SELECT 'ssd_linked_identifiers'      UNION ALL
-SELECT 'ssd_missing'                 UNION ALL
-SELECT 'ssd_mother'                  UNION ALL
-SELECT 'ssd_permanence'              UNION ALL
-SELECT 'ssd_person'                  UNION ALL
-SELECT 'ssd_pre_proceedings'         UNION ALL
-SELECT 'ssd_professionals'           UNION ALL
-SELECT 'ssd_s251_finance'            UNION ALL
-SELECT 'ssd_s47_enquiry'             UNION ALL
-SELECT 'ssd_sdq_scores'              UNION ALL
-SELECT 'ssd_sen_need'                UNION ALL
-SELECT 'ssd_send'                    UNION ALL
-SELECT 'ssd_voice_of_child'          UNION ALL
-SELECT 'ssd_version_log';                -- Admin table
 
 OPEN table_cursor;
 
@@ -5805,7 +5742,6 @@ FETCH NEXT FROM table_cursor INTO @table_name;
 WHILE @@FETCH_STATUS = 0
 BEGIN
     BEGIN TRY
-
         -- Get row count
         SET @sql = N'SELECT @row_count = COUNT(*) FROM ' + @schema_name + '.' + @table_name;
         EXEC sp_executesql @sql, N'@row_count INT OUTPUT', @row_count OUTPUT;
@@ -5842,49 +5778,60 @@ BEGIN
             FROM sys.indexes
             WHERE object_id = OBJECT_ID(''' + @schema_name + '.' + @table_name + ''')';
         EXEC sp_executesql @sql, N'@index_count INT OUTPUT', @index_count OUTPUT;
-        --
-
-        -- -- Get count of null values
-        -- SET @sql = N'SELECT @null_count = SUM(CASE WHEN col IS NULL THEN 1 ELSE 0 END) FROM ' + @schema_name + '.' + @table_name;
-        -- EXEC sp_executesql @sql, N'@null_count INT OUTPUT', @null_count OUTPUT;
-        -- --
 
         -- Get count of null values
-        DECLARE @col NVARCHAR(255)
+        DECLARE @col NVARCHAR(255);
+        DECLARE @total_nulls INT;
+        SET @total_nulls = 0;
+
         DECLARE column_cursor CURSOR FOR
         SELECT COLUMN_NAME
         FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_SCHEMA = @schema_name AND TABLE_NAME = @table_name
+        WHERE TABLE_SCHEMA = @schema_name AND TABLE_NAME = @table_name;
 
-        SET @null_count = 0
-        OPEN column_cursor
-        FETCH NEXT FROM column_cursor INTO @col
+        OPEN column_cursor;
+        FETCH NEXT FROM column_cursor INTO @col;
         WHILE @@FETCH_STATUS = 0
         BEGIN
-            SET @sql = N'SELECT @null_count = @null_count + COUNT(*) FROM ' + @schema_name + '.' + @table_name + ' WHERE ' + @col + ' IS NULL'
-            EXEC sp_executesql @sql, N'@null_count INT OUTPUT', @null_count OUTPUT
-            FETCH NEXT FROM column_cursor INTO @col
+            SET @sql = N'SELECT @total_nulls = @total_nulls + (SELECT COUNT(*) FROM ' + @schema_name + '.' + @table_name + ' WHERE ' + @col + ' IS NULL)';
+            EXEC sp_executesql @sql, N'@total_nulls INT OUTPUT', @total_nulls OUTPUT;
+            FETCH NEXT FROM column_cursor INTO @col;
         END
-        CLOSE column_cursor
-        DEALLOCATE column_cursor
+        CLOSE column_cursor;
+        DEALLOCATE column_cursor;
 
+        SET @null_count = @total_nulls;
 
         -- Get datatype of the primary key
         SET @sql = N'
-            SELECT @pk_datatype = c.DATA_TYPE
+            SELECT TOP 1 @pk_datatype = c.DATA_TYPE
             FROM INFORMATION_SCHEMA.COLUMNS c
-            JOIN sys.index_columns ic ON c.COLUMN_NAME = ic.column_id
-            JOIN sys.indexes i ON ic.index_id = i.index_id
-            WHERE i.is_primary_key = 1 AND i.object_id = OBJECT_ID(''' + @schema_name + '.' + @table_name + ''')';
-        EXEC sp_executesql @sql, N'@pk_datatype NVARCHAR(255) OUTPUT', @pk_datatype OUTPUT;
+            JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu ON c.COLUMN_NAME = kcu.COLUMN_NAME AND c.TABLE_NAME = kcu.TABLE_NAME AND c.TABLE_SCHEMA = kcu.TABLE_SCHEMA
+            JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc ON kcu.CONSTRAINT_NAME = tc.CONSTRAINT_NAME
+            WHERE tc.CONSTRAINT_TYPE = ''PRIMARY KEY''
+            AND kcu.TABLE_NAME = @table_name
+            AND kcu.TABLE_SCHEMA = @schema_name';
+        EXEC sp_executesql @sql, N'@pk_datatype NVARCHAR(255) OUTPUT, @table_name NVARCHAR(255), @schema_name NVARCHAR(255)', @pk_datatype OUTPUT, @table_name, @schema_name;
         --
+
+       
 
 
         -- Get duplicate record count
-        SET @sql = N'SELECT @duplicate_count = COUNT(*) - COUNT(DISTINCT *) FROM ' + @schema_name + '.' + @table_name;
-        EXEC sp_executesql @sql, N'@duplicate_count INT OUTPUT', @duplicate_count OUTPUT;
+        DECLARE @primary_key_columns NVARCHAR(MAX);
+        SELECT @primary_key_columns = STRING_AGG(COLUMN_NAME, ', ')
+        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+        WHERE TABLE_SCHEMA = @schema_name AND TABLE_NAME = @table_name;
 
-
+        IF @primary_key_columns IS NOT NULL
+        BEGIN
+            SET @sql = N'SELECT @duplicate_count = COUNT(*) - COUNT(DISTINCT ' + @primary_key_columns + ') FROM ' + @schema_name + '.' + @table_name;
+            EXEC sp_executesql @sql, N'@duplicate_count INT OUTPUT', @duplicate_count OUTPUT;
+        END
+        ELSE
+        BEGIN
+            SET @duplicate_count = 0;
+        END
 
         -- Insert log entry 
         INSERT INTO ssd_development.ssd_extract_log (
@@ -5906,15 +5853,24 @@ BEGIN
     BEGIN CATCH
         -- Log error 
         SET @error_message = ERROR_MESSAGE();
-        INSERT INTO ssd_development.ssd_extract_log (table_name, schema_name, status, rows_inserted, table_size_kb, has_pk, has_fks, index_count, null_count, pk_datatype, duplicate_count, additional_detail, error_message)
+        INSERT INTO ssd_development.ssd_extract_log (
+            table_name, 
+            schema_name, 
+            status, 
+            rows_inserted, 
+            table_size_kb, 
+            has_pk, 
+            has_fks, 
+            index_count, 
+            null_count, 
+            pk_datatype, 
+            duplicate_count, 
+            additional_detail, 
+            error_message
+            )
         VALUES (@table_name, @schema_name, 'Error', 0, NULL, 0, 0, 0, 0, NULL, 0, NULL, @error_message);
     END CATCH;
-    -- BEGIN CATCH
-    --     -- Log error 
-    --     SET @error_message = ERROR_MESSAGE();
-    --     INSERT INTO ssd_development.ssd_extract_log (table_name, schema_name, status, rows_inserted, table_size_kb, has_pk, has_fks, index_count, null_count, pk_datatype, duplicate_count, additional_detail, error_message)
-    --     VALUES (@table_name, @schema_name, 'Error', 0, NULL, 0, 0, 0, 0, NULL, 0, NULL, @error_message);
-    -- END CATCH;
+
     -- Fetch next table name
     FETCH NEXT FROM table_cursor INTO @table_name;
 END;
