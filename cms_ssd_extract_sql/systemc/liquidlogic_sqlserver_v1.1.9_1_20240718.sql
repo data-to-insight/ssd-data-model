@@ -5331,7 +5331,6 @@ CREATE TABLE ssd_development.ssd_extract_log (
     creation_date        DATETIME DEFAULT GETDATE(),
     null_count           INT,          -- New: count of null values for each table
     pk_datatype          NVARCHAR(255),-- New: datatype of the PK field
-    duplicate_count      INT,          -- New: duplicate record count per table
     additional_detail    NVARCHAR(MAX), -- on hold|future use, e.g. data quality issues detected
     error_message        NVARCHAR(MAX)  -- on hold|future use, e.g. errors encountered during the process
 );
@@ -5347,11 +5346,11 @@ DECLARE @has_fks            BIT;                -- 1|0 flag                     
 DECLARE @index_count        INT;                -- count                                    -- not for #tempdb/non-persistent
 DECLARE @null_count         INT;                -- count of null values                     -- not for #tempdb/non-persistent
 DECLARE @pk_datatype        NVARCHAR(255);      -- New: datatype of the PK field            -- not for #tempdb/non-persistent
-DECLARE @duplicate_count    INT;                -- New: duplicate record count per table    -- not for #tempdb/non-persistent
 DECLARE @additional_detail  NVARCHAR(MAX);
 DECLARE @error_message      NVARCHAR(MAX);
 DECLARE @table_name         NVARCHAR(255);
-DECLARE @schema_name        NVARCHAR(255) = N'ssd_development'; -- Placeholder schema name for all tables
+DECLARE @schema_name        NVARCHAR(255) = N'ssd_development'; -- Placeholder OR empty string schema name for all tables
+-- DECLARE @schema_name        NVARCHAR(255) = N''; -- Placeholder OR empty string schema name for all tables
 
 -- Placeholder for table_cursor selection logic
 -- tables in the order they were created. 
@@ -5417,50 +5416,62 @@ SELECT 'ssd_ehcp_active_plans';
 -- FETCH NEXT FROM table_cursor INTO @table_name;
 
 
+
+-- Open table cursor
 OPEN table_cursor;
 
--- next table name from above list
+-- Fetch next table name from the list
 FETCH NEXT FROM table_cursor INTO @table_name;
 
--- iterate table names listed above
+-- Iterate table names listed above
 WHILE @@FETCH_STATUS = 0
 BEGIN
     BEGIN TRY
+        -- Generate the schema-qualified table name
+        DECLARE @full_table_name NVARCHAR(511);
+        SET @full_table_name = CASE WHEN @schema_name = '' THEN @table_name ELSE @schema_name + '.' + @table_name END;
+
+        -- Check if table exists
+        SET @sql = N'SELECT @table_exists = COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = CASE WHEN @schema_name = '''' THEN SCHEMA_NAME() ELSE @schema_name END AND TABLE_NAME = @table_name';
+        DECLARE @table_exists INT;
+        EXEC sp_executesql @sql, N'@table_exists INT OUTPUT, @schema_name NVARCHAR(255), @table_name NVARCHAR(255)', @table_exists OUTPUT, @schema_name, @table_name;
+
+        IF @table_exists = 0
+        BEGIN
+            THROW 50001, 'Table does not exist', 1;
+        END
+        
         -- Get row count
-        SET @sql = N'SELECT @row_count = COUNT(*) FROM ' + @schema_name + '.' + @table_name;
+        SET @sql = N'SELECT @row_count = COUNT(*) FROM ' + @full_table_name;
         EXEC sp_executesql @sql, N'@row_count INT OUTPUT', @row_count OUTPUT;
-        --
 
         -- Get table size in KB
-        SET @sql = N'SELECT @table_size_kb = SUM(reserved_page_count) * 8 FROM sys.dm_db_partition_stats WHERE object_id = OBJECT_ID(''' + @schema_name + '.' + @table_name + ''')';
+        SET @sql = N'SELECT @table_size_kb = SUM(reserved_page_count) * 8 FROM sys.dm_db_partition_stats WHERE object_id = OBJECT_ID(''' + @full_table_name + ''')';
         EXEC sp_executesql @sql, N'@table_size_kb INT OUTPUT', @table_size_kb OUTPUT;
-        --
 
         -- Check for primary key
         SET @sql = N'
             SELECT @has_pk = CASE WHEN EXISTS (
                 SELECT 1 
                 FROM sys.indexes i
-                WHERE i.is_primary_key = 1 AND i.object_id = OBJECT_ID(''' + @schema_name + '.' + @table_name + ''')
+                WHERE i.is_primary_key = 1 AND i.object_id = OBJECT_ID(''' + @full_table_name + ''')
             ) THEN 1 ELSE 0 END';
         EXEC sp_executesql @sql, N'@has_pk BIT OUTPUT', @has_pk OUTPUT;
-        --
 
         -- Check for foreign key(s)
         SET @sql = N'
             SELECT @has_fks = CASE WHEN EXISTS (
                 SELECT 1 
                 FROM sys.foreign_keys fk
-                WHERE fk.parent_object_id = OBJECT_ID(''' + @schema_name + '.' + @table_name + ''')
+                WHERE fk.parent_object_id = OBJECT_ID(''' + @full_table_name + ''')
             ) THEN 1 ELSE 0 END';
         EXEC sp_executesql @sql, N'@has_fks BIT OUTPUT', @has_fks OUTPUT;
-        --
 
         -- Get index count
         SET @sql = N'
             SELECT @index_count = COUNT(*)
             FROM sys.indexes
-            WHERE object_id = OBJECT_ID(''' + @schema_name + '.' + @table_name + ''')';
+            WHERE object_id = OBJECT_ID(''' + @full_table_name + ''')';
         EXEC sp_executesql @sql, N'@index_count INT OUTPUT', @index_count OUTPUT;
 
         -- Get count of null values
@@ -5471,13 +5482,13 @@ BEGIN
         DECLARE column_cursor CURSOR FOR
         SELECT COLUMN_NAME
         FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_SCHEMA = @schema_name AND TABLE_NAME = @table_name;
+        WHERE TABLE_SCHEMA = CASE WHEN @schema_name = '' THEN SCHEMA_NAME() ELSE @schema_name END AND TABLE_NAME = @table_name;
 
         OPEN column_cursor;
         FETCH NEXT FROM column_cursor INTO @col;
         WHILE @@FETCH_STATUS = 0
         BEGIN
-            SET @sql = N'SELECT @total_nulls = @total_nulls + (SELECT COUNT(*) FROM ' + @schema_name + '.' + @table_name + ' WHERE ' + @col + ' IS NULL)';
+            SET @sql = N'SELECT @total_nulls = @total_nulls + (SELECT COUNT(*) FROM ' + @full_table_name + ' WHERE ' + @col + ' IS NULL)';
             EXEC sp_executesql @sql, N'@total_nulls INT OUTPUT', @total_nulls OUTPUT;
             FETCH NEXT FROM column_cursor INTO @col;
         END
@@ -5494,25 +5505,8 @@ BEGIN
             JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc ON kcu.CONSTRAINT_NAME = tc.CONSTRAINT_NAME
             WHERE tc.CONSTRAINT_TYPE = ''PRIMARY KEY''
             AND kcu.TABLE_NAME = @table_name
-            AND kcu.TABLE_SCHEMA = @schema_name';
+            AND kcu.TABLE_SCHEMA = CASE WHEN @schema_name = '''' THEN SCHEMA_NAME() ELSE @schema_name END';
         EXEC sp_executesql @sql, N'@pk_datatype NVARCHAR(255) OUTPUT, @table_name NVARCHAR(255), @schema_name NVARCHAR(255)', @pk_datatype OUTPUT, @table_name, @schema_name;
-        --
-
-        -- Get duplicate record count
-        DECLARE @primary_key_columns NVARCHAR(MAX);
-        SELECT @primary_key_columns = STRING_AGG(COLUMN_NAME, ', ')
-        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-        WHERE TABLE_SCHEMA = @schema_name AND TABLE_NAME = @table_name;
-
-        IF @primary_key_columns IS NOT NULL
-        BEGIN
-            SET @sql = N'SELECT @duplicate_count = COUNT(*) - COUNT(DISTINCT ' + @primary_key_columns + ') FROM ' + @schema_name + '.' + @table_name;
-            EXEC sp_executesql @sql, N'@duplicate_count INT OUTPUT', @duplicate_count OUTPUT;
-        END
-        ELSE
-        BEGIN
-            SET @duplicate_count = 0;
-        END
 
         -- Insert log entry 
         INSERT INTO ssd_development.ssd_extract_log (
@@ -5526,10 +5520,9 @@ BEGIN
             index_count, 
             null_count, 
             pk_datatype, 
-            duplicate_count, 
             additional_detail
             )
-        VALUES (@table_name, @schema_name, 'Success', @row_count, @table_size_kb, @has_pk, @has_fks, @index_count, @null_count, @pk_datatype, @duplicate_count, NULL);
+        VALUES (@table_name, @schema_name, 'Success', @row_count, @table_size_kb, @has_pk, @has_fks, @index_count, @null_count, @pk_datatype, NULL);
     END TRY
     BEGIN CATCH
         -- Log error 
@@ -5545,11 +5538,10 @@ BEGIN
             index_count, 
             null_count, 
             pk_datatype, 
-            duplicate_count, 
             additional_detail, 
             error_message
             )
-        VALUES (@table_name, @schema_name, 'Error', 0, NULL, 0, 0, 0, 0, NULL, 0, NULL, @error_message);
+        VALUES (@table_name, @schema_name, 'Error', 0, NULL, 0, 0, 0, 0, NULL, NULL, @error_message);
     END CATCH;
 
     -- Fetch next table name
