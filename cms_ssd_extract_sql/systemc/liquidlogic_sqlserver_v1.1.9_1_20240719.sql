@@ -893,12 +893,16 @@ SELECT
     fls.END_DTTM
 FROM
     Child_Social.FACT_LEGAL_STATUS AS fls
-WHERE EXISTS
+
+WHERE 
+    (fls.END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR fls.END_DTTM IS NULL)
+
+AND EXISTS
     ( -- only ssd relevant records
     SELECT 1
     FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fls.DIM_PERSON_ID -- #DtoI-1799
-    AND fls.END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) OR NULL -- #DtoI-1806
     );
 
 IF @Run_SSD_As_Temporary_Tables = 0
@@ -1000,8 +1004,11 @@ SELECT
         ) AS cont_contact_outcome_json
 FROM 
     Child_Social.FACT_CONTACTS AS fc
-    
-WHERE EXISTS 
+
+WHERE 
+    (fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())) -- #DtoI-1806
+
+AND EXISTS
     (   -- only ssd relevant records
     SELECT 1 
     FROM ssd_development.ssd_person p
@@ -1091,7 +1098,11 @@ SELECT
 FROM
     Child_Social.FACT_CAF_EPISODE AS cafe
  
-WHERE EXISTS
+WHERE 
+    (cafe.EPISODE_END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR cafe.EPISODE_END_DTTM IS NULL)
+
+AND EXISTS
     ( -- only ssd relevant records
     SELECT 1
     FROM ssd_development.ssd_person p
@@ -1219,8 +1230,8 @@ FROM
     Child_Social.FACT_REFERRALS AS fr
  
 WHERE
-    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())    
-    OR fr.REFRL_END_DTTM IS NULL
+    (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())    -- #DtoI-1806
+    OR fr.REFRL_END_DTTM IS NULL)
 
 AND
     DIM_PERSON_ID <> -1  -- Exclude rows with -1
@@ -1383,6 +1394,10 @@ LEFT JOIN
  
 WHERE fa.DIM_LOOKUP_STEP_SUBSTATUS_CODE NOT IN ('X','D')        --Excludes draft and cancelled assessments
  
+AND 
+    (afa.AssessmentAuthorisedDate >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR afa.AssessmentAuthorisedDate IS NULL)
+
 AND EXISTS (
     -- access pre-processed data in CTE
     SELECT 1
@@ -1633,6 +1648,10 @@ LEFT JOIN Child_Social.FACT_CARE_PLANS fp ON fp.FACT_CARE_PLAN_SUMMARY_ID = cps.
  
 WHERE DIM_LOOKUP_PLAN_TYPE_CODE = 'FP' AND cps.DIM_LOOKUP_PLAN_STATUS_ID_CODE <> 'z'
  
+AND
+    (cps.END_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR cps.END_DTTM IS NULL)
+
 AND EXISTS
 (
     -- only ssd relevant records
@@ -1728,7 +1747,11 @@ FROM
 WHERE
     cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('CNSTAT', 'CNSTATCOVID', 'STAT', 'HVIS', 'DRCT', 'IRO',
     'SUPERCONT', 'STVL', 'STVLCOVID', 'CNSTAT', 'CNSTATCOVID', 'STVC', 'STVCPCOVID')
- 
+
+AND
+    (cn.EVENT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR cn.EVENT_DTTM IS NULL)
+
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
     FROM ssd_development.ssd_person p
@@ -1835,7 +1858,11 @@ SELECT
 FROM 
     Child_Social.FACT_S47 AS s47
 
-WHERE EXISTS ( -- only ssd relevant records
+WHERE
+    (s47.END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR s47.END_DTTM IS NULL)
+
+AND EXISTS ( -- only ssd relevant records
     SELECT 1
     FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = s47.DIM_PERSON_ID -- #DtoI-1799
@@ -1965,6 +1992,10 @@ LEFT JOIN
 WHERE
     fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
 
+AND
+    (fm.ACTUAL_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR fm.ACTUAL_DTTM IS NULL)
+
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
     FROM ssd_development.ssd_person p
@@ -2064,8 +2095,11 @@ SELECT
 FROM
     Child_Social.FACT_CP_PLAN cpp
  
- 
-WHERE EXISTS ( -- only ssd relevant records
+WHERE
+    (cpp.END_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR cpp.END_DTTM IS NULL)
+
+AND EXISTS ( -- only ssd relevant records
     SELECT 1
     FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = cpp.DIM_PERSON_ID -- #DtoI-1799
@@ -2168,8 +2202,11 @@ LEFT JOIN
 LEFT JOIN
     Child_Social.DIM_PERSON p ON cn.DIM_PERSON_ID = p.DIM_PERSON_ID
  
-WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC'); -- Ref. ( 'STVC','STVCPCOVID')
+WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC') -- Ref. ( 'STVC','STVCPCOVID')
 
+AND
+    (cn.EVENT_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR cn.EVENT_DTTM IS NULL);
 
 IF @Run_SSD_As_Temporary_Tables = 0
 BEGIN
@@ -2286,8 +2323,12 @@ LEFT JOIN
  
 LEFT JOIN
     Child_Social.DIM_PERSON p ON cpr.DIM_PERSON_ID = p.DIM_PERSON_ID
- 
-WHERE EXISTS ( -- only ssd relevant records
+
+WHERE
+    (cpr.MEETING_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR cpr.MEETING_DTTM IS NULL)
+
+AND EXISTS ( -- only ssd relevant records
     SELECT 1 
     FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = cpr.DIM_PERSON_ID -- #DtoI-1799
@@ -2406,8 +2447,12 @@ WITH FilteredData AS (
         Child_Social.FACT_CASENOTES cn ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
 
     WHERE
-        -- casting as source data remains as INT
-        CAST(fce.DIM_PERSON_ID AS NVARCHAR(48)) IN (SELECT pers_person_id FROM ssd_development.ssd_person)
+        fce.DIM_PERSON_ID IN (SELECT CAST(pers_person_id AS INT) FROM ssd_development.ssd_person) -- 
+
+    AND
+        (fce.CARE_END_DATE  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+        OR fce.CARE_END_DATE IS NULL)
+
 
     GROUP BY
         fce.FACT_CARE_EPISODES_ID,
@@ -2668,8 +2713,12 @@ SELECT
 FROM
     Child_Social.FACT_HEALTH_CHECK as fhc
  
- 
-WHERE EXISTS ( -- only ssd relevant records
+
+WHERE
+    (fhc.START_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR fhc.START_DTTM IS NULL)
+
+AND EXISTS ( -- only ssd relevant records
     SELECT 1
     FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fhc.DIM_PERSON_ID -- #DtoI-1799
@@ -2949,6 +2998,9 @@ WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1',
                                             'H4','H5','H5a','K1','K2','M2','M3','P1','P2','Q1','Q2','R1','R2','R3',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
+AND
+    (fcp.END_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR fcp.END_DTTM IS NULL);
 
 IF @Run_SSD_As_Temporary_Tables = 0
 BEGIN
@@ -3053,6 +3105,10 @@ LEFT JOIN
     Child_Social.DIM_PERSON p ON fcr.DIM_PERSON_ID = p.DIM_PERSON_ID
  
 WHERE  ff.DIM_LOOKUP_FORM_TYPE_ID_CODE NOT IN ('1391', '1195', '1377', '1540', '2069', '2340')  -- 'LAC / Adoption Outcome Record'
+
+AND
+    (fcr.MEETING_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR fcr.MEETING_DTTM IS NULL)
  
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
@@ -3401,7 +3457,8 @@ SELECT
  
 FROM
     Child_Social.FACT_CARE_PLANS AS fcp
- 
+
+
 WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
     AND EXISTS (
         SELECT 1
@@ -3498,7 +3555,11 @@ LEFT JOIN
     Child_Social.DIM_PERSON p ON   clav.DIM_PERSON_ID = p.DIM_PERSON_ID
  
 WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVL')
- 
+
+AND
+    (cn.EVENT_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR cn.EVENT_DTTM IS NULL)
+
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
     FROM ssd_development.ssd_person p
@@ -3744,7 +3805,11 @@ SELECT
 FROM 
     Child_Social.FACT_MISSING_PERSON AS fmp
 
-WHERE EXISTS 
+WHERE
+    (fmp.END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR fmp.END_DTTM IS NULL)
+
+AND EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
     FROM ssd_development.ssd_person p
@@ -4451,7 +4516,13 @@ SELECT
     fi.FACT_REFERRAL_ID                           AS invo_referral_id
 FROM
     Child_Social.FACT_INVOLVEMENTS AS fi
-WHERE EXISTS
+
+WHERE
+    (fi.END_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR fi.END_DTTM  IS NULL)
+
+
+AND EXISTS
     (
     SELECT 1
     FROM ssd_development.ssd_person p
@@ -4465,11 +4536,11 @@ BEGIN
     -- Add constraint(s)
 
     -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_invo_person_id            ON ssd_development.ssd_involvements (invo_person_id);
-    CREATE NONCLUSTERED INDEX idx_invo_professional_role_id ON ssd_development.ssd_involvements (invo_professional_role_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_invo_start_date       ON ssd_development.ssd_involvements(invo_involvement_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_invo_end_date         ON ssd_development.ssd_involvements(invo_involvement_end_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id      ON ssd_development.ssd_involvements(invo_referral_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_invo_person_id                ON ssd_development.ssd_involvements(invo_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_invo_professional_role_id     ON ssd_development.ssd_involvements(invo_professional_role_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_invo_involvement_start_date   ON ssd_development.ssd_involvements(invo_involvement_start_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_invo_involvement_end_date     ON ssd_development.ssd_involvements(invo_involvement_end_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id              ON ssd_development.ssd_involvements(invo_referral_id);
 END
 
 
@@ -4552,8 +4623,12 @@ SELECT
 FROM
     Child_Social.dim_person cs
 WHERE
-    cs.former_upn IS NOT NULL AND
-    EXISTS (
+    cs.former_upn IS NOT NULL
+
+-- AND (link_valid_to_date IS NULL OR link_valid_to_date > GETDATE()) -- We can't yet apply this until source(s) defined. 
+-- Filter shown here for future reference #DtoI-1806
+
+ AND EXISTS (
         SELECT 1
         FROM ssd_development.ssd_person sp
         WHERE sp.pers_person_id = cs.dim_person_id
@@ -5079,6 +5154,10 @@ END
 -- INSERT INTO ssd_development.ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01', 'SSD_PH');
 
+-- WHERE
+--     (source_to_ehcr_ehcp_req_outcome_date  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+--     OR source_to_ehcr_ehcp_req_outcome_date  IS NULL)
+
 
 -- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
@@ -5135,6 +5214,9 @@ END
 -- INSERT INTO ssd_development.ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', 'SSD_PH', 'SSD_PH');
 
+-- WHERE
+--     (source_to_ehca_ehcp_assessment_outcome_date  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+--     OR source_to_ehca_ehcp_assessment_outcome_date  IS NULL)
 
 
 
@@ -5196,6 +5278,9 @@ END
 -- INSERT INTO ssd_development.ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_ceased_date, ehcn_named_plan_ceased_reason)
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01', 'SSD_PH');
 
+-- WHERE
+--     (source_to_ehcn_named_plan_ceased_date  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+--     OR source_to_ehcn_named_plan_ceased_date  IS NULL)
 
 -- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
@@ -5248,6 +5333,9 @@ END
 -- INSERT INTO ssd_development.ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
 -- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01');
 
+-- WHERE
+--     (source_to_ehcp_active_ehcp_last_review_date  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+--     OR source_to_ehcp_active_ehcp_last_review_date IS NULL)
 
 -- [TESTING] Table added
 PRINT 'Table created: ' + @TableName;
