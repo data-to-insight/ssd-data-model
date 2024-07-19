@@ -339,45 +339,45 @@ ON
 WHERE 
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
-    -- AND (p.IS_CLIENT = 'Y'
-    --     OR (
-    --         EXISTS (
-    --             SELECT 1 
-    --             FROM Child_Social.FACT_CONTACTS fc
-    --             WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
-    --             AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
-    --         )
-    --         OR EXISTS (
-    --             SELECT 1 
-    --             FROM Child_Social.FACT_REFERRALS fr
-    --             WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
-    --             AND (
-    --                 fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
-    --                 OR fr.REFRL_END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
-    --                 OR fr.REFRL_END_DTTM IS NULL
-    --             )
-    --         )
-    --         OR EXISTS (
-    --             SELECT 1 FROM Child_Social.FACT_CLA_CARE_LEAVERS fccl
-    --             WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
-    --             AND fccl.IN_TOUCH_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
-    --         )
-    --         OR EXISTS (
-    --             SELECT 1 FROM Child_Social.DIM_CLA_ELIGIBILITY dce
-    --             WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
-    --             AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
-    --         )
-    --         OR EXISTS (
-    --             SELECT 1 FROM Child_Social.FACT_INVOLVEMENTS fi
-    --             WHERE (fi.DIM_PERSON_ID = p.DIM_PERSON_ID
-    --             AND (fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE 'KA%' --Key Agencies (External)
-	-- 			OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL OR fi.IS_ALLOCATED_CW_FLAG = 'Y')
-	-- 			AND START_DTTM > '2009-12-04 00:54:49.947' -- was trying to cut off from 2010 but when I changed the date it threw up an erro
-	-- 			AND DIM_WORKER_ID <> '-1' 
-    --             AND (fi.END_DTTM IS NULL OR fi.END_DTTM > GETDATE()))
-    --         )
-    --     )
-    -- )
+    AND (p.IS_CLIENT = 'Y'
+        OR (
+            EXISTS (
+                SELECT 1 
+                FROM Child_Social.FACT_CONTACTS fc
+                WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
+                AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+            )
+            OR EXISTS (
+                SELECT 1 
+                FROM Child_Social.FACT_REFERRALS fr
+                WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
+                AND (
+                    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
+                    OR fr.REFRL_END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
+                    OR fr.REFRL_END_DTTM IS NULL
+                )
+            )
+            OR EXISTS (
+                SELECT 1 FROM Child_Social.FACT_CLA_CARE_LEAVERS fccl
+                WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
+                AND fccl.IN_TOUCH_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+            )
+            OR EXISTS (
+                SELECT 1 FROM Child_Social.DIM_CLA_ELIGIBILITY dce
+                WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
+                AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
+            )
+            OR EXISTS (
+                SELECT 1 FROM Child_Social.FACT_INVOLVEMENTS fi
+                WHERE (fi.DIM_PERSON_ID = p.DIM_PERSON_ID
+                AND (fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE 'KA%' --Key Agencies (External)
+				OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL OR fi.IS_ALLOCATED_CW_FLAG = 'Y')
+				AND START_DTTM > '2009-12-04 00:54:49.947' -- was trying to cut off from 2010 but when I changed the date it threw up an erro
+				AND DIM_WORKER_ID <> '-1' 
+                AND (fi.END_DTTM IS NULL OR fi.END_DTTM > GETDATE()))
+            )
+        )
+    )
     ;
 
 
@@ -5308,6 +5308,7 @@ END
 
 
 
+
 /* Start
 
         SSD Extract Logging
@@ -5336,24 +5337,21 @@ CREATE TABLE ssd_development.ssd_extract_log (
 );
 
 -- GO
-
 -- Ensure all variables are declared correctly
--- Note that if running in #tempdb/non-persistent tables some of the below are not picked up
 DECLARE @row_count          INT;
-DECLARE @table_size_kb      INT;                --                                          -- not for #tempdb/non-persistent
-DECLARE @has_pk             BIT;                -- 1|0 flag                                 -- not for #tempdb/non-persistent
-DECLARE @has_fks            BIT;                -- 1|0 flag                                 -- not for #tempdb/non-persistent
-DECLARE @index_count        INT;                -- count                                    -- not for #tempdb/non-persistent
-DECLARE @null_count         INT;                -- count of null values                     -- not for #tempdb/non-persistent
-DECLARE @pk_datatype        NVARCHAR(255);      -- New: datatype of the PK field            -- not for #tempdb/non-persistent
+DECLARE @table_size_kb      INT;
+DECLARE @has_pk             BIT;
+DECLARE @has_fks            BIT;
+DECLARE @index_count        INT;
+DECLARE @null_count         INT;
+DECLARE @pk_datatype        NVARCHAR(255);
 DECLARE @additional_detail  NVARCHAR(MAX);
 DECLARE @error_message      NVARCHAR(MAX);
 DECLARE @table_name         NVARCHAR(255);
-DECLARE @schema_name        NVARCHAR(255) = N'ssd_development'; -- Placeholder OR empty string schema name for all tables
--- DECLARE @schema_name        NVARCHAR(255) = N''; -- Placeholder OR empty string schema name for all tables
+DECLARE @schema_name        NVARCHAR(255) = N'ssd_development'; -- Placeholder  schema name for all tables <OR> empty string
+-- DECLARE @schema_name        NVARCHAR(255) = N'';                -- Placeholder  schema name for all tables <OR> empty string
 
 -- Placeholder for table_cursor selection logic
--- tables in the order they were created. 
 DECLARE table_cursor CURSOR FOR
 SELECT 'ssd_version_log'             UNION ALL -- Admin table, not SSD
 SELECT 'ssd_person'                  UNION ALL
@@ -5363,7 +5361,7 @@ SELECT 'ssd_disability'              UNION ALL
 SELECT 'ssd_immigration_status'      UNION ALL
 SELECT 'ssd_mother'                  UNION ALL
 SELECT 'ssd_legal_status'            UNION ALL
-SELECT 'ssd_contacts'                 UNION ALL
+SELECT 'ssd_contacts'                UNION ALL
 SELECT 'ssd_early_help_episodes'     UNION ALL
 SELECT 'ssd_cin_episodes'            UNION ALL
 SELECT 'ssd_cin_assessments'         UNION ALL
@@ -5403,19 +5401,23 @@ SELECT 'ssd_ehcp_assessment'         UNION ALL
 SELECT 'ssd_ehcp_named_plan'         UNION ALL
 SELECT 'ssd_ehcp_active_plans';
 
+-- Define placeholder tables
+DECLARE @ssd_placeholder_tables TABLE (table_name NVARCHAR(255));
+INSERT INTO @ssd_placeholder_tables (table_name)
+VALUES
+    ('ssd_send'),
+    ('ssd_sen_need'),
+    ('ssd_ehcp_requests'),
+    ('ssd_ehcp_assessment'),
+    ('ssd_ehcp_named_plan'),
+    ('ssd_ehcp_active_plans');
 
--- -- Refactored option for known schema [TESTING]
--- -- Table names towards logging|error check cursor
--- DECLARE table_cursor CURSOR FOR
--- SELECT TABLE_SCHEMA + '.' + TABLE_NAME
--- FROM INFORMATION_SCHEMA.TABLES
--- WHERE TABLE_SCHEMA = 'ssd_development'
--- AND TABLE_NAME LIKE 'ssd_%';
--- OPEN table_cursor;
--- -- Fetch next table name
--- FETCH NEXT FROM table_cursor INTO @table_name;
-
-
+DECLARE @dfe_project_placeholder_tables TABLE (table_name NVARCHAR(255));
+INSERT INTO @dfe_project_placeholder_tables (table_name)
+VALUES
+    ('ssd_s251_finance'),
+    ('ssd_voice_of_child'),
+    ('ssd_pre_proceedings');
 
 -- Open table cursor
 OPEN table_cursor;
@@ -5441,15 +5443,15 @@ BEGIN
             THROW 50001, 'Table does not exist', 1;
         END
         
-        -- Get row count
+        -- get row count
         SET @sql = N'SELECT @row_count = COUNT(*) FROM ' + @full_table_name;
         EXEC sp_executesql @sql, N'@row_count INT OUTPUT', @row_count OUTPUT;
 
-        -- Get table size in KB
+        -- get table size in KB
         SET @sql = N'SELECT @table_size_kb = SUM(reserved_page_count) * 8 FROM sys.dm_db_partition_stats WHERE object_id = OBJECT_ID(''' + @full_table_name + ''')';
         EXEC sp_executesql @sql, N'@table_size_kb INT OUTPUT', @table_size_kb OUTPUT;
 
-        -- Check for primary key
+        -- check for primary key (flag field)
         SET @sql = N'
             SELECT @has_pk = CASE WHEN EXISTS (
                 SELECT 1 
@@ -5458,7 +5460,7 @@ BEGIN
             ) THEN 1 ELSE 0 END';
         EXEC sp_executesql @sql, N'@has_pk BIT OUTPUT', @has_pk OUTPUT;
 
-        -- Check for foreign key(s)
+        -- check for foreign key(s) (flag field)
         SET @sql = N'
             SELECT @has_fks = CASE WHEN EXISTS (
                 SELECT 1 
@@ -5467,14 +5469,14 @@ BEGIN
             ) THEN 1 ELSE 0 END';
         EXEC sp_executesql @sql, N'@has_fks BIT OUTPUT', @has_fks OUTPUT;
 
-        -- Get index count
+        -- count index(es)
         SET @sql = N'
             SELECT @index_count = COUNT(*)
             FROM sys.indexes
             WHERE object_id = OBJECT_ID(''' + @full_table_name + ''')';
         EXEC sp_executesql @sql, N'@index_count INT OUTPUT', @index_count OUTPUT;
 
-        -- Get count of null values
+        -- Get null values count (~overview of data sparcity)
         DECLARE @col NVARCHAR(255);
         DECLARE @total_nulls INT;
         SET @total_nulls = 0;
@@ -5497,7 +5499,7 @@ BEGIN
 
         SET @null_count = @total_nulls;
 
-        -- Get datatype of the primary key
+        -- get datatype of the primary key
         SET @sql = N'
             SELECT TOP 1 @pk_datatype = c.DATA_TYPE
             FROM INFORMATION_SCHEMA.COLUMNS c
@@ -5508,7 +5510,20 @@ BEGIN
             AND kcu.TABLE_SCHEMA = CASE WHEN @schema_name = '''' THEN SCHEMA_NAME() ELSE @schema_name END';
         EXEC sp_executesql @sql, N'@pk_datatype NVARCHAR(255) OUTPUT, @table_name NVARCHAR(255), @schema_name NVARCHAR(255)', @pk_datatype OUTPUT, @table_name, @schema_name;
 
-        -- Insert log entry 
+        -- set additional_detail comment to make sense|add detail to expected 
+        -- empty/placholder tables incl. future DfE projects
+        SET @additional_detail = NULL;
+
+        IF EXISTS (SELECT 1 FROM @ssd_placeholder_tables WHERE table_name = @table_name)
+        BEGIN
+            SET @additional_detail = 'ssd placeholder table';
+        END
+        ELSE IF EXISTS (SELECT 1 FROM @dfe_project_placeholder_tables WHERE table_name = @table_name)
+        BEGIN
+            SET @additional_detail = 'DfE project placeholder table';
+        END
+
+        -- insert log entry 
         INSERT INTO ssd_development.ssd_extract_log (
             table_name, 
             schema_name, 
@@ -5522,10 +5537,11 @@ BEGIN
             pk_datatype, 
             additional_detail
             )
-        VALUES (@table_name, @schema_name, 'Success', @row_count, @table_size_kb, @has_pk, @has_fks, @index_count, @null_count, @pk_datatype, NULL);
+        VALUES (@table_name, @schema_name, 'Success', @row_count, @table_size_kb, @has_pk, @has_fks, @index_count, @null_count, @pk_datatype, @additional_detail);
     END TRY
     BEGIN CATCH
-        -- Log error 
+        -- log any error (this only an indicator of possible issue)
+        -- tricky 
         SET @error_message = ERROR_MESSAGE();
         INSERT INTO ssd_development.ssd_extract_log (
             table_name, 
@@ -5541,7 +5557,7 @@ BEGIN
             additional_detail, 
             error_message
             )
-        VALUES (@table_name, @schema_name, 'Error', 0, NULL, 0, 0, 0, 0, NULL, NULL, @error_message);
+        VALUES (@table_name, @schema_name, 'Error', 0, NULL, 0, 0, 0, 0, NULL, @additional_detail, @error_message);
     END CATCH;
 
     -- Fetch next table name
@@ -5553,10 +5569,8 @@ DEALLOCATE table_cursor;
 
 SET @sql = N'';
 
-
 -- Forming part of the extract admin results output
 SELECT * FROM ssd_development.ssd_extract_log ORDER BY rows_inserted DESC;
-
 
 
 /* Start
