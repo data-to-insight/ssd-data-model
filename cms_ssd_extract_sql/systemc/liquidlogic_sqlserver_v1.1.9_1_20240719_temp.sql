@@ -58,7 +58,7 @@ GO
 DECLARE @sql NVARCHAR(MAX) = N'';
 
 DECLARE @Run_SSD_As_Temporary_Tables BIT;
-SET     @Run_SSD_As_Temporary_Tables = 0;  -- 1==Single use SSD extract uses tempdb..# | 0==Persistent SSD table set up
+SET     @Run_SSD_As_Temporary_Tables = 1;  -- 1==Single use SSD extract uses tempdb..# | 0==Persistent SSD table set up
 
 
 

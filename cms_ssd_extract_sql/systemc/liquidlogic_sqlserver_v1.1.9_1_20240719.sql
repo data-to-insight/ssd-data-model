@@ -898,6 +898,7 @@ WHERE EXISTS
     SELECT 1
     FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fls.DIM_PERSON_ID -- #DtoI-1799
+    AND fls.END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) OR NULL -- #DtoI-1806
     );
 
 IF @Run_SSD_As_Temporary_Tables = 0
@@ -4556,6 +4557,7 @@ WHERE
         SELECT 1
         FROM ssd_development.ssd_person sp
         WHERE sp.pers_person_id = cs.dim_person_id
+        AND (sp.end_date IS NULL OR sp.end_date > GETDATE()) -- #DtoI-1806
     );
 
 -- Example entry 2
