@@ -5022,10 +5022,10 @@ SELECT
     ed.uln AS send_uln,                
     'SSD_PH' AS send_upn_unknown      
 FROM
-    HDM_Local.Child_Social.dim_person cs
+    Child_Social.dim_person cs
 LEFT JOIN
     -- we have to switch to Education schema in order to obtain this
-    HDM_Local.Education.dim_person ed ON cs.dim_person_id = ed.dim_person_id
+    Education.dim_person ed ON cs.dim_person_id = ed.dim_person_id
 WHERE
     EXISTS (
         SELECT 1
