@@ -78,7 +78,7 @@ Dependencies:
 */
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_development.AA_1_contacts') IS NOT NULL DROP TABLE ssd_development.AA_1_contacts;
+IF OBJECT_ID('AA_1_contacts') IS NOT NULL DROP TABLE AA_1_contacts;
 IF OBJECT_ID('tempdb..#AA_1_contacts') IS NOT NULL DROP TABLE #AA_1_contacts;
 
 SELECT
@@ -154,19 +154,19 @@ SELECT
         ELSE 'u) 10: Unknown' -- 'Catch All' for any other Contact/Referral Sources not in above list
     END AS ContactSource
 
-INTO ssd_development.AA_1_contacts
+INTO AA_1_contacts
 
 FROM
-    ssd_development.ssd_contacts c
+    ssd_contacts c
 
 LEFT JOIN
-    ssd_development.ssd_person p ON c.cont_person_id = p.pers_person_id
+    ssd_person p ON c.cont_person_id = p.pers_person_id
 
 WHERE
     c.cont_contact_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
 
 -- [TESTING]
-SELECT * FROM ssd_development.AA_1_contacts;
+SELECT * FROM AA_1_contacts;
 
 
 
@@ -202,7 +202,7 @@ Annex A refers to Early Help Assessments whereas SSDS interpreted (perhaps incor
 */
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_development.AA_2_early_help_assessments') IS NOT NULL DROP TABLE ssd_development.AA_2_early_help_assessments;
+IF OBJECT_ID('AA_2_early_help_assessments') IS NOT NULL DROP TABLE AA_2_early_help_assessments;
 IF OBJECT_ID('tempdb..#AA_2_early_help_assessments') IS NOT NULL DROP TABLE #AA_2_early_help_assessments;
 
 
@@ -253,13 +253,13 @@ SELECT
     FORMAT(e.earl_episode_end_date, 'dd/MM/yyyy')	AS AssessmentCompletionDate,            -- [TESTING] Need a col name change?
     e.earl_episode_organisation						AS OrganisationCompletingAssessment    -- [TESTING] Need a col name change?
 
-INTO ssd_development.AA_2_early_help_assessments
+INTO AA_2_early_help_assessments
 
 FROM
-    ssd_development.ssd_early_help_episodes e	
+    ssd_early_help_episodes e	
 
 LEFT JOIN
-    ssd_development.ssd_person p ON e.earl_person_id = p.pers_person_id	
+    ssd_person p ON e.earl_person_id = p.pers_person_id	
 
 WHERE
 
@@ -267,7 +267,7 @@ WHERE
 
 
 -- [TESTING]
-select * from ssd_development.AA_2_early_help_assessments;
+select * from AA_2_early_help_assessments;
 
 
 
@@ -295,7 +295,7 @@ Dependencies:
 */
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_development.AA_3_referrals') IS NOT NULL DROP TABLE ssd_development.AA_3_referrals;
+IF OBJECT_ID('AA_3_referrals') IS NOT NULL DROP TABLE AA_3_referrals;
 IF OBJECT_ID('tempdb..#AA_3_referrals') IS NOT NULL DROP TABLE #AA_3_referrals;
 
 
@@ -384,13 +384,13 @@ SELECT
     dept.dept_team_name                             AS AllocatedTeam,
     pro.prof_professional_name                      AS AllocatedWorker
 
-INTO ssd_development.AA_3_referrals
+INTO AA_3_referrals
 
 FROM
-    ssd_development.ssd_cin_episodes ce
+    ssd_cin_episodes ce
 
 LEFT JOIN
-    ssd_development.ssd_person p ON ce.cine_person_id = p.pers_person_id
+    ssd_person p ON ce.cine_person_id = p.pers_person_id
 
 LEFT JOIN
     (
@@ -401,7 +401,7 @@ LEFT JOIN
                 ELSE 0
             END as count_12months
         FROM 
-            ssd_development.ssd_cin_episodes
+            ssd_cin_episodes
         WHERE
             cine_referral_date >= DATEADD(MONTH, -12, GETDATE())
         GROUP BY
@@ -410,16 +410,16 @@ LEFT JOIN
 
 -- obtain professional & team names
 LEFT JOIN
-    ssd_development.ssd_department dept ON ce.cine_referral_team = dept.dept_team_id
+    ssd_department dept ON ce.cine_referral_team = dept.dept_team_id
 LEFT JOIN
-    ssd_development.ssd_professionals pro ON ce.cine_referral_worker_id = pro.prof_professional_id
+    ssd_professionals pro ON ce.cine_referral_worker_id = pro.prof_professional_id
 
 WHERE
     ce.cine_referral_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());
 
 
 -- [TESTING]
-select * from ssd_development.AA_3_referrals;
+select * from AA_3_referrals;
 
 
 
@@ -447,7 +447,7 @@ Dependencies:
 */
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_development.AA_4_assessments') IS NOT NULL DROP TABLE ssd_development.AA_4_assessments;
+IF OBJECT_ID('AA_4_assessments') IS NOT NULL DROP TABLE AA_4_assessments;
 IF OBJECT_ID('tempdb..#AA_4_assessments') IS NOT NULL DROP TABLE #AA_4_assessments;
 
 
@@ -518,13 +518,13 @@ SELECT
     dept.dept_team_name                             AS AllocatedTeam,
     pro.prof_professional_name                      AS AllocatedWorker
 
-INTO ssd_development.AA_4_assessments
+INTO AA_4_assessments
 
 FROM
-    ssd_development.ssd_cin_assessments a
+    ssd_cin_assessments a
 
 INNER JOIN
-    ssd_development.ssd_person p ON a.cina_person_id = p.pers_person_id
+    ssd_person p ON a.cina_person_id = p.pers_person_id
 
 /*PW - Amended as #ssd_disability table can have multiple records for a single child*/
 LEFT JOIN   -- ensure we get all records even if there's no matching disability
@@ -532,7 +532,7 @@ LEFT JOIN   -- ensure we get all records even if there's no matching disability
 		SELECT DISTINCT
 			dis.disa_person_id 
 		FROM
-			ssd_development.ssd_disability dis
+			ssd_disability dis
 		WHERE
 			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 	) AS d ON p.pers_person_id = d.disa_person_id
@@ -540,9 +540,9 @@ LEFT JOIN   -- ensure we get all records even if there's no matching disability
 
 -- obtain professional & team names
 LEFT JOIN
-    ssd_development.ssd_department dept ON a.cina_assessment_team = dept.dept_team_id
+    ssd_department dept ON a.cina_assessment_team = dept.dept_team_id
 LEFT JOIN
-    ssd_development.ssd_professionals pro ON a.cina_assessment_worker_id = pro.prof_professional_id
+    ssd_professionals pro ON a.cina_assessment_worker_id = pro.prof_professional_id
 
 WHERE
     --a.cina_assessment_start_date >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE());	/*Original criteria - Assessments starting in last 6 months*/
@@ -550,7 +550,7 @@ WHERE
 
 
 -- [TESTING]
-select * from ssd_development.AA_4_assessments;
+select * from AA_4_assessments;
 
 
 
@@ -582,7 +582,7 @@ Dependencies:
 */
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_development.AA_5_s47_enquiries') IS NOT NULL DROP TABLE ssd_development.AA_5_s47_enquiries;
+IF OBJECT_ID('AA_5_s47_enquiries') IS NOT NULL DROP TABLE AA_5_s47_enquiries;
 IF OBJECT_ID('tempdb..#AA_5_s47_enquiries') IS NOT NULL DROP TABLE #AA_5_s47_enquiries;
 
 
@@ -664,20 +664,20 @@ SELECT
     -- icpc.icpc_icpc_worker_id					AS AllocatedWorker
  
 
-INTO ssd_development.AA_5_s47_enquiries 
+INTO AA_5_s47_enquiries 
 
 FROM
-    ssd_development.ssd_s47_enquiry s47e	
+    ssd_s47_enquiry s47e	
 
 INNER JOIN
-    ssd_development.ssd_person p ON s47e.s47e_person_id = p.pers_person_id		
+    ssd_person p ON s47e.s47e_person_id = p.pers_person_id		
 
 LEFT JOIN  
     (
 		SELECT DISTINCT
 			dis.disa_person_id 
 		FROM
-			ssd_development.ssd_disability dis
+			ssd_disability dis
 		WHERE
 			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 	) AS d ON p.pers_person_id = d.disa_person_id
@@ -685,7 +685,7 @@ LEFT JOIN
 -- [TESTING]
 -- towards icpc.icpc_icpc_outcome_cp_flag 
 LEFT JOIN
-	ssd_development.ssd_initial_cp_conference icpc ON s47e.s47e_s47_enquiry_id = icpc.icpc_s47_enquiry_id	
+	ssd_initial_cp_conference icpc ON s47e.s47e_s47_enquiry_id = icpc.icpc_s47_enquiry_id	
 										AND s47e.s47e_person_id = icpc.icpc_person_id		/*PW - additional join added because WorkflowStepID used as enquiry_id and this isn't unique due to group working*/
 
 LEFT JOIN 
@@ -698,9 +698,9 @@ LEFT JOIN
 			COUNT(s47e2.s47e_s47_enquiry_id) as CountS47s12m,
 			DENSE_RANK() OVER(PARTITION BY s47e.s47e_person_id ORDER BY s47e.s47e_s47_start_date DESC, s47e.s47e_s47_enquiry_id DESC) Rnk
 		FROM
-			ssd_development.ssd_s47_enquiry s47e
+			ssd_s47_enquiry s47e
 		LEFT JOIN
-			ssd_development.ssd_s47_enquiry s47e2 ON s47e.s47e_person_id = s47e2.s47e_person_id
+			ssd_s47_enquiry s47e2 ON s47e.s47e_person_id = s47e2.s47e_person_id
 				AND (s47e2.s47e_s47_start_date between DATEADD(MONTH, -12, s47e.s47e_s47_start_date) and DATEADD(DAY, -1, s47e.s47e_s47_start_date)
 				OR (s47e2.s47e_s47_start_date = s47e.s47e_s47_start_date and s47e2.s47e_s47_enquiry_id < s47e.s47e_s47_enquiry_id))	/*PW - allows for cases where 2 S47s start on same day*/
 		WHERE
@@ -720,9 +720,9 @@ LEFT JOIN
 			COUNT(icpc_icpc_date) as CountICPCs12m,
 			DENSE_RANK() OVER(PARTITION BY s47e.s47e_person_id ORDER BY s47e.s47e_s47_start_date DESC, s47e.s47e_s47_enquiry_id DESC) Rnk
 		FROM
-			ssd_development.ssd_s47_enquiry s47e
+			ssd_s47_enquiry s47e
 		LEFT JOIN
-			ssd_development.ssd_initial_cp_conference icpc on s47e.s47e_person_id = icpc.icpc_person_id
+			ssd_initial_cp_conference icpc on s47e.s47e_person_id = icpc.icpc_person_id
 			AND icpc_icpc_date between DATEADD(MONTH, -12, s47e.s47e_s47_start_date) and DATEADD(DAY, -1, s47e.s47e_s47_start_date)
 		WHERE
 			COALESCE(s47e.s47e_s47_end_date,'99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -733,10 +733,10 @@ LEFT JOIN
 
 -- obtain professional & team names
 LEFT JOIN
-    ssd_development.ssd_professionals pro ON s47e.s47e_s47_completed_by_worker_id = pro.prof_professional_id
+    ssd_professionals pro ON s47e.s47e_s47_completed_by_worker_id = pro.prof_professional_id
 
 LEFT JOIN
-    ssd_development.ssd_department dept ON s47e.s47e_s47_completed_by_team = dept.dept_team_id
+    ssd_department dept ON s47e.s47e_s47_completed_by_team = dept.dept_team_id
 
 WHERE
 	-- S47 open in last 6 months (includes those starting more that 6 months ago that were completed in last 6 months)
@@ -744,7 +744,7 @@ WHERE
 
 
 -- [TESTING]
-select * from ssd_development.AA_5_s47_enquiries;
+select * from AA_5_s47_enquiries;
 
 
 
@@ -780,7 +780,7 @@ Dependencies:
 */
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_development.AA_6_children_in_need') IS NOT NULL DROP TABLE ssd_development.AA_6_children_in_need;
+IF OBJECT_ID('AA_6_children_in_need') IS NOT NULL DROP TABLE AA_6_children_in_need;
 IF OBJECT_ID('tempdb..#AA_6_children_in_need') IS NOT NULL DROP TABLE #AA_6_children_in_need;
 
 SELECT
@@ -799,7 +799,7 @@ SELECT
 	d.AllocatedTeam,
 	d.AllocatedWorker
 
-INTO ssd_development.AA_6_children_in_need
+INTO AA_6_children_in_need
 
 FROM
 (
@@ -894,17 +894,17 @@ FROM
 		DENSE_RANK() OVER(PARTITION BY p.pers_person_id ORDER BY ce.cine_referral_date DESC, COALESCE(ce.cine_close_date,'99991231') DESC) Rnk
 
 	FROM
-		ssd_development.ssd_cin_episodes ce
+		ssd_cin_episodes ce
 
 	INNER JOIN
-		ssd_development.ssd_person p ON ce.cine_person_id = p.pers_person_id	
+		ssd_person p ON ce.cine_person_id = p.pers_person_id	
 
 	LEFT JOIN 
 		(
 			SELECT DISTINCT
 				dis.disa_person_id 
 			FROM
-				ssd_development.ssd_disability dis
+				ssd_disability dis
 			WHERE
 				COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 		) AS d ON p.pers_person_id = d.disa_person_id
@@ -926,9 +926,9 @@ FROM
                         ce.cine_close_date CINClosureDate,
                         v.cinv_cin_visit_date VisitDate
                     FROM
-                        ssd_development.ssd_cin_episodes ce
+                        ssd_cin_episodes ce
                     INNER JOIN
-                        ssd_development.ssd_cin_visits v ON ce.cine_person_id = v.cinv_person_id -- corrected column name
+                        ssd_cin_visits v ON ce.cine_person_id = v.cinv_person_id -- corrected column name
                     AND v.cinv_cin_visit_date between ce.cine_referral_date and COALESCE(ce.cine_close_date, GETDATE())
 
                     UNION
@@ -939,7 +939,7 @@ FROM
                         ce.cine_close_date CINClosureDate,
                         v.cppv_cp_visit_date VisitDate
                     FROM
-                        ssd_development.ssd_cin_episodes ce
+                        ssd_cin_episodes ce
                     INNER JOIN
                         ssd_cp_visits v ON ce.cine_person_id = v.cppv_person_id -- corrected column name
                     AND v.cppv_cp_visit_date between ce.cine_referral_date and COALESCE(ce.cine_close_date, GETDATE())
@@ -952,7 +952,7 @@ FROM
                         ce.cine_close_date CINClosureDate,
                         v.clav_cla_visit_date VisitDate
                     FROM
-                        ssd_development.ssd_cin_episodes ce
+                        ssd_cin_episodes ce
                     INNER JOIN
                         ssd_cla_visits v ON ce.cine_person_id = v.clav_person_id
                     AND v.clav_cla_visit_date between ce.cine_referral_date and COALESCE(ce.cine_close_date, GETDATE())
@@ -971,9 +971,9 @@ FROM
 			SELECT DISTINCT
 				ls.lega_person_id
 			FROM
-				ssd_development.ssd_legal_status ls
+				ssd_legal_status ls
 			INNER JOIN
-				ssd_development.ssd_person p ON ls.lega_person_id = p.pers_person_id
+				ssd_person p ON ls.lega_person_id = p.pers_person_id
 			WHERE
 				ls.lega_legal_status not in ('V1','V3','V4')	--Exclude children subject to Short Breaks
 				AND ls.lega_legal_status_start_date <= GETDATE()
@@ -986,7 +986,7 @@ FROM
 			SELECT DISTINCT
 				cp.cppl_person_id
 			FROM
-				ssd_development.ssd_cp_plans cp
+				ssd_cp_plans cp
 			WHERE
 				cp.cppl_cp_plan_start_date <= GETDATE()
 				AND COALESCE(cp.cppl_cp_plan_end_date,'99991231') > GETDATE()
@@ -997,7 +997,7 @@ FROM
 			SELECT DISTINCT
 				cin.cinp_person_id
 			FROM
-				ssd_development.ssd_cin_plans cin
+				ssd_cin_plans cin
 			WHERE
 				cin.cinp_cin_plan_start_date <= GETDATE()
 				AND COALESCE(cin.cinp_cin_plan_end_date,'99991231') > GETDATE()
@@ -1008,7 +1008,7 @@ FROM
 			SELECT DISTINCT
 				ass.cina_person_id
 			FROM
-				ssd_development.ssd_cin_assessments ass
+				ssd_cin_assessments ass
 			WHERE
 				ass.cina_assessment_start_date <= GETDATE()
 				AND COALESCE(ass.cina_assessment_auth_date,'99991231') > GETDATE()
@@ -1019,7 +1019,7 @@ FROM
 			SELECT DISTINCT
 				cl.clea_person_id
 			FROM
-				ssd_development.ssd_care_leavers cl
+				ssd_care_leavers cl
 		) AS cl ON ce.cine_person_id = cl.clea_person_id
 
 	-- Added to get latest allocatd Team and Worker
@@ -1038,13 +1038,13 @@ FROM
 				DENSE_RANK() OVER(PARTITION BY cine.cine_person_id, cine.cine_referral_id 
 									ORDER BY COALESCE(inv.invo_involvement_end_date,'99991231') DESC, inv.invo_involvement_start_date DESC, inv.invo_involvements_id DESC) Rnk
 			FROM
-				ssd_development.ssd_cin_episodes cine
+				ssd_cin_episodes cine
 			INNER JOIN
-				ssd_development.ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
+				ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
 				AND inv.invo_involvement_start_date <= COALESCE(cine.cine_close_date,'99991231')
 				AND COALESCE(inv.invo_involvement_end_date,'99991231') > cine.cine_referral_date
 			INNER JOIN
-				ssd_development.ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
+				ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
 			WHERE
 				COALESCE(cine.cine_close_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
 		) AS inv ON ce.cine_person_id = inv.PersonID
@@ -1061,7 +1061,7 @@ where d.rnk = 1;
 
 
 -- [TESTING]
-select * from ssd_development.AA_6_children_in_need;
+select * from AA_6_children_in_need;
 
 
 
@@ -1076,9 +1076,10 @@ Description:
  
 Author: D2I
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
-            0.9 JH excluded temporary OLA plans
-            0.8 PW/Blackpool major edits/reworked PW 030324
+Version: 1.1:
+            1.0: Fix incorrect source for clar_ fields, allocated TeamName not ID 300724 RH
+            0.9: JH excluded temporary OLA plans
+            0.8: PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming.
 Status: [R]elease
 Remarks:
@@ -1089,12 +1090,13 @@ Dependencies:
 - ssd_cin_episodes
 - ssd_professionals
 - ssd_cp_visits
+- ssd_department
 - @AA_ReportingPeriod
 =============================================================================
 */
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_development.AA_7_child_protection') IS NOT NULL DROP TABLE ssd_development.AA_7_child_protection;
+IF OBJECT_ID('AA_7_child_protection') IS NOT NULL DROP TABLE AA_7_child_protection;
 IF OBJECT_ID('tempdb..#AA_7_child_protection') IS NOT NULL DROP TABLE #AA_7_child_protection;
  
 SELECT
@@ -1116,7 +1118,7 @@ SELECT
     d.AllocatedTeam,
     d.AllocatedWorker
  
-INTO ssd_development.AA_7_child_protection
+INTO AA_7_child_protection
  
 FROM
 (
@@ -1204,17 +1206,17 @@ FROM
  
        
     FROM
-        ssd_development.ssd_cp_plans cp
+        ssd_cp_plans cp
  
     INNER JOIN
-        ssd_development.ssd_person p ON cp.cppl_person_id = p.pers_person_id  
+        ssd_person p ON cp.cppl_person_id = p.pers_person_id  
  
     LEFT JOIN
         (
             SELECT DISTINCT
                 dis.disa_person_id
             FROM
-                ssd_development.ssd_disability dis
+                ssd_disability dis
             WHERE
                 COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
         ) AS d ON p.pers_person_id = d.disa_person_id
@@ -1229,7 +1231,7 @@ FROM
                 vis.cppv_cp_visit_seen_alone ChildSeenAlone,
                 DENSE_RANK() OVER(PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id ORDER BY vis.cppv_cp_visit_date DESC, vis.cppv_cp_visit_seen_alone DESC, vis.cppv_cp_visit_id) Rnk
             FROM
-                ssd_development.ssd_cp_plans cp
+                ssd_cp_plans cp
             INNER JOIN
                 ssd_cp_visits vis ON cp.cppl_person_id = vis.cppv_person_id
                 AND cp.cppl_cp_plan_id = vis.cppv_cp_plan_id
@@ -1249,9 +1251,9 @@ FROM
             ROW_NUMBER() OVER (PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id ORDER BY rev.cppr_cp_review_date DESC) AS Rnk,
             rev.cppr_cp_review_date AS ReviewDate
         FROM
-            ssd_development.ssd_cp_plans cp
+            ssd_cp_plans cp
         INNER JOIN
-            ssd_development.ssd_cp_reviews rev ON cp.cppl_person_id = rev.cppr_person_id
+            ssd_cp_reviews rev ON cp.cppl_person_id = rev.cppr_person_id
             AND cp.cppl_cp_plan_id = rev.cppr_cp_plan_id
             AND rev.cppr_cp_review_date BETWEEN cp.cppl_cp_plan_start_date AND COALESCE(cp.cppl_cp_plan_end_date, GETDATE())
         WHERE
@@ -1267,13 +1269,13 @@ FROM
             SELECT DISTINCT
                 ls.lega_person_id
             FROM
-                ssd_development.ssd_legal_status ls
+                ssd_legal_status ls
             WHERE
                 ls.lega_legal_status in ('L1','L2')
                 AND COALESCE(ls.lega_legal_status_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
         ) AS pr ON p.pers_person_id = pr.lega_person_id
  
-    -- get number of previous CP Plans.  NOTE - because this uses #ssd_cp_plans, only has details of CP Plans open in the last 6 years
+    -- get number of previous CP Plans.  NOTE: ssd_cp_plans has details of CP Plans open in the last 6 years (threshold is defined by SSD timeframe)
     LEFT JOIN
         (
             SELECT
@@ -1282,7 +1284,7 @@ FROM
                 cp.cppl_cp_plan_id,
                 COUNT(cp2.cppl_cp_plan_id) as CountPrevCPPlans
             FROM
-                ssd_development.ssd_cp_plans cp
+                ssd_cp_plans cp
             LEFT JOIN
                 ssd_cp_plans cp2 ON cp.cppl_person_id = cp2.cppl_person_id
                 AND cp2.cppl_cp_plan_start_date < cp.cppl_cp_plan_start_date
@@ -1294,27 +1296,32 @@ FROM
         ) AS aggcpp ON cp.cppl_person_id = aggcpp.cppl_person_id
             AND cp.cppl_cp_plan_id = aggcpp.cppl_cp_plan_id
  
-    -- get latest allocatd Team and Worker
+    -- get latest allocated Team and Worker
     LEFT JOIN
         (
             SELECT
                 cp.cppl_person_id PersonID,
                 cp.cppl_cp_plan_id CPRegID,
-                inv.invo_professional_team Team,
+                --inv.invo_professional_team Team,  -- Has Team ID only
+                dpt.dept_team_name AS Team,         -- Obtains Team Name from ssd_department
                 pro.prof_professional_name WorkerName,
                 DENSE_RANK() OVER(PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id
                                     ORDER BY COALESCE(inv.invo_involvement_end_date,'99991231') DESC, inv.invo_involvement_start_date DESC, inv.invo_involvements_id DESC) Rnk
             FROM
-                ssd_development.ssd_cp_plans cp
+                ssd_cp_plans cp
             INNER JOIN
-                ssd_development.ssd_cin_episodes cine ON cp.cppl_person_id = cine.cine_person_id
+                ssd_cin_episodes cine ON cp.cppl_person_id = cine.cine_person_id
                 AND cp.cppl_referral_id = cine.cine_referral_id
             INNER JOIN
-                ssd_development.ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
+                ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
                 AND inv.invo_involvement_start_date <= COALESCE(cine.cine_close_date,'99991231')
                 AND COALESCE(inv.invo_involvement_end_date,'99991231') > cine.cine_referral_date
             INNER JOIN
-                ssd_development.ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
+                ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
+
+            LEFT JOIN -- in order to retrieve TeamName as invo_professional_team contains only ID
+                ssd_department dpt ON inv.invo_professional_team = dpt.dept_team_id
+
             WHERE
                 COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
         ) AS inv on cp.cppl_person_id = inv.PersonID
@@ -1331,7 +1338,7 @@ where d.rnk = 1;
  
  
 -- [TESTING]
-select * from ssd_development.AA_7_child_protection;
+select * from AA_7_child_protection;
 
 
 
@@ -1367,7 +1374,7 @@ Dependencies:
  
  
 -- Check if exists & drop
-IF OBJECT_ID('ssd_development.AA_8_children_in_care') IS NOT NULL DROP TABLE ssd_development.AA_8_children_in_care;
+IF OBJECT_ID('AA_8_children_in_care') IS NOT NULL DROP TABLE AA_8_children_in_care;
 IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_children_in_care;
  
  
@@ -1485,8 +1492,8 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                                          ORDER BY clap.clap_cla_placement_start_date DESC,
                                                   COALESCE(clap.clap_cla_placement_end_date, '99991231') DESC) Rnk
                     FROM
-                        ssd_development.ssd_cla_placement clap
-                    LEFT JOIN ssd_development.ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
+                        ssd_cla_placement clap
+                    LEFT JOIN ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
                     WHERE
                         COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
                 ) clapl2
@@ -1494,13 +1501,13 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 clapl2.Rnk = 1
         ) clapl
     INNER JOIN
-        ssd_development.ssd_person p ON clapl.PersonID = p.pers_person_id
+        ssd_person p ON clapl.PersonID = p.pers_person_id
     LEFT JOIN  
         (
             SELECT DISTINCT
                 dis.disa_person_id
             FROM
-                ssd_development.ssd_disability dis
+                ssd_disability dis
             WHERE
                 COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
         ) AS d ON p.pers_person_id = d.disa_person_id
@@ -1509,7 +1516,7 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
             SELECT DISTINCT
                 uasc.immi_person_id
             FROM
-                ssd_development.ssd_immigration_status uasc
+                ssd_immigration_status uasc
             WHERE
                 uasc.immi_immigration_status = 'UASC'
         ) AS uasc ON p.pers_person_id = uasc.immi_person_id
@@ -1526,8 +1533,8 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                                   ORDER BY clap.clap_cla_placement_start_date DESC,
                                            clae.clae_cla_episode_start_date DESC) Rnk
             FROM
-                ssd_development.ssd_cla_placement clap
-            INNER JOIN ssd_development.ssd_cla_episodes clae ON clap.clap_cla_id = clae.clae_cla_id
+                ssd_cla_placement clap
+            INNER JOIN ssd_cla_episodes clae ON clap.clap_cla_id = clae.clae_cla_id
             WHERE
                 COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
                 AND COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -1540,9 +1547,9 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 clae.clae_person_id,
                 MIN(clae.clae_cla_episode_start_date) FirstLACStartDate
             FROM
-                ssd_development.ssd_cla_episodes clae
+                ssd_cla_episodes clae
             INNER JOIN
-                ssd_development.ssd_legal_status leg on clae.clae_person_id = leg.lega_person_id
+                ssd_legal_status leg on clae.clae_person_id = leg.lega_person_id
                 AND clae.clae_cla_episode_start_date = leg.lega_legal_status_start_date
             WHERE
                 clae.clae_cla_episode_start_reason = 'S'
@@ -1562,8 +1569,8 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 DENSE_RANK() OVER(PARTITION BY clap.clap_person_id
                                   ORDER BY clap.clap_cla_placement_start_date DESC, clals.lega_legal_status_start_date DESC) Rnk
             FROM
-                ssd_development.ssd_cla_placement clap
-            LEFT JOIN ssd_development.ssd_legal_status clals ON clap.clap_person_id = clals.lega_person_id
+                ssd_cla_placement clap
+            LEFT JOIN ssd_legal_status clals ON clap.clap_person_id = clals.lega_person_id
             WHERE
                 COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
                 AND COALESCE(clals.lega_legal_status_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -1595,9 +1602,9 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 rev.clar_cla_review_date ReviewDate,
                 ROW_NUMBER() OVER(PARTITION BY clap.clap_person_id ORDER BY rev.clar_cla_review_date DESC) AS Rnk
             FROM
-                ssd_development.ssd_cla_placement clap
-            INNER JOIN ssd_development.ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
-            INNER JOIN ssd_development.ssd_cla_reviews rev ON clae.clae_cla_id = rev.clar_cla_id
+                ssd_cla_placement clap
+            INNER JOIN ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
+            INNER JOIN ssd_cla_reviews rev ON clae.clae_cla_id = rev.clar_cla_id
             WHERE
                 COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
                 AND rev.clar_cla_review_date BETWEEN clae.clae_entered_care_date AND COALESCE(clap.clap_cla_placement_end_date, GETDATE())
@@ -1612,8 +1619,8 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 vis.clav_cla_visit_date VisitDate,
                 ROW_NUMBER() OVER(PARTITION BY clap.clap_person_id ORDER BY vis.clav_cla_visit_date DESC) AS Rnk
             FROM
-                ssd_development.ssd_cla_placement clap
-            INNER JOIN ssd_development.ssd_cla_visits vis ON clap.clap_person_id = vis.clav_person_id
+                ssd_cla_placement clap
+            INNER JOIN ssd_cla_visits vis ON clap.clap_person_id = vis.clav_person_id
                 AND vis.clav_cla_visit_date BETWEEN clap.clap_cla_placement_start_date AND COALESCE(clap.clap_cla_placement_end_date, GETDATE())
             WHERE
                 COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -1628,9 +1635,9 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 lacp.lacp_cla_care_plan_json CarePlan,
                 ROW_NUMBER() OVER(PARTITION BY lacp.lacp_person_id ORDER BY clap.clap_cla_placement_start_date DESC, lacp.lacp_cla_care_plan_start_date DESC, lacp.lacp_table_id DESC) AS Rnk
             FROM
-                ssd_development.ssd_cla_placement clap
-            INNER JOIN ssd_development.ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
-            INNER JOIN ssd_development.ssd_cla_care_plan lacp ON clae.clae_person_id = lacp.lacp_person_id
+                ssd_cla_placement clap
+            INNER JOIN ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
+            INNER JOIN ssd_cla_care_plan lacp ON clae.clae_person_id = lacp.lacp_person_id
                 AND lacp.lacp_cla_care_plan_start_date BETWEEN clae.clae_entered_care_date AND COALESCE(clap.clap_cla_placement_end_date, GETDATE())
             WHERE
                 COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
@@ -1644,9 +1651,9 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 h.clah_health_check_date HealthAssessmentDate,
                 ROW_NUMBER() OVER(PARTITION BY clap.clap_person_id ORDER BY h.clah_health_check_date DESC) AS Rnk
             FROM
-                ssd_development.ssd_cla_placement clap
-            INNER JOIN ssd_development.ssd_cla_episodes clae ON clae.clae_cla_placement_id = clap.clap_cla_placement_id
-            INNER JOIN ssd_development.ssd_cla_health h ON clae.clae_person_id = h.clah_person_id
+                ssd_cla_placement clap
+            INNER JOIN ssd_cla_episodes clae ON clae.clae_cla_placement_id = clap.clap_cla_placement_id
+            INNER JOIN ssd_cla_health h ON clae.clae_person_id = h.clah_person_id
                 AND h.clah_health_check_type IN ('HEALTH', 'Health Assessment')
                 AND h.clah_health_check_date BETWEEN clae.clae_entered_care_date AND COALESCE(clap.clap_cla_placement_end_date, GETDATE())
             WHERE
@@ -1661,9 +1668,9 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 h.clah_health_check_date DentalCheckDate,
                 ROW_NUMBER() OVER(PARTITION BY clap.clap_person_id ORDER BY h.clah_health_check_date DESC) AS Rnk
             FROM
-                ssd_development.ssd_cla_placement clap
-            INNER JOIN ssd_development.ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
-            INNER JOIN ssd_development.ssd_cla_health h ON clae.clae_person_id = h.clah_person_id
+                ssd_cla_placement clap
+            INNER JOIN ssd_cla_episodes clae ON clap.clap_cla_placement_id = clae.clae_cla_placement_id
+            INNER JOIN ssd_cla_health h ON clae.clae_person_id = h.clah_person_id
                 AND h.clah_health_check_type IN ('DENTAL', 'Dental Check')
                 AND h.clah_health_check_date BETWEEN clae.clae_entered_care_date AND COALESCE(clap.clap_cla_placement_end_date, GETDATE())
             WHERE
@@ -1677,7 +1684,7 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 clae.clae_person_id,
                 COUNT(clae.clae_person_id) AS CountCLAPlacements
             FROM
-                ssd_development.ssd_cla_episodes clae
+                ssd_cla_episodes clae
             WHERE
                 COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -12, GETDATE())
                 AND (clae.clae_cla_episode_start_reason IN ('S', 'P', 'B')
@@ -1697,8 +1704,8 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 ROW_NUMBER() OVER(PARTITION BY clap.clap_person_id, clap.clap_cla_placement_id ORDER BY clap.clap_cla_placement_start_date DESC, m.miss_table_id DESC) AS Rnk,
                 COUNT(m.miss_table_id) AS MissingEpi
             FROM
-                ssd_development.ssd_cla_placement clap
-            INNER JOIN ssd_development.ssd_missing m ON clap.clap_person_id = m.miss_person_id
+                ssd_cla_placement clap
+            INNER JOIN ssd_missing m ON clap.clap_person_id = m.miss_person_id
                 AND m.miss_missing_episode_type IN ('M', 'Missing')
                 AND m.miss_missing_episode_start_date >= DATEADD(MONTH, -12, GETDATE())
             WHERE
@@ -1718,8 +1725,8 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 ROW_NUMBER() OVER(PARTITION BY clap.clap_person_id, clap.clap_cla_placement_id ORDER BY clap.clap_cla_placement_start_date DESC, m.miss_table_id DESC) AS Rnk,
                 COUNT(m.miss_table_id) AS AbsenceEpi
             FROM
-                ssd_development.ssd_cla_placement clap
-            INNER JOIN ssd_development.ssd_missing m ON clap.clap_person_id = m.miss_person_id
+                ssd_cla_placement clap
+            INNER JOIN ssd_missing m ON clap.clap_person_id = m.miss_person_id
                 AND m.miss_missing_episode_type IN ('A', 'Absent', 'Away')
                 AND m.miss_missing_episode_start_date >= DATEADD(MONTH, -12, GETDATE())
                 AND m.miss_missing_episode_start_date BETWEEN clap.clap_cla_placement_start_date AND COALESCE(clap.clap_cla_placement_end_date, GETDATE())
@@ -1739,8 +1746,8 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 m.miss_missing_rhi_accepted,
                 ROW_NUMBER() OVER(PARTITION BY clap.clap_person_id ORDER BY CASE WHEN m.miss_missing_episode_end_date IS NOT NULL THEN 1 ELSE 2 END, clap.clap_cla_placement_start_date DESC, m.miss_missing_episode_start_date DESC, m.miss_table_id DESC) AS Rnk
             FROM
-                ssd_development.ssd_cla_placement clap
-            INNER JOIN ssd_development.ssd_missing m ON clap.clap_person_id = m.miss_person_id
+                ssd_cla_placement clap
+            INNER JOIN ssd_missing m ON clap.clap_person_id = m.miss_person_id
                 AND m.miss_missing_episode_type IN ('M', 'Missing')
                 AND m.miss_missing_episode_start_date >= DATEADD(MONTH, -12, GETDATE())
                 AND m.miss_missing_episode_start_date BETWEEN clap.clap_cla_placement_start_date AND COALESCE(clap.clap_cla_placement_end_date, GETDATE())
@@ -1758,13 +1765,13 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 pro.prof_professional_name WorkerName,
                 DENSE_RANK() OVER(PARTITION BY clae.clae_person_id, clae.clae_cla_episode_start_date ORDER BY COALESCE(inv.invo_involvement_end_date, '99991231') DESC, inv.invo_involvement_start_date DESC, inv.invo_involvements_id DESC) Rnk
             FROM
-                ssd_development.ssd_cla_episodes clae
-            INNER JOIN ssd_development.ssd_cin_episodes cine ON clae.clae_person_id = cine.cine_person_id
+                ssd_cla_episodes clae
+            INNER JOIN ssd_cin_episodes cine ON clae.clae_person_id = cine.cine_person_id
                 AND clae.clae_referral_id = cine.cine_referral_id
-            INNER JOIN ssd_development.ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
+            INNER JOIN ssd_involvements inv ON cine.cine_person_id = inv.invo_person_id
                 AND inv.invo_involvement_start_date <= COALESCE(cine.cine_close_date, '99991231')
                 AND COALESCE(inv.invo_involvement_end_date, '99991231') > cine.cine_referral_date
-            INNER JOIN ssd_development.ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
+            INNER JOIN ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
             WHERE
                 COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
         ) inv
@@ -1778,12 +1785,12 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
 
 -- replaces the INSERT used on other lists (due to CTE)
 SELECT *
-INTO ssd_development.AA_8_children_in_care
+INTO AA_8_children_in_care
 FROM CTE
 WHERE RowNum = 1;
 
 -- -- For testing and viewing the result
--- SELECT * FROM ssd_development.AA_8_children_in_care;
+-- SELECT * FROM AA_8_children_in_care;
 
 
 
@@ -1813,7 +1820,7 @@ Dependencies:
 */
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_development.AA_9_care_leavers') IS NOT NULL DROP TABLE ssd_development.AA_9_care_leavers;
+IF OBJECT_ID('AA_9_care_leavers') IS NOT NULL DROP TABLE AA_9_care_leavers;
 IF OBJECT_ID('tempdb..#AA_9_care_leavers') IS NOT NULL DROP TABLE #AA_9_care_leavers;
 
 SELECT
@@ -1924,20 +1931,20 @@ SELECT
 		WHEN clea.clea_care_leaver_activity = 'G6' THEN 'G6: Not in education, employment or training - pregnancy or parenting'
 	END															AS ActivityStatus
 
-INTO ssd_development.AA_9_care_leavers
+INTO AA_9_care_leavers
 
 FROM
-    ssd_development.ssd_care_leavers clea
+    ssd_care_leavers clea
 
 INNER JOIN
-	ssd_development.ssd_person p ON clea.clea_person_id = p.pers_person_id
+	ssd_person p ON clea.clea_person_id = p.pers_person_id
 
 LEFT JOIN  
 	(
 		SELECT DISTINCT
 			dis.disa_person_id 
 		FROM
-			ssd_development.ssd_disability dis
+			ssd_disability dis
 		WHERE
 			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 	) AS d ON p.pers_person_id = d.disa_person_id
@@ -1948,7 +1955,7 @@ LEFT JOIN
 		SELECT DISTINCT
 			uasc.immi_person_id 
 		FROM
-			ssd_development.ssd_immigration_status uasc
+			ssd_immigration_status uasc
 		WHERE
 			uasc.immi_immigration_status = 'UASC'
 			--AND COALESCE(uasc.immi_immigration_status_end_date,'99991231') >= DATEADD(MONTH, -12 , GETDATE())	/*PW - Row commented out as giving error 'Arithmetic overflow error converting expression to data type datetime' (possibly because no records have end date)*/
@@ -1956,13 +1963,13 @@ LEFT JOIN
 
 -- obtain professional & team names
 LEFT JOIN
-	ssd_development.ssd_professionals pro on clea.clea_care_leaver_worker_id = pro.prof_professional_id
+	ssd_professionals pro on clea.clea_care_leaver_worker_id = pro.prof_professional_id
 
 LEFT JOIN
-    ssd_development.ssd_professionals pro_advisor ON clea.clea_care_leaver_personal_advisor = pro_advisor.prof_professional_id
+    ssd_professionals pro_advisor ON clea.clea_care_leaver_personal_advisor = pro_advisor.prof_professional_id
 
 -- [TESTING]
-select * from ssd_development.AA_9_care_leavers;
+select * from AA_9_care_leavers;
 
 
 
@@ -1993,7 +2000,7 @@ Dependencies:
 */
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_development.AA_10_adoption') IS NOT NULL DROP TABLE ssd_development.AA_10_adoption;
+IF OBJECT_ID('AA_10_adoption') IS NOT NULL DROP TABLE AA_10_adoption;
 IF OBJECT_ID('tempdb..#AA_10_adoption') IS NOT NULL DROP TABLE #AA_10_adoption;
 
 
@@ -2061,20 +2068,20 @@ SELECT
 	FORMAT(perm.perm_placed_ffa_cp_date, 'dd/MM/yyyy')			AS DateFFAConsurrencyPlacement
 	
 
-INTO ssd_development.AA_10_adoption
+INTO AA_10_adoption
 
 FROM
-	ssd_development.ssd_permanence perm
+	ssd_permanence perm
 
 INNER JOIN
-	ssd_development.ssd_person p ON perm.perm_person_id = p.pers_person_id
+	ssd_person p ON perm.perm_person_id = p.pers_person_id
 
 LEFT JOIN  
 	(
 		SELECT DISTINCT
 			dis.disa_person_id 
 		FROM
-			ssd_development.ssd_disability dis
+			ssd_disability dis
 		WHERE
 			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 	) AS d ON p.pers_person_id = d.disa_person_id
@@ -2082,7 +2089,7 @@ LEFT JOIN
 /*PW - Commented out as FamilyID in Ofsted List 10 isn't the same FamilyID as #ssd_family - List 10 is 'Local adoptive family identifier for the adoptive family the child is matched or placed with’ i.e. an identifier for the adopter, which allows for cross-matching with List 11*/
 /*
 LEFT JOIN   -- family table
-    ssd_development.ssd_family fam ON perm.perm_person_id = fam.fami_person_id
+    ssd_family fam ON perm.perm_person_id = fam.fami_person_id
 */
 
 WHERE
@@ -2097,7 +2104,7 @@ WHERE
 
 
 -- [TESTING]
-select * from ssd_development.AA_10_adoption;
+select * from AA_10_adoption;
 
 
 
@@ -2125,7 +2132,7 @@ Dependencies:
 */
 
 -- Check if exists & drop
-IF OBJECT_ID('ssd_development.AA_11_adopters') IS NOT NULL DROP TABLE ssd_development.AA_11_adopters;
+IF OBJECT_ID('AA_11_adopters') IS NOT NULL DROP TABLE AA_11_adopters;
 IF OBJECT_ID('tempdb..#AA_11_adopters') IS NOT NULL DROP TABLE #AA_11_adopters;
 
 
@@ -2181,30 +2188,30 @@ SELECT
     FORMAT(perm.perm_decision_reversed_date, 'dd/MM/yyyy')          AS AdoptionLeaveDate,   -- Date of leaving adoption process
     perm.perm_decision_reversed_reason                              AS AdoptingLeaveReason  -- Reason for leaving adoption process
     
-INTO ssd_development.AA_11_adopters
+INTO AA_11_adopters
 
 FROM
-    ssd_development.ssd_permanence perm
+    ssd_permanence perm
 
 INNER JOIN
-    ssd_development.ssd_person p ON perm.perm_person_id = p.pers_person_id
+    ssd_person p ON perm.perm_person_id = p.pers_person_id
 
 LEFT JOIN  
     (
         SELECT DISTINCT
             dis.disa_person_id 
         FROM
-            ssd_development.ssd_disability dis
+            ssd_disability dis
         WHERE
             COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
     ) AS d ON p.pers_person_id = d.disa_person_id
 
 LEFT JOIN
-    ssd_development.ssd_contacts c ON perm.perm_person_id = c.cont_person_id 
+    ssd_contacts c ON perm.perm_person_id = c.cont_person_id 
 
 WHERE
     c.cont_contact_date >= DATEADD(MONTH, -12, GETDATE()); -- Filter on last 12 months
 
     -- [TESTING]
-select * from ssd_development.AA_11_adopters;
+select * from AA_11_adopters;
 
