@@ -1240,26 +1240,28 @@ FROM
             AND cp.cppl_cp_plan_id = vis.CPRegID
             AND vis.Rnk = 1
  
-    -- Get latest review
+    -- get latest review
     LEFT JOIN
-    (
-        SELECT
-            cp.cppl_person_id AS PersonID,
-            cp.cppl_cp_plan_id AS CPRegID,
-            ROW_NUMBER() OVER (PARTITION BY cp.cppl_person_id, cp.cppl_cp_plan_id ORDER BY rev.cppr_cp_review_date DESC) AS Rnk,
-            rev.cppr_cp_review_date AS ReviewDate
-        FROM
-            ssd_development.ssd_cp_plans cp
-        INNER JOIN
-            ssd_development.ssd_cp_reviews rev ON cp.cppl_person_id = rev.cppr_person_id
-            AND cp.cppl_cp_plan_id = rev.cppr_cp_plan_id
-            AND rev.cppr_cp_review_date BETWEEN cp.cppl_cp_plan_start_date AND COALESCE(cp.cppl_cp_plan_end_date, GETDATE())
-        WHERE
-            COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-    ) AS rev ON cp.cppl_person_id = rev.PersonID
-        AND cp.cppl_cp_plan_id = rev.CPRegID
-        AND rev.Rnk = 1
+        (
+            SELECT
+                cp.cppl_person_id PersonID,
+                cp.cppl_cp_plan_id CPRegID,
+                -- MAX(rev.cppr_cp_review_date) ReviewDate
+                ROW_NUMBER() OVER(PARTITION BY clap.clap_person_id ORDER BY rev.clar_cla_review_date DESC) AS Rnk
 
+            FROM
+                ssd_development.ssd_cp_plans cp
+            INNER JOIN
+                ssd_cp_reviews rev ON cp.cppl_person_id = rev.cppr_person_id
+                AND cp.cppl_cp_plan_id = rev.cppr_cp_plan_id
+                AND rev.cppr_cp_review_date between cp.cppl_cp_plan_start_date and COALESCE(cp.cppl_cp_plan_end_date, GETDATE())
+            WHERE
+                COALESCE(cp.cppl_cp_plan_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
+            GROUP BY
+                cp.cppl_person_id,
+                cp.cppl_cp_plan_id
+        ) AS rev on cp.cppl_person_id = rev.PersonID
+            AND cp.cppl_cp_plan_id = rev.CPRegID
  
     -- get whether child subject to Emergency Protection Order or Protected Under Police Powers in Last Six Months
     LEFT JOIN

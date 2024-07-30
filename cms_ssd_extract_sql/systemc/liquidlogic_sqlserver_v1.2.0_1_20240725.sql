@@ -58,7 +58,10 @@ GO
 
 DECLARE @Run_SSD_As_Temporary_Tables BIT;
 SET     @Run_SSD_As_Temporary_Tables = 0;  -- 1==Single use SSD extract uses tempdb..# | 0==Persistent SSD table set up
+
 DECLARE @sql NVARCHAR(MAX) = N''; -- used in both clean-up and logging
+DECLARE @schema_name NVARCHAR(128) = N'ssd_development';    -- Set your schema name here. Leave empty for default behaviour
+DECLARE @default_schema NVARCHAR(128) = N'dbo';             -- Default schema if none provided
 
 
 SET NOCOUNT ON;
@@ -98,9 +101,6 @@ BEGIN
 
     -- pre-emptively avoid any run-time conflicts from left-behind FK constraints
 
-    DECLARE @schema_name NVARCHAR(128) = N'ssd_development';    -- Set your schema name here. Leave empty for default behaviour
-    DECLARE @default_schema NVARCHAR(128) = N'dbo';             -- Default schema if none provided
-    DECLARE @sql NVARCHAR(MAX);
 
     -- Set schema name to default if not provided
     IF @schema_name = N'' OR @schema_name IS NULL
@@ -3138,8 +3138,7 @@ INSERT INTO ssd_development.ssd_cla_reviews (
     clar_cla_review_date,
     clar_cla_review_cancelled,
     clar_cla_review_participation
-)
- 
+) 
 SELECT
     fcr.FACT_CLA_REVIEW_ID                          AS clar_cla_review_id,
     fcr.FACT_CLA_ID                                 AS clar_cla_id,                
@@ -4533,11 +4532,15 @@ PRINT 'Table created: ' + @TableName;
 Object Name: ssd_involvements
 Description:
 Author: D2I
-Version: 1.1
+Version: 1.2:
+            1.1: Revisions to 1.0/0.9. DEPT_ID else .._HISTORY_DEPARTMENT_ID 300724 RH
             1.0: Trancated professional_team field IF comment data populates 110624 RH
             0.9: added person_id and changed source of professional_team 090424 JH
 Status: [R]elease
-Remarks: Regarding the increased size/len on invo_professional_team
+Remarks:    v1.2 revisions backtrack prev changes in favour of dept/hist ID fields
+
+            [TESTING] The below towards v1.0 for ref. only
+            Regarding the increased size/len on invo_professional_team
             The (truncated)COMMENTS field is only used if:
                 WORKER_HISTORY_DEPARTMENT_DESC is NULL.
                 DEPARTMENT_NAME is NULL.
@@ -4604,12 +4607,14 @@ SELECT
     --         THEN fi.COMMENTS 
     --     END -- if fi.COMMENTS is NULL, results in NULL
     -- ), 255)                                       AS invo_professional_team,
-
+   
     CASE 
-        -- replacing the above and...
-        -- replace admin -1 values for when no worker associated [TESTING] #DtoI-1762
-        WHEN fi.FACT_WORKER_HISTORY_DEPARTMENT_ID = -1 THEN NULL
-        ELSE fi.FACT_WORKER_HISTORY_DEPARTMENT_ID 
+        WHEN fi.DIM_DEPARTMENT_ID IS NOT NULL AND fi.DIM_DEPARTMENT_ID != -1 THEN fi.DIM_DEPARTMENT_ID
+        ELSE CASE 
+            -- replace system -1 values for when no worker associated [TESTING] #DtoI-1762
+            WHEN fi.FACT_WORKER_HISTORY_DEPARTMENT_ID = -1 THEN NULL
+            ELSE fi.FACT_WORKER_HISTORY_DEPARTMENT_ID 
+        END 
     END                                           AS invo_professional_team, 
     fi.DIM_PERSON_ID                              AS invo_person_id,
     fi.START_DTTM                                 AS invo_involvement_start_date,
@@ -5566,7 +5571,6 @@ DECLARE @pk_datatype        NVARCHAR(255);
 DECLARE @additional_detail  NVARCHAR(MAX);
 DECLARE @error_message      NVARCHAR(MAX);
 DECLARE @table_name         NVARCHAR(255);
-DECLARE @schema_name        NVARCHAR(255) = N'ssd_development';     -- Placeholder  schema name for all tables <OR> empty string
 -- DECLARE @schema_name        NVARCHAR(255) = N'';                 -- Placeholder  schema name for all tables <OR> empty string
 
 
