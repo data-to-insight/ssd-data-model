@@ -197,7 +197,7 @@ UPDATE ssd_development.ssd_version_log SET is_current = 0 WHERE is_current = 1;
 INSERT INTO ssd_development.ssd_version_log 
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
-    ('1.2.0', GETDATE(), '_team field fixes #DtoI-1762 improved 0/-1 handling', 1, 'admin', 'impacts all _team fields');
+    ('1.2.0', GETDATE(), '#DtoI-1762, #DtoI-1810, improved 0/-1 handling', 1, 'admin', 'impacts all _team fields, AAL7 outputs');
 
 
 -- historic versioning log data

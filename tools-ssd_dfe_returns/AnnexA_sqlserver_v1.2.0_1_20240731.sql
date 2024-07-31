@@ -77,6 +77,10 @@ Dependencies:
 =============================================================================
 */
 
+-- -- Set reporting period in months
+-- DECLARE @AA_ReportingPeriod INT;
+-- SET @AA_ReportingPeriod = 6; -- Months
+
 -- Check if exists & drop
 IF OBJECT_ID('AA_1_contacts') IS NOT NULL DROP TABLE AA_1_contacts;
 IF OBJECT_ID('tempdb..#AA_1_contacts') IS NOT NULL DROP TABLE #AA_1_contacts;
@@ -181,11 +185,16 @@ Description:
 
 Author: D2I
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
-			0.9 PW/Blackpool major edits/reworked PW 030324
+Version: 1.0:
+			0.9 PW/Blackpool major edits/reworked & EH feedback PW 030324
             0.3: Removed old obj/item naming. 
 Status: [R]elease
 Remarks: 
+    Possible disconnect between SSDS Dataset and Annex A.
+    - Currently no agreed standard ways of running an Early Help service == variance between LA's
+    - Project Team is aware Annex A refers to Early Help Assessments whereas SSDS interpreted as Early Help Episodes
+    - SSD specification around this may require adjustments based on ongoing feedback from data teams/LA's
+
 Dependencies: 
 - ssd_cin_episodes
 - ssd_person
@@ -194,12 +203,9 @@ Dependencies:
 =============================================================================
 */
 
-/*
-[TESTING]
-11/02/2024 - PW Comment
-Possible disconnect between SSDS Dataset and Annex A.
-Annex A refers to Early Help Assessments whereas SSDS interpreted (perhaps incorrectly) as Early Help Episodes
-*/
+-- -- Set reporting period in months
+-- DECLARE @AA_ReportingPeriod INT;
+-- SET @AA_ReportingPeriod = 6; -- Months
 
 -- Check if exists & drop
 IF OBJECT_ID('AA_2_early_help_assessments') IS NOT NULL DROP TABLE AA_2_early_help_assessments;
@@ -249,9 +255,9 @@ SELECT
 			END									AS Age,
     
     /* List additional AA fields */
-    FORMAT(e.earl_episode_start_date, 'dd/MM/yyyy')	AS AssessmentStartDate,          -- [TESTING] Need a col name change?
+    FORMAT(e.earl_episode_start_date, 'dd/MM/yyyy')	AS AssessmentStartDate,                 -- [TESTING] Need a col name change?
     FORMAT(e.earl_episode_end_date, 'dd/MM/yyyy')	AS AssessmentCompletionDate,            -- [TESTING] Need a col name change?
-    e.earl_episode_organisation						AS OrganisationCompletingAssessment    -- [TESTING] Need a col name change?
+    e.earl_episode_organisation						AS OrganisationCompletingAssessment     -- [TESTING] Need a col name change?
 
 INTO AA_2_early_help_assessments
 
@@ -293,6 +299,11 @@ Dependencies:
 - ssd_person
 =============================================================================
 */
+
+-- -- Set reporting period in months
+-- DECLARE @AA_ReportingPeriod INT;
+-- SET @AA_ReportingPeriod = 6; -- Months
+
 
 -- Check if exists & drop
 IF OBJECT_ID('AA_3_referrals') IS NOT NULL DROP TABLE AA_3_referrals;
@@ -446,6 +457,10 @@ Dependencies:
 =============================================================================
 */
 
+-- -- Set reporting period in months
+-- DECLARE @AA_ReportingPeriod INT;
+-- SET @AA_ReportingPeriod = 6; -- Months
+
 -- Check if exists & drop
 IF OBJECT_ID('AA_4_assessments') IS NOT NULL DROP TABLE AA_4_assessments;
 IF OBJECT_ID('tempdb..#AA_4_assessments') IS NOT NULL DROP TABLE #AA_4_assessments;
@@ -580,6 +595,10 @@ Dependencies:
 - @AA_ReportingPeriod
 =============================================================================
 */
+
+-- -- Set reporting period in months
+-- DECLARE @AA_ReportingPeriod INT;
+-- SET @AA_ReportingPeriod = 6; -- Months
 
 -- Check if exists & drop
 IF OBJECT_ID('AA_5_s47_enquiries') IS NOT NULL DROP TABLE AA_5_s47_enquiries;
@@ -760,8 +779,8 @@ Description:
 
 Author: D2I
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
-			0.9 PW/Blackpool major edits/reworked PW 030324
+Version: 1.0:
+			0.9: PW/Blackpool major edits/reworked PW 030324
             0.3: Removed old obj/item naming RH 
 Status: [R]elease
 Remarks: 
@@ -778,6 +797,10 @@ Dependencies:
 - @AA_ReportingPeriod
 =============================================================================
 */
+
+-- -- Set reporting period in months
+-- DECLARE @AA_ReportingPeriod INT;
+-- SET @AA_ReportingPeriod = 6; -- Months
 
 -- Check if exists & drop
 IF OBJECT_ID('AA_6_children_in_need') IS NOT NULL DROP TABLE AA_6_children_in_need;
@@ -1094,7 +1117,11 @@ Dependencies:
 - @AA_ReportingPeriod
 =============================================================================
 */
- 
+-- -- Set reporting period in Mths
+-- DECLARE @AA_ReportingPeriod INT;
+-- SET @AA_ReportingPeriod = 6; -- Mths
+
+
 -- Check if exists & drop
 IF OBJECT_ID('AA_7_child_protection') IS NOT NULL DROP TABLE AA_7_child_protection;
 IF OBJECT_ID('tempdb..#AA_7_child_protection') IS NOT NULL DROP TABLE #AA_7_child_protection;
@@ -1761,7 +1788,8 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
             SELECT
                 clae.clae_person_id PersonID,
                 clae.clae_cla_episode_start_date CLAEpiStart,
-                inv.invo_professional_team Team,
+                -- inv.invo_professional_team Team,
+                dpt.dept_team_name AS Team,
                 pro.prof_professional_name WorkerName,
                 DENSE_RANK() OVER(PARTITION BY clae.clae_person_id, clae.clae_cla_episode_start_date ORDER BY COALESCE(inv.invo_involvement_end_date, '99991231') DESC, inv.invo_involvement_start_date DESC, inv.invo_involvements_id DESC) Rnk
             FROM
@@ -1772,6 +1800,9 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 AND inv.invo_involvement_start_date <= COALESCE(cine.cine_close_date, '99991231')
                 AND COALESCE(inv.invo_involvement_end_date, '99991231') > cine.cine_referral_date
             INNER JOIN ssd_professionals pro ON inv.invo_professional_id = pro.prof_professional_id
+            
+            LEFT JOIN ssd_department dpt ON inv.invo_professional_team = dpt.dept_team_id
+
             WHERE
                 COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
         ) inv
@@ -1789,8 +1820,8 @@ INTO AA_8_children_in_care
 FROM CTE
 WHERE RowNum = 1;
 
--- -- For testing and viewing the result
--- SELECT * FROM AA_8_children_in_care;
+-- For testing and viewing the result
+SELECT * FROM AA_8_children_in_care;
 
 
 
@@ -1818,7 +1849,11 @@ Dependencies:
 - ssd_immigration_status
 =============================================================================
 */
-
+-- -- Set reporting period in Mths
+--DECLARE @AA_ReportingPeriod INT;
+--SET @AA_ReportingPeriod = 6; -- Mths
+ 
+ 
 -- Check if exists & drop
 IF OBJECT_ID('AA_9_care_leavers') IS NOT NULL DROP TABLE AA_9_care_leavers;
 IF OBJECT_ID('tempdb..#AA_9_care_leavers') IS NOT NULL DROP TABLE #AA_9_care_leavers;
@@ -1985,8 +2020,9 @@ Description:
 
 Author: D2I
 DB Compatibility: SQL Server 2014+|...
-Version: 1.0
-			0.9 PW/Blackpool major edits/reworked PW 030324
+Version: 1.1:
+            1.0: entered care date field has moved to ssd_cla_episodes 300724 RH
+			0.9: PW/Blackpool major edits/reworked 030324 PW 
             0.3: Removed old obj/item naming. 
 Status: [R]elease
 Remarks: 
@@ -1998,6 +2034,9 @@ Dependencies:
 - ssd_family
 =============================================================================
 */
+-- -- Set reporting period in Mths
+-- DECLARE @AA_ReportingPeriod INT;
+-- SET @AA_ReportingPeriod = 6; -- Mths
 
 -- Check if exists & drop
 IF OBJECT_ID('AA_10_adoption') IS NOT NULL DROP TABLE AA_10_adoption;
@@ -2052,7 +2091,7 @@ SELECT
 		WHEN d.disa_person_id is not null THEN 'a) Yes'
 		ELSE 'b) No'
 	END															AS HasDisability,
-	FORMAT(perm.perm_entered_care_date, 'dd/MM/yyyy')			AS EnteredCareDate,
+    FORMAT(clae.clae_entered_care_date, 'dd/MM/yyyy')           AS EnteredCareDate,         -- Note: date coming from ssd_cla_episodes
 	FORMAT(perm.perm_adm_decision_date, 'dd/MM/yyyy')			AS ADMSHOBPADecisionDate,
 	FORMAT(perm.perm_placement_order_date, 'dd/MM/yyyy')		AS PlacementOrderDate,
 	FORMAT(perm.perm_matched_date, 'dd/MM/yyyy')				AS MatchedForAdoptionDate,
@@ -2085,6 +2124,9 @@ LEFT JOIN
 		WHERE
 			COALESCE(dis.disa_disability_code, 'NONE') <> 'NONE'
 	) AS d ON p.pers_person_id = d.disa_person_id
+
+LEFT JOIN
+    ssd_cla_episodes clae ON p.pers_person_id = clae.clae_person_id
 
 /*PW - Commented out as FamilyID in Ofsted List 10 isn't the same FamilyID as #ssd_family - List 10 is 'Local adoptive family identifier for the adoptive family the child is matched or placed with’ i.e. an identifier for the adopter, which allows for cross-matching with List 11*/
 /*
@@ -2131,6 +2173,10 @@ Dependencies:
 =============================================================================
 */
 
+-- -- Set reporting period in months
+-- DECLARE @AA_ReportingPeriod INT;
+-- SET @AA_ReportingPeriod = 6; -- Months
+
 -- Check if exists & drop
 IF OBJECT_ID('AA_11_adopters') IS NOT NULL DROP TABLE AA_11_adopters;
 IF OBJECT_ID('tempdb..#AA_11_adopters') IS NOT NULL DROP TABLE #AA_11_adopters;
@@ -2173,7 +2219,7 @@ SELECT
         ELSE 'b) No'
     END AS HasDisability,
 
-    perm.perm_adopted_by_carer_flag                                 AS AdoptedByCarer, -- Is the (prospective) adopter fostering for adoption?
+    perm.perm_adopted_by_carer_flag                                 AS AdoptedByCarer,      -- Is the (prospective) adopter fostering for adoption?
     '01/01/1900'                                                    AS EnquiryDate,         -- Date enquiry received
     '01/01/1900'                                                    AS Stage1StartDate,     -- Date Stage 1 started
     '01/01/1900'                                                    AS Stage1EndDate,       -- Date Stage 1 ended
