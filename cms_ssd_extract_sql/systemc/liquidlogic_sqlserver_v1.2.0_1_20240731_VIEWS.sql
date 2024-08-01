@@ -1233,12 +1233,14 @@ WHERE
 
 
 
+
 /*
 =============================================================================
 Object Name: ssd_cp_visits
 Description:
 Author: D2I
-Version: 1.0
+Version: 1.1:
+            1.0: #DtoI-1715 fix on PK violation 010824 RH
             0.3: (cppv casenote date) removed 070524 RH
             0.2: cppv_person_id added, where claus removed 'STVCPCOVID' 130224 JH
 Status: [R]elease
@@ -1257,22 +1259,50 @@ IF OBJECT_ID('ssd_development.ssd_cp_visits_v') IS NOT NULL DROP VIEW ssd_develo
 -- Create View
 CREATE VIEW ssd_development.ssd_cp_visits_v AS
 SELECT
-    cn.FACT_CASENOTE_ID AS cppv_cp_visit_id,
-    p.DIM_PERSON_ID AS cppv_person_id,
-    cpv.FACT_CP_PLAN_ID AS cppv_cp_plan_id,
-    cn.EVENT_DTTM AS cppv_cp_visit_date,
-    cn.SEEN_FLAG AS cppv_cp_visit_seen,
-    cn.SEEN_ALONE_FLAG AS cppv_cp_visit_seen_alone,
-    cn.SEEN_BEDROOM_FLAG AS cppv_cp_visit_bedroom
+    cppv_cp_visit_id,  
+    cppv_person_id,            
+    cppv_cp_plan_id,  
+    cppv_cp_visit_date,
+    cppv_cp_visit_seen,
+    cppv_cp_visit_seen_alone,
+    cppv_cp_visit_bedroom
 FROM
-    HDM.Child_Social.FACT_CASENOTES AS cn
-LEFT JOIN
-    HDM.Child_Social.FACT_CP_VISIT AS cpv ON cn.FACT_CASENOTE_ID = cpv.FACT_CASENOTE_ID
-LEFT JOIN
-    HDM.Child_Social.DIM_PERSON p ON cn.DIM_PERSON_ID = p.DIM_PERSON_ID
-WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC')
-    AND (cn.EVENT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) OR cn.EVENT_DTTM IS NULL);
-
+    ( -- The query from above
+        WITH UniqueCasenotes AS (
+            SELECT
+                cn.FACT_CASENOTE_ID     AS cppv_cp_visit_id,  
+                p.DIM_PERSON_ID         AS cppv_person_id,            
+                cpv.FACT_CP_PLAN_ID     AS cppv_cp_plan_id,  
+                cn.EVENT_DTTM           AS cppv_cp_visit_date,
+                cn.SEEN_FLAG            AS cppv_cp_visit_seen,
+                cn.SEEN_ALONE_FLAG      AS cppv_cp_visit_seen_alone,
+                cn.SEEN_BEDROOM_FLAG    AS cppv_cp_visit_bedroom,
+                -- assign unique row num to each FACT_CASENOTE_ID partition, order by EVENT_DTTM desc to prioritise latest date 
+                ROW_NUMBER() OVER (PARTITION BY cn.FACT_CASENOTE_ID ORDER BY cn.EVENT_DTTM DESC) AS rn
+            FROM
+                HDM.Child_Social.FACT_CASENOTES AS cn
+            LEFT JOIN
+                HDM.Child_Social.FACT_CP_VISIT AS cpv ON cn.FACT_CASENOTE_ID = cpv.FACT_CASENOTE_ID
+            LEFT JOIN
+                HDM.Child_Social.DIM_PERSON p ON cn.DIM_PERSON_ID = p.DIM_PERSON_ID
+            WHERE
+                cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC') -- Ref. ( 'STVC','STVCPCOVID')
+                AND (cn.EVENT_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+                OR cn.EVENT_DTTM IS NULL)
+        )
+        SELECT
+            cppv_cp_visit_id,  
+            cppv_person_id,            
+            cppv_cp_plan_id,  
+            cppv_cp_visit_date,
+            cppv_cp_visit_seen,
+            cppv_cp_visit_seen_alone,
+            cppv_cp_visit_bedroom
+        FROM
+            UniqueCasenotes
+        WHERE
+            rn = 1
+    ) AS SourceData;
 
 
 
