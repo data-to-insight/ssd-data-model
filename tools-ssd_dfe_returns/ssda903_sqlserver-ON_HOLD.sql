@@ -26,7 +26,6 @@ Description:
             ""
 
 Author: D2I
-Last Modified Date: 09/02/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
@@ -37,8 +36,10 @@ Dependencies:
 - ssd_send (this temporary. SSD route for UPN is via ssd_linked_identifiers)
 =============================================================================
 */
+
 -- Check if exists & drop
-IF OBJECT_ID('tempdb..#SSDA903_header') IS NOT NULL DROP TABLE #SSDA903_header;
+IF OBJECT_ID('SSDA903_1_header') IS NOT NULL DROP TABLE SSDA903_1_header;
+IF OBJECT_ID('tempdb..#SSDA903_header') IS NOT NULL DROP TABLE #SSDA903_1_header;
 
 -- Ref default file headers from guidance
 -- CHILD,SEX,DOB,ETHNIC,UPN,MOTHER,MC_DOB
@@ -53,21 +54,21 @@ SELECT
     p.pers_is_mother                            AS MOTHER,
     FORMAT(moth.moth_childs_dob , 'dd/MM/yyyy') AS MC_DOB
 
-INTO #SSDA903_header
+INTO SSDA903_header
 
 FROM
-    #ssd_person p
+    ssd_person p
 
 LEFT JOIN 
-    #ssd_send sen ON p.pers_person_id = sen.send_person_id 
+    ssd_send sen ON p.pers_person_id = sen.send_person_id 
 
 LEFT JOIN 
-    #ssd_mother moth ON p.pers_person_id = moth.moth_person_id;
+    ssd_mother moth ON p.pers_person_id = moth.moth_person_id;
 
 -- Dev notes: How/on what date field are we filtering this back to 31st march? 
 
 -- -- [TESTING]
--- select * from #SSDA903_header;
+-- select * from SSDA903_header;
 
 
 
@@ -87,7 +88,6 @@ Description:
             be placed for adoption"
 
 Author: D2I
-Last Modified Date: 14/02/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
@@ -98,6 +98,7 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
+IF OBJECT_ID('SSDA903_adoption') IS NOT NULL DROP TABLE SSDA903_adoption;
 IF OBJECT_ID('tempdb..#SSDA903_adoption') IS NOT NULL DROP TABLE #SSDA903_adoption;
 
 -- Ref default file headers from guidance
@@ -113,14 +114,14 @@ SELECT
     perm.perm_adopter_sex               AS SEX_ADOPTR,
     perm.perm_adopter_legal_status      AS LS_ADOPTR
 
-INTO #SSDA903_adoption
+INTO SSDA903_adoption
 
 FROM 
-    #ssd_permanence perm
+    ssd_permanence perm
 
 
 LEFT JOIN   -- person table for core dets
-    #ssd_person p ON perm.perm_person_id = p.pers_person_id
+    ssd_person p ON perm.perm_person_id = p.pers_person_id
 
 WHERE
     -- Filter on last 12 months
@@ -129,7 +130,7 @@ WHERE
     OR perm.perm_decision_reversed_date     >= DATEADD(MONTH, -12, GETDATE());
 
 -- -- [TESTING]
--- select * from #SSDA903_adoption;
+-- select * from SSDA903_adoption;
 
 
 
@@ -140,9 +141,7 @@ WHERE
 Report Name: 903 [3] - children_ceased_care_during_year
 Description: 
             ""
-
 Author: D2I
-Last Modified Date: 09/02/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
@@ -152,6 +151,7 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
+IF OBJECT_ID('SSDA903_children_ceased_care_during_year') IS NOT NULL DROP TABLE SSDA903_children_ceased_care_during_year;
 IF OBJECT_ID('tempdb..#SSDA903_children_ceased_care_during_year') IS NOT NULL DROP TABLE #SSDA903_children_ceased_care_during_year;
 
 -- Ref default file headers from guidance
@@ -159,7 +159,7 @@ IF OBJECT_ID('tempdb..#SSDA903_children_ceased_care_during_year') IS NOT NULL DR
 
 
 -- -- [TESTING]
--- select * from #SSDA903_children_ceased_care_during_year;
+-- select * from SSDA903_children_ceased_care_during_year;
 
 
 
@@ -171,7 +171,6 @@ Description:
             ""
 
 Author: D2I
-Last Modified Date: 09/02/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
@@ -181,6 +180,7 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
+IF OBJECT_ID('SSDA903_children_ceasing_to_be_looked_after_for_other_reasons') IS NOT NULL DROP TABLE SSDA903_children_ceasing_to_be_looked_after_for_other_reasons;
 IF OBJECT_ID('tempdb..#SSDA903_children_ceasing_to_be_looked_after_for_other_reasons') IS NOT NULL DROP TABLE #SSDA903_children_ceasing_to_be_looked_after_for_other_reasons;
 
 -- Ref default file headers from example file
@@ -195,7 +195,7 @@ IF OBJECT_ID('tempdb..#SSDA903_children_ceasing_to_be_looked_after_for_other_rea
 
 
 -- -- [TESTING]
--- select * from #SSDA903_children_ceasing_to_be_looked_after_for_other_reasons;
+-- select * from SSDA903_children_ceasing_to_be_looked_after_for_other_reasons;
 
 
 
@@ -207,7 +207,6 @@ Description:
             ""
 
 Author: D2I
-Last Modified Date: 09/02/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
@@ -217,13 +216,14 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
+IF OBJECT_ID('SSDA903_children_looked_after_on_31st_March') IS NOT NULL DROP TABLE SSDA903_children_looked_after_on_31st_March;
 IF OBJECT_ID('tempdb..#SSDA903_children_looked_after_on_31st_March') IS NOT NULL DROP TABLE #SSDA903_children_looked_after_on_31st_March;
 
 -- Ref default file headers from example file
 -- CHILD_LA_CODE	DECOM	SEX	LEGAL_STATUS	CIN	PLACEMENT_TYPE	DOB	ETHNIC_CODE
 
 -- -- [TESTING]
--- select * from #SSDA903_children_looked_after_on_31st_March;
+-- select * from SSDA903_children_looked_after_on_31st_March;
 
 
 
@@ -236,7 +236,6 @@ Description:
             ""
 
 Author: D2I
-Last Modified Date: 09/02/24 RH
 DB Compatibility: SQL Server 2014+|...
 Version: 1.0
 Status: [*Dev, Testing, Release, Blocked, AwaitingReview, Backlog]
@@ -246,13 +245,14 @@ Dependencies:
 =============================================================================
 */
 -- Check if exists & drop
+IF OBJECT_ID('SSDA903_children_started_care_during_year') IS NOT NULL DROP TABLE SSDA903_children_started_care_during_year;
 IF OBJECT_ID('tempdb..#SSDA903_children_started_care_during_year') IS NOT NULL DROP TABLE #SSDA903_children_started_care_during_year;
 
 -- Ref default file headers from example file
 -- CHILD_LA_CODE	SEX	ETHNIC_CODE	DOB	LEGAL_STATUS	POC_START	PLACEMENT_TYPE
 
 -- -- [TESTING]
--- select * from #SSDA903_children_started_care_during_year;
+-- select * from SSDA903_children_started_care_during_year;
 
 
 

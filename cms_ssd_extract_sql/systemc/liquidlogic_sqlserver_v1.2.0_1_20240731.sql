@@ -857,6 +857,8 @@ AND EXISTS
     WHERE CAST(p.pers_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1799
     );
 
+
+
 IF @Run_SSD_As_Temporary_Tables = 0
 BEGIN
     PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
@@ -865,9 +867,9 @@ BEGIN
     ALTER TABLE ssd_development.ssd_mother ADD CONSTRAINT FK_ssd_moth_to_person 
     FOREIGN KEY (moth_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
-    -- -- [TESTING] deployment issues remain
-    -- ALTER TABLE ssd_development.ssd_mother ADD CONSTRAINT FK_ssd_child_to_person 
-    -- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
+    -- [TESTING] deployment issues remain
+    ALTER TABLE ssd_development.ssd_mother ADD CONSTRAINT FK_ssd_child_to_person 
+    FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
     -- -- [TESTING] Comment this out for ESCC until further notice
     -- ALTER TABLE ssd_development.ssd_mother ADD CONSTRAINT CHK_ssd_no_self_parenting -- Ensure person cannot be their own mother
@@ -1222,7 +1224,7 @@ CREATE TABLE ssd_development.ssd_cin_episodes
     cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A"}
     cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
     cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
-    cine_referral_team              NVARCHAR(255),  -- metadata={"item_ref":"CINE008A"}
+    cine_referral_team              NVARCHAR(48),  -- metadata={"item_ref":"CINE008A"}
     cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
 );
  
@@ -1356,7 +1358,7 @@ CREATE TABLE ssd_development.ssd_cin_assessments
     cina_assessment_auth_date       DATETIME,                   -- metadata={"item_ref":"CINA005A"}             
     cina_assessment_outcome_json    NVARCHAR(1000),             -- metadata={"item_ref":"CINA006A"}           
     cina_assessment_outcome_nfa     NCHAR(1),                   -- metadata={"item_ref":"CINA009A"}
-    cina_assessment_team            NVARCHAR(255),              -- metadata={"item_ref":"CINA007A"}
+    cina_assessment_team            NVARCHAR(48),              -- metadata={"item_ref":"CINA007A"}
     cina_assessment_worker_id       NVARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
 );
 
@@ -1655,7 +1657,7 @@ CREATE TABLE ssd_development.ssd_cin_plans (
     cinp_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINP002A"}
     cinp_cin_plan_start_date    DATETIME,                   -- metadata={"item_ref":"CINP003A"}
     cinp_cin_plan_end_date      DATETIME,                   -- metadata={"item_ref":"CINP004A"}
-    cinp_cin_plan_team          NVARCHAR(255),              -- metadata={"item_ref":"CINP005A"}
+    cinp_cin_plan_team          NVARCHAR(48),              -- metadata={"item_ref":"CINP005A"}
     cinp_cin_plan_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"CINP006A"}
 );
  
@@ -1872,7 +1874,7 @@ CREATE TABLE ssd_development.ssd_s47_enquiry (
     s47e_s47_end_date                   DATETIME,                   -- metadata={"item_ref":"S47E005A"}
     s47e_s47_nfa                        NCHAR(1),                   -- metadata={"item_ref":"S47E006A"}
     s47e_s47_outcome_json               NVARCHAR(1000),             -- metadata={"item_ref":"S47E007A"}
-    s47e_s47_completed_by_team          NVARCHAR(255),              -- metadata={"item_ref":"S47E009A"}
+    s47e_s47_completed_by_team          NVARCHAR(48),              -- metadata={"item_ref":"S47E009A"}
     s47e_s47_completed_by_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"S47E008A"}
 );
 
@@ -1989,7 +1991,7 @@ CREATE TABLE ssd_development.ssd_initial_cp_conference (
     icpc_icpc_date              DATETIME,                   -- metadata={"item_ref":"ICPC005A"}
     icpc_icpc_outcome_cp_flag   NCHAR(1),                   -- metadata={"item_ref":"ICPC013A"}
     icpc_icpc_outcome_json      NVARCHAR(1000),             -- metadata={"item_ref":"ICPC006A"}
-    icpc_icpc_team              NVARCHAR(255),              -- metadata={"item_ref":"ICPC007A"}
+    icpc_icpc_team              NVARCHAR(48),              -- metadata={"item_ref":"ICPC007A"}
     icpc_icpc_worker_id         NVARCHAR(100),              -- metadata={"item_ref":"ICPC008A"}
 );
  
@@ -2096,7 +2098,8 @@ PRINT 'Table created: ' + @TableName;
 Object Name: ssd_cp_plans
 Description:
 Author: D2I
-Version: 1.0
+Version: 1.1:
+            1.0: #DtoI-1809 fix on cppl_referral_id/cppl_icpc_id 010824 RH
             0.4: cppl_cp_plan_ola type change from nvarchar 100524 RH
             0.3: added IS_OLA field to identify OLA temporary plans
             which need to be excluded from statutory returns 090224 JCH
@@ -2147,8 +2150,14 @@ INSERT INTO ssd_development.ssd_cp_plans (
 )
 SELECT
     cpp.FACT_CP_PLAN_ID                 AS cppl_cp_plan_id,
-    cpp.FACT_REFERRAL_ID                AS cppl_referral_id,
-    cpp.FACT_INITIAL_CP_CONFERENCE_ID   AS cppl_icpc_id,
+    CASE 
+        WHEN cpp.FACT_REFERRAL_ID = -1 THEN NULL
+        ELSE cpp.FACT_REFERRAL_ID
+    END                                 AS cppl_referral_id,
+    CASE 
+        WHEN cpp.FACT_INITIAL_CP_CONFERENCE_ID = -1 THEN NULL
+        ELSE cpp.FACT_INITIAL_CP_CONFERENCE_ID
+    END                                 AS cppl_icpc_id,
     cpp.DIM_PERSON_ID                   AS cppl_person_id,
     cpp.START_DTTM                      AS cppl_cp_plan_start_date,
     cpp.END_DTTM                        AS cppl_cp_plan_end_date,
@@ -2173,12 +2182,20 @@ IF @Run_SSD_As_Temporary_Tables = 0
 BEGIN
     PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
     
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_development.ssd_cp_plans ADD CONSTRAINT FK_ssd_cppl_person_id
-    -- FOREIGN KEY (cppl_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
+    -- Add constraint(s)
+    ALTER TABLE ssd_development.ssd_cp_plans ADD CONSTRAINT FK_ssd_cppl_person_id
+    FOREIGN KEY (cppl_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
+    -- [TESTING]
     -- ALTER TABLE ssd_development.ssd_cp_plans ADD CONSTRAINT FK_ssd_cppl_icpc_id
     -- FOREIGN KEY (cppl_icpc_id) REFERENCES ssd_development.ssd_initial_cp_conference(icpc_icpc_id);
+
+    -- -- used to test compatibility with the above constraint
+    -- SELECT cppl_icpc_id
+    -- FROM ssd_cp_plans
+    -- WHERE cppl_icpc_id IS NOT NULL
+    --   AND cppl_icpc_id NOT IN (SELECT icpc_icpc_id FROM ssd_initial_cp_conference)
+    --   and cppl_icpc_id <> -1;
 
     -- Create index(es)
     CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_person_id ON ssd_development.ssd_cp_plans(cppl_person_id);
@@ -2278,14 +2295,16 @@ IF @Run_SSD_As_Temporary_Tables = 0
 BEGIN
     PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
     
-    -- -- Add constraint(s)
+    -- -- Add constraint(s) [TESTING]
     -- ALTER TABLE ssd_development.ssd_cp_visits ADD CONSTRAINT FK_ssd_cppv_to_cppl
     -- FOREIGN KEY (cppv_cp_plan_id) REFERENCES ssd_development.ssd_cp_plans(cppl_cp_plan_id);
 
-    -- -- DEV NOTES: [TESTING]
-    -- -- Msg 547, Level 16, State 0, Line 105
-    -- -- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_ssd_cppv_to_cppl". 
-    -- -- The conflict occurred in database "HDM_Local", table "ssd_development.ssd_cp_plans", column 'cppl_cp_plan_id'.
+    -- -- [TESTING] investigating the above constraint failure. (29 IDs not in cP_plans)
+    -- SELECT cppv_cp_plan_id
+    -- FROM ssd_development.ssd_cp_visits
+    -- WHERE cppv_cp_plan_id IS NOT NULL
+    --   AND cppv_cp_plan_id NOT IN (SELECT cppl_cp_plan_id FROM ssd_development.ssd_cp_plans);
+
 
     -- Create index(es)
     CREATE NONCLUSTERED INDEX idx_ssd_cppv_person_id        ON ssd_development.ssd_cp_visits(cppv_person_id);
@@ -2721,8 +2740,6 @@ BEGIN
     PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
     
     -- -- Add constraint(s)
-    -- ALTER TABLE ssd_development.ssd_cla_convictions ADD CONSTRAINT FK_ssd_clac_to_clae 
-    -- FOREIGN KEY (clac_person_id) REFERENCES ssd_development.ssd_cla_episodes(clae_person_id);
 
     -- Create index(es)
     CREATE NONCLUSTERED INDEX idx_ssd_clac_person_id ON ssd_development.ssd_cla_convictions(clac_person_id);
@@ -3433,6 +3450,7 @@ IF OBJECT_ID('tempdb..#ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_cla_
 
 -- persistent tmp/pre-processing table (this not part of core ssd, clean-up occurs later)
 -- replacing all commented above
+
 -- Check if exists & drop
 IF OBJECT_ID('ssd_development.ssd_pre_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_pre_cla_care_plan;
 IF OBJECT_ID('tempdb..#ssd_pre_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_pre_cla_care_plan;
@@ -3833,7 +3851,7 @@ Object Name: ssd_missing
 Description: 
 Author: D2I
 Version: 1.1
-            1.0 miss_ missing_ rhi_accepted/offered 'NA' not valid value 240524 RH
+            1.0 miss_ missing_ rhi_accepted/offered 'NA' not valid value #DtoI-1617 240524 RH
             0.9 miss_missing_rhi_accepted/offered increased to size (2) 100524 RH
 Status: [R]elease
 Remarks: 
@@ -3882,14 +3900,14 @@ SELECT
     CASE 
         WHEN UPPER(fmp.RETURN_INTERVIEW_OFFERED) = 'YES' THEN 'Y'
         WHEN UPPER(fmp.RETURN_INTERVIEW_OFFERED) = 'NO' THEN 'N'
-        WHEN UPPER(fmp.RETURN_INTERVIEW_OFFERED) = 'NA' THEN 'NA'
+        WHEN UPPER(fmp.RETURN_INTERVIEW_OFFERED) = 'NA' THEN 'NA' -- #DtoI-1617
         WHEN fmp.RETURN_INTERVIEW_OFFERED = '' THEN NULL
         ELSE NULL
     END AS miss_missing_rhi_offered,
     CASE 
         WHEN UPPER(fmp.RETURN_INTERVIEW_ACCEPTED) = 'YES' THEN 'Y'
         WHEN UPPER(fmp.RETURN_INTERVIEW_ACCEPTED) = 'NO' THEN 'N'
-        WHEN UPPER(fmp.RETURN_INTERVIEW_ACCEPTED) = 'NA' THEN 'NA'
+        WHEN UPPER(fmp.RETURN_INTERVIEW_ACCEPTED) = 'NA' THEN 'NA' -- #DtoI-1617
         WHEN fmp.RETURN_INTERVIEW_ACCEPTED = '' THEN NULL
         ELSE NULL
     END AS miss_missing_rhi_accepted
@@ -3982,7 +4000,7 @@ CREATE TABLE ssd_development.ssd_care_leavers
     clea_care_leaver_activity               NVARCHAR(100),              -- metadata={"item_ref":"CLEA008A"}
     clea_pathway_plan_review_date           DATETIME,                   -- metadata={"item_ref":"CLEA009A"}
     clea_care_leaver_personal_advisor       NVARCHAR(100),              -- metadata={"item_ref":"CLEA010A"}
-    clea_care_leaver_allocated_team         NVARCHAR(255),              -- metadata={"item_ref":"CLEA011A"}
+    clea_care_leaver_allocated_team         NVARCHAR(48),              -- metadata={"item_ref":"CLEA011A"}
     clea_care_leaver_worker_id              NVARCHAR(100)               -- metadata={"item_ref":"CLEA012A"}
 );
  
@@ -4584,7 +4602,7 @@ CREATE TABLE ssd_development.ssd_involvements (
     invo_involvements_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"INVO005A"}
     invo_professional_id        NVARCHAR(48),               -- metadata={"item_ref":"INVO006A"}
     invo_professional_role_id   NVARCHAR(200),              -- metadata={"item_ref":"INVO007A"}
-    invo_professional_team      NVARCHAR(255),              -- metadata={"item_ref":"INVO009A", "info":"This is a truncated field at 255"}
+    invo_professional_team      NVARCHAR(48),              -- metadata={"item_ref":"INVO009A", "info":"This is a truncated field at 255"}
     invo_person_id              NVARCHAR(48),               -- metadata={"item_ref":"INVO011A"}
     invo_involvement_start_date DATETIME,                   -- metadata={"item_ref":"INVO002A"}
     invo_involvement_end_date   DATETIME,                   -- metadata={"item_ref":"INVO003A"}
@@ -4679,8 +4697,6 @@ PRINT 'Table created: ' + @TableName;
 
 
 
-
-
 /* 
 =============================================================================
 Object Name: ssd_linked_identifiers
@@ -4711,8 +4727,6 @@ Dependencies:
 */
 -- [TESTING] Create marker
 SET @TableName = N'ssd_linked_identifiers';
-
-
 
 -- Check if exists, & drop 
 IF OBJECT_ID('ssd_development.linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_linked_identifiers;
