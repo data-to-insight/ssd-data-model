@@ -846,14 +846,17 @@ WHERE
     AND
     fpr.END_DTTM IS NULL
  
-AND EXISTS
-    ( -- only ssd relevant records
-    SELECT 1
-    FROM #ssd_person p
-    WHERE CAST(p.pers_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1799
+    AND (
+        EXISTS ( -- only ssd relevant records
+            SELECT 1
+            FROM ssd_development.ssd_person p
+            WHERE CAST(p.pers_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1799
+        ) OR EXISTS ( 
+            SELECT 1 -- #DtoI-1806
+            FROM ssd_development.ssd_cin_episodes ce
+            WHERE CAST(ce.cine_person_id AS INT) = fpr.DIM_PERSON_ID
+        )
     );
-
-
 
 IF @Run_SSD_As_Temporary_Tables = 0
 BEGIN

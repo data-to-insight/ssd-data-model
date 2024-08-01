@@ -798,7 +798,8 @@ PRINT 'Table created: ' + @TableName;
 Object Name: ssd_mother
 Description: Contains parent-child relations between mother-child 
 Author: D2I
-Version: 1.0
+Version: 1.1:
+            1.0: Add ssd_cin_episodes filter towards #DtoI-1806 010824 RH
             0.2: updated to exclude relationships with an end date 280224 JH
 Status: [R]elease
 Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
@@ -849,12 +850,18 @@ WHERE
     AND
     fpr.END_DTTM IS NULL
  
-AND EXISTS
-    ( -- only ssd relevant records
-    SELECT 1
-    FROM ssd_development.ssd_person p
-    WHERE CAST(p.pers_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1799
+    AND (
+        EXISTS ( -- only ssd relevant records
+            SELECT 1
+            FROM ssd_development.ssd_person p
+            WHERE CAST(p.pers_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1799
+        ) OR EXISTS ( 
+            SELECT 1 
+            FROM ssd_development.ssd_cin_episodes ce
+            WHERE CAST(ce.cine_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1806
+        )
     );
+
 
 
 
@@ -5848,133 +5855,133 @@ SELECT * FROM ssd_development.ssd_extract_log ORDER BY rows_inserted DESC;
 
 
 
-/* 
-=============================================================================
-MOD Name: involvements history, involvements type history
-Description: 
-Author: D2I
-Version: 0.2
-            0.1: involvement_history_json size change from 4000 to max fix trunc err 040724 RH
-Status: [DT]ataTesting
-Remarks: The addition of these MOD columns is overhead heavy. This is <especially> noticable 
-         on larger dimension versions of ssd_person (i.e. > 40k).
-         Recommend that this MOD is switched off during any test runs|peak-time extract runs
-Dependencies: 
-- FACT_INVOLVEMENTS
-- ssd_person
-=============================================================================
-*/
--- [TESTING] Create marker
-SET @TableName = N' Involvement History';
-PRINT 'Adding MOD: ' + @TableName;
+-- /* 
+-- =============================================================================
+-- MOD Name: involvements history, involvements type history
+-- Description: 
+-- Author: D2I
+-- Version: 0.2
+--             0.1: involvement_history_json size change from 4000 to max fix trunc err 040724 RH
+-- Status: [DT]ataTesting
+-- Remarks: The addition of these MOD columns is overhead heavy. This is <especially> noticable 
+--          on larger dimension versions of ssd_person (i.e. > 40k).
+--          Recommend that this MOD is switched off during any test runs|peak-time extract runs
+-- Dependencies: 
+-- - FACT_INVOLVEMENTS
+-- - ssd_person
+-- =============================================================================
+-- */
+-- -- [TESTING] Create marker
+-- SET @TableName = N' Involvement History';
+-- PRINT 'Adding MOD: ' + @TableName;
 
-ALTER TABLE ssd_development.ssd_person
-ADD pers_involvement_history_json NVARCHAR(max),  -- Adjust data type as needed
-    pers_involvement_type_story NVARCHAR(1000);   -- Adjust data type as needed
+-- ALTER TABLE ssd_development.ssd_person
+-- ADD pers_involvement_history_json NVARCHAR(max),  -- Adjust data type as needed
+--     pers_involvement_type_story NVARCHAR(1000);   -- Adjust data type as needed
 
-GO -- ensure new cols ALTER TABLE completed prior to onward processing
--- All variables now reset, will require redeclaring if testing below in isolation
+-- GO -- ensure new cols ALTER TABLE completed prior to onward processing
+-- -- All variables now reset, will require redeclaring if testing below in isolation
 
--- CTE for involvement history incl. worker data
-WITH InvolvementHistoryCTE AS (
-    SELECT 
-        fi.DIM_PERSON_ID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
-        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
+-- -- CTE for involvement history incl. worker data
+-- WITH InvolvementHistoryCTE AS (
+--     SELECT 
+--         fi.DIM_PERSON_ID,
+--         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
+--         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
+--         MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
 
-        JSON_QUERY((
-            -- structure of the main|complete invovements history json 
-            SELECT 
-                ISNULL(fi2.FACT_INVOLVEMENTS_ID, '')              AS INVOLVEMENT_ID,
-                ISNULL(fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '')  AS INVOLVEMENT_TYPE_CODE,
-                ISNULL(fi2.START_DTTM, '')                        AS START_DATE, 
-                ISNULL(fi2.END_DTTM, '')                          AS END_DATE, 
-                ISNULL(fi2.DIM_WORKER_ID, '')                     AS WORKER_ID, 
-                ISNULL(fi2.DIM_DEPARTMENT_ID, '')                 AS DEPARTMENT_ID
-            FROM 
-                HDM.Child_Social.FACT_INVOLVEMENTS fi2
-            WHERE 
-                fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
+--         JSON_QUERY((
+--             -- structure of the main|complete invovements history json 
+--             SELECT 
+--                 ISNULL(fi2.FACT_INVOLVEMENTS_ID, '')              AS INVOLVEMENT_ID,
+--                 ISNULL(fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '')  AS INVOLVEMENT_TYPE_CODE,
+--                 ISNULL(fi2.START_DTTM, '')                        AS START_DATE, 
+--                 ISNULL(fi2.END_DTTM, '')                          AS END_DATE, 
+--                 ISNULL(fi2.DIM_WORKER_ID, '')                     AS WORKER_ID, 
+--                 ISNULL(fi2.DIM_DEPARTMENT_ID, '')                 AS DEPARTMENT_ID
+--             FROM 
+--                 HDM.Child_Social.FACT_INVOLVEMENTS fi2
+--             WHERE 
+--                 fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
 
-            FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-            -- rem WITHOUT_ARRAY_WRAPPER if restricting FULL contact history in _json (involvement_history_json)
-        )) AS involvement_history
-    FROM (
+--             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--             -- rem WITHOUT_ARRAY_WRAPPER if restricting FULL contact history in _json (involvement_history_json)
+--         )) AS involvement_history
+--     FROM (
 
-        -- commented out to enable FULL contact history in _json (involvement_history_json). Re-enable if wanting only most recent/1
-        SELECT *,
-            -- ROW_NUMBER() OVER (
-            --     PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
-            --     ORDER BY FACT_INVOLVEMENTS_ID DESC
-            -- ) AS rn,
-            -- only applied if the following fi.rn = 1 is uncommented
+--         -- commented out to enable FULL contact history in _json (involvement_history_json). Re-enable if wanting only most recent/1
+--         SELECT *,
+--             -- ROW_NUMBER() OVER (
+--             --     PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
+--             --     ORDER BY FACT_INVOLVEMENTS_ID DESC
+--             -- ) AS rn,
+--             -- only applied if the following fi.rn = 1 is uncommented
 
-            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
-        FROM HDM.Child_Social.FACT_INVOLVEMENTS
-        WHERE 
-            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
-            -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
-            AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-            AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
-            AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
-                                                -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
-    ) fi
+--             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
+--         FROM HDM.Child_Social.FACT_INVOLVEMENTS
+--         WHERE 
+--             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
+--             -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
+--             AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+--             AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
+--             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
+--                                                 -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
+--     ) fi
 
-WHERE 
-    -- -- Commented out to enable FULL contact history in _json (involvement_history_json). Re-enable if wanting only most recent/1
-    -- fi.rn = 1
-    -- AND
+-- WHERE 
+--     -- -- Commented out to enable FULL contact history in _json (involvement_history_json). Re-enable if wanting only most recent/1
+--     -- fi.rn = 1
+--     -- AND
 
-    EXISTS (    -- Remove filter IF wishing to extract records beyond scope of SSD timeframe
-        SELECT 1 FROM ssd_development.ssd_person p
-         WHERE CAST(p.pers_person_id AS INT) = fi.DIM_PERSON_ID -- #DtoI-1799
+--     EXISTS (    -- Remove filter IF wishing to extract records beyond scope of SSD timeframe
+--         SELECT 1 FROM ssd_development.ssd_person p
+--          WHERE CAST(p.pers_person_id AS INT) = fi.DIM_PERSON_ID -- #DtoI-1799
 
-    )
+--     )
 
-    GROUP BY 
-        fi.DIM_PERSON_ID
-),
--- CTE for involvement type story
-InvolvementTypeStoryCTE AS (
-    SELECT 
-        fi.DIM_PERSON_ID,
-        STUFF((
-            -- Concat involvement type codes into string
-            -- cannot use STRING AGG as appears to not work (Needs v2017+)
-            SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
-            FROM HDM.Child_Social.FACT_INVOLVEMENTS fi3
-            WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
+--     GROUP BY 
+--         fi.DIM_PERSON_ID
+-- ),
+-- -- CTE for involvement type story
+-- InvolvementTypeStoryCTE AS (
+--     SELECT 
+--         fi.DIM_PERSON_ID,
+--         STUFF((
+--             -- Concat involvement type codes into string
+--             -- cannot use STRING AGG as appears to not work (Needs v2017+)
+--             SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
+--             FROM HDM.Child_Social.FACT_INVOLVEMENTS fi3
+--             WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
 
-            AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-                SELECT 1 FROM ssd_development.ssd_person p
-             WHERE CAST(p.pers_person_id AS INT) = fi3.DIM_PERSON_ID -- #DtoI-1799
+--             AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+--                 SELECT 1 FROM ssd_development.ssd_person p
+--              WHERE CAST(p.pers_person_id AS INT) = fi3.DIM_PERSON_ID -- #DtoI-1799
 
-            )
+--             )
 
-            ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
-            FOR XML PATH('')
-        ), 1, 1, '') AS InvolvementTypeStory
-    FROM 
-        HDM.Child_Social.FACT_INVOLVEMENTS fi
+--             ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
+--             FOR XML PATH('')
+--         ), 1, 1, '') AS InvolvementTypeStory
+--     FROM 
+--         HDM.Child_Social.FACT_INVOLVEMENTS fi
     
-    WHERE 
-        EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
-            SELECT 1 FROM ssd_development.ssd_person p
-             WHERE CAST(p.pers_person_id AS INT) = fi.DIM_PERSON_ID -- #DtoI-1799
+--     WHERE 
+--         EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
+--             SELECT 1 FROM ssd_development.ssd_person p
+--              WHERE CAST(p.pers_person_id AS INT) = fi.DIM_PERSON_ID -- #DtoI-1799
              
-        )
-    GROUP BY 
-        fi.DIM_PERSON_ID
-)
+--         )
+--     GROUP BY 
+--         fi.DIM_PERSON_ID
+-- )
 
 
--- Update
-UPDATE p
-SET
-    p.pers_involvement_history_json = ih.involvement_history,
-    p.pers_involvement_type_story = CONCAT('[', its.InvolvementTypeStory, ']')
-FROM ssd_development.ssd_person p
-LEFT JOIN InvolvementHistoryCTE ih ON CAST(p.pers_person_id AS INT) = ih.DIM_PERSON_ID -- #DtoI-1799
-LEFT JOIN InvolvementTypeStoryCTE its ON CAST(p.pers_person_id AS INT) = its.DIM_PERSON_ID; -- #DtoI-1799
+-- -- Update
+-- UPDATE p
+-- SET
+--     p.pers_involvement_history_json = ih.involvement_history,
+--     p.pers_involvement_type_story = CONCAT('[', its.InvolvementTypeStory, ']')
+-- FROM ssd_development.ssd_person p
+-- LEFT JOIN InvolvementHistoryCTE ih ON CAST(p.pers_person_id AS INT) = ih.DIM_PERSON_ID -- #DtoI-1799
+-- LEFT JOIN InvolvementTypeStoryCTE its ON CAST(p.pers_person_id AS INT) = its.DIM_PERSON_ID; -- #DtoI-1799
 
