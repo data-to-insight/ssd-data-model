@@ -792,6 +792,144 @@ PRINT 'Table created: ' + @TableName;
 
 /* 
 =============================================================================
+Object Name: ssd_cin_episodes
+Description: 
+Author: D2I
+Version: 1.4
+            1.3 cine_referral_team now DIM_DEPARTMENT_ID #DtoI-1762 290724 RH
+            1.2: cine_referral_outcome_json size 500 to 4000 to include COMMENTS 160724 RH
+            1.2: fr.OUTCOME_COMMENTS added cine_referral_outcome_json #DtoI-1796 160724 RH
+            1.2: fr.TOTAL_NUMBER_OF_OUTCOMES added cine_referral_outcome_json #DtoI-1796 160724 RH
+            1.2: rem NFA_OUTCOME from cine_referral_outcome_json #DtoI-1796 160724 RH
+            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
+            0.3 primary _need suffix of _code added #DtoI-1738 2105 RH
+            0.2: primary _need type/size adjustment from revised spec 160524 RH
+            0.1: contact_source_desc added, _source now populated with ID 141223 RH
+Status: [R]elease
+Remarks: 
+Dependencies: 
+- @ssd_timeframe_years
+- FACT_REFERRALS
+=============================================================================
+*/
+-- [TESTING] Create marker
+SET @TableName = N'ssd_cin_episodes';
+
+
+
+-- Check if exists & drop
+IF OBJECT_ID('#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
+IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
+
+-- Create structure
+CREATE TABLE #ssd_cin_episodes
+(
+    cine_referral_id                NVARCHAR(48) PRIMARY KEY NOT NULL,-- metadata={"item_ref":"CINE001A"}
+    cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
+    cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
+    cine_cin_primary_need_code      NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
+    cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
+    cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
+    cine_referral_outcome_json      NVARCHAR(4000),  -- metadata={"item_ref":"CINE005A"}
+    cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A"}
+    cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
+    cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
+    cine_referral_team              NVARCHAR(48),  -- metadata={"item_ref":"CINE008A"}
+    cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
+);
+ 
+-- Insert data
+INSERT INTO #ssd_cin_episodes
+(
+    cine_referral_id,
+    cine_person_id,
+    cine_referral_date,
+    cine_cin_primary_need_code,
+    cine_referral_source_code,
+    cine_referral_source_desc,
+    cine_referral_outcome_json,
+    cine_referral_nfa,
+    cine_close_reason,
+    cine_close_date,
+    cine_referral_team,
+    cine_referral_worker_id
+)
+SELECT
+    fr.FACT_REFERRAL_ID,
+    fr.DIM_PERSON_ID,
+    fr.REFRL_START_DTTM,
+    fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE,
+    fr.DIM_LOOKUP_CONT_SORC_ID,
+    fr.DIM_LOOKUP_CONT_SORC_ID_DESC,
+    (
+        SELECT
+            -- SSD standard 
+            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
+            ISNULL(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS SINGLE_ASSESSMENT_FLAG,
+            -- ISNULL(fr.OUTCOME_NFA_FLAG, '')                 AS NFA_FLAG,
+            ISNULL(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS STRATEGY_DISCUSSION_FLAG,
+            ISNULL(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS CLA_REQUEST_FLAG,
+            ISNULL(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS NON_AGENCY_ADOPTION_FLAG,
+            ISNULL(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS PRIVATE_FOSTERING_FLAG,
+            ISNULL(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS CP_TRANSFER_IN_FLAG,
+            ISNULL(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS CP_CONFERENCE_FLAG,
+            ISNULL(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS CARE_LEAVER_FLAG,
+            ISNULL(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS OTHER_OUTCOMES_EXIST_FLAG,
+            CASE 
+                WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL  -- to counter -1 values
+                ELSE fr.TOTAL_NO_OF_OUTCOMES 
+            END                                             AS NUMBER_OF_OUTCOMES,
+            ISNULL(fr.OUTCOME_COMMENTS, '')                 AS COMMENTS
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS cine_referral_outcome_json,
+    fr.OUTCOME_NFA_FLAG,
+    fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
+    fr.REFRL_END_DTTM,
+    fr.DIM_DEPARTMENT_ID, -- Swap out on DIM_DEPARTMENT_ID_DESC #DtoI-1762
+    fr.DIM_WORKER_ID_DESC
+FROM
+    HDM.Child_Social.FACT_REFERRALS AS fr
+ 
+WHERE
+    (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())    -- #DtoI-1806
+    OR fr.REFRL_END_DTTM IS NULL)
+
+AND
+    DIM_PERSON_ID <> -1  -- Exclude rows with -1
+
+AND EXISTS
+    ( -- only ssd relevant records
+    SELECT 1
+    FROM #ssd_person p
+    WHERE CAST(p.pers_person_id AS INT) = fr.DIM_PERSON_ID -- #DtoI-1799
+    );
+
+    
+IF @Run_SSD_As_Temporary_Tables = 0
+BEGIN
+    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
+    
+    -- Add constraint(s)
+    ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
+    FOREIGN KEY (cine_person_id) REFERENCES #ssd_person(pers_person_id);
+
+    -- Create index(es)
+    CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id    ON #ssd_cin_episodes(cine_person_id);
+    CREATE NONCLUSTERED INDEX idx_ssd_cin_referral_date             ON #ssd_cin_episodes(cine_referral_date);
+    CREATE NONCLUSTERED INDEX idx_ssd_cin_close_date                ON #ssd_cin_episodes(cine_close_date);
+END
+
+
+
+-- [TESTING] Table added
+PRINT 'Table created: ' + @TableName;
+
+
+
+
+
+/* 
+=============================================================================
 Object Name: ssd_mother
 Description: Contains parent-child relations between mother-child 
 Author: D2I
@@ -866,9 +1004,9 @@ BEGIN
     ALTER TABLE #ssd_mother ADD CONSTRAINT FK_ssd_moth_to_person 
     FOREIGN KEY (moth_person_id) REFERENCES #ssd_person(pers_person_id);
 
-    -- [TESTING] deployment issues remain
-    ALTER TABLE #ssd_mother ADD CONSTRAINT FK_ssd_child_to_person 
-    FOREIGN KEY (moth_childs_person_id) REFERENCES #ssd_person(pers_person_id);
+    -- -- [TESTING] deployment issues remain
+    -- ALTER TABLE #ssd_mother ADD CONSTRAINT FK_ssd_child_to_person 
+    -- FOREIGN KEY (moth_childs_person_id) REFERENCES #ssd_person(pers_person_id);
 
     -- -- [TESTING] Comment this out for ESCC until further notice
     -- ALTER TABLE #ssd_mother ADD CONSTRAINT CHK_ssd_no_self_parenting -- Ensure person cannot be their own mother
@@ -1171,142 +1309,6 @@ BEGIN
     CREATE NONCLUSTERED INDEX idx_ssd_early_help_end_date               ON #ssd_early_help_episodes(earl_episode_end_date);
 END
 
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_cin_episodes
-Description: 
-Author: D2I
-Version: 1.4
-            1.3 cine_referral_team now DIM_DEPARTMENT_ID #DtoI-1762 290724 RH
-            1.2: cine_referral_outcome_json size 500 to 4000 to include COMMENTS 160724 RH
-            1.2: fr.OUTCOME_COMMENTS added cine_referral_outcome_json #DtoI-1796 160724 RH
-            1.2: fr.TOTAL_NUMBER_OF_OUTCOMES added cine_referral_outcome_json #DtoI-1796 160724 RH
-            1.2: rem NFA_OUTCOME from cine_referral_outcome_json #DtoI-1796 160724 RH
-            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
-            0.3 primary _need suffix of _code added #DtoI-1738 2105 RH
-            0.2: primary _need type/size adjustment from revised spec 160524 RH
-            0.1: contact_source_desc added, _source now populated with ID 141223 RH
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- @ssd_timeframe_years
-- FACT_REFERRALS
-=============================================================================
-*/
--- [TESTING] Create marker
-SET @TableName = N'ssd_cin_episodes';
-
-
-
--- Check if exists & drop
-IF OBJECT_ID('#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
-IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
-
--- Create structure
-CREATE TABLE #ssd_cin_episodes
-(
-    cine_referral_id                NVARCHAR(48) PRIMARY KEY NOT NULL,-- metadata={"item_ref":"CINE001A"}
-    cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
-    cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
-    cine_cin_primary_need_code      NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
-    cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
-    cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
-    cine_referral_outcome_json      NVARCHAR(4000),  -- metadata={"item_ref":"CINE005A"}
-    cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A"}
-    cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
-    cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
-    cine_referral_team              NVARCHAR(48),  -- metadata={"item_ref":"CINE008A"}
-    cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
-);
- 
--- Insert data
-INSERT INTO #ssd_cin_episodes
-(
-    cine_referral_id,
-    cine_person_id,
-    cine_referral_date,
-    cine_cin_primary_need_code,
-    cine_referral_source_code,
-    cine_referral_source_desc,
-    cine_referral_outcome_json,
-    cine_referral_nfa,
-    cine_close_reason,
-    cine_close_date,
-    cine_referral_team,
-    cine_referral_worker_id
-)
-SELECT
-    fr.FACT_REFERRAL_ID,
-    fr.DIM_PERSON_ID,
-    fr.REFRL_START_DTTM,
-    fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE,
-    fr.DIM_LOOKUP_CONT_SORC_ID,
-    fr.DIM_LOOKUP_CONT_SORC_ID_DESC,
-    (
-        SELECT
-            -- SSD standard 
-            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
-            ISNULL(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS SINGLE_ASSESSMENT_FLAG,
-            -- ISNULL(fr.OUTCOME_NFA_FLAG, '')                 AS NFA_FLAG,
-            ISNULL(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS STRATEGY_DISCUSSION_FLAG,
-            ISNULL(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS CLA_REQUEST_FLAG,
-            ISNULL(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS NON_AGENCY_ADOPTION_FLAG,
-            ISNULL(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS PRIVATE_FOSTERING_FLAG,
-            ISNULL(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS CP_TRANSFER_IN_FLAG,
-            ISNULL(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS CP_CONFERENCE_FLAG,
-            ISNULL(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS CARE_LEAVER_FLAG,
-            ISNULL(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS OTHER_OUTCOMES_EXIST_FLAG,
-            CASE 
-                WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL  -- to counter -1 values
-                ELSE fr.TOTAL_NO_OF_OUTCOMES 
-            END                                             AS NUMBER_OF_OUTCOMES,
-            ISNULL(fr.OUTCOME_COMMENTS, '')                 AS COMMENTS
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        ) AS cine_referral_outcome_json,
-    fr.OUTCOME_NFA_FLAG,
-    fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
-    fr.REFRL_END_DTTM,
-    fr.DIM_DEPARTMENT_ID, -- Swap out on DIM_DEPARTMENT_ID_DESC #DtoI-1762
-    fr.DIM_WORKER_ID_DESC
-FROM
-    HDM.Child_Social.FACT_REFERRALS AS fr
- 
-WHERE
-    (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())    -- #DtoI-1806
-    OR fr.REFRL_END_DTTM IS NULL)
-
-AND
-    DIM_PERSON_ID <> -1  -- Exclude rows with -1
-
-AND EXISTS
-    ( -- only ssd relevant records
-    SELECT 1
-    FROM #ssd_person p
-    WHERE CAST(p.pers_person_id AS INT) = fr.DIM_PERSON_ID -- #DtoI-1799
-    );
-
-    
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE #ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
-    FOREIGN KEY (cine_person_id) REFERENCES #ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id    ON #ssd_cin_episodes(cine_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cin_referral_date             ON #ssd_cin_episodes(cine_referral_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_cin_close_date                ON #ssd_cin_episodes(cine_close_date);
-END
 
 
 
