@@ -278,8 +278,8 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 CREATE TABLE ssd_development.ssd_person (
     pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
     pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}   
-    pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A"} 
-    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"T", "expected_data":["unknown","NULL", "F", "U", "M", "I"]}       
+    pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If additional status to Gender is held, otherwise dup of pers_gender"}    
+    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown","NULL","F","U","M","I"]}       
     pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"} 
     pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
     pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
@@ -309,8 +309,8 @@ WITH f903_data_CTE AS (
 INSERT INTO ssd_development.ssd_person (
     pers_legacy_id,
     pers_person_id,
-    pers_sex,
-    pers_gender, -- Ensure this is mapped to GENDER_MAIN_CODE
+    pers_sex,       -- sex and gender currently extracted as one
+    pers_gender,    -- 
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,                               
@@ -322,11 +322,11 @@ INSERT INTO ssd_development.ssd_person (
     pers_nationality,
     ssd_flag
 )
-SELECT
+SELECT TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING]
     p.LEGACY_ID,
-    CAST(p.DIM_PERSON_ID AS NVARCHAR(48)), -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
-    p.GENDER_MAIN_CODE AS pers_sex, -- Assuming pers_sex is meant to map to GENDER_MAIN_CODE
-    p.GENDER_MAIN_CODE, -- Ensure this maps correctly to pers_gender
+    CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
+    'SSD_PH' AS pers_sex,                   -- Placeholder for those LAs that store sex and gender independently
+    p.GENDER_MAIN_CODE,                     -- Gender as used in stat-returns
     p.ETHNICITY_MAIN_CODE,
     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
@@ -349,63 +349,13 @@ SELECT
         ELSE NULL -- No child relation found
     END,
     p.NATNL_CODE,
-    1
+    1 AS ssd_flag -- Non-core data flag for D2I filter testing [TESTING]
 FROM
     HDM.Child_Social.DIM_PERSON AS p
 
--- -- Insert data
--- INSERT INTO ssd_development.ssd_person (
---     pers_legacy_id,
---     pers_person_id,
---     pers_sex,
---     pers_gender,
---     pers_ethnicity,
---     pers_dob,
---     pers_common_child_id,                               
---     pers_upn_unknown,                                  
---     pers_send_flag,
---     pers_expected_dob,
---     pers_death_date,
---     pers_is_mother,
---     pers_nationality,
---     ssd_flag
--- )
--- SELECT
---     p.LEGACY_ID,
---     CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),              -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
---     'SSD_PH' AS pers_sex,                     -- 
---     p.GENDER_MAIN_CODE,
---     p.NHS_NUMBER,                                       
---     p.ETHNICITY_MAIN_CODE,
---     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
---         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
---         ELSE NULL 
---     END,                                                --  or NULL
---     NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
---     COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
---     p.EHM_SEN_FLAG,
---     CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
---         THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
---         ELSE NULL 
---     END,                                                --  or NULL
---     p.DEATH_DTTM,
---     CASE
---         WHEN p.GENDER_MAIN_CODE <> 'M' AND              -- Assumption that if male is not mother
---              EXISTS (SELECT 1 FROM HDM.Child_Social.FACT_PERSON_RELATION fpr
---                      WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND
---                            fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI')  -- check for child relation only
---         THEN 'Y'
---         ELSE NULL -- No child relation found
---     END,
---     p.NATNL_CODE,
---     1
-   
--- FROM
---     HDM.Child_Social.DIM_PERSON AS p
- 
 -- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period?
 LEFT JOIN (
-    -- no other accessible location for UPN data
+    -- no other accessible location for UPN data than 903 table
     SELECT 
         dim_person_id, 
         no_upn_code

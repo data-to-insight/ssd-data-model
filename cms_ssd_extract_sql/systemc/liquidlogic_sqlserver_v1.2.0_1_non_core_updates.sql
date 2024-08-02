@@ -73,7 +73,9 @@ PRINT 'Updating table: ' + @TableName;
 
 
 -- Insert new records into ssd_person with ssd_flag set to 0
+
 -- CTE to get a no_upn_code 
+-- (assumption here is that all codes will be the same/current)
 WITH f903_data_CTE AS (
     SELECT 
         -- get the most recent no_upn_code if exists
@@ -88,8 +90,8 @@ WITH f903_data_CTE AS (
 INSERT INTO ssd_development.ssd_person (
     pers_legacy_id,
     pers_person_id,
-    pers_sex,
-    pers_gender,
+    pers_sex,       -- sex and gender currently extracted as one
+    pers_gender,    -- 
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,                               
@@ -99,42 +101,42 @@ INSERT INTO ssd_development.ssd_person (
     pers_death_date,
     pers_is_mother,
     pers_nationality,
-    ssd_flag -- flag col used only for internal testing on person filter(s) [0,1]
+    ssd_flag
 )
 SELECT
     p.LEGACY_ID,
-    CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),              -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
-    p.GENDER_MAIN_CODE,
-    p.NHS_NUMBER,                                       
+    CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
+    'SSD_PH' AS pers_sex,                   -- Placeholder for those LAs that store sex and gender independently
+    p.GENDER_MAIN_CODE,                     -- Gender as used in stat-returns
     p.ETHNICITY_MAIN_CODE,
     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
-        THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
+        THEN p.BIRTH_DTTM -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL 
-    END,                                                -- Or NULL
-    NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
+    END, -- or NULL
+    NULL AS pers_common_child_id, -- Set to NULL as default(dev) / or set to NHS num
     COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
     p.EHM_SEN_FLAG,
     CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
-        THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
+        THEN p.BIRTH_DTTM -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
         ELSE NULL 
-    END,                                                -- Or NULL
+    END, -- or NULL
     p.DEATH_DTTM,
     CASE
-        WHEN p.GENDER_MAIN_CODE <> 'M' AND              -- Assumption that if male is not mother
-             EXISTS (SELECT 1 FROM Child_Social.FACT_PERSON_RELATION fpr
+        WHEN p.GENDER_MAIN_CODE <> 'M' AND -- Assumption that if male is not mother
+             EXISTS (SELECT 1 FROM HDM.Child_Social.FACT_PERSON_RELATION fpr
                      WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND
-                           fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI')  -- Check for child relation only
+                           fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI') -- check for child relation only
         THEN 'Y'
         ELSE NULL -- No child relation found
     END,
     p.NATNL_CODE,
-    0  -- Set ssd_flag to 0 for new records
-   
+    0 AS ssd_flag -- Non-core data flag for D2I filter testing [TESTING]
 FROM
-    Child_Social.DIM_PERSON AS p
- 
+    HDM.Child_Social.DIM_PERSON AS p
+
+-- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period?
 LEFT JOIN (
-    -- No other accessible location for UPN data
+    -- no other accessible location for UPN data than 903 table
     SELECT 
         dim_person_id, 
         no_upn_code
@@ -147,14 +149,17 @@ ON
     p.DIM_PERSON_ID = f903.dim_person_id
 
 
-
 -- Only select records that are not already in ssd_person 
 -- (these become our non-core 0 flag records)
 WHERE 
+    -- ignore the admin/false records
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
-    AND p.DIM_PERSON_ID NOT IN (SELECT pers_person_id FROM ssd_development.ssd_person)
-    AND YEAR(p.BIRTH_DTTM) != 1900;
+    AND YEAR(p.BIRTH_DTTM) != 1900
+
+    -- don't re-import those that are already in ssd_person
+    AND p.DIM_PERSON_ID NOT IN (SELECT pers_person_id FROM ssd_development.ssd_person);
+   
 
 -- [TESTING] Table added
 PRINT 'Table UPDATED: ' + @TableName;
@@ -250,14 +255,26 @@ PRINT 'Updating table: ' + @TableName;
 TRUNCATE TABLE ssd_development.ssd_cla_care_plan;
 
 
+-- We can't be 100% if this pre-processing table was already dropped or not
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'ssd_development' 
+               AND TABLE_NAME = 'ssd_pre_cla_care_plan')
+BEGIN
+    CREATE TABLE ssd_development.ssd_pre_cla_care_plan (
+        FACT_FORM_ID        NVARCHAR(48),
+        DIM_PERSON_ID       NVARCHAR(48),
+        ANSWER_NO           NVARCHAR(10),
+        ANSWER              NVARCHAR(255),
+        LatestResponseDate  DATETIME
+    );
+END
+ELSE
+BEGIN
+    -- Clear all data from the table
+    TRUNCATE TABLE ssd_development.ssd_pre_cla_care_plan;
+    -- We drop this table later, after processing is complete 
+END
 
-CREATE TABLE ssd_development.ssd_pre_cla_care_plan (
-    FACT_FORM_ID        NVARCHAR(48),
-    DIM_PERSON_ID       NVARCHAR(48),
-    ANSWER_NO           NVARCHAR(10),
-    ANSWER              NVARCHAR(255),
-    LatestResponseDate  DATETIME
-);
 
 WITH MostRecentQuestionResponse AS (
     SELECT  -- Return the most recent response for each question for each persons

@@ -302,12 +302,11 @@ WITH f903_data_CTE AS (
     WHERE
         no_upn_code IS NOT NULL -- sparse data in this field, filter for performance
 )
--- Insert data
 INSERT INTO #ssd_person (
     pers_legacy_id,
     pers_person_id,
-    pers_sex,
-    pers_gender,
+    pers_sex,       -- sex and gender currently extracted as one
+    pers_gender,    -- 
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,                               
@@ -319,41 +318,40 @@ INSERT INTO #ssd_person (
     pers_nationality,
     ssd_flag
 )
-SELECT
+SELECT TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING]
     p.LEGACY_ID,
-    CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),              -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
-    p.GENDER_MAIN_CODE,
-    p.NHS_NUMBER,                                       
+    CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
+    'SSD_PH' AS pers_sex,                   -- Placeholder for those LAs that store sex and gender independently
+    p.GENDER_MAIN_CODE,                     -- Gender as used in stat-returns
     p.ETHNICITY_MAIN_CODE,
     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
-        THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
+        THEN p.BIRTH_DTTM -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL 
-    END,                                                --  or NULL
-    NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
+    END, -- or NULL
+    NULL AS pers_common_child_id, -- Set to NULL as default(dev) / or set to NHS num
     COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
     p.EHM_SEN_FLAG,
     CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
-        THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
+        THEN p.BIRTH_DTTM -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
         ELSE NULL 
-    END,                                                --  or NULL
+    END, -- or NULL
     p.DEATH_DTTM,
     CASE
-        WHEN p.GENDER_MAIN_CODE <> 'M' AND              -- Assumption that if male is not mother
+        WHEN p.GENDER_MAIN_CODE <> 'M' AND -- Assumption that if male is not mother
              EXISTS (SELECT 1 FROM HDM.Child_Social.FACT_PERSON_RELATION fpr
                      WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND
-                           fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI')  -- check for child relation only
+                           fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI') -- check for child relation only
         THEN 'Y'
         ELSE NULL -- No child relation found
     END,
     p.NATNL_CODE,
     1
-   
 FROM
     HDM.Child_Social.DIM_PERSON AS p
- 
+
 -- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period?
 LEFT JOIN (
-    -- no other accessible location for UPN data
+    -- no other accessible location for UPN data than 903 table
     SELECT 
         dim_person_id, 
         no_upn_code
@@ -368,6 +366,7 @@ ON
 WHERE 
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
+    AND YEAR(p.BIRTH_DTTM) != 1900 -- #DtoI-1814
     AND (p.IS_CLIENT = 'Y'
         OR (
             EXISTS (
@@ -408,6 +407,7 @@ WHERE
         )
     )
     ;
+
 
 
 IF @Run_SSD_As_Temporary_Tables = 0
@@ -989,11 +989,11 @@ WHERE
     AND (
         EXISTS ( -- only ssd relevant records
             SELECT 1
-            FROM ssd_development.ssd_person p
+            FROM #ssd_person p
             WHERE CAST(p.pers_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1799
         ) OR EXISTS ( 
             SELECT 1 -- #DtoI-1806
-            FROM ssd_development.ssd_cin_episodes ce
+            FROM #ssd_cin_episodes ce
             WHERE CAST(ce.cine_person_id AS INT) = fpr.DIM_PERSON_ID
         )
     );
