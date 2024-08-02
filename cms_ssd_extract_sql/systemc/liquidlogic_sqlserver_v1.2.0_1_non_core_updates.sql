@@ -73,16 +73,18 @@ PRINT 'Updating table: ' + @TableName;
 
 
 -- Insert new records into ssd_person with ssd_flag set to 0
+-- CTE to get a no_upn_code 
 WITH f903_data_CTE AS (
     SELECT 
-        -- Get the most recent no_upn_code if exists
+        -- get the most recent no_upn_code if exists
         dim_person_id, 
         no_upn_code,
         ROW_NUMBER() OVER (PARTITION BY dim_person_id ORDER BY no_upn_code DESC) AS rn
     FROM 
-        Child_Social.fact_903_data
+        HDM.Child_Social.fact_903_data
+    WHERE
+        no_upn_code IS NOT NULL -- sparse data in this field, filter for performance
 )
-
 INSERT INTO ssd_development.ssd_person (
     pers_legacy_id,
     pers_person_id,

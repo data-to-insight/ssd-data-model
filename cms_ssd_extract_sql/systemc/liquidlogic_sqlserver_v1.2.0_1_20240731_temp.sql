@@ -299,6 +299,8 @@ WITH f903_data_CTE AS (
         ROW_NUMBER() OVER (PARTITION BY dim_person_id ORDER BY no_upn_code DESC) AS rn
     FROM 
         HDM.Child_Social.fact_903_data
+    WHERE
+        no_upn_code IS NOT NULL -- sparse data in this field, filter for performance
 )
 -- Insert data
 INSERT INTO #ssd_person (
