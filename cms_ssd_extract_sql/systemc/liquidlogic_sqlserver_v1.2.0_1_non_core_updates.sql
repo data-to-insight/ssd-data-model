@@ -151,7 +151,8 @@ ON
 WHERE 
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
-    AND p.DIM_PERSON_ID NOT IN (SELECT pers_person_id FROM ssd_development.ssd_person);
+    AND p.DIM_PERSON_ID NOT IN (SELECT pers_person_id FROM ssd_development.ssd_person)
+    AND YEAR(p.BIRTH_DTTM) != 1900;
 
 -- [TESTING] Table added
 PRINT 'Table UPDATED: ' + @TableName;

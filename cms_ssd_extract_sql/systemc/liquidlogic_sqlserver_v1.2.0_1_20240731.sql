@@ -369,6 +369,7 @@ ON
 WHERE 
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
+    AND YEAR(p.BIRTH_DTTM) != 1900 -- #DtoI-1814
     AND (p.IS_CLIENT = 'Y'
         OR (
             EXISTS (
@@ -1880,7 +1881,7 @@ CREATE TABLE ssd_development.ssd_s47_enquiry (
     s47e_s47_end_date                   DATETIME,                   -- metadata={"item_ref":"S47E005A"}
     s47e_s47_nfa                        NCHAR(1),                   -- metadata={"item_ref":"S47E006A"}
     s47e_s47_outcome_json               NVARCHAR(1000),             -- metadata={"item_ref":"S47E007A"}
-    s47e_s47_completed_by_team          NVARCHAR(48),              -- metadata={"item_ref":"S47E009A"}
+    s47e_s47_completed_by_team          NVARCHAR(48),               -- metadata={"item_ref":"S47E009A"}
     s47e_s47_completed_by_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"S47E008A"}
 );
 
