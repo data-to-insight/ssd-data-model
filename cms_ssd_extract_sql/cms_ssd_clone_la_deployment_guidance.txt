@@ -1,42 +1,44 @@
 /* clean up */
 rm -rf /workspaces/ssd-data-model/cms_ssd_clone_la_deployment
 
-/* Disable Cone Mode for Sparse Checkout */
-git config --unset core.sparsecheckoutcone 
-
 /* 
 cd /workspaces/ssd-data-model
 mkdir -p cms_ssd_clone_la_deployment/east-sussex
 cd cms_ssd_clone_la_deployment/east-sussex
 
 git clone --filter=blob:none --no-checkout https://github.com/data-to-insight/ssd-data-model.git .
-git sparse-checkout init --cone
+rm -f .git/info/sparse-checkout # clean out any existing sparse settings
 
-cat <<EOL > .git/info/sparse-checkout
-cms_ssd_extract_sql/systemc/
-!/cms_ssd_extract_sql/systemc/BAK/
-!/cms_ssd_extract_sql/mosaic/BAK/
-/cms_ssd_extract_sql/systemc/
-!/rebaseline_repo.sh
-!/setup.sh
-!/requirements.txt
-!/pyproject.toml
-!/poetry.lock
-EOL
+
+/* Disable Cone Mode for Sparse Checkout */
+git config --unset core.sparsecheckoutcone
+git sparse-checkout init --cone
+git sparse-checkout init
+# cat .git/info/sparse-checkout
+
 
 echo '/cms_ssd_extract_sql/systemc/' > .git/info/sparse-checkout
 
 echo 'cms_ssd_extract_sql/systemc/*' >> .git/info/sparse-checkout
-echo '!/cms_ssd_extract_sql/systemc/BAK/' >> .git/info/sparse-checkout
-echo '!/cms_ssd_extract_sql/mosaic/BAK/' >> .git/info/sparse-checkout
+echo 'cms_ssd_extract_sql/systemc/*' >> .git/info/sparse-checkout
+echo '!cms_ssd_extract_sql/systemc/*/' >> .git/info/sparse-checkout  # Exclude all subdirectories
+echo '!cms_ssd_extract_sql/mosaic/BAK/' >> .git/info/sparse-checkout
 echo '!rebaseline_repo.sh' >> .git/info/sparse-checkout
 echo '!setup.sh' >> .git/info/sparse-checkout
 echo '!requirements.txt' >> .git/info/sparse-checkout
 echo '!pyproject.toml' >> .git/info/sparse-checkout
 echo '!poetry.lock' >> .git/info/sparse-checkout
 
+git sparse-checkout reapply
 
 git checkout main
+
+cd /workspaces/ssd-data-model
+git add cms_ssd_clone_la_deployment/east-sussex
+git commit -m "Add sparse checkout for east-sussex"
+git push origin main
+ls cms_ssd_clone_la_deployment/east-sussex
+
 
 /******************************/
 cd ../../..
