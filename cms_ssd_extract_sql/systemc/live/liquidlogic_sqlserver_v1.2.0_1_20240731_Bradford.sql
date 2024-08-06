@@ -288,7 +288,7 @@ WITH f903_data_CTE AS (
 )
 -- Insert data
 INSERT INTO ssd_person (
-    pers_legacy_id,
+    pers_legacy_id_bradford,
     pers_person_id,
     pers_sex,
     pers_gender,
