@@ -322,7 +322,8 @@ INSERT INTO ssd_development.ssd_person (
     pers_nationality,
     ssd_flag
 )
-SELECT TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING]
+SELECT 
+    -- TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING]
     p.LEGACY_ID,
     CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
     'SSD_PH' AS pers_sex,                   -- Placeholder for those LAs that store sex and gender independently
