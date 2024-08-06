@@ -370,7 +370,7 @@ ON
 WHERE 
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
-    AND YEAR(p.BIRTH_DTTM) != 1900 -- #DtoI-1814
+    -- AND YEAR(p.BIRTH_DTTM) != 1900 -- #DtoI-1814
     AND (p.IS_CLIENT = 'Y'
         OR (
             EXISTS (

@@ -155,7 +155,7 @@ WHERE
     -- ignore the admin/false records
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
-    AND YEAR(p.BIRTH_DTTM) != 1900
+    -- AND YEAR(p.BIRTH_DTTM) != 1900 -- #DtoI-1814
 
     -- don't re-import those that are already in ssd_person
     AND p.DIM_PERSON_ID NOT IN (SELECT pers_person_id FROM ssd_development.ssd_person);
