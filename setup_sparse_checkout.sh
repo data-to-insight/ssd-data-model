@@ -79,3 +79,13 @@ git checkout main
 
 # # check current sparse checkout folders
 # cat .git/info/sparse-checkout
+
+
+# # configure Git to disable push access by removing push URL for the remote
+# # For knowsley
+# cd /workspaces/ssd-data-model/cms_ssd_clone_la_deployment/knowsley
+# git remote set-url --delete origin [push URL]
+
+# # For east-sussex
+# cd /workspaces/ssd-data-model/cms_ssd_clone_la_deployment/east-sussex
+# git remote set-url --delete origin [push URL]
