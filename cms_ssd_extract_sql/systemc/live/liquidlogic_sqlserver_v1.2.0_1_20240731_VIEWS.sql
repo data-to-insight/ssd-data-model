@@ -90,7 +90,7 @@ DECLARE @sql NVARCHAR(MAX) = N'';           -- used in both clean-up and logging
 /* ********************************************************************************************************** */
 /* Start [TESTING] Set up (these towards simplistic TEST run outputs and logging*/
 
-Simplistic run-time monitoring outputs (to be removed from live v2+)
+ /* Simplistic run-time monitoring outputs (to be removed from live v2+)
 */
 DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder'; -- Note: also/seperately use @table_name in non-test|live elements of script. 
 
@@ -102,71 +102,6 @@ SET @StartTime = GETDATE(); -- Script start time
 /* ********************************************************************************************************** */
 
 
-
-/* ********************************************************************************************************** */
-/* START SSD pre-extract clean up (remove all previous SSD objects) */
-
-IF @Run_SSD_As_Temporary_Tables = 1
-BEGIN
-    -- extracting into non-persistent temp tables
-    -- i.e. no clean-up required
-    PRINT  CHAR(13) + CHAR(10) + 'Establishing SSD in temporary db namespace, prefixed as #ssd_' + CHAR(13) + CHAR(10);
-END
-ELSE
-BEGIN
-    -- extracting into persistent|perm tables
-    -- some potential clean-up needed from any previous implementations/testing
-    PRINT CHAR(13) + CHAR(10) + 'Establishing SSD as persistant tables, prefixed as ssd_' + CHAR(13) + CHAR(10);
-
-    /* 
-    START drop all ssd_development. schema constraints */
-
-    -- pre-emptively avoid any run-time conflicts from left-behind FK constraints
-
-    -- Set schema name to default if not provided
-    IF @schema_name = N'' OR @schema_name IS NULL
-    BEGIN
-        SET @schema_name = @default_schema;
-    END
-
-    -- generate DROP FK commands
-    SET @sql = N'';
-    SELECT @sql += '
-        IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = ' + QUOTENAME(fk.name, '''') + ')
-        BEGIN
-            ALTER TABLE ' + QUOTENAME(SCHEMA_NAME(fk.schema_id)) + '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) + ' DROP CONSTRAINT ' + QUOTENAME(fk.name) + ';
-        END;'
-    FROM sys.foreign_keys AS fk
-    INNER JOIN sys.tables AS t ON fk.parent_object_id = t.object_id
-    INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
-    WHERE s.name = @schema_name;
-
-    -- execute drop FK
-    EXEC sp_executesql @sql;
-
-    -- Clear SQL var
-    SET @sql = N'';
-
-    -- generate DROP TABLE for each table in schema
-    SELECT @sql += '
-    IF OBJECT_ID(''' + @schema_name + '.' + t.name + ''', ''U'') IS NOT NULL
-    BEGIN
-        DROP TABLE ' + QUOTENAME(@schema_name) + '.' + QUOTENAME(t.name) + ';
-    END;
-    '
-    FROM sys.tables AS t
-    INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
-    WHERE s.name = @schema_name;
-
-    -- Execute drop tables
-    EXEC sp_executesql @sql;
-
-    -- Clear SQL var
-    SET @sql = N'';
-
-END
-/* END SSD pre-extract clean up (remove all previous SSD objects) */
-/* ********************************************************************************************************** */
 
 
 
@@ -190,15 +125,16 @@ Dependencies:
 =============================================================================
 */
 -- [TESTING] Create marker
-SET @TableName = N'ssd_version_log';
+SET @TableName = N'ssd_version_log_v';
 
 
 -- Check if exists, & drop
-IF OBJECT_ID('ssd_development.ssd_version_log', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_version_log;
+IF OBJECT_ID('ssd_development.ssd_version_log_v', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_version_log_v;
 IF OBJECT_ID('tempdb..#ssd_version_log', 'U') IS NOT NULL DROP TABLE #ssd_version_log;
 
+
 -- create versioning information object
-CREATE TABLE ssd_development.ssd_version_log (
+CREATE TABLE ssd_development.ssd_version_log_v (
     version_number      NVARCHAR(10) NOT NULL,          -- version num (e.g., "1.0.0")
     release_date        DATE NOT NULL,                  -- date of version release
     description         NVARCHAR(100),                  -- brief description of version
@@ -209,18 +145,18 @@ CREATE TABLE ssd_development.ssd_version_log (
 );
 
 -- ensure any previous current-version flag is set to 0 (not current), before adding new current version
-UPDATE ssd_development.ssd_version_log SET is_current = 0 WHERE is_current = 1;
+UPDATE ssd_development.ssd_version_log_v SET is_current = 0 WHERE is_current = 1;
 
 
 -- insert & update current version (using MAJOR.MINOR.PATCH)
-INSERT INTO ssd_development.ssd_version_log 
+INSERT INTO ssd_development.ssd_version_log_v 
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     ('1.2.0', GETDATE(), '#DtoI-1762, #DtoI-1810, improved 0/-1 handling', 1, 'admin', 'impacts all _team fields, AAL7 outputs');
 
 
 -- historic versioning log data
-INSERT INTO ssd_development.ssd_version_log (version_number, release_date, description, is_current, created_by, impact_description)
+INSERT INTO ssd_development.ssd_version_log_v (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     ('1.0.0', '2023-01-01', 'Initial alpha release (Phase 1 end)', 0, 'admin', ''),
     ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 0, 'admin', 'Revised JSON Array structure implemented for CiN'),
@@ -268,6 +204,8 @@ Dependencies:
 
 -- check exists & drop
 IF OBJECT_ID('ssd_development.ssd_person_v') IS NOT NULL DROP VIEW ssd_development.ssd_person_v;
+
+GO
 
 -- Create View
 CREATE VIEW ssd_development.ssd_person_v AS
