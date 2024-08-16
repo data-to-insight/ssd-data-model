@@ -1,31 +1,19 @@
-
-
-
--- Run SSD into Temporary OR Persistent extract structure
--- 
+USE HDM_Local;  -- Ensure the correct database is being used
 
 DECLARE @sql NVARCHAR(MAX) = N'';                           -- used in both clean-up and logging
-DECLARE @schema_name NVARCHAR(128) = N'ssd_development';    -- Set your schema name here OR leave empty for default behaviour
-DECLARE @default_schema NVARCHAR(128) = N'dbo';             -- Default schema if none provided
-
+DECLARE @schema_name NVARCHAR(128) = N'ssd_development';    -- Set your schema name here
 
 /* ********************************************************************************************************** */
 /* START SSD pre-extract clean up (remove all previous SSD objects) */
 
+/* persistent|perm SSD tables */
+PRINT CHAR(13) + CHAR(10) + 'Removing SSD persistent tables, prefixed as ssd_' + CHAR(13) + CHAR(10);
 
--- extracting into persistent|perm tables
--- some potential clean-up needed from any previous implementations/testing
-PRINT CHAR(13) + CHAR(10) + 'Removing SSD persistant tables, prefixed as ssd_' + CHAR(13) + CHAR(10);
-
-/*
-START drop all ssd_development. schema constraints */
-
--- pre-emptively avoid any run-time conflicts from left-behind FK constraints
-
--- Set schema name to default if not provided
+-- ensure schema name is provided
 IF @schema_name = N'' OR @schema_name IS NULL
 BEGIN
-    SET @schema_name = @default_schema;
+    RAISERROR('Schema name must be provided and cannot be empty.', 16, 1);
+    RETURN;
 END
 
 -- generate DROP FK commands
@@ -44,10 +32,10 @@ AND t.name LIKE 'ssd_%';  -- Filter for tables prefixed with 'ssd_'
 -- execute drop FK
 EXEC sp_executesql @sql;
 
--- Clear SQL var
+-- reset var
 SET @sql = N'';
 
--- generate DROP TABLE for each table in schema prefixed with 'ssd_'
+-- generate DROP TABLE commands for tables in schema prefixed with 'ssd_'
 SELECT @sql += '
 IF OBJECT_ID(''' + @schema_name + '.' + t.name + ''', ''U'') IS NOT NULL
 BEGIN
@@ -59,12 +47,11 @@ INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
 WHERE s.name = @schema_name
 AND t.name LIKE 'ssd_%';  -- Filter for tables prefixed with 'ssd_'
 
--- Execute drop tables
+-- execute drop tables
 EXEC sp_executesql @sql;
 
--- Clear SQL var
+-- reset var
 SET @sql = N'';
-
 
 /* END SSD pre-extract clean up (remove all previous SSD objects) */
 /* ********************************************************************************************************** */
