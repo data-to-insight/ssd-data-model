@@ -1,10 +1,8 @@
 
 
+
 -- Run SSD into Temporary OR Persistent extract structure
 -- 
-DECLARE @Run_SSD_As_Temporary_Tables BIT;
-SET     @Run_SSD_As_Temporary_Tables = 0;   -- 1==Single use SSD extract uses tempdb..# | 0==Persistent SSD table set up
-                                            -- This flag enables/disables running such as FK constraints that don't apply to tempdb..# implementation
 
 DECLARE @sql NVARCHAR(MAX) = N'';                           -- used in both clean-up and logging
 DECLARE @schema_name NVARCHAR(128) = N'ssd_development';    -- Set your schema name here OR leave empty for default behaviour
