@@ -145,7 +145,7 @@ LEFT JOIN
 LEFT JOIN
     RecentReview AS r ON cla.clae_cla_id = r.clar_cla_id AND r.rn = 1
 
--- join to ssd_cin_episodes towards filter for active episodes, cine_close_date being NULL
+-- join to ssd_cin_episodes and filter on cine_close_date being NULL
 JOIN
     ssd_development.ssd_cin_episodes AS cine ON p.pers_person_id = cine.cine_person_id
     AND cine.cine_close_date IS NULL;
