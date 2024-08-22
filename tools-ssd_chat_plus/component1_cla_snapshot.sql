@@ -1,7 +1,11 @@
 /* 
 Reductive views extract SQL - CLA snapshot
 #DtoI-1647
+#Requires ssd_development.ssd_ tables
 */
+
+Use HDM_Local;
+
 
 -- CTE most recent cla_episode
 WITH RecentCLA AS (
