@@ -3928,6 +3928,11 @@ Status: [R]elease
 Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_development.ssd_person> references in the CTEs(added for performance)
             Dev: Revised V3/4 to aid performance on large involvements table aggr
+
+            This table the cohort of children who are preparing to leave care, typically 15/16/17yrs+; 
+            Not those who are finishing a period of care. 
+            clea_care_leaver_eligibility == LAC for 13wks+(since 14yrs)+LAC since 16yrs 
+
 Dependencies:
 - FACT_INVOLVEMENTS
 - FACT_CLA_CARE_LEAVERS
@@ -3951,7 +3956,7 @@ CREATE TABLE ssd_development.ssd_care_leavers
 (
     clea_table_id                           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLEA001A"}
     clea_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"CLEA002A"}
-    clea_care_leaver_eligibility            NVARCHAR(100),              -- metadata={"item_ref":"CLEA003A"}
+    clea_care_leaver_eligibility            NVARCHAR(100),              -- metadata={"item_ref":"CLEA003A", "info":"LAC for 13wks(since 14yrs)+LAC since 16yrs"}
     clea_care_leaver_in_touch               NVARCHAR(100),              -- metadata={"item_ref":"CLEA004A"}
     clea_care_leaver_latest_contact         DATETIME,                   -- metadata={"item_ref":"CLEA005A"}
     clea_care_leaver_accommodation          NVARCHAR(100),              -- metadata={"item_ref":"CLEA006A"}

@@ -1,4 +1,6 @@
 
+Use HDM_Local;
+
 /* Caseload count by Team only */
 SELECT
     ISNULL(d.dept_team_name, 'Unassigned') AS TeamName,             -- NULL Team vals become unassigned

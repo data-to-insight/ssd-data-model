@@ -129,7 +129,6 @@ SELECT
     r.clar_cla_review_cancelled,
     r.clar_cla_review_participation
 
-
 FROM
     ssd_development.ssd_person AS p
     
@@ -143,6 +142,10 @@ LEFT JOIN
     RecentHealthCheck AS hc ON p.pers_person_id = hc.clah_person_id AND hc.rn = 1
 LEFT JOIN
     RecentVisit AS v ON p.pers_person_id = v.clav_person_id AND v.rn = 1
-
 LEFT JOIN
-    RecentReview AS r ON cla.clae_cla_id = r.clar_cla_id AND r.rn = 1;
+    RecentReview AS r ON cla.clae_cla_id = r.clar_cla_id AND r.rn = 1
+
+-- join to ssd_cin_episodes towards filter for active episodes, cine_close_date being NULL
+JOIN
+    ssd_development.ssd_cin_episodes AS cine ON p.pers_person_id = cine.cine_person_id
+    AND cine.cine_close_date IS NULL;
