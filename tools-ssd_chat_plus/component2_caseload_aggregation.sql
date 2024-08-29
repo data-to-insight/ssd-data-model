@@ -16,156 +16,280 @@ Reductive views extract SQL - Caseload counts/aggr by Team
 Use HDM_Local;
 
 
-
 WITH
--- involvements filter open cases with 'ALLOCATED CASE WORKER' role
-FilteredInvolvements AS (
+/* involvements filter open cases with 'ALLOCATED CASE WORKER' role */
+InvolvementCounts AS (
     SELECT
-        i.invo_involvements_id,
-        i.invo_professional_team,
-        i.invo_referral_id
+        i.invo_professional_team,                           -- grouping by team
+        COUNT(DISTINCT cla.clae_person_id) AS InvolvementCaseload -- count person_id for each team with open CLA episode
     FROM
         ssd_involvements AS i
+    INNER JOIN
+        ssd_cla_episodes AS cla ON i.invo_referral_id = cla.clae_referral_id -- join to link involvements with CLA episodes
     WHERE
-        UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER'
-        AND i.invo_involvement_end_date IS NULL
-),
--- get the department details
-DepartmentDetails AS (
-    SELECT
-        d.dept_team_id,
-        ISNULL(d.dept_team_name, 'Unassigned') AS TeamName,
-        ISNULL(d.dept_team_parent_name, 'No Parent') AS TeamParentName
-    FROM
-        ssd_department AS d
-),
-
--- get count of open CP plans
-OpenCPPlans AS (
-    /*
-    count number of open Child Protection (CP) plans associated with each team
-    filters for active CP plans linked to ongoing involvements with an 'ALLOCATED CASE WORKER'
-    count is valid, open CP plans grouped by involvement team
-    */
-    SELECT
-        i.invo_professional_team,                   -- grp by involvement team 
-        COUNT(*) AS OpenCPPlanCount                 -- count open CP plans for each team
-    FROM
-        FilteredInvolvements AS i
-    LEFT JOIN
-        ssd_cp_plans AS cp ON i.invo_referral_id = cp.cppl_referral_id
-        AND cp.cppl_cp_plan_end_date IS NULL        -- only consider CP plans that are still open (no end date)
-    WHERE
-        cp.cppl_cp_plan_id IS NOT NULL              -- exclude involvements without associated CP plan
+        UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER'  -- filter by role 'ALLOCATED CASE WORKER'
+        AND i.invo_involvement_end_date IS NULL                       -- filter for open cases in involvements
     GROUP BY
-        i.invo_professional_team                    -- aggregate count of open CP plans by team
+        i.invo_professional_team
 ),
 
-
--- get count of CiN episodes with no plan
-CiNWithoutPlans AS (
-    /*
-    count number of Child in Need (CiN) episodes that have no associated plan
-    filters for involvements linked to CiN episodes where no assessment plan exists
-    count is grouped by involvement team
-    */
+/* get count of open CLA episodes (where clae_cla_episode_ceased is NULL) */
+OpenCLAEpisodes AS (
     SELECT
-        i.invo_professional_team,                   -- grp by involvement team 
-        COUNT(*) AS CiNWithoutPlanCount             -- count CiN episodes without plan for each team
+        i.invo_professional_team,                                 -- grouping by team ID via involvements
+        COUNT(DISTINCT cla.clae_person_id) AS OpenCLAEpisodeCount     -- count person_id with open CLA episodes by team
     FROM
-        FilteredInvolvements AS i
+        ssd_cla_episodes AS cla
     LEFT JOIN
-        ssd_cin_episodes AS cine ON i.invo_referral_id = cine.cine_referral_id
-    LEFT JOIN
-        ssd_cin_assessments AS cina ON cine.cine_referral_id = cina.cina_referral_id
+        ssd_involvements AS i ON cla.clae_referral_id = i.invo_referral_id -- join to link with involvements for team details
     WHERE
-        cine.cine_referral_id IS NOT NULL           -- ensure involvement has linked CiN episode
-        AND cina.cina_referral_id IS NULL           -- exclude cases where an assessment plan exists
+        UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER'  -- filter by role 'ALLOCATED CASE WORKER'
+        AND cla.clae_cla_episode_ceased IS NULL                       -- ensure the CLA episode is still open
     GROUP BY
-        i.invo_professional_team                    -- aggregate count of CiN episodes without plan by team
+        i.invo_professional_team
 ),
 
-
-
--- get count of active (with NULL cine_close_date) ssd_cin_episodes
-OpenCINEpisodes AS (
-    /*
-    count active Child in Need (CiN) episodes where close date is NULL
-    identifies episodes still ongoing
-    count is grouped by referral team
-    */
+/* get count of open CLA episodes that also have an open CP plan */
+OpenCPAndLAC AS (
     SELECT
-        cine.cine_referral_team,                       -- grp by referral team responsible for CiN episode
-        COUNT(DISTINCT cine.cine_person_id) AS OpenCINEpisodeCount -- count distinct persons with open CIN episode
+        i.invo_professional_team,                                 -- grouping by team ID via involvements
+        COUNT(cp.cppl_cp_plan_id) AS CPAndLACCount                -- count of open CLA episodes with an open CP plan by team
     FROM
-        ssd_cin_episodes AS cine
+        ssd_cp_plans AS cp
+    LEFT JOIN
+        ssd_cla_episodes AS cla ON cp.cppl_person_id = cla.clae_person_id
+    LEFT JOIN
+        ssd_involvements AS i ON cp.cppl_referral_id = i.invo_referral_id -- join to link with involvements for team details
     WHERE
-        cine.cine_close_date IS NULL                   -- only include episodes with no close date (still active)
+        cla.clae_cla_episode_ceased IS NULL                       -- filter for open CLA episodes
+        AND cp.cppl_cp_plan_end_date IS NULL                      -- filter for open CP plans
     GROUP BY
-        cine.cine_referral_team                        -- aggregate count of open CiN episodes by team
+        i.invo_professional_team
 ),
 
--- get count of care leavers by team, only incl.those with open CIN episode
-CareLeavers AS ( 
-    /*
-    count number of care leavers by team, includes only those with open CIN episode
-    filters out care leavers without an active CIN case
-    count is grouped by team assigned to care leaver
-    */
+/* get count of active CP plans with no related CLA episode */
+ActiveCPWithoutCLA AS (
     SELECT
-        cl.clea_care_leaver_allocated_team,            -- grp by team assigned to care leaver
-        COUNT(DISTINCT cl.clea_person_id) AS CareLeaverCount -- count distinct care leavers with open CIN episode
+        i.invo_professional_team,                                 -- grouping by team ID via involvements
+        COUNT(cp.cppl_cp_plan_id) AS CPnoLAC                      -- count of active CP plans without a related CLA episode
+    FROM
+        ssd_cp_plans AS cp
+    LEFT JOIN
+        ssd_cla_episodes AS cla ON cp.cppl_referral_id = cla.clae_referral_id
+    LEFT JOIN
+        ssd_involvements AS i ON cp.cppl_referral_id = i.invo_referral_id -- join to link with involvements for team details
+    WHERE
+        cp.cppl_cp_plan_end_date IS NULL                          -- filter for active CP plans
+        AND cla.clae_cla_episode_id IS NULL                       -- ensure no related CLA episode
+    GROUP BY
+        i.invo_professional_team
+),
+
+/* count care leavers without an associated open involvement or CLA episode */
+CareLeaversWithoutInvolvementOrCLA AS (
+    SELECT
+        cl.clea_care_leaver_allocated_team,                       -- grouping by care leaver allocated team
+        COUNT(cl.clea_person_id) AS CareLeaversNoInvolvementOrCLA -- count care leavers without open involvement or CLA episode by team
     FROM
         ssd_care_leavers AS cl
-    JOIN
-        ssd_cin_episodes AS cine ON cl.clea_person_id = cine.cine_person_id
+    LEFT JOIN
+        ssd_involvements AS i ON cl.clea_person_id = i.invo_person_id AND i.invo_involvement_end_date IS NULL
+    LEFT JOIN
+        ssd_cla_episodes AS cla ON cl.clea_person_id = cla.clae_person_id AND cla.clae_cla_episode_ceased IS NULL
     WHERE
-        cine.cine_close_date IS NULL                   -- only include care leavers with open CIN episode
+        i.invo_involvement_end_date IS NULL                            -- no open involvement
+        AND cla.clae_cla_episode_ceased IS NULL                       -- no open CLA episode
     GROUP BY
-        cl.clea_care_leaver_allocated_team             -- aggregate count of care leavers by team
+        cl.clea_care_leaver_allocated_team
 )
 
+/* main query selecting and combining all counts */
 SELECT
-    dd.TeamName,
-    dd.TeamParentName,
-    COUNT(fi.invo_involvements_id) AS CaseloadCount,             -- Total involvements (cases) for each team
-    COALESCE(cp.OpenCPPlanCount, 0) +                            -- Calculation for testCount: Sum of all other counts
-    COALESCE(cn.CiNWithoutPlanCount, 0) + 
-    COALESCE(oc.OpenCINEpisodeCount, 0) + 
-    COALESCE(cl.CareLeaverCount, 0) AS TestCount,                -- testCount used as [TESTING] comparison against CaseloadCount
-    COALESCE(cp.OpenCPPlanCount, 0) AS OpenCPPlanCount,          -- Cnt open Child Protection plans, defaults to 0 if no open plans are found
-    COALESCE(cn.CiNWithoutPlanCount, 0) AS CiNWithoutPlan,       -- Cnt Child in Need episodes without a plan, defaults to 0 if none are found
-    COALESCE(oc.OpenCINEpisodeCount, 0) AS OpenCINEpisodeCount,  -- Cnt unique open CIN episodes by team
-    COALESCE(cl.CareLeaverCount, 0) AS CareLeaverCount           -- Cnt care leavers by team
+    ISNULL(dd.dept_team_name, 'Unassigned')         AS TeamName,              -- team name from department details
+    ISNULL(dd.dept_team_parent_name, 'No Parent')   AS TeamParentName,        -- parent team name from department details
+    COALESCE(ic.InvolvementCaseload, 0)             AS InvolvementCaseload,   -- total involvements/caseload for each team
+    COALESCE(ocla.OpenCLAEpisodeCount, 0)           AS OpenCLAEpisodeCount,   -- open CLA episodes by team
+    COALESCE(cp_lac.CPAndLACCount, 0)               AS LACwithCP,             -- open CLA episodes with an open CP plan by team
+    COALESCE(acp.CPnoLAC, 0)                        AS LACnoCP,               -- active CP plans with no related CLA episode
+    COALESCE(cl_no_involvement_or_cla.CareLeaversNoInvolvementOrCLA, 0) 
+                                                    AS CareLeaversNoInvolvementOrCLA -- count care leavers without open involvement or CLA episode by team
 FROM
-    FilteredInvolvements AS fi
+    ssd_department AS dd
 LEFT JOIN
-    DepartmentDetails AS dd ON fi.invo_professional_team = dd.dept_team_id
+    InvolvementCounts AS ic ON dd.dept_team_id = ic.invo_professional_team
 LEFT JOIN
-    OpenCPPlans AS cp ON fi.invo_professional_team = cp.invo_professional_team
+    OpenCLAEpisodes AS ocla ON dd.dept_team_id = ocla.invo_professional_team
 LEFT JOIN
-    CiNWithoutPlans AS cn ON fi.invo_professional_team = cn.invo_professional_team
+    OpenCPAndLAC AS cp_lac ON dd.dept_team_id = cp_lac.invo_professional_team 
 LEFT JOIN
-    OpenCINEpisodes AS oc ON dd.dept_team_id = oc.cine_referral_team                -- Join to get open CIN episodes count by team
+    ActiveCPWithoutCLA AS acp ON dd.dept_team_id = acp.invo_professional_team 
 LEFT JOIN
-    CareLeavers AS cl ON dd.dept_team_id = cl.clea_care_leaver_allocated_team       -- Join to get care leaver count by team
+    CareLeaversWithoutInvolvementOrCLA AS cl_no_involvement_or_cla ON dd.dept_team_id = cl_no_involvement_or_cla.clea_care_leaver_allocated_team 
+WHERE
+    COALESCE(ic.InvolvementCaseload, 0) > 0 OR                           -- include teams with at least one involvement case
+    COALESCE(ocla.OpenCLAEpisodeCount, 0) > 0 OR                         -- include teams with at least one open CLA episode
+    COALESCE(cp_lac.CPAndLACCount, 0) > 0 OR                             -- include teams with at least one open CLA episode with a CP plan
+    COALESCE(acp.CPnoLAC, 0) > 0 OR                                      -- include teams with at least one active CP plan with no related CLA episode
+    COALESCE(cl_no_involvement_or_cla.CareLeaversNoInvolvementOrCLA, 0) > 0 -- include teams with care leavers having no open involvement or CLA episode
 
-GROUP BY
-    dd.TeamName,
-    dd.TeamParentName,
-    cp.OpenCPPlanCount,
-    cn.CiNWithoutPlanCount,
-    oc.OpenCINEpisodeCount,
-    cl.CareLeaverCount
-HAVING
-    -- only list teams with relevant caseloads
-    COALESCE(cp.OpenCPPlanCount, 0) > 0 OR                      -- Include teams with at least one open CP plan
-    COALESCE(cn.CiNWithoutPlanCount, 0) > 0 OR                  -- Or include teams with at least one CiN episode without a plan
-    COALESCE(oc.OpenCINEpisodeCount, 0) > 0 OR                  -- Or include teams with at least one open CIN episode
-    COALESCE(cl.CareLeaverCount, 0) > 0                         -- Or include teams with at least one care leaver
 ORDER BY
-    CaseloadCount DESC;
+    InvolvementCaseload DESC;
 
+
+
+
+--- start of previous version BAK
+
+-- WITH
+-- -- involvements filter open cases with 'ALLOCATED CASE WORKER' role
+-- FilteredInvolvements AS (
+--     SELECT
+--         i.invo_involvements_id,
+--         i.invo_professional_team,
+--         i.invo_referral_id
+--     FROM
+--         ssd_involvements AS i
+--     WHERE
+--         UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER'
+--         AND i.invo_involvement_end_date IS NULL
+-- ),
+-- -- get the department details
+-- DepartmentDetails AS (
+--     SELECT
+--         d.dept_team_id,
+--         ISNULL(d.dept_team_name, 'Unassigned') AS TeamName,
+--         ISNULL(d.dept_team_parent_name, 'No Parent') AS TeamParentName
+--     FROM
+--         ssd_department AS d
+-- ),
+
+-- -- get count of open CP plans
+-- OpenCPPlans AS (
+--     /*
+--     count number of open Child Protection (CP) plans associated with each team
+--     filters for active CP plans linked to ongoing involvements with an 'ALLOCATED CASE WORKER'
+--     count is valid, open CP plans grouped by involvement team
+--     */
+--     SELECT
+--         i.invo_professional_team,                   -- grp by involvement team 
+--         COUNT(*) AS OpenCPPlanCount                 -- count open CP plans for each team
+--     FROM
+--         FilteredInvolvements AS i
+--     LEFT JOIN
+--         ssd_cp_plans AS cp ON i.invo_referral_id = cp.cppl_referral_id
+--         AND cp.cppl_cp_plan_end_date IS NULL        -- only consider CP plans that are still open (no end date)
+--     WHERE
+--         cp.cppl_cp_plan_id IS NOT NULL              -- exclude involvements without associated CP plan
+--     GROUP BY
+--         i.invo_professional_team                    -- aggregate count of open CP plans by team
+-- ),
+
+
+-- -- get count of CiN episodes with no plan
+-- CiNWithoutPlans AS (
+--     /*
+--     count number of Child in Need (CiN) episodes that have no associated plan
+--     filters for involvements linked to CiN episodes where no assessment plan exists
+--     count is grouped by involvement team
+--     */
+--     SELECT
+--         i.invo_professional_team,                   -- grp by involvement team 
+--         COUNT(*) AS CiNWithoutPlanCount             -- count CiN episodes without plan for each team
+--     FROM
+--         FilteredInvolvements AS i
+--     LEFT JOIN
+--         ssd_cin_episodes AS cine ON i.invo_referral_id = cine.cine_referral_id
+--     LEFT JOIN
+--         ssd_cin_assessments AS cina ON cine.cine_referral_id = cina.cina_referral_id
+--     WHERE
+--         cine.cine_referral_id IS NOT NULL           -- ensure involvement has linked CiN episode
+--         AND cina.cina_referral_id IS NULL           -- exclude cases where an assessment plan exists
+--     GROUP BY
+--         i.invo_professional_team                    -- aggregate count of CiN episodes without plan by team
+-- ),
+
+
+
+-- -- get count of active (with NULL cine_close_date) ssd_cin_episodes
+-- OpenCINEpisodes AS (
+--     /*
+--     count active Child in Need (CiN) episodes where close date is NULL
+--     identifies episodes still ongoing
+--     count is grouped by referral team
+--     */
+--     SELECT
+--         cine.cine_referral_team,                       -- grp by referral team responsible for CiN episode
+--         COUNT(DISTINCT cine.cine_person_id) AS OpenCINEpisodeCount -- count distinct persons with open CIN episode
+--     FROM
+--         ssd_cin_episodes AS cine
+--     WHERE
+--         cine.cine_close_date IS NULL                   -- only include episodes with no close date (still active)
+--     GROUP BY
+--         cine.cine_referral_team                        -- aggregate count of open CiN episodes by team
+-- ),
+
+-- -- get count of care leavers by team, only incl.those with open CIN episode
+-- CareLeavers AS ( 
+--     /*
+--     count number of care leavers by team, includes only those with open CIN episode
+--     filters out care leavers without an active CIN case
+--     count is grouped by team assigned to care leaver
+--     */
+--     SELECT
+--         cl.clea_care_leaver_allocated_team,            -- grp by team assigned to care leaver
+--         COUNT(DISTINCT cl.clea_person_id) AS CareLeaverCount -- count distinct care leavers with open CIN episode
+--     FROM
+--         ssd_care_leavers AS cl
+--     JOIN
+--         ssd_cin_episodes AS cine ON cl.clea_person_id = cine.cine_person_id
+--     WHERE
+--         cine.cine_close_date IS NULL                   -- only include care leavers with open CIN episode
+--     GROUP BY
+--         cl.clea_care_leaver_allocated_team             -- aggregate count of care leavers by team
+-- )
+
+-- SELECT
+--     dd.TeamName,
+--     dd.TeamParentName,
+--     COUNT(fi.invo_involvements_id) AS CaseloadCount,             -- Total involvements (cases) for each team
+--     COALESCE(cp.OpenCPPlanCount, 0) +                            -- Calculation for testCount: Sum of all other counts
+--     COALESCE(cn.CiNWithoutPlanCount, 0) + 
+--     COALESCE(oc.OpenCINEpisodeCount, 0) + 
+--     COALESCE(cl.CareLeaverCount, 0) AS TestCount,                -- testCount used as [TESTING] comparison against CaseloadCount
+--     COALESCE(cp.OpenCPPlanCount, 0) AS OpenCPPlanCount,          -- Cnt open Child Protection plans, defaults to 0 if no open plans are found
+--     COALESCE(cn.CiNWithoutPlanCount, 0) AS CiNWithoutPlan,       -- Cnt Child in Need episodes without a plan, defaults to 0 if none are found
+--     COALESCE(oc.OpenCINEpisodeCount, 0) AS OpenCINEpisodeCount,  -- Cnt unique open CIN episodes by team
+--     COALESCE(cl.CareLeaverCount, 0) AS CareLeaverCount           -- Cnt care leavers by team
+-- FROM
+--     FilteredInvolvements AS fi
+-- LEFT JOIN
+--     DepartmentDetails AS dd ON fi.invo_professional_team = dd.dept_team_id
+-- LEFT JOIN
+--     OpenCPPlans AS cp ON fi.invo_professional_team = cp.invo_professional_team
+-- LEFT JOIN
+--     CiNWithoutPlans AS cn ON fi.invo_professional_team = cn.invo_professional_team
+-- LEFT JOIN
+--     OpenCINEpisodes AS oc ON dd.dept_team_id = oc.cine_referral_team                -- Join to get open CIN episodes count by team
+-- LEFT JOIN
+--     CareLeavers AS cl ON dd.dept_team_id = cl.clea_care_leaver_allocated_team       -- Join to get care leaver count by team
+
+-- GROUP BY
+--     dd.TeamName,
+--     dd.TeamParentName,
+--     cp.OpenCPPlanCount,
+--     cn.CiNWithoutPlanCount,
+--     oc.OpenCINEpisodeCount,
+--     cl.CareLeaverCount
+-- HAVING
+--     -- only list teams with relevant caseloads
+--     COALESCE(cp.OpenCPPlanCount, 0) > 0 OR                      -- Include teams with at least one open CP plan
+--     COALESCE(cn.CiNWithoutPlanCount, 0) > 0 OR                  -- Or include teams with at least one CiN episode without a plan
+--     COALESCE(oc.OpenCINEpisodeCount, 0) > 0 OR                  -- Or include teams with at least one open CIN episode
+--     COALESCE(cl.CareLeaverCount, 0) > 0                         -- Or include teams with at least one care leaver
+-- ORDER BY
+--     CaseloadCount DESC;
+
+--- end of previous version BAK
 
 
 
