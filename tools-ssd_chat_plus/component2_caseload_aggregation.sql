@@ -13,9 +13,6 @@ Reductive views extract SQL - Caseload counts/aggr by Team
 #Requires ssd_development.ssd_ tables
 */
 
-Use HDM_Local;
-
-
 WITH
 /* involvements filter active cases with 'ALLOCATED CASE WORKER' role */
 InvolvementCounts AS (
