@@ -15,6 +15,13 @@ Reductive views extract SQL - Caseload counts/aggr by Team
 
 WITH
 /* involvements filter active cases with 'ALLOCATED CASE WORKER' role */
+
+/*
+ssd_involvements [caseload count, LAC count, LACwithCP, LACnoCP, careleaverCount] 
+CaseloadCount 
+No exclusions (this count is OPEN involvements) 
+*/
+
 InvolvementCounts AS (
     SELECT
         i.invo_professional_team,                           -- grouping by team
@@ -31,6 +38,11 @@ InvolvementCounts AS (
 ),
 
 /* get count of active CLA episodes (where clae_cla_episode_ceased is NULL) */
+
+/*
+ssd_cp_plans [LACwithCP, LACnoCP, careleaverCount]	CPPlan	involvements minus|exclude those with LAC episode (cla_episodes)
+??
+*/
 OpenCLAEpisodes AS (
     SELECT
         i.invo_professional_team,                                 -- grouping by team via involvements
@@ -47,73 +59,152 @@ OpenCLAEpisodes AS (
 ),
 
 /* get count of active CLA episodes that also have an active CP plan */
-OpenCPAndLAC AS (
+/*
+ssd_cla_episodes [LACwithCP, LACnoCP, IF excluding for careLeaverCount]	
+LACwithCP	involvements minus|include only those with CP Plan
+*/
+LACwithActiveCP AS (
     SELECT
-        i.invo_professional_team,                                 -- grouping by team via involvements
-        COUNT(DISTINCT cp.cppl_person_id) AS CPAndLACCount                -- active CLA episodes with an active CP plan
+        i.invo_professional_team,                             -- grouping by team via involvements
+        COUNT(DISTINCT cla.clae_person_id) AS CPAndLACCount   -- count of CLA episodes with an active CP plan
     FROM
-        ssd_cp_plans AS cp
+        ssd_cla_episodes AS cla
     LEFT JOIN
-        ssd_cla_episodes AS cla ON cp.cppl_person_id = cla.clae_person_id
+        ssd_cp_plans AS cp ON cla.clae_referral_id = cp.cppl_referral_id
     LEFT JOIN
-        ssd_involvements AS i ON cp.cppl_referral_id = i.invo_referral_id -- link with involvements for team dets
+        ssd_involvements AS i ON cla.clae_referral_id = i.invo_referral_id -- link with involvements for team details
+    WHERE
+        cla.clae_cla_episode_ceased IS NULL                  -- filter for active CLA episodes
+        AND cp.cppl_cp_plan_end_date IS NULL                 -- ensure the CP plan is still active
+    GROUP BY
+        i.invo_professional_team
+),
+
+
+/* get count of CLA episodes with no related active CP plan */
+
+/*
+ssd_cla_episodes 	
+LACnoCP	involvements minus|include only those with closed/no CP Plan
+*/
+LACnoActiveCP AS (
+    SELECT
+        i.invo_professional_team,                                  -- grouping by team via involvements
+        COUNT(DISTINCT cla.clae_person_id) AS LACnoActiveCP        -- count of CLA episodes without an active CP plan
+    FROM
+        ssd_cla_episodes AS cla
+    LEFT JOIN
+        ssd_cp_plans AS cp ON cla.clae_referral_id = cp.cppl_referral_id
+        AND cp.cppl_cp_plan_end_date IS NULL                      -- ensure we only consider active CP plans in the join
+    LEFT JOIN
+        ssd_involvements AS i ON cla.clae_referral_id = i.invo_referral_id -- link with involvements for team details
     WHERE
         cla.clae_cla_episode_ceased IS NULL                       -- filter for active CLA episodes
-        AND cp.cppl_cp_plan_end_date IS NULL                      -- filter for active CP plans
+        AND cp.cppl_cp_plan_id IS NULL                            -- ensure there is no active CP plan
     GROUP BY
         i.invo_professional_team
 ),
 
-/* get count of active CP plans with no related active CLA episode */
-ActiveCPWithoutCLA AS (
-    SELECT
-        i.invo_professional_team,                                 -- grouping by team via involvements
-        COUNT(DISTINCT cp.cppl_person_id) AS CPnoLAC                      -- active CP plans without a related CLA episode
-    FROM
-        ssd_cp_plans AS cp
-    LEFT JOIN
-        ssd_cla_episodes AS cla ON cp.cppl_referral_id = cla.clae_referral_id
-    LEFT JOIN
-        ssd_involvements AS i ON cp.cppl_referral_id = i.invo_referral_id -- link with involvements for team dets
-    WHERE
-        cp.cppl_cp_plan_end_date IS NULL                                    -- filter for active CP plans
-        AND cla.clae_cla_episode_ceased IS NULL                             -- ensure no related CLA episode
-    GROUP BY
-        i.invo_professional_team
-),
 
-/* count care leavers without related active involvement or CLA episode */
-CareLeaversWithoutInvolvementOrCLA AS (
+/* get count care leavers without active referral CLA episode & without CP Plan */
+/*
+ssd_care_leavers [careLeaverCount(exclude with CP plan, exclude with cla_episode)]	
+CareleaverCount	involvements minus|those with CP Plan, CLA Episode
+
+*/
+CareLeaversWithoutCLAWithoutCP AS (
     SELECT
-        -- cl.clea_care_leaver_allocated_team,                       -- grouping by care leaver team
-        i.invo_professional_team,                                   -- grouping by involvements team
-        COUNT(DISTINCT cl.clea_person_id) AS CareLeaversNoInvolvementOrCLA -- care leavers without active involvement or CLA episode
+        ISNULL(i.invo_professional_team, cl.clea_care_leaver_allocated_team) AS invo_professional_team,   -- group by involvement team or care leaver allocated team
+        COUNT(DISTINCT cl.clea_person_id) AS CareLeaversNoCLACP -- count care leavers without active CLA episode or CP plan
     FROM
         ssd_care_leavers AS cl
-    LEFT JOIN
-        ssd_involvements AS i ON cl.clea_person_id = i.invo_person_id AND i.invo_involvement_end_date IS NULL
+
     LEFT JOIN
         ssd_cla_episodes AS cla ON cl.clea_person_id = cla.clae_person_id AND cla.clae_cla_episode_ceased IS NULL
-
+    LEFT JOIN
+        ssd_cp_plans AS cp ON cl.clea_person_id = cp.cppl_person_id AND cp.cppl_cp_plan_end_date IS NULL
+    LEFT JOIN
+        ssd_involvements AS i ON cl.clea_person_id = i.invo_person_id AND i.invo_involvement_end_date IS NULL
     WHERE
-        i.invo_involvement_end_date IS NULL                             -- no active involvement
-        AND cla.clae_cla_episode_ceased IS NULL                         -- no active CLA episode
+        cla.clae_cla_episode_ceased IS NULL                         -- no active CLA episode
+        AND cp.cppl_cp_plan_end_date IS NULL                        -- no active CP plan
+        -- AND i.invo_involvements_id IS NULL                       -- no active involvement
     GROUP BY
-        -- cl.clea_care_leaver_allocated_team                               -- 1)[TESTING] group by care leaver team from care_leavers
-        i.invo_professional_team                                         -- 2)[TESTING] group by professional team from involvements
+        ISNULL(i.invo_professional_team, cl.clea_care_leaver_allocated_team) -- group by involvement team or care leaver allocated team
+),
+
+/*
+CiNwithPlan 
+active plan in cin_plans table + involvements (in theory these not LAC or CP) 
+*/
+CiNwithActivePlan AS (
+    SELECT
+        i.invo_professional_team,                                   -- grouping by involvements team
+        COUNT(DISTINCT cinp.cinp_person_id) AS CiNwithPlanCount     -- correct alias for CiN plan count
+    FROM
+        ssd_cin_plans AS cinp
+    LEFT JOIN
+        ssd_involvements AS i ON cinp.cinp_person_id = i.invo_person_id
+    WHERE
+        cinp.cinp_cin_plan_end_date IS NULL                         -- active CIN plan
+    GROUP BY
+        i.invo_professional_team                                    -- group by professional team from involvements
+),
+
+/*
+CiNnoPlan 
+involvements minus|exclude LAC+CP+CareLeaver+CiNPlan 
+*/
+CiNnoActivePlan AS (
+    SELECT
+        i.invo_professional_team,                                -- grouping by involvements team
+        COUNT(DISTINCT cine.cine_person_id) AS CiNwithPlanCount   -- correct alias for CiN plan count
+    FROM
+        ssd_cin_episodes AS cine
+    LEFT JOIN
+        ssd_involvements AS i ON cine.cine_person_id = i.invo_person_id
+    WHERE
+        cine.cine_cin_close_date IS NULL                         -- active CIN plan
+        AND NOT EXISTS (
+            SELECT 1
+            FROM ssd_cla_episodes AS cla
+            WHERE cla.clae_person_id = cine.cine_person_id
+        )                                                       -- exclude if related CLA episode exists
+        AND NOT EXISTS (
+            SELECT 1
+            FROM ssd_cp_plans AS cp
+            WHERE cp.cppl_person_id = cine.cine_person_id
+        )                                                       -- exclude if related CP plan exists
+        AND NOT EXISTS (
+            SELECT 1
+            FROM ssd_care_leavers AS cl
+            WHERE cl.clea_person_id = cine.cine_person_id
+        )                                                       -- exclude if related care leaver record exists
+        AND NOT EXISTS (
+            SELECT 1
+            FROM ssd_cin_plans AS cinp
+            WHERE cinp.cinp_person_id = cine.cine_person_id
+        )                                                       -- exclude if related CIN plan exists
+    GROUP BY
+        i.invo_professional_team                                 -- group by professional team from involvements
 )
+
 
 /* main select, combine all counts */
 SELECT
     ISNULL(dd.dept_team_name, 'Unassigned')         AS TeamName,              -- from department dets (if None/NULL placeholder used)
     ISNULL(dd.dept_team_parent_name, 'No Parent')   AS TeamParentName,        -- from department dets (if None/NULL placeholder used)
+   
     -- Summary counts (by team)
     COALESCE(ic.InvolvementCaseload, 0)             AS InvolvementCaseload,   -- total involvements/caseload (else 0)
     COALESCE(ocla.OpenCLAEpisodeCount, 0)           AS OpenCLAEpisodeCount,   -- active CLA episode (else 0)
     COALESCE(cp_lac.CPAndLACCount, 0)               AS LACwithCP,             -- active CLA episode with an active CP plan (else 0)
-    COALESCE(acp.CPnoLAC, 0)                        AS LACnoCP,               -- active CLA episode without active plan (else 0)
-    COALESCE(cl_no_involvement_or_cla.CareLeaversNoInvolvementOrCLA, 0) 
-                                                    AS CareLeaversNoInvolvementOrCLA -- care leavers without active involvement or CLA episode (else 0)
+    COALESCE(acp.LACnoActiveCP, 0)                  AS LACnoCP,               -- active CLA episode without active plan (else 0)
+    COALESCE(cl_no_involvement_or_cla.CareLeaversNoCLACP, 0) 
+                                                    AS CareLeaversNoCLACP,    -- care leavers without active involvement or CLA episode (else 0)
+    COALESCE(cinp.CiNwithPlanCount, 0)              AS CiNwithActivePlan,     -- active CLA episode without active plan (else 0)
+    COALESCE(cnp.CiNnoActivePlanCount, 0)           AS CiNnoActivePlan        -- count of CIN episodes without related CLA, CP, or care leaver record
+
 FROM
     ssd_department AS dd
 
@@ -122,23 +213,189 @@ LEFT JOIN
 LEFT JOIN
     OpenCLAEpisodes AS ocla ON dd.dept_team_id = ocla.invo_professional_team
 LEFT JOIN
-    OpenCPAndLAC AS cp_lac ON dd.dept_team_id = cp_lac.invo_professional_team 
+    LACwithActiveCP AS cp_lac ON dd.dept_team_id = cp_lac.invo_professional_team 
 LEFT JOIN
-    ActiveCPWithoutCLA AS acp ON dd.dept_team_id = acp.invo_professional_team 
+    LACnoActiveCP AS acp ON dd.dept_team_id = acp.invo_professional_team 
 LEFT JOIN
-    -- CareLeaversWithoutInvolvementOrCLA AS cl_no_involvement_or_cla ON dd.dept_team_id = cl_no_involvement_or_cla.clea_care_leaver_allocated_team 
-    CareLeaversWithoutInvolvementOrCLA AS cl_no_involvement_or_cla ON dd.dept_team_id = cl_no_involvement_or_cla.invo_professional_team  
+    CareLeaversWithoutCLAWithoutCP AS cl_no_involvement_or_cla ON dd.dept_team_id = cl_no_involvement_or_cla.invo_professional_team  
+LEFT JOIN
+    CiNwithActivePlan AS cinp ON dd.dept_team_id = cinp.invo_professional_team 
+LEFT JOIN
+    CiNnoActivePlan AS cnp ON dd.dept_team_id = cnp.invo_professional_team     -- new join for CiNnoActivePlan
 
 WHERE
-    COALESCE(ic.InvolvementCaseload, 0)     > 0 OR                          -- include teams with at least one involvement case
-    COALESCE(ocla.OpenCLAEpisodeCount, 0)   > 0 OR                          -- include teams with at least one active CLA episode
-    COALESCE(cp_lac.CPAndLACCount, 0)       > 0 OR                          -- include teams with at least one active CLA episode with a CP plan
-    COALESCE(acp.CPnoLAC, 0)                > 0 OR                          -- include teams with at least one active CP plan with no related CLA episode
-    COALESCE(cl_no_involvement_or_cla.CareLeaversNoInvolvementOrCLA, 0) > 0 -- include teams with care leavers having no active involvement or CLA episode
+    COALESCE(ic.InvolvementCaseload, 0)     > 0 OR                            -- include teams with at least one involvement case
+    COALESCE(ocla.OpenCLAEpisodeCount, 0)   > 0 OR                            -- include teams with at least one active CLA episode
+    COALESCE(cp_lac.CPAndLACCount, 0)       > 0 OR                            -- include teams with at least one active CLA episode with a CP plan
+    COALESCE(acp.LACnoActiveCP, 0)          > 0 OR                            -- include teams with at least one active CP plan with no related CLA episode
+    COALESCE(cl_no_involvement_or_cla.CareLeaversNoCLACP, 0) > 0 OR           -- include teams with care leavers having no active involvement or CLA episode
+    COALESCE(cinp.CiNwithPlanCount, 0)      > 0 OR                            -- include teams with at least one active CP plan with no related CLA episode
+    COALESCE(cnp.CiNnoActivePlanCount, 0)   > 0                               -- include teams with at least one CIN episode without related CLA, CP, or care leaver record
 
 ORDER BY
     InvolvementCaseload DESC;
 
+
+
+-- start of prev ver BAK
+-- WITH
+-- /* involvements filter active cases with 'ALLOCATED CASE WORKER' role */
+-- InvolvementCounts AS (
+--     SELECT
+--         i.invo_professional_team,                           -- grouping by team
+--         COUNT(DISTINCT cla.clae_person_id) AS InvolvementCaseload -- count person_id for each team with active CLA episode
+--     FROM
+--         ssd_involvements AS i
+--     INNER JOIN
+--         ssd_cla_episodes AS cla ON i.invo_referral_id = cla.clae_referral_id -- link involvements with CLA episodes 
+--     WHERE
+--         UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER'  -- filter by role 'ALLOCATED CASE WORKER'
+--         AND i.invo_involvement_end_date IS NULL                       -- filter for active cases in involvements
+--     GROUP BY
+--         i.invo_professional_team
+-- ),
+
+-- /* get count of active CLA episodes (where clae_cla_episode_ceased is NULL) */
+-- OpenCLAEpisodes AS (
+--     SELECT
+--         i.invo_professional_team,                                 -- grouping by team via involvements
+--         COUNT(DISTINCT cla.clae_person_id) AS OpenCLAEpisodeCount     -- count person_id with active CLA episodes by team
+--     FROM
+--         ssd_cla_episodes AS cla
+--     LEFT JOIN
+--         ssd_involvements AS i ON cla.clae_referral_id = i.invo_referral_id -- link with involvements for team dets
+--     WHERE
+--         UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER'  -- filter by role 'ALLOCATED CASE WORKER'
+--         AND cla.clae_cla_episode_ceased IS NULL                       -- ensure the CLA episode is still open
+--     GROUP BY
+--         i.invo_professional_team
+-- ),
+
+-- /* get count of active CLA episodes that also have an active CP plan */
+-- OpenCPAndLAC AS (
+--     SELECT
+--         i.invo_professional_team,                                 -- grouping by team via involvements
+--         COUNT(DISTINCT cp.cppl_person_id) AS CPAndLACCount                -- active CLA episodes with an active CP plan
+--     FROM
+--         ssd_cp_plans AS cp
+--     LEFT JOIN
+--         ssd_cla_episodes AS cla ON cp.cppl_person_id = cla.clae_person_id
+--     LEFT JOIN
+--         ssd_involvements AS i ON cp.cppl_referral_id = i.invo_referral_id -- link with involvements for team dets
+--     WHERE
+--         cla.clae_cla_episode_ceased IS NULL                       -- filter for active CLA episodes
+--         AND cp.cppl_cp_plan_end_date IS NULL                      -- filter for active CP plans
+--     GROUP BY
+--         i.invo_professional_team
+-- ),
+
+-- /* get count of active CP plans with no related active CLA episode */
+-- ActiveCPWithoutCLA AS (
+--     SELECT
+--         i.invo_professional_team,                                 -- grouping by team via involvements
+--         COUNT(DISTINCT cp.cppl_person_id) AS CPnoLAC                      -- active CP plans without a related CLA episode
+--     FROM
+--         ssd_cp_plans AS cp
+--     LEFT JOIN
+--         ssd_cla_episodes AS cla ON cp.cppl_referral_id = cla.clae_referral_id
+--     LEFT JOIN
+--         ssd_involvements AS i ON cp.cppl_referral_id = i.invo_referral_id -- link with involvements for team dets
+--     WHERE
+--         cp.cppl_cp_plan_end_date IS NULL                                    -- filter for active CP plans
+--         AND cla.clae_cla_episode_ceased IS NULL                             -- ensure no related CLA episode
+--     GROUP BY
+--         i.invo_professional_team
+-- ),
+
+-- /* count care leavers without related active involvement or CLA episode */
+
+-- /*
+
+-- ssd_care_leavers [careLeaverCount(exclude with CP plan, exclude with cla_episode)] 
+-- CareleaverCount 
+-- involvements minus|those with CP Plan, CLA Episode 
+
+-- */
+
+-- CareLeaversWithoutInvolvementOrCLA AS (
+--     SELECT
+--         -- cl.clea_care_leaver_allocated_team,                       -- grouping by care leaver team
+--         i.invo_professional_team,                                   -- grouping by involvements team
+--         COUNT(DISTINCT cl.clea_person_id) AS CareLeaversNoInvolvementOrCLA -- care leavers without active involvement or CLA episode
+--     FROM
+--         ssd_care_leavers AS cl
+--     LEFT JOIN
+--         ssd_involvements AS i ON cl.clea_person_id = i.invo_person_id AND i.invo_involvement_end_date IS NULL
+--     LEFT JOIN
+--         ssd_cla_episodes AS cla ON cl.clea_person_id = cla.clae_person_id AND cla.clae_cla_episode_ceased IS NULL
+
+--     WHERE
+--         i.invo_involvement_end_date IS NULL                             -- no active involvement
+--         AND cla.clae_cla_episode_ceased IS NULL                         -- no active CLA episode
+--     GROUP BY
+--         -- cl.clea_care_leaver_allocated_team                               -- 1)[TESTING] group by care leaver team from care_leavers
+--         i.invo_professional_team                                         -- 2)[TESTING] group by professional team from involvements
+-- )
+
+-- /*
+
+-- ssd_cin_plans [] 
+-- CiNwithPlan 
+-- active plan in cin_plans table + involvements (in theory these not LAC or CP) 
+-- */
+-- CiNwithPlan AS (
+--     SELECT
+--         i.invo_professional_team,                                   -- grouping by involvements team
+--         COUNT(DISTINCT cl.clea_person_id) AS CareLeaversNoInvolvementOrCLA -- care leavers without active involvement or CLA episode
+--     FROM
+--         ssd_cin_plans AS cinp
+--     LEFT JOIN
+--         ssd_involvements AS i ON cinp.cinp_person_id = i.invo_person_id AND i.invo_involvement_end_date IS NULL
+
+--     WHERE
+--         i.invo_involvement_end_date IS NULL                             -- no active involvement
+--         AND cla.clae_cla_episode_ceased IS NULL                         -- no active CLA episode
+--     GROUP BY
+--         i.invo_professional_team                                         -- 2)[TESTING] group by professional team from involvements
+-- )
+
+
+-- /* main select, combine all counts */
+-- SELECT
+--     ISNULL(dd.dept_team_name, 'Unassigned')         AS TeamName,              -- from department dets (if None/NULL placeholder used)
+--     ISNULL(dd.dept_team_parent_name, 'No Parent')   AS TeamParentName,        -- from department dets (if None/NULL placeholder used)
+--     -- Summary counts (by team)
+--     COALESCE(ic.InvolvementCaseload, 0)             AS InvolvementCaseload,   -- total involvements/caseload (else 0)
+--     COALESCE(ocla.OpenCLAEpisodeCount, 0)           AS OpenCLAEpisodeCount,   -- active CLA episode (else 0)
+--     COALESCE(cp_lac.CPAndLACCount, 0)               AS LACwithCP,             -- active CLA episode with an active CP plan (else 0)
+--     COALESCE(acp.CPnoLAC, 0)                        AS LACnoCP,               -- active CLA episode without active plan (else 0)
+--     COALESCE(cl_no_involvement_or_cla.CareLeaversNoInvolvementOrCLA, 0) 
+--                                                     AS CareLeaversNoInvolvementOrCLA -- care leavers without active involvement or CLA episode (else 0)
+-- FROM
+--     ssd_department AS dd
+
+-- LEFT JOIN
+--     InvolvementCounts AS ic ON dd.dept_team_id = ic.invo_professional_team
+-- LEFT JOIN
+--     OpenCLAEpisodes AS ocla ON dd.dept_team_id = ocla.invo_professional_team
+-- LEFT JOIN
+--     OpenCPAndLAC AS cp_lac ON dd.dept_team_id = cp_lac.invo_professional_team 
+-- LEFT JOIN
+--     ActiveCPWithoutCLA AS acp ON dd.dept_team_id = acp.invo_professional_team 
+-- LEFT JOIN
+--     -- CareLeaversWithoutInvolvementOrCLA AS cl_no_involvement_or_cla ON dd.dept_team_id = cl_no_involvement_or_cla.clea_care_leaver_allocated_team 
+--     CareLeaversWithoutInvolvementOrCLA AS cl_no_involvement_or_cla ON dd.dept_team_id = cl_no_involvement_or_cla.invo_professional_team  
+
+-- WHERE
+--     COALESCE(ic.InvolvementCaseload, 0)     > 0 OR                          -- include teams with at least one involvement case
+--     COALESCE(ocla.OpenCLAEpisodeCount, 0)   > 0 OR                          -- include teams with at least one active CLA episode
+--     COALESCE(cp_lac.CPAndLACCount, 0)       > 0 OR                          -- include teams with at least one active CLA episode with a CP plan
+--     COALESCE(acp.CPnoLAC, 0)                > 0 OR                          -- include teams with at least one active CP plan with no related CLA episode
+--     COALESCE(cl_no_involvement_or_cla.CareLeaversNoInvolvementOrCLA, 0) > 0 -- include teams with care leavers having no active involvement or CLA episode
+
+-- ORDER BY
+--     InvolvementCaseload DESC;
+-- end of prev ver BAK
 
 
 

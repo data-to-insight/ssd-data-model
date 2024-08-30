@@ -39,7 +39,8 @@ Currently in [REVIEW]
 
 -- LA specific vars
 USE HDM_local;
-GO
+
+GO -- also reset previously defined vars
 
 -- Set reporting period in months
 DECLARE @AA_ReportingPeriod INT;

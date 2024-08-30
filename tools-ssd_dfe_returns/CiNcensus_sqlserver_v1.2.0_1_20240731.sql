@@ -17,7 +17,8 @@ cinf_table_id	cinf_assessment_id	cinf_assessment_factors_json
 1000017	        1087182	            ["21"]
 */
 
-
+USE HDM_local;
+GO -- also reset previously defined vars
 
 
 --[Start_of_Census_Year], a constant value for this census of 2023-04-01
