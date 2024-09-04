@@ -1,4 +1,5 @@
 #!/bin/bash
+# chmod +x ./systemc/init_all_downstream_branches.sh
 
 # Declare an associative array to map organizations to system types
 declare -A org_system_map

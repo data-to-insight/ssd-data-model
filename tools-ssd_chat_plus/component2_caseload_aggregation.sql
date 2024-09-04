@@ -7,12 +7,6 @@ Reductive views extract SQL - Caseload counts/aggr by Team
 Use HDM_Local;
 
 
-/* 
-Reductive views extract SQL - Caseload counts/aggr by Team
-#DtoI-
-#Requires ssd_development.ssd_ tables
-*/
-
 WITH
 /* involvements filter active cases with 'ALLOCATED CASE WORKER' role */
 
@@ -153,41 +147,37 @@ CiNwithActivePlan AS (
 
 /*
 CiNnoPlan 
-involvements minus|exclude LAC+CP+CareLeaver+CiNPlan 
+[ACTIVE] involvements excluding those with active LAC | CP | CareLeaver | CiNPlan 
 */
 CiNnoActivePlan AS (
     SELECT
-        i.invo_professional_team,                                -- grouping by involvements team
-        COUNT(DISTINCT cine.cine_person_id) AS CiNwithPlanCount   -- correct alias for CiN plan count
+        i.invo_professional_team,                                   -- grouping by involvements team
+        COUNT(DISTINCT cine.cine_person_id) AS CiNwithNoPlanCount   -- correct alias for CiN plan count
     FROM
         ssd_cin_episodes AS cine
     LEFT JOIN
-        ssd_involvements AS i ON cine.cine_person_id = i.invo_person_id
+        ssd_involvements AS i ON cine.cine_person_id = i.invo_person_id -- link CIN episodes with involvements
+    LEFT JOIN
+        ssd_cla_episodes AS cla ON cine.cine_person_id = cla.clae_person_id
+        AND cla.clae_cla_episode_ceased IS NULL                      -- only join if the CLA episode is active
+    LEFT JOIN
+        ssd_cp_plans AS cp ON cine.cine_person_id = cp.cppl_person_id
+        AND cp.cppl_cp_plan_end_date IS NULL                         -- only join if the CP plan is active
+    LEFT JOIN
+        ssd_care_leavers AS cl ON cine.cine_person_id = cl.clea_person_id
+    LEFT JOIN
+        ssd_cin_plans AS cinp ON cine.cine_person_id = cinp.cinp_person_id
+        AND cinp.cinp_cin_plan_end_date IS NULL                      -- only join if the CIN plan is active
     WHERE
-        cine.cine_cin_close_date IS NULL                         -- active CIN plan
-        AND NOT EXISTS (
-            SELECT 1
-            FROM ssd_cla_episodes AS cla
-            WHERE cla.clae_person_id = cine.cine_person_id
-        )                                                       -- exclude if related CLA episode exists
-        AND NOT EXISTS (
-            SELECT 1
-            FROM ssd_cp_plans AS cp
-            WHERE cp.cppl_person_id = cine.cine_person_id
-        )                                                       -- exclude if related CP plan exists
-        AND NOT EXISTS (
-            SELECT 1
-            FROM ssd_care_leavers AS cl
-            WHERE cl.clea_person_id = cine.cine_person_id
-        )                                                       -- exclude if related care leaver record exists
-        AND NOT EXISTS (
-            SELECT 1
-            FROM ssd_cin_plans AS cinp
-            WHERE cinp.cinp_person_id = cine.cine_person_id
-        )                                                       -- exclude if related CIN plan exists
+        cine.cine_close_date IS NULL                                 -- only consider active CIN episodes
+        AND cla.clae_person_id IS NULL                               -- exclude if there is an active CLA episode
+        AND cp.cppl_person_id IS NULL                                -- exclude if there is an active CP plan
+        AND cl.clea_person_id IS NULL                                -- exclude if there is a care leaver record
+        AND cinp.cinp_person_id IS NULL                              -- exclude if there is an active CIN plan
     GROUP BY
-        i.invo_professional_team                                 -- group by professional team from involvements
+        i.invo_professional_team                                     -- group by professional team from involvements
 )
+
 
 
 /* main select, combine all counts */
@@ -203,7 +193,7 @@ SELECT
     COALESCE(cl_no_involvement_or_cla.CareLeaversNoCLACP, 0) 
                                                     AS CareLeaversNoCLACP,    -- care leavers without active involvement or CLA episode (else 0)
     COALESCE(cinp.CiNwithPlanCount, 0)              AS CiNwithActivePlan,     -- active CLA episode without active plan (else 0)
-    COALESCE(cnp.CiNnoActivePlanCount, 0)           AS CiNnoActivePlan        -- count of CIN episodes without related CLA, CP, or care leaver record
+    COALESCE(cnp.CiNwithNoPlanCount, 0)             AS CiNnoActivePlan        -- count of CIN episodes without related CLA, CP, or care leaver record
 
 FROM
     ssd_department AS dd
@@ -230,7 +220,7 @@ WHERE
     COALESCE(acp.LACnoActiveCP, 0)          > 0 OR                            -- include teams with at least one active CP plan with no related CLA episode
     COALESCE(cl_no_involvement_or_cla.CareLeaversNoCLACP, 0) > 0 OR           -- include teams with care leavers having no active involvement or CLA episode
     COALESCE(cinp.CiNwithPlanCount, 0)      > 0 OR                            -- include teams with at least one active CP plan with no related CLA episode
-    COALESCE(cnp.CiNnoActivePlanCount, 0)   > 0                               -- include teams with at least one CIN episode without related CLA, CP, or care leaver record
+    COALESCE(cnp.CiNwithNoPlanCount, 0)   > 0                               -- include teams with at least one CIN episode without related CLA, CP, or care leaver record
 
 ORDER BY
     InvolvementCaseload DESC;
@@ -561,9 +551,9 @@ SELECT
     ISNULL(d.dept_team_parent_name, 'No Parent') AS TeamParentName, -- Similar handling for NULL PArent Teams
     COUNT(*) AS CaseloadCount
 FROM
-    ssd_development.ssd_involvements AS i
+    ssd_involvements AS i
 LEFT JOIN
-    ssd_development.ssd_department AS d ON i.invo_professional_team = d.dept_team_id
+    ssd_department AS d ON i.invo_professional_team = d.dept_team_id
 WHERE
     UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER'    -- filter on Case Workers only
     AND i.invo_involvement_end_date IS NULL                         -- active cases only
@@ -587,12 +577,12 @@ SELECT
     p.prof_professional_caseload                    AS CurrentCaseload,
     COUNT(*)                                        AS TotalCaseloadSSD      -- Takes the existing SSD total caseload count from ssd_professionals 
 FROM
-    ssd_development.ssd_involvements AS i
+    ssd_involvements AS i
 
 LEFT JOIN
-    ssd_development.ssd_department AS d ON i.invo_professional_team = d.dept_team_id
+    ssd_department AS d ON i.invo_professional_team = d.dept_team_id
 LEFT JOIN
-    ssd_development.ssd_professionals AS p ON i.invo_professional_id = p.prof_professional_id
+    ssd_professionals AS p ON i.invo_professional_id = p.prof_professional_id
 WHERE
     UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER'
     AND i.invo_involvement_end_date IS NULL
