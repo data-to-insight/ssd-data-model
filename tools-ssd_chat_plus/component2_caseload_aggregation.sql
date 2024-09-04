@@ -70,9 +70,11 @@ LACwithActiveCP AS (
     WHERE
         cla.clae_cla_episode_ceased IS NULL                  -- filter for active CLA episodes
         AND cp.cppl_cp_plan_end_date IS NULL                 -- ensure the CP plan is still active
+        AND UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER' -- filter by role
     GROUP BY
         i.invo_professional_team
 ),
+
 
 
 /* get count of CLA episodes with no related active CP plan */
@@ -95,9 +97,11 @@ LACnoActiveCP AS (
     WHERE
         cla.clae_cla_episode_ceased IS NULL                       -- filter for active CLA episodes
         AND cp.cppl_cp_plan_id IS NULL                            -- ensure there is no active CP plan
+        AND UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER' -- filter by role
     GROUP BY
         i.invo_professional_team
 ),
+
 
 
 /* get count care leavers without active referral CLA episode & without CP Plan */
@@ -112,7 +116,6 @@ CareLeaversWithoutCLAWithoutCP AS (
         COUNT(DISTINCT cl.clea_person_id) AS CareLeaversNoCLACP -- count care leavers without active CLA episode or CP plan
     FROM
         ssd_care_leavers AS cl
-
     LEFT JOIN
         ssd_cla_episodes AS cla ON cl.clea_person_id = cla.clae_person_id AND cla.clae_cla_episode_ceased IS NULL
     LEFT JOIN
@@ -122,7 +125,7 @@ CareLeaversWithoutCLAWithoutCP AS (
     WHERE
         cla.clae_cla_episode_ceased IS NULL                         -- no active CLA episode
         AND cp.cppl_cp_plan_end_date IS NULL                        -- no active CP plan
-        -- AND i.invo_involvements_id IS NULL                       -- no active involvement
+        AND UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER' -- filter by role
     GROUP BY
         ISNULL(i.invo_professional_team, cl.clea_care_leaver_allocated_team) -- group by involvement team or care leaver allocated team
 ),
@@ -141,9 +144,11 @@ CiNwithActivePlan AS (
         ssd_involvements AS i ON cinp.cinp_person_id = i.invo_person_id
     WHERE
         cinp.cinp_cin_plan_end_date IS NULL                         -- active CIN plan
+        AND UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER' -- filter by role
     GROUP BY
         i.invo_professional_team                                    -- group by professional team from involvements
 ),
+
 
 /*
 CiNnoPlan 
@@ -174,6 +179,7 @@ CiNnoActivePlan AS (
         AND cp.cppl_person_id IS NULL                                -- exclude if there is an active CP plan
         AND cl.clea_person_id IS NULL                                -- exclude if there is a care leaver record
         AND cinp.cinp_person_id IS NULL                              -- exclude if there is an active CIN plan
+        AND UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER' -- filter by role
     GROUP BY
         i.invo_professional_team                                     -- group by professional team from involvements
 )
