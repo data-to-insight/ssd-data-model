@@ -1,29 +1,29 @@
 #!/bin/bash
 # chmod +x ./systemc/init_all_downstream_branches.sh
 
-# Declare an associative array to map organizations to system types
-declare -A org_system_map
+# LAs to system types
+declare -A la_system_map
 
-# Populate the array with org:systemtype pairs
-org_system_map=(
-    ["org1"]="systemc"
-    ["org2"]="systemc"
-    ["org3"]="mosaic"
-    ["org4"]="mosaic"
+# Populate with LA:systemtype pairs
+la_system_map=(
+    ["la1"]="systemc"
+    ["la2"]="systemc"
+    ["la3"]="mosaic"
+    ["la4"]="mosaic"
 )
 
-# Iterate over each organization and system type
-for org in "${!org_system_map[@]}"; do
-  system=${org_system_map[$org]}
+# Iterate over each la and system type
+for la in "${!la_system_map[@]}"; do
+  system=${la_system_map[$la]}
 
-  # Create a branch for each organization and system type if it doesn't already exist
-  branch_name="${system}-${org}-branch"
+  # Create branch for each la and system type if doesn't already exist
+  branch_name="${system}-${la}-branch"
   
   if ! git rev-parse --verify $branch_name > /dev/null 2>&1; then
     git checkout -b $branch_name
-    mkdir -p $system/$org/
-    git add $system/$org/
-    git commit -m "Initial setup for $system-$org"
+    mkdir -p $system/$la/
+    git add $system/$la/
+    git commit -m "Initial setup for $system-$la"
     git push origin $branch_name
   fi
 done
