@@ -90,10 +90,10 @@ SELECT
     /* Common AA fields */
     p.pers_person_id AS ChildUniqueID,
     CASE
-        WHEN p.pers_sex = 'M' THEN 'a) Male'
-        WHEN p.pers_sex = 'F' THEN 'b) Female'
-        WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-        WHEN p.pers_sex = 'I' THEN 'd) Neither'
+        WHEN p.pers_gender = 'M' THEN 'a) Male'
+        WHEN p.pers_gender = 'F' THEN 'b) Female'
+        WHEN p.pers_gender = 'U' THEN 'c) Not stated/recorded'
+        WHEN p.pers_gender = 'I' THEN 'd) Neither'
     END AS Gender,
     CASE
         WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
@@ -217,10 +217,10 @@ SELECT
     /* Common AA fields */
     p.pers_person_id							AS ChildUniqueID,	
     CASE
-		WHEN p.pers_sex = 'M' THEN 'a) Male'
-		WHEN p.pers_sex = 'F' THEN 'b) Female'
-		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+		WHEN p.pers_gender = 'M' THEN 'a) Male'
+		WHEN p.pers_gender = 'F' THEN 'b) Female'
+		WHEN p.pers_gender = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_gender = 'I' THEN 'd) Neither'
 	END											AS Gender,
     CASE
         WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
@@ -315,10 +315,10 @@ SELECT
     /* Common AA fields */
     p.pers_person_id							AS ChildUniqueID,	
     CASE
-        WHEN p.pers_sex = 'M' THEN 'a) Male'
-        WHEN p.pers_sex = 'F' THEN 'b) Female'
-        WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-        WHEN p.pers_sex = 'I' THEN 'd) Neither'
+        WHEN p.pers_gender = 'M' THEN 'a) Male'
+        WHEN p.pers_gender = 'F' THEN 'b) Female'
+        WHEN p.pers_gender = 'U' THEN 'c) Not stated/recorded'
+        WHEN p.pers_gender = 'I' THEN 'd) Neither'
     END											AS Gender,
     CASE
         WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
@@ -471,10 +471,10 @@ SELECT
     /* Common AA fields */
     p.pers_person_id							AS ChildUniqueID,	
     CASE
-        WHEN p.pers_sex = 'M' THEN 'a) Male'
-        WHEN p.pers_sex = 'F' THEN 'b) Female'
-        WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-        WHEN p.pers_sex = 'I' THEN 'd) Neither'
+        WHEN p.pers_gender = 'M' THEN 'a) Male'
+        WHEN p.pers_gender = 'F' THEN 'b) Female'
+        WHEN p.pers_gender = 'U' THEN 'c) Not stated/recorded'
+        WHEN p.pers_gender = 'I' THEN 'd) Neither'
     END											AS Gender,
     CASE
         WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
@@ -610,10 +610,10 @@ SELECT
     /* Common AA fields */
     p.pers_person_id							AS ChildUniqueID,	
     CASE
-        WHEN p.pers_sex = 'M' THEN 'a) Male'
-        WHEN p.pers_sex = 'F' THEN 'b) Female'
-        WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-        WHEN p.pers_sex = 'I' THEN 'd) Neither'
+        WHEN p.pers_gender = 'M' THEN 'a) Male'
+        WHEN p.pers_gender = 'F' THEN 'b) Female'
+        WHEN p.pers_gender = 'U' THEN 'c) Not stated/recorded'
+        WHEN p.pers_gender = 'I' THEN 'd) Neither'
     END											AS Gender,
     CASE
         WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
@@ -831,10 +831,10 @@ FROM
         /* Common AA fields */
         p.pers_person_id							AS ChildUniqueID,	
         CASE
-            WHEN p.pers_sex = 'M' THEN 'a) Male'
-            WHEN p.pers_sex = 'F' THEN 'b) Female'
-            WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-            WHEN p.pers_sex = 'I' THEN 'd) Neither'
+            WHEN p.pers_gender = 'M' THEN 'a) Male'
+            WHEN p.pers_gender = 'F' THEN 'b) Female'
+            WHEN p.pers_gender = 'U' THEN 'c) Not stated/recorded'
+            WHEN p.pers_gender = 'I' THEN 'd) Neither'
         END											AS Gender,
         CASE
             WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
@@ -1154,10 +1154,10 @@ FROM
         /* Common AA fields */
 		p.pers_person_id											AS ChildUniqueID,	/*PW - Field Name changed from p.pers_legacy_id as that doesn't match SSDS Spec*/
         CASE
-            WHEN p.pers_sex = 'M' THEN 'a) Male'
-            WHEN p.pers_sex = 'F' THEN 'b) Female'
-            WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-            WHEN p.pers_sex = 'I' THEN 'd) Neither'
+            WHEN p.pers_gender = 'M' THEN 'a) Male'
+            WHEN p.pers_gender = 'F' THEN 'b) Female'
+            WHEN p.pers_gender = 'U' THEN 'c) Not stated/recorded'
+            WHEN p.pers_gender = 'I' THEN 'd) Neither'
         END                                                 AS Gender,
         CASE
             WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
@@ -1411,10 +1411,10 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
     SELECT
         p.pers_person_id AS ChildUniqueID,  
         CASE
-            WHEN p.pers_sex = 'M' THEN 'a) Male'
-            WHEN p.pers_sex = 'F' THEN 'b) Female'
-            WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-            WHEN p.pers_sex = 'I' THEN 'd) Neither'
+            WHEN p.pers_gender = 'M' THEN 'a) Male'
+            WHEN p.pers_gender = 'F' THEN 'b) Female'
+            WHEN p.pers_gender = 'U' THEN 'c) Not stated/recorded'
+            WHEN p.pers_gender = 'I' THEN 'd) Neither'
         END AS Gender,
         CASE
             WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
@@ -1863,10 +1863,10 @@ SELECT
 	/* Common AA fields */
 	p.pers_person_id											AS ChildUniqueID,	/*PW - Field Name changed from p.pers_legacy_id as that doesn't match SSDS Spec*/
 	CASE
-		WHEN p.pers_sex = 'M' THEN 'a) Male'
-		WHEN p.pers_sex = 'F' THEN 'b) Female'
-		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+		WHEN p.pers_gender = 'M' THEN 'a) Male'
+		WHEN p.pers_gender = 'F' THEN 'b) Female'
+		WHEN p.pers_gender = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_gender = 'I' THEN 'd) Neither'
 	END															AS Gender,
     CASE
         WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
@@ -2049,10 +2049,10 @@ SELECT
 	p.pers_person_id											AS ChildUniqueID,	
 	NULL														AS FamilyID,	/*PW - Field Added (only in List 10).  Don't think Family ID is present in SSDS (Local adoptive family identifier for the adoptive family the child is matched or placed with)*/
 	CASE
-		WHEN p.pers_sex = 'M' THEN 'a) Male'
-		WHEN p.pers_sex = 'F' THEN 'b) Female'
-		WHEN p.pers_sex = 'U' THEN 'c) Not stated/recorded'
-		WHEN p.pers_sex = 'I' THEN 'd) Neither'
+		WHEN p.pers_gender = 'M' THEN 'a) Male'
+		WHEN p.pers_gender = 'F' THEN 'b) Female'
+		WHEN p.pers_gender = 'U' THEN 'c) Not stated/recorded'
+		WHEN p.pers_gender = 'I' THEN 'd) Neither'
 	END															AS Gender,
     CASE
         WHEN p.pers_ethnicity IN ('WBRI', 'A1') THEN 'a) WBRI'
@@ -2187,7 +2187,7 @@ SELECT
     /* Common AA fields */
     p.pers_person_id                            AS AdopterID,      -- Individual adopter identifier  Field Name changed from p.pers_legacy_id
     --  fam.fami_person_id            -- IS this coming from fc.DIM_PERSON_ID AS fami_person_id, as doesnt seem valid context
-    p.pers_sex                                  AS Gender,
+    p.pers_gender                                  AS Gender,
     p.pers_ethnicity                            AS Ethnicity,
     FORMAT(p.pers_dob, 'dd/MM/yyyy')            AS DateOfBirth, --  note: returns string representation of the date
     
