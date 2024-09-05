@@ -443,7 +443,8 @@ Description:
             "Young people and children with assessments in previous six months"
 Author: D2I
 DB Compatibility: SQL Server 2014+|...
-Version: 1.1
+Version: 1.2
+            1.1 #DtoI-1825 pers_sex to pers_gender applied to all lists
             1.0 get worker name and team name from dept and prof tables 040624 RH
 			0.9 PW/Blackpool major edits/reworked PW 030324
             0.5 Further edits of source obj referencing, Fixed to working state
