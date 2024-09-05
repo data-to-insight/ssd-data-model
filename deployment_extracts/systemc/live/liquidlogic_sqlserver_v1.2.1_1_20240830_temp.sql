@@ -1270,7 +1270,8 @@ PRINT 'Table created: ' + @TableName;
 Object Name: ssd_cin_assessments
 Description: 
 Author: D2I
-Version: 1.2
+Version: 1.3 
+            1.2 replace -1 vals _team_id and _worker_id with NULL #DtoI-1824 050924 RH
             1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
             1.0: Fix Aggr warnings use of isnull() 310524 RH
             0.2: cina_assessment_child_seen type change from nvarchar 100524 RH
@@ -1382,8 +1383,8 @@ SELECT
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
         ) AS cina_assessment_outcome_json,
     fa.OUTCOME_NFA_FLAG                                         AS cina_assessment_outcome_nfa,
-    fa.COMPLETED_BY_DEPT_ID                                     AS cina_assessment_team,        -- fa.COMPLETED_BY_DEPT_NAME also available -- #DtoI-1762
-    fa.COMPLETED_BY_USER_STAFF_ID                               AS cina_assessment_worker_id    -- fa.COMPLETED_BY_USER_NAME also available
+    NULLIF(fa.COMPLETED_BY_DEPT_ID, -1)                        AS cina_assessment_team,             -- replace -1 values with NULL _team_id
+    NULLIF(fa.COMPLETED_BY_USER_STAFF_ID, -1)                  AS cina_assessment_worker_id         -- replace -1 values with NULL for _worker_id
  
 FROM
     HDM.Child_Social.FACT_SINGLE_ASSESSMENT fa
