@@ -22,8 +22,10 @@ InvolvementCounts AS (
         COUNT(DISTINCT cla.clae_person_id) AS InvolvementCaseload -- count person_id for each team with active CLA episode
     FROM
         ssd_involvements AS i
+    
     INNER JOIN
         ssd_cla_episodes AS cla ON i.invo_referral_id = cla.clae_referral_id -- link involvements with CLA episodes 
+    
     WHERE
         UPPER(i.invo_professional_role_id) = 'ALLOCATED CASE WORKER'  -- filter by role 'ALLOCATED CASE WORKER'
         AND i.invo_involvement_end_date IS NULL                       -- filter for active cases in involvements

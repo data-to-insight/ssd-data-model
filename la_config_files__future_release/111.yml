@@ -1,0 +1,42 @@
+111:
+  metadata:
+    last_updated: 2024-09-06
+    version: 1.0
+    updated_by: rharrison
+    change_description: Updated CMS details and corrected table names.
+    approved_by: 
+    documentation_link: http://example.com/doc
+    
+  la_code: 111
+  la_name: Bradford
+  cms: SystemC
+
+  cms_db: 'SQL Server' # 2020
+
+  db_vers: '' 
+  ics_universe_vers: ''
+
+  data_warehouse_vers: ''
+  front_end_vers: ''
+
+  db_schema:
+    tables:
+      person: # known/expected data object
+        name: person_Lambeth # replacement name/actual db table on this la system
+        fields:
+          person_sex: person_sex_Lambeth # swap out current_fieldname:  for :new_fieldname
+          person_gender: person_gender_Lambeth
+      address:
+        name: address_Lambeth
+        fields:
+          address_type: address_type_Lambeth
+          address_postcode: address_postcode_Lambeth
+
+
+  extract_sql_customisations:
+    remove_tables:  # table(s) that need to be removed from bespoke SQL extract
+      - ssd_family 
+
+    remove_table_idx:  # remove indexes associated with the following tables from bespoke SQL extract
+      - ssd_family 
+      - ssd_address

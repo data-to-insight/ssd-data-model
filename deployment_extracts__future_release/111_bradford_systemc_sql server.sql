@@ -140,7 +140,6 @@ CREATE TABLE ssd_development.ssd_version_log (
     created_by          NVARCHAR(10),                   -- which user created the record
     impact_description  NVARCHAR(255)                   -- additional notes on the impact of the release
 ); 
--- META-END
 
 -- ensure any previous current-version flag is set to 0 (not current), before adding new current version
 UPDATE ssd_development.ssd_version_log SET is_current = 0 WHERE is_current = 1;
@@ -229,7 +228,6 @@ CREATE TABLE ssd_development.ssd_person (
     pers_nationality        NVARCHAR(48),               -- metadata={"item_ref":"PERS012A"} 
     ssd_flag                INT                         -- Non-core data flag for D2I filter testing [TESTING]
 );
--- META-END
 
 -- CTE to get a no_upn_code 
 -- (assumption here is that all codes will be the same/current)
@@ -362,7 +360,6 @@ BEGIN
     CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob               ON ssd_development.ssd_person(pers_dob);
     CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id   ON ssd_development.ssd_person(pers_common_child_id);
     CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender       ON ssd_development.ssd_person(pers_ethnicity, pers_gender);
-    -- META-END
 END
 
 
@@ -421,14 +418,10 @@ SET @TableName = N'ssd_family';
 IF OBJECT_ID('ssd_development.ssd_family') IS NOT NULL DROP TABLE ssd_development.ssd_family;
 IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
--- META: {"type": "create_table", "name": "ssd_family"}
--- Create structure
-CREATE TABLE ssd_development.ssd_family (
-    fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"FAMI003A"} 
-    fami_family_id  NVARCHAR(48),               -- metadata={"item_ref":"FAMI001A"}
-    fami_person_id  NVARCHAR(48)                -- metadata={"item_ref":"FAMI002A"}
-);
--- META-END
+
+
+/***************** BRADFORD CONFIG REMOVED SQL BLOCK : create_table *****************/
+
 
 
 -- Insert data 
@@ -459,12 +452,10 @@ BEGIN
     -- Add constraint(s)
     ALTER TABLE ssd_development.ssd_family ADD CONSTRAINT FK_ssd_family_person
     FOREIGN KEY (fami_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
-    -- META-END
-    -- META: {"type": "create_idx", "name": "ssd_family"}
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_family_person_id          ON ssd_development.ssd_family(fami_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id     ON ssd_development.ssd_family(fami_family_id);
-    -- META-END
+
+
+/***************** BRADFORD CONFIG REMOVED SQL BLOCK : create_idx *****************/
+
 END
 
 
@@ -510,7 +501,6 @@ CREATE TABLE ssd_development.ssd_address (
     addr_address_postcode   NVARCHAR(15),               -- metadata={"item_ref":"ADDR006A"}
     addr_address_json       NVARCHAR(1000)              -- metadata={"item_ref":"ADDR001A"}
 );
--- META-END
 
 -- insert data
 INSERT INTO ssd_development.ssd_address (
@@ -568,14 +558,10 @@ BEGIN
     -- Add constraint(s)
     ALTER TABLE ssd_development.ssd_address ADD CONSTRAINT FK_ssd_address_person
     FOREIGN KEY (addr_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
-    -- META-END
-    -- META: {"type": "create_idx", "name": "ssd_address"}
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_address_person        ON ssd_development.ssd_address(addr_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_address_start         ON ssd_development.ssd_address(addr_address_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_address_end           ON ssd_development.ssd_address(addr_address_end_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_ssd_address_postcode  ON ssd_development.ssd_address(addr_address_postcode);
-    -- META-END
+
+
+/***************** BRADFORD CONFIG REMOVED SQL BLOCK : create_idx *****************/
+
 END
 
 
@@ -617,7 +603,6 @@ CREATE TABLE ssd_development.ssd_disability
     disa_person_id          NVARCHAR(48) NOT NULL,      -- metadata={"item_ref":"DISA001A"}
     disa_disability_code    NVARCHAR(48) NOT NULL       -- metadata={"item_ref":"DISA002A"}
 );
--- META-END
 
 -- Insert data
 INSERT INTO ssd_development.ssd_disability (
@@ -647,12 +632,10 @@ BEGIN
     -- Add constraint(s)
     ALTER TABLE ssd_development.ssd_disability ADD CONSTRAINT FK_ssd_disability_person 
     FOREIGN KEY (disa_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
-    -- META-END
     -- META: {"type": "create_idx", "name": "ssd_disability"}
     -- Create index(es)
     CREATE NONCLUSTERED INDEX idx_ssd_disability_person_id  ON ssd_development.ssd_disability(disa_person_id);
     CREATE NONCLUSTERED INDEX idx_ssd_disability_code       ON ssd_development.ssd_disability(disa_disability_code);
-    -- META-END
 END
 
 
@@ -698,7 +681,6 @@ CREATE TABLE ssd_development.ssd_immigration_status (
     immi_immigration_status_end_date    DATETIME,                   -- metadata={"item_ref":"IMMI004A"}
     immi_immigration_status             NVARCHAR(100)               -- metadata={"item_ref":"IMMI002A"}
 );
--- META-END
  
 -- insert data
 INSERT INTO ssd_development.ssd_immigration_status (
@@ -734,13 +716,11 @@ BEGIN
     -- Add constraint(s)
     ALTER TABLE ssd_development.ssd_immigration_status ADD CONSTRAINT FK_ssd_immigration_status_person
     FOREIGN KEY (immi_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
-    -- META-END
     -- META: {"type": "create_idx", "name": "ssd_immigration_status"}
     -- Create index(es)
     CREATE NONCLUSTERED INDEX idx_ssd_immigration_status_immi_person_id ON ssd_development.ssd_immigration_status(immi_person_id);
     CREATE NONCLUSTERED INDEX idx_ssd_immigration_status_start          ON ssd_development.ssd_immigration_status(immi_immigration_status_start_date);
     CREATE NONCLUSTERED INDEX idx_ssd_immigration_status_end            ON ssd_development.ssd_immigration_status(immi_immigration_status_end_date);
-    -- META-END
 END
 
 
@@ -798,7 +778,6 @@ CREATE TABLE ssd_development.ssd_cin_episodes
     cine_referral_team              NVARCHAR(48),  -- metadata={"item_ref":"CINE008A"}
     cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
 ); 
--- META-END
 
 -- Insert data
 INSERT INTO ssd_development.ssd_cin_episodes
