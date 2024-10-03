@@ -1,0 +1,126 @@
+344:    
+  la_code: 344
+  la_name: Knowsley
+
+  deployment_system: # META-ELEMENT: {"type": "deployment_system"}
+    cms: SystemC
+    cms_db: 'SQLServer' # 2014
+    db_vers: '11.0.0'  
+    ics_universe_vers: '11.0.0' 
+    data_warehouse_vers: '15.3'
+    front_end_vers: '16.0.11.2'
+
+
+  config_metadata: # META-ELEMENT: {"type": "config_metadata"}
+    last_updated: 2024-09-09
+    version: 1.0
+    updated_by: rharrison
+    change_description: null
+    approved_by: null
+    documentation_link: https://data-to-insight.github.io/ssd-data-model
+
+  header: # META-ELEMENT: {"type": "header"}
+    header_text: |
+      *********************************************************************************************************
+      STANDARD SAFEGUARDING DATASET EXTRACT 
+      https://data-to-insight.github.io/ssd-data-model/
+      We strongly recommend that initial pilot/trials of SSD scripts occur in a development|test environment.
+      The SQL script is non-destructive. SSD clean-up scripts are available seperately, these are destructive.
+      *********************************************************************************************************
+
+
+# EXTRACT SETTINGS
+  settings:
+    # params used within SQL SSD extract
+
+    extract_parameters: # META-ELEMENT: {"type": "ssd_timeframe"}
+      ssd_timeframe_years: 5
+      ssd_sub1_range_years: 1
+      # CaseloadLastSept30th: "2024-09-30" # currently set in sql based on currDate->prevSept30th
+
+    persistent_ssd: # META-ELEMENT: {"type": "persistent_ssd"}
+      deploy_temp_tables: false  # true = temporary tables, false = persistent tables
+      temp_table_prefix: "#ssd_"  
+
+
+    dbschema: # META-ELEMENT: {"type": "dbschema"}  # la schema definition 
+      database_name: HDM_Local             # i.e. default tablespace
+      schema_name: ssd_development
+
+    dev_setup: # META-ELEMENT: {"type": "dev_setup"} 
+      no_count_on: false # true = SET NOCOUNT ON; / false = SET NOCOUNT OFF;
+
+# REMOVE | CLEAN UP SQL
+
+  # remove ALL in script refs of named META-ELEMENT: block type using: true/false flags
+  # overides and precedes localised settings in <named_sql_tag_remove:>
+  global_sql_tag_remove:
+    remove_drop_table: true                # all blocks tagged with -- META-ELEMENT: {"type": "drop_table"}    - lossy/destructive SQL
+    remove_insert_data: false              # all blocks tagged with -- META-ELEMENT: {"type": "insert_data"}   - towards creating no-data SSD structure
+    remove_test: false                      # all blocks tagged with -- META-ELEMENT: {"type": "test"}          - towards silent running
+    remove_console: false                   # all blocks tagged with -- META-ELEMENT: {"type": "console_output"} - towards silent running
+    remove_deployment_status_note: true    # all blocks tagged with -- META-ELEMENT: {"type": "deployment_status_note"}
+    remove_ssd_non_core_modifications: true # all blocks tagged with -- META-ELEMENT: {"type": "ssd_non_core_modifications"}
+ 
+    remove_create_pk: true          # all blocks tagged with -- META-ELEMENT: {"type": "create_pk"}
+    remove_create_fk: true           # all blocks tagged with -- META-ELEMENT: {"type": "create_fk"}
+    remove_create_idx: true          # all blocks tagged with -- META-ELEMENT: {"type": "create_idx"}
+
+  named_sql_container_remove:
+  - involvements_history
+
+  
+  # remove named object/table level references <within> labelled parent block type
+  # e.g.  [parent block] -- META-CONTAINER: {"type": "table", "name": "ssd_family"}
+  #       [child type meta block]-- META-ELEMENT: {"type": "drop_table"}
+  named_sql_tag_remove:
+    remove_drop_table:           # {"type": "drop_table"}
+    - null # e.g. ssd_family
+    remove_create_table:         # {"type": "create_table"}
+    -  null # e.g. ssd_family
+    remove_insert_data:          # {"type": "insert_data"}
+    - ssd_ehcp_active_plans
+    - ssd_ehcp_named_plan
+    - ssd_ehcp_assessment
+    - ssd_ehcp_requests
+    - ssd_sen_need
+    - pre_proceedings
+    - ssd_voice_of_child
+    - ssd_s251_finance
+    remove_create_pk:           # {"type": "create_pk"}
+    - null # e.g. ssd_family
+    remove_create_fk:           # {"type": "create_fk"}
+     - ssd_ehcp_active_plans
+     - ssd_ehcp_named_plan
+     - ssd_ehcp_assessment
+     - ssd_ehcp_requests
+     - ssd_sen_need
+     - pre_proceedings
+     - ssd_voice_of_child
+     - ssd_s251_finance
+    remove_create_idx:          # {"type": "create_idx"}
+    - ssd_ehcp_active_plans
+    - ssd_ehcp_named_plan
+    - ssd_ehcp_assessment
+    - ssd_ehcp_requests
+    - ssd_sen_need
+    - pre_proceedings
+    - ssd_voice_of_child
+    - ssd_s251_finance
+
+
+
+
+# BESPOKE SQL | SCHEMA
+  extract_sql_custom_la:
+   customise_db_schema:
+    - ssd_item_ref: null # compulsory: needed to identify all items
+      ssd_table: null # compulsory: to ensure correct container block to effect edits 
+      ssd_field_name: null
+      la_field_name: null  # if you want to replace the field name
+      la_table_name: null  # replacement name/actual db table in LA system (can be different)
+      la_datatype: null
+      la_datatype_size: null
+    
+    
+    # duplicate the above block to add further bespoke changes

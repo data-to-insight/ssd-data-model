@@ -1,142 +1,103 @@
+-- META-CONTAINER: {"type": "header", "name": "extract_settings"}
+-- META-ELEMENT: {"type": "header"}
+
+
+
 /*
+*********************************************************************************************************
 STANDARD SAFEGUARDING DATASET EXTRACT 
 https://data-to-insight.github.io/ssd-data-model/
-
-Script creates labelled persistent(unless set otherwise) tables in your existing|specified database. 
-There is no data sharing, and no changes to your existing systems are required. Data tables(with data copied 
-from the raw CMS tables) and indexes for the SSD are created, and therefore in some cases will need support 
-and/or agreement from either your IT or Intelligence team. The SQL script is always non-destructive, i.e. it 
-does nothing to your existing data/tables/anything - the SSD process is simply a series of SELECT statements, 
-pulling copied data into a new standardised field and table structure on your own system for access by only 
-you/your LA.
+We strongly recommend that initial pilot/trials of SSD scripts occur in a development|test environment.
+The SQL script is non-destructive. SSD clean-up scripts are available seperately, these are destructive.
+*********************************************************************************************************
 */
 
 
-/* **********************************************************************************************************
-
-Notes: 
-This version of the SSD script creates persistant _perm tables. A version that instead creates _temp|session 
-tables is also available to enable those restricted to read access on the cms db|schema.   
-
-There remain some [TESTING] [REVIEW] notes as the project iterates wider testing results; similarly some test related 
-console outputs remain to aid such as run-time problem solving. These [TESTING] blocks can/will be removed. 
-
+-- META-ELEMENT: {"type": "deployment_system"}
 /*
-Dev Objact & Item Status Flags (~in this order):
-Status:     [B]acklog,          -- To do|for review but not current priority
-            [D]ev,              -- Currently being developed 
-            [T]est,             -- Dev work being tested/run time script tests
-            [DT]ataTesting,     -- Sense checking of extract data ongoing
-            [AR]waitingReview,  -- Hand-over to SSD project team for review
-            [R]elease,          -- Ready for wider release and secondary data testing
-            [Bl]ocked,          -- Data is not held in CMS/accessible, or other stoppage reason
-            [P]laceholder       -- Data not held by any LA, new data, - Future structure added as placeholder
+Bespoke SSD extract script for Knowsley (344).
+Expected deployment system: SystemC | SQLServer | 11.0.0 | 11.0.0 | 15.3 | 16.0.11.2.
+*********************************************************************************************************
 */
 
-Development notes:
-Currently in [REVIEW]
-- DfE returns expect dd/mm/YYYY formating on dates, SSD Extract initially maintains DATETIME not DATE.
-- Extended default field sizes - Some are exagerated e.g. family_id NVARCHAR(48), to ensure cms/la compatibility
-- Caseload counts - should these be restricted to SSD timeframe counts(currently this) or full system counts?
-- ITEM level metadata using the format/key labels: 
-- metadata={
-            "item_ref"      :"AAAA000A", 
 
-            -- and where applicable any of the following: 
-            "item_status"   :"[B], [D].." As per the above status list, 
-            "expected_data" :[csv list of "strings" or nums]
-            "info"          : "short string desc"
-            }
-********************************************************************************************************** */
-
-/* Development set up */
-
--- Run SSD into Temporary OR Persistent extract structure
--- 
+-- META-ELEMENT: {"type": "config_metadata"}
+/*
+Config metadata last updated on 2024-09-09 (version 1.0) by rharrison.
+Change description: None
+Project and submit change request link: https://data-to-insight.github.io/ssd-data-model
+*********************************************************************************************************
+*/
+-- META-ELEMENT: {"type": "dev_set_up"}
 GO 
-
-
-DECLARE @Run_SSD_As_Temporary_Tables BIT;
-SET     @Run_SSD_As_Temporary_Tables = 0;  -- 1==Single use SSD extract uses tempdb..# | 0==Persistent SSD table set up
-
-DECLARE @sql NVARCHAR(MAX) = N''; -- used in both clean-up and logging
-DECLARE @schema_name NVARCHAR(128) = N'';    -- Set your schema name here. Leave empty for default behaviour
-DECLARE @default_schema NVARCHAR(128) = N'dbo';             -- Default schema if none provided
-
-
 SET NOCOUNT ON;
 
--- Point to DB/TABLE_CATALOG if required (SSD tables created here)
-USE HDM_Local; 
-
-
-
-/* [TESTING] Start Set up
-Simplistic run-time monitoring outputs (to be removed from live v2+)
-*/
-DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder'; -- Note: also/seperately use @table_name in non-test|live elements of script. 
-
--- Query run time vars
-DECLARE @StartTime DATETIME, @EndTime DATETIME;
-SET @StartTime = GETDATE(); -- Script start time
-/*[TESTING] End
-*/
-
-
-/* ********************************************************************************************************** */
-/* SSD extract set up */
-
--- ssd extract time-frame (YRS)
-DECLARE @ssd_timeframe_years INT = 6;
+-- META-ELEMENT: {"type": "ssd_timeframe"}
+DECLARE @ssd_timeframe_years INT = 5;
 DECLARE @ssd_sub1_range_years INT = 1;
 
--- store date on which CASELOAD count required. Currently : Most recent past Sept30th
-DECLARE @LastSept30th DATE; 
+-- CASELOAD count Date (Currently: September 30th)
+DECLARE @CaseloadLastSept30th DATE; 
+SET @CaseloadLastSept30th = CASE 
+                        WHEN CONVERT(DATE, GETDATE()) > DATEFROMPARTS(YEAR(GETDATE()), 9, 30) 
+                        THEN DATEFROMPARTS(YEAR(GETDATE()), 9, 30)
+                        ELSE DATEFROMPARTS(YEAR(GETDATE()) - 1, 9, 30)
+                    END;
 
-/* 
-=============================================================================
-Object Name: ssd_version_log
-Description: maintain SSD versioning meta data
-Author: D2I
-Version: 1.0
-Status: [R]elease
-Remarks: SSD extract metadata enabling version consistency across LAs. 
-Dependencies: 
-- None
-=============================================================================
-*/
--- [TESTING] Create marker
+
+DECLARE @CaseloadTimeframeStartDate DATE = DATEADD(YEAR, -@ssd_timeframe_years, @CaseloadLastSept30th);
+-- Example resultant dates into @CaseloadTimeframeStartDate
+                                -- With 
+                                -- @CaseloadLastSept30th = 30th September 2023
+                                -- @CaseloadTimeframeStartDate = 30th September 2017
+
+
+
+-- META-CONTAINER: {"type": "settings", "name": "testing"}
+/* Towards simplistic TEST run outputs and logging  (to be removed from live v2+) */
+
+-- META-CONTAINER: {"type": "table", "name": "ssd_version_log"}
+-- =============================================================================
+-- Description: maintain SSD versioning meta data
+-- Author: D2I
+-- Version: 1.0
+-- Status: [R]elease
+-- Remarks: SSD extract metadata enabling version consistency across LAs. 
+-- Dependencies: 
+-- - None
+-- =============================================================================
+
+
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_version_log';
 
-
--- Check if exists, & drop
-IF OBJECT_ID('ssd_version_log', 'U') IS NOT NULL DROP TABLE ssd_version_log;
-IF OBJECT_ID('tempdb..#ssd_version_log', 'U') IS NOT NULL DROP TABLE #ssd_version_log;
-
+-- META-ELEMENT: {"type": "create_table"}
 -- create versioning information object
-CREATE TABLE ssd_version_log (
-    version_number      NVARCHAR(10) NOT NULL,          -- version num (e.g., "1.0.0")
+CREATE TABLE ssd_development.ssd_version_log (
+    version_number      NVARCHAR(10) PRIMARY KEY,                   -- version num (e.g., "1.0.0")
     release_date        DATE NOT NULL,                  -- date of version release
     description         NVARCHAR(100),                  -- brief description of version
     is_current          BIT NOT NULL DEFAULT 0,         -- flag to indicate if this is the current version
     created_at          DATETIME DEFAULT GETDATE(),     -- timestamp when record was created
     created_by          NVARCHAR(10),                   -- which user created the record
     impact_description  NVARCHAR(255)                   -- additional notes on the impact of the release
-);
+); 
+
+
 
 -- ensure any previous current-version flag is set to 0 (not current), before adding new current version
-UPDATE ssd_version_log SET is_current = 0 WHERE is_current = 1;
+UPDATE ssd_development.ssd_version_log SET is_current = 0 WHERE is_current = 1;
 
-
--- insert & update current version (using MAJOR.MINOR.PATCH)
-INSERT INTO ssd_version_log 
+-- META-ELEMENT: {"type": "insert_data"}
+-- insert & update for CURRENT version (using MAJOR.MINOR.PATCH)
+INSERT INTO ssd_development.ssd_version_log 
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
-    ('1.2.0', GETDATE(), '#DtoI-1762, #DtoI-1810, improved 0/-1 handling', 1, 'admin', 'impacts all _team fields, AAL7 outputs');
+    ('1.2.2', GETDATE(), '#DtoI-1826, META+YML restructure incl. remove opt blocks', 1, 'admin', 'feat/bespoke LA extracts');
 
 
--- historic versioning log data
-INSERT INTO ssd_version_log (version_number, release_date, description, is_current, created_by, impact_description)
+-- HISTORIC versioning log data
+INSERT INTO ssd_development.ssd_version_log (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     ('1.0.0', '2023-01-01', 'Initial alpha release (Phase 1 end)', 0, 'admin', ''),
     ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 0, 'admin', 'Revised JSON Array structure implemented for CiN'),
@@ -147,56 +108,43 @@ VALUES
     ('1.1.6', '2024-07-12', 'FK fixes for #DtoI-1769', 0, 'admin', 'non-unique/FK issues addressed: #DtoI-1769, #DtoI-1601'),
     ('1.1.7', '2024-07-15', 'Non-core ssd_person records added', 0, 'admin', 'Fix requ towards #DtoI-1802'),
     ('1.1.8', '2024-07-17', 'admin table creation logging process defined', 0, 'admin', ''),
-    ('1.1.9', '2024-07-29', 'Applied CAST(person_id) + minor fixes', 0, 'admin', 'impacts all tables using where exists');
+    ('1.1.9', '2024-07-29', 'Applied CAST(person_id) + minor fixes', 0, 'admin', 'impacts all tables using where exists'),
+    ('1.2.0', '2024-08-13', '#DtoI-1762, #DtoI-1810, improved 0/-1 handling', 0, 'admin', 'impacts all _team fields, AAL7 outputs'),
+    ('1.2.1', '2024-08-20', '#DtoI-1820, removed destructive pre-clean-up incl .dbo refs', 0, 'admin', 'priority patch fix');
+
+-- META-CONTAINER: {"type": "table", "name": "ssd_person"}
+-- =============================================================================
+-- Description: Person/child details. This the most connected table in the SSD.
+-- Author: D2I
+-- Version: 1.2:
+--             1.1: ssd_flag added for phase 2 non-core filter testing [1,0] 010824 RH
+--             1.0: fixes to where filter in-line with existing cincplac reorting 040724 JH
+--             0.2: upn _unknown size change in line with DfE to 4 160524 RH
+--             0.1: Additional inclusion criteria added to capture care leavers 120324 JH
+-- Status: [R]elease
+-- Remarks:    
+--             Note: Due to part reliance on 903 table, be aware that if 903 not populated pre-ssd run, 
+--             this/subsequent queries can return v.low|unexpected row counts.
+-- Dependencies:
+-- - HDM.Child_Social.DIM_PERSON
+-- - HDM.Child_Social.FACT_REFERRALS
+-- - HDM.Child_Social.FACT_CONTACTS
+-- - HDM.Child_Social.FACT_903_DATA
+-- - HDM.Child_Social.FACT_CLA_CARE_LEAVERS
+-- - HDM.Child_Social.DIM_CLA_ELIGIBILITY
+-- =============================================================================
 
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-/* ********************************************************************************************************** */
-/* SSD main extract start */
-
-
-/*
-=============================================================================
-Object Name: ssd_person
-Description: Person/child details. This the most connected table in the SSD.
-Author: D2I
-Version: 1.1
-            1.0: fixes to where filter in-line with existing cincplac reorting 040724 JH
-            0.2: upn _unknown size change in line with DfE to 4 160524 RH
-            0.1: Additional inclusion criteria added to capture care leavers 120324 JH
-Status: [R]elease
-Remarks:    
-            Note: Due to part reliance on 903 table, be aware that if 903 not populated pre-ssd run, 
-            this/subsequent queries can return v.low|unexpected row counts.
-Dependencies:
-- HDM.Child_Social.DIM_PERSON
-- HDM.Child_Social.FACT_REFERRALS
-- HDM.Child_Social.FACT_CONTACTS
-- HDM.Child_Social.FACT_903_DATA
-- HDM.Child_Social.FACT_CLA_CARE_LEAVERS
-- HDM.Child_Social.DIM_CLA_ELIGIBILITY
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_person';
 
 
-
--- check exists & drop
-IF OBJECT_ID('ssd_person') IS NOT NULL DROP TABLE ssd_person;
-IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
-
-
--- Create structure
-CREATE TABLE ssd_person (
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_person (
     pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
     pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}   
-    pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A"} 
-    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"T", "expected_data":["unknown","NULL", "F", "U", "M", "I"]}       
+    pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If additional status to Gender is held, otherwise dup of pers_gender"}    
+    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown","NULL","F","U","M","I"]}       
     pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"} 
     pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
     pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
@@ -206,10 +154,10 @@ CREATE TABLE ssd_person (
     pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"} 
     pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
     pers_nationality        NVARCHAR(48),               -- metadata={"item_ref":"PERS012A"} 
-    ssd_flag INT
+    ssd_flag                INT                         -- Non-core data flag for D2I filter testing [TESTING]
 );
 
-
+-- META-ELEMENT: {"type": "insert_data"}
 -- CTE to get a no_upn_code 
 -- (assumption here is that all codes will be the same/current)
 WITH f903_data_CTE AS (
@@ -220,13 +168,14 @@ WITH f903_data_CTE AS (
         ROW_NUMBER() OVER (PARTITION BY dim_person_id ORDER BY no_upn_code DESC) AS rn
     FROM 
         HDM.Child_Social.fact_903_data
+    WHERE
+        no_upn_code IS NOT NULL -- sparse data in this field, filter for performance
 )
--- Insert data
-INSERT INTO ssd_person (
+INSERT INTO ssd_development.ssd_person (
     pers_legacy_id,
     pers_person_id,
-    pers_sex,
-    pers_gender,
+    pers_sex,       -- sex and gender currently extracted as one
+    pers_gender,    -- 
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,                               
@@ -238,41 +187,41 @@ INSERT INTO ssd_person (
     pers_nationality,
     ssd_flag
 )
-SELECT
+SELECT 
+    -- TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING]
     p.LEGACY_ID,
-    CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),              -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
-    p.GENDER_MAIN_CODE,
-    p.NHS_NUMBER,                                       
+    CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
+    'SSD_PH' AS pers_sex,                   -- Placeholder for those LAs that store sex and gender independently
+    p.GENDER_MAIN_CODE,                     -- Gender as used in stat-returns
     p.ETHNICITY_MAIN_CODE,
     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
-        THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
+        THEN p.BIRTH_DTTM -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL 
-    END,                                                --  or NULL
-    NULL AS pers_common_child_id,                       -- Set to NULL as default(dev) / or set to NHS num
+    END, -- or NULL
+    NULL AS pers_common_child_id, -- Set to NULL as default(dev) / or set to NHS num
     COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
     p.EHM_SEN_FLAG,
     CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
-        THEN p.BIRTH_DTTM                               -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
+        THEN p.BIRTH_DTTM -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
         ELSE NULL 
-    END,                                                --  or NULL
+    END, -- or NULL
     p.DEATH_DTTM,
     CASE
-        WHEN p.GENDER_MAIN_CODE <> 'M' AND              -- Assumption that if male is not mother
+        WHEN p.GENDER_MAIN_CODE <> 'M' AND -- Assumption that if male is not mother
              EXISTS (SELECT 1 FROM HDM.Child_Social.FACT_PERSON_RELATION fpr
                      WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND
-                           fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI')  -- check for child relation only
+                           fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI') -- check for child relation only
         THEN 'Y'
         ELSE NULL -- No child relation found
     END,
     p.NATNL_CODE,
-    1
-   
+    1 AS ssd_flag -- Non-core data flag for D2I filter testing [TESTING]
 FROM
     HDM.Child_Social.DIM_PERSON AS p
- 
+
 -- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period?
 LEFT JOIN (
-    -- no other accessible location for UPN data
+    -- no other accessible location for UPN data than 903 table
     SELECT 
         dim_person_id, 
         no_upn_code
@@ -287,6 +236,7 @@ ON
 WHERE 
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
+    -- AND YEAR(p.BIRTH_DTTM) != 1900 -- #DtoI-1814
     AND (p.IS_CLIENT = 'Y'
         OR (
             EXISTS (
@@ -329,83 +279,35 @@ WHERE
     ;
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    -- Add constraint(s)
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob               ON ssd_person(pers_dob);
-    CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id   ON ssd_person(pers_common_child_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender       ON ssd_person(pers_ethnicity, pers_gender);
-END
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_family"}
+-- =============================================================================
+-- Description: Contains the family connections for each person
+-- Author: D2I
+-- Version: 1.0
+-- Status: [R]elease
+-- Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
+-- Dependencies: 
+-- - FACT_CONTACTS
+-- - ssd_person
+-- =============================================================================
 
 
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-/*SSD Person filter (notes): - Implemented*/
--- [done]contact in last 6yrs - HDM.Child_Social.FACT_CONTACTS.CONTACT_DTTM - -- might have only contact, not yet RFRL 
--- [done] has open referral - FACT_REFERRALS.REFRL_START_DTTM or doesn't closed date or a closed date within last 6yrs
--- [picked up within the referral] active plan or has been active in 6yrs 
-
-/*SSD Person filter (notes): - ON HOLD/Not included in SSD Ver/Iteration 1*/
---1
--- ehcp request in last 6yrs - HDM.Child_Social.FACT_EHCP_EPISODE.REQUEST_DTTM ; [perhaps not in iteration|version 1]
-    -- OR EXISTS (
-    --     -- ehcp request in last x@yrs
-    --     SELECT 1 FROM HDM.Child_Social.FACT_EHCP_EPISODE fe 
-    --     WHERE fe.DIM_PERSON_ID = p.DIM_PERSON_ID
-    --     AND fe.REQUEST_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
-    -- )
-    
---2 (Uncertainty re access EH)
--- Has eh_referral open in last 6yrs - 
-
---3 (Uncertainty re access SEN)
--- Has a record in send - HDM.Child_Social.FACT_SEN, DIM_LOOKUP_SEN, DIM_LOOKUP_SEN_TYPE ? 
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_family
-Description: Contains the family connections for each person
-Author: D2I
-Version: 1.0
-Status: [R]elease
-Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
-Dependencies: 
-- FACT_CONTACTS
-- ssd.ssd_person
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_family';
 
 
-
--- check exists & drop
-IF OBJECT_ID('ssd_family') IS NOT NULL DROP TABLE ssd_family;
-IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
-
-
--- Create structure
-CREATE TABLE ssd_family (
-    fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"FAMI003A"} 
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_family (
+    fami_table_id   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"FAMI003A"} 
     fami_family_id  NVARCHAR(48),               -- metadata={"item_ref":"FAMI001A"}
     fami_person_id  NVARCHAR(48)                -- metadata={"item_ref":"FAMI002A"}
 );
 
--- Insert data 
-INSERT INTO ssd_family (
+
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_family (
     fami_table_id, 
     fami_family_id, 
     fami_person_id
@@ -419,60 +321,31 @@ FROM HDM.Child_Social.FACT_CONTACTS AS fc
 WHERE EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fc.DIM_PERSON_ID -- #DtoI-1799
     );
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
 
-    -- Add constraint(s)
-    ALTER TABLE ssd_family ADD CONSTRAINT FK_ssd_family_person
-    FOREIGN KEY (fami_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_family_person_id          ON ssd_family(fami_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id     ON ssd_family(fami_family_id);
-
-END
-
+-- META-CONTAINER: {"type": "table", "name": "ssd_address"}
+-- =============================================================================
+-- Description: Contains full address details for every person 
+-- Author: D2I
+-- Version: 1.0
+-- Status: [R]elease
+-- Remarks: Need to verify json obj structure on pre-2014 SQL server instances
+-- Dependencies: 
+-- - ssd_person
+-- - DIM_PERSON_ADDRESS
+-- =============================================================================
 
 
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_address
-Description: Contains full address details for every person 
-Author: D2I
-Version: 1.0
-Status: [R]elease
-Remarks: Need to verify json obj structure on pre-2014 SQL server instances
-Dependencies: 
-- ssd_person
-- DIM_PERSON_ADDRESS
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_address';
 
 
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_address') IS NOT NULL DROP TABLE ssd_address;
-IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
-
-
--- Create structure
-CREATE TABLE ssd_address (
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_address (
     addr_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"ADDR007A"}
     addr_person_id          NVARCHAR(48),               -- metadata={"item_ref":"ADDR002A"} 
     addr_address_type       NVARCHAR(48),               -- metadata={"item_ref":"ADDR003A"}
@@ -483,8 +356,8 @@ CREATE TABLE ssd_address (
 );
 
 
--- insert data
-INSERT INTO ssd_address (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_address (
     addr_table_id, 
     addr_person_id, 
     addr_address_type, 
@@ -527,67 +400,42 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = pa.DIM_PERSON_ID -- #DtoI-1799
     );
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_address ADD CONSTRAINT FK_ssd_address_person
-    FOREIGN KEY (addr_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_address_person        ON ssd_address(addr_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_address_start         ON ssd_address(addr_address_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_address_end           ON ssd_address(addr_address_end_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_ssd_address_postcode  ON ssd_address(addr_address_postcode);
-END
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
 
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_disability"}
+-- =============================================================================
+-- Description: Contains the Y/N flag for persons with disability
+-- Author: D2I
+-- Version: 1.0
+--             0.1: Removed disability_code replace() into Y/N flag 130324 RH
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_DISABILITY
+-- =============================================================================
 
 
-/* 
-=============================================================================
-Object Name: ssd_disability
-Description: Contains the Y/N flag for persons with disability
-Author: D2I
-Version: 1.0
-            0.1: Removed disability_code replace() into Y/N flag 130324 RH
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_person
-- FACT_DISABILITY
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_disability';
 
 
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_disability') IS NOT NULL DROP TABLE ssd_disability;
-IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
-
--- Create the structure
-CREATE TABLE ssd_disability
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_disability
 (
-    disa_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"DISA003A"}
+    disa_table_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"DISA003A"}
     disa_person_id          NVARCHAR(48) NOT NULL,      -- metadata={"item_ref":"DISA001A"}
     disa_disability_code    NVARCHAR(48) NOT NULL       -- metadata={"item_ref":"DISA002A"}
 );
 
 
--- Insert data
-INSERT INTO ssd_disability (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_disability (
     disa_table_id,  
     disa_person_id, 
     disa_disability_code
@@ -602,70 +450,41 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fd.DIM_PERSON_ID -- #DtoI-1799
     );
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_disability ADD CONSTRAINT FK_ssd_disability_person 
-    FOREIGN KEY (disa_person_id) REFERENCES ssd_person(pers_person_id);
-        
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_disability_person_id  ON ssd_disability(disa_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_disability_code       ON ssd_disability(disa_disability_code);
-END
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_immigration_status"}
+-- =============================================================================
+-- Description: (UASC)
+-- Author: D2I
+-- Version: 1.0
+--             0.9 rem ims.DIM_LOOKUP_IMMGR_STATUS_DESC rpld with _CODE 270324 JH 
+-- Status: [R]elease
+-- Remarks: Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
+--             increased field size to 100
+-- Dependencies:
+-- - ssd_person
+-- - FACT_IMMIGRATION_STATUS
+-- =============================================================================
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
 
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_immigration_status (UASC)
-Description:
-Author: D2I
-Version: 1.0
-            0.9 rem ims.DIM_LOOKUP_IMMGR_STATUS_DESC rpld with _CODE 270324 JH 
-Status: [R]elease
-Remarks: Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
-            increased field size to 100
-Dependencies:
-- ssd_person
-- FACT_IMMIGRATION_STATUS
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_immigration_status';
 
- 
- 
--- Check if exists & drop
-IF OBJECT_ID('ssd_immigration_status') IS NOT NULL DROP TABLE ssd_immigration_status;
-IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
-
-
--- Create structure
-CREATE TABLE ssd_immigration_status (
-    immi_immigration_status_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"IMMI005A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_immigration_status (
+    immi_immigration_status_id          NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"IMMI005A"}
     immi_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"IMMI001A"}
     immi_immigration_status_start_date  DATETIME,                   -- metadata={"item_ref":"IMMI003A"}
     immi_immigration_status_end_date    DATETIME,                   -- metadata={"item_ref":"IMMI004A"}
     immi_immigration_status             NVARCHAR(100)               -- metadata={"item_ref":"IMMI002A"}
 );
- 
- 
--- insert data
-INSERT INTO ssd_immigration_status (
+
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_immigration_status (
     immi_immigration_status_id,
     immi_person_id,
     immi_immigration_status_start_date,
@@ -685,466 +504,60 @@ WHERE
     EXISTS
     ( -- only ssd relevant records
         SELECT 1
-        FROM ssd_person p
+        FROM ssd_development.ssd_person p
         WHERE CAST(p.pers_person_id AS INT) = ims.DIM_PERSON_ID -- #DtoI-1799
     );
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_immigration_status ADD CONSTRAINT FK_ssd_immigration_status_person
-    FOREIGN KEY (immi_person_id) REFERENCES ssd_person(pers_person_id);
 
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_immigration_status_immi_person_id ON ssd_immigration_status(immi_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_immigration_status_start          ON ssd_immigration_status(immi_immigration_status_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_immigration_status_end            ON ssd_immigration_status(immi_immigration_status_end_date);
-END
 
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_mother
-Description: Contains parent-child relations between mother-child 
-Author: D2I
-Version: 1.0
-            0.2: updated to exclude relationships with an end date 280224 JH
-Status: [R]elease
-Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
-Dependencies: 
-- ssd_person
-- FACT_PERSON_RELATION
-=============================================================================
-*/
--- [TESTING] Create marker
-SET @TableName = N'ssd_mother';
-
-
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_mother', 'U') IS NOT NULL DROP TABLE ssd_mother;
-IF OBJECT_ID('tempdb..#ssd_mother') IS NOT NULL DROP TABLE #ssd_mother;
-
-
--- Create structure
-CREATE TABLE ssd_mother (
-    moth_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"MOTH004A"}
-    moth_person_id          NVARCHAR(48),               -- metadata={"item_ref":"MOTH002A"}
-    moth_childs_person_id   NVARCHAR(48),               -- metadata={"item_ref":"MOTH001A"}
-    moth_childs_dob         DATETIME                    -- metadata={"item_ref":"MOTH003A"}
-);
- 
--- Insert data
-INSERT INTO ssd_mother (
-    moth_table_id,
-    moth_person_id,
-    moth_childs_person_id,
-    moth_childs_dob
-)
-SELECT
-    fpr.FACT_PERSON_RELATION_ID         AS moth_table_id,
-    fpr.DIM_PERSON_ID                   AS moth_person_id,
-    fpr.DIM_RELATED_PERSON_ID           AS moth_childs_person_id,
-    fpr.DIM_RELATED_PERSON_DOB          AS moth_childs_dob
- 
-FROM
-    HDM.Child_Social.FACT_PERSON_RELATION AS fpr
-JOIN
-    HDM.Child_Social.DIM_PERSON AS p ON fpr.DIM_PERSON_ID = p.DIM_PERSON_ID
-WHERE
-    p.GENDER_MAIN_CODE <> 'M'
-    AND
-    fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI' -- only interested in parent/child relations
-    AND
-    fpr.END_DTTM IS NULL
- 
-AND EXISTS
-    ( -- only ssd relevant records
-    SELECT 1
-    FROM ssd_person p
-    WHERE CAST(p.pers_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1799
-    );
-
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_mother ADD CONSTRAINT FK_ssd_moth_to_person 
-    FOREIGN KEY (moth_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- -- [TESTING] deployment issues remain
-    -- ALTER TABLE ssd_mother ADD CONSTRAINT FK_ssd_child_to_person 
-    -- FOREIGN KEY (moth_childs_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- -- [TESTING] Comment this out for ESCC until further notice
-    -- ALTER TABLE ssd_mother ADD CONSTRAINT CHK_ssd_no_self_parenting -- Ensure person cannot be their own mother
-    -- CHECK (moth_person_id <> moth_childs_person_id);
-
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON ssd_mother(moth_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON ssd_mother(moth_childs_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON ssd_mother(moth_childs_dob);
-END
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_legal_status
-Description: 
-Author: D2I
-Version: 1.0
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_person
-- FACT_LEGAL_STATUS
-=============================================================================
-*/
--- [TESTING] Create marker
-SET @TableName = N'ssd_legal_status';
-
-
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_legal_status') IS NOT NULL DROP TABLE ssd_legal_status;
-IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
-
--- Create structure
-CREATE TABLE ssd_legal_status (
-    lega_legal_status_id            NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LEGA001A"}
-    lega_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LEGA002A"}
-    lega_legal_status               NVARCHAR(100),              -- metadata={"item_ref":"LEGA003A"}
-    lega_legal_status_start_date    DATETIME,                   -- metadata={"item_ref":"LEGA004A"}
-    lega_legal_status_end_date      DATETIME                    -- metadata={"item_ref":"LEGA005A"}
-);
- 
--- Insert data
-INSERT INTO ssd_legal_status (
-    lega_legal_status_id,
-    lega_person_id,
-    lega_legal_status,
-    lega_legal_status_start_date,
-    lega_legal_status_end_date
- 
-)
-SELECT
-    fls.FACT_LEGAL_STATUS_ID,
-    fls.DIM_PERSON_ID,
-    fls.DIM_LOOKUP_LGL_STATUS_DESC,
-    fls.START_DTTM,
-    fls.END_DTTM
-FROM
-    HDM.Child_Social.FACT_LEGAL_STATUS AS fls
-
-WHERE 
-    (fls.END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
-    OR fls.END_DTTM IS NULL)
-
-AND EXISTS
-    ( -- only ssd relevant records
-    SELECT 1
-    FROM ssd_person p
-    WHERE CAST(p.pers_person_id AS INT) = fls.DIM_PERSON_ID -- #DtoI-1799
-    );
-
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_legal_status ADD CONSTRAINT FK_ssd_legal_status_person
-    FOREIGN KEY (lega_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id   ON ssd_legal_status(lega_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_legal_status                  ON ssd_legal_status(lega_legal_status);
-    CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start            ON ssd_legal_status(lega_legal_status_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end              ON ssd_legal_status(lega_legal_status_end_date);
-END
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_contacts
-Description: 
-Author: D2I
-Version: 1.1
-            1.0: cont_contact_outcome_json size 500 to 4000 to include COMMENTS 160724 RH
-            1.0: fc.TOTAL_NO_OF_OUTCOMES added to cont_contact_outcome_json #DtoI-1796 160724 RH 
-            1.0: fc.OUTCOME_COMMENTS added to cont_contact_outcome_json #DtoI-1796 160724 RH
-            0.2: cont_contact_source_code field name edit 260124 RH
-            0.1: cont_contact_source_desc added RH
-Status: [R]elease
-Remarks:Inclusion in contacts might differ between LAs. 
-        Baseline definition:
-        Contains safeguarding and referral to early help data.
-Dependencies: 
-- ssd_person
-- FACT_CONTACTS
-=============================================================================
-*/
--- [TESTING] Create marker
-SET @TableName = N'ssd_contacts';
-
-
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_contacts') IS NOT NULL DROP TABLE ssd_contacts;
-IF OBJECT_ID('tempdb..#ssd_contacts') IS NOT NULL DROP TABLE #ssd_contacts;
-
-
--- Create structure
-CREATE TABLE ssd_contacts (
-    cont_contact_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CONT001A"}
-    cont_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CONT002A"}
-    cont_contact_date               DATETIME,                   -- metadata={"item_ref":"CONT003A"}
-    cont_contact_source_code        NVARCHAR(48),               -- metadata={"item_ref":"CONT004A"} 
-    cont_contact_source_desc        NVARCHAR(255),              -- metadata={"item_ref":"CONT006A"} 
-    cont_contact_outcome_json       NVARCHAR(4000)              -- metadata={"item_ref":"CONT005A"}
-);
-
--- Insert data
-INSERT INTO ssd_contacts (
-    cont_contact_id, 
-    cont_person_id, 
-    cont_contact_date,
-    cont_contact_source_code,
-    cont_contact_source_desc,
-    cont_contact_outcome_json
-)
-SELECT 
-    fc.FACT_CONTACT_ID,
-    fc.DIM_PERSON_ID, 
-    fc.CONTACT_DTTM,
-    fc.DIM_LOOKUP_CONT_SORC_ID,
-    fc.DIM_LOOKUP_CONT_SORC_ID_DESC,
-    (   -- Create JSON string for outcomes
-        SELECT 
-            -- SSD standard 
-            -- all keys in structure regardless of data presence
-            ISNULL(fc.OUTCOME_NEW_REFERRAL_FLAG, '')         AS NEW_REFERRAL_FLAG,
-            ISNULL(fc.OUTCOME_EXISTING_REFERRAL_FLAG, '')    AS EXISTING_REFERRAL_FLAG,
-            ISNULL(fc.OUTCOME_CP_ENQUIRY_FLAG, '')           AS CP_ENQUIRY_FLAG,
-            ISNULL(fc.OUTCOME_NFA_FLAG, '')                  AS NFA_FLAG,
-            ISNULL(fc.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '')  AS NON_AGENCY_ADOPTION_FLAG,
-            ISNULL(fc.OUTCOME_PRIVATE_FOSTERING_FLAG, '')    AS PRIVATE_FOSTERING_FLAG,
-            ISNULL(fc.OUTCOME_ADVICE_FLAG, '')               AS ADVICE_FLAG,
-            ISNULL(fc.OUTCOME_MISSING_FLAG, '')              AS MISSING_FLAG,
-            ISNULL(fc.OUTCOME_OLA_CP_FLAG, '')               AS OLA_CP_FLAG,
-            ISNULL(fc.OTHER_OUTCOMES_EXIST_FLAG, '')         AS OTHER_OUTCOMES_EXIST_FLAG,
-            CASE 
-                WHEN fc.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL  -- to counter -1 values
-                ELSE fc.TOTAL_NO_OF_OUTCOMES 
-            END                                              AS NUMBER_OF_OUTCOMES,
-            ISNULL(fc.OUTCOME_COMMENTS, '')                  AS COMMENTS
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        ) AS cont_contact_outcome_json
-FROM 
-    HDM.Child_Social.FACT_CONTACTS AS fc
-
-WHERE 
-    (fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())) -- #DtoI-1806
-
-AND EXISTS
-    (   -- only ssd relevant records
-    SELECT 1 
-    FROM ssd_person p
-    WHERE CAST(p.pers_person_id AS INT) = fc.DIM_PERSON_ID -- #DtoI-1799
-    );
-
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_contacts ADD CONSTRAINT FK_ssd_contact_person 
-    FOREIGN KEY (cont_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_contact_person_id     ON ssd_contacts(cont_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_contact_date          ON ssd_contacts(cont_contact_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_contact_source_code   ON ssd_contacts(cont_contact_source_code);
-END
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_early_help_episodes
-Description: 
-Author: D2I
-Version: 1.2
-            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_person
-- FACT_CAF_EPISODE
-=============================================================================
-*/
--- [TESTING] Create marker
-SET @TableName = N'ssd_early_help_episodes';
-
-
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_early_help_episodes') IS NOT NULL DROP TABLE ssd_early_help_episodes;
-IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL DROP TABLE #ssd_early_help_episodes;
-
-
--- Create structure
-CREATE TABLE ssd_early_help_episodes (
-    earl_episode_id             NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EARL001A"}
-    earl_person_id              NVARCHAR(48),               -- metadata={"item_ref":"EARL002A"}
-    earl_episode_start_date     DATETIME,                   -- metadata={"item_ref":"EARL003A"}
-    earl_episode_end_date       DATETIME,                   -- metadata={"item_ref":"EARL004A"}
-    earl_episode_reason         NVARCHAR(MAX),              -- metadata={"item_ref":"EARL005A"}
-    earl_episode_end_reason     NVARCHAR(MAX),              -- metadata={"item_ref":"EARL006A"}
-    earl_episode_organisation   NVARCHAR(MAX),              -- metadata={"item_ref":"EARL007A"}
-    earl_episode_worker_id      NVARCHAR(100)               -- metadata={"item_ref":"EARL008A", "item_status": "A", "info":"Consider for removal"}
-);
- 
- 
--- Insert data
-INSERT INTO ssd_early_help_episodes (
-    earl_episode_id,
-    earl_person_id,
-    earl_episode_start_date,
-    earl_episode_end_date,
-    earl_episode_reason,
-    earl_episode_end_reason,
-    earl_episode_organisation,
-    earl_episode_worker_id                    
-)
- 
-SELECT
-    cafe.FACT_CAF_EPISODE_ID,
-    cafe.DIM_PERSON_ID,
-    cafe.EPISODE_START_DTTM,
-    cafe.EPISODE_END_DTTM,
-    cafe.START_REASON,
-    cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE,
-    cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
-    'SSD_PH'                             
-FROM
-    HDM.Child_Social.FACT_CAF_EPISODE AS cafe
- 
-WHERE 
-    (cafe.EPISODE_END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
-    OR cafe.EPISODE_END_DTTM IS NULL)
-
-AND EXISTS
-    ( -- only ssd relevant records
-    SELECT 1
-    FROM ssd_person p
-    WHERE CAST(p.pers_person_id AS INT) = cafe.DIM_PERSON_ID -- #DtoI-1799
-    );
-
-
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_early_help_episodes ADD CONSTRAINT FK_ssd_earl_to_person 
-    FOREIGN KEY (earl_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id     ON ssd_early_help_episodes(earl_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_early_help_start_date             ON ssd_early_help_episodes(earl_episode_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_early_help_end_date               ON ssd_early_help_episodes(earl_episode_end_date);
-END
-
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_cin_episodes
-Description: 
-Author: D2I
-Version: 1.4
-            1.3 cine_referral_team now DIM_DEPARTMENT_ID #DtoI-1762 290724 RH
-            1.2: cine_referral_outcome_json size 500 to 4000 to include COMMENTS 160724 RH
-            1.2: fr.OUTCOME_COMMENTS added cine_referral_outcome_json #DtoI-1796 160724 RH
-            1.2: fr.TOTAL_NUMBER_OF_OUTCOMES added cine_referral_outcome_json #DtoI-1796 160724 RH
-            1.2: rem NFA_OUTCOME from cine_referral_outcome_json #DtoI-1796 160724 RH
-            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
-            0.3 primary _need suffix of _code added #DtoI-1738 2105 RH
-            0.2: primary _need type/size adjustment from revised spec 160524 RH
-            0.1: contact_source_desc added, _source now populated with ID 141223 RH
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- @ssd_timeframe_years
-- FACT_REFERRALS
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-CONTAINER: {"type": "table", "name": "ssd_cin_episodes"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.4
+--             1.3 cine_referral_team now DIM_DEPARTMENT_ID #DtoI-1762 290724 RH
+--             1.2: cine_referral_outcome_json size 500 to 4000 to include COMMENTS 160724 RH
+--             1.2: fr.OUTCOME_COMMENTS added cine_referral_outcome_json #DtoI-1796 160724 RH
+--             1.2: fr.TOTAL_NUMBER_OF_OUTCOMES added cine_referral_outcome_json #DtoI-1796 160724 RH
+--             1.2: rem NFA_OUTCOME from cine_referral_outcome_json #DtoI-1796 160724 RH
+--             1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
+--             0.3 primary _need suffix of _code added #DtoI-1738 2105 RH
+--             0.2: primary _need type/size adjustment from revised spec 160524 RH
+--             0.1: contact_source_desc added, _source now populated with ID 141223 RH
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - @ssd_timeframe_years
+-- - FACT_REFERRALS
+-- =============================================================================
+
+
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cin_episodes';
 
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_cin_episodes') IS NOT NULL DROP TABLE ssd_cin_episodes;
-IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
-
--- Create structure
-CREATE TABLE ssd_cin_episodes
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cin_episodes
 (
-    cine_referral_id                NVARCHAR(48) PRIMARY KEY NOT NULL,-- metadata={"item_ref":"CINE001A"}
+    cine_referral_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINE001A"}
     cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
     cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
-    cine_cin_primary_need_code      NVARCHAR(4),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
+    cine_cin_primary_need_code      NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
     cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
     cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
-    cine_referral_outcome_json      NVARCHAR(4000),  -- metadata={"item_ref":"CINE005A"}
+    cine_referral_outcome_json      NVARCHAR(4000), -- metadata={"item_ref":"CINE005A"}
     cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A"}
     cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
     cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
-    cine_referral_team              NVARCHAR(255),  -- metadata={"item_ref":"CINE008A"}
+    cine_referral_team              NVARCHAR(48),   -- metadata={"item_ref":"CINE008A"}
     cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
-);
- 
--- Insert data
-INSERT INTO ssd_cin_episodes
+); 
+
+
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cin_episodes
 (
     cine_referral_id,
     cine_person_id,
@@ -1205,67 +618,318 @@ AND
 AND EXISTS
     ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fr.DIM_PERSON_ID -- #DtoI-1799
     );
 
     
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
-    FOREIGN KEY (cine_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id    ON ssd_cin_episodes(cine_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cin_referral_date             ON ssd_cin_episodes(cine_referral_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_cin_close_date                ON ssd_cin_episodes(cine_close_date);
-END
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_mother"}
+-- =============================================================================
+-- Description: Contains parent-child relations between mother-child 
+-- Author: D2I
+-- Version: 1.1:
+--             1.0: Add ssd_cin_episodes filter towards #DtoI-1806 010824 RH
+--             0.2: updated to exclude relationships with an end date 280224 JH
+-- Status: [R]elease
+-- Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_PERSON_RELATION
+-- =============================================================================
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
+
+-- META-ELEMENT: {"type": "test"}
+SET @TableName = N'ssd_mother';
+
+
+
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_mother (
+    moth_table_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"MOTH004A"}
+    moth_person_id          NVARCHAR(48),               -- metadata={"item_ref":"MOTH002A"}
+    moth_childs_person_id   NVARCHAR(48),               -- metadata={"item_ref":"MOTH001A"}
+    moth_childs_dob         DATETIME                    -- metadata={"item_ref":"MOTH003A"}
+);
+ 
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_mother (
+    moth_table_id,
+    moth_person_id,
+    moth_childs_person_id,
+    moth_childs_dob
+)
+SELECT
+    fpr.FACT_PERSON_RELATION_ID         AS moth_table_id,
+    fpr.DIM_PERSON_ID                   AS moth_person_id,
+    fpr.DIM_RELATED_PERSON_ID           AS moth_childs_person_id,
+    fpr.DIM_RELATED_PERSON_DOB          AS moth_childs_dob
+ 
+FROM
+    HDM.Child_Social.FACT_PERSON_RELATION AS fpr
+JOIN
+    HDM.Child_Social.DIM_PERSON AS p ON fpr.DIM_PERSON_ID = p.DIM_PERSON_ID
+WHERE
+    p.GENDER_MAIN_CODE <> 'M'
+    AND
+    fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI' -- only interested in parent/child relations
+    AND
+    fpr.END_DTTM IS NULL
+ 
+    AND (
+        EXISTS ( -- only ssd relevant records
+            SELECT 1
+            FROM ssd_development.ssd_person p
+            WHERE CAST(p.pers_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1799
+        ) OR EXISTS ( 
+            SELECT 1 
+            FROM ssd_development.ssd_cin_episodes ce
+            WHERE CAST(ce.cine_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1806
+        )
+    );
+
+
+
+-- META-CONTAINER: {"type": "table", "name": "ssd_legal_status"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.0
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_LEGAL_STATUS
+-- =============================================================================
+
+-- META-ELEMENT: {"type": "test"}
+SET @TableName = N'ssd_legal_status';
+
+
+
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_legal_status (
+    lega_legal_status_id            NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"LEGA001A"}
+    lega_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LEGA002A"}
+    lega_legal_status               NVARCHAR(100),              -- metadata={"item_ref":"LEGA003A"}
+    lega_legal_status_start_date    DATETIME,                   -- metadata={"item_ref":"LEGA004A"}
+    lega_legal_status_end_date      DATETIME                    -- metadata={"item_ref":"LEGA005A"}
+);
+ 
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_legal_status (
+    lega_legal_status_id,
+    lega_person_id,
+    lega_legal_status,
+    lega_legal_status_start_date,
+    lega_legal_status_end_date
+ 
+)
+SELECT
+    fls.FACT_LEGAL_STATUS_ID,
+    fls.DIM_PERSON_ID,
+    fls.DIM_LOOKUP_LGL_STATUS_DESC,
+    fls.START_DTTM,
+    fls.END_DTTM
+FROM
+    HDM.Child_Social.FACT_LEGAL_STATUS AS fls
+
+WHERE 
+    (fls.END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR fls.END_DTTM IS NULL)
+
+AND EXISTS
+    ( -- only ssd relevant records
+    SELECT 1
+    FROM ssd_development.ssd_person p
+    WHERE CAST(p.pers_person_id AS INT) = fls.DIM_PERSON_ID -- #DtoI-1799
+    );
+
+
+
+-- META-CONTAINER: {"type": "table", "name": "ssd_contacts"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.1
+--             1.0: cont_contact_outcome_json size 500 to 4000 to include COMMENTS 160724 RH
+--             1.0: fc.TOTAL_NO_OF_OUTCOMES added to cont_contact_outcome_json #DtoI-1796 160724 RH 
+--             1.0: fc.OUTCOME_COMMENTS added to cont_contact_outcome_json #DtoI-1796 160724 RH
+--             0.2: cont_contact_source_code field name edit 260124 RH
+--             0.1: cont_contact_source_desc added RH
+-- Status: [R]elease
+-- Remarks:Inclusion in contacts might differ between LAs. 
+--         Baseline definition:
+--         Contains safeguarding and referral to early help data.
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_CONTACTS
+-- =============================================================================
+
+-- META-ELEMENT: {"type": "test"}
+SET @TableName = N'ssd_contacts';
+
+
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_contacts (
+    cont_contact_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CONT001A"}
+    cont_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CONT002A"}
+    cont_contact_date               DATETIME,                   -- metadata={"item_ref":"CONT003A"}
+    cont_contact_source_code        NVARCHAR(48),               -- metadata={"item_ref":"CONT004A"} 
+    cont_contact_source_desc        NVARCHAR(255),              -- metadata={"item_ref":"CONT006A"} 
+    cont_contact_outcome_json       NVARCHAR(4000)              -- metadata={"item_ref":"CONT005A"}
+);
+
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_contacts (
+    cont_contact_id, 
+    cont_person_id, 
+    cont_contact_date,
+    cont_contact_source_code,
+    cont_contact_source_desc,
+    cont_contact_outcome_json
+)
+SELECT 
+    fc.FACT_CONTACT_ID,
+    fc.DIM_PERSON_ID, 
+    fc.CONTACT_DTTM,
+    fc.DIM_LOOKUP_CONT_SORC_ID,
+    fc.DIM_LOOKUP_CONT_SORC_ID_DESC,
+    (   -- Create JSON string for outcomes
+        SELECT 
+            -- SSD standard 
+            -- all keys in structure regardless of data presence
+            ISNULL(fc.OUTCOME_NEW_REFERRAL_FLAG, '')         AS NEW_REFERRAL_FLAG,
+            ISNULL(fc.OUTCOME_EXISTING_REFERRAL_FLAG, '')    AS EXISTING_REFERRAL_FLAG,
+            ISNULL(fc.OUTCOME_CP_ENQUIRY_FLAG, '')           AS CP_ENQUIRY_FLAG,
+            ISNULL(fc.OUTCOME_NFA_FLAG, '')                  AS NFA_FLAG,
+            ISNULL(fc.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '')  AS NON_AGENCY_ADOPTION_FLAG,
+            ISNULL(fc.OUTCOME_PRIVATE_FOSTERING_FLAG, '')    AS PRIVATE_FOSTERING_FLAG,
+            ISNULL(fc.OUTCOME_ADVICE_FLAG, '')               AS ADVICE_FLAG,
+            ISNULL(fc.OUTCOME_MISSING_FLAG, '')              AS MISSING_FLAG,
+            ISNULL(fc.OUTCOME_OLA_CP_FLAG, '')               AS OLA_CP_FLAG,
+            ISNULL(fc.OTHER_OUTCOMES_EXIST_FLAG, '')         AS OTHER_OUTCOMES_EXIST_FLAG,
+            CASE 
+                WHEN fc.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL  -- to counter -1 values
+                ELSE fc.TOTAL_NO_OF_OUTCOMES 
+            END                                              AS NUMBER_OF_OUTCOMES,
+            ISNULL(fc.OUTCOME_COMMENTS, '')                  AS COMMENTS
+        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        ) AS cont_contact_outcome_json
+FROM 
+    HDM.Child_Social.FACT_CONTACTS AS fc
+
+WHERE 
+    (fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())) -- #DtoI-1806
+
+AND EXISTS
+    (   -- only ssd relevant records
+    SELECT 1 
+    FROM ssd_development.ssd_person p
+    WHERE CAST(p.pers_person_id AS INT) = fc.DIM_PERSON_ID -- #DtoI-1799
+    );
+
+
+
+-- META-CONTAINER: {"type": "table", "name": "ssd_early_help_episodes"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.2
+--             1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_CAF_EPISODE
+-- =============================================================================
+
+-- META-ELEMENT: {"type": "test"}
+SET @TableName = N'ssd_early_help_episodes';
+
+
+
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_early_help_episodes (
+    earl_episode_id             NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EARL001A"}
+    earl_person_id              NVARCHAR(48),               -- metadata={"item_ref":"EARL002A"}
+    earl_episode_start_date     DATETIME,                   -- metadata={"item_ref":"EARL003A"}
+    earl_episode_end_date       DATETIME,                   -- metadata={"item_ref":"EARL004A"}
+    earl_episode_reason         NVARCHAR(MAX),              -- metadata={"item_ref":"EARL005A"}
+    earl_episode_end_reason     NVARCHAR(MAX),              -- metadata={"item_ref":"EARL006A"}
+    earl_episode_organisation   NVARCHAR(MAX),              -- metadata={"item_ref":"EARL007A"}
+    earl_episode_worker_id      NVARCHAR(100)               -- metadata={"item_ref":"EARL008A", "item_status": "A", "info":"Consider for removal"}
+);
+ 
+ 
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_early_help_episodes (
+    earl_episode_id,
+    earl_person_id,
+    earl_episode_start_date,
+    earl_episode_end_date,
+    earl_episode_reason,
+    earl_episode_end_reason,
+    earl_episode_organisation,
+    earl_episode_worker_id                    
+)
+ 
+SELECT
+    cafe.FACT_CAF_EPISODE_ID,
+    cafe.DIM_PERSON_ID,
+    cafe.EPISODE_START_DTTM,
+    cafe.EPISODE_END_DTTM,
+    cafe.START_REASON,
+    cafe.DIM_LOOKUP_CAF_EP_ENDRSN_ID_CODE,
+    cafe.DIM_LOOKUP_ORIGINATING_ORGANISATION_CODE,
+    'SSD_PH'                             
+FROM
+    HDM.Child_Social.FACT_CAF_EPISODE AS cafe
+ 
+WHERE 
+    (cafe.EPISODE_END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+    OR cafe.EPISODE_END_DTTM IS NULL)
+
+AND EXISTS
+    ( -- only ssd relevant records
+    SELECT 1
+    FROM ssd_development.ssd_person p
+    WHERE CAST(p.pers_person_id AS INT) = cafe.DIM_PERSON_ID -- #DtoI-1799
+    );
 
 
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_cin_assessments"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.4 
+--             1.3 COMPLETED_BY_USER_STAFF_ID swap to COMPLETED_BY_USER_ID #DtoI-1823 060924 RH
+--             1.2 replace -1 vals _team_id and _worker_id with NULL #DtoI-1824 050924 RH
+--             1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
+--             1.0: Fix Aggr warnings use of isnull() 310524 RH
+--             0.2: cina_assessment_child_seen type change from nvarchar 100524 RH
+--             0.1: fa.COMPLETED_BY_USER_NAME replaces fa.COMPLETED_BY_USER_STAFF_ID 080524
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_SINGLE_ASSESSMENT
+-- - FACT_FORMS
+-- - FACT_FORM_ANSWERS
+-- =============================================================================
 
-/* 
-=============================================================================
-Object Name: ssd_cin_assessments
-Description: 
-Author: D2I
-Version: 1.2
-            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
-            1.0: Fix Aggr warnings use of isnull() 310524 RH
-            0.2: cina_assessment_child_seen type change from nvarchar 100524 RH
-            0.1: fa.COMPLETED_BY_USER_NAME replaces fa.COMPLETED_BY_USER_STAFF_ID 080524
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_person
-- FACT_SINGLE_ASSESSMENT
-- FACT_FORMS
-- FACT_FORM_ANSWERS
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cin_assessments';
 
 
 
--- Check if exists, & drop 
-IF OBJECT_ID('ssd_cin_assessments') IS NOT NULL DROP TABLE ssd_cin_assessments;
-IF OBJECT_ID('tempdb..#ssd_cin_assessments') IS NOT NULL DROP TABLE #ssd_cin_assessments;
-
-
--- Create structure
-CREATE TABLE ssd_cin_assessments
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cin_assessments
 (
-    cina_assessment_id              NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINA001A"}
+    cina_assessment_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINA001A"}
     cina_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CINA002A"}
     cina_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CINA010A"}
     cina_assessment_start_date      DATETIME,                   -- metadata={"item_ref":"CINA003A"}
@@ -1273,14 +937,14 @@ CREATE TABLE ssd_cin_assessments
     cina_assessment_auth_date       DATETIME,                   -- metadata={"item_ref":"CINA005A"}             
     cina_assessment_outcome_json    NVARCHAR(1000),             -- metadata={"item_ref":"CINA006A"}           
     cina_assessment_outcome_nfa     NCHAR(1),                   -- metadata={"item_ref":"CINA009A"}
-    cina_assessment_team            NVARCHAR(255),              -- metadata={"item_ref":"CINA007A"}
+    cina_assessment_team            NVARCHAR(48),               -- metadata={"item_ref":"CINA007A"}
     cina_assessment_worker_id       NVARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
 );
 
 -- CTE for the EXISTS
 WITH RelevantPersons AS (
     SELECT p.pers_person_id
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
 ),
  
 -- CTE for the JOIN
@@ -1304,8 +968,8 @@ AggregatedFormAnswers AS (
     GROUP BY ffa.FACT_FORM_ID
 ) 
  
--- Insert data
-INSERT INTO ssd_cin_assessments
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cin_assessments
 (
     cina_assessment_id,
     cina_person_id,
@@ -1350,8 +1014,8 @@ SELECT
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
         ) AS cina_assessment_outcome_json,
     fa.OUTCOME_NFA_FLAG                                         AS cina_assessment_outcome_nfa,
-    fa.COMPLETED_BY_DEPT_ID                                     AS cina_assessment_team,        -- fa.COMPLETED_BY_DEPT_NAME also available -- #DtoI-1762
-    fa.COMPLETED_BY_USER_STAFF_ID                               AS cina_assessment_worker_id    -- fa.COMPLETED_BY_USER_NAME also available
+    NULLIF(fa.COMPLETED_BY_DEPT_ID, -1)                         AS cina_assessment_team,             -- replace -1 values with NULL _team_id
+    NULLIF(fa.COMPLETED_BY_USER_ID, -1)                         AS cina_assessment_worker_id         -- replace -1 values with NULL for _worker_id
  
 FROM
     HDM.Child_Social.FACT_SINGLE_ASSESSMENT fa
@@ -1373,63 +1037,31 @@ AND EXISTS (
     WHERE CAST(p.pers_person_id AS INT) = fa.DIM_PERSON_ID -- #DtoI-1799
 );
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
-    FOREIGN KEY (cina_person_id) REFERENCES ssd_person(pers_person_id);
 
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_cin_assessments_person_id     ON ssd_cin_assessments(cina_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cina_assessment_start_date    ON ssd_cin_assessments(cina_assessment_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_cina_assessment_auth_date     ON ssd_cin_assessments(cina_assessment_auth_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_cina_referral_id              ON ssd_cin_assessments(cina_referral_id);
-END
+-- META-CONTAINER: {"type": "table", "name": "ssd_assessment_factors"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.2
+--             1.1: ensure only factors with associated cina_assessment_id #DtoI-1769 090724 RH
+--             1.0: New alternative structure for assessment_factors_json 250624 RH
+-- Status: [R]elease
+-- Remarks: This object referrences some large source tables- Instances of 45m+. 
+-- Dependencies: 
+-- - #ssd_TMP_PRE_assessment_factors (as staged pre-processing)
+-- - ssd_cin_assessments
+-- - FACT_SINGLE_ASSESSMENT
+-- - FACT_FORM_ANSWERS
+-- =============================================================================
 
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_assessment_factors
-Description: 
-Author: D2I
-Version: 1.2
-            1.1: ensure only factors with associated cina_assessment_id #DtoI-1769 090724 RH
-            1.0: New alternative structure for assessment_factors_json 250624 RH
-Status: [R]elease
-Remarks: This object referrences some large source tables- Instances of 45m+. 
-Dependencies: 
-- #ssd_TMP_PRE_assessment_factors (as staged pre-processing)
-- ssd_cin_assessments
-- FACT_SINGLE_ASSESSMENT
-- FACT_FORM_ANSWERS
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_assessment_factors';
 
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_assessment_factors') IS NOT NULL DROP TABLE ssd_assessment_factors;
-IF OBJECT_ID('tempdb..#ssd_assessment_factors') IS NOT NULL DROP TABLE #ssd_assessment_factors;
-
-IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
-
-
-
--- Create structure
-CREATE TABLE ssd_assessment_factors (
-    cinf_table_id                   NVARCHAR(48) PRIMARY KEY,       -- metadata={"item_ref":"CINF003A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_assessment_factors (
+    cinf_table_id                   NVARCHAR(48) PRIMARY KEY,                   -- metadata={"item_ref":"CINF003A"}
     cinf_assessment_id              NVARCHAR(48),                   -- metadata={"item_ref":"CINF001A"}
     cinf_assessment_factors_json    NVARCHAR(1000)                  -- metadata={"item_ref":"CINF002A"}
 );
@@ -1461,8 +1093,9 @@ WHERE
     AND ffa.FACT_FORM_ID <> -1;     -- possible admin data present
 
 
--- Insert data into the final table
-INSERT INTO ssd_assessment_factors (
+-- META-ELEMENT: {"type": "insert_data"} 
+-- into the final table
+INSERT INTO ssd_development.ssd_assessment_factors (
                cinf_table_id, 
                cinf_assessment_id, 
                cinf_assessment_factors_json
@@ -1491,7 +1124,7 @@ FROM
     HDM.Child_Social.FACT_SINGLE_ASSESSMENT fsa
 WHERE 
     fsa.EXTERNAL_ID <> -1
-    AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_cin_assessments);
+    AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_development.ssd_cin_assessments);
 
 
 -- -- Opt2: (commented implementation ready for forward compatibility)
@@ -1513,71 +1146,44 @@ WHERE
 --     HDM.Child_Social.FACT_SINGLE_ASSESSMENT fsa
 -- WHERE 
 --     fsa.EXTERNAL_ID <> -1
---      AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_cin_assessments);
-
-
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s) #DtoI-1769
-    ALTER TABLE ssd_assessment_factors ADD CONSTRAINT FK_ssd_cinf_assessment_id
-    FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_cin_assessments(cina_assessment_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_cinf_assessment_id ON ssd_assessment_factors(cinf_assessment_id);
-END
-
--- Drop tmp/pre-processing structure(s)
-IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
+--      AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_development.ssd_cin_assessments);
 
 
 
 
-/* 
-=============================================================================
-Object Name: ssd_cin_plans
-Description: 
-Author: D2I
-Version: 1.2
-            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
-            1.0: Fix Aggr warnings use of isnull() 310524 RH
-            0.1: Update fix returning new row for each revision of the plan JH 070224
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_person
-- FACT_CARE_PLANS
-- FACT_CARE_PLAN_SUMMARY
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-CONTAINER: {"type": "table", "name": "ssd_cin_plans"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.2
+--             1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
+--             1.0: Fix Aggr warnings use of isnull() 310524 RH
+--             0.1: Update fix returning new row for each revision of the plan JH 070224
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_CARE_PLANS
+-- - FACT_CARE_PLAN_SUMMARY
+-- =============================================================================
+
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cin_plans';
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_cin_plans', 'U') IS NOT NULL DROP TABLE ssd_cin_plans;
-IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plans;
-
-
--- Create structure
-CREATE TABLE ssd_cin_plans (
-    cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINP001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cin_plans (
+    cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINP001A"}
     cinp_referral_id            NVARCHAR(48),               -- metadata={"item_ref":"CINP007A"}
     cinp_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINP002A"}
     cinp_cin_plan_start_date    DATETIME,                   -- metadata={"item_ref":"CINP003A"}
     cinp_cin_plan_end_date      DATETIME,                   -- metadata={"item_ref":"CINP004A"}
-    cinp_cin_plan_team          NVARCHAR(255),              -- metadata={"item_ref":"CINP005A"}
+    cinp_cin_plan_team          NVARCHAR(48),               -- metadata={"item_ref":"CINP005A"}
     cinp_cin_plan_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"CINP006A"}
 );
  
--- Insert data
-INSERT INTO ssd_cin_plans (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cin_plans (
     cinp_cin_plan_id,
     cinp_referral_id,
     cinp_person_id,
@@ -1628,7 +1234,7 @@ AND EXISTS
 (
     -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = cps.DIM_PERSON_ID -- #DtoI-1799
 )
  
@@ -1640,57 +1246,32 @@ GROUP BY
     cps.END_DTTM
     ;
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_cin_plans ADD CONSTRAINT FK_ssd_cinp_to_person 
-    FOREIGN KEY (cinp_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_cin_plans_person_id       ON ssd_cin_plans(cinp_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cinp_cin_plan_start_date  ON ssd_cin_plans(cinp_cin_plan_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_cinp_cin_plan_end_date    ON ssd_cin_plans(cinp_cin_plan_end_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_cinp_referral_id          ON ssd_cin_plans(cinp_referral_id);
-END
 
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
+-- META-CONTAINER: {"type": "table", "name": "ssd_cin_visits"}
+-- =============================================================================
+-- Description:
+-- Author: D2I
+-- Version: 1.0
+-- Status: [R]elease
+-- Remarks:    Source table can be very large! Avoid any unfiltered queries.
+--             Notes: Does this need to be filtered by only visits in their current Referral episode?
+--                     however for some this ==2 weeks, others==~17 years
+--                 --> when run for records in ssd_person c.64k records 29s runtime
+-- Dependencies:
+-- - ssd_person
+-- - FACT_CASENOTES
+-- =============================================================================
 
-
-
-
-/*
-=============================================================================
-Object Name: ssd_cin_visits
-Description:
-Author: D2I
-Version: 1.0
-Status: [R]elease
-Remarks:    Source table can be very large! Avoid any unfiltered queries.
-            Notes: Does this need to be filtered by only visits in their current Referral episode?
-                    however for some this ==2 weeks, others==~17 years
-                --> when run for records in ssd_person c.64k records 29s runtime
-Dependencies:
-- ssd_person
-- FACT_CASENOTES
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cin_visits';
 
  
  
--- Check if exists, & drop
-IF OBJECT_ID('ssd_cin_visits') IS NOT NULL DROP TABLE ssd_cin_visits;
-IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
- 
--- Create structure
-CREATE TABLE ssd_cin_visits
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cin_visits
 (
-    cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINV001A"}      
+    cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINV001A"}      
     cinv_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINV007A"}
     cinv_cin_visit_date         DATETIME,                   -- metadata={"item_ref":"CINV003A"}
     cinv_cin_visit_seen         NCHAR(1),                   -- metadata={"item_ref":"CINV004A"}
@@ -1698,8 +1279,8 @@ CREATE TABLE ssd_cin_visits
     cinv_cin_visit_bedroom      NCHAR(1)                    -- metadata={"item_ref":"CINV006A"}
 );
  
--- Insert data
-INSERT INTO ssd_cin_visits
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cin_visits
 (
     cinv_cin_visit_id,                  
     cinv_person_id,
@@ -1728,60 +1309,32 @@ AND
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = cn.DIM_PERSON_ID -- #DtoI-1799
     );
  
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_cin_visits ADD CONSTRAINT FK_ssd_cin_visits_to_person
-    FOREIGN KEY (cinv_person_id) REFERENCES ssd_person(pers_person_id);
-    
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_cinv_person_id        ON ssd_cin_visits(cinv_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cinv_cin_visit_date   ON ssd_cin_visits(cinv_cin_visit_date);
-END
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_s47_enquiry"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.2
+--             1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_S47
+-- - FACT_CP_CONFERENCE
+-- =============================================================================
 
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_s47_enquiry
-Description: 
-Author: D2I
-Version: 1.2
-            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_person
-- FACT_S47
-- FACT_CP_CONFERENCE
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_s47_enquiry';
 
 
-
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_s47_enquiry;
-IF OBJECT_ID('tempdb..#ssd_s47_enquiry') IS NOT NULL DROP TABLE #ssd_s47_enquiry;
-
--- Create structure 
-CREATE TABLE ssd_s47_enquiry (
+-- META-ELEMENT: {"type": "create_table"} 
+CREATE TABLE ssd_development.ssd_s47_enquiry (
     s47e_s47_enquiry_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"S47E001A"}
     s47e_referral_id                    NVARCHAR(48),               -- metadata={"item_ref":"S47E010A"}
     s47e_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"S47E002A"}
@@ -1789,12 +1342,12 @@ CREATE TABLE ssd_s47_enquiry (
     s47e_s47_end_date                   DATETIME,                   -- metadata={"item_ref":"S47E005A"}
     s47e_s47_nfa                        NCHAR(1),                   -- metadata={"item_ref":"S47E006A"}
     s47e_s47_outcome_json               NVARCHAR(1000),             -- metadata={"item_ref":"S47E007A"}
-    s47e_s47_completed_by_team          NVARCHAR(255),              -- metadata={"item_ref":"S47E009A"}
+    s47e_s47_completed_by_team          NVARCHAR(48),               -- metadata={"item_ref":"S47E009A"}
     s47e_s47_completed_by_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"S47E008A"}
 );
 
--- insert data
-INSERT INTO ssd_s47_enquiry(
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_s47_enquiry(
     s47e_s47_enquiry_id,
     s47e_referral_id,
     s47e_person_id,
@@ -1840,62 +1393,36 @@ WHERE
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = s47.DIM_PERSON_ID -- #DtoI-1799
     ) ;
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_ssd_s47_person
-    FOREIGN KEY (s47e_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_person_id     ON ssd_s47_enquiry(s47e_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_start_date    ON ssd_s47_enquiry(s47e_s47_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_end_date      ON ssd_s47_enquiry(s47e_s47_end_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_referral_id   ON ssd_s47_enquiry(s47e_referral_id);
-END
 
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
+-- META-CONTAINER: {"type": "table", "name": "ssd_initial_cp_conference"}
+-- =============================================================================
+-- Description:
+-- Author: D2I
+-- Version: 1.2
+--             1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
+--             0.3 Updated source of CP_PLAN_ID 100424 JH
+--             0.2 Updated the worker fields 020424 JH
+--             0.1 Re-instated the worker details 010224 JH
+-- Status: [R]elease
+-- Remarks:
+-- Dependencies:
+-- - FACT_CP_CONFERENCE
+-- - FACT_MEETINGS
+-- - FACT_CP_PLAN
+-- =============================================================================
 
-
-
-
-/*
-=============================================================================
-Object Name: ssd_initial_cp_conference
-Description:
-Author: D2I
-Version: 1.2
-            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
-            0.3 Updated source of CP_PLAN_ID 100424 JH
-            0.2 Updated the worker fields 020424 JH
-            0.1 Re-instated the worker details 010224 JH
-Status: [R]elease
-Remarks:
-Dependencies:
-- FACT_CP_CONFERENCE
-- FACT_MEETINGS
-- FACT_CP_PLAN
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_initial_cp_conference';
 
  
--- Check if exists & drop
-IF OBJECT_ID('ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_initial_cp_conference;
-IF OBJECT_ID('tempdb..#ssd_initial_cp_conference') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
- 
-
--- Create structure
-CREATE TABLE ssd_initial_cp_conference (
-    icpc_icpc_id                NVARCHAR(48),               -- metadata={"item_ref":"ICPC001A"} --  PRIMARY KEY
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_initial_cp_conference (
+    icpc_icpc_id                NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"ICPC001A"}
     icpc_icpc_meeting_id        NVARCHAR(48),               -- metadata={"item_ref":"ICPC009A"}
     icpc_s47_enquiry_id         NVARCHAR(48),               -- metadata={"item_ref":"ICPC002A"}
     icpc_person_id              NVARCHAR(48),               -- metadata={"item_ref":"ICPC010A"}
@@ -1906,13 +1433,13 @@ CREATE TABLE ssd_initial_cp_conference (
     icpc_icpc_date              DATETIME,                   -- metadata={"item_ref":"ICPC005A"}
     icpc_icpc_outcome_cp_flag   NCHAR(1),                   -- metadata={"item_ref":"ICPC013A"}
     icpc_icpc_outcome_json      NVARCHAR(1000),             -- metadata={"item_ref":"ICPC006A"}
-    icpc_icpc_team              NVARCHAR(255),              -- metadata={"item_ref":"ICPC007A"}
+    icpc_icpc_team              NVARCHAR(48),               -- metadata={"item_ref":"ICPC007A"}
     icpc_icpc_worker_id         NVARCHAR(100),              -- metadata={"item_ref":"ICPC008A"}
 );
  
  
--- insert data
-INSERT INTO ssd_initial_cp_conference(
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_initial_cp_conference(
     icpc_icpc_id,
     icpc_icpc_meeting_id,
     icpc_s47_enquiry_id,
@@ -1976,69 +1503,38 @@ AND
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fcpc.DIM_PERSON_ID -- #DtoI-1799
     ) ;
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_ssd_icpc_person_id
-    FOREIGN KEY (icpc_person_id) REFERENCES ssd_person(pers_person_id);
 
-    -- -- [TESTING] #DtoI-1769 - failing at 160724 RH
-    -- ALTER TABLE ssd_initial_cp_conference ADD CONSTRAINT FK_ssd_icpc_referral_id
-    -- FOREIGN KEY (icpc_referral_id) REFERENCES ssd_cin_episodes(cine_referral_id);
-
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_icpc_person_id        ON ssd_initial_cp_conference(icpc_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_icpc_s47_enquiry_id   ON ssd_initial_cp_conference(icpc_s47_enquiry_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_icpc_referral_id      ON ssd_initial_cp_conference(icpc_referral_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_icpc_icpc_date        ON ssd_initial_cp_conference(icpc_icpc_date);
-END
-
+-- META-CONTAINER: {"type": "table", "name": "ssd_cp_plans"}
+-- =============================================================================
+-- Description:
+-- Author: D2I
+-- Version: 1.1:
+--             1.0: #DtoI-1809 fix on cppl_referral_id/cppl_icpc_id 010824 RH
+--             0.4: cppl_cp_plan_ola type change from nvarchar 100524 RH
+--             0.3: added IS_OLA field to identify OLA temporary plans
+--             which need to be excluded from statutory returns 090224 JCH
+--             0.2: removed depreciated team/worker id fields RH
+-- Status: [R]elease
+-- Remarks:
+-- Dependencies:
+-- - ssd_person
+-- - ssd_initial_cp_conference
+-- - FACT_CP_PLAN
+-- =============================================================================
 
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-/*
-=============================================================================
-Object Name: ssd_cp_plans
-Description:
-Author: D2I
-Version: 1.0
-            0.4: cppl_cp_plan_ola type change from nvarchar 100524 RH
-            0.3: added IS_OLA field to identify OLA temporary plans
-            which need to be excluded from statutory returns 090224 JCH
-            0.2: removed depreciated team/worker id fields RH
-Status: [R]elease
-Remarks:
-Dependencies:
-- ssd_person
-- ssd_initial_cp_conference
-- FACT_CP_PLAN
-=============================================================================
-*/
-
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cp_plans';
 
 
 
--- Check if exists & drop 
-IF OBJECT_ID('ssd_cp_plans') IS NOT NULL DROP TABLE ssd_cp_plans;
-IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
-
--- Create structure
-CREATE TABLE ssd_cp_plans (
-    cppl_cp_plan_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPL001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cp_plans (
+    cppl_cp_plan_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CPPL001A"}
     cppl_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CPPL007A"}
     cppl_icpc_id                    NVARCHAR(48),               -- metadata={"item_ref":"CPPL008A"}
     cppl_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CPPL002A"}
@@ -2050,8 +1546,8 @@ CREATE TABLE ssd_cp_plans (
 );
  
  
--- Insert data
-INSERT INTO ssd_cp_plans (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cp_plans (
     cppl_cp_plan_id,
     cppl_referral_id,
     cppl_icpc_id,
@@ -2064,8 +1560,14 @@ INSERT INTO ssd_cp_plans (
 )
 SELECT
     cpp.FACT_CP_PLAN_ID                 AS cppl_cp_plan_id,
-    cpp.FACT_REFERRAL_ID                AS cppl_referral_id,
-    cpp.FACT_INITIAL_CP_CONFERENCE_ID   AS cppl_icpc_id,
+    CASE 
+        WHEN cpp.FACT_REFERRAL_ID = -1 THEN NULL
+        ELSE cpp.FACT_REFERRAL_ID
+    END                                 AS cppl_referral_id,
+    CASE 
+        WHEN cpp.FACT_INITIAL_CP_CONFERENCE_ID = -1 THEN NULL
+        ELSE cpp.FACT_INITIAL_CP_CONFERENCE_ID
+    END                                 AS cppl_icpc_id,
     cpp.DIM_PERSON_ID                   AS cppl_person_id,
     cpp.START_DTTM                      AS cppl_cp_plan_start_date,
     cpp.END_DTTM                        AS cppl_cp_plan_end_date,
@@ -2082,71 +1584,36 @@ WHERE
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = cpp.DIM_PERSON_ID -- #DtoI-1799
     );
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_ssd_cppl_person_id
-    -- FOREIGN KEY (cppl_person_id) REFERENCES ssd_person(pers_person_id);
 
-    -- ALTER TABLE ssd_cp_plans ADD CONSTRAINT FK_ssd_cppl_icpc_id
-    -- FOREIGN KEY (cppl_icpc_id) REFERENCES ssd_initial_cp_conference(icpc_icpc_id);
+-- META-CONTAINER: {"type": "table", "name": "ssd_cp_visits"}
+-- =============================================================================
+-- Description:
+-- Author: D2I
+-- Version: 1.1:
+--             1.0: prev v1.2.0 - #DtoI-1715 fix on PK violation 010824 RH
+--             0.3: (cppv casenote date) removed 070524 RH
+--             0.2: cppv_person_id added, where claus removed 'STVCPCOVID' 130224 JH
+-- Status: [R]elease
+-- Remarks: Not all CP Visit Casenotes have a link back to the CP Visit -
+--          using casenote ID as PK and linking to CP Visit where available.
+--          Will have to use Person ID to link object to Person table
+-- Dependencies:
+-- - FACT_CASENOTES
+-- - FACT_CP_VISIT
+-- - ssd_person
+-- =============================================================================
 
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_person_id ON ssd_cp_plans(cppl_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_icpc_id ON ssd_cp_plans(cppl_icpc_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_referral_id ON ssd_cp_plans(cppl_referral_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_start_date ON ssd_cp_plans(cppl_cp_plan_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_end_date ON ssd_cp_plans(cppl_cp_plan_end_date);
-END
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-
-/*
-=============================================================================
-Object Name: ssd_cp_visits
-Description:
-Author: D2I
-Version: 1.0
-            0.3: (cppv casenote date) removed 070524 RH
-            0.2: cppv_person_id added, where claus removed 'STVCPCOVID' 130224 JH
-Status: [R]elease
-Remarks: Not all CP Visit Casenotes have a link back to the CP Visit -
-         using casenote ID as PK and linking to CP Visit where available.
-         Will have to use Person ID to link object to Person table
-Dependencies:
-- FACT_CASENOTES
-- FACT_CP_VISIT
-- ssd_person
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cp_visits';
 
  
- 
- 
--- Check if exists & drop
-IF OBJECT_ID('ssd_cp_visits') IS NOT NULL DROP TABLE ssd_cp_visits;
-IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
-  
- 
--- Create structure
-CREATE TABLE ssd_cp_visits (
-    cppv_cp_visit_id                NVARCHAR(48),   -- metadata={"item_ref":"CPPV007A"} -- [TESTING] Can PRIMARY KEY be re-instated?
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cp_visits (
+    cppv_cp_visit_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPV007A"} 
     cppv_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CPPV008A"}
     cppv_cp_plan_id                 NVARCHAR(48),   -- metadata={"item_ref":"CPPV001A"}
     cppv_cp_visit_date              DATETIME,       -- metadata={"item_ref":"CPPV003A"}
@@ -2154,104 +1621,90 @@ CREATE TABLE ssd_cp_visits (
     cppv_cp_visit_seen_alone        NCHAR(1),       -- metadata={"item_ref":"CPPV005A"}
     cppv_cp_visit_bedroom           NCHAR(1)        -- metadata={"item_ref":"CPPV006A"}
 );
- 
--- Insert data
-INSERT INTO ssd_cp_visits
-(
-    cppv_cp_visit_id,
-    cppv_person_id,
-    cppv_cp_plan_id,        
-    cppv_cp_visit_date,      
-    cppv_cp_visit_seen,      
-    cppv_cp_visit_seen_alone,
-    cppv_cp_visit_bedroom  
+
+-- CTE Ensure unique cases only, most recent has priority-- #DtoI-1715 
+;WITH UniqueCasenotes AS (
+    SELECT
+        cn.FACT_CASENOTE_ID     AS cppv_cp_visit_id,  
+        p.DIM_PERSON_ID         AS cppv_person_id,            
+        cpv.FACT_CP_PLAN_ID     AS cppv_cp_plan_id,  
+        cn.EVENT_DTTM           AS cppv_cp_visit_date,
+        cn.SEEN_FLAG            AS cppv_cp_visit_seen,
+        cn.SEEN_ALONE_FLAG      AS cppv_cp_visit_seen_alone,
+        cn.SEEN_BEDROOM_FLAG    AS cppv_cp_visit_bedroom,
+        ROW_NUMBER() OVER (
+            PARTITION BY cn.FACT_CASENOTE_ID 
+            ORDER BY cn.EVENT_DTTM DESC
+        ) AS rn
+    FROM
+        HDM.Child_Social.FACT_CASENOTES AS cn
+    LEFT JOIN
+        HDM.Child_Social.FACT_CP_VISIT AS cpv ON cn.FACT_CASENOTE_ID = cpv.FACT_CASENOTE_ID
+    LEFT JOIN
+        HDM.Child_Social.DIM_PERSON p ON cn.DIM_PERSON_ID = p.DIM_PERSON_ID
+    WHERE
+        cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC') -- Ref. ( 'STVC','STVCPCOVID')
+        AND (cn.EVENT_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
+        OR cn.EVENT_DTTM IS NULL)
 )
- 
+
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cp_visits (
+    cppv_cp_visit_id,
+    cppv_person_id,            
+    cppv_cp_plan_id,  
+    cppv_cp_visit_date,
+    cppv_cp_visit_seen,
+    cppv_cp_visit_seen_alone,
+    cppv_cp_visit_bedroom
+)
 SELECT
-    cn.FACT_CASENOTE_ID     AS cppv_cp_visit_id,  
-    p.DIM_PERSON_ID         AS cppv_person_id,            
-    cpv.FACT_CP_PLAN_ID     AS cppv_cp_plan_id,  
-    cn.EVENT_DTTM           AS cppv_cp_visit_date,
-    cn.SEEN_FLAG            AS cppv_cp_visit_seen,
-    cn.SEEN_ALONE_FLAG      AS cppv_cp_visit_seen_alone,
-    cn.SEEN_BEDROOM_FLAG    AS cppv_cp_visit_bedroom
- 
+    cppv_cp_visit_id,  
+    cppv_person_id,            
+    cppv_cp_plan_id,  
+    cppv_cp_visit_date,
+    cppv_cp_visit_seen,
+    cppv_cp_visit_seen_alone,
+    cppv_cp_visit_bedroom
 FROM
-    HDM.Child_Social.FACT_CASENOTES AS cn
- 
-LEFT JOIN
-    HDM.Child_Social.FACT_CP_VISIT AS cpv ON cn.FACT_CASENOTE_ID = cpv.FACT_CASENOTE_ID
- 
-LEFT JOIN
-    HDM.Child_Social.DIM_PERSON p ON cn.DIM_PERSON_ID = p.DIM_PERSON_ID
- 
-WHERE cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE IN ('STVC') -- Ref. ( 'STVC','STVCPCOVID')
-
-AND
-    (cn.EVENT_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
-    OR cn.EVENT_DTTM IS NULL);
-
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_cp_visits ADD CONSTRAINT FK_ssd_cppv_to_cppl
-    -- FOREIGN KEY (cppv_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
-
-    -- -- DEV NOTES: [TESTING]
-    -- -- Msg 547, Level 16, State 0, Line 105
-    -- -- The ALTER TABLE statement conflicted with the FOREIGN KEY constraint "FK_ssd_cppv_to_cppl". 
-    -- -- The conflict occurred in database "HDM_Local", table "ssd_cp_plans", column 'cppl_cp_plan_id'.
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_cppv_person_id        ON ssd_cp_visits(cppv_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_plan_id       ON ssd_cp_visits(cppv_cp_plan_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_visit_date    ON ssd_cp_visits(cppv_cp_visit_date);
-END
+    UniqueCasenotes
+WHERE
+    rn = 1;
 
 
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_cp_reviews"}
+-- =============================================================================
+-- Description:
+-- Author: D2I
+-- Version: 1.0
+--             0.1: Resolved issue with linking to Quoracy information 130224 JH
+-- Status: [R]elease
+-- Remarks:    cppr_cp_review_participation - ON HOLD/Not included in SSD Ver/Iteration 1
+--             Resolved issue with linking to Quoracy information. Added fm.FACT_MEETING_ID
+--             so users can identify conferences including multiple children. Reviews held
+--             pre-LCS implementation don't have a CP_PLAN_ID recorded so have added
+--             cpr.DIM_PERSON_ID for linking reviews to the ssd_cp_plans object.
+--             Re-named cppr_cp_review_outcome_continue_cp for clarity.
+-- Dependencies:
+-- - ssd_person
+-- - ssd_cp_plans
+-- - FACT_CP_REVIEW
+-- - FACT_MEETINGS
+-- - FACT_MEETING_SUBJECTS
+-- - FACT_FORM_ANSWERS [Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
+-- =============================================================================
 
-/*
-=============================================================================
-Object Name: ssd_cp_reviews
-Description:
-Author: D2I
-Version: 1.0
-            0.1: Resolved issue with linking to Quoracy information 130224 JH
-Status: [R]elease
-Remarks:    cppr_cp_review_participation - ON HOLD/Not included in SSD Ver/Iteration 1
-            Resolved issue with linking to Quoracy information. Added fm.FACT_MEETING_ID
-            so users can identify conferences including multiple children. Reviews held
-            pre-LCS implementation don't have a CP_PLAN_ID recorded so have added
-            cpr.DIM_PERSON_ID for linking reviews to the ssd_cp_plans object.
-            Re-named cppr_cp_review_outcome_continue_cp for clarity.
-Dependencies:
-- ssd_person
-- ssd_cp_plans
-- FACT_CP_REVIEW
-- FACT_MEETINGS
-- FACT_MEETING_SUBJECTS
-- FACT_FORM_ANSWERS [Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
-=============================================================================
-*/
--- [TESTING] Create marker
+
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cp_reviews';
 
  
  
--- Check if table exists, & drop
-IF OBJECT_ID('ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_cp_reviews;
-IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
-  
- 
--- Create structure
-CREATE TABLE ssd_cp_reviews
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cp_reviews
 (
     cppr_cp_review_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPR001A"}
     cppr_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"CPPR008A"}
@@ -2264,8 +1717,8 @@ CREATE TABLE ssd_cp_reviews
     cppr_cp_review_participation        NVARCHAR(100)               -- metadata={"item_ref":"CPPR007A"}
 );
  
--- Insert data
-INSERT INTO ssd_cp_reviews
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cp_reviews
 (
     cppr_cp_review_id,
     cppr_cp_plan_id,
@@ -2315,7 +1768,7 @@ WHERE
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = cpr.DIM_PERSON_ID -- #DtoI-1799
 )
 GROUP BY cpr.FACT_CP_REVIEW_ID,
@@ -2332,65 +1785,33 @@ GROUP BY cpr.FACT_CP_REVIEW_ID,
 
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_cp_reviews ADD CONSTRAINT FK_ssd_cp_reviews_to_cp_plans 
-    -- FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_cp_plans(cppl_cp_plan_id);
 
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_cppr_person_id ON ssd_cp_reviews(cppr_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_plan_id ON ssd_cp_reviews(cppr_cp_plan_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_due ON ssd_cp_reviews(cppr_cp_review_due);
-    CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_date ON ssd_cp_reviews(cppr_cp_review_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_meeting_id ON ssd_cp_reviews(cppr_cp_review_meeting_id);
-END
+-- META-CONTAINER: {"type": "table", "name": "ssd_cla_episodes"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.1
+--             1.0: Fix Aggr warnings use of isnull() 310524 RH
+--             0.2: primary _need type/size adjustment from revised spec 160524 RH
+--             0.1: cla_placement_id added as part of cla_placements review RH 060324
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_involvements
+-- - ssd_person
+-- - FACT_CLA
+-- - FACT_REFERRALS
+-- - FACT_CARE_EPISODES
+-- - FACT_CASENOTES
+-- =============================================================================
 
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_cla_episodes
-Description: 
-Author: D2I
-Version: 1.1
-            1.0: Fix Aggr warnings use of isnull() 310524 RH
-            0.2: primary _need type/size adjustment from revised spec 160524 RH
-            0.1: cla_placement_id added as part of cla_placements review RH 060324
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_involvements
-- ssd_person
-- FACT_CLA
-- FACT_REFERRALS
-- FACT_CARE_EPISODES
-- FACT_CASENOTES
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_episodes';
 
 
-
--- Check if table exists, & drop
-IF OBJECT_ID('ssd_cla_episodes') IS NOT NULL DROP TABLE ssd_cla_episodes;
-IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episodes;
-
- 
--- Create structure
-CREATE TABLE ssd_cla_episodes (
-    clae_cla_episode_id             NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAE001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cla_episodes (
+    clae_cla_episode_id             NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAE001A"}
     clae_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CLAE002A"}
     clae_cla_placement_id           NVARCHAR(48),               -- metadata={"item_ref":"CLAE013A"} 
     clae_cla_episode_start_date     DATETIME,                   -- metadata={"item_ref":"CLAE003A"}
@@ -2435,7 +1856,7 @@ WITH FilteredData AS (
         HDM.Child_Social.FACT_CASENOTES cn ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
 
     WHERE
-        fce.DIM_PERSON_ID IN (SELECT CAST(pers_person_id AS INT) FROM ssd_person) -- 
+        fce.DIM_PERSON_ID IN (SELECT CAST(pers_person_id AS INT) FROM ssd_development.ssd_person) -- 
 
     AND
         (fce.CARE_END_DATE  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
@@ -2456,8 +1877,8 @@ WITH FilteredData AS (
         fc.START_DTTM,
         cn.DIM_PERSON_ID
 )
--- Insert data
-INSERT INTO ssd_cla_episodes (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cla_episodes (
     clae_cla_episode_id,
     clae_person_id,
     clae_cla_placement_id,
@@ -2489,8 +1910,8 @@ FROM
 
 
 -- -- [TESTING]
--- -- Insert data
--- INSERT INTO ssd_cla_episodes (
+-- -- META-ELEMENT: {"type": "insert_data"}
+-- INSERT INTO ssd_development.ssd_cla_episodes (
 --     clae_cla_episode_id,
 --     clae_person_id,
 --     clae_cla_placement_id,
@@ -2529,11 +1950,11 @@ FROM
     
 -- WHERE EXISTS (
 --     SELECT 1
---     FROM ssd_person p
+--     FROM ssd_development.ssd_person p
 --      WHERE CAST(p.pers_person_id AS INT) = fce.DIM_PERSON_ID -- #DtoI-1799
 -- )
 -- -- WHERE
--- --     fce.DIM_PERSON_ID IN (SELECT pers_person_id FROM ssd_person)
+-- --     fce.DIM_PERSON_ID IN (SELECT pers_person_id FROM ssd_development.ssd_person)
 
 -- GROUP BY
 --     fce.FACT_CARE_EPISODES_ID,
@@ -2550,69 +1971,39 @@ FROM
 --     cn.DIM_PERSON_ID;
 
 -- -- [TESTING]
--- SELECT DISTINCT clae_person_id FROM ssd_cla_episodes WHERE clae_person_id NOT IN (SELECT pers_person_id FROM ssd_person);
-
-
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s) #DtoI-1769
-    ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_ssd_clae_to_person 
-    FOREIGN KEY (clae_person_id) REFERENCES ssd_person (pers_person_id);
-
-    -- ALTER TABLE ssd_cla_episodes ADD CONSTRAINT FK_ssd_clae_cla_placement_id
-    -- FOREIGN KEY (clae_cla_placement_id) REFERENCES ssd_cla_placements (clap_cla_placement_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_clae_person_id ON ssd_cla_episodes(clae_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_start_date ON ssd_cla_episodes(clae_cla_episode_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_ceased ON ssd_cla_episodes(clae_cla_episode_ceased);
-    CREATE NONCLUSTERED INDEX idx_ssd_clae_referral_id ON ssd_cla_episodes(clae_referral_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_clae_cla_last_iro_contact_date ON ssd_cla_episodes(clae_cla_last_iro_contact_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_clae_cla_placement_id ON ssd_cla_episodes(clae_cla_placement_id);
-END
+-- SELECT DISTINCT clae_person_id FROM ssd_development.ssd_cla_episodes WHERE clae_person_id NOT IN (SELECT pers_person_id FROM ssd_development.ssd_person);
 
 
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_cla_convictions"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.0
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_OFFENCE
+-- =============================================================================
 
-/* 
-=============================================================================
-Object Name: ssd_cla_convictions
-Description: 
-Author: D2I
-Version: 1.0
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_person
-- FACT_OFFENCE
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_convictions';
 
 
 
--- Check if exists, & drop
-IF OBJECT_ID('ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE ssd_cla_convictions;
-IF OBJECT_ID('tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cla_convictions;
-
-
--- create structure
-CREATE TABLE ssd_cla_convictions (
-    clac_cla_conviction_id      NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAC001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cla_convictions (
+    clac_cla_conviction_id      NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAC001A"}
     clac_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAC002A"}
     clac_cla_conviction_date    DATETIME,                   -- metadata={"item_ref":"CLAC003A"}
     clac_cla_conviction_offence NVARCHAR(1000)              -- metadata={"item_ref":"CLAC004A"}
 );
 
--- insert data
-INSERT INTO ssd_cla_convictions (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cla_convictions (
     clac_cla_conviction_id, 
     clac_person_id, 
     clac_cla_conviction_date, 
@@ -2629,66 +2020,43 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fo.DIM_PERSON_ID -- #DtoI-1799
     );
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_cla_convictions ADD CONSTRAINT FK_ssd_clac_to_clae 
-    -- FOREIGN KEY (clac_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_clac_person_id ON ssd_cla_convictions(clac_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_clac_conviction_date ON ssd_cla_convictions(clac_cla_conviction_date);
-END
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_cla_health"}
+-- =============================================================================
+-- Object Name: ssd_cla_health
+-- Description:
+-- Author: D2I
+-- Version: 1.0
+-- Status: [R]elease
+-- Remarks: 1.5 JH updated source for clah_health_check_type to resolve blanks.
+--             Updated to use DIM_LOOKUP_EXAM_STATUS_DESC as opposed to _CODE
+--             to inprove readability.
+-- Dependencies:
+-- - ssd_person
+-- - FACT_HEALTH_CHECK
+-- =============================================================================
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-/*
-=============================================================================
-Object Name: ssd_cla_health
-Description:
-Author: D2I
-Version: 1.0
-Status: [R]elease
-Remarks: 1.5 JH updated source for clah_health_check_type to resolve blanks.
-            Updated to use DIM_LOOKUP_EXAM_STATUS_DESC as opposed to _CODE
-            to inprove readability.
-Dependencies:
-- ssd_person
-- FACT_HEALTH_CHECK
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_health';
 
 
 
--- Check if exists, & drop
-IF OBJECT_ID('ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_cla_health;
-IF OBJECT_ID('tempdb..#ssd_cla_health', 'U') IS NOT NULL DROP TABLE #ssd_cla_health;
-
--- create structure
-CREATE TABLE ssd_cla_health (
-    clah_health_check_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAH001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cla_health (
+    clah_health_check_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAH001A"}
     clah_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAH002A"}
     clah_health_check_type      NVARCHAR(500),              -- metadata={"item_ref":"CLAH003A"}
     clah_health_check_date      DATETIME,                   -- metadata={"item_ref":"CLAH004A"}
     clah_health_check_status    NVARCHAR(48)                -- metadata={"item_ref":"CLAH005A"}
 );
  
--- insert data
-INSERT INTO ssd_cla_health (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cla_health (
     clah_health_check_id,
     clah_person_id,
     clah_health_check_type,
@@ -2712,63 +2080,35 @@ WHERE
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fhc.DIM_PERSON_ID -- #DtoI-1799
     );
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_cla_health ADD CONSTRAINT FK_ssd_clah_to_clae 
-    -- FOREIGN KEY (clah_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_clah_person_id ON ssd_cla_health (clah_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_date ON ssd_cla_health(clah_health_check_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_status ON ssd_cla_health(clah_health_check_status);
-END
 
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_cla_immunisations"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.0
+--             0.2: most recent status reworked / 903 source removed 220224 JH
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_CLA
+-- - FACT_903_DATA [Depreciated]
+-- =============================================================================
 
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_cla_immunisations
-Description: 
-Author: D2I
-Version: 1.0
-            0.2: most recent status reworked / 903 source removed 220224 JH
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_person
-- FACT_CLA
-- FACT_903_DATA [Depreciated]
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_immunisations';
 
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_cla_immunisations') IS NOT NULL DROP TABLE ssd_cla_immunisations;
-IF OBJECT_ID('tempdb..#ssd_cla_immunisations') IS NOT NULL DROP TABLE #ssd_cla_immunisations;
-
--- Create structure
-CREATE TABLE ssd_cla_immunisations (
-    clai_person_id                  NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAI002A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cla_immunisations (
+    clai_person_id                  NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAI002A"}
     clai_immunisations_status       NCHAR(1),                   -- metadata={"item_ref":"CLAI004A"}
     clai_immunisations_status_date  DATETIME                    -- metadata={"item_ref":"CLAI005A"}
 );
@@ -2787,12 +2127,13 @@ CREATE TABLE ssd_cla_immunisations (
     WHERE
         EXISTS ( -- only ssd relevant records be considered for ranking
             SELECT 1 
-            FROM ssd_person p
+            FROM ssd_development.ssd_person p
             WHERE CAST(p.pers_person_id AS INT) = fcla.DIM_PERSON_ID -- #DtoI-1799
         )
 )
--- Insert data (only most recent/rn==1 records)
-INSERT INTO ssd_cla_immunisations (
+-- META-ELEMENT: {"type": "insert_data"} 
+-- (only most recent/rn==1 records)
+INSERT INTO ssd_development.ssd_cla_immunisations (
     clai_person_id,
     clai_immunisations_status,
     clai_immunisations_status_date
@@ -2806,62 +2147,35 @@ FROM
 WHERE
     rn = 1; -- pull needed record based on rank==1/most recent record for each DIM_PERSON_ID
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_cla_immunisations ADD CONSTRAINT FK_ssd_cla_immunisations_person
-    -- FOREIGN KEY (clai_person_id) REFERENCES ssd_person(pers_person_id);
 
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_clai_person_id ON ssd_cla_immunisations(clai_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_clai_immunisations_status ON ssd_cla_immunisations(clai_immunisations_status);
-END
+-- META-CONTAINER: {"type": "table", "name": "ssd_cla_substance_misuse"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.0
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_SUBSTANCE_MISUSE
+-- =============================================================================
 
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_cla_substance_misuse
-Description: 
-Author: D2I
-Version: 1.0
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_person
-- FACT_SUBSTANCE_MISUSE
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_substance_misuse';
 
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_cla_substance_misuse') IS NOT NULL DROP TABLE ssd_cla_substance_misuse;
-IF OBJECT_ID('tempdb..#ssd_cla_substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_substance_misuse;
-
--- Create structure 
-CREATE TABLE ssd_cla_substance_misuse (
-    clas_substance_misuse_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAS001A"}
+-- META-ELEMENT: {"type": "create_table"} 
+CREATE TABLE ssd_development.ssd_cla_substance_misuse (
+    clas_substance_misuse_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAS001A"}
     clas_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CLAS002A"}
     clas_substance_misuse_date      DATETIME,                   -- metadata={"item_ref":"CLAS003A"}
     clas_substance_misused          NVARCHAR(100),              -- metadata={"item_ref":"CLAS004A"}
     clas_intervention_received      NCHAR(1)                    -- metadata={"item_ref":"CLAS005A"}
 );
 
--- Insert data
-INSERT INTO ssd_cla_substance_misuse (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cla_substance_misuse (
     clas_substance_misuse_id,
     clas_person_id,
     clas_substance_misuse_date,
@@ -2880,61 +2194,35 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fsm.DIM_PERSON_ID -- #DtoI-1799
     );
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_cla_substance_misuse ADD CONSTRAINT FK_ssd_cla_substance_misuse_clas_person_id 
-    -- FOREIGN KEY (clas_person_id) REFERENCES ssd_cla_episodes (clae_person_id);
 
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_clas_person_id ON ssd_cla_substance_misuse (clas_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_clas_substance_misuse_date ON ssd_cla_substance_misuse(clas_substance_misuse_date);
-END
+-- META-CONTAINER: {"type": "table", "name": "ssd_cla_placement"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.0 
+--             0.2: 060324 JH
+--             0.1: Corrected/removal of placement_la & episode_id 090124 RH
+-- Status: [R]elease
+-- Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_CLA_PLACEMENT
+-- - FACT_CARE_EPISODES
+-- =============================================================================
 
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_cla_placement
-Description: 
-Author: D2I
-Version: 1.0 
-            0.2: 060324 JH
-            0.1: Corrected/removal of placement_la & episode_id 090124 RH
-Status: [R]elease
-Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
-Dependencies: 
-- ssd_person
-- FACT_CLA_PLACEMENT
-- FACT_CARE_EPISODES
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_placement';
 
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_cla_placement', 'U') IS NOT NULL DROP TABLE ssd_cla_placement;
-IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_placement;
-  
--- Create structure
-CREATE TABLE ssd_cla_placement (
-    clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAP001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cla_placement (
+    clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAP001A"}
     clap_cla_id                         NVARCHAR(48),               -- metadata={"item_ref":"CLAP012A"}
     clap_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"CLAP013A"}
     clap_cla_placement_start_date       DATETIME,                   -- metadata={"item_ref":"CLAP003A"}
@@ -2947,8 +2235,8 @@ CREATE TABLE ssd_cla_placement (
     clap_cla_placement_change_reason    NVARCHAR(100)               -- metadata={"item_ref":"CLAP010A"}
 );
  
--- Insert data
-INSERT INTO ssd_cla_placement (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cla_placement (
     clap_cla_placement_id,
     clap_cla_id,
     clap_person_id,
@@ -3000,64 +2288,33 @@ AND
     (fcp.END_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
     OR fcp.END_DTTM IS NULL);
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_cla_placement ADD CONSTRAINT FK_ssd_clap_to_clae 
-    -- FOREIGN KEY (clap_cla_id) REFERENCES ssd_cla_episodes(clae_cla_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_clap_cla_placement_urn ON ssd_cla_placement (clap_cla_placement_urn);
-    CREATE NONCLUSTERED INDEX idx_ssd_clap_cla_id ON ssd_cla_placement(clap_cla_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_start_date ON ssd_cla_placement(clap_cla_placement_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_end_date ON ssd_cla_placement(clap_cla_placement_end_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_postcode ON ssd_cla_placement(clap_cla_placement_postcode);
-    CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_type ON ssd_cla_placement(clap_cla_placement_type);
-END
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_cla_reviews"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.0
+--             0.2: clar_cla_review_cancelled type change from nvarchar 100524 RH
+--             0.1: clar_cla_id change from clar cla episode id 120124 JH
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_cla_episodes
+-- - FACT_CLA_REVIEW
+-- - FACT_MEETING_SUBJECTS 
+-- - FACT_MEETINGS
+-- =============================================================================
 
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_cla_reviews
-Description: 
-Author: D2I
-Version: 1.0
-            0.2: clar_cla_review_cancelled type change from nvarchar 100524 RH
-            0.1: clar_cla_id change from clar cla episode id 120124 JH
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_cla_episodes
-- FACT_CLA_REVIEW
-- FACT_MEETING_SUBJECTS 
-- FACT_MEETINGS
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_reviews';
 
 
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE ssd_cla_reviews;
-IF OBJECT_ID('tempdb..#ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE #ssd_cla_reviews;
-  
--- Create structure
-CREATE TABLE ssd_cla_reviews (
-    clar_cla_review_id              NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAR001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cla_reviews (
+    clar_cla_review_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAR001A"}
     clar_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAR011A"}
     clar_cla_review_due_date        DATETIME,                   -- metadata={"item_ref":"CLAR003A"}
     clar_cla_review_date            DATETIME,                   -- metadata={"item_ref":"CLAR004A"}
@@ -3065,8 +2322,8 @@ CREATE TABLE ssd_cla_reviews (
     clar_cla_review_participation   NVARCHAR(100)               -- metadata={"item_ref":"CLAR007A"}
     );
  
--- Insert data
-INSERT INTO ssd_cla_reviews (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cla_reviews (
     clar_cla_review_id,
     clar_cla_id,
     clar_cla_review_due_date,
@@ -3111,7 +2368,7 @@ AND
  
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fcr.DIM_PERSON_ID -- #DtoI-1799
     )
  
@@ -3127,57 +2384,29 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
     ;
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_cla_reviews ADD CONSTRAINT FK_ssd_clar_to_clae 
-    -- FOREIGN KEY (clar_cla_id) REFERENCES ssd_cla_episodes(clae_cla_id);
 
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_clar_cla_id ON ssd_cla_reviews(clar_cla_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_clar_review_due_date ON ssd_cla_reviews(clar_cla_review_due_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_clar_review_date ON ssd_cla_reviews(clar_cla_review_date);
-END
+-- META-CONTAINER: {"type": "table", "name": "ssd_cla_previous_permanence"}
+-- =============================================================================
+-- Description:
+-- Author: D2I
+-- Version: 1.1 
+--             1.0: Fix Aggr warnings use of isnull() 310524 RH
+-- Status: [R]elease
+-- Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley.
+--         1.5 JH tmp table was not being referenced, updated query and reduced running
+--         time considerably, also filtered out rows where ANSWER IS NULL
+-- Dependencies:
+-- - ssd_person
+-- - FACT_903_DATA [depreciated]
+-- - FACT_FORMS
+-- - FACT_FORM_ANSWERS
+-- =============================================================================
 
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-/*
-=============================================================================
-Object Name: ssd_cla_previous_permanence
-Description:
-Author: D2I
-Version: 1.1 
-            1.0: Fix Aggr warnings use of isnull() 310524 RH
-Status: [R]elease
-Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley.
-        1.5 JH tmp table was not being referenced, updated query and reduced running
-        time considerably, also filtered out rows where ANSWER IS NULL
-Dependencies:
-- ssd_person
-- FACT_903_DATA [depreciated]
-- FACT_FORMS
-- FACT_FORM_ANSWERS
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_previous_permanence';
 
  
--- Check if exists & drop
-IF OBJECT_ID('ssd_cla_previous_permanence') IS NOT NULL DROP TABLE ssd_cla_previous_permanence;
-IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
-
-IF OBJECT_ID('tempdb..#ssd_TMP_PRE_previous_permanence') IS NOT NULL DROP TABLE #ssd_TMP_PRE_previous_permanence;
- 
+-- META-ELEMENT: {"type": "create_table"} 
 -- Create TMP structure with filtered answers
 SELECT
     ffa.FACT_FORM_ID,
@@ -3195,17 +2424,17 @@ WHERE
     AND
     ffa.ANSWER IS NOT NULL
  
--- Create structure
-CREATE TABLE ssd_cla_previous_permanence (
-    lapp_table_id                               NVARCHAR(48) PRIMARY KEY,
-    lapp_person_id                              NVARCHAR(48),
-    lapp_previous_permanence_option             NVARCHAR(200),
-    lapp_previous_permanence_la                 NVARCHAR(100),
-    lapp_previous_permanence_order_date         NVARCHAR(10)
+-- META-ELEMENT: {"type": "create_table"}     
+CREATE TABLE ssd_development.ssd_cla_previous_permanence (
+    lapp_table_id                               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LAPP001A"}
+    lapp_person_id                              NVARCHAR(48),   -- metadata={"item_ref":"LAPP002A"}
+    lapp_previous_permanence_option             NVARCHAR(200),  -- metadata={"item_ref":"LAPP003A"}
+    lapp_previous_permanence_la                 NVARCHAR(100),  -- metadata={"item_ref":"LAPP004A"}
+    lapp_previous_permanence_order_date         NVARCHAR(10)    -- metadata={"item_ref":"LAPP005A"}
 );
  
--- Insert data
-INSERT INTO ssd_cla_previous_permanence (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cla_previous_permanence (
                lapp_table_id,
                lapp_person_id,
                lapp_previous_permanence_option,
@@ -3250,111 +2479,36 @@ JOIN
     HDM.Child_Social.FACT_FORMS ff ON tmp_ffa.FACT_FORM_ID = ff.FACT_FORM_ID
 AND EXISTS (
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = ff.DIM_PERSON_ID -- #DtoI-1799
 )
 GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_cla_previous_permanence ADD CONSTRAINT FK_ssd_lapp_person_id
-    -- FOREIGN KEY (lapp_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_lapp_person_id ON ssd_cla_previous_permanence(lapp_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_lapp_previous_permanence_option ON ssd_cla_previous_permanence(lapp_previous_permanence_option);
-END
+-- META-CONTAINER: {"type": "table", "name": "ssd_cla_care_plan"}
+-- =============================================================================
+-- Description:
+-- Author: D2I
+-- Version: 1.1
+--             1.0: Fix Aggr warnings use of isnull() 310524 RH
+--             0.1: Altered _json keys and groupby towards > clarity 190224 JH
+-- Status: [R]elease
+-- Remarks:    Added short codes to plan type questions to improve readability.
+--             Removed form type filter, only filtering ffa. on ANSWER_NO.
+-- Dependencies:
+-- - FACT_CARE_PLANS
+-- - FACT_FORMS
+-- - FACT_FORM_ANSWERS
+-- - #ssd_TMP_PRE_cla_care_plan - Used to stage/prep most recent relevant form response
+-- =============================================================================
 
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-/*
-=============================================================================
-Object Name: ssd_cla_care_plan
-Description:
-Author: D2I
-Version: 1.1
-            1.0: Fix Aggr warnings use of isnull() 310524 RH
-            0.1: Altered _json keys and groupby towards > clarity 190224 JH
-Status: [R]elease
-Remarks:    Added short codes to plan type questions to improve readability.
-            Removed form type filter, only filtering ffa. on ANSWER_NO.
-Dependencies:
-- FACT_CARE_PLANS
-- FACT_FORMS
-- FACT_FORM_ANSWERS
-- #ssd_TMP_PRE_cla_care_plan - Used to stage/prep most recent relevant form response
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_care_plan';
 
  
--- Check if exists & drop
-IF OBJECT_ID('ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_cla_care_plan;
-IF OBJECT_ID('tempdb..#ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_cla_care_plan;
-
--- -- Drop the temporary table with explicit reference to tempdb
--- IF OBJECT_ID('tempdb..#ssd_TMP_PRE_cla_care_plan') IS NOT NULL DROP TABLE tempdb..#ssd_TMP_PRE_cla_care_plan;
- 
--- WITH MostRecentQuestionResponse AS (
---     SELECT  -- Return the most recent response for each question for each persons
---         ff.DIM_PERSON_ID,
---         ffa.ANSWER_NO,
---         MAX(ffa.FACT_FORM_ID) AS MaxFormID
---     FROM
---         HDM.Child_Social.FACT_FORM_ANSWERS ffa
---     JOIN
---         HDM.Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID    -- obtain the relevant person_id
---     WHERE
---         ffa.ANSWER_NO    IN ('CPFUP1', 'CPFUP10', 'CPFUP2', 'CPFUP3', 'CPFUP4', 'CPFUP5', 'CPFUP6', 'CPFUP7', 'CPFUP8', 'CPFUP9')
---     GROUP BY
---         ff.DIM_PERSON_ID,
---         ffa.ANSWER_NO
--- ),
--- LatestResponses AS (
---     SELECT  -- Now add the answered_date (only indirectly of use here/cross referencing)
---         mrqr.DIM_PERSON_ID,
---         mrqr.ANSWER_NO,
---         mrqr.MaxFormID      AS FACT_FORM_ID,
---         ffa.ANSWER,
---         ffa.ANSWERED_DTTM   AS LatestResponseDate
---     FROM
---         MostRecentQuestionResponse mrqr
---     JOIN
---         HDM.Child_Social.FACT_FORM_ANSWERS ffa ON mrqr.MaxFormID = ffa.FACT_FORM_ID AND mrqr.ANSWER_NO = ffa.ANSWER_NO
--- )
- 
--- SELECT
---     -- Add the now aggregated reponses into tmp table
---     lr.FACT_FORM_ID,
---     lr.DIM_PERSON_ID,
---     lr.ANSWER_NO,
---     lr.ANSWER,
---     lr.LatestResponseDate
--- INTO #ssd_TMP_PRE_cla_care_plan
--- FROM
---     LatestResponses lr
--- ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
- 
-
--- persistent tmp/pre-processing table (this not part of core ssd, clean-up occurs later)
--- replacing all commented above
--- Check if exists & drop
-IF OBJECT_ID('ssd_pre_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_pre_cla_care_plan;
-IF OBJECT_ID('tempdb..#ssd_pre_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_pre_cla_care_plan;
-
-CREATE TABLE ssd_pre_cla_care_plan (
+-- META-ELEMENT: {"type": "create_table"}   
+CREATE TABLE ssd_development.ssd_pre_cla_care_plan (
     FACT_FORM_ID        NVARCHAR(48),
     DIM_PERSON_ID       NVARCHAR(48),
     ANSWER_NO           NVARCHAR(10),
@@ -3362,6 +2516,7 @@ CREATE TABLE ssd_pre_cla_care_plan (
     LatestResponseDate  DATETIME
 );
 
+-- META-ELEMENT: {"type": "insert_data"} 
 WITH MostRecentQuestionResponse AS (
     SELECT  -- Return the most recent response for each question for each persons
         ff.DIM_PERSON_ID,
@@ -3389,8 +2544,8 @@ LatestResponses AS (
     JOIN
         HDM.Child_Social.FACT_FORM_ANSWERS ffa ON mrqr.MaxFormID = ffa.FACT_FORM_ID AND mrqr.ANSWER_NO = ffa.ANSWER_NO
 )
- 
-INSERT INTO ssd_pre_cla_care_plan (
+
+INSERT INTO ssd_development.ssd_pre_cla_care_plan (
     FACT_FORM_ID,
     DIM_PERSON_ID,
     ANSWER_NO,
@@ -3408,20 +2563,18 @@ FROM
 ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
 
 
-
-
  
--- Create structure
-CREATE TABLE ssd_cla_care_plan (
-    lacp_table_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LACP001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cla_care_plan (
+    lacp_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"LACP001A"}
     lacp_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LACP007A"}
     lacp_cla_care_plan_start_date   DATETIME,                   -- metadata={"item_ref":"LACP004A"}
     lacp_cla_care_plan_end_date     DATETIME,                   -- metadata={"item_ref":"LACP005A"}
     lacp_cla_care_plan_json         NVARCHAR(1000)              -- metadata={"item_ref":"LACP003A"}
 );
  
--- Insert data
-INSERT INTO ssd_cla_care_plan (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cla_care_plan (
     lacp_table_id,
     lacp_person_id,
     lacp_cla_care_plan_start_date,
@@ -3449,7 +2602,7 @@ SELECT
             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END, '')), NULL) AS OTHERPLN
         FROM
             -- #ssd_TMP_PRE_cla_care_plan tmp_cpl
-            ssd_pre_cla_care_plan tmp_cpl
+            ssd_development.ssd_pre_cla_care_plan tmp_cpl
 
         WHERE
             tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
@@ -3465,65 +2618,37 @@ FROM
 WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
     AND EXISTS (
         SELECT 1
-        FROM ssd_person p
+        FROM ssd_development.ssd_person p
         WHERE CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID -- #DtoI-1799
     );
  
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_cla_care_plan ADD CONSTRAINT FK_ssd_lacp_person_id
-    FOREIGN KEY (lacp_person_id) REFERENCES ssd_person(pers_person_id);
-    
-    -- create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_lacp_person_id ON ssd_cla_care_plan(lacp_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_start_date ON ssd_cla_care_plan(lacp_cla_care_plan_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_end_date ON ssd_cla_care_plan(lacp_cla_care_plan_end_date);
-END
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_cla_visits"}
+-- =============================================================================
+-- Description:
+-- Author: D2I
+-- Version: 1.0!
+--             !0.3: Prep for casenote _ id to be removed... not yet actioned RH
+--             0.2: FK updated to person_id. change from clav.VISIT_DTTM  150224 JH
+--             0.1: pers_person_id and clav_cla_id  added JH
+-- Status: [R]elease
+-- Remarks:
+-- Dependencies:
+-- - FACT_CARE_EPISODES
+-- - FACT_CASENOTES
+-- - FACT_CLA_VISIT
+-- =============================================================================
 
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-/*
-=============================================================================
-Object Name: ssd_cla_visits
-Description:
-Author: D2I
-Version: 1.0!
-            !0.3: Prep for casenote _ id to be removed... not yet actioned RH
-            0.2: FK updated to person_id. change from clav.VISIT_DTTM  150224 JH
-            0.1: pers_person_id and clav_cla_id  added JH
-Status: [R]elease
-Remarks:
-Dependencies:
-- FACT_CARE_EPISODES
-- FACT_CASENOTES
-- FACT_CLA_VISIT
-=============================================================================
-*/
  
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_visits';
 
  
--- Check if exists & drop
-IF OBJECT_ID('ssd_cla_visits', 'U') IS NOT NULL DROP TABLE ssd_cla_visits;
-IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_visits;
-
-
--- Create structure
-CREATE TABLE ssd_cla_visits (
-    clav_cla_visit_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAV001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_cla_visits (
+    clav_cla_visit_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAV001A"}
     clav_cla_id                 NVARCHAR(48),               -- metadata={"item_ref":"CLAV007A"}
     clav_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAV008A"}
     clav_cla_visit_date         DATETIME,                   -- metadata={"item_ref":"CLAV003A"}
@@ -3531,8 +2656,8 @@ CREATE TABLE ssd_cla_visits (
     clav_cla_visit_seen_alone   NCHAR(1)                    -- metadata={"item_ref":"CLAV005A"}
 );
  
--- Insert data
-INSERT INTO ssd_cla_visits (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_cla_visits (
     clav_cla_visit_id,
     clav_cla_id,
     clav_person_id,
@@ -3567,73 +2692,45 @@ AND
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = clav.DIM_PERSON_ID -- #DtoI-1799
     );
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_cla_visits ADD CONSTRAINT FK_ssd_clav_person_id
-    -- FOREIGN KEY (clav_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
-    -- create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_clav_person_id ON ssd_cla_visits(clav_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_clav_visit_date ON ssd_cla_visits(clav_cla_visit_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_clav_cla_id ON ssd_cla_visits(clav_cla_id);
-END
+-- META-CONTAINER: {"type": "table", "name": "ssd_sdq_scores"}
+-- =============================================================================
+-- Description:
+-- Author: D2I
+-- Version: 1.0
+-- Status: [R]elease
+-- Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
+--         Removed csdq _form_ id as the form id is also being used as csdq_table_id
+--         Added placeholder for csdq_sdq_reason
+--         Removed PRIMARY KEY stipulation for csdq_table_id
+-- Dependencies:
+-- - ssd_person
+-- - FACT_FORMS
+-- - FACT_FORM_ANSWERS
+-- =============================================================================
 
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-/*
-=============================================================================
-Object Name: ssd_sdq_scores
-Description:
-Author: D2I
-Version: 1.0
-Status: [R]elease
-Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
-        Removed csdq _form_ id as the form id is also being used as csdq_table_id
-        Added placeholder for csdq_sdq_reason
-        Removed PRIMARY KEY stipulation for csdq_table_id
-Dependencies:
-- ssd_person
-- FACT_FORMS
-- FACT_FORM_ANSWERS
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_sdq_scores';
 
  
  
  
--- Check if exists & drop
-IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_sdq_scores;
-IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
- 
- 
--- Create structure
-CREATE TABLE ssd_sdq_scores (
-    csdq_table_id               NVARCHAR(48),               -- metadata={"item_ref":"CSDQ001A"} PRIMARY KEY
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_sdq_scores (
+    csdq_table_id               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CSDQ001A"} 
     csdq_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CSDQ002A"}
     csdq_sdq_completed_date     DATETIME,                   -- metadata={"item_ref":"CSDQ003A"}
     csdq_sdq_score              INT,                        -- metadata={"item_ref":"CSDQ005A"}
     csdq_sdq_reason             NVARCHAR(100)               -- metadata={"item_ref":"CSDQ004A", "item_status":"P"}
 );
 
--- insert data
-INSERT INTO ssd_sdq_scores (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_sdq_scores (
     csdq_table_id, 
     csdq_person_id, 
     csdq_sdq_completed_date, 
@@ -3668,7 +2765,7 @@ JOIN
     AND ffa.ANSWER IS NOT NULL
 WHERE EXISTS (
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = ff.DIM_PERSON_ID -- #DtoI-1799
 );
 
@@ -3683,12 +2780,12 @@ WHERE EXISTS (
         -- Assign unique row nums <within each partition> of csdq_person_id,
         -- the most recent csdq _form_ id/csdq_table_id will have a row number of 1.
         ROW_NUMBER() OVER (PARTITION BY csdq_person_id ORDER BY csdq_table_id DESC) AS rn
-    FROM ssd_sdq_scores
+    FROM ssd_development.ssd_sdq_scores
 )
 
 -- delete all records from the ssd_sdq_scores table where row number(rn) > 1
 -- i.e. keep only the most recent
-DELETE FROM ssd_sdq_scores
+DELETE FROM ssd_development.ssd_sdq_scores
 WHERE csdq_table_id IN (
     SELECT csdq_table_id
     FROM RankedSDQScores
@@ -3706,9 +2803,9 @@ WHERE csdq_table_id IN (
         -- Assign row num to each set of dups,
         -- partitioned by all columns that could potentially make a row unique
         ROW_NUMBER() OVER (PARTITION BY csdq_table_id, csdq_person_id ORDER BY csdq_table_id) AS row_num
-    FROM ssd_sdq_scores
+    FROM ssd_development.ssd_sdq_scores
 )
-DELETE FROM ssd_sdq_scores
+DELETE FROM ssd_development.ssd_sdq_scores
 WHERE csdq_table_id IN (
     SELECT csdq_table_id
     FROM DuplicateSDQScores
@@ -3716,61 +2813,28 @@ WHERE csdq_table_id IN (
 );
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_sdq_scores ADD CONSTRAINT FK_csdq_person_id
-    -- FOREIGN KEY (csdq_person_id) REFERENCES ssd_person(pers_person_id);
+-- META-CONTAINER: {"type": "table", "name": "ssd_missing"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.1
+--             1.0 miss_ missing_ rhi_accepted/offered 'NA' not valid value #DtoI-1617 240524 RH
+--             0.9 miss_missing_rhi_accepted/offered increased to size (2) 100524 RH
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_MISSING_PERSON
+-- =============================================================================
 
-    -- DEV NOTES [TESTING]
-    -- Msg 2627, Level 14, State 1, Line 3129
-    -- Violation of PRIMARY KEY constraint 'PK__ssd_sdq___EACA4F0597284006'. 
-    -- Cannot insert duplicate key in object 'ssd_sdq_scores'. The duplicate key value is (2316504).
-
-
-    -- create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_csdq_person_id ON ssd_sdq_scores(csdq_person_id);
-END
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_missing
-Description: 
-Author: D2I
-Version: 1.1
-            1.0 miss_ missing_ rhi_accepted/offered 'NA' not valid value 240524 RH
-            0.9 miss_missing_rhi_accepted/offered increased to size (2) 100524 RH
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- ssd_person
-- FACT_MISSING_PERSON
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_missing';
 
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_missing', 'U') IS NOT NULL DROP TABLE ssd_missing;
-IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL DROP TABLE #ssd_missing;
-
--- Create structure
-CREATE TABLE ssd_missing (
-    miss_table_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"MISS001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_missing (
+    miss_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"MISS001A"}
     miss_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"MISS002A"}
     miss_missing_episode_start_date DATETIME,                   -- metadata={"item_ref":"MISS003A"}
     miss_missing_episode_type       NVARCHAR(100),              -- metadata={"item_ref":"MISS004A"}
@@ -3780,8 +2844,8 @@ CREATE TABLE ssd_missing (
 );
 
 
--- Insert data 
-INSERT INTO ssd_missing (
+-- META-ELEMENT: {"type": "insert_data"} 
+INSERT INTO ssd_development.ssd_missing (
     miss_table_id,
     miss_person_id,
     miss_missing_episode_start_date,
@@ -3799,14 +2863,14 @@ SELECT
     CASE 
         WHEN UPPER(fmp.RETURN_INTERVIEW_OFFERED) = 'YES' THEN 'Y'
         WHEN UPPER(fmp.RETURN_INTERVIEW_OFFERED) = 'NO' THEN 'N'
-        WHEN UPPER(fmp.RETURN_INTERVIEW_OFFERED) = 'NA' THEN 'NA'
+        WHEN UPPER(fmp.RETURN_INTERVIEW_OFFERED) = 'NA' THEN 'NA' -- #DtoI-1617
         WHEN fmp.RETURN_INTERVIEW_OFFERED = '' THEN NULL
         ELSE NULL
     END AS miss_missing_rhi_offered,
     CASE 
         WHEN UPPER(fmp.RETURN_INTERVIEW_ACCEPTED) = 'YES' THEN 'Y'
         WHEN UPPER(fmp.RETURN_INTERVIEW_ACCEPTED) = 'NO' THEN 'N'
-        WHEN UPPER(fmp.RETURN_INTERVIEW_ACCEPTED) = 'NA' THEN 'NA'
+        WHEN UPPER(fmp.RETURN_INTERVIEW_ACCEPTED) = 'NA' THEN 'NA' -- #DtoI-1617
         WHEN fmp.RETURN_INTERVIEW_ACCEPTED = '' THEN NULL
         ELSE NULL
     END AS miss_missing_rhi_accepted
@@ -3821,77 +2885,51 @@ WHERE
 AND EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fmp.DIM_PERSON_ID -- #DtoI-1799
     );
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_missing ADD CONSTRAINT FK_ssd_missing_to_person
-    FOREIGN KEY (miss_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_miss_person_id        ON ssd_missing(miss_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_start    ON ssd_missing(miss_missing_episode_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_end      ON ssd_missing(miss_missing_episode_end_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_offered      ON ssd_missing(miss_missing_rhi_offered);
-    CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_accepted     ON ssd_missing(miss_missing_rhi_accepted);
-END
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_care_leavers"}
+-- =============================================================================
+-- Description:
+-- Author: D2I
+-- Version: 1.3:
+--             1.2: Added NULLIF(NULLIF(... fixes for CurrentWorker & AllocatedTeam 290724 RH
+--             1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
+--             1.0: Fix Aggr warnings use of isnull() 310524 RH
+--             0.3: change of main source to DIM_CLA_ELIGIBILITY in order to capture full care leaver cohort 12/03/24 JH
+--             0.2: switch field _worker)nm and _team_nm around as in wrong order RH
+--             0.1: worker/p.a id field changed to descriptive name towards AA reporting JH
+-- Status: [R]elease
+-- Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
+--             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_development.ssd_person> references in the CTEs(added for performance)
+--             Dev: Revised V3/4 to aid performance on large involvements table aggr
 
+--             This table the cohort of children who are preparing to leave care, typically 15/16/17yrs+; 
+--             Not those who are finishing a period of care. 
+--             clea_care_leaver_eligibility == LAC for 13wks+(since 14yrs)+LAC since 16yrs 
 
+-- Dependencies:
+-- - FACT_INVOLVEMENTS
+-- - FACT_CLA_CARE_LEAVERS
+-- - DIM_CLA_ELIGIBILITY
+-- - FACT_CARE_PLANS
+-- - ssd_person
+-- =============================================================================
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-/*
-=============================================================================
-Object Name: ssd_care_leavers
-Description:
-Author: D2I
-Version: 1.3:
-            1.2: Added NULLIF(NULLIF(... fixes for CurrentWorker & AllocatedTeam 290724 RH
-            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
-            1.0: Fix Aggr warnings use of isnull() 310524 RH
-            0.3: change of main source to DIM_CLA_ELIGIBILITY in order to capture full care leaver cohort 12/03/24 JH
-            0.2: switch field _worker)nm and _team_nm around as in wrong order RH
-            0.1: worker/p.a id field changed to descriptive name towards AA reporting JH
-Status: [R]elease
-Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
-            Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
-            Dev: Revised V3/4 to aid performance on large involvements table aggr
-Dependencies:
-- FACT_INVOLVEMENTS
-- FACT_CLA_CARE_LEAVERS
-- DIM_CLA_ELIGIBILITY
-- FACT_CARE_PLANS
-- ssd_person
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_care_leavers';
 
  
  
--- Check if exists & drop
-IF OBJECT_ID('ssd_care_leavers', 'U') IS NOT NULL DROP TABLE ssd_care_leavers;
-IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
- 
- 
--- Create structure
-CREATE TABLE ssd_care_leavers
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_care_leavers
 (
-    clea_table_id                           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLEA001A"}
+    clea_table_id                           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLEA001A"}
     clea_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"CLEA002A"}
-    clea_care_leaver_eligibility            NVARCHAR(100),              -- metadata={"item_ref":"CLEA003A"}
+    clea_care_leaver_eligibility            NVARCHAR(100),              -- metadata={"item_ref":"CLEA003A", "info":"LAC for 13wks(since 14yrs)+LAC since 16yrs"}
     clea_care_leaver_in_touch               NVARCHAR(100),              -- metadata={"item_ref":"CLEA004A"}
     clea_care_leaver_latest_contact         DATETIME,                   -- metadata={"item_ref":"CLEA005A"}
     clea_care_leaver_accommodation          NVARCHAR(100),              -- metadata={"item_ref":"CLEA006A"}
@@ -3899,10 +2937,11 @@ CREATE TABLE ssd_care_leavers
     clea_care_leaver_activity               NVARCHAR(100),              -- metadata={"item_ref":"CLEA008A"}
     clea_pathway_plan_review_date           DATETIME,                   -- metadata={"item_ref":"CLEA009A"}
     clea_care_leaver_personal_advisor       NVARCHAR(100),              -- metadata={"item_ref":"CLEA010A"}
-    clea_care_leaver_allocated_team         NVARCHAR(255),              -- metadata={"item_ref":"CLEA011A"}
+    clea_care_leaver_allocated_team         NVARCHAR(48),              -- metadata={"item_ref":"CLEA011A"}
     clea_care_leaver_worker_id              NVARCHAR(100)               -- metadata={"item_ref":"CLEA012A"}
 );
- 
+
+-- META-ELEMENT: {"type": "insert_data"}  
 -- CTE for involvement history incl. worker data
 -- aggregate/extract current worker infos, allocated team, and p.advisor ID
 WITH InvolvementHistoryCTE AS (
@@ -3942,8 +2981,7 @@ WITH InvolvementHistoryCTE AS (
         fi.DIM_PERSON_ID
 )
  
--- Insert data
-INSERT INTO ssd_care_leavers
+INSERT INTO ssd_development.ssd_care_leavers
 (
     clea_table_id,
     clea_person_id,
@@ -3960,8 +2998,7 @@ INSERT INTO ssd_care_leavers
 )
  
 SELECT
-    CONCAT(dce.DIM_CLA_ELIGIBILITY_ID, fccl.FACT_CLA_CARE_LEAVERS_ID)
-              AS clea_table_id,
+    NEWID() AS clea_table_id, -- [TESTING] #DtoI-1821 CONCAT(dce.DIM_CLA_ELIGIBILITY_ID, fccl.FACT_CLA_CARE_LEAVERS_ID) AS clea_table_id,
     dce.DIM_PERSON_ID                                       AS clea_person_id,
     CASE WHEN
         dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NULL
@@ -3998,7 +3035,7 @@ LEFT JOIN InvolvementHistoryCTE AS ih ON dce.DIM_PERSON_ID = ih.DIM_PERSON_ID   
  
 WHERE EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = dce.DIM_PERSON_ID -- #DtoI-1799
     )
  
@@ -4019,70 +3056,44 @@ GROUP BY
     ;
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_care_leavers ADD CONSTRAINT FK_ssd_care_leavers_person
-    -- FOREIGN KEY (clea_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_clea_person_id                    ON ssd_care_leavers(clea_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_clea_care_leaver_latest_contact   ON ssd_care_leavers(clea_care_leaver_latest_contact);
-    CREATE NONCLUSTERED INDEX idx_ssd_clea_pathway_plan_review_date     ON ssd_care_leavers(clea_pathway_plan_review_date);
-END
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_permanence"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.2
+--             1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
+--             0.5: perm_placed_foster_carer_date placeholder re-added 240424 RH
+--             0.4: worker_name field name change for consistency 100424 JH
+--             0.3: entered_care_date removed/moved to cla_episodes 060324 RH
+--             0.2: perm_placed_foster_carer_date (from fc.START_DTTM) removed RH
+--             0.1: perm_adopter_sex, perm_adopter_legal_status added RH
+-- Status: [R]elease
+-- Remarks: 
+--         DEV: 181223: Assumed that only one permanence order per child. 
+--         - In order to handle/reflect the v.rare cases where this has broken down, further work is required.
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
+--         DEV: Some fields need spec checking for datatypes e.g. perm_adopted_by_carer_flag and others
+
+-- Dependencies: 
+-- - ssd_person
+-- - FACT_ADOPTION
+-- - FACT_CLA_PLACEMENT
+-- - FACT_LEGAL_STATUS
+-- - FACT_CARE_EPISODES
+-- - FACT_CLA
+-- =============================================================================
 
 
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_permanence
-Description: 
-Author: D2I
-Version: 1.2
-            1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
-            0.5: perm_placed_foster_carer_date placeholder re-added 240424 RH
-            0.4: worker_name field name change for consistency 100424 JH
-            0.3: entered_care_date removed/moved to cla_episodes 060324 RH
-            0.2: perm_placed_foster_carer_date (from fc.START_DTTM) removed RH
-            0.1: perm_adopter_sex, perm_adopter_legal_status added RH
-Status: [R]elease
-Remarks: 
-        DEV: 181223: Assumed that only one permanence order per child. 
-        - In order to handle/reflect the v.rare cases where this has broken down, further work is required.
-
-        DEV: Some fields need spec checking for datatypes e.g. perm_adopted_by_carer_flag and others
-
-Dependencies: 
-- ssd_person
-- FACT_ADOPTION
-- FACT_CLA_PLACEMENT
-- FACT_LEGAL_STATUS
-- FACT_CARE_EPISODES
-- FACT_CLA
-=============================================================================
-*/
-
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_permanence';
 
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_permanence', 'U') IS NOT NULL DROP TABLE ssd_permanence;
-IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
-
--- Create structure
-CREATE TABLE ssd_permanence (
-    perm_table_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERM001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_permanence (
+    perm_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"PERM001A"}
     perm_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"PERM002A"}
     perm_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"PERM022A"}
     perm_adm_decision_date          DATETIME,                   -- metadata={"item_ref":"PERM003A"}
@@ -4108,7 +3119,7 @@ CREATE TABLE ssd_permanence (
     
 );
 
-
+-- META-ELEMENT: {"type": "insert_data"}  
 WITH RankedPermanenceData AS (
     -- CTE to rank permanence rows for each person
     -- used to assist in dup filtering on/towards perm_table_id
@@ -4179,14 +3190,13 @@ WITH RankedPermanenceData AS (
         -- -- Exclusion block commented for further [TESTING] 
         -- AND EXISTS ( -- ssd records only
         --     SELECT 1
-        --     FROM ssd_person p
+        --     FROM ssd_development.ssd_person p
         --      WHERE CAST(p.pers_person_id AS INT) = fce.DIM_PERSON_ID -- #DtoI-1799
         -- )
 
 )
 
--- Insert data
-INSERT INTO ssd_permanence (
+INSERT INTO ssd_development.ssd_permanence (
     perm_table_id,
     perm_person_id,
     perm_cla_id,
@@ -4243,77 +3253,39 @@ WHERE rn = 1
 AND EXISTS
     ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE p.pers_person_id = perm_person_id -- this a NVARCHAR(48) equality link
     );
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_permanence ADD CONSTRAINT FK_ssd_perm_person_id
-    -- FOREIGN KEY (perm_person_id) REFERENCES ssd_cla_episodes(clae_person_id);
 
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id            ON ssd_permanence(perm_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date    ON ssd_permanence(perm_adm_decision_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date           ON ssd_permanence(perm_permanence_order_date);
-END
+-- META-CONTAINER: {"type": "table", "name": "ssd_professionals"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.2
+--             1.1: staff_id field clean-up, removal of dirty|admin values 090724 RH
+--             1.0: #DtoI-1743 caseload count revised to be within ssd timeframe 170524 RH
+--             0.9: prof_professional_id now becomes staff_id 090424 JH
+--             0.8: prof _table_ id(prof _system_ id) becomes prof _professional_ id 090424 JH
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - @CaseloadLastSept30th
+-- - @CaseloadTimeframeStartDate
+-- - @ssd_timeframe_years
+-- - DIM_WORKER
+-- - FACT_REFERRALS
+-- - ssd_cin_episodes (if counting caseloads within SSD timeframe)
+-- =============================================================================
 
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_professionals
-Description: 
-Author: D2I
-Version: 1.2
-            1.1: staff_id field clean-up, removal of dirty|admin values 090724 RH
-            1.0: #DtoI-1743 caseload count revised to be within ssd timeframe 170524 RH
-            0.9: prof_professional_id now becomes staff_id 090424 JH
-            0.8: prof _table_ id(prof _system_ id) becomes prof _professional_ id 090424 JH
-Status: [R]elease
-Remarks: 
-Dependencies: 
-- @LastSept30th
-- @TimeframeStartDate
-- @ssd_timeframe_years
-- DIM_WORKER
-- FACT_REFERRALS
-- ssd_cin_episodes (if counting caseloads within SSD timeframe)
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_professionals';
 
 
-
--- Check if exists & drop
-IF OBJECT_ID('ssd_professionals', 'U') IS NOT NULL DROP TABLE ssd_professionals;
-IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL DROP TABLE #ssd_professionals;
-
-
--- Determine/Define date on which CASELOAD count required (Currently: September 30th)
-SET @LastSept30th = CASE 
-                        WHEN CONVERT(DATE, GETDATE()) > DATEFROMPARTS(YEAR(GETDATE()), 9, 30) 
-                        THEN DATEFROMPARTS(YEAR(GETDATE()), 9, 30)
-                        ELSE DATEFROMPARTS(YEAR(GETDATE()) - 1, 9, 30)
-                    END;
-
-DECLARE @TimeframeStartDate DATE = DATEADD(YEAR, -@ssd_timeframe_years, @LastSept30th);
-
-
--- Create structure
-CREATE TABLE ssd_professionals (
-    prof_professional_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PROF001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_professionals (
+    prof_professional_id                NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"PROF001A"}
     prof_staff_id                       NVARCHAR(48),               -- metadata={"item_ref":"PROF010A"}
     prof_professional_name              NVARCHAR(300),              -- metadata={"item_ref":"PROF013A"}
     prof_social_worker_registration_no  NVARCHAR(48),               -- metadata={"item_ref":"PROF002A"}
@@ -4325,8 +3297,8 @@ CREATE TABLE ssd_professionals (
 );
 
 
--- Insert data
-INSERT INTO ssd_professionals (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_professionals (
     prof_professional_id, 
     prof_staff_id, 
     prof_professional_name,
@@ -4361,9 +3333,9 @@ LEFT JOIN (
         HDM.Child_Social.FACT_REFERRALS
 
     WHERE 
-        REFRL_START_DTTM <= @LastSept30th AND 
-        (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM >= @LastSept30th) AND
-        REFRL_START_DTTM >= @TimeframeStartDate  -- ssd timeframe constraint
+        REFRL_START_DTTM <= @CaseloadLastSept30th AND 
+        (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM >= @CaseloadLastSept30th) AND
+        REFRL_START_DTTM >= @CaseloadTimeframeStartDate  -- ssd timeframe constraint
     GROUP BY 
         DIM_WORKER_ID
 ) AS rc ON dw.DIM_WORKER_ID = rc.DIM_WORKER_ID
@@ -4374,57 +3346,35 @@ WHERE
 
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_prof_staff_id             ON ssd_professionals (prof_staff_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON ssd_professionals(prof_social_worker_registration_no);
-END
 
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
+-- META-CONTAINER: {"type": "table", "name": "ssd_department"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.1:
+--             1.0: 
+-- Status: [T]est
+-- Remarks: 
+-- Dependencies: 
+-- -
+-- =============================================================================
 
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_department
-Description: 
-Author: D2I
-Version: 1.1:
-            1.0: 
-Status: [T]est
-Remarks: 
-Dependencies: 
--
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_department';
 
 
 
--- Check if exists & drop
-IF OBJECT_ID('ssd_department', 'U') IS NOT NULL DROP TABLE ssd_department;
-IF OBJECT_ID('tempdb..#ssd_department', 'U') IS NOT NULL DROP TABLE #ssd_department;
-
-
--- Create structure
-CREATE TABLE ssd_department (
-    dept_team_id           NVARCHAR(48),  -- metadata={"item_ref":"DEPT1001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_department (
+    dept_team_id           NVARCHAR(48) PRIMARY KEY,  -- metadata={"item_ref":"DEPT1001A"}
     dept_team_name         NVARCHAR(255), -- metadata={"item_ref":"DEPT1002A"}
-    dept_team_parent_id    NVARCHAR(48),  -- metadata={"item_ref":"DEPT1003A"}, references ssd_department.dept_team_id
+    dept_team_parent_id    NVARCHAR(48),  -- metadata={"item_ref":"DEPT1003A", "info":"references ssd_department.dept_team_id"}
     dept_team_parent_name  NVARCHAR(255)  -- metadata={"item_ref":"DEPT1004A"}
 );
 
--- Insert data
-INSERT INTO ssd_department (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_department (
     dept_team_id,
     dept_team_name,
     dept_team_parent_id,
@@ -4444,64 +3394,41 @@ WHERE dpt.dim_department_id <> -1;
 -- Can/should  dept data be reduced by matching back to objects to ensure only in-use dept data is retrieved
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- -- Add constraint(s)
-    -- ALTER TABLE ssd_department ADD CONSTRAINT FK_ssd_dept_team_parent_id 
-    -- FOREIGN KEY (dept_team_parent_id) REFERENCES ssd_department(dept_team_id);
 
-    -- Create index(es)
-    CREATE INDEX idx_ssd_dept_team_id ON ssd_department (dept_team_id);
-END
+-- META-CONTAINER: {"type": "table", "name": "ssd_involvements"}
+-- =============================================================================
+-- Description:
+-- Author: D2I
+-- Version: 1.2:
+--             1.1: Revisions to 1.0/0.9. DEPT_ID else .._HISTORY_DEPARTMENT_ID 300724 RH
+--             1.0: Trancated professional_team field IF comment data populates 110624 RH
+--             0.9: added person_id and changed source of professional_team 090424 JH
+-- Status: [R]elease
+-- Remarks:    v1.2 revisions backtrack prev changes in favour of dept/hist ID fields
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
+--             [TESTING] The below towards v1.0 for ref. only
+--             Regarding the increased size/len on invo_professional_team
+--             The (truncated)COMMENTS field is only used if:
+--                 WORKER_HISTORY_DEPARTMENT_DESC is NULL.
+--                 DEPARTMENT_NAME is NULL.
+--                 GROUP_NAME is NULL.
+--                 COMMENTS contains the keyword %WORKER% or %ALLOC%.
+-- Dependencies:
+-- - ssd_person
+-- - FACT_INVOLVEMENTS
+-- - ssd_departments (if obtaining team_name)
+-- =============================================================================
 
-
-
-
-/*
-=============================================================================
-Object Name: ssd_involvements
-Description:
-Author: D2I
-Version: 1.2:
-            1.1: Revisions to 1.0/0.9. DEPT_ID else .._HISTORY_DEPARTMENT_ID 300724 RH
-            1.0: Trancated professional_team field IF comment data populates 110624 RH
-            0.9: added person_id and changed source of professional_team 090424 JH
-Status: [R]elease
-Remarks:    v1.2 revisions backtrack prev changes in favour of dept/hist ID fields
-
-            [TESTING] The below towards v1.0 for ref. only
-            Regarding the increased size/len on invo_professional_team
-            The (truncated)COMMENTS field is only used if:
-                WORKER_HISTORY_DEPARTMENT_DESC is NULL.
-                DEPARTMENT_NAME is NULL.
-                GROUP_NAME is NULL.
-                COMMENTS contains the keyword %WORKER% or %ALLOC%.
-Dependencies:
-- ssd_person
-- FACT_INVOLVEMENTS
-- ssd_departments (if obtaining team_name)
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_involvements';
 
  
- 
--- Check if exists & drop
-IF OBJECT_ID('ssd_involvements', 'U') IS NOT NULL DROP TABLE ssd_involvements;
-IF OBJECT_ID('tempdb..#ssd_involvements', 'U') IS NOT NULL DROP TABLE #ssd_involvements;
- 
--- Create structure
-CREATE TABLE ssd_involvements (
-    invo_involvements_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"INVO005A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_involvements (
+    invo_involvements_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"INVO005A"}
     invo_professional_id        NVARCHAR(48),               -- metadata={"item_ref":"INVO006A"}
     invo_professional_role_id   NVARCHAR(200),              -- metadata={"item_ref":"INVO007A"}
-    invo_professional_team      NVARCHAR(255),              -- metadata={"item_ref":"INVO009A", "info":"This is a truncated field at 255"}
+    invo_professional_team      NVARCHAR(48),              -- metadata={"item_ref":"INVO009A", "info":"This is a truncated field at 255"}
     invo_person_id              NVARCHAR(48),               -- metadata={"item_ref":"INVO011A"}
     invo_involvement_start_date DATETIME,                   -- metadata={"item_ref":"INVO002A"}
     invo_involvement_end_date   DATETIME,                   -- metadata={"item_ref":"INVO003A"}
@@ -4509,8 +3436,8 @@ CREATE TABLE ssd_involvements (
     invo_referral_id            NVARCHAR(48)                -- metadata={"item_ref":"INVO010A"}
 );
  
--- Insert data
-INSERT INTO ssd_involvements (
+-- META-ELEMENT: {"type": "insert_data"}
+INSERT INTO ssd_development.ssd_involvements (
     invo_involvements_id,
     invo_professional_id,
     invo_professional_role_id,
@@ -4567,77 +3494,46 @@ WHERE
 AND EXISTS
     (
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fi.DIM_PERSON_ID -- #DtoI-1799
 
     );
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
 
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_invo_person_id                ON ssd_involvements(invo_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_invo_professional_role_id     ON ssd_involvements(invo_professional_role_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_invo_involvement_start_date   ON ssd_involvements(invo_involvement_start_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_invo_involvement_end_date     ON ssd_involvements(invo_involvement_end_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id              ON ssd_involvements(invo_referral_id);
-END
-
-
-    
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_linked_identifiers
-Description: 
-Author: D2I
-Version: 1.1
-            1.0: added source data for UPN+FORMER_UPN 140624 RH
+-- META-CONTAINER: {"type": "table", "name": "ssd_linked_identifiers"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.1
+--             1.0: added source data for UPN+FORMER_UPN 140624 RH
             
-Status: [R]elease
-Remarks: Have temporarily disabled populating UPN & ULN as these access non-core
-            CMS modules. Can be re-enabled on a localised basis. 
+-- Status: [R]elease
+-- Remarks: Have temporarily disabled populating UPN & ULN as these access non-core
+--             CMS modules. Can be re-enabled on a localised basis. 
 
-        The list of allowed identifier_type codes are:
-            ['Case Number', 
-            'Unique Pupil Number', 
-            'NHS Number', 
-            'Home Office Registration', 
-            'National Insurance Number', 
-            'YOT Number', 
-            'Court Case Number', 
-            'RAA ID', 
-            'Incident ID']
-            To have any further codes agreed into the standard, issue a change request
+--         The list of allowed identifier_type codes are:
+--             ['Case Number', 
+--             'Unique Pupil Number', 
+--             'NHS Number', 
+--             'Home Office Registration', 
+--             'National Insurance Number', 
+--             'YOT Number', 
+--             'Court Case Number', 
+--             'RAA ID', 
+--             'Incident ID']
+--             To have any further codes agreed into the standard, issue a change request
 
-Dependencies: 
-- Yet to be defined
-=============================================================================
-*/
--- [TESTING] Create marker
+-- Dependencies: 
+-- - Yet to be defined
+-- =============================================================================
+
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_linked_identifiers';
 
-
-
--- Check if exists, & drop 
-IF OBJECT_ID('linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_linked_identifiers;
-IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
-
--- Create structure
-CREATE TABLE ssd_linked_identifiers (
-    link_table_id               NVARCHAR(48) PRIMARY KEY DEFAULT NEWID(),   -- metadata={"item_ref":"LINK001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_linked_identifiers (
+    link_table_id               NVARCHAR(48) DEFAULT NEWID() PRIMARY KEY,               -- metadata={"item_ref":"LINK001A"}
     link_person_id              NVARCHAR(48),                               -- metadata={"item_ref":"LINK002A"} 
     link_identifier_type        NVARCHAR(100),                              -- metadata={"item_ref":"LINK003A"}
     link_identifier_value       NVARCHAR(100),                              -- metadata={"item_ref":"LINK004A"}
@@ -4652,9 +3548,9 @@ CREATE TABLE ssd_linked_identifiers (
 
 -- Example entry 1
 
--- Insert data for 
+-- META-ELEMENT: {"type": "insert_data"}
 -- link_identifier_type "FORMER_UPN"
-INSERT INTO ssd_linked_identifiers (
+INSERT INTO ssd_development.ssd_linked_identifiers (
     link_person_id, 
     link_identifier_type,
     link_identifier_value,
@@ -4677,15 +3573,15 @@ WHERE
 
  AND EXISTS (
         SELECT 1
-        FROM ssd_person p
+        FROM ssd_development.ssd_person p
         WHERE p.pers_person_id = csp.dim_person_id
     );
 
 -- Example entry 2
 
--- Insert data for 
+-- META-ELEMENT: {"type": "insert_data"}
 -- link_identifier_type "UPN"
-INSERT INTO ssd_linked_identifiers (
+INSERT INTO ssd_development.ssd_linked_identifiers (
     link_person_id, 
     link_identifier_type,
     link_identifier_value,
@@ -4708,69 +3604,31 @@ WHERE
     csp.upn IS NOT NULL AND
     EXISTS (
         SELECT 1
-        FROM ssd_person p
+        FROM ssd_development.ssd_person p
         WHERE p.pers_person_id = csp.dim_person_id
     );
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_linked_identifiers ADD CONSTRAINT FK_ssd_link_to_person 
-    FOREIGN KEY (link_person_id) REFERENCES ssd_person(pers_person_id);
 
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_link_person_id        ON ssd_linked_identifiers(link_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_link_valid_from_date  ON ssd_linked_identifiers(link_valid_from_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_link_valid_to_date    ON ssd_linked_identifiers(link_valid_to_date);
-END
+-- META-CONTAINER: {"type": "table", "name": "ssd_s251_finance"}
+-- =============================================================================
+-- Description: Placeholder structure as source data not common|confirmed
+-- Author: D2I
+-- Version: 1.0
+-- Status: [P]laceholder
+-- Remarks: 
+-- Dependencies: 
+-- - Yet to be defined
+-- =============================================================================
 
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-
-/* Start 
-
-         SSDF Other DfE projects (e.g. 1b, 2(a,b) elements extracts 
-        
-        */
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_s251_finance
-Description: Placeholder structure as source data not common|confirmed
-Author: D2I
-Version: 1.0
-Status: [P]laceholder
-Remarks: 
-Dependencies: 
-- Yet to be defined
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_s251_finance';
 
 
 
-
--- Check if exists, & drop 
-IF OBJECT_ID('s251_finance', 'U') IS NOT NULL DROP TABLE ssd_s251_finance;
-IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_finance;
-
--- Create structure
-CREATE TABLE ssd_s251_finance (
-    s251_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"S251001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_s251_finance (
+    s251_table_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"S251001A"}
     s251_cla_placement_id   NVARCHAR(48),               -- metadata={"item_ref":"S251002A"} 
     s251_placeholder_1      NVARCHAR(48),               -- metadata={"item_ref":"S251003A"}
     s251_placeholder_2      NVARCHAR(48),               -- metadata={"item_ref":"S251004A"}
@@ -4778,64 +3636,26 @@ CREATE TABLE ssd_s251_finance (
     s251_placeholder_4      NVARCHAR(48)                -- metadata={"item_ref":"S251006A"}
 );
 
--- -- Insert placeholder data [TESTING]
--- INSERT INTO ssd_s251_finance (
---     -- row id ommitted as ID generated (s251_table_id,)
---     s251_cla_placement_id,
---     s251_placeholder_1,
---     s251_placeholder_2,
---     s251_placeholder_3,
---     s251_placeholder_4
--- )
--- VALUES
---     ('SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH', 'SSD_PH');
+-- META-CONTAINER: {"type": "table", "name": "ssd_voice_of_child"}
+-- =============================================================================
+-- Object Name: ssd_voice_of_child
+-- Description: Placeholder structure as source data not common|confirmed
+-- Author: D2I
+-- Version: 1.0
+-- Status: [P]laceholder
+-- Remarks: 
+-- Dependencies: 
+-- - Yet to be defined
+-- =============================================================================
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_s251_finance ADD CONSTRAINT FK_ssd_s251_to_cla_placement 
-    FOREIGN KEY (s251_cla_placement_id) REFERENCES ssd_cla_placement(clap_cla_placement_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_s251_cla_placement_id ON ssd_s251_finance(s251_cla_placement_id);
-END
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_voice_of_child
-Description: Placeholder structure as source data not common|confirmed
-Author: D2I
-Version: 1.0
-Status: [P]laceholder
-Remarks: 
-Dependencies: 
-- Yet to be defined
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_voice_of_child';
 
 
 
--- Check if exists, & drop 
-IF OBJECT_ID('voice_of_child', 'U') IS NOT NULL DROP TABLE ssd_voice_of_child;
-IF OBJECT_ID('tempdb..#ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voice_of_child;
-
--- Create structure
-CREATE TABLE ssd_voice_of_child (
-    voch_table_id               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"VOCH007A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_voice_of_child (
+    voch_table_id               NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"VOCH007A"}
     voch_person_id              NVARCHAR(48),               -- metadata={"item_ref":"VOCH001A"}
     voch_explained_worries      NCHAR(1),                   -- metadata={"item_ref":"VOCH002A"}
     voch_story_help_understand  NCHAR(1),                   -- metadata={"item_ref":"VOCH003A"}
@@ -4844,75 +3664,26 @@ CREATE TABLE ssd_voice_of_child (
     voch_tablet_help_explain    NCHAR(1)                    -- metadata={"item_ref":"VOCH006A"}
 );
 
--- -- Insert placeholder data [TESTING]
--- INSERT INTO ssd_voice_of_child (
---     -- row id ommitted as ID generated (voch_table_id,)
---     voch_person_id,
---     voch_explained_worries,
---     voch_story_help_understand,
---     voch_agree_worker,
---     voch_plan_safe,
---     voch_tablet_help_explain
--- )
--- VALUES
---     ('10001', 'Y', 'Y', 'Y', 'Y', 'Y'),
---     ('10002', 'Y', 'Y', 'Y', 'Y', 'Y');
+-- META-CONTAINER: {"type": "table", "name": "ssd_pre_proceedings"}
+-- =============================================================================
+-- Description: Placeholder structure as source data not common|confirmed
+-- Author: D2I
+-- Version: 1.0
+-- Status: [P]laceholder
+-- Remarks: 
+-- Dependencies: 
+-- - Yet to be defined
+-- - ssd_person
+-- =============================================================================
 
-
--- To switch on once source data for voice defined.
--- WHERE EXISTS 
---  ( -- only ssd relevant records
---     SELECT 1 
---     FROM ssd_person p
---     WHERE p.pers_person_id = source_table.DIM_PERSON_ID
---     );
-
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_voice_of_child ADD CONSTRAINT FK_ssd_voch_to_person 
-    FOREIGN KEY (voch_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_voice_of_child_voch_person_id ON ssd_voice_of_child(voch_person_id);
-END
-
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_pre_proceedings
-Description: Placeholder structure as source data not common|confirmed
-Author: D2I
-Version: 1.0
-Status: [P]laceholder
-Remarks: 
-Dependencies: 
-- Yet to be defined
-- ssd_person
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_pre_proceedings';
 
 
 
--- Check if exists, & drop
-IF OBJECT_ID('pre_proceedings', 'U') IS NOT NULL DROP TABLE ssd_pre_proceedings;
-IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pre_proceedings;
-
--- Create structure
-CREATE TABLE ssd_pre_proceedings (
-    prep_table_id                           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PREP024A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_pre_proceedings (
+    prep_table_id                           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"PREP024A"}
     prep_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"PREP001A"}
     prep_plo_family_id                      NVARCHAR(48),               -- metadata={"item_ref":"PREP002A"}
     prep_pre_pro_decision_date              DATETIME,                   -- metadata={"item_ref":"PREP003A"}
@@ -4938,8 +3709,9 @@ CREATE TABLE ssd_pre_proceedings (
     prep_la_final_care_plan                 NVARCHAR(100)               -- metadata={"item_ref":"PREP023A"}
 );
 
+-- META-ELEMENT: {"type": "insert_data"} 
 -- -- Insert placeholder data
--- INSERT INTO ssd_pre_proceedings (
+-- INSERT INTO ssd_development.ssd_pre_proceedings (
 --     -- row id ommitted as ID generated (prep_table_id,)
 --     prep_person_id,
 --     prep_plo_family_id,
@@ -4983,89 +3755,47 @@ CREATE TABLE ssd_pre_proceedings (
 -- WHERE EXISTS 
 -- ( -- only ssd relevant records
 --     SELECT 1 
---     FROM ssd_person p
+--     FROM ssd_development.ssd_person p
 --     WHERE p.pers_person_id = plo_source_data_table.DIM_PERSON_ID
 --     );
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s) #DtoI-1769
-    ALTER TABLE ssd_pre_proceedings ADD CONSTRAINT FK_ssd_prep_to_person 
-    FOREIGN KEY (prep_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-    CREATE NONCLUSTERED INDEX idx_ssd_prep_person_id                ON ssd_pre_proceedings (prep_person_id);
-    CREATE NONCLUSTERED INDEX idx_ssd_prep_pre_pro_decision_date    ON ssd_pre_proceedings (prep_pre_pro_decision_date);
-    CREATE NONCLUSTERED INDEX idx_ssd_prep_legal_gateway_outcome    ON ssd_pre_proceedings (prep_legal_gateway_outcome);
-END
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
 
 
 
 
-/* End
+-- META-CONTAINER: {"type": "table", "name": "ssd_send"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.0
+--             0.1: upn _unknown size change in line with DfE to 4 160524 RH
+-- Status: [P]laceholder
+-- Remarks: Have temporarily disabled populating UPN & ULN as these access non-core
+--             CMS modules. Can be re-enabled on a localised basis. 
+-- Dependencies: 
+-- - FACT_903_DATA
+-- - ssd_person
+-- - Education.DIM_PERSON
+-- =============================================================================
 
-        SSDF Other projects elements extracts 
-        
-        */
-
-
-
-
-
-
-
-/* Start 
-
-        Non-Core Liquid Logic elements extracts (E.g. SEND/EH Module data)
-        
-        */
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_send
-Description: 
-Author: D2I
-Version: 1.0
-            0.1: upn _unknown size change in line with DfE to 4 160524 RH
-Status: [P]laceholder
-Remarks: Have temporarily disabled populating UPN & ULN as these access non-core
-            CMS modules. Can be re-enabled on a localised basis. 
-Dependencies: 
-- FACT_903_DATA
-- ssd_person
-- Education.DIM_PERSON
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_send';
 
 
 
 
--- Check if exists, & drop
-IF OBJECT_ID('ssd_send') IS NOT NULL DROP TABLE ssd_send;
-IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL DROP TABLE #ssd_send;
-
--- Create structure 
-CREATE TABLE ssd_send (
-    send_table_id       NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"SEND001A"}
+-- META-ELEMENT: {"type": "create_table"} 
+CREATE TABLE ssd_development.ssd_send (
+    send_table_id       NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"SEND001A"}
     send_person_id      NVARCHAR(48),               -- metadata={"item_ref":"SEND005A"}
     send_upn            NVARCHAR(48),               -- metadata={"item_ref":"SEND002A"}
     send_uln            NVARCHAR(48),               -- metadata={"item_ref":"SEND003A"}
     send_upn_unknown    NVARCHAR(6)                 -- metadata={"item_ref":"SEND004A"}
     );
 
--- Insert data for link_identifier_type "FORMER_UPN"
-INSERT INTO ssd_send (
+-- META-ELEMENT: {"type": "insert_data"} 
+-- for link_identifier_type "FORMER_UPN"
+INSERT INTO ssd_development.ssd_send (
     send_table_id,
     send_person_id, 
     send_upn,
@@ -5088,113 +3818,58 @@ FROM
 WHERE
     EXISTS (
         SELECT 1
-        FROM ssd_person p
+        FROM ssd_development.ssd_person p
         WHERE p.pers_person_id = csp.dim_person_id
     );
  
- 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s) -- #DtoI-1769
-    ALTER TABLE ssd_send ADD CONSTRAINT FK_send_to_person 
-    FOREIGN KEY (send_person_id) REFERENCES ssd_person(pers_person_id);
-
-    -- Create index(es)
-
-END
 
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
+-- META-CONTAINER: {"type": "table", "name": "ssd_sen_need"}
+-- =============================================================================
+-- Description: Placeholder structure as source data not common|confirmed
+-- Author: D2I
+-- Version: 0.1
+-- Status: [P]laceholder
+-- Remarks:
+-- Dependencies:
+-- - Yet to be defined
+-- - ssd_person
+-- =============================================================================
 
-
-
-
-
-/*
-=============================================================================
-Object Name: ssd_sen_need
-Description: Placeholder structure as source data not common|confirmed
-Author: D2I
-Version: 0.1
-Status: [P]laceholder
-Remarks:
-Dependencies:
-- Yet to be defined
-- ssd_person
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_sen_need';
 
  
  
--- Check if exists, & drop
-IF OBJECT_ID('ssd_sen_need', 'U') IS NOT NULL DROP TABLE ssd_sen_need  ;
-IF OBJECT_ID('tempdb..#ssd_sen_need', 'U') IS NOT NULL DROP TABLE #ssd_sen_need  ;
- 
- 
--- Create structure
-CREATE TABLE ssd_sen_need (
-    senn_table_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"SENN001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_sen_need (
+    senn_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"SENN001A"}
     senn_active_ehcp_id             NVARCHAR(48),               -- metadata={"item_ref":"SENN002A"}
     senn_active_ehcp_need_type      NVARCHAR(100),              -- metadata={"item_ref":"SENN003A"}
     senn_active_ehcp_need_rank      NCHAR(1)                    -- metadata={"item_ref":"SENN004A"}
 );
  
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    -- Applied post-object creation/end of extract [TESTING]
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_ehcp_requests"}
+-- =============================================================================
+-- Description: Placeholder structure as source data not common|confirmed
+-- Author: D2I
+-- Version: 0.1
+-- Status: [P]laceholder
+-- Remarks: 
+-- Dependencies: 
+-- - Yet to be defined
+-- - ssd_person
+-- =============================================================================
 
-    -- Create index(es)
-END
-
--- -- Insert placeholder data
--- INSERT INTO ssd_sen_need (senn_table_id, senn_active_ehcp_id, senn_active_ehcp_need_type, senn_active_ehcp_need_rank)
--- VALUES ('SSD_PH', 'SSD_PH', 'SSD_PH', '0');
- 
- 
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
- 
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_ehcp_requests 
-Description: Placeholder structure as source data not common|confirmed
-Author: D2I
-Version: 0.1
-Status: [P]laceholder
-Remarks: 
-Dependencies: 
-- Yet to be defined
-- ssd_person
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_ehcp_requests ';
 
 
 
--- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE ssd_ehcp_requests ;
-IF OBJECT_ID('tempdb..#ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_requests ;
-
-
--- Create structure
-CREATE TABLE ssd_ehcp_requests (
-    ehcr_ehcp_request_id            NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCR001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_ehcp_requests (
+    ehcr_ehcp_request_id            NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCR001A"}
     ehcr_send_table_id              NVARCHAR(48),               -- metadata={"item_ref":"EHCR002A"}
     ehcr_ehcp_req_date              DATETIME,                   -- metadata={"item_ref":"EHCR003A"}
     ehcr_ehcp_req_outcome_date      DATETIME,                   -- metadata={"item_ref":"EHCR004A"}
@@ -5202,59 +3877,29 @@ CREATE TABLE ssd_ehcp_requests (
 );
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    -- Applied post-object creation/end of extract 
-
-    -- Create index(es)
-END
-
-
--- -- Insert placeholder data
--- INSERT INTO ssd_ehcp_requests (ehcr_ehcp_request_id, ehcr_send_table_id, ehcr_ehcp_req_date, ehcr_ehcp_req_outcome_date, ehcr_ehcp_req_outcome)
--- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01', 'SSD_PH');
-
--- WHERE
---     (source_to_ehcr_ehcp_req_outcome_date  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
---     OR source_to_ehcr_ehcp_req_outcome_date  IS NULL)
-
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
 
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_ehcp_assessment"}
+-- =============================================================================
+-- Description: Placeholder structure as source data not common|confirmed
+-- Author: D2I
+-- Version: 0.1
+-- Status: [P]laceholder
+-- Remarks: 
+-- Dependencies: 
+-- - Yet to be defined
+-- - ssd_person
+-- =============================================================================
 
-
-/* 
-=============================================================================
-Object Name: ssd_ehcp_assessment
-Description: Placeholder structure as source data not common|confirmed
-Author: D2I
-Version: 0.1
-Status: [P]laceholder
-Remarks: 
-Dependencies: 
-- Yet to be defined
-- ssd_person
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_ehcp_assessment';
 
 
 
--- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE ssd_ehcp_assessment ;
-IF OBJECT_ID('tempdb..#ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_assessment ;
-
-
--- Create ssd_ehcp_assessment table
-CREATE TABLE ssd_ehcp_assessment (
-    ehca_ehcp_assessment_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCA001A"}
+-- META-ELEMENT: {"type": "create_table"} 
+CREATE TABLE ssd_development.ssd_ehcp_assessment (
+    ehca_ehcp_assessment_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCA001A"}
     ehca_ehcp_request_id                    NVARCHAR(48),               -- metadata={"item_ref":"EHCA002A"}
     ehca_ehcp_assessment_outcome_date       DATETIME,                   -- metadata={"item_ref":"EHCA003A"}
     ehca_ehcp_assessment_outcome            NVARCHAR(100),              -- metadata={"item_ref":"EHCA004A"}
@@ -5262,63 +3907,29 @@ CREATE TABLE ssd_ehcp_assessment (
 );
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    -- Applied post-object creation/end of extract 
-
-    -- Create index(es)
-
-END
-
-
--- -- Insert placeholder data
--- INSERT INTO ssd_ehcp_assessment (ehca_ehcp_assessment_id, ehca_ehcp_request_id, ehca_ehcp_assessment_outcome_date, ehca_ehcp_assessment_outcome, ehca_ehcp_assessment_exceptions)
--- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', 'SSD_PH', 'SSD_PH');
-
--- WHERE
---     (source_to_ehca_ehcp_assessment_outcome_date  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
---     OR source_to_ehca_ehcp_assessment_outcome_date  IS NULL)
 
 
 
+-- META-CONTAINER: {"type": "table", "name": "ssd_ehcp_named_plan"}
+-- =============================================================================
+-- Description: Placeholder structure as source data not common|confirmed
+-- Author: D2I
+-- Version: 0.1
+-- Status: [P]laceholder
+-- Remarks: 
+-- Dependencies: 
+-- - Yet to be defined
+-- - ssd_person
+-- =============================================================================
 
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_ehcp_named_plan 
-Description: Placeholder structure as source data not common|confirmed
-Author: D2I
-Version: 0.1
-Status: [P]laceholder
-Remarks: 
-Dependencies: 
-- Yet to be defined
-- ssd_person
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_ehcp_named_plan';
 
 
 
--- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE ssd_ehcp_named_plan;
-IF OBJECT_ID('tempdb..#ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_named_plan;
-
--- Create structure
-CREATE TABLE ssd_ehcp_named_plan (
-    ehcn_named_plan_id              NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCN001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_ehcp_named_plan (
+    ehcn_named_plan_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCN001A"}
     ehcn_ehcp_asmt_id               NVARCHAR(48),               -- metadata={"item_ref":"EHCN002A"}
     ehcn_named_plan_start_date      DATETIME,                   -- metadata={"item_ref":"EHCN003A"}
     ehcn_named_plan_ceased_date     DATETIME,                   -- metadata={"item_ref":"EHCN004A"}     
@@ -5327,86 +3938,38 @@ CREATE TABLE ssd_ehcp_named_plan (
 
 
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    -- Applied post-object creation/end of extract 
-
-    -- Create index(es)
-
-END
 
 
--- -- Insert placeholder data
--- INSERT INTO ssd_ehcp_named_plan (ehcn_named_plan_id, ehcn_ehcp_asmt_id, ehcn_named_plan_start_date, ehcn_named_plan_ceased_date, ehcn_named_plan_ceased_reason)
--- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01', '1900/01/01', 'SSD_PH');
+-- META-CONTAINER: {"type": "table", "name": "ssd_ehcp_active_plans"}
+-- =============================================================================
+-- Description: Placeholder structure as source data not common|confirmed
+-- Author: D2I
+-- Version: 0.1
+-- Status: [P]laceholder
+-- Remarks: 
+-- Dependencies: 
+-- - Yet to be defined
+-- - ssd_person
+-- =============================================================================
 
--- WHERE
---     (source_to_ehcn_named_plan_ceased_date  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
---     OR source_to_ehcn_named_plan_ceased_date  IS NULL)
-
--- [TESTING] Table added
-PRINT 'Table created: ' + @TableName;
-
-
-
-
-
-/* 
-=============================================================================
-Object Name: ssd_ehcp_active_plans
-Description: Placeholder structure as source data not common|confirmed
-Author: D2I
-Version: 0.1
-Status: [P]laceholder
-Remarks: 
-Dependencies: 
-- Yet to be defined
-- ssd_person
-=============================================================================
-*/
--- [TESTING] Create marker
+-- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_ehcp_active_plans';
 
 
 
--- Check if exists, & drop
-IF OBJECT_ID('ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE ssd_ehcp_active_plans  ;
-IF OBJECT_ID('tempdb..#ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_active_plans  ;
-
--- Create structure
-CREATE TABLE ssd_ehcp_active_plans (
-    ehcp_active_ehcp_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCP001A"}
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_ehcp_active_plans (
+    ehcp_active_ehcp_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCP001A"}
     ehcp_ehcp_request_id                NVARCHAR(48),               -- metadata={"item_ref":"EHCP002A"}
     ehcp_active_ehcp_last_review_date   DATETIME                    -- metadata={"item_ref":"EHCP003A"}
 );
 
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    -- Applied post-object creation/end of extract 
 
-    -- Create index(es)
-
-END
-
-
--- -- Insert placeholder data
--- INSERT INTO ssd_ehcp_active_plans (ehcp_active_ehcp_id, ehcp_ehcp_request_id, ehcp_active_ehcp_last_review_date)
--- VALUES ('SSD_PH', 'SSD_PH', '1900/01/01');
-
--- WHERE
---     (source_to_ehcp_active_ehcp_last_review_date  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
---     OR source_to_ehcp_active_ehcp_last_review_date IS NULL)
-
--- [TESTING] Table added
+-- META-ELEMENT: {"type": "test"}
 PRINT 'Table created: ' + @TableName;
 
 
+-- META-END
 
 
 /* End
@@ -5417,69 +3980,23 @@ PRINT 'Table created: ' + @TableName;
 
 
 
--- output for ref most recent/current ssd version and last update
-SELECT * FROM ssd_version_log WHERE is_current = 1;
+
+-- META-CONTAINER: {"type": "table", "name": "ssd_extract_log"}
+-- =============================================================================
+-- Description: Enable LA extract overview logging
+-- Author: D2I
+-- Version: 0.1
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - 
+-- =============================================================================
 
 
 
-/* ********************************************************************************************************** */
-/* Development clean up */
-
--- Get & print run time 
-SET @EndTime = GETDATE();
-PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) AS NVARCHAR(50)) + ' ms';
-
-
-/* ********************************************************************************************************** */
-
-
-/* Start
-
-        SSD Object Contraints
-
-        */
-
-IF @Run_SSD_As_Temporary_Tables = 0
-BEGIN
-    PRINT '' -- fail-safe entry for test runs where FK constraints are added/run seperately
-    
-    -- Add constraint(s)
-    ALTER TABLE ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
-    FOREIGN KEY (senn_active_ehcp_id) REFERENCES ssd_ehcp_active_plans(ehcp_active_ehcp_id);
-
-    -- Add constraint(s)
-    ALTER TABLE ssd_ehcp_active_plans ADD CONSTRAINT FK_ehcp_active_plans_requests
-    FOREIGN KEY (ehcp_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
-
-    -- Add constraint(s)
-    ALTER TABLE ssd_ehcp_named_plan ADD CONSTRAINT FK_ehcp_named_plan_assessment
-    FOREIGN KEY (ehcn_ehcp_asmt_id) REFERENCES ssd_ehcp_assessment(ehca_ehcp_assessment_id);
-
-    -- Add constraint(s)
-    ALTER TABLE ssd_ehcp_assessment ADD CONSTRAINT FK_ehcp_assessment_requests
-    FOREIGN KEY (ehca_ehcp_request_id) REFERENCES ssd_ehcp_requests(ehcr_ehcp_request_id);
-
-    -- Add constraint(s)
-    ALTER TABLE ssd_ehcp_requests ADD CONSTRAINT FK_ehcp_requests_send
-    FOREIGN KEY (ehcr_send_table_id) REFERENCES ssd_send(send_table_id);
-END
-
-
-
-
-/* Start
-
-        SSD Extract Logging
-        */
-
-
--- Check if exists, & drop
-IF OBJECT_ID('ssd_extract_log', 'U') IS NOT NULL DROP TABLE ssd_extract_log;
-IF OBJECT_ID('tempdb..#ssd_extract_log', 'U') IS NOT NULL DROP TABLE #ssd_extract_log;
-
--- Create logging structure
-CREATE TABLE ssd_extract_log (
-    table_name           NVARCHAR(255),     
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE ssd_development.ssd_extract_log (
+    table_name           NVARCHAR(255) PRIMARY KEY,     
     schema_name          NVARCHAR(255),
     status               NVARCHAR(50), -- status code includes error output + schema.table_name
     rows_inserted        INT,
@@ -5494,6 +4011,8 @@ CREATE TABLE ssd_extract_log (
     error_message        NVARCHAR(MAX)  -- on hold|future use, e.g. errors encountered during the process
 );
 
+
+-- META-ELEMENT: {"type": "insert_data"} 
 -- GO
 -- Ensure all variables are declared correctly
 DECLARE @row_count          INT;
@@ -5506,77 +4025,76 @@ DECLARE @pk_datatype        NVARCHAR(255);
 DECLARE @additional_detail  NVARCHAR(MAX);
 DECLARE @error_message      NVARCHAR(MAX);
 DECLARE @table_name         NVARCHAR(255);
--- DECLARE @schema_name        NVARCHAR(255) = N'';                 -- Placeholder  schema name for all tables <OR> empty string
-
+DECLARE @sql                NVARCHAR(MAX) = N'';   
 
 
 -- Placeholder for table_cursor selection logic
 DECLARE table_cursor CURSOR FOR
-SELECT 'ssd_version_log'             UNION ALL -- Admin table, not SSD
-SELECT 'ssd_person'                  UNION ALL
-SELECT 'ssd_family'                  UNION ALL
-SELECT 'ssd_address'                 UNION ALL
-SELECT 'ssd_disability'              UNION ALL
-SELECT 'ssd_immigration_status'      UNION ALL
-SELECT 'ssd_mother'                  UNION ALL
-SELECT 'ssd_legal_status'            UNION ALL
-SELECT 'ssd_contacts'                UNION ALL
-SELECT 'ssd_early_help_episodes'     UNION ALL
-SELECT 'ssd_cin_episodes'            UNION ALL
-SELECT 'ssd_cin_assessments'         UNION ALL
-SELECT 'ssd_assessment_factors'      UNION ALL
-SELECT 'ssd_cin_plans'               UNION ALL
-SELECT 'ssd_cin_visits'              UNION ALL
-SELECT 'ssd_s47_enquiry'             UNION ALL
-SELECT 'ssd_initial_cp_conference'   UNION ALL
-SELECT 'ssd_cp_plans'                UNION ALL
-SELECT 'ssd_cp_visits'               UNION ALL
-SELECT 'ssd_cp_reviews'              UNION ALL
-SELECT 'ssd_cla_episodes'            UNION ALL
-SELECT 'ssd_cla_convictions'         UNION ALL
-SELECT 'ssd_cla_health'              UNION ALL
-SELECT 'ssd_cla_immunisations'       UNION ALL
-SELECT 'ssd_cla_substance_misuse'    UNION ALL
-SELECT 'ssd_cla_placement'           UNION ALL
-SELECT 'ssd_cla_reviews'             UNION ALL
-SELECT 'ssd_cla_previous_permanence' UNION ALL
-SELECT 'ssd_cla_care_plan'           UNION ALL
-SELECT 'ssd_cla_visits'              UNION ALL
-SELECT 'ssd_sdq_scores'              UNION ALL
-SELECT 'ssd_missing'                 UNION ALL
-SELECT 'ssd_care_leavers'            UNION ALL
-SELECT 'ssd_permanence'              UNION ALL
-SELECT 'ssd_professionals'           UNION ALL
-SELECT 'ssd_department'              UNION ALL
-SELECT 'ssd_involvements'            UNION ALL
-SELECT 'ssd_linked_identifiers'      UNION ALL
-SELECT 'ssd_s251_finance'            UNION ALL
-SELECT 'ssd_voice_of_child'          UNION ALL
-SELECT 'ssd_pre_proceedings'         UNION ALL
-SELECT 'ssd_send'                    UNION ALL
-SELECT 'ssd_sen_need'                UNION ALL
-SELECT 'ssd_ehcp_requests'           UNION ALL
-SELECT 'ssd_ehcp_assessment'         UNION ALL
-SELECT 'ssd_ehcp_named_plan'         UNION ALL
-SELECT 'ssd_ehcp_active_plans';
+SELECT 'ssd_development.ssd_version_log'             UNION ALL -- Admin table, not SSD
+SELECT 'ssd_development.ssd_person'                  UNION ALL
+SELECT 'ssd_development.ssd_family'                  UNION ALL
+SELECT 'ssd_development.ssd_address'                 UNION ALL
+SELECT 'ssd_development.ssd_disability'              UNION ALL
+SELECT 'ssd_development.ssd_immigration_status'      UNION ALL
+SELECT 'ssd_development.ssd_mother'                  UNION ALL
+SELECT 'ssd_development.ssd_legal_status'            UNION ALL
+SELECT 'ssd_development.ssd_contacts'                UNION ALL
+SELECT 'ssd_development.ssd_early_help_episodes'     UNION ALL
+SELECT 'ssd_development.ssd_cin_episodes'            UNION ALL
+SELECT 'ssd_development.ssd_cin_assessments'         UNION ALL
+SELECT 'ssd_development.ssd_assessment_factors'      UNION ALL
+SELECT 'ssd_development.ssd_cin_plans'               UNION ALL
+SELECT 'ssd_development.ssd_cin_visits'              UNION ALL
+SELECT 'ssd_development.ssd_s47_enquiry'             UNION ALL
+SELECT 'ssd_development.ssd_initial_cp_conference'   UNION ALL
+SELECT 'ssd_development.ssd_cp_plans'                UNION ALL
+SELECT 'ssd_development.ssd_cp_visits'               UNION ALL
+SELECT 'ssd_development.ssd_cp_reviews'              UNION ALL
+SELECT 'ssd_development.ssd_cla_episodes'            UNION ALL
+SELECT 'ssd_development.ssd_cla_convictions'         UNION ALL
+SELECT 'ssd_development.ssd_cla_health'              UNION ALL
+SELECT 'ssd_development.ssd_cla_immunisations'       UNION ALL
+SELECT 'ssd_development.ssd_cla_substance_misuse'    UNION ALL
+SELECT 'ssd_development.ssd_cla_placement'           UNION ALL
+SELECT 'ssd_development.ssd_cla_reviews'             UNION ALL
+SELECT 'ssd_development.ssd_cla_previous_permanence' UNION ALL
+SELECT 'ssd_development.ssd_cla_care_plan'           UNION ALL
+SELECT 'ssd_development.ssd_cla_visits'              UNION ALL
+SELECT 'ssd_development.ssd_sdq_scores'              UNION ALL
+SELECT 'ssd_development.ssd_missing'                 UNION ALL
+SELECT 'ssd_development.ssd_care_leavers'            UNION ALL
+SELECT 'ssd_development.ssd_permanence'              UNION ALL
+SELECT 'ssd_development.ssd_professionals'           UNION ALL
+SELECT 'ssd_development.ssd_department'              UNION ALL
+SELECT 'ssd_development.ssd_involvements'            UNION ALL
+SELECT 'ssd_development.ssd_linked_identifiers'      UNION ALL
+SELECT 'ssd_development.ssd_s251_finance'            UNION ALL
+SELECT 'ssd_development.ssd_voice_of_child'          UNION ALL
+SELECT 'ssd_development.ssd_pre_proceedings'         UNION ALL
+SELECT 'ssd_development.ssd_send'                    UNION ALL
+SELECT 'ssd_development.ssd_sen_need'                UNION ALL
+SELECT 'ssd_development.ssd_ehcp_requests'           UNION ALL
+SELECT 'ssd_development.ssd_ehcp_assessment'         UNION ALL
+SELECT 'ssd_development.ssd_ehcp_named_plan'         UNION ALL
+SELECT 'ssd_development.ssd_ehcp_active_plans';
 
 -- Define placeholder tables
 DECLARE @ssd_placeholder_tables TABLE (table_name NVARCHAR(255));
 INSERT INTO @ssd_placeholder_tables (table_name)
 VALUES
-    ('ssd_send'),
-    ('ssd_sen_need'),
-    ('ssd_ehcp_requests'),
-    ('ssd_ehcp_assessment'),
-    ('ssd_ehcp_named_plan'),
-    ('ssd_ehcp_active_plans');
+    ('ssd_development.ssd_send'),
+    ('ssd_development.ssd_sen_need'),
+    ('ssd_development.ssd_ehcp_requests'),
+    ('ssd_development.ssd_ehcp_assessment'),
+    ('ssd_development.ssd_ehcp_named_plan'),
+    ('ssd_development.ssd_ehcp_active_plans');
 
 DECLARE @dfe_project_placeholder_tables TABLE (table_name NVARCHAR(255));
 INSERT INTO @dfe_project_placeholder_tables (table_name)
 VALUES
-    ('ssd_s251_finance'),
-    ('ssd_voice_of_child'),
-    ('ssd_pre_proceedings');
+    ('ssd_development.ssd_s251_finance'),
+    ('ssd_development.ssd_voice_of_child'),
+    ('ssd_development.ssd_pre_proceedings');
 
 -- Open table cursor
 OPEN table_cursor;
@@ -5683,7 +4201,7 @@ BEGIN
         END
 
         -- insert log entry 
-        INSERT INTO ssd_extract_log (
+        INSERT INTO ssd_development.ssd_extract_log (
             table_name, 
             schema_name, 
             status, 
@@ -5702,7 +4220,7 @@ BEGIN
         -- log any error (this only an indicator of possible issue)
         -- tricky 
         SET @error_message = ERROR_MESSAGE();
-        INSERT INTO ssd_extract_log (
+        INSERT INTO ssd_development.ssd_extract_log (
             table_name, 
             schema_name, 
             status, 
@@ -5728,154 +4246,22 @@ DEALLOCATE table_cursor;
 
 SET @sql = N'';
 
+
+
+
+
+-- META-ELEMENT: {"type": "console_output"}
 -- Forming part of the extract admin results output
-SELECT * FROM ssd_extract_log ORDER BY rows_inserted DESC;
+SELECT * FROM ssd_development.ssd_extract_log ORDER BY rows_inserted DESC;
 
 
+-- META-ELEMENT: {"type": "console_output"}
+-- Forming part of the extract admin results output
+SELECT * FROM ssd_development.ssd_extract_log ORDER BY rows_inserted DESC;
 
 
+-- META-CONTAINER: {"type": "table", "name": "involvements_history"}
+-- META-END
 
 
-/* Start
-
-        Non-SDD Bespoke extract mods
-        
-        Examples of how to build on the ssd with bespoke additional fields. These can be 
-        refreshed|incl. within the rebuild script and rebuilt at the same time as the SSD
-        Changes should be limited to additional, non-destructive enhancements that do not
-        alter the core structure of the SSD. 
-        */
-
-
-
-
--- /* 
--- =============================================================================
--- MOD Name: involvements history, involvements type history
--- Description: 
--- Author: D2I
--- Version: 0.2
---             0.1: involvement_history_json size change from 4000 to max fix trunc err 040724 RH
--- Status: [DT]ataTesting
--- Remarks: The addition of these MOD columns is overhead heavy. This is <especially> noticable 
---          on larger dimension versions of ssd_person (i.e. > 40k).
---          Recommend that this MOD is switched off during any test runs|peak-time extract runs
--- Dependencies: 
--- - FACT_INVOLVEMENTS
--- - ssd_person
--- =============================================================================
--- */
--- -- [TESTING] Create marker
--- SET @TableName = N' Involvement History';
--- PRINT 'Adding MOD: ' + @TableName;
-
--- ALTER TABLE ssd_person
--- ADD pers_involvement_history_json NVARCHAR(max),  -- Adjust data type as needed
---     pers_involvement_type_story NVARCHAR(1000);   -- Adjust data type as needed
-
--- GO -- ensure new cols ALTER TABLE completed prior to onward processing
--- -- All variables now reset, will require redeclaring if testing below in isolation
-
--- -- CTE for involvement history incl. worker data
--- WITH InvolvementHistoryCTE AS (
---     SELECT 
---         fi.DIM_PERSON_ID,
---         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.DIM_WORKER_ID END)                          AS CurrentWorkerID,
---         MAX(CASE WHEN fi.RecentInvolvement = 'CW'       THEN fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC END)    AS AllocatedTeam,
---         MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'   THEN fi.DIM_WORKER_ID END)                          AS PersonalAdvisorID,
-
---         JSON_QUERY((
---             -- structure of the main|complete invovements history json 
---             SELECT 
---                 ISNULL(fi2.FACT_INVOLVEMENTS_ID, '')              AS INVOLVEMENT_ID,
---                 ISNULL(fi2.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '')  AS INVOLVEMENT_TYPE_CODE,
---                 ISNULL(fi2.START_DTTM, '')                        AS START_DATE, 
---                 ISNULL(fi2.END_DTTM, '')                          AS END_DATE, 
---                 ISNULL(fi2.DIM_WORKER_ID, '')                     AS WORKER_ID, 
---                 ISNULL(fi2.DIM_DEPARTMENT_ID, '')                 AS DEPARTMENT_ID
---             FROM 
---                 HDM.Child_Social.FACT_INVOLVEMENTS fi2
---             WHERE 
---                 fi2.DIM_PERSON_ID = fi.DIM_PERSON_ID
-
---             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
---             -- rem WITHOUT_ARRAY_WRAPPER if restricting FULL contact history in _json (involvement_history_json)
---         )) AS involvement_history
---     FROM (
-
---         -- commented out to enable FULL contact history in _json (involvement_history_json). Re-enable if wanting only most recent/1
---         SELECT *,
---             -- ROW_NUMBER() OVER (
---             --     PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
---             --     ORDER BY FACT_INVOLVEMENTS_ID DESC
---             -- ) AS rn,
---             -- only applied if the following fi.rn = 1 is uncommented
-
---             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
---         FROM HDM.Child_Social.FACT_INVOLVEMENTS
---         WHERE 
---             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS') 
---             -- AND END_DTTM IS NULL -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
---             AND DIM_WORKER_ID IS NOT NULL       -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
---             AND DIM_WORKER_ID <> -1             -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
---             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
---                                                 -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
---     ) fi
-
--- WHERE 
---     -- -- Commented out to enable FULL contact history in _json (involvement_history_json). Re-enable if wanting only most recent/1
---     -- fi.rn = 1
---     -- AND
-
---     EXISTS (    -- Remove filter IF wishing to extract records beyond scope of SSD timeframe
---         SELECT 1 FROM ssd_person p
---          WHERE CAST(p.pers_person_id AS INT) = fi.DIM_PERSON_ID -- #DtoI-1799
-
---     )
-
---     GROUP BY 
---         fi.DIM_PERSON_ID
--- ),
--- -- CTE for involvement type story
--- InvolvementTypeStoryCTE AS (
---     SELECT 
---         fi.DIM_PERSON_ID,
---         STUFF((
---             -- Concat involvement type codes into string
---             -- cannot use STRING AGG as appears to not work (Needs v2017+)
---             SELECT CONCAT(',', '"', fi3.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE, '"')
---             FROM HDM.Child_Social.FACT_INVOLVEMENTS fi3
---             WHERE fi3.DIM_PERSON_ID = fi.DIM_PERSON_ID
-
---             AND EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
---                 SELECT 1 FROM ssd_person p
---              WHERE CAST(p.pers_person_id AS INT) = fi3.DIM_PERSON_ID -- #DtoI-1799
-
---             )
-
---             ORDER BY fi3.FACT_INVOLVEMENTS_ID DESC
---             FOR XML PATH('')
---         ), 1, 1, '') AS InvolvementTypeStory
---     FROM 
---         HDM.Child_Social.FACT_INVOLVEMENTS fi
-    
---     WHERE 
---         EXISTS (    -- Remove this filter IF wishing to extract records beyond scope of SSD timeframe
---             SELECT 1 FROM ssd_person p
---              WHERE CAST(p.pers_person_id AS INT) = fi.DIM_PERSON_ID -- #DtoI-1799
-             
---         )
---     GROUP BY 
---         fi.DIM_PERSON_ID
--- )
-
-
--- -- Update
--- UPDATE p
--- SET
---     p.pers_involvement_history_json = ih.involvement_history,
---     p.pers_involvement_type_story = CONCAT('[', its.InvolvementTypeStory, ']')
--- FROM ssd_person p
--- LEFT JOIN InvolvementHistoryCTE ih ON CAST(p.pers_person_id AS INT) = ih.DIM_PERSON_ID -- #DtoI-1799
--- LEFT JOIN InvolvementTypeStoryCTE its ON CAST(p.pers_person_id AS INT) = its.DIM_PERSON_ID; -- #DtoI-1799
 

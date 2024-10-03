@@ -1,0 +1,96 @@
+825:
+  la_code: 825
+  la_name: Buckinghamshire
+  deployment_system:
+    cms: SystemC
+    cms_db: SQLServer[D]
+    db_vers: null
+    db_compatibility: null
+    ics_universe_vers: null
+    data_warehouse_vers: null
+    front_end_vers: null
+  config_metadata:
+    last_updated: 2024-09-25
+    version: 1.0
+    updated_by: rharrison
+    change_description: null
+    approved_by: null
+    documentation_link: https://data-to-insight.github.io/ssd-data-model
+  header:
+    header_text: |
+      *********************************************************************************************************
+      STANDARD SAFEGUARDING DATASET EXTRACT
+      https://data-to-insight.github.io/ssd-data-model/
+      We strongly recommend that initial pilot/trials of SSD scripts occur in a development|test environment.
+      The SQL script is non-destructive. SSD clean-up scripts are available seperately, these are destructive.
+      *********************************************************************************************************
+  settings:
+    extract_parameters:
+      ssd_timeframe_years: 5
+      ssd_sub1_range_years: 1
+    persistent_ssd:
+      deploy_temp_tables: false
+      temp_table_prefix: null
+    dbschema:
+      database_name: HDM_Local
+      schema_name: null
+    dev_setup:
+      no_count_on: false
+  global_sql_tag_remove:
+    remove_drop_table: true
+    remove_insert_data: false
+    remove_test: true
+    remove_console: false
+    remove_deployment_status_note: true
+    remove_ssd_non_core_modifications: true
+    remove_create_pk: false
+    remove_create_fk: false
+    remove_create_idx: false
+  named_sql_container_remove:
+  - involvements_history
+  named_sql_tag_remove:
+    remove_drop_table:
+    - null
+    remove_create_table:
+    - null
+    remove_insert_data:
+    - ssd_ehcp_active_plans
+    - ssd_ehcp_named_plan
+    - ssd_ehcp_assessment
+    - ssd_ehcp_requests
+    - ssd_sen_need
+    - pre_proceedings
+    - ssd_voice_of_child
+    - ssd_s251_finance
+    remove_create_pk:
+    - null
+    remove_create_fk:
+     - ssd_ehcp_active_plans
+     - ssd_ehcp_named_plan
+     - ssd_ehcp_assessment
+     - ssd_ehcp_requests
+     - ssd_sen_need
+     - pre_proceedings
+     - ssd_voice_of_child
+     - ssd_s251_finance
+     - ssd_cla_visits
+     - ssd_cp_visits
+     - ssd_cp_reviews
+    remove_create_idx:
+    - ssd_ehcp_active_plans
+    - ssd_ehcp_named_plan
+    - ssd_ehcp_assessment
+    - ssd_ehcp_requests
+    - ssd_sen_need
+    - pre_proceedings
+    - ssd_voice_of_child
+    - ssd_s251_finance
+  extract_sql_custom_la:
+   customise_db_schema:
+    - ssd_item_ref: null
+      ssd_table: null
+      ssd_item_field_name: null
+      la_field_name: null
+      la_table_name: null
+      la_datatype: null
+      la_datatype_size: null
