@@ -32,8 +32,9 @@
       deploy_temp_tables: false
       temp_table_prefix: null
     dbschema:
-      database_name: HDM_Local
-      schema_name: null
+      data_source_schema: HDM.Child_Social 
+      deployment_database_name: HDM_Local
+      deployment_schema_name: null
     dev_setup:
       no_count_on: false
   global_sql_tag_remove:
@@ -59,7 +60,7 @@
     - ssd_ehcp_assessment
     - ssd_ehcp_requests
     - ssd_sen_need
-    - pre_proceedings
+    - ssd_pre_proceedings
     - ssd_voice_of_child
     - ssd_s251_finance
     remove_create_pk:
@@ -70,23 +71,31 @@
      - ssd_ehcp_assessment
      - ssd_ehcp_requests
      - ssd_sen_need
-     - pre_proceedings
+     - ssd_pre_proceedings
      - ssd_voice_of_child
      - ssd_s251_finance
+     - ssd_cla_reviews
+     - ssd_cla_previous_permanence
+     - ssd_cla_visits
+     - ssd_sdq_scores
+     - ssd_care_leavers
+     - ssd_permanence
+     - ssd_cp_visits
+     - ssd_cp_reviews
     remove_create_idx:
     - ssd_ehcp_active_plans
     - ssd_ehcp_named_plan
     - ssd_ehcp_assessment
     - ssd_ehcp_requests
     - ssd_sen_need
-    - pre_proceedings
+    - ssd_pre_proceedings
     - ssd_voice_of_child
     - ssd_s251_finance
   extract_sql_custom_la:
    customise_db_schema:
     - ssd_item_ref: null
       ssd_table: null
-      ssd_field_name: null
+      ssd_item_field_name: null
       la_field_name: null
       la_table_name: null
       la_datatype: null

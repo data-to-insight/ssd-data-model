@@ -13,8 +13,8 @@ def process_dbschema_block(block_lines, dbschema_settings):
     processed_lines = []
     
     # Get database and schema names from yaml config
-    database_name = dbschema_settings.get('database_name')
-    schema_name = dbschema_settings.get('schema_name')
+    database_name = dbschema_settings.get('deployment_database_name')
+    schema_name = dbschema_settings.get('deployment_schema_name')
 
     print(f"dbschema_settings: {dbschema_settings}")  # Debugging the config data
 
@@ -32,17 +32,22 @@ def process_dbschema_block(block_lines, dbschema_settings):
     for line in block_lines:
         normalised_line = whitespace_normaliser.sub(" ", line.strip().lower())
 
-        # Debugging to ensure lines are being processed correctly
-        print(f"Processing line: {line.strip()}")
+        
+        # print(f"Processing line: {line.strip()}") # Debugging 
 
         # Locate and set database name from yml, but only replace once
         if "use " in normalised_line and database_name and not db_name_replaced:
-            print(f"Replacing USE with {database_name}")
+            print(f"Replacing DB/TABLE_CATALOG with : {database_name}") # Debugging 
             line = f"USE {database_name};\n"
             db_name_replaced = True
 
         elif "declare @schema_name" in normalised_line and not schema_name_replaced:
-            print(f"Replacing schema_name with {schema_name}")
+            if schema_name:
+                print(f"Replacing schema_name with : '{schema_name}'") # debugging
+            else:
+                # print("No schema_name provided, using default or empty schema.") # debugging
+                pass
+
             line = f"DECLARE @schema_name NVARCHAR(128) = '{schema_name}';\n"
             schema_name_replaced = True
 
@@ -53,7 +58,7 @@ def process_dbschema_block(block_lines, dbschema_settings):
 
         processed_lines.append(line)
 
-    print(f"Processed dbschema block: {processed_lines}")  # Final debug output of processed block
+    # print(f"Processed dbschema block: {processed_lines}")  # Final # Debugging output of processed block
     return processed_lines
 
 
@@ -226,48 +231,6 @@ def process_settings_block(block_lines, la_config):
     return processed_lines
 
 
-
-# def process_remove_blocks(block_lines, block_type, remove_objects, global_remove_flags, block_name=None):
-#     """
-#     process and remove blocks based on global and named removal flags from config.
-#     """
-#     processed_lines = []
-#     remove_block = False
-
-#     # ensure remove_objects is dictionary, even if None
-#     if remove_objects is None:
-#         remove_objects = {}
-
-#     # debug: print block type, block name, and global removal flag status
-#     #print(f"checking block: type = '{block_type}', name = '{block_name}'")
-#     #print(f"global removal flag for '{block_type}': {global_remove_flags.get(f'remove_{block_type}', False)}")
-
-#     # check if block type set for global removal
-#     if global_remove_flags.get(f'remove_{block_type}', False):
-#         remove_block = True
-#         #print(f"globally removing all {block_type} blocks.")
-
-#     # check for named object removal based on yaml config
-#     remove_list = remove_objects.get(f'remove_{block_type}', [])
-#     remove_list = [item for item in remove_list if item]  # remove empty values
-#     #print(f"remove list for block type {block_type}: {remove_list}")
-
-#     # check for local (named) removal
-#     if not remove_block and block_name and isinstance(remove_list, list):
-#         if block_name in remove_list:
-#             remove_block = True
-#             #print(f"locally removing {block_type} block for: {block_name}")
-
-#     # retain or remove the entire block (multi-line)
-#     if not remove_block:
-#         processed_lines.extend(block_lines)
-#     else:
-#         pass
-#         # print(f"block '{block_type}' for {block_name} is being removed.")
-
-#     return processed_lines
-
-
 def process_remove_blocks(block_lines, block_type, remove_objects, global_remove_flags, block_name=None):
     """
     Process and remove blocks based on global and named removal flags from config.
@@ -285,6 +248,7 @@ def process_remove_blocks(block_lines, block_type, remove_objects, global_remove
     # print(f"Global removal flag for '{block_type}': {global_remove_flags.get(f'remove_{block_type}', False)}")
 
     # Check if block type is set for global removal
+    # this being flags set to true within yml global_sql_tag_remove: 
     if global_remove_flags.get(f'remove_{block_type}', False):
         remove_block = True
         # print(f"Globally removing all {block_type} blocks.")
@@ -307,6 +271,7 @@ def process_remove_blocks(block_lines, block_type, remove_objects, global_remove
         # print(f"Block '{block_type}' for {block_name} is being removed.")
         pass
 
+
     # Handle the specific case of console_output
     if block_type == 'console_output':
         if global_remove_flags.get('remove_console', False):
@@ -319,41 +284,6 @@ def process_remove_blocks(block_lines, block_type, remove_objects, global_remove
 
     return processed_lines
 
-
-
-
-# def process_persistent_ssd_block(block_lines, persistent_ssd_settings):
-#     """
-#     process and modify persistent_ssd block based on deploy_temp_tables config.
-#     """
-#     processed_lines = []
-
-#     # from yaml config, default true(use temp tables) if not found
-#     use_temp_tables = persistent_ssd_settings.get('deploy_temp_tables', True)
-
-#     whitespace_normaliser = re.compile(r"\s+")
-#     found_ssd_line = False  
-
-
-#     for line in block_lines:
-
-#         normalised_line = whitespace_normaliser.sub(" ", line.strip())
-
-#         # check if line contains @Run_SSD_As_Temporary_Tables variable
-#         if "SET @Run_SSD_As_Temporary_Tables" in normalised_line:
-#             found_ssd_line = True
-#             temp_value = 1 if use_temp_tables else 0
-#             line = f"SET     @Run_SSD_As_Temporary_Tables = {temp_value};\n"
-#             #print(f"modified line to: {line}")  # debugging: confirm line modified
-
-
-#         processed_lines.append(line)
-
-#     # if core flag command not found, warn
-#     if not found_ssd_line:
-#         print("warning: SET @Run_SSD_As_Temporary_Tables not found in block.")
-
-#     return processed_lines
 
 
 
@@ -464,6 +394,7 @@ def extract_meta_blocks(lines):
 
 
 
+
 def extract_meta_blocks_with_children(lines):
     """
     Extract meta-container (parent) and m-element (child/sub) blocks from SQL lines.
@@ -478,11 +409,17 @@ def extract_meta_blocks_with_children(lines):
     for line in lines:
         # Detect start of meta-container using -- META-CONTAINER
         if '-- META-CONTAINER:' in line:
+            # Save the previous parent and its child blocks, if any
             if current_block:
+                child_blocks.append((current_meta_info, current_block))
                 parent_blocks.append((current_parent_name, child_blocks))
+                print(f"Appending parent block: {current_parent_name} with children: {len(child_blocks)}")  # Debug
+
+            # Reset the current block and child blocks
             current_block = []
             child_blocks = []
-            # Get JSON meta info for container
+            
+            # Get JSON meta info for the container
             meta_str = re.search(r'-- META-CONTAINER: ({.*?})', line).group(1)
             current_meta_info = json.loads(meta_str)
             current_parent_name = current_meta_info.get("name", "")
@@ -493,12 +430,15 @@ def extract_meta_blocks_with_children(lines):
         # Detect start of meta-elements (e.g., -- META-ELEMENT: {"type": "create_table"} or dbschema)
         elif '-- META-ELEMENT:' in line:
             if current_block:
+                # Append the previous element to the child blocks
                 child_blocks.append((current_meta_info, current_block))
-            current_block = []
-            # Get JSON meta info for meta-element
+                # print(f"Appending child block: {current_meta_info}")  # Debugging child block append
+                current_block = []
+
+            # Get JSON meta info for the meta-element
             meta_str = re.search(r'-- META-ELEMENT: ({.*?})', line).group(1)
             current_meta_info = json.loads(meta_str)
-            print(f"Detected META-ELEMENT: {current_meta_info}")  # Debugging the detected meta-element
+            # print(f"Detected META-ELEMENT: {current_meta_info}")  # Debugging the detected meta-element
             in_meta_block = True
             current_block.append(line)
 
@@ -511,91 +451,15 @@ def extract_meta_blocks_with_children(lines):
             if current_block:
                 current_block.append(line)
 
-    # Append any remaining meta-container block
+    # Append any remaining meta-container block at the end of the file
     if current_block:
         child_blocks.append((current_meta_info, current_block))
         parent_blocks.append((current_parent_name, child_blocks))
+        # print(f"Final append parent block: {current_parent_name} with children: {len(child_blocks)}")  # Debugging
 
     return parent_blocks
 
 
-
-# def process_parent_block(parent_name, child_blocks, named_sql_tag_remove, global_sql_tag_remove, la_config):
-#     """
-#     process m-elements(chil|sub) within a meta-container(parent), applying global and named object|table removals
-#     """
-#     processed_lines = []
-
-#     # get relevant configs from yaml
-
-#     # root yml blocks
-#     la_code = la_config.get('la_code', {})
-#     la_name = la_config.get('la_name', {})
-#     deployment_system_settings = la_config.get('deployment_system', {})
-#     config_metadata = la_config.get('config_metadata', {})
-#     header_settings = la_config.get('header', {})
-#     # sub yml elements
-#     extract_parameters = la_config.get('settings', {}).get('extract_parameters', {})
-#     temp_table_settings = la_config.get('settings', {}).get('persistent_ssd', {})
-#     dbschema_settings = la_config.get('settings', {}).get('dbschema', {})
-#     dev_setup_settings = la_config.get('settings', {}).get('dev_setup', {})
-
-#     # debugging: ensure named_sql_tag_remove is populated correctly (if any named)
-#     # print(f"Named SQL Tag Remove in process_parent_block: {named_sql_tag_remove}")
-
-#     # process each m-element within meta-container
-#     for meta_info, block_lines in child_blocks:
-#         block_type = meta_info.get("type", "")
-#         block_name = meta_info.get("name", parent_name)  # inherit meta-container name if block_name is None
-
-#         # debugging: print block type and name being processed
-#         print(f"Processing m-element: {block_type}, within meta-container name: {block_name}")
-
-#         # normalise block type
-#         normalised_block_type = block_type.lower().strip()
-#         if block_name == "extract_settings":
-#             print("************************************************************")
-
-#         # call process_remove_blocks to handle global and named removals for all block types
-#         processed_block = process_remove_blocks(block_lines, normalised_block_type, named_sql_tag_remove, global_sql_tag_remove, block_name)
-#         if not processed_block:
-#             # if block was removed (globally or locally), skip further processing
-#             continue
-
-#         # print(f"testing block_type: {processed_block}, {normalised_block_type}") # debug
-              
-#         # process core (settings) blocks based on type
-#         if normalised_block_type == "header":
-#             processed_block = process_header_block(block_lines, header_settings)
-
-#         elif normalised_block_type == "ssd_timeframe":
-#             # defines ssd timeframe params agreed by la, default 5yrs
-#             processed_block = process_timeframe_block(block_lines, extract_parameters)
-
-#         # elif normalised_block_type == "persistent_ssd":
-#         #     # checks if la requested persistent ssd implementation or temp tables
-#         #     processed_block = process_persistent_ssd_block(block_lines, temp_table_settings)
-
-#         elif normalised_block_type == "dbschema":
-#             print("landed here")
-#             processed_block = process_dbschema_block(block_lines, dbschema_settings)
-
-#         elif normalised_block_type == "config_metadata":
-#             # includes details like config version, last updated. replaces full block
-#             processed_block = process_config_metadata_block(config_metadata)
-
-#         elif normalised_block_type == "deployment_system":
-#             processed_block = process_deployment_system_block(block_lines, deployment_system_settings, la_code, la_name)
-
-#         elif normalised_block_type == "dev_setup":
-#             processed_block = process_dev_setup_block(block_lines, dev_setup_settings)
-
-#         elif normalised_block_type == "settings":
-#             processed_block = process_settings_block(block_lines, la_config)  # handle settings block bespoke changes
-
-#         processed_lines.extend(processed_block)
-
-#     return processed_lines
 
 def process_parent_block(parent_name, child_blocks, named_sql_tag_remove, global_sql_tag_remove, la_config):
     """
@@ -611,31 +475,34 @@ def process_parent_block(parent_name, child_blocks, named_sql_tag_remove, global
     deployment_system_settings = la_config.get('deployment_system', {})
     config_metadata = la_config.get('config_metadata', {})
     header_settings = la_config.get('header', {})
+
     # sub yml elements
     extract_parameters = la_config.get('settings', {}).get('extract_parameters', {})
     temp_table_settings = la_config.get('settings', {}).get('persistent_ssd', {})
     dbschema_settings = la_config.get('settings', {}).get('dbschema', {})
     dev_setup_settings = la_config.get('settings', {}).get('dev_setup', {})
 
+
     # process each m-element within meta-container
     for meta_info, block_lines in child_blocks:
         block_type = meta_info.get("type", "")
         block_name = meta_info.get("name", parent_name)  # inherit meta-container name if block_name is None
 
-        # debugging: print block type and name being processed
-        print(f"Processing m-element: {block_type}, within meta-container name: {block_name}")
+        # print(f"Processing m-element: {block_type}, within meta-container name: {block_name}") # debugging
 
         # normalise block type
         normalised_block_type = block_type.lower().strip()
-        if block_name == "extract_settings":
-            print("************************************************************")
 
         # call process_remove_blocks to handle global and named removals for all block types
         processed_block = process_remove_blocks(block_lines, normalised_block_type, named_sql_tag_remove, global_sql_tag_remove, block_name)
+
+        # print(f"Block type before normalisation: '{block_type}', after normalization: '{normalised_block_type}'") # debugging
+
         if not processed_block:
             # if block was removed (globally or locally), skip further processing
-            print(f"Block {block_type} within {block_name} was removed.")
+            # print(f"Block {block_type} within {block_name} was removed.") # debugging
             continue
+        
 
         # process core (settings) blocks based on type
         if normalised_block_type == "header":
@@ -650,7 +517,6 @@ def process_parent_block(parent_name, child_blocks, named_sql_tag_remove, global
             processed_block = process_persistent_ssd_block(block_lines, temp_table_settings)
 
         elif normalised_block_type == "dbschema":
-            print(f"Processing dbschema block for {block_name}")
             processed_block = process_dbschema_block(block_lines, dbschema_settings)
 
         elif normalised_block_type == "config_metadata":
@@ -692,9 +558,9 @@ def process_bespoke_sql_for_la(sql_lines, la_config):
                 ssd_item_ref_map[ssd_item_ref] = []
             ssd_item_ref_map[ssd_item_ref].append(field)
 
-    # debug
-    # print(f"Bespoke Config Loaded: {bespoke_config}")
-    # print(f"Item Ref Map: {ssd_item_ref_map}")
+   
+    # print(f"Bespoke Config Loaded: {bespoke_config}") # debugging
+    # print(f"Item Ref Map: {ssd_item_ref_map}") # debugging
 
     # Updated regex to match the ssd_item_ref in the metadata of the SQL
     ssd_item_ref_regex = re.compile(r'-- metadata=\{.*?"item_ref":"(.*?)".*?\}')
@@ -781,21 +647,19 @@ def remove_primary_key_in_table(sql_lines, la_config):
         if table_container_match:
             current_table = table_container_match.group(1)
             inside_create_table = False  # Reset when a new table starts
-            # debug
-            # print(f"Detected table: {current_table}")
+            # print(f"Detected table: {current_table}") # debugging
         
         # Detect start of create_table block
         create_table_match = create_table_regex.search(line)
         if create_table_match and current_table in tables_to_remove_pk:
             inside_create_table = True  #  inside create_table block of specified table
-            # debug
-            # print(f"Removing primary key for table: {current_table}")
+            # print(f"Removing primary key for table: {current_table}")  # debugging
         
         # If inside create_table block of specified table, remove PK line
         if inside_create_table and 'PRIMARY KEY' in line:
             line = re.sub(r'\s+PRIMARY\s+KEY', '', line)  # Remove PRIMARY KEY def
             cleaned_line = re.sub(r'\s+', '', line.strip()) 
-            print(f"Removed primary key from table/line: {cleaned_line} for local authority {la_name}({la_id}).")
+            print(f"Removed primary key from table/line: {cleaned_line} for local authority {la_name}({la_id}).")  # debugging
         
         # If create_table block ends (closing parenthesis), stop processing for block
         if inside_create_table and line.strip() == ');':
@@ -827,7 +691,7 @@ def process_sql(la_config, master_sql_path, output_sql_path):
 
     # get config supplied schema (i.e. where the ssd tables created, if not temp# tables)
     schema_settings = la_config.get('settings', {}).get('dbschema', {})
-    schema_name = schema_settings.get('schema_name')
+    schema_name = schema_settings.get('deployment_schema_name')
 
     # treat any falsy value (None, "None", or "") as an empty string
     if not schema_name or schema_name == "None":
@@ -839,12 +703,18 @@ def process_sql(la_config, master_sql_path, output_sql_path):
         search_string = "ssd_development.ssd_" # look for table name def instances
         replace_string = "#ssd_"
         sql_lines = search_and_replace_in_sql(sql_lines, search_string, replace_string)
+        
+        search_string = "ssd_development.ssd_" # look for table name def instances
+        replace_string = "#ssd_"    
+        sql_lines = search_and_replace_in_sql(sql_lines, search_string, replace_string)
+
     else:
         search_string = "ssd_development.ssd_"  # look for table name def instances
         if schema_name:  # if schema_name exists, prepend it
             replace_string = f"{schema_name}.ssd_"
         else:  # otherwise, just remove the schema part, leaving 'ssd_'
             replace_string = "ssd_"
+
         sql_lines = search_and_replace_in_sql(sql_lines, search_string, replace_string)
 
 
@@ -861,7 +731,7 @@ def process_sql(la_config, master_sql_path, output_sql_path):
 
     processed_lines = []
 
-    # print(f"testing blocks:{parent_blocks}") # debug
+    # print(f"testing blocks:{parent_blocks}")  # debugging
 
     # process each meta-container block and its m-elements
     for parent_name, child_blocks in parent_blocks:
@@ -889,7 +759,7 @@ def process_yaml_files(yaml_directory):
 
     for yaml_file in yaml_files:
         # debug
-        # print(f"Processing file: {yaml_file}") 
+        # print(f"Processing file: {yaml_file}") # debugging
 
         try:
             yaml_config = load_yaml_config(os.path.join(yaml_directory, yaml_file))
@@ -905,11 +775,11 @@ def process_yaml_files(yaml_directory):
 
         # atm we are only processing bespoke extract sql for systemC LAs. [#CMS]
         if cms_value != 'systemc':
-            print(f"Skipping {yaml_file} due to mismatched CMS: {cms_value}")
+            print(f"Skipping {yaml_file} due to mismatched CMS: {cms_value}") # debugging
             continue
 
         if not all(k in la_config for k in ['la_code', 'la_name']):
-            print(f"Missing data in YAML file {yaml_file}")
+            print(f"Missing data in YAML file {yaml_file}") # debugging
             continue
 
         valid_configs.append(la_config)
@@ -930,9 +800,9 @@ def generate_sql_files(valid_configs, master_sql_path, output_directory, vers):
 
         output_file_name = f"{la_code}_{la_name}_{cms}_{cms_db}_{vers}.sql"
         output_sql_path = os.path.join(output_directory, output_file_name)
-        
-        process_sql(la_config, master_sql_path, output_sql_path)
-        print(f"Generated SQL file: {output_file_name}")
+        print(f"\n\n ************************Processing SQL file for: {la_name}|{la_code} ************************") # debugging
+        process_sql( la_config, master_sql_path, output_sql_path)
+        print(f" ************************ Generated SQL file: {output_file_name} ************************") # debugging
 
 
 
