@@ -296,14 +296,14 @@ CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender       ON ssd_person(pe
 -- Status: [R]elease
 -- Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 -- Dependencies: 
--- - FACT_CONTACTS
+-- - HDM.Child_Social.FACT_CONTACTS
 -- - ssd_person
 -- =============================================================================
 
 
 -- META-ELEMENT: {"type": "create_table"}
 CREATE TABLE ssd_family (
-    fami_table_id   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"FAMI003A"} 
+    fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"FAMI003A"} 
     fami_family_id  NVARCHAR(48),               -- metadata={"item_ref":"FAMI001A"}
     fami_person_id  NVARCHAR(48)                -- metadata={"item_ref":"FAMI002A"}
 );
@@ -315,12 +315,19 @@ INSERT INTO ssd_family (
     fami_family_id, 
     fami_person_id
     )
+
+
+
 SELECT 
     fc.EXTERNAL_ID                          AS fami_table_id,
     fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID      AS fami_family_id,
     fc.DIM_PERSON_ID                        AS fami_person_id
 
 FROM HDM.Child_Social.FACT_CONTACTS AS fc
+
+
+
+
 WHERE EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
@@ -350,7 +357,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id     ON ssd_family(fami_f
 -- Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 -- Dependencies: 
 -- - ssd_person
--- - DIM_PERSON_ADDRESS
+-- - HDM.Child_Social.DIM_PERSON_ADDRESS
 -- =============================================================================
 
 
@@ -440,7 +447,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_ssd_address_postcode  ON ssd_address(addr_addr
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_DISABILITY
+-- - HDM.Child_Social.FACT_DISABILITY
 -- =============================================================================
 
 
@@ -497,7 +504,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_disability_code       ON ssd_disability(disa_d
 --             increased field size to 100
 -- Dependencies:
 -- - ssd_person
--- - FACT_IMMIGRATION_STATUS
+-- - HDM.Child_Social.FACT_IMMIGRATION_STATUS
 -- =============================================================================
 
 
@@ -567,7 +574,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_immigration_status_end            ON ssd_immig
 -- Remarks: 
 -- Dependencies: 
 -- - @ssd_timeframe_years
--- - FACT_REFERRALS
+-- - HDM.Child_Social.FACT_REFERRALS
 -- =============================================================================
 
 
@@ -680,7 +687,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_cin_close_date                ON ssd_cin_episo
 -- Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_PERSON_RELATION
+-- - HDM.Child_Social.FACT_PERSON_RELATION
 -- =============================================================================
 
 
@@ -759,7 +766,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON ssd_mother(moth_childs_do
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_LEGAL_STATUS
+-- - HDM.Child_Social.FACT_LEGAL_STATUS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -830,7 +837,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end              ON ssd_legal_sta
 --         Contains safeguarding and referral to early help data.
 -- Dependencies: 
 -- - ssd_person
--- - FACT_CONTACTS
+-- - HDM.Child_Social.FACT_CONTACTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -917,7 +924,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_contact_source_code   ON ssd_contacts(cont_con
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_CAF_EPISODE
+-- - HDM.Child_Social.FACT_CAF_EPISODE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -999,9 +1006,9 @@ CREATE NONCLUSTERED INDEX idx_ssd_early_help_end_date               ON ssd_early
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_SINGLE_ASSESSMENT
--- - FACT_FORMS
--- - FACT_FORM_ANSWERS
+-- - HDM.Child_Social.FACT_SINGLE_ASSESSMENT
+-- - HDM.Child_Social.FACT_FORMS
+-- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1142,8 +1149,8 @@ CREATE NONCLUSTERED INDEX idx_ssd_cina_referral_id              ON ssd_cin_asses
 -- Dependencies: 
 -- - #ssd_TMP_PRE_assessment_factors (as staged pre-processing)
 -- - ssd_cin_assessments
--- - FACT_SINGLE_ASSESSMENT
--- - FACT_FORM_ANSWERS
+-- - HDM.Child_Social.FACT_SINGLE_ASSESSMENT
+-- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1261,8 +1268,8 @@ CREATE NONCLUSTERED INDEX idx_ssd_cinf_assessment_id ON ssd_assessment_factors(c
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_CARE_PLANS
--- - FACT_CARE_PLAN_SUMMARY
+-- - HDM.Child_Social.FACT_CARE_PLANS
+-- - HDM.Child_Social.FACT_CARE_PLAN_SUMMARY
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1366,7 +1373,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_cinp_referral_id          ON ssd_cin_plans(cin
 --                 --> when run for records in ssd_person c.64k records 29s runtime
 -- Dependencies:
 -- - ssd_person
--- - FACT_CASENOTES
+-- - HDM.Child_Social.FACT_CASENOTES
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1438,8 +1445,8 @@ CREATE NONCLUSTERED INDEX idx_ssd_cinv_cin_visit_date   ON ssd_cin_visits(cinv_c
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_S47
--- - FACT_CP_CONFERENCE
+-- - HDM.Child_Social.FACT_S47
+-- - HDM.Child_Social.FACT_CP_CONFERENCE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"} 
@@ -1532,9 +1539,9 @@ CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_referral_id   ON ssd_s47_enquiry(s
 -- Status: [R]elease
 -- Remarks:
 -- Dependencies:
--- - FACT_CP_CONFERENCE
--- - FACT_MEETINGS
--- - FACT_CP_PLAN
+-- - HDM.Child_Social.FACT_CP_CONFERENCE
+-- - HDM.Child_Social.FACT_MEETINGS
+-- - HDM.Child_Social.FACT_CP_PLAN
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1658,7 +1665,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_icpc_icpc_date        ON ssd_initial_cp_confer
 -- Dependencies:
 -- - ssd_person
 -- - ssd_initial_cp_conference
--- - FACT_CP_PLAN
+-- - HDM.Child_Social.FACT_CP_PLAN
 -- =============================================================================
 
 
@@ -1757,9 +1764,9 @@ CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_end_date ON ssd_cp_plans(cppl_cp_plan
 --          using casenote ID as PK and linking to CP Visit where available.
 --          Will have to use Person ID to link object to Person table
 -- Dependencies:
--- - FACT_CASENOTES
--- - FACT_CP_VISIT
 -- - ssd_person
+-- - HDM.Child_Social.FACT_CASENOTES
+-- - HDM.Child_Social.FACT_CP_VISIT
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1850,10 +1857,10 @@ CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_visit_date    ON ssd_cp_visits(cppv_cp
 -- Dependencies:
 -- - ssd_person
 -- - ssd_cp_plans
--- - FACT_CP_REVIEW
--- - FACT_MEETINGS
--- - FACT_MEETING_SUBJECTS
--- - FACT_FORM_ANSWERS [Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
+-- - HDM.Child_Social.FACT_CP_REVIEW
+-- - HDM.Child_Social.FACT_MEETINGS
+-- - HDM.Child_Social.FACT_MEETING_SUBJECTS
+-- - HDM.Child_Social.FACT_FORM_ANSWERS [Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
 -- =============================================================================
 
 
@@ -1963,10 +1970,10 @@ CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_meeting_id ON ssd_cp_reviews(cp
 -- Dependencies: 
 -- - ssd_involvements
 -- - ssd_person
--- - FACT_CLA
--- - FACT_REFERRALS
--- - FACT_CARE_EPISODES
--- - FACT_CASENOTES
+-- - HDM.Child_Social.FACT_CLA
+-- - HDM.Child_Social.FACT_REFERRALS
+-- - HDM.Child_Social.FACT_CARE_EPISODES
+-- - HDM.Child_Social.FACT_CASENOTES
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2165,7 +2172,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_clae_cla_placement_id ON ssd_cla_episodes(clae
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_OFFENCE
+-- - HDM.Child_Social.FACT_OFFENCE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2223,7 +2230,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_clac_conviction_date ON ssd_cla_convictions(cl
 --             to inprove readability.
 -- Dependencies:
 -- - ssd_person
--- - FACT_HEALTH_CHECK
+-- - HDM.Child_Social.FACT_HEALTH_CHECK
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2288,8 +2295,8 @@ CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_status ON ssd_cla_health(cla
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_CLA
--- - FACT_903_DATA [Depreciated]
+-- - HDM.Child_Social.FACT_CLA
+-- - HDM.Child_Social.FACT_903_DATA [Depreciated]
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2355,7 +2362,8 @@ CREATE NONCLUSTERED INDEX idx_ssd_clai_immunisations_status ON ssd_cla_immunisat
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_SUBSTANCE_MISUSE
+-- - HDM.Child_Social.ssd_person
+-- - HDM.Child_Social.FACT_SUBSTANCE_MISUSE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"} 
@@ -2416,8 +2424,8 @@ CREATE NONCLUSTERED INDEX idx_ssd_clas_substance_misuse_date ON ssd_cla_substanc
 -- Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
 -- Dependencies: 
 -- - ssd_person
--- - FACT_CLA_PLACEMENT
--- - FACT_CARE_EPISODES
+-- - HDM.Child_Social.FACT_CLA_PLACEMENT
+-- - HDM.Child_Social.FACT_CARE_EPISODES
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2517,10 +2525,11 @@ CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_type ON ssd_cla_placement(clap_
 -- Status: [R]elease
 -- Remarks: 
 -- Dependencies: 
+-- - ssd_person
 -- - ssd_cla_episodes
--- - FACT_CLA_REVIEW
--- - FACT_MEETING_SUBJECTS 
--- - FACT_MEETINGS
+-- - HDM.Child_Social.FACT_CLA_REVIEW
+-- - HDM.Child_Social.FACT_MEETING_SUBJECTS 
+-- - HDM.Child_Social.FACT_MEETINGS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2617,9 +2626,9 @@ CREATE NONCLUSTERED INDEX idx_ssd_clar_review_date ON ssd_cla_reviews(clar_cla_r
 --         time considerably, also filtered out rows where ANSWER IS NULL
 -- Dependencies:
 -- - ssd_person
--- - FACT_903_DATA [depreciated]
--- - FACT_FORMS
--- - FACT_FORM_ANSWERS
+-- - HDM.Child_Social.FACT_903_DATA [depreciated]
+-- - HDM.Child_Social.FACT_FORMS
+-- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"} 
@@ -2720,10 +2729,11 @@ CREATE NONCLUSTERED INDEX idx_ssd_lapp_previous_permanence_option ON ssd_cla_pre
 -- Remarks:    Added short codes to plan type questions to improve readability.
 --             Removed form type filter, only filtering ffa. on ANSWER_NO.
 -- Dependencies:
--- - FACT_CARE_PLANS
--- - FACT_FORMS
--- - FACT_FORM_ANSWERS
+-- - ssd_person
 -- - #ssd_TMP_PRE_cla_care_plan - Used to stage/prep most recent relevant form response
+-- - HDM.Child_Social.FACT_CARE_PLANS
+-- - HDM.Child_Social.FACT_FORMS
+-- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}   
@@ -2869,9 +2879,10 @@ CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_end_date ON ssd_cla_care_plan(l
 -- Status: [R]elease
 -- Remarks:
 -- Dependencies:
--- - FACT_CARE_EPISODES
--- - FACT_CASENOTES
--- - FACT_CLA_VISIT
+-- - ssd_person
+-- - HDM.Child_Social.FACT_CARE_EPISODES
+-- - HDM.Child_Social.FACT_CASENOTES
+-- - HDM.Child_Social.FACT_CLA_VISIT
 -- =============================================================================
 
  
@@ -2948,8 +2959,8 @@ CREATE NONCLUSTERED INDEX idx_ssd_clav_cla_id ON ssd_cla_visits(clav_cla_id);
 --         Removed PRIMARY KEY stipulation for csdq_table_id
 -- Dependencies:
 -- - ssd_person
--- - FACT_FORMS
--- - FACT_FORM_ANSWERS
+-- - HDM.Child_Social.FACT_FORMS
+-- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -3062,7 +3073,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_csdq_person_id ON ssd_sdq_scores(csdq_person_i
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_MISSING_PERSON
+-- - HDM.Child_Social.FACT_MISSING_PERSON
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -3159,11 +3170,11 @@ CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_accepted     ON ssd_missing(miss_miss
 --             clea_care_leaver_eligibility == LAC for 13wks+(since 14yrs)+LAC since 16yrs 
 
 -- Dependencies:
--- - FACT_INVOLVEMENTS
--- - FACT_CLA_CARE_LEAVERS
--- - DIM_CLA_ELIGIBILITY
--- - FACT_CARE_PLANS
 -- - ssd_person
+-- - HDM.Child_Social.FACT_INVOLVEMENTS
+-- - HDM.Child_Social.FACT_CLA_CARE_LEAVERS
+-- - HDM.Child_Social.DIM_CLA_ELIGIBILITY
+-- - HDM.Child_Social.FACT_CARE_PLANS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -3328,11 +3339,11 @@ CREATE NONCLUSTERED INDEX idx_ssd_clea_pathway_plan_review_date     ON ssd_care_
 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_ADOPTION
--- - FACT_CLA_PLACEMENT
--- - FACT_LEGAL_STATUS
--- - FACT_CARE_EPISODES
--- - FACT_CLA
+-- - HDM.Child_Social.FACT_ADOPTION
+-- - HDM.Child_Social.FACT_CLA_PLACEMENT
+-- - HDM.Child_Social.FACT_LEGAL_STATUS
+-- - HDM.Child_Social.FACT_CARE_EPISODES
+-- - HDM.Child_Social.FACT_CLA
 -- =============================================================================
 
 
@@ -3527,8 +3538,8 @@ CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date           ON ssd_permanence(pe
 -- - @CaseloadLastSept30th
 -- - @CaseloadTimeframeStartDate
 -- - @ssd_timeframe_years
--- - DIM_WORKER
--- - FACT_REFERRALS
+-- - HDM.Child_Social.DIM_WORKER
+-- - HDM.Child_Social.FACT_REFERRALS
 -- - ssd_cin_episodes (if counting caseloads within SSD timeframe)
 -- =============================================================================
 
@@ -3614,7 +3625,7 @@ CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON ssd_professionals
 -- Status: [T]est
 -- Remarks: 
 -- Dependencies: 
--- -
+-- - HDM.Child_Social.DIM_DEPARTMENT
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -3648,8 +3659,8 @@ WHERE dpt.dim_department_id <> -1;
 
 
 -- META-ELEMENT: {"type": "create_fk"} 
--- ALTER TABLE ssd_department ADD CONSTRAINT FK_ssd_dept_team_parent_id 
--- FOREIGN KEY (dept_team_parent_id) REFERENCES ssd_department(dept_team_id);
+ALTER TABLE ssd_department ADD CONSTRAINT FK_ssd_dept_team_parent_id 
+FOREIGN KEY (dept_team_parent_id) REFERENCES ssd_department(dept_team_id);
 
 -- META-ELEMENT: {"type": "create_idx"}
 CREATE INDEX idx_ssd_dept_team_id ON ssd_department (dept_team_id);
@@ -3676,8 +3687,8 @@ CREATE INDEX idx_ssd_dept_team_id ON ssd_department (dept_team_id);
 --                 COMMENTS contains the keyword %WORKER% or %ALLOC%.
 -- Dependencies:
 -- - ssd_person
--- - FACT_INVOLVEMENTS
 -- - ssd_departments (if obtaining team_name)
+-- - HDM.Child_Social.FACT_INVOLVEMENTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -3768,10 +3779,6 @@ CREATE NONCLUSTERED INDEX idx_ssd_invo_involvement_end_date     ON ssd_involveme
 CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id              ON ssd_involvements(invo_referral_id);
 
 
-
-
-    
-
 -- META-CONTAINER: {"type": "table", "name": "ssd_linked_identifiers"}
 -- =============================================================================
 -- Description: 
@@ -3796,7 +3803,9 @@ CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id              ON ssd_involveme
 --             To have any further codes agreed into the standard, issue a change request
 
 -- Dependencies: 
--- - Yet to be defined
+-- - Will be LA specific depending on systems/data being linked
+-- - ssd_person
+-- - HDM.Child_Social.DIM_PERSON
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -3985,9 +3994,9 @@ CREATE TABLE ssd_pre_proceedings (
 -- Remarks: Have temporarily disabled populating UPN & ULN as these access non-core
 --             CMS modules. Can be re-enabled on a localised basis. 
 -- Dependencies: 
--- - FACT_903_DATA
 -- - ssd_person
--- - Education.DIM_PERSON
+-- - HDM.Child_Social.FACT_903_DATA
+-- - HDM.Education.DIM_PERSON
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"} 

@@ -287,14 +287,14 @@ WHERE
 -- Status: [R]elease
 -- Remarks: Part of early help system. Restrict to records related to x@yrs of ssd_person
 -- Dependencies: 
--- - FACT_CONTACTS
+-- - HDM.Child_Social.FACT_CONTACTS
 -- - ssd_person
 -- =============================================================================
 
 
 -- META-ELEMENT: {"type": "create_table"}
 CREATE TABLE ssd_family (
-    fami_table_id   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"FAMI003A"} 
+    fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"FAMI003A"} 
     fami_family_id  NVARCHAR(48),               -- metadata={"item_ref":"FAMI001A"}
     fami_person_id  NVARCHAR(48)                -- metadata={"item_ref":"FAMI002A"}
 );
@@ -306,12 +306,19 @@ INSERT INTO ssd_family (
     fami_family_id, 
     fami_person_id
     )
+
+
+
 SELECT 
     fc.EXTERNAL_ID                          AS fami_table_id,
     fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID      AS fami_family_id,
     fc.DIM_PERSON_ID                        AS fami_person_id
 
 FROM HDM.Child_Social.FACT_CONTACTS AS fc
+
+
+
+
 WHERE EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
@@ -330,7 +337,7 @@ WHERE EXISTS
 -- Remarks: Need to verify json obj structure on pre-2014 SQL server instances
 -- Dependencies: 
 -- - ssd_person
--- - DIM_PERSON_ADDRESS
+-- - HDM.Child_Social.DIM_PERSON_ADDRESS
 -- =============================================================================
 
 
@@ -407,7 +414,7 @@ WHERE EXISTS
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_DISABILITY
+-- - HDM.Child_Social.FACT_DISABILITY
 -- =============================================================================
 
 
@@ -453,7 +460,7 @@ WHERE EXISTS
 --             increased field size to 100
 -- Dependencies:
 -- - ssd_person
--- - FACT_IMMIGRATION_STATUS
+-- - HDM.Child_Social.FACT_IMMIGRATION_STATUS
 -- =============================================================================
 
 
@@ -512,7 +519,7 @@ WHERE
 -- Remarks: 
 -- Dependencies: 
 -- - @ssd_timeframe_years
--- - FACT_REFERRALS
+-- - HDM.Child_Social.FACT_REFERRALS
 -- =============================================================================
 
 
@@ -614,7 +621,7 @@ AND EXISTS
 -- Remarks: LAC/ CLA for stat return purposes but also useful to know any children who are parents 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_PERSON_RELATION
+-- - HDM.Child_Social.FACT_PERSON_RELATION
 -- =============================================================================
 
 
@@ -673,7 +680,7 @@ WHERE
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_LEGAL_STATUS
+-- - HDM.Child_Social.FACT_LEGAL_STATUS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -732,7 +739,7 @@ AND EXISTS
 --         Contains safeguarding and referral to early help data.
 -- Dependencies: 
 -- - ssd_person
--- - FACT_CONTACTS
+-- - HDM.Child_Social.FACT_CONTACTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -806,7 +813,7 @@ AND EXISTS
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_CAF_EPISODE
+-- - HDM.Child_Social.FACT_CAF_EPISODE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -875,9 +882,9 @@ AND EXISTS
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_SINGLE_ASSESSMENT
--- - FACT_FORMS
--- - FACT_FORM_ANSWERS
+-- - HDM.Child_Social.FACT_SINGLE_ASSESSMENT
+-- - HDM.Child_Social.FACT_FORMS
+-- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1004,8 +1011,8 @@ AND EXISTS (
 -- Dependencies: 
 -- - #ssd_TMP_PRE_assessment_factors (as staged pre-processing)
 -- - ssd_cin_assessments
--- - FACT_SINGLE_ASSESSMENT
--- - FACT_FORM_ANSWERS
+-- - HDM.Child_Social.FACT_SINGLE_ASSESSMENT
+-- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1112,8 +1119,8 @@ WHERE
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_CARE_PLANS
--- - FACT_CARE_PLAN_SUMMARY
+-- - HDM.Child_Social.FACT_CARE_PLANS
+-- - HDM.Child_Social.FACT_CARE_PLAN_SUMMARY
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1205,7 +1212,7 @@ GROUP BY
 --                 --> when run for records in ssd_person c.64k records 29s runtime
 -- Dependencies:
 -- - ssd_person
--- - FACT_CASENOTES
+-- - HDM.Child_Social.FACT_CASENOTES
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1265,8 +1272,8 @@ AND EXISTS ( -- only ssd relevant records
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_S47
--- - FACT_CP_CONFERENCE
+-- - HDM.Child_Social.FACT_S47
+-- - HDM.Child_Social.FACT_CP_CONFERENCE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"} 
@@ -1347,9 +1354,9 @@ AND EXISTS ( -- only ssd relevant records
 -- Status: [R]elease
 -- Remarks:
 -- Dependencies:
--- - FACT_CP_CONFERENCE
--- - FACT_MEETINGS
--- - FACT_CP_PLAN
+-- - HDM.Child_Social.FACT_CP_CONFERENCE
+-- - HDM.Child_Social.FACT_MEETINGS
+-- - HDM.Child_Social.FACT_CP_PLAN
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1455,7 +1462,7 @@ AND EXISTS ( -- only ssd relevant records
 -- Dependencies:
 -- - ssd_person
 -- - ssd_initial_cp_conference
--- - FACT_CP_PLAN
+-- - HDM.Child_Social.FACT_CP_PLAN
 -- =============================================================================
 
 
@@ -1529,9 +1536,9 @@ AND EXISTS ( -- only ssd relevant records
 --          using casenote ID as PK and linking to CP Visit where available.
 --          Will have to use Person ID to link object to Person table
 -- Dependencies:
--- - FACT_CASENOTES
--- - FACT_CP_VISIT
 -- - ssd_person
+-- - HDM.Child_Social.FACT_CASENOTES
+-- - HDM.Child_Social.FACT_CP_VISIT
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1614,10 +1621,10 @@ WHERE
 -- Dependencies:
 -- - ssd_person
 -- - ssd_cp_plans
--- - FACT_CP_REVIEW
--- - FACT_MEETINGS
--- - FACT_MEETING_SUBJECTS
--- - FACT_FORM_ANSWERS [Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
+-- - HDM.Child_Social.FACT_CP_REVIEW
+-- - HDM.Child_Social.FACT_MEETINGS
+-- - HDM.Child_Social.FACT_MEETING_SUBJECTS
+-- - HDM.Child_Social.FACT_FORM_ANSWERS [Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
 -- =============================================================================
 
 
@@ -1717,10 +1724,10 @@ GROUP BY cpr.FACT_CP_REVIEW_ID,
 -- Dependencies: 
 -- - ssd_involvements
 -- - ssd_person
--- - FACT_CLA
--- - FACT_REFERRALS
--- - FACT_CARE_EPISODES
--- - FACT_CASENOTES
+-- - HDM.Child_Social.FACT_CLA
+-- - HDM.Child_Social.FACT_REFERRALS
+-- - HDM.Child_Social.FACT_CARE_EPISODES
+-- - HDM.Child_Social.FACT_CASENOTES
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1900,7 +1907,7 @@ FROM
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_OFFENCE
+-- - HDM.Child_Social.FACT_OFFENCE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -1947,7 +1954,7 @@ WHERE EXISTS
 --             to inprove readability.
 -- Dependencies:
 -- - ssd_person
--- - FACT_HEALTH_CHECK
+-- - HDM.Child_Social.FACT_HEALTH_CHECK
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2001,8 +2008,8 @@ AND EXISTS ( -- only ssd relevant records
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_CLA
--- - FACT_903_DATA [Depreciated]
+-- - HDM.Child_Social.FACT_CLA
+-- - HDM.Child_Social.FACT_903_DATA [Depreciated]
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2056,7 +2063,8 @@ WHERE
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_SUBSTANCE_MISUSE
+-- - HDM.Child_Social.ssd_person
+-- - HDM.Child_Social.FACT_SUBSTANCE_MISUSE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"} 
@@ -2105,8 +2113,8 @@ WHERE EXISTS
 -- Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
 -- Dependencies: 
 -- - ssd_person
--- - FACT_CLA_PLACEMENT
--- - FACT_CARE_EPISODES
+-- - HDM.Child_Social.FACT_CLA_PLACEMENT
+-- - HDM.Child_Social.FACT_CARE_EPISODES
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2189,10 +2197,11 @@ AND
 -- Status: [R]elease
 -- Remarks: 
 -- Dependencies: 
+-- - ssd_person
 -- - ssd_cla_episodes
--- - FACT_CLA_REVIEW
--- - FACT_MEETING_SUBJECTS 
--- - FACT_MEETINGS
+-- - HDM.Child_Social.FACT_CLA_REVIEW
+-- - HDM.Child_Social.FACT_MEETING_SUBJECTS 
+-- - HDM.Child_Social.FACT_MEETINGS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2376,10 +2385,11 @@ GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 -- Remarks:    Added short codes to plan type questions to improve readability.
 --             Removed form type filter, only filtering ffa. on ANSWER_NO.
 -- Dependencies:
--- - FACT_CARE_PLANS
--- - FACT_FORMS
--- - FACT_FORM_ANSWERS
+-- - ssd_person
 -- - #ssd_TMP_PRE_cla_care_plan - Used to stage/prep most recent relevant form response
+-- - HDM.Child_Social.FACT_CARE_PLANS
+-- - HDM.Child_Social.FACT_FORMS
+-- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}   
@@ -2511,9 +2521,10 @@ WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
 -- Status: [R]elease
 -- Remarks:
 -- Dependencies:
--- - FACT_CARE_EPISODES
--- - FACT_CASENOTES
--- - FACT_CLA_VISIT
+-- - ssd_person
+-- - HDM.Child_Social.FACT_CARE_EPISODES
+-- - HDM.Child_Social.FACT_CASENOTES
+-- - HDM.Child_Social.FACT_CLA_VISIT
 -- =============================================================================
 
  
@@ -2581,8 +2592,8 @@ AND EXISTS ( -- only ssd relevant records
 --         Removed PRIMARY KEY stipulation for csdq_table_id
 -- Dependencies:
 -- - ssd_person
--- - FACT_FORMS
--- - FACT_FORM_ANSWERS
+-- - HDM.Child_Social.FACT_FORMS
+-- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2689,7 +2700,7 @@ WHERE csdq_table_id IN (
 -- Remarks: 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_MISSING_PERSON
+-- - HDM.Child_Social.FACT_MISSING_PERSON
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2772,11 +2783,11 @@ AND EXISTS
 --             clea_care_leaver_eligibility == LAC for 13wks+(since 14yrs)+LAC since 16yrs 
 
 -- Dependencies:
--- - FACT_INVOLVEMENTS
--- - FACT_CLA_CARE_LEAVERS
--- - DIM_CLA_ELIGIBILITY
--- - FACT_CARE_PLANS
 -- - ssd_person
+-- - HDM.Child_Social.FACT_INVOLVEMENTS
+-- - HDM.Child_Social.FACT_CLA_CARE_LEAVERS
+-- - HDM.Child_Social.DIM_CLA_ELIGIBILITY
+-- - HDM.Child_Social.FACT_CARE_PLANS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -2933,11 +2944,11 @@ GROUP BY
 
 -- Dependencies: 
 -- - ssd_person
--- - FACT_ADOPTION
--- - FACT_CLA_PLACEMENT
--- - FACT_LEGAL_STATUS
--- - FACT_CARE_EPISODES
--- - FACT_CLA
+-- - HDM.Child_Social.FACT_ADOPTION
+-- - HDM.Child_Social.FACT_CLA_PLACEMENT
+-- - HDM.Child_Social.FACT_LEGAL_STATUS
+-- - HDM.Child_Social.FACT_CARE_EPISODES
+-- - HDM.Child_Social.FACT_CLA
 -- =============================================================================
 
 
@@ -3124,8 +3135,8 @@ AND EXISTS
 -- - @CaseloadLastSept30th
 -- - @CaseloadTimeframeStartDate
 -- - @ssd_timeframe_years
--- - DIM_WORKER
--- - FACT_REFERRALS
+-- - HDM.Child_Social.DIM_WORKER
+-- - HDM.Child_Social.FACT_REFERRALS
 -- - ssd_cin_episodes (if counting caseloads within SSD timeframe)
 -- =============================================================================
 
@@ -3203,7 +3214,7 @@ WHERE
 -- Status: [T]est
 -- Remarks: 
 -- Dependencies: 
--- -
+-- - HDM.Child_Social.DIM_DEPARTMENT
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -3256,8 +3267,8 @@ WHERE dpt.dim_department_id <> -1;
 --                 COMMENTS contains the keyword %WORKER% or %ALLOC%.
 -- Dependencies:
 -- - ssd_person
--- - FACT_INVOLVEMENTS
 -- - ssd_departments (if obtaining team_name)
+-- - HDM.Child_Social.FACT_INVOLVEMENTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -3362,7 +3373,9 @@ AND EXISTS
 --             To have any further codes agreed into the standard, issue a change request
 
 -- Dependencies: 
--- - Yet to be defined
+-- - Will be LA specific depending on systems/data being linked
+-- - ssd_person
+-- - HDM.Child_Social.DIM_PERSON
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
@@ -3538,9 +3551,9 @@ CREATE TABLE ssd_pre_proceedings (
 -- Remarks: Have temporarily disabled populating UPN & ULN as these access non-core
 --             CMS modules. Can be re-enabled on a localised basis. 
 -- Dependencies: 
--- - FACT_903_DATA
 -- - ssd_person
--- - Education.DIM_PERSON
+-- - HDM.Child_Social.FACT_903_DATA
+-- - HDM.Education.DIM_PERSON
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"} 

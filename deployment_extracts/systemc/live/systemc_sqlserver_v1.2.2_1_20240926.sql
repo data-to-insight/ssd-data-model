@@ -96,7 +96,6 @@ DECLARE @schema_name NVARCHAR(128) = N'ssd_development';    -- set your schema n
 -- META-ELEMENT: {"type": "test"}
 DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder'; -- Note: also/seperately use of @table_name in non-test|live elements of script. 
 
-
 -- META-END
 
 /* ********************************************************************************************************** */
@@ -420,7 +419,7 @@ IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
 
 -- META-ELEMENT: {"type": "create_table"}
 CREATE TABLE ssd_development.ssd_family (
-    fami_table_id   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"FAMI003A"} 
+    fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"FAMI003A"} 
     fami_family_id  NVARCHAR(48),               -- metadata={"item_ref":"FAMI001A"}
     fami_person_id  NVARCHAR(48)                -- metadata={"item_ref":"FAMI002A"}
 );
@@ -432,12 +431,19 @@ INSERT INTO ssd_development.ssd_family (
     fami_family_id, 
     fami_person_id
     )
+
+
+
 SELECT 
     fc.EXTERNAL_ID                          AS fami_table_id,
     fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID      AS fami_family_id,
     fc.DIM_PERSON_ID                        AS fami_person_id
 
 FROM HDM.Child_Social.FACT_CONTACTS AS fc
+
+
+
+
 WHERE EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
