@@ -1,13 +1,13 @@
-935:
-  la_code: 935
-  la_name: Suffolk
+887:
+  la_code: 887
+  la_name: Medway
   deployment_system:
-    cms: SystemC
-    cms_db: SQLServer[D]
+    cms: MOSAIC
+    cms_db: Oracle
     db_vers: null
     db_compatibility: null
     ics_universe_vers: null
-    data_warehouse_vers: null
+    data_warehouse_vers: mosrep
     front_end_vers: null
   config_metadata:
     last_updated: 2024-09-25
@@ -32,9 +32,9 @@
       deploy_temp_tables: false
       temp_table_prefix: null
     dbschema:
-      data_source_schema: HDM.Child_Social
-      deployment_database_name: HDM_Local
-      deployment_schema_name: null
+      data_source_schema: mosrep
+      deployment_database_name: 
+      deployment_schema_name: 
     dev_setup:
       no_count_on: false
   global_sql_tag_remove:

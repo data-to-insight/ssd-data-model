@@ -1,9 +1,9 @@
-887:
-  la_code: 887
-  la_name: Medway
+931:
+  la_code: 931
+  la_name: Oxfordshire
   deployment_system:
-    cms: MOSAIC
-    cms_db: Oracle
+    cms: SystemC
+    cms_db: SQLServer
     db_vers: null
     db_compatibility: null
     ics_universe_vers: null
@@ -29,10 +29,10 @@
       ssd_timeframe_years: 5
       ssd_sub1_range_years: 1
     persistent_ssd:
-      deploy_temp_tables: false
+      deploy_temp_tables: true
       temp_table_prefix: null
     dbschema:
-      data_source_schema: HDM.Child_Social
+      data_source_schema: HDM.Child_Social 
       deployment_database_name: HDM_Local
       deployment_schema_name: null
     dev_setup:

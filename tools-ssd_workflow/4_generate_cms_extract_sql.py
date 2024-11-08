@@ -248,7 +248,6 @@ def process_remove_blocks(block_lines, block_type, remove_objects, global_remove
     # print(f"Global removal flag for '{block_type}': {global_remove_flags.get(f'remove_{block_type}', False)}")
 
     # Check if block type is set for global removal
-    # this being flags set to true within yml global_sql_tag_remove: 
     if global_remove_flags.get(f'remove_{block_type}', False):
         remove_block = True
         # print(f"Globally removing all {block_type} blocks.")
@@ -264,25 +263,81 @@ def process_remove_blocks(block_lines, block_type, remove_objects, global_remove
             remove_block = True
             # print(f"Locally removing {block_type} block for: {block_name}")
 
+    # Handle the specific case of 'console_output' separately to avoid duplication
+    if block_type == 'console_output':
+        # If globally flagged for removal, skip the console output block
+        if global_remove_flags.get('remove_console', False):
+            print(f"Removing console_output block globally.")
+            return []  # Skip the entire block
+
+        # Otherwise, append it once (avoid duplicating it later)
+        processed_lines.extend(block_lines)
+        return processed_lines  # Return early to avoid re-processing
+
     # Retain or remove the entire block (multi-line)
     if not remove_block:
         processed_lines.extend(block_lines)
     else:
-        # print(f"Block '{block_type}' for {block_name} is being removed.")
+        # Block is being removed
         pass
 
-
-    # Handle the specific case of console_output
-    if block_type == 'console_output':
-        if global_remove_flags.get('remove_console', False):
-            print(f"Removing console_output block globally.")
-            return []  # If flagged for removal, skip the entire console block
-
-        # If the global flag is False, ensure no console_output blocks are removed
-        else:
-            processed_lines.extend(block_lines)
-
     return processed_lines
+
+
+
+# # the below is re-adding duplicate console_output blocks
+# def process_remove_blocks(block_lines, block_type, remove_objects, global_remove_flags, block_name=None):
+#     """
+#     Process and remove blocks based on global and named removal flags from config.
+#     Handles cases where multiple blocks of the same type exist.
+#     """
+#     processed_lines = []
+#     remove_block = False
+
+#     # Ensure remove_objects is a dictionary, even if None
+#     if remove_objects is None:
+#         remove_objects = {}
+
+#     # Debug: Print block type, block name, and global removal flag status
+#     # print(f"Checking block: type = '{block_type}', name = '{block_name}'")
+#     # print(f"Global removal flag for '{block_type}': {global_remove_flags.get(f'remove_{block_type}', False)}")
+
+#     # Check if block type is set for global removal
+#     # this being flags set to true within yml global_sql_tag_remove: 
+#     if global_remove_flags.get(f'remove_{block_type}', False):
+#         remove_block = True
+#         # print(f"Globally removing all {block_type} blocks.")
+
+#     # Check for named object removal based on YAML config
+#     remove_list = remove_objects.get(f'remove_{block_type}', [])
+#     remove_list = [item for item in remove_list if item]  # Remove empty values
+#     # print(f"Remove list for block type {block_type}: {remove_list}")
+
+#     # Check for local (named) removal
+#     if not remove_block and block_name and isinstance(remove_list, list):
+#         if block_name in remove_list:
+#             remove_block = True
+#             # print(f"Locally removing {block_type} block for: {block_name}")
+
+#     # Retain or remove the entire block (multi-line)
+#     if not remove_block:
+#         processed_lines.extend(block_lines)
+#     else:
+#         # print(f"Block '{block_type}' for {block_name} is being removed.")
+#         pass
+
+
+#     # Handle the specific case of console_output
+#     if block_type == 'console_output':
+#         if global_remove_flags.get('remove_console', False):
+#             print(f"Removing console_output block globally.")
+#             return []  # If flagged for removal, skip the entire console block
+
+#         # If the global flag is False, ensure no console_output blocks are removed
+#         else:
+#             processed_lines.extend(block_lines)
+
+#     return processed_lines
 
 
 
@@ -817,7 +872,7 @@ def load_yaml_config(yaml_file):
 
 # Main execution block
 if __name__ == "__main__":
-    yaml_directory = '/workspaces/ssd-data-model/la_config_files__future_release/'
+    yaml_directory = '/workspaces/ssd-data-model/la_config_files/'
     
 
     # live extract filename(s)/paths stub
@@ -841,7 +896,7 @@ if __name__ == "__main__":
     print(latest_file)
     
     # use latest file as the master_sql_path
-    output_directory = '/workspaces/ssd-data-model/deployment_extracts__future_release/'
+    output_directory = '/workspaces/ssd-data-model/deployment_extracts_la_release/'
 
     # get most recent version num (subsequently added to bespoke extract filename)
     # regex extract live version (from 'v' to '.sql')

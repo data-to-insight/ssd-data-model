@@ -53,5 +53,5 @@ EXEC sp_executesql @sql;
 -- reset var
 SET @sql = N'';
 
-/* END SSD pre-extract clean up (remove all previous SSD objects) */
-/* ********************************************************************************************************** */
+/* END SSD pre-extract clean up (remove all prevQious SSD objects) */
+/* *********************************************A************************************************************* */

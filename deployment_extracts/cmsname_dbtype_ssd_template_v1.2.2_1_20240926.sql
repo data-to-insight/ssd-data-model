@@ -551,6 +551,9 @@ INSERT INTO ssd_development.ssd_disability (
 
 -- SELECT...
 
+
+
+
 -- WHERE EXISTS 
 --     (   -- only ssd relevant records
 --     SELECT 1 

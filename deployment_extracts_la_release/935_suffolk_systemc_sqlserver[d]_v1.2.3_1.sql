@@ -5,7 +5,7 @@
 
 /*
 *********************************************************************************************************
-STANDARD SAFEGUARDING DATASET EXTRACT 
+STANDARD SAFEGUARDING DATASET EXTRACT
 https://data-to-insight.github.io/ssd-data-model/
 We strongly recommend that initial pilot/trials of SSD scripts occur in a development|test environment.
 The SQL script is non-destructive. SSD clean-up scripts are available seperately, these are destructive.
@@ -15,8 +15,8 @@ The SQL script is non-destructive. SSD clean-up scripts are available seperately
 
 -- META-ELEMENT: {"type": "deployment_system"}
 /*
-Bespoke SSD extract script for Bradford (350).
-Expected deployment system: SystemC | SQLServer.
+Bespoke SSD extract script for Suffolk (935).
+Expected deployment system: SystemC | SQLServer[D].
 *********************************************************************************************************
 */
 
@@ -33,7 +33,7 @@ GO
 SET NOCOUNT ON;
 
 -- META-ELEMENT: {"type": "ssd_timeframe"}
-DECLARE @ssd_timeframe_years INT = 5;
+DECLARE @ssd_timeframe_years INT = 1;
 DECLARE @ssd_sub1_range_years INT = 1;
 
 -- CASELOAD count Date (Currently: September 30th)
@@ -58,6 +58,9 @@ DECLARE @CaseloadTimeframeStartDate DATE = DATEADD(YEAR, -@ssd_timeframe_years, 
 USE HDM_Local;
 DECLARE @schema_name NVARCHAR(128) = '';
 
+ALTER USER [ESCC\RobertHa] WITH DEFAULT_SCHEMA = [ssd_development];
+
+
 -- META-CONTAINER: {"type": "settings", "name": "testing"}
 /* Towards simplistic TEST run outputs and logging  (to be removed from live v2+) */
 
@@ -72,10 +75,9 @@ DECLARE @schema_name NVARCHAR(128) = '';
 -- - None
 -- =============================================================================
 
-
 -- META-ELEMENT: {"type": "create_table"}
 -- create versioning information object
-CREATE TABLE ssd_version_log (
+CREATE TABLE #ssd_version_log (
     version_number      NVARCHAR(10) PRIMARY KEY,                   -- version num (e.g., "1.0.0")
     release_date        DATE NOT NULL,                  -- date of version release
     description         NVARCHAR(100),                  -- brief description of version
@@ -88,18 +90,18 @@ CREATE TABLE ssd_version_log (
 
 
 -- ensure any previous current-version flag is set to 0 (not current), before adding new current version
-UPDATE ssd_version_log SET is_current = 0 WHERE is_current = 1;
+UPDATE #ssd_version_log SET is_current = 0 WHERE is_current = 1;
 
 -- META-ELEMENT: {"type": "insert_data"}
 -- insert & update for CURRENT version (using MAJOR.MINOR.PATCH)
-INSERT INTO ssd_version_log 
+INSERT INTO #ssd_version_log 
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
-    ('1.2.2', GETDATE(), '#DtoI-1826, META+YML restructure incl. remove opt blocks', 1, 'admin', 'feat/bespoke LA extracts');
+    ('1.2.3', GETDATE(), 'non-core ssd_flag field removal', 1, 'admin', 'no wider impact');
 
 
 -- HISTORIC versioning log data
-INSERT INTO ssd_version_log (version_number, release_date, description, is_current, created_by, impact_description)
+INSERT INTO #ssd_version_log (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     ('1.0.0', '2023-01-01', 'Initial alpha release (Phase 1 end)', 0, 'admin', ''),
     ('1.1.1', '2024-06-26', 'Minor updates with revised assessment_factors', 0, 'admin', 'Revised JSON Array structure implemented for CiN'),
@@ -112,7 +114,9 @@ VALUES
     ('1.1.8', '2024-07-17', 'admin table creation logging process defined', 0, 'admin', ''),
     ('1.1.9', '2024-07-29', 'Applied CAST(person_id) + minor fixes', 0, 'admin', 'impacts all tables using where exists'),
     ('1.2.0', '2024-08-13', '#DtoI-1762, #DtoI-1810, improved 0/-1 handling', 0, 'admin', 'impacts all _team fields, AAL7 outputs'),
-    ('1.2.1', '2024-08-20', '#DtoI-1820, removed destructive pre-clean-up incl .dbo refs', 0, 'admin', 'priority patch fix');
+    ('1.2.1', '2024-08-20', '#DtoI-1820, removed destructive pre-clean-up incl .dbo refs', 0, 'admin', 'priority patch fix'),
+    ('1.2.2', '2024-11-06', '#DtoI-1826, META+YML restructure incl. remove opt blocks', 0, 'admin', 'feat/bespoke LA extracts');
+
 
 -- META-CONTAINER: {"type": "table", "name": "ssd_person"}
 -- =============================================================================
@@ -138,12 +142,12 @@ VALUES
 
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_person (
+CREATE TABLE #ssd_person (
     pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
     pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}   
-    pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If additional status to Gender is held, otherwise dup of pers_gender"}    
-    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown","NULL","F","U","M","I"]}       
-    pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"} 
+    pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If -additional- status to Gender is held, otherwise duplicate pers_gender"}    
+    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown",NULL,"F","U","M","I"]}       
+    pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A", "expected_data":[NULL, tbc]} 
     pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
     pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
     pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A", "info":"SEN2 guidance suggests size(4)", "expected_data":["UN1-10"]}                                 
@@ -151,8 +155,7 @@ CREATE TABLE ssd_person (
     pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}                  
     pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"} 
     pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
-    pers_nationality        NVARCHAR(48),               -- metadata={"item_ref":"PERS012A"} 
-    ssd_flag                INT                         -- Non-core data flag for D2I filter testing [TESTING]
+    pers_nationality        NVARCHAR(48)               -- metadata={"item_ref":"PERS012A", "expected_data":[NULL, tbc]}   
 );
 
 -- META-ELEMENT: {"type": "insert_data"}
@@ -169,7 +172,7 @@ WITH f903_data_CTE AS (
     WHERE
         no_upn_code IS NOT NULL -- sparse data in this field, filter for performance
 )
-INSERT INTO ssd_person (
+INSERT INTO #ssd_person (
     pers_legacy_id,
     pers_person_id,
     pers_sex,       -- sex and gender currently extracted as one
@@ -182,8 +185,8 @@ INSERT INTO ssd_person (
     pers_expected_dob,
     pers_death_date,
     pers_is_mother,
-    pers_nationality,
-    ssd_flag
+    pers_nationality
+    
 )
 SELECT 
     -- TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING]
@@ -212,8 +215,7 @@ SELECT
         THEN 'Y'
         ELSE NULL -- No child relation found
     END,
-    p.NATNL_CODE,
-    1 AS ssd_flag -- Non-core data flag for D2I filter testing [TESTING]
+    p.NATNL_CODE
 FROM
     HDM.Child_Social.DIM_PERSON AS p
 
@@ -268,7 +270,7 @@ WHERE
                 WHERE (fi.DIM_PERSON_ID = p.DIM_PERSON_ID
                 AND (fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE 'KA%' --Key Agencies (External)
 				OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL OR fi.IS_ALLOCATED_CW_FLAG = 'Y')
-				AND START_DTTM > '2009-12-04 00:54:49.947' -- was trying to cut off from 2010 but when I changed the date it threw up an erro
+				AND START_DTTM > '2009-12-04 00:54:49.947' -- was trying to cut off from 2010 but when I changed the date it threw up an error
 				AND DIM_WORKER_ID <> '-1' 
                 AND (fi.END_DTTM IS NULL OR fi.END_DTTM > GETDATE()))
             )
@@ -293,7 +295,7 @@ WHERE
 
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_family (
+CREATE TABLE #ssd_family (
     fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"FAMI003A"} 
     fami_family_id  NVARCHAR(48),               -- metadata={"item_ref":"FAMI001A"}
     fami_person_id  NVARCHAR(48)                -- metadata={"item_ref":"FAMI002A"}
@@ -301,7 +303,7 @@ CREATE TABLE ssd_family (
 
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_family (
+INSERT INTO #ssd_family (
     fami_table_id, 
     fami_family_id, 
     fami_person_id
@@ -322,7 +324,7 @@ FROM HDM.Child_Social.FACT_CONTACTS AS fc
 WHERE EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fc.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -342,7 +344,7 @@ WHERE EXISTS
 
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_address (
+CREATE TABLE #ssd_address (
     addr_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"ADDR007A"}
     addr_person_id          NVARCHAR(48),               -- metadata={"item_ref":"ADDR002A"} 
     addr_address_type       NVARCHAR(48),               -- metadata={"item_ref":"ADDR003A"}
@@ -354,7 +356,7 @@ CREATE TABLE ssd_address (
 
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_address (
+INSERT INTO #ssd_address (
     addr_table_id, 
     addr_person_id, 
     addr_address_type, 
@@ -397,7 +399,7 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = pa.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -419,7 +421,7 @@ WHERE EXISTS
 
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_disability
+CREATE TABLE #ssd_disability
 (
     disa_table_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"DISA003A"}
     disa_person_id          NVARCHAR(48) NOT NULL,      -- metadata={"item_ref":"DISA001A"}
@@ -428,7 +430,7 @@ CREATE TABLE ssd_disability
 
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_disability (
+INSERT INTO #ssd_disability (
     disa_table_id,  
     disa_person_id, 
     disa_disability_code
@@ -443,7 +445,7 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fd.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -465,7 +467,7 @@ WHERE EXISTS
 
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_immigration_status (
+CREATE TABLE #ssd_immigration_status (
     immi_immigration_status_id          NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"IMMI005A"}
     immi_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"IMMI001A"}
     immi_immigration_status_start_date  DATETIME,                   -- metadata={"item_ref":"IMMI003A"}
@@ -474,7 +476,7 @@ CREATE TABLE ssd_immigration_status (
 );
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_immigration_status (
+INSERT INTO #ssd_immigration_status (
     immi_immigration_status_id,
     immi_person_id,
     immi_immigration_status_start_date,
@@ -494,7 +496,7 @@ WHERE
     EXISTS
     ( -- only ssd relevant records
         SELECT 1
-        FROM ssd_person p
+        FROM #ssd_person p
         WHERE CAST(p.pers_person_id AS INT) = ims.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -524,12 +526,12 @@ WHERE
 
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cin_episodes
+CREATE TABLE #ssd_cin_episodes
 (
     cine_referral_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINE001A"}
     cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
     cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
-    cine_cin_primary_need_code      nvarchar(6),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
+    cine_cin_primary_need_code      NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
     cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
     cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
     cine_referral_outcome_json      NVARCHAR(4000), -- metadata={"item_ref":"CINE005A"}
@@ -542,7 +544,7 @@ CREATE TABLE ssd_cin_episodes
 
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cin_episodes
+INSERT INTO #ssd_cin_episodes
 (
     cine_referral_id,
     cine_person_id,
@@ -603,7 +605,7 @@ AND
 AND EXISTS
     ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fr.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -622,11 +624,12 @@ AND EXISTS
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_PERSON_RELATION
+-- - Gender codes are populated/stored as single char M|F|... 
 -- =============================================================================
 
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_mother (
+CREATE TABLE #ssd_mother (
     moth_table_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"MOTH004A"}
     moth_person_id          NVARCHAR(48),               -- metadata={"item_ref":"MOTH002A"}
     moth_childs_person_id   NVARCHAR(48),               -- metadata={"item_ref":"MOTH001A"}
@@ -634,7 +637,7 @@ CREATE TABLE ssd_mother (
 );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_mother (
+INSERT INTO #ssd_mother (
     moth_table_id,
     moth_person_id,
     moth_childs_person_id,
@@ -651,7 +654,7 @@ FROM
 JOIN
     HDM.Child_Social.DIM_PERSON AS p ON fpr.DIM_PERSON_ID = p.DIM_PERSON_ID
 WHERE
-    p.GENDER_MAIN_CODE <> 'M'
+    p.GENDER_MAIN_CODE <> 'M' 
     AND
     fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI' -- only interested in parent/child relations
     AND
@@ -660,11 +663,11 @@ WHERE
     AND (
         EXISTS ( -- only ssd relevant records
             SELECT 1
-            FROM ssd_person p
+            FROM #ssd_person p
             WHERE CAST(p.pers_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1799
         ) OR EXISTS ( 
             SELECT 1 
-            FROM ssd_cin_episodes ce
+            FROM #ssd_cin_episodes ce
             WHERE CAST(ce.cine_person_id AS INT) = fpr.DIM_PERSON_ID -- #DtoI-1806
         )
     );
@@ -684,7 +687,7 @@ WHERE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_legal_status (
+CREATE TABLE #ssd_legal_status (
     lega_legal_status_id            NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"LEGA001A"}
     lega_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LEGA002A"}
     lega_legal_status               NVARCHAR(100),              -- metadata={"item_ref":"LEGA003A"}
@@ -693,7 +696,7 @@ CREATE TABLE ssd_legal_status (
 );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_legal_status (
+INSERT INTO #ssd_legal_status (
     lega_legal_status_id,
     lega_person_id,
     lega_legal_status,
@@ -717,7 +720,7 @@ WHERE
 AND EXISTS
     ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fls.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -743,7 +746,7 @@ AND EXISTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_contacts (
+CREATE TABLE #ssd_contacts (
     cont_contact_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CONT001A"}
     cont_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CONT002A"}
     cont_contact_date               DATETIME,                   -- metadata={"item_ref":"CONT003A"}
@@ -753,7 +756,7 @@ CREATE TABLE ssd_contacts (
 );
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_contacts (
+INSERT INTO #ssd_contacts (
     cont_contact_id, 
     cont_person_id, 
     cont_contact_date,
@@ -797,7 +800,7 @@ WHERE
 AND EXISTS
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fc.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -817,7 +820,7 @@ AND EXISTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_early_help_episodes (
+CREATE TABLE #ssd_early_help_episodes (
     earl_episode_id             NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EARL001A"}
     earl_person_id              NVARCHAR(48),               -- metadata={"item_ref":"EARL002A"}
     earl_episode_start_date     DATETIME,                   -- metadata={"item_ref":"EARL003A"}
@@ -830,7 +833,7 @@ CREATE TABLE ssd_early_help_episodes (
  
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_early_help_episodes (
+INSERT INTO #ssd_early_help_episodes (
     earl_episode_id,
     earl_person_id,
     earl_episode_start_date,
@@ -860,7 +863,7 @@ WHERE
 AND EXISTS
     ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = cafe.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -888,7 +891,7 @@ AND EXISTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cin_assessments
+CREATE TABLE #ssd_cin_assessments
 (
     cina_assessment_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINA001A"}
     cina_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CINA002A"}
@@ -905,7 +908,7 @@ CREATE TABLE ssd_cin_assessments
 -- CTE for the EXISTS
 WITH RelevantPersons AS (
     SELECT p.pers_person_id
-    FROM ssd_person p
+    FROM #ssd_person p
 ),
  
 -- CTE for the JOIN
@@ -930,7 +933,7 @@ AggregatedFormAnswers AS (
 ) 
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cin_assessments
+INSERT INTO #ssd_cin_assessments
 (
     cina_assessment_id,
     cina_person_id,
@@ -1016,7 +1019,7 @@ AND EXISTS (
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_assessment_factors (
+CREATE TABLE #ssd_assessment_factors (
     cinf_table_id                   NVARCHAR(48) PRIMARY KEY,                   -- metadata={"item_ref":"CINF003A"}
     cinf_assessment_id              NVARCHAR(48),                   -- metadata={"item_ref":"CINF001A"}
     cinf_assessment_factors_json    NVARCHAR(1000)                  -- metadata={"item_ref":"CINF002A"}
@@ -1051,7 +1054,7 @@ WHERE
 
 -- META-ELEMENT: {"type": "insert_data"} 
 -- into the final table
-INSERT INTO ssd_assessment_factors (
+INSERT INTO #ssd_assessment_factors (
                cinf_table_id, 
                cinf_assessment_id, 
                cinf_assessment_factors_json
@@ -1080,7 +1083,7 @@ FROM
     HDM.Child_Social.FACT_SINGLE_ASSESSMENT fsa
 WHERE 
     fsa.EXTERNAL_ID <> -1
-    AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_cin_assessments);
+    AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM #ssd_cin_assessments);
 
 
 -- -- Opt2: (commented implementation ready for forward compatibility)
@@ -1102,7 +1105,88 @@ WHERE
 --     HDM.Child_Social.FACT_SINGLE_ASSESSMENT fsa
 -- WHERE 
 --     fsa.EXTERNAL_ID <> -1
---      AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_cin_assessments);
+--      AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM #ssd_cin_assessments);
+
+
+
+
+-- -- ALTERNATIVE TO AVOID USE OF STRING_AGG
+-- -- Create TMP structure with filtered answers
+-- SELECT 
+--     ffa.FACT_FORM_ID,
+--     ffa.ANSWER_NO,
+--     ffa.ANSWER
+-- INTO #ssd_TMP_PRE_assessment_factors
+-- FROM 
+--     HDM.Child_Social.FACT_FORM_ANSWERS ffa
+-- WHERE 
+--     ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC = 'FAMILY ASSESSMENT'
+--     AND ffa.ANSWER_NO IN (  '1A', '1B', '1C'
+--                             ,'2A', '2B', '2C', '3A', '3B', '3C'
+--                             ,'4A', '4B', '4C'
+--                             ,'5A', '5B', '5C'
+--                             ,'6A', '6B', '6C'
+--                             ,'7A'
+--                             ,'8B', '8C', '8D', '8E', '8F'
+--                             ,'9A', '10A', '11A','12A', '13A', '14A', '15A', '16A', '17A'
+--                             ,'18A', '18B', '18C'
+--                             ,'19A', '19B', '19C'
+--                             ,'20', '21'
+--                             ,'22A', '23A', '24A')
+--     -- filters:                        
+--     AND LOWER(ffa.ANSWER) = 'yes'   -- expected [Yes/No/NULL], adds redundancy into resultant field but allows later expansion
+--     AND ffa.FACT_FORM_ID <> -1;     -- possible admin data present
+
+-- -- Recursive CTE for concatenating values
+-- WITH CTE_Concat AS (
+--     -- Anchor query - start by selecting distinct FACT_FORM_ID
+--     SELECT 
+--         FACT_FORM_ID,
+--         CAST('[' AS NVARCHAR(MAX)) AS Concat_Result, 
+--         MIN(ANSWER_NO) AS ANSWER_NO,
+--         1 AS Level
+--     FROM #ssd_TMP_PRE_assessment_factors
+--     GROUP BY FACT_FORM_ID
+    
+--     UNION ALL
+
+--     -- Recursive query - concatenate next ANSWER_NO
+--     SELECT 
+--         CTE.FACT_FORM_ID,
+--         CAST(CTE.Concat_Result + '"' + tmp.ANSWER_NO + '", ' AS NVARCHAR(MAX)),
+--         tmp.ANSWER_NO,
+--         CTE.Level + 1
+--     FROM CTE_Concat CTE
+--     JOIN #ssd_TMP_PRE_assessment_factors tmp 
+--         ON CTE.FACT_FORM_ID = tmp.FACT_FORM_ID
+--     WHERE tmp.ANSWER_NO > CTE.ANSWER_NO
+-- )
+-- -- Select and finalize the concatenation by closing the JSON array
+-- , Final_Concat AS (
+--     SELECT 
+--         FACT_FORM_ID,
+--         -- Remove the last comma and space, and close the JSON array with ']'
+--         LEFT(Concat_Result, LEN(Concat_Result) - 2) + ']' AS cinf_assessment_factors_json
+--     FROM CTE_Concat
+--     WHERE ANSWER_NO = (SELECT MAX(ANSWER_NO) FROM #ssd_TMP_PRE_assessment_factors tmp WHERE tmp.FACT_FORM_ID = CTE_Concat.FACT_FORM_ID)
+-- )
+
+-- -- Insert into the final table
+-- INSERT INTO #ssd_assessment_factors (
+--                cinf_table_id, 
+--                cinf_assessment_id, 
+--                cinf_assessment_factors_json
+--            )
+-- SELECT 
+--     fsa.EXTERNAL_ID AS cinf_table_id,
+--     fsa.FACT_FORM_ID AS cinf_assessment_id,
+--     final.cinf_assessment_factors_json
+-- FROM 
+--     HDM.Child_Social.FACT_SINGLE_ASSESSMENT fsa
+-- JOIN Final_Concat final ON final.FACT_FORM_ID = fsa.FACT_FORM_ID
+-- WHERE 
+--     fsa.EXTERNAL_ID <> -1
+--     AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM #ssd_cin_assessments);
 
 
 
@@ -1124,7 +1208,7 @@ WHERE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cin_plans (
+CREATE TABLE #ssd_cin_plans (
     cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINP001A"}
     cinp_referral_id            NVARCHAR(48),               -- metadata={"item_ref":"CINP007A"}
     cinp_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINP002A"}
@@ -1135,7 +1219,7 @@ CREATE TABLE ssd_cin_plans (
 );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cin_plans (
+INSERT INTO #ssd_cin_plans (
     cinp_cin_plan_id,
     cinp_referral_id,
     cinp_person_id,
@@ -1186,7 +1270,7 @@ AND EXISTS
 (
     -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = cps.DIM_PERSON_ID -- #DtoI-1799
 )
  
@@ -1216,7 +1300,7 @@ GROUP BY
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cin_visits
+CREATE TABLE #ssd_cin_visits
 (
     cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINV001A"}      
     cinv_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINV007A"}
@@ -1227,7 +1311,7 @@ CREATE TABLE ssd_cin_visits
 );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cin_visits
+INSERT INTO #ssd_cin_visits
 (
     cinv_cin_visit_id,                  
     cinv_person_id,
@@ -1256,7 +1340,7 @@ AND
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = cn.DIM_PERSON_ID -- #DtoI-1799
     );
  
@@ -1277,7 +1361,7 @@ AND EXISTS ( -- only ssd relevant records
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"} 
-CREATE TABLE ssd_s47_enquiry (
+CREATE TABLE #ssd_s47_enquiry (
     s47e_s47_enquiry_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"S47E001A"}
     s47e_referral_id                    NVARCHAR(48),               -- metadata={"item_ref":"S47E010A"}
     s47e_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"S47E002A"}
@@ -1290,7 +1374,7 @@ CREATE TABLE ssd_s47_enquiry (
 );
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_s47_enquiry(
+INSERT INTO #ssd_s47_enquiry(
     s47e_s47_enquiry_id,
     s47e_referral_id,
     s47e_person_id,
@@ -1336,7 +1420,7 @@ WHERE
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = s47.DIM_PERSON_ID -- #DtoI-1799
     ) ;
 
@@ -1360,8 +1444,8 @@ AND EXISTS ( -- only ssd relevant records
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_initial_cp_conference (
-    icpc_icpc_id                NVARCHAR(48),               -- metadata={"item_ref":"ICPC001A"}
+CREATE TABLE #ssd_initial_cp_conference (
+    icpc_icpc_id                NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"ICPC001A"}
     icpc_icpc_meeting_id        NVARCHAR(48),               -- metadata={"item_ref":"ICPC009A"}
     icpc_s47_enquiry_id         NVARCHAR(48),               -- metadata={"item_ref":"ICPC002A"}
     icpc_person_id              NVARCHAR(48),               -- metadata={"item_ref":"ICPC010A"}
@@ -1378,7 +1462,7 @@ CREATE TABLE ssd_initial_cp_conference (
  
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_initial_cp_conference(
+INSERT INTO #ssd_initial_cp_conference(
     icpc_icpc_id,
     icpc_icpc_meeting_id,
     icpc_s47_enquiry_id,
@@ -1442,7 +1526,7 @@ AND
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fcpc.DIM_PERSON_ID -- #DtoI-1799
     ) ;
 
@@ -1467,7 +1551,7 @@ AND EXISTS ( -- only ssd relevant records
 
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cp_plans (
+CREATE TABLE #ssd_cp_plans (
     cppl_cp_plan_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CPPL001A"}
     cppl_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CPPL007A"}
     cppl_icpc_id                    NVARCHAR(48),               -- metadata={"item_ref":"CPPL008A"}
@@ -1481,7 +1565,7 @@ CREATE TABLE ssd_cp_plans (
  
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cp_plans (
+INSERT INTO #ssd_cp_plans (
     cppl_cp_plan_id,
     cppl_referral_id,
     cppl_icpc_id,
@@ -1518,7 +1602,7 @@ WHERE
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = cpp.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -1542,7 +1626,7 @@ AND EXISTS ( -- only ssd relevant records
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cp_visits (
+CREATE TABLE #ssd_cp_visits (
     cppv_cp_visit_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPV007A"} 
     cppv_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CPPV008A"}
     cppv_cp_plan_id                 NVARCHAR(48),   -- metadata={"item_ref":"CPPV001A"}
@@ -1579,7 +1663,7 @@ CREATE TABLE ssd_cp_visits (
 )
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cp_visits (
+INSERT INTO #ssd_cp_visits (
     cppv_cp_visit_id,
     cppv_person_id,            
     cppv_cp_plan_id,  
@@ -1629,7 +1713,7 @@ WHERE
 
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cp_reviews
+CREATE TABLE #ssd_cp_reviews
 (
     cppr_cp_review_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPR001A"}
     cppr_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"CPPR008A"}
@@ -1643,7 +1727,7 @@ CREATE TABLE ssd_cp_reviews
 );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cp_reviews
+INSERT INTO #ssd_cp_reviews
 (
     cppr_cp_review_id,
     cppr_cp_plan_id,
@@ -1693,7 +1777,7 @@ WHERE
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = cpr.DIM_PERSON_ID -- #DtoI-1799
 )
 GROUP BY cpr.FACT_CP_REVIEW_ID,
@@ -1731,7 +1815,7 @@ GROUP BY cpr.FACT_CP_REVIEW_ID,
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cla_episodes (
+CREATE TABLE #ssd_cla_episodes (
     clae_cla_episode_id             NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAE001A"}
     clae_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CLAE002A"}
     clae_cla_placement_id           NVARCHAR(48),               -- metadata={"item_ref":"CLAE013A"} 
@@ -1777,7 +1861,7 @@ WITH FilteredData AS (
         HDM.Child_Social.FACT_CASENOTES cn ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
 
     WHERE
-        fce.DIM_PERSON_ID IN (SELECT CAST(pers_person_id AS INT) FROM ssd_person) -- 
+        fce.DIM_PERSON_ID IN (SELECT CAST(pers_person_id AS INT) FROM #ssd_person) -- 
 
     AND
         (fce.CARE_END_DATE  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
@@ -1799,7 +1883,7 @@ WITH FilteredData AS (
         cn.DIM_PERSON_ID
 )
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cla_episodes (
+INSERT INTO #ssd_cla_episodes (
     clae_cla_episode_id,
     clae_person_id,
     clae_cla_placement_id,
@@ -1830,9 +1914,10 @@ FROM
     FilteredData;
 
 
--- -- [TESTING]
+
 -- -- META-ELEMENT: {"type": "insert_data"}
--- INSERT INTO ssd_cla_episodes (
+-- -- [TESTING]
+-- INSERT INTO #ssd_cla_episodes (
 --     clae_cla_episode_id,
 --     clae_person_id,
 --     clae_cla_placement_id,
@@ -1871,11 +1956,11 @@ FROM
     
 -- WHERE EXISTS (
 --     SELECT 1
---     FROM ssd_person p
+--     FROM #ssd_person p
 --      WHERE CAST(p.pers_person_id AS INT) = fce.DIM_PERSON_ID -- #DtoI-1799
 -- )
 -- -- WHERE
--- --     fce.DIM_PERSON_ID IN (SELECT pers_person_id FROM ssd_person)
+-- --     fce.DIM_PERSON_ID IN (SELECT pers_person_id FROM #ssd_person)
 
 -- GROUP BY
 --     fce.FACT_CARE_EPISODES_ID,
@@ -1892,7 +1977,7 @@ FROM
 --     cn.DIM_PERSON_ID;
 
 -- -- [TESTING]
--- SELECT DISTINCT clae_person_id FROM ssd_cla_episodes WHERE clae_person_id NOT IN (SELECT pers_person_id FROM ssd_person);
+-- SELECT DISTINCT clae_person_id FROM #ssd_cla_episodes WHERE clae_person_id NOT IN (SELECT pers_person_id FROM #ssd_person);
 
 
 
@@ -1911,7 +1996,7 @@ FROM
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cla_convictions (
+CREATE TABLE #ssd_cla_convictions (
     clac_cla_conviction_id      NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAC001A"}
     clac_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAC002A"}
     clac_cla_conviction_date    DATETIME,                   -- metadata={"item_ref":"CLAC003A"}
@@ -1919,7 +2004,7 @@ CREATE TABLE ssd_cla_convictions (
 );
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cla_convictions (
+INSERT INTO #ssd_cla_convictions (
     clac_cla_conviction_id, 
     clac_person_id, 
     clac_cla_conviction_date, 
@@ -1936,7 +2021,7 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fo.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -1958,7 +2043,7 @@ WHERE EXISTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cla_health (
+CREATE TABLE #ssd_cla_health (
     clah_health_check_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAH001A"}
     clah_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAH002A"}
     clah_health_check_type      NVARCHAR(500),              -- metadata={"item_ref":"CLAH003A"}
@@ -1967,7 +2052,7 @@ CREATE TABLE ssd_cla_health (
 );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cla_health (
+INSERT INTO #ssd_cla_health (
     clah_health_check_id,
     clah_person_id,
     clah_health_check_type,
@@ -1991,7 +2076,7 @@ WHERE
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fhc.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -2013,7 +2098,7 @@ AND EXISTS ( -- only ssd relevant records
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cla_immunisations (
+CREATE TABLE #ssd_cla_immunisations (
     clai_person_id                  NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAI002A"}
     clai_immunisations_status       NCHAR(1),                   -- metadata={"item_ref":"CLAI004A"}
     clai_immunisations_status_date  DATETIME                    -- metadata={"item_ref":"CLAI005A"}
@@ -2033,13 +2118,13 @@ CREATE TABLE ssd_cla_immunisations (
     WHERE
         EXISTS ( -- only ssd relevant records be considered for ranking
             SELECT 1 
-            FROM ssd_person p
+            FROM #ssd_person p
             WHERE CAST(p.pers_person_id AS INT) = fcla.DIM_PERSON_ID -- #DtoI-1799
         )
 )
 -- META-ELEMENT: {"type": "insert_data"} 
 -- (only most recent/rn==1 records)
-INSERT INTO ssd_cla_immunisations (
+INSERT INTO #ssd_cla_immunisations (
     clai_person_id,
     clai_immunisations_status,
     clai_immunisations_status_date
@@ -2068,7 +2153,7 @@ WHERE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"} 
-CREATE TABLE ssd_cla_substance_misuse (
+CREATE TABLE #ssd_cla_substance_misuse (
     clas_substance_misuse_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAS001A"}
     clas_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CLAS002A"}
     clas_substance_misuse_date      DATETIME,                   -- metadata={"item_ref":"CLAS003A"}
@@ -2077,7 +2162,7 @@ CREATE TABLE ssd_cla_substance_misuse (
 );
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cla_substance_misuse (
+INSERT INTO #ssd_cla_substance_misuse (
     clas_substance_misuse_id,
     clas_person_id,
     clas_substance_misuse_date,
@@ -2096,7 +2181,7 @@ FROM
 WHERE EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fsm.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -2118,7 +2203,7 @@ WHERE EXISTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cla_placement (
+CREATE TABLE #ssd_cla_placement (
     clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAP001A"}
     clap_cla_id                         NVARCHAR(48),               -- metadata={"item_ref":"CLAP012A"}
     clap_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"CLAP013A"}
@@ -2133,7 +2218,7 @@ CREATE TABLE ssd_cla_placement (
 );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cla_placement (
+INSERT INTO #ssd_cla_placement (
     clap_cla_placement_id,
     clap_cla_id,
     clap_person_id,
@@ -2205,7 +2290,7 @@ AND
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cla_reviews (
+CREATE TABLE #ssd_cla_reviews (
     clar_cla_review_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAR001A"}
     clar_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAR011A"}
     clar_cla_review_due_date        DATETIME,                   -- metadata={"item_ref":"CLAR003A"}
@@ -2215,7 +2300,7 @@ CREATE TABLE ssd_cla_reviews (
     );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cla_reviews (
+INSERT INTO #ssd_cla_reviews (
     clar_cla_review_id,
     clar_cla_id,
     clar_cla_review_due_date,
@@ -2260,7 +2345,7 @@ AND
  
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fcr.DIM_PERSON_ID -- #DtoI-1799
     )
  
@@ -2313,7 +2398,7 @@ WHERE
     ffa.ANSWER IS NOT NULL
  
 -- META-ELEMENT: {"type": "create_table"}     
-CREATE TABLE ssd_cla_previous_permanence (
+CREATE TABLE #ssd_cla_previous_permanence (
     lapp_table_id                               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LAPP001A"}
     lapp_person_id                              NVARCHAR(48),   -- metadata={"item_ref":"LAPP002A"}
     lapp_previous_permanence_option             NVARCHAR(200),  -- metadata={"item_ref":"LAPP003A"}
@@ -2322,7 +2407,7 @@ CREATE TABLE ssd_cla_previous_permanence (
 );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cla_previous_permanence (
+INSERT INTO #ssd_cla_previous_permanence (
                lapp_table_id,
                lapp_person_id,
                lapp_previous_permanence_option,
@@ -2367,7 +2452,7 @@ JOIN
     HDM.Child_Social.FACT_FORMS ff ON tmp_ffa.FACT_FORM_ID = ff.FACT_FORM_ID
 AND EXISTS (
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = ff.DIM_PERSON_ID -- #DtoI-1799
 )
 GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
@@ -2393,7 +2478,7 @@ GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}   
-CREATE TABLE ssd_pre_cla_care_plan (
+CREATE TABLE #ssd_pre_cla_care_plan (
     FACT_FORM_ID        NVARCHAR(48),
     DIM_PERSON_ID       NVARCHAR(48),
     ANSWER_NO           NVARCHAR(10),
@@ -2430,7 +2515,7 @@ LatestResponses AS (
         HDM.Child_Social.FACT_FORM_ANSWERS ffa ON mrqr.MaxFormID = ffa.FACT_FORM_ID AND mrqr.ANSWER_NO = ffa.ANSWER_NO
 )
 
-INSERT INTO ssd_pre_cla_care_plan (
+INSERT INTO #ssd_pre_cla_care_plan (
     FACT_FORM_ID,
     DIM_PERSON_ID,
     ANSWER_NO,
@@ -2450,7 +2535,7 @@ ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
 
  
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cla_care_plan (
+CREATE TABLE #ssd_cla_care_plan (
     lacp_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"LACP001A"}
     lacp_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LACP007A"}
     lacp_cla_care_plan_start_date   DATETIME,                   -- metadata={"item_ref":"LACP004A"}
@@ -2459,7 +2544,7 @@ CREATE TABLE ssd_cla_care_plan (
 );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cla_care_plan (
+INSERT INTO #ssd_cla_care_plan (
     lacp_table_id,
     lacp_person_id,
     lacp_cla_care_plan_start_date,
@@ -2487,7 +2572,7 @@ SELECT
             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END, '')), NULL) AS OTHERPLN
         FROM
             -- #ssd_TMP_PRE_cla_care_plan tmp_cpl
-            ssd_pre_cla_care_plan tmp_cpl
+            #ssd_pre_cla_care_plan tmp_cpl
 
         WHERE
             tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
@@ -2503,7 +2588,7 @@ FROM
 WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
     AND EXISTS (
         SELECT 1
-        FROM ssd_person p
+        FROM #ssd_person p
         WHERE CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID -- #DtoI-1799
     );
  
@@ -2529,7 +2614,7 @@ WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
 
  
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_cla_visits (
+CREATE TABLE #ssd_cla_visits (
     clav_cla_visit_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAV001A"}
     clav_cla_id                 NVARCHAR(48),               -- metadata={"item_ref":"CLAV007A"}
     clav_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAV008A"}
@@ -2539,7 +2624,7 @@ CREATE TABLE ssd_cla_visits (
 );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_cla_visits (
+INSERT INTO #ssd_cla_visits (
     clav_cla_visit_id,
     clav_cla_id,
     clav_person_id,
@@ -2574,7 +2659,7 @@ AND
 
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = clav.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -2597,7 +2682,7 @@ AND EXISTS ( -- only ssd relevant records
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_sdq_scores (
+CREATE TABLE #ssd_sdq_scores (
     csdq_table_id               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CSDQ001A"} 
     csdq_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CSDQ002A"}
     csdq_sdq_completed_date     DATETIME,                   -- metadata={"item_ref":"CSDQ003A"}
@@ -2606,7 +2691,7 @@ CREATE TABLE ssd_sdq_scores (
 );
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_sdq_scores (
+INSERT INTO #ssd_sdq_scores (
     csdq_table_id, 
     csdq_person_id, 
     csdq_sdq_completed_date, 
@@ -2641,7 +2726,7 @@ JOIN
     AND ffa.ANSWER IS NOT NULL
 WHERE EXISTS (
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = ff.DIM_PERSON_ID -- #DtoI-1799
 );
 
@@ -2656,12 +2741,12 @@ WHERE EXISTS (
         -- Assign unique row nums <within each partition> of csdq_person_id,
         -- the most recent csdq _form_ id/csdq_table_id will have a row number of 1.
         ROW_NUMBER() OVER (PARTITION BY csdq_person_id ORDER BY csdq_table_id DESC) AS rn
-    FROM ssd_sdq_scores
+    FROM #ssd_sdq_scores
 )
 
 -- delete all records from the ssd_sdq_scores table where row number(rn) > 1
 -- i.e. keep only the most recent
-DELETE FROM ssd_sdq_scores
+DELETE FROM #ssd_sdq_scores
 WHERE csdq_table_id IN (
     SELECT csdq_table_id
     FROM RankedSDQScores
@@ -2679,9 +2764,9 @@ WHERE csdq_table_id IN (
         -- Assign row num to each set of dups,
         -- partitioned by all columns that could potentially make a row unique
         ROW_NUMBER() OVER (PARTITION BY csdq_table_id, csdq_person_id ORDER BY csdq_table_id) AS row_num
-    FROM ssd_sdq_scores
+    FROM #ssd_sdq_scores
 )
-DELETE FROM ssd_sdq_scores
+DELETE FROM #ssd_sdq_scores
 WHERE csdq_table_id IN (
     SELECT csdq_table_id
     FROM DuplicateSDQScores
@@ -2704,7 +2789,7 @@ WHERE csdq_table_id IN (
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_missing (
+CREATE TABLE #ssd_missing (
     miss_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"MISS001A"}
     miss_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"MISS002A"}
     miss_missing_episode_start_date DATETIME,                   -- metadata={"item_ref":"MISS003A"}
@@ -2716,7 +2801,7 @@ CREATE TABLE ssd_missing (
 
 
 -- META-ELEMENT: {"type": "insert_data"} 
-INSERT INTO ssd_missing (
+INSERT INTO #ssd_missing (
     miss_table_id,
     miss_person_id,
     miss_missing_episode_start_date,
@@ -2756,7 +2841,7 @@ WHERE
 AND EXISTS 
     ( -- only ssd relevant records
     SELECT 1 
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fmp.DIM_PERSON_ID -- #DtoI-1799
     );
 
@@ -2775,7 +2860,7 @@ AND EXISTS
 --             0.1: worker/p.a id field changed to descriptive name towards AA reporting JH
 -- Status: [R]elease
 -- Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
---             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
+--             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM #ssd_person> references in the CTEs(added for performance)
 --             Dev: Revised V3/4 to aid performance on large involvements table aggr
 
 --             This table the cohort of children who are preparing to leave care, typically 15/16/17yrs+; 
@@ -2791,7 +2876,7 @@ AND EXISTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_care_leavers
+CREATE TABLE #ssd_care_leavers
 (
     clea_table_id                           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLEA001A"}
     clea_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"CLEA002A"}
@@ -2847,7 +2932,7 @@ WITH InvolvementHistoryCTE AS (
         fi.DIM_PERSON_ID
 )
  
-INSERT INTO ssd_care_leavers
+INSERT INTO #ssd_care_leavers
 (
     clea_table_id,
     clea_person_id,
@@ -2901,7 +2986,7 @@ LEFT JOIN InvolvementHistoryCTE AS ih ON dce.DIM_PERSON_ID = ih.DIM_PERSON_ID   
  
 WHERE EXISTS ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = dce.DIM_PERSON_ID -- #DtoI-1799
     )
  
@@ -2953,7 +3038,7 @@ GROUP BY
 
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_permanence (
+CREATE TABLE #ssd_permanence (
     perm_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"PERM001A"}
     perm_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"PERM002A"}
     perm_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"PERM022A"}
@@ -3051,13 +3136,13 @@ WITH RankedPermanenceData AS (
         -- -- Exclusion block commented for further [TESTING] 
         -- AND EXISTS ( -- ssd records only
         --     SELECT 1
-        --     FROM ssd_person p
+        --     FROM #ssd_person p
         --      WHERE CAST(p.pers_person_id AS INT) = fce.DIM_PERSON_ID -- #DtoI-1799
         -- )
 
 )
 
-INSERT INTO ssd_permanence (
+INSERT INTO #ssd_permanence (
     perm_table_id,
     perm_person_id,
     perm_cla_id,
@@ -3114,7 +3199,7 @@ WHERE rn = 1
 AND EXISTS
     ( -- only ssd relevant records
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE p.pers_person_id = perm_person_id -- this a NVARCHAR(48) equality link
     );
 
@@ -3141,7 +3226,7 @@ AND EXISTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_professionals (
+CREATE TABLE #ssd_professionals (
     prof_professional_id                NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"PROF001A"}
     prof_staff_id                       NVARCHAR(48),               -- metadata={"item_ref":"PROF010A"}
     prof_professional_name              NVARCHAR(300),              -- metadata={"item_ref":"PROF013A"}
@@ -3155,7 +3240,7 @@ CREATE TABLE ssd_professionals (
 
 
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_professionals (
+INSERT INTO #ssd_professionals (
     prof_professional_id, 
     prof_staff_id, 
     prof_professional_name,
@@ -3218,24 +3303,26 @@ WHERE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_department (
+CREATE TABLE #ssd_department (
     dept_team_id           NVARCHAR(48) PRIMARY KEY,  -- metadata={"item_ref":"DEPT1001A"}
     dept_team_name         NVARCHAR(255), -- metadata={"item_ref":"DEPT1002A"}
     dept_team_parent_id    NVARCHAR(48),  -- metadata={"item_ref":"DEPT1003A", "info":"references ssd_department.dept_team_id"}
     dept_team_parent_name  NVARCHAR(255)  -- metadata={"item_ref":"DEPT1004A"}
 );
 
+
+
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_department (
+INSERT INTO #ssd_department (
     dept_team_id,
     dept_team_name,
     dept_team_parent_id,
     dept_team_parent_name
 )
 SELECT 
-    dpt.dim_department_id       AS dept_team_id,
-    dpt.name                    AS dept_team_name,
-    dpt.dept_id                 AS dept_team_parent_id,
+    dpt.DIM_DEPARTMENT_ID       AS dept_team_id,
+    dpt.NAME                    AS dept_team_name,
+    dpt.DEPT_ID                 AS dept_team_parent_id,
     dpt.DEPT_TYPE_DESCRIPTION   AS dept_team_parent_name
 
 FROM HDM.Child_Social.DIM_DEPARTMENT dpt
@@ -3272,7 +3359,7 @@ WHERE dpt.dim_department_id <> -1;
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_involvements (
+CREATE TABLE #ssd_involvements (
     invo_involvements_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"INVO005A"}
     invo_professional_id        NVARCHAR(48),               -- metadata={"item_ref":"INVO006A"}
     invo_professional_role_id   NVARCHAR(200),              -- metadata={"item_ref":"INVO007A"}
@@ -3285,7 +3372,7 @@ CREATE TABLE ssd_involvements (
 );
  
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_involvements (
+INSERT INTO #ssd_involvements (
     invo_involvements_id,
     invo_professional_id,
     invo_professional_role_id,
@@ -3342,7 +3429,7 @@ WHERE
 AND EXISTS
     (
     SELECT 1
-    FROM ssd_person p
+    FROM #ssd_person p
     WHERE CAST(p.pers_person_id AS INT) = fi.DIM_PERSON_ID -- #DtoI-1799
 
     );
@@ -3379,7 +3466,7 @@ AND EXISTS
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_linked_identifiers (
+CREATE TABLE #ssd_linked_identifiers (
     link_table_id               NVARCHAR(48) DEFAULT NEWID() PRIMARY KEY,               -- metadata={"item_ref":"LINK001A"}
     link_person_id              NVARCHAR(48),                               -- metadata={"item_ref":"LINK002A"} 
     link_identifier_type        NVARCHAR(100),                              -- metadata={"item_ref":"LINK003A"}
@@ -3397,7 +3484,7 @@ CREATE TABLE ssd_linked_identifiers (
 
 -- META-ELEMENT: {"type": "insert_data"}
 -- link_identifier_type "FORMER_UPN"
-INSERT INTO ssd_linked_identifiers (
+INSERT INTO #ssd_linked_identifiers (
     link_person_id, 
     link_identifier_type,
     link_identifier_value,
@@ -3420,7 +3507,7 @@ WHERE
 
  AND EXISTS (
         SELECT 1
-        FROM ssd_person p
+        FROM #ssd_person p
         WHERE p.pers_person_id = csp.dim_person_id
     );
 
@@ -3428,7 +3515,7 @@ WHERE
 
 -- META-ELEMENT: {"type": "insert_data"}
 -- link_identifier_type "UPN"
-INSERT INTO ssd_linked_identifiers (
+INSERT INTO #ssd_linked_identifiers (
     link_person_id, 
     link_identifier_type,
     link_identifier_value,
@@ -3451,7 +3538,7 @@ WHERE
     csp.upn IS NOT NULL AND
     EXISTS (
         SELECT 1
-        FROM ssd_person p
+        FROM #ssd_person p
         WHERE p.pers_person_id = csp.dim_person_id
     );
 
@@ -3469,7 +3556,7 @@ WHERE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_s251_finance (
+CREATE TABLE #ssd_s251_finance (
     s251_table_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"S251001A"}
     s251_cla_placement_id   NVARCHAR(48),               -- metadata={"item_ref":"S251002A"} 
     s251_placeholder_1      NVARCHAR(48),               -- metadata={"item_ref":"S251003A"}
@@ -3491,7 +3578,7 @@ CREATE TABLE ssd_s251_finance (
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_voice_of_child (
+CREATE TABLE #ssd_voice_of_child (
     voch_table_id               NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"VOCH007A"}
     voch_person_id              NVARCHAR(48),               -- metadata={"item_ref":"VOCH001A"}
     voch_explained_worries      NCHAR(1),                   -- metadata={"item_ref":"VOCH002A"}
@@ -3514,7 +3601,7 @@ CREATE TABLE ssd_voice_of_child (
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_pre_proceedings (
+CREATE TABLE #ssd_pre_proceedings (
     prep_table_id                           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"PREP024A"}
     prep_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"PREP001A"}
     prep_plo_family_id                      NVARCHAR(48),               -- metadata={"item_ref":"PREP002A"}
@@ -3549,7 +3636,7 @@ CREATE TABLE ssd_pre_proceedings (
 --             0.1: upn _unknown size change in line with DfE to 4 160524 RH
 -- Status: [P]laceholder
 -- Remarks: Have temporarily disabled populating UPN & ULN as these access non-core
---             CMS modules. Can be re-enabled on a localised basis. 
+--             CMS modules. Can be re-enabled locally if accessible. 
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_903_DATA
@@ -3557,8 +3644,8 @@ CREATE TABLE ssd_pre_proceedings (
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"} 
-CREATE TABLE ssd_send (
-    send_table_id       NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"SEND001A"}
+CREATE TABLE #ssd_send (
+    send_table_id       NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"SEND001A"}
     send_person_id      NVARCHAR(48),               -- metadata={"item_ref":"SEND005A"}
     send_upn            NVARCHAR(48),               -- metadata={"item_ref":"SEND002A"}
     send_uln            NVARCHAR(48),               -- metadata={"item_ref":"SEND003A"}
@@ -3567,7 +3654,7 @@ CREATE TABLE ssd_send (
 
 -- META-ELEMENT: {"type": "insert_data"} 
 -- for link_identifier_type "FORMER_UPN"
-INSERT INTO ssd_send (
+INSERT INTO #ssd_send (
     send_table_id,
     send_person_id, 
     send_upn,
@@ -3590,7 +3677,7 @@ FROM
 WHERE
     EXISTS (
         SELECT 1
-        FROM ssd_person p
+        FROM #ssd_person p
         WHERE p.pers_person_id = csp.dim_person_id
     );
  
@@ -3609,7 +3696,7 @@ WHERE
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_sen_need (
+CREATE TABLE #ssd_sen_need (
     senn_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"SENN001A"}
     senn_active_ehcp_id             NVARCHAR(48),               -- metadata={"item_ref":"SENN002A"}
     senn_active_ehcp_need_type      NVARCHAR(100),              -- metadata={"item_ref":"SENN003A"}
@@ -3630,7 +3717,7 @@ CREATE TABLE ssd_sen_need (
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_ehcp_requests (
+CREATE TABLE #ssd_ehcp_requests (
     ehcr_ehcp_request_id            NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCR001A"}
     ehcr_send_table_id              NVARCHAR(48),               -- metadata={"item_ref":"EHCR002A"}
     ehcr_ehcp_req_date              DATETIME,                   -- metadata={"item_ref":"EHCR003A"}
@@ -3655,7 +3742,7 @@ CREATE TABLE ssd_ehcp_requests (
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"} 
-CREATE TABLE ssd_ehcp_assessment (
+CREATE TABLE #ssd_ehcp_assessment (
     ehca_ehcp_assessment_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCA001A"}
     ehca_ehcp_request_id                    NVARCHAR(48),               -- metadata={"item_ref":"EHCA002A"}
     ehca_ehcp_assessment_outcome_date       DATETIME,                   -- metadata={"item_ref":"EHCA003A"}
@@ -3680,7 +3767,7 @@ CREATE TABLE ssd_ehcp_assessment (
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_ehcp_named_plan (
+CREATE TABLE #ssd_ehcp_named_plan (
     ehcn_named_plan_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCN001A"}
     ehcn_ehcp_asmt_id               NVARCHAR(48),               -- metadata={"item_ref":"EHCN002A"}
     ehcn_named_plan_start_date      DATETIME,                   -- metadata={"item_ref":"EHCN003A"}
@@ -3705,7 +3792,7 @@ CREATE TABLE ssd_ehcp_named_plan (
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_ehcp_active_plans (
+CREATE TABLE #ssd_ehcp_active_plans (
     ehcp_active_ehcp_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCP001A"}
     ehcp_ehcp_request_id                NVARCHAR(48),               -- metadata={"item_ref":"EHCP002A"}
     ehcp_active_ehcp_last_review_date   DATETIME                    -- metadata={"item_ref":"EHCP003A"}
@@ -3726,7 +3813,7 @@ CREATE TABLE ssd_ehcp_active_plans (
 
 
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_extract_log (
+CREATE TABLE #ssd_extract_log (
     table_name           NVARCHAR(255) PRIMARY KEY,     
     schema_name          NVARCHAR(255),
     status               NVARCHAR(50), -- status code includes error output + schema.table_name
@@ -3761,71 +3848,71 @@ DECLARE @sql                NVARCHAR(MAX) = N'';
 
 -- Placeholder for table_cursor selection logic
 DECLARE table_cursor CURSOR FOR
-SELECT 'ssd_version_log'             UNION ALL -- Admin table, not SSD
-SELECT 'ssd_person'                  UNION ALL
-SELECT 'ssd_family'                  UNION ALL
-SELECT 'ssd_address'                 UNION ALL
-SELECT 'ssd_disability'              UNION ALL
-SELECT 'ssd_immigration_status'      UNION ALL
-SELECT 'ssd_mother'                  UNION ALL
-SELECT 'ssd_legal_status'            UNION ALL
-SELECT 'ssd_contacts'                UNION ALL
-SELECT 'ssd_early_help_episodes'     UNION ALL
-SELECT 'ssd_cin_episodes'            UNION ALL
-SELECT 'ssd_cin_assessments'         UNION ALL
-SELECT 'ssd_assessment_factors'      UNION ALL
-SELECT 'ssd_cin_plans'               UNION ALL
-SELECT 'ssd_cin_visits'              UNION ALL
-SELECT 'ssd_s47_enquiry'             UNION ALL
-SELECT 'ssd_initial_cp_conference'   UNION ALL
-SELECT 'ssd_cp_plans'                UNION ALL
-SELECT 'ssd_cp_visits'               UNION ALL
-SELECT 'ssd_cp_reviews'              UNION ALL
-SELECT 'ssd_cla_episodes'            UNION ALL
-SELECT 'ssd_cla_convictions'         UNION ALL
-SELECT 'ssd_cla_health'              UNION ALL
-SELECT 'ssd_cla_immunisations'       UNION ALL
-SELECT 'ssd_cla_substance_misuse'    UNION ALL
-SELECT 'ssd_cla_placement'           UNION ALL
-SELECT 'ssd_cla_reviews'             UNION ALL
-SELECT 'ssd_cla_previous_permanence' UNION ALL
-SELECT 'ssd_cla_care_plan'           UNION ALL
-SELECT 'ssd_cla_visits'              UNION ALL
-SELECT 'ssd_sdq_scores'              UNION ALL
-SELECT 'ssd_missing'                 UNION ALL
-SELECT 'ssd_care_leavers'            UNION ALL
-SELECT 'ssd_permanence'              UNION ALL
-SELECT 'ssd_professionals'           UNION ALL
-SELECT 'ssd_department'              UNION ALL
-SELECT 'ssd_involvements'            UNION ALL
-SELECT 'ssd_linked_identifiers'      UNION ALL
-SELECT 'ssd_s251_finance'            UNION ALL
-SELECT 'ssd_voice_of_child'          UNION ALL
-SELECT 'ssd_pre_proceedings'         UNION ALL
-SELECT 'ssd_send'                    UNION ALL
-SELECT 'ssd_sen_need'                UNION ALL
-SELECT 'ssd_ehcp_requests'           UNION ALL
-SELECT 'ssd_ehcp_assessment'         UNION ALL
-SELECT 'ssd_ehcp_named_plan'         UNION ALL
-SELECT 'ssd_ehcp_active_plans';
+SELECT '#ssd_version_log'             UNION ALL -- Admin table, not SSD
+SELECT '#ssd_person'                  UNION ALL
+SELECT '#ssd_family'                  UNION ALL
+SELECT '#ssd_address'                 UNION ALL
+SELECT '#ssd_disability'              UNION ALL
+SELECT '#ssd_immigration_status'      UNION ALL
+SELECT '#ssd_mother'                  UNION ALL
+SELECT '#ssd_legal_status'            UNION ALL
+SELECT '#ssd_contacts'                UNION ALL
+SELECT '#ssd_early_help_episodes'     UNION ALL
+SELECT '#ssd_cin_episodes'            UNION ALL
+SELECT '#ssd_cin_assessments'         UNION ALL
+SELECT '#ssd_assessment_factors'      UNION ALL
+SELECT '#ssd_cin_plans'               UNION ALL
+SELECT '#ssd_cin_visits'              UNION ALL
+SELECT '#ssd_s47_enquiry'             UNION ALL
+SELECT '#ssd_initial_cp_conference'   UNION ALL
+SELECT '#ssd_cp_plans'                UNION ALL
+SELECT '#ssd_cp_visits'               UNION ALL
+SELECT '#ssd_cp_reviews'              UNION ALL
+SELECT '#ssd_cla_episodes'            UNION ALL
+SELECT '#ssd_cla_convictions'         UNION ALL
+SELECT '#ssd_cla_health'              UNION ALL
+SELECT '#ssd_cla_immunisations'       UNION ALL
+SELECT '#ssd_cla_substance_misuse'    UNION ALL
+SELECT '#ssd_cla_placement'           UNION ALL
+SELECT '#ssd_cla_reviews'             UNION ALL
+SELECT '#ssd_cla_previous_permanence' UNION ALL
+SELECT '#ssd_cla_care_plan'           UNION ALL
+SELECT '#ssd_cla_visits'              UNION ALL
+SELECT '#ssd_sdq_scores'              UNION ALL
+SELECT '#ssd_missing'                 UNION ALL
+SELECT '#ssd_care_leavers'            UNION ALL
+SELECT '#ssd_permanence'              UNION ALL
+SELECT '#ssd_professionals'           UNION ALL
+SELECT '#ssd_department'              UNION ALL
+SELECT '#ssd_involvements'            UNION ALL
+SELECT '#ssd_linked_identifiers'      UNION ALL
+SELECT '#ssd_s251_finance'            UNION ALL
+SELECT '#ssd_voice_of_child'          UNION ALL
+SELECT '#ssd_pre_proceedings'         UNION ALL
+SELECT '#ssd_send'                    UNION ALL
+SELECT '#ssd_sen_need'                UNION ALL
+SELECT '#ssd_ehcp_requests'           UNION ALL
+SELECT '#ssd_ehcp_assessment'         UNION ALL
+SELECT '#ssd_ehcp_named_plan'         UNION ALL
+SELECT '#ssd_ehcp_active_plans';
 
 -- Define placeholder tables
 DECLARE @ssd_placeholder_tables TABLE (table_name NVARCHAR(255));
 INSERT INTO @ssd_placeholder_tables (table_name)
 VALUES
-    ('ssd_send'),
-    ('ssd_sen_need'),
-    ('ssd_ehcp_requests'),
-    ('ssd_ehcp_assessment'),
-    ('ssd_ehcp_named_plan'),
-    ('ssd_ehcp_active_plans');
+    ('#ssd_send'),
+    ('#ssd_sen_need'),
+    ('#ssd_ehcp_requests'),
+    ('#ssd_ehcp_assessment'),
+    ('#ssd_ehcp_named_plan'),
+    ('#ssd_ehcp_active_plans');
 
 DECLARE @dfe_project_placeholder_tables TABLE (table_name NVARCHAR(255));
 INSERT INTO @dfe_project_placeholder_tables (table_name)
 VALUES
-    ('ssd_s251_finance'),
-    ('ssd_voice_of_child'),
-    ('ssd_pre_proceedings');
+    ('#ssd_s251_finance'),
+    ('#ssd_voice_of_child'),
+    ('#ssd_pre_proceedings');
 
 -- Open table cursor
 OPEN table_cursor;
@@ -3932,7 +4019,7 @@ BEGIN
         END
 
         -- insert log entry 
-        INSERT INTO ssd_extract_log (
+        INSERT INTO #ssd_extract_log (
             table_name, 
             schema_name, 
             status, 
@@ -3951,7 +4038,7 @@ BEGIN
         -- log any error (this only an indicator of possible issue)
         -- tricky 
         SET @error_message = ERROR_MESSAGE();
-        INSERT INTO ssd_extract_log (
+        INSERT INTO #ssd_extract_log (
             table_name, 
             schema_name, 
             status, 
@@ -3983,40 +4070,12 @@ SET @sql = N'';
 
 -- META-ELEMENT: {"type": "console_output"}
 -- Forming part of the extract admin results output
-SELECT * FROM ssd_extract_log ORDER BY rows_inserted DESC;
-
-
--- META-ELEMENT: {"type": "console_output"}
--- Forming part of the extract admin results output
-SELECT * FROM ssd_extract_log ORDER BY rows_inserted DESC;
+SELECT * FROM #ssd_extract_log ORDER BY rows_inserted DESC;
 
 
 -- META-ELEMENT: {"type": "console_output"} 
 -- output for ref most recent/current ssd version and last update
-SELECT * FROM ssd_version_log WHERE is_current = 1;
-
-
-
-
--- META-END
-
-
-/* Start
-
-        Non-SDD Bespoke extract mods
-        
-        Examples of how to build on the ssd with bespoke additional fields. These can be 
-        refreshed|incl. within the rebuild script and rebuilt at the same time as the SSD
-        Changes should be limited to additional, non-destructive enhancements that do not
-        alter the core structure of the SSD. 
-        */
-
-
-
-
--- META-ELEMENT: {"type": "console_output"} 
--- output for ref most recent/current ssd version and last update
-SELECT * FROM ssd_version_log WHERE is_current = 1;
+SELECT * FROM #ssd_version_log WHERE is_current = 1;
 
 
 

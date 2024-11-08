@@ -29,7 +29,7 @@
       ssd_timeframe_years: 5
       ssd_sub1_range_years: 1
     persistent_ssd:
-      deploy_temp_tables: false
+      deploy_temp_tables: true
       temp_table_prefix: null
     dbschema:
       data_source_schema: HDM.Child_Social

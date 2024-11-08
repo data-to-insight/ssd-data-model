@@ -1,9 +1,9 @@
-340:
-  la_code: 340
-  la_name: Knowsley
+841:
+  la_code: 841
+  la_name: Darlington
   deployment_system:
     cms: SystemC
-    cms_db: SQLServer<2014
+    cms_db: SQLServer[D]
     db_vers: null
     db_compatibility: null
     ics_universe_vers: null
@@ -26,10 +26,10 @@
       *********************************************************************************************************
   settings:
     extract_parameters:
-      ssd_timeframe_years: 5
+      ssd_timeframe_years: 2
       ssd_sub1_range_years: 1
     persistent_ssd:
-      deploy_temp_tables: false
+      deploy_temp_tables: true
       temp_table_prefix: null
     dbschema:
       data_source_schema: HDM.Child_Social

@@ -1,9 +1,9 @@
-931:
-  la_code: 931
-  la_name: Oxfordshire
+935:
+  la_code: 935
+  la_name: Suffolk
   deployment_system:
     cms: SystemC
-    cms_db: SQLServer
+    cms_db: SQLServer[D]
     db_vers: null
     db_compatibility: null
     ics_universe_vers: null
@@ -26,13 +26,13 @@
       *********************************************************************************************************
   settings:
     extract_parameters:
-      ssd_timeframe_years: 5
+      ssd_timeframe_years: 1
       ssd_sub1_range_years: 1
     persistent_ssd:
-      deploy_temp_tables: false
+      deploy_temp_tables: true
       temp_table_prefix: null
     dbschema:
-      data_source_schema: HDM.Child_Social 
+      data_source_schema: HDM.Child_Social
       deployment_database_name: HDM_Local
       deployment_schema_name: null
     dev_setup:
@@ -45,8 +45,8 @@
     remove_deployment_status_note: true
     remove_ssd_non_core_modifications: true
     remove_create_pk: false
-    remove_create_fk: false
-    remove_create_idx: false
+    remove_create_fk: true
+    remove_create_idx: true
   named_sql_container_remove:
   - involvements_history
   named_sql_tag_remove:

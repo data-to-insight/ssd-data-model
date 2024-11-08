@@ -33,7 +33,7 @@
     # params used within SQL SSD extract
 
     extract_parameters: # META-ELEMENT: {"type": "ssd_timeframe"}
-      ssd_timeframe_years: 3
+      ssd_timeframe_years: 5
       ssd_sub1_range_years: 1
 
     persistent_ssd: # META-ELEMENT: {"type": "persistent_ssd"}
@@ -44,7 +44,7 @@
     dbschema: # META-ELEMENT: {"type": "dbschema"}  # la schema definition
       data_source_schema: HDM.Child_Social  
       deployment_database_name: HDM_Local             
-      deployment_schema_name: ssd_development
+      deployment_schema_name: null # default for east sussex is 'ssd_development.'', except when issuing to live
 
     dev_setup: # META-ELEMENT: {"type": "dev_setup"} 
       no_count_on: false 
@@ -66,7 +66,8 @@
 
 
   named_sql_container_remove:
-  - involvements_history
+  - null
+  # - involvements_history
 
   named_sql_tag_remove:
     remove_drop_table:           # {"type": "drop_table"}

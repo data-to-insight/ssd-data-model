@@ -36,7 +36,7 @@
       ssd_sub1_range_years: 1
 
     persistent_ssd: # META-ELEMENT: {"type": "persistent_ssd"}
-      deploy_temp_tables: false  # true = temporary tables, false = persistent tables
+      deploy_temp_tables: true  # true = temporary tables, false = persistent tables
       temp_table_prefix: "#ssd_"  
 
     dbschema: # META-ELEMENT: {"type": "dbschema"}  # la schema definition
