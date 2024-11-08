@@ -26,9 +26,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_send
     - mosaic:ssd_send
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      Row identifier for the ssd_send table'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Row identifier
+      for the ssd_send table
   - name: send_upn
     description: UPN
     item_ref: SEND002A
@@ -53,9 +52,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_send
     - mosaic:ssd_send
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      The Child''s Unique Pupil Number'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) The Child's
+      Unique Pupil Number
   - name: send_uln
     description: ULN
     item_ref: SEND003A
@@ -97,7 +95,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_send
     - mosaic:ssd_send
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nWhere no\
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Where no\
       \ identifier is available, please record one of the following options:\n-UN1\
       \ Child is aged under 6 years old and is not yet assigned a UPN\n-UN2 Child\
       \ has never attended a state-funded school in England and has not been assigned\
@@ -131,6 +129,5 @@ nodes:
     cms_table:
     - liquid_logic:ssd_send
     - mosaic:ssd_send
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      Person''s ID generated in CMS Database'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Person's
+      ID generated in CMS Database

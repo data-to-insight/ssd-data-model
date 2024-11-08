@@ -27,8 +27,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_assessment
     - mosaic:ssd_ehcp_assessment
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nEHCP assessment\
-      \ record unique ID from system or auto-generated as part of export.\nThis module\
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) EHCP assessment\
+      \ record unique ID from system or auto-generated as part of export. This module\
       \ collects information on the decision to issue a plan. Where a decision has\
       \ been made to issue a plan, the detail about the placement named on the EHC\
       \ plan should be recorded in Module 4. It is possible that multiple assessments\
@@ -62,9 +62,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_assessment
     - mosaic:ssd_ehcp_assessment
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      EHCP request record unique ID from system or auto-generated as part of export.'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) EHCP request
+      record unique ID from system or auto-generated as part of export.
   - name: ehca_ehcp_assessment_outcome_date
     description: Assessment Outcome Date
     item_ref: EHCA003A
@@ -86,10 +85,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_assessment
     - mosaic:ssd_ehcp_assessment
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nThe assessment\
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) The assessment\
       \ outcome date is required where EAM004A is equal to \u2018Y\u2019 or \u2018\
-      N\u2019, either record:\n-Date on which EHC plan was issued, or\n-Date on which\
-      \ person was notified of decision not to issue a plan\nIf a decision to issue\
+      N\u2019, either record: -Date on which EHC plan was issued, or -Date on which\
+      \ person was notified of decision not to issue a plan If a decision to issue\
       \ has been made but no plan has been issued, please leave blank."
   - name: ehca_ehcp_assessment_outcome
     description: Assessment Outcome
@@ -112,19 +111,19 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_assessment
     - mosaic:ssd_ehcp_assessment
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nAssessment\
-      \ outcome - decision to issue EHC plan:\n-Y It was decided an EHC plan would\
-      \ be issued\n-N It was decided an EHC plan would not be issued\n-A Decision\
-      \ has not yet been made\n-W Request withdrawn or ceased before decision whether\
-      \ to issue was made\n-H Historical \u2013 Decision to issue was made before\
-      \ the latest collection period\nIf a local authority decides not to issue an\
-      \ EHC plan and this decision is subsequently changed by the local authority\
-      \ for any reason the original assessment outcome and assessment outcome date\
-      \ should not be changed. If the change follows from mediation or tribunal the\
-      \ appropriate mediation and tribunal indicators should be selected for the assessment.\n\
-      W may include where the person moves out of the local authority area, leaves\
-      \ education or training or if the child or young person dies.\nWhere A or W\
-      \ is selected, no further information is required in this or subsequent modules.\
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Assessment\
+      \ outcome - decision to issue EHC plan: -Y It was decided an EHC plan would\
+      \ be issued -N It was decided an EHC plan would not be issued -A Decision has\
+      \ not yet been made -W Request withdrawn or ceased before decision whether to\
+      \ issue was made -H Historical \u2013 Decision to issue was made before the\
+      \ latest collection period If a local authority decides not to issue an EHC\
+      \ plan and this decision is subsequently changed by the local authority for\
+      \ any reason the original assessment outcome and assessment outcome date should\
+      \ not be changed. If the change follows from mediation or tribunal the appropriate\
+      \ mediation and tribunal indicators should be selected for the assessment. W\
+      \ may include where the person moves out of the local authority area, leaves\
+      \ education or training or if the child or young person dies. Where A or W is\
+      \ selected, no further information is required in this or subsequent modules.\
       \ The 20-week timeliness measure will not apply in cases where a plan has not\
       \ yet been issued.\nFor an active plan, where the decision to issue was made\
       \ before the latest collection period (H - Historical) information is still\
@@ -150,6 +149,6 @@ nodes:
     cms_table:
     - liquid_logic:ssd_ehcp_assessment
     - mosaic:ssd_ehcp_assessment
-    guidance: "(currently 'PLACEHOLDER_DATA' pending further development)\nAssessment\
-      \ 20-week time limit exceptions apply?\n1 \u2013 Yes, exceptions apply\n0 \u2013\
+    guidance: "(currently 'PLACEHOLDER_DATA' pending further development) Assessment\
+      \ 20-week time limit exceptions apply? 1 \u2013 Yes, exceptions apply 0 \u2013\
       \ No, exceptions do not apply"

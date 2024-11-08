@@ -19,7 +19,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_professionals
     - mosaic:ssd_professionals
-    guidance: Row identifier for the ssd_professionals table
+    guidance: System generated worker ID field
   - name: prof_staff_id
     description: Staff Identifier
     item_ref: PROF010A
@@ -32,7 +32,8 @@ nodes:
     - liquid_logic
     - mosaic
     - azeus
-    guidance: System ID generated in CMS Database
+    guidance: Staff ID used within reporting. Not all professionals are expected to
+      have a staff_id e.g. External Agency|GP
   - name: prof_professional_name
     description: Staff name
     item_ref: PROF013A
@@ -106,7 +107,7 @@ nodes:
     cms_table:
     - liquid_logic:ssd_professionals
     - mosaic:ssd_professionals
-    guidance: (currently 'PLACEHOLDER_DATA' pending further development)
+    guidance: Caseload calculated based on SSD time frame for each worker(using prof_professional_id)
   - name: prof_professional_department
     description: Worker Department e.g. 'Youth Support Team West'
     item_ref: PROF012A
@@ -148,6 +149,5 @@ nodes:
     cms_field:
     - liquid_logic:prof_agency_worker_flag
     - mosaic:prof_agency_worker_flag
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      Y/N flag indicating if worker is an Agency worker'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Y/N flag
+      indicating if worker is an Agency worker

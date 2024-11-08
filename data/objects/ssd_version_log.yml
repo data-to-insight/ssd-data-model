@@ -1,0 +1,53 @@
+---
+nodes:
+- name: ssd_version_log
+  fields:
+  - name: version_number
+    description: version num (e.g., "1.0.0")
+    item_ref: VERS1001A
+    type: nvarchar
+    categories:
+    - admin
+    guidance: SSD ADMIN only table/field
+  - name: release_date
+    description: date of version release
+    item_ref: VERS1002A
+    type: Datetime
+    categories:
+    - admin
+    guidance: SSD ADMIN only table/field
+  - name: description
+    description: brief description of version
+    item_ref: VERS1003A
+    type: nvarchar
+    categories:
+    - admin
+    guidance: SSD ADMIN only table/field
+  - name: is_current
+    description: flag to indicate if this is the current version
+    item_ref: VERS1004A
+    type: Bit
+    categories:
+    - admin
+    guidance: SSD ADMIN only table/field
+  - name: created_at
+    description: timestamp when record was created
+    item_ref: VERS1005A
+    type: Datetime
+    categories:
+    - admin
+    guidance: SSD ADMIN only table/field
+  - name: created_by
+    description: which user created the record
+    item_ref: VERS1006A
+    type: nvarchar
+    categories:
+    - admin
+    guidance: SSD ADMIN only table/field
+  - name: impact_description
+    description: additional notes on the impact of the release
+    item_ref: VERS1007A
+    type: nvarchar
+    categories:
+    - admin
+    guidance: SSD ADMIN only table/field

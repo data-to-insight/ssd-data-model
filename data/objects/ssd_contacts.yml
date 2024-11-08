@@ -119,28 +119,12 @@ nodes:
     - liquid_logic:ssd_contacts
     - mosaic:ssd_contacts
     guidance: 'Outcome of the Contact. Combined dictionary/ json type containing the
-      following, where there is a value recorded:
+      following, AS cont_contact_outcome_json
 
-      - NEW_REFERRAL_FLAG
+      ---------------------------------------
 
-      - EXISTING_REFERRAL_FLAG
+      -- SSD standard - all keys in structure regardless of data presence
 
-      - CP_ENQUIRY_FLAG
-
-      - NFA_FLAG
-
-      - NON_AGENCY_ADOPTION_FLAG
-
-      - PRIVATE_FOSTERING_FLAG
-
-      - FAADVICE_FLAG
-
-      - MISSING_FLAG
-
-      - OLA_CP_FLAG
-
-      - OTHER_OUTCOMES_EXIST_FLAG
-
-      - NUMBER_OF_OUTCOMES
-
-      - COMMENTS'
+      { NEW_REFERRAL_FLAG: "", EXISTING_REFERRAL_FLAG: "", CP_ENQUIRY_FLAG: "", NFA_FLAG:
+      "", NON_AGENCY_ADOPTION_FLAG: "", PRIVATE_FOSTERING_FLAG: "", ADVICE_FLAG: "",
+      MISSING_FLAG: "", OLA_CP_FLAG: "", OTHER_OUTCOMES_EXIST_FLAG: "" }'

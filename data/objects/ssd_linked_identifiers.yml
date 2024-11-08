@@ -20,9 +20,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_linked_identifiers
     - mosaic:ssd_linked_identifiers
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      Row identifier for the ssd_linked_identifiers table'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Row identifier
+      for the ssd_linked_identifiers table
   - name: link_person_id
     description: Person Unique ID
     item_ref: LINK002A
@@ -44,9 +43,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_linked_identifiers
     - mosaic:ssd_linked_identifiers
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      Person''s ID generated in CMS Database'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Person's
+      ID generated in CMS Database
   - name: link_identifier_type
     description: '[''Case Number'', ''Unique Pupil Number'', NHS Number'', ''Home
       Office Registration'', National Insurance Number'', ''YOT Number'', Court Case
@@ -66,11 +64,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_linked_identifiers
     - mosaic:ssd_linked_identifiers
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      Linked Identifier Type e.g. [''Case Number'', ''Unique Pupil Number'', NHS Number'',
-      ''Home Office Registration'', National Insurance Number'', ''YOT Number'', Court
-      Case Number'', RAA ID'', ''Incident ID'']'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Linked Identifier
+      Type e.g. ['Case Number', 'Unique Pupil Number', NHS Number', 'Home Office Registration',
+      National Insurance Number', 'YOT Number', Court Case Number', RAA ID', 'Incident
+      ID']
   - name: link_identifier_value
     description: Identifier or reference code
     item_ref: LINK004A
@@ -88,9 +85,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_linked_identifiers
     - mosaic:ssd_linked_identifiers
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      Identifier value'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Identifier
+      value
   - name: link_valid_from_date
     description: Date the identifier is known/valid from
     item_ref: LINK005A
@@ -108,9 +104,8 @@ nodes:
     cms_table:
     - liquid_logic:ssd_linked_identifiers
     - mosaic:ssd_linked_identifiers
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      Date the identifier is known/valid from'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Date the
+      identifier is known/valid from
   - name: link_valid_to_date
     description: Date the identifier ceases to be known/valid
     item_ref: LINK006A
@@ -128,6 +123,5 @@ nodes:
     cms_table:
     - liquid_logic:ssd_linked_identifiers
     - mosaic:ssd_linked_identifiers
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      Date the identifier ceases to be known/valid'
+    guidance: (currently 'PLACEHOLDER_DATA' pending further development) Date the
+      identifier ceases to be known/valid

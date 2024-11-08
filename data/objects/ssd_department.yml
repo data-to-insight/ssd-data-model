@@ -3,7 +3,7 @@ nodes:
 - name: ssd_department
   fields:
   - name: dept_team_id
-    description: null
+    description: Department or Team ID
     item_ref: DEPT1001A
     type: nvarchar
     categories:
@@ -13,11 +13,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      No guidance available yet'
+    guidance: System unique identifier for department|team
   - name: dept_team_name
-    description: null
+    description: Department or Team name
     item_ref: DEPT1002A
     type: nvarchar
     categories:
@@ -27,11 +25,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      No guidance available yet'
+    guidance: Name description for department|team
   - name: dept_team_parent_id
-    description: null
+    description: Parent Department or Team ID
     item_ref: DEPT1003A
     type: nvarchar
     foreign_key: ssd_department.dept_team_id
@@ -42,11 +38,9 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      No guidance available yet'
+    guidance: System identifier for department|team parent
   - name: dept_team_parent_name
-    description: null
+    description: Parent Department or Team name
     item_ref: DEPT1004A
     type: nvarchar
     categories:
@@ -56,6 +50,4 @@ nodes:
     cms:
     - liquid_logic
     - mosaic
-    guidance: '(currently ''PLACEHOLDER_DATA'' pending further development)
-
-      No guidance available yet'
+    guidance: Name description for department|team parent

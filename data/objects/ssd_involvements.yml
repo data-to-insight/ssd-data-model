@@ -108,29 +108,13 @@ nodes:
     cms_table:
     - liquid_logic:ssd_involvements
     - mosaic:ssd_involvements
-    guidance: 'Reason for change of Social Worker
-
-      Code set
-
-      MANAGE - Managing Caseloads
-
-      FCONTA - First contact or re-referral
-
-      LEFTRL - Previous social worker left role
-
-      ORGRST - New social worker assigned following organisational restructure
-
-      TSPROC - New social worker assigned following child transfer due to standard
-      process
-
+    guidance: Reason for change of Social Worker Code set MANAGE - Managing Caseloads
+      FCONTA - First contact or re-referral LEFTRL - Previous social worker left role
+      ORGRST - New social worker assigned following organisational restructure TSPROC
+      - New social worker assigned following child transfer due to standard process
       ABSENC - Absence cover or return from absence CHCHAN - Child requested change
-      from previous social worker
-
-      PCCHAN - Parent/carer requested change from previous social worker
-
-      SWDIED - Previous Social Worker died
-
-      OTHERS - Other reason'
+      from previous social worker PCCHAN - Parent/carer requested change from previous
+      social worker SWDIED - Previous Social Worker died OTHERS - Other reason
   - name: invo_person_id
     description: Person Unique ID
     item_ref: INVO011A
@@ -139,7 +123,7 @@ nodes:
     - workforce
     returns:
     - Local
-    guidance: null
+    guidance: Person's ID generated in CMS Database
   - name: invo_referral_id
     description: Referral ID
     item_ref: INVO010A

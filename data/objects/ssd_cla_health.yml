@@ -101,14 +101,10 @@ nodes:
     cms_table:
     - liquid_logic:ssd_cla_health
     - mosaic:ssd_cla_health
-    guidance: 'Status of Health Check
-
-      Code set
+    guidance: 'Status of Health Check Code set
 
       Planned
 
-      Refused
-
-      Cancelled
+      Refused Cancelled
 
       Completed'

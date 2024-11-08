@@ -53,8 +53,15 @@ nodes:
     cms_table:
     - liquid_logic:ssd_address
     - mosaic:ssd_address
-    guidance: 'Address (combined dictionary/json type containing: room, floor, flat,
-      building, house num, street, locality, town, county, uprn, easting, northing)'
+    guidance: 'Persons address Combined dictionary/ json type containing the following,
+      AS addr_address_json
+
+      ---------------------------------------
+
+      -- SSD standard - all keys in structure regardless of data presence
+
+      { ROOM: "", FLOOR: "", FLAT: "", BUILDING: "", HOUSE: "", STREET: "", TOWN:
+      "", UPRN: "", EASTING: "", NORTHING: "" }'
   - name: addr_person_id
     description: Person Unique ID
     item_ref: ADDR002A

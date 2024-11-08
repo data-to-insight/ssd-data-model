@@ -69,7 +69,7 @@ nodes:
     - liquid_logic:ssd_cla_placement
     - mosaic:ssd_cla_placement
     guidance: "This category can be defined, in a broad sense, as indicating where\
-      \ the child is living.\nCode set\nA3 - Placed for adoption with parental/guardian\
+      \ the child is living.\nCode set A3 - Placed for adoption with parental/guardian\
       \ consent with current foster carer(s) (S19 Adoption and Children Act 2002)\
       \ or with a freeing order where parental/guardian consent has been given (S18(1)(a)\
       \ Adoption Act 1976)\nA4 - Placed for adoption with parental/guardian consent\

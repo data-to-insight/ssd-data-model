@@ -94,7 +94,7 @@ nodes:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
     guidance: "CIN Primary Need Code. This code indicates the main reason why a child\
-      \ started to receive services.\nThe categories are designed only to identify\
+      \ started to receive services. The categories are designed only to identify\
       \ what kind of pressures are placed on social services. They have no diagnostic\
       \ value with regard to the children themselves and must not be used to determine\
       \ what type of service the child should receive.\nIf there is difficulty choosing\
@@ -184,34 +184,17 @@ nodes:
     - liquid_logic:ssd_cin_episodes
     - mosaic:ssd_cin_episodes
     guidance: 'Outcome of the Referral. This indicates the outcome of the initial
-      Referral, not the CIN Episode.
+      Referral, not the CIN Episode. Combined dictionary/ json type containing the
+      following AS cine_referral_outcome_json
 
-      Combined dictionary/ json type containing the following, where there is a value
-      recorded:
+      ---------------------------------------
 
-      - SINGLE_ASSESSMENT_FLAG
+      -- SSD standard - all keys in structure regardless of data presence
 
-      - NFA_FLAG
-
-      - STRATEGY_DISCUSSION_FLAG
-
-      - CLA_REQUEST_FLAG
-
-      - NON_AGENCY_ADOPTION_FLAG
-
-      - PRIVATE_FOSTERING_FLAG
-
-      - CP_TRANSFER_IN_FLAG
-
-      - CP_CONFERENCE_FLAG
-
-      - CARE_LEAVER_FLAG
-
-      - OTHER_OUTCOMES_EXIST_FLAG
-
-      - NUMBER_OF_OUTCOMES
-
-      - COMMENTS'
+      { SINGLE_ASSESSMENT_FLAG: "", NFA_FLAG: "", STRATEGY_DISCUSSION_FLAG: "", CLA_REQUEST_FLAG:
+      "", NON_AGENCY_ADOPTION_FLAG: "", PRIVATE_FOSTERING_FLAG: "", CP_TRANSFER_IN_FLAG:
+      "", CP_CONFERENCE_FLAG: "", CARE_LEAVER_FLAG: "", OTHER_OUTCOMES_EXIST_FLAG:
+      "" }'
   - name: cine_referral_nfa
     description: CIN Referral NFA Flag
     item_ref: CINE011A

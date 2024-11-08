@@ -21,7 +21,7 @@ nodes:
     cms_field:
     - liquid_logic:moth_table_id
     - mosaic:moth_table_id
-    guidance: null
+    guidance: Row identifier for the ssd_mother table
   - name: moth_person_id
     description: Person Unique ID (Mother)
     item_ref: MOTH002A

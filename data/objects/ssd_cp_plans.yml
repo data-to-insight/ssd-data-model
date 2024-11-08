@@ -166,7 +166,7 @@ nodes:
     - cp_plan
     returns:
     - Local
-    guidance: null
+    guidance: Is this an Other Local Authority Plan? Y/N
   - name: cppl_cp_plan_latest_category
     description: CP Plan Latest Category of Abuse
     item_ref: CPPL010A

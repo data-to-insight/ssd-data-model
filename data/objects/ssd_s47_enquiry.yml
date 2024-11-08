@@ -154,27 +154,16 @@ nodes:
     - liquid_logic:ssd_s47_enquiry
     - mosaic:ssd_s47_enquiry
     guidance: 'Outcome of the Section 47 Enquiry. Combined dictionary/ json type containing
-      the following, where there is a value recorded:
+      the following, AS s47e_s47_outcome_json
 
-      - NFA_FLAG
+      ---------------------------------------
 
-      - LEGAL_ACTION_FLAG
+      -- SSD standard - all keys in structure regardless of data presence
 
-      - PROV_OF_SERVICES_FLAG
-
-      - PROV_OF_SB_CARE_FLAG
-
-      - CP_CONFERENCE_FLAG
-
-      - NFA_CONTINUE_SINGLE_FLAG
-
-      - MONITOR_FLAG
-
-      - OTHER_OUTCOMES_EXIST_FLAG
-
-      - TOTAL_NO_OF_OUTCOMES
-
-      - COMMENTS'
+      { NFA_FLAG: "", LEGAL_ACTION_FLAG: "", PROV_OF_SERVICES_FLAG: "", PROV_OF_SB_CARE_FLAG:
+      "", CP_CONFERENCE_FLAG: "", NFA_CONTINUE_SINGLE_FLAG: "", MONITOR_FLAG: "",
+      OTHER_OUTCOMES_EXIST_FLAG: "", TOTAL_NO_OF_OUTCOMES: , OUTCOME_COMMENTS: ""
+      }'
   - name: s47e_s47_completed_by_worker_id
     description: S47 Enquiries completed by worker
     item_ref: S47E008A
@@ -185,6 +174,9 @@ nodes:
     - child_protection
     returns:
     - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:s47e_s47_completed_by_worker_name
     - mosaic:s47e_s47_completed_by_worker_name
@@ -202,6 +194,9 @@ nodes:
     - child_protection
     returns:
     - Local
+    cms:
+    - liquid_logic
+    - mosaic
     cms_field:
     - liquid_logic:s47e_s47_completed_by_team_name
     - mosaic:s47e_s47_completed_by_team_name

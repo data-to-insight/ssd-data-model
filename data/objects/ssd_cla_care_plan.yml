@@ -99,10 +99,8 @@ nodes:
     - liquid_logic:ssd_cla_care_plan
     - mosaic:ssd_cla_care_plan
     guidance: 'The current permanence plan for the child. Combined dictionary/ json
-      type containing one or more of the following, where there is value recorded:
-
-      REMAINSUP - Remaining with birth family supported by shared care/short term
-      breaks
+      type containing the following, REMAINSUP - Remaining with birth family supported
+      by shared care/short term breaks
 
       RETURN1M - Return to birth family within one month
 
@@ -125,4 +123,11 @@ nodes:
 
       Where the child does not have a permanence plan agreed (such as recently entered
       care) please leave blank. More than one box might be ticked if parallel planning
-      is being pursued'
+      is being pursued AS lacp_cla_care_plan_json
+
+      ---------------------------------------
+
+      -- SSD standard - all keys in structure regardless of data presence
+
+      { REMAINSUP: "", RETURN1M: "", RETURN6M: "", RETURNEV: "", LTRELFR: "", LTFOST18:
+      "", RESPLMT: "", SUPPLIV: "", ADOPTION: "", OTHERPLN: "" }'

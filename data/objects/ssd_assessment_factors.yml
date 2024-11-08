@@ -59,13 +59,18 @@ nodes:
     cms_table:
     - liquid_logic:ssd_assessment_factors
     - mosaic:ssd_assessment_factors
-    guidance: "Record of the factors as understood at the end of the Assessment.\n\
-      Code set\n1A/1B/1C - Alcohol misuse by the child/ parent(s) or carer(s)/ another\
-      \ person living in the household.\n2A/2B/2C - Drug misuse by the child/ parent(s)\
-      \ or carer(s)/ another person living in the household.\n3A/3B/3C - Concerns\
-      \ about the child/ parent(s) or carer(s)/ another person living in the household\
-      \ being the subject of domestic violence.\n4A/4B/4C - Concerns about Mental\
-      \ Health of the child/ parent(s) or carer(s)/ another person living in the household.\n\
+    guidance: "Record of the factors as understood at the end of the Assessment. Combined\
+      \ dictionary/ json type containing the following AS cinf_assessment_factors_json\n\
+      ---------------------------------------\n-- SSD standard - all keys in structure\
+      \ regardless of data presence\n-- Opt1: Current implementation as JSON ARRAY\
+      \ [ ] [\n\"1A\", \"2B\", \"3A\", ...] -- Opt2: Forward planned implementation\
+      \ as JSON {\n\"1A\": \"Yes\", \"2B\": \"No\", \"3A\": \"Yes\", ...} Code set\n\
+      1A/1B/1C - Alcohol misuse by the child/ parent(s) or carer(s)/ another person\
+      \ living in the household.\n2A/2B/2C - Drug misuse by the child/ parent(s) or\
+      \ carer(s)/ another person living in the household.\n3A/3B/3C - Concerns about\
+      \ the child/ parent(s) or carer(s)/ another person living in the household being\
+      \ the subject of domestic violence.\n4A/4B/4C - Concerns about Mental Health\
+      \ of the child/ parent(s) or carer(s)/ another person living in the household.\n\
       5A/5B/5C - Concerns about Learning Disability of the Child/ parent(s) or carer(s)/\
       \ another person living in the household.\n6A/6B/6C - Concerns about Physical\
       \ Disability/ illness of the Child/ parent(s) or carer(s)/ another person living\
