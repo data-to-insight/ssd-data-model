@@ -2,7 +2,7 @@
   la_code: <la_id>
   la_name: <la_name>
 
-  deployment_system: # META-ELEMENT: {"type": "deployment_system"}
+  deployment_system: # META-ELEMENT: {"type": "deployment_system"} # vals here must be type(str)
     cms: <null>
     cms_db: <null> 
     db_vers: <null> 

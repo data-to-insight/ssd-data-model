@@ -4,7 +4,7 @@
   deployment_system:
     cms: SystemC
     cms_db: SQLServer
-    db_vers: null
+    db_vers: '2014' # legacy PRE2016
     db_compatibility: null
     ics_universe_vers: null
     data_warehouse_vers: null

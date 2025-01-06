@@ -7,8 +7,8 @@ https://data-to-insight.github.io/ssd-data-model/
 
 Script creates DfE AnnexA outputs list 1->10 from the SSD structure. 
 Prerequisit(s): The SSD extract must have been run/set up before running this tool.
-List queries L1-10 might need to be run seperately, or output to a file(not provided) in order to view the outputs. 
-Each list populates a temporary table of the extracted data to enable additional peocessing/monitoring to be 
+List queries might need to be run seperately, or output to a file(not provided) in order to view the outputs. 
+Each list populates a temporary table of the extracted data to enable additional preprocessing/monitoring to be 
 undertaken. 
 */
 
