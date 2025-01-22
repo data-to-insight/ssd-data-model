@@ -200,7 +200,8 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: Person/child details. This the most connected table in the SSD.
 -- Author: D2I
--- Version: 1.2:
+-- Version: 1.3
+--              1.2: forename and surname added to aid onward data project on api 220125 RH
 --             1.1: ssd_flag added for phase 2 non-core filter testing [1,0] 010824 RH
 --             1.0: fixes to where filter in-line with existing cincplac reorting 040724 JH
 --             0.2: upn _unknown size change in line with DfE to 4 160524 RH
@@ -230,7 +231,9 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 -- META-ELEMENT: {"type": "create_table"}
 CREATE TABLE ssd_development.ssd_person (
     pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
-    pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}   
+    pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"} 
+    pers_forename          NVARCHAR(100),              -- metadata={"item_ref":"PERS015A"}  
+    pers_surname            NVARCHAR(255),              -- metadata={"item_ref":"PERS016A"}  
     pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If -additional- status to Gender is held, otherwise duplicate pers_gender"}    
     pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown",NULL,"F","U","M","I"]}       
     pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A", "expected_data":[NULL, tbc]} 
@@ -261,6 +264,8 @@ WITH f903_data_CTE AS (
 INSERT INTO ssd_development.ssd_person (
     pers_legacy_id,
     pers_person_id,
+    pers_forename,
+    pers_surname,
     pers_sex,       -- sex and gender currently extracted as one
     pers_gender,    -- 
     pers_ethnicity,
@@ -278,6 +283,8 @@ SELECT
     -- TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING]
     p.LEGACY_ID,
     CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
+    p.FORENAME, 
+    p.SURNAME,
     'SSD_PH' AS pers_sex,                   -- Placeholder for those LAs that store sex and gender independently
     p.GENDER_MAIN_CODE,                     -- Gender as used in stat-returns
     p.ETHNICITY_MAIN_CODE,
@@ -4659,7 +4666,8 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: 
 -- Author: D2I
--- Version: 1.2
+-- Version: 1.3
+--             1.2: idx added o prof_professional_id towards csc api work 220125 RH
 --             1.1: staff_id field clean-up, removal of dirty|admin values 090724 RH
 --             1.0: #DtoI-1743 caseload count revised to be within ssd timeframe 170524 RH
 --             0.9: prof_professional_id now becomes staff_id 090424 JH
@@ -4754,7 +4762,8 @@ WHERE
 
 -- META-ELEMENT: {"type": "create_fk"}    
 
--- META-ELEMENT: {"type": "create_idx"}
+-- META-ELEMENT: {"type": "create_idx"} 
+CREATE NONCLUSTERED INDEX idx_ssd_prof_professional_id      ON ssd_development.ssd_professionals (prof_professional_id);
 CREATE NONCLUSTERED INDEX idx_ssd_prof_staff_id             ON ssd_development.ssd_professionals (prof_staff_id);
 CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON ssd_development.ssd_professionals(prof_social_worker_registration_no);
 
@@ -4843,7 +4852,8 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description:
 -- Author: D2I
--- Version: 1.2:
+-- Version: 1.3
+--             1.2: idex on invo_professional_id added towards csc api work 220125 RH
 --             1.1: Revisions to 1.0/0.9. DEPT_ID else .._HISTORY_DEPARTMENT_ID 300724 RH
 --             1.0: Trancated professional_team field IF comment data populates 110624 RH
 --             0.9: added person_id and changed source of professional_team 090424 JH
@@ -4952,12 +4962,12 @@ AND EXISTS
 -- META-ELEMENT: {"type": "create_fk"} 
 
 -- META-ELEMENT: {"type": "create_idx"}
+CREATE NONCLUSTERED INDEX idx_ssd_invo_professional_id          ON ssd_development.ssd_involvements(invo_professional_id);
 CREATE NONCLUSTERED INDEX idx_ssd_invo_person_id                ON ssd_development.ssd_involvements(invo_person_id);
 CREATE NONCLUSTERED INDEX idx_ssd_invo_professional_role_id     ON ssd_development.ssd_involvements(invo_professional_role_id);
 CREATE NONCLUSTERED INDEX idx_ssd_invo_involvement_start_date   ON ssd_development.ssd_involvements(invo_involvement_start_date);
 CREATE NONCLUSTERED INDEX idx_ssd_invo_involvement_end_date     ON ssd_development.ssd_involvements(invo_involvement_end_date);
 CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id              ON ssd_development.ssd_involvements(invo_referral_id);
-
 
 -- META-ELEMENT: {"type": "test"}
 PRINT 'Table created: ' + @TableName;
@@ -5735,7 +5745,7 @@ IF OBJECT_ID('tempdb..#ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE #ssd_
 
 -- META-ELEMENT: {"type": "create_table"}
 CREATE TABLE ssd_development.ssd_ehcp_active_plans (
-    ehcp_active_ehcp_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCP001A"}
+    ehcp_active_ehcp_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCP001A"}
     ehcp_ehcp_request_id                NVARCHAR(48),               -- metadata={"item_ref":"EHCP002A"}
     ehcp_active_ehcp_last_review_date   DATETIME                    -- metadata={"item_ref":"EHCP003A"}
 );
@@ -5765,6 +5775,212 @@ PRINT 'Table created: ' + @TableName;
 
 
 -- META-END
+
+
+
+
+
+
+
+-- META-CONTAINER: {"type": "table", "name": "ssd_dfe_api_data_collection"}
+-- =============================================================================
+-- Description: API DfE table for API payload and logging. For most LA's this is a placeholder structure as source data not common|confirmed
+-- Author: D2I
+-- Version: 0.1
+-- Status: [D]ev
+-- Remarks: This object only in use by LA's who have explicitly agreed to DfE pilot API scheme.
+-- Dependencies: 
+-- - Yet to be defined
+-- - ssd_person
+-- -
+-- =============================================================================
+
+-- META-ELEMENT: {"type": "test"}
+SET @TableName = N'ssd_dfe_api_data_collection';
+
+-- META-ELEMENT: {"type": "drop_table"}
+IF OBJECT_ID('ssd_dfe_api_data_collection', 'U') IS NOT NULL DROP TABLE ssd_dfe_api_data_collection;
+
+CREATE TABLE ssd_dfe_api_data_collection (
+    id INT IDENTITY(1,1) PRIMARY KEY, -- Unique identifier for each JSON entry
+    json_payload NVARCHAR(MAX) NOT NULL, -- The JSON data from your query
+    submission_status NVARCHAR(50) DEFAULT 'Pending', -- Status: Pending, Sent, Error
+    submission_timestamp DATETIME DEFAULT GETDATE(), -- Timestamp of data insertion
+    api_response NVARCHAR(MAX) NULL -- Store the API response or error messages
+);
+
+
+-- META-ELEMENT: {"type": "create_fk"}
+
+-- META-ELEMENT: {"type": "create_idx"}
+
+
+-- META-ELEMENT: {"type": "test"}
+PRINT 'Table created: ' + @TableName;
+
+
+
+-- META-ELEMENT: {"type": "insert_data"}
+
+-- sample|fake rows into the table
+-- 'Pending' status
+INSERT INTO ssd_dfe_api_data_collection (json_payload, submission_status)
+VALUES (
+    '{
+        "LA_Child_ID_id": 1,
+        "common_person_id": "C12345",
+        "FirstName": "SSD_PH",
+        "Surname": "SSD_PH",
+        "UPN": "UPN123456",
+        "Former_UPN": "UPN54321",
+        "UPN_Unknown": false,
+        "Date_of_Birth": "2010-05-15",
+        "Expected_Date_of_Birth": null,
+        "Sex": "M",
+        "Ethnicity": "White",
+        "Disabilities": [{"Disability": "D001"}],
+        "Postcode": "BN12 4AX",
+        "UASC": "Yes",
+        "UASC_End_Date": "2023-12-31",
+        "SDQ_Scores": [{"SDQ_Completed_Date": "2023-01-15", "SDQ_Score": 15}],
+        "EHCP": {
+            "EHCP_Request_Date": "2023-02-01",
+            "Assessment": {
+                "EHCP_Assessment_Outcome_Date": "2023-03-01",
+                "EHCP_Assessment_Outcome": "Approved",
+                "Named_Plan": [{"Named_Plan_Start_Date": "2023-04-01"}]
+            }
+        },
+        "CIN_Episodes": [{
+            "Referral_Date": "2022-12-01",
+            "Source_of_Referral": "Social Worker",
+            "Closure_Date": "2023-06-01",
+            "Reason_for_Closure": "Resolved",
+            "CP_Plans": [{"Plan_Start_Date": "2022-12-15", "Plan_End_Date": "2023-05-31"}]
+        }]
+    }',
+    'Pending'
+);
+
+-- 'Sent' status
+INSERT INTO ssd_dfe_api_data_collection (json_payload, submission_status, api_response)
+VALUES (
+    '{
+        "LA_Child_ID_id": 2,
+        "common_person_id": "C67890",
+        "FirstName": "SSD_PH",
+        "Surname": "SSD_PH",
+        "UPN": "UPN987654",
+        "Former_UPN": null,
+        "UPN_Unknown": false,
+        "Date_of_Birth": "2012-11-22",
+        "Expected_Date_of_Birth": null,
+        "Sex": "F",
+        "Ethnicity": "Asian",
+        "Disabilities": [],
+        "Postcode": "BN13 8XR",
+        "UASC": null,
+        "UASC_End_Date": null,
+        "SDQ_Scores": [],
+        "EHCP": null,
+        "CIN_Episodes": [{
+            "Referral_Date": "2023-06-15",
+            "Source_of_Referral": "Police",
+            "Closure_Date": null,
+            "Reason_for_Closure": null,
+            "CP_Plans": []
+        }]
+    }',
+    'Sent',
+    'API response: {"status": "success", "message": "Data submitted successfully"}'
+);
+
+-- 'Error' status
+INSERT INTO ssd_dfe_api_data_collection (json_payload, submission_status, api_response)
+VALUES (
+    '{
+        "LA_Child_ID_id": 3,
+        "common_person_id": "C54321",
+        "FirstName": "SSD_PH",
+        "Surname": "SSD_PH",
+        "UPN": "UPN543210",
+        "Former_UPN": null,
+        "UPN_Unknown": true,
+        "Date_of_Birth": "2008-03-10",
+        "Expected_Date_of_Birth": null,
+        "Sex": "U",
+        "Ethnicity": "Mixed",
+        "Disabilities": [{"Disability": "D002"}, {"Disability": "D003"}],
+        "Postcode": "BN14 7GH",
+        "UASC": "No",
+        "UASC_End_Date": null,
+        "SDQ_Scores": [{"SDQ_Completed_Date": "2023-03-05", "SDQ_Score": 12}],
+        "EHCP": null,
+        "CIN_Episodes": null
+    }',
+    'Error',
+    'API response: {"status": "error", "message": "Invalid UPN format"}'
+);
+
+
+INSERT INTO ssd_dfe_api_data_collection (json_payload)
+SELECT 
+(
+    SELECT 
+        p.pers_person_id AS [LA_Child_ID_id],
+        p.pers_common_child_id AS [common_person_id],
+        'SSD_PH' AS [FirstName],
+        'SSD_PH' AS [Surname],
+        (
+            SELECT TOP 1 link_identifier_value
+            FROM ssd_linked_identifiers
+            WHERE link_person_id = p.pers_person_id 
+              AND link_identifier_type = 'Unique Pupil Number'
+            ORDER BY link_valid_from_date DESC
+        ) AS [UPN],
+        (
+            SELECT TOP 1 link_identifier_value
+            FROM ssd_linked_identifiers
+            WHERE link_person_id = p.pers_person_id 
+              AND link_identifier_type = 'Former Unique Pupil Number'
+            ORDER BY link_valid_from_date DESC
+        ) AS [Former_UPN],
+        p.pers_upn_unknown AS [UPN_Unknown],
+        CONVERT(VARCHAR(10), p.pers_dob, 23) AS [Date_of_Birth],
+        CONVERT(VARCHAR(10), p.pers_expected_dob, 23) AS [Expected_Date_of_Birth],
+        CASE 
+            WHEN p.pers_sex = 'M' THEN 'M'
+            WHEN p.pers_sex = 'F' THEN 'F'
+            ELSE 'U'
+        END AS [Sex],
+        p.pers_ethnicity AS [Ethnicity],
+        (
+            SELECT 
+                d.disa_disability_code AS [Disability]
+            FROM ssd_disability d
+            WHERE d.disa_person_id = p.pers_person_id
+            FOR JSON PATH
+        ) AS [Disabilities],
+        (
+            SELECT TOP 1 a.addr_address_postcode
+            FROM ssd_address a
+            WHERE a.addr_person_id = p.pers_person_id
+            ORDER BY a.addr_address_start_date DESC
+        ) AS [Postcode],
+        (
+            SELECT TOP 1 immi.immi_immigration_status
+            FROM ssd_immigration_status immi
+            WHERE immi.immi_person_id = p.pers_person_id
+            ORDER BY 
+                CASE 
+                    WHEN immi.immi_immigration_status_end_date IS NULL THEN 1 
+                    ELSE 0 
+                END,
+                immi.immi_immigration_status_start_date DESC
+        ) AS [UASC]
+    FROM ssd_person p
+    FOR JSON PATH, ROOT('Children')
+) AS json_payload;
 
 
 /* End
