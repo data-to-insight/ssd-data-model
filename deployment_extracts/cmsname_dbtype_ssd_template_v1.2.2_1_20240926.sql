@@ -61,79 +61,65 @@ Currently in [REVIEW]
 **********************************************************************************************************
 */
 -- META-ELEMENT: {"type": "config_metadata"}
--- Developers pls leave blank 
+-- Optional notes from la config file 
 
 -- META-ELEMENT: {"type": "dev_set_up"}
--- e.g. 
--- GO 
--- SET NOCOUNT ON;
+GO 
+SET NOCOUNT ON;
+
+
 
 
 -- META-ELEMENT: {"type": "ssd_timeframe"}
--- postgress version
-DO $$ 
-DECLARE 
-    ssd_timeframe_years INT := 4; -- ssd extract time-frame (YRS)
-    ssd_sub1_range_years INT := 1; -- Not in use
-    CaseloadLastSept30th DATE;
-    CaseloadTimeframeStartDate DATE;
-BEGIN
-    -- CASELOAD count Date (Currently: September 30th)
-    CaseloadLastSept30th := CASE 
-        WHEN CURRENT_DATE > MAKE_DATE(EXTRACT(YEAR FROM CURRENT_DATE)::INT, 9, 30)
-        THEN MAKE_DATE(EXTRACT(YEAR FROM CURRENT_DATE)::INT, 9, 30)
-        ELSE MAKE_DATE(EXTRACT(YEAR FROM CURRENT_DATE)::INT - 1, 9, 30)
-    END;
+DECLARE @ssd_timeframe_years INT = 6; -- ssd extract time-frame (YRS)
+DECLARE @ssd_sub1_range_years INT = 1;
 
-    -- Start Date for Caseload Timeframe
-    CaseloadTimeframeStartDate := CaseloadLastSept30th - INTERVAL '6 years';
 
-    RAISE NOTICE 'CaseloadLastSept30th: %, CaseloadTimeframeStartDate: %', CaseloadLastSept30th, CaseloadTimeframeStartDate;
-END $$;
+
+-- CASELOAD count Date (Currently: September 30th)
+DECLARE @CaseloadLastSept30th DATE; 
+SET @CaseloadLastSept30th = CASE 
+                        WHEN CONVERT(DATE, GETDATE()) > DATEFROMPARTS(YEAR(GETDATE()), 9, 30) 
+                        THEN DATEFROMPARTS(YEAR(GETDATE()), 9, 30)
+                        ELSE DATEFROMPARTS(YEAR(GETDATE()) - 1, 9, 30)
+                    END;
+
+
+DECLARE @CaseloadTimeframeStartDate DATE = DATEADD(YEAR, -@ssd_timeframe_years, @CaseloadLastSept30th);
+-- Example resultant dates into @CaseloadTimeframeStartDate
+                                -- With 
+                                -- @CaseloadLastSept30th = 30th September 2023
+                                -- @CaseloadTimeframeStartDate = 30th September 2017
+
+
 
 
 -- META-ELEMENT: {"type": "dbschema"}
--- Postgress example for review
--- Set the schema search path if needed (SSD tables created here)
-SET search_path TO 'ssd_development'; -- replace 'ssd_development' with the desired schema name
+-- Point to DB/TABLE_CATALOG if required (SSD tables created here)
+USE HDM_Local;                           -- used in logging (and seperate clean-up script(s))
+DECLARE @schema_name NVARCHAR(128) = N'ssd_development';    -- set your schema name here OR leave empty for default behaviour. Used towards ssd_extract_log
 
-DO $$ 
-DECLARE 
-    schema_name VARCHAR(128) := 'ssd_development';  -- set schema name here OR leave empty for default behavior
-BEGIN
-    RAISE NOTICE 'Schema Name: %', schema_name;
-END $$;
+ALTER USER [ESCC\RobertHa] WITH DEFAULT_SCHEMA = [ssd_development];
+
 
 -- META-ELEMENT: {"type": "test"}
-DO $$ 
-DECLARE 
-    TableName VARCHAR(128) := 'table_name_placeholder'; -- replace placeholder with the actual table name
-BEGIN
-    RAISE NOTICE 'Table Name: %', TableName;
-END $$;
-
-
--- -- META-ELEMENT: {"type": "dbschema"}
--- -- SQL Server variant for review
--- -- Point to DB/TABLE_CATALOG if required (SSD tables created here)
--- USE HDM_Local;                           -- used in logging (and seperate clean-up script(s))
--- DECLARE @schema_name NVARCHAR(128) = N'ssd_development';    -- set your schema name here OR leave empty for default behaviour. Used towards ssd_extract_log
-
--- -- META-ELEMENT: {"type": "test"}
--- DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder'; -- Note: also/seperately use of @table_name in non-test|live elements of script. 
-
-
+DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder'; -- Note: also/seperately use of @table_name in non-test|live elements of script. 
 
 -- META-END
+
+
 
 
 
 /* ********************************************************************************************************** */
 -- META-CONTAINER: {"type": "settings", "name": "testing"}
 /* Towards simplistic TEST run outputs and logging  (to be removed from live v2+) */
--- Devs can ignore this block. 
--- META-END
 
+-- META-ELEMENT: {"type": "test"}
+DECLARE @StartTime DATETIME, @EndTime DATETIME;
+SET @StartTime = GETDATE(); -- Script start time
+
+-- META-END
 
 
 
@@ -230,7 +216,9 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 -- META-ELEMENT: {"type": "create_table"}
 CREATE TABLE ssd_development.ssd_person (
     pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
-    pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}   
+    pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}
+    pers_forename           NVARCHAR(100),              -- metadata={"item_ref":"PERS015A"}  
+    pers_surname            NVARCHAR(255),              -- metadata={"item_ref":"PERS016A"}   
     pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If additional status to Gender is held, otherwise dup of pers_gender"}    
     pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown","NULL","F","U","M","I"]}       
     pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"} 
@@ -249,6 +237,8 @@ CREATE TABLE ssd_development.ssd_person (
 INSERT INTO ssd_development.ssd_person (
     pers_legacy_id,
     pers_person_id,
+    pers_forename,
+    pers_surname,
     pers_sex,       -- sex and gender currently extracted as one
     pers_gender,    -- 
     pers_ethnicity,
@@ -304,7 +294,7 @@ INSERT INTO ssd_development.ssd_person (
 -- WHERE 
 --     p.DIM_PERSON_ID IS NOT NULL
 --     AND p.DIM_PERSON_ID <> -1
---     -- AND YEAR(p.BIRTH_DTTM) != 1900 
+--     -- AND YEAR(p.BIRTH_DTTM) != 1900 -- #DtoI-1814
 --     AND (p.IS_CLIENT = 'Y'
 --         OR (
 --             EXISTS (
@@ -338,13 +328,14 @@ INSERT INTO ssd_development.ssd_person (
 --                 WHERE (fi.DIM_PERSON_ID = p.DIM_PERSON_ID
 --                 AND (fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE 'KA%' --Key Agencies (External)
 -- 				OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL OR fi.IS_ALLOCATED_CW_FLAG = 'Y')
--- 				AND START_DTTM > '2009-12-04 00:54:49.947' -- was trying to cut off from 2010 but when I changed the date it threw up an erro
+-- 				-- AND START_DTTM > '2009-12-04 00:54:49.947' -- #DtoI-1830 care leavers who were aged 22-25 and may not have had Allocated Case Worker relationship for years+.
 -- 				AND DIM_WORKER_ID <> '-1' 
 --                 AND (fi.END_DTTM IS NULL OR fi.END_DTTM > GETDATE()))
 --             )
 --         )
 --     )
 --     ;
+
 
 
 
@@ -1933,7 +1924,7 @@ CREATE TABLE ssd_development.ssd_cla_episodes (
     clae_cla_episode_start_date     DATETIME,                   -- metadata={"item_ref":"CLAE003A"}
     clae_cla_episode_start_reason   NVARCHAR(100),              -- metadata={"item_ref":"CLAE004A"}
     clae_cla_primary_need_code      NVARCHAR(3),                -- metadata={"item_ref":"CLAE009A", "info":"Expecting codes N0-N9"} 
-    clae_cla_episode_ceased         DATETIME,                   -- metadata={"item_ref":"CLAE005A"}
+    clae_cla_episode_ceased_date    DATETIME,                   -- metadata={"item_ref":"CLAE005A"}
     clae_cla_episode_ceased_reason  NVARCHAR(255),              -- metadata={"item_ref":"CLAE006A"}
     clae_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAE010A"}
     clae_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CLAE011A"}

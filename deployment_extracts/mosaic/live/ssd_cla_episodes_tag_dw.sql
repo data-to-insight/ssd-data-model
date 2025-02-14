@@ -37,7 +37,7 @@ select
 			and
 			dbo.future(ref.CLOSURE_DATE) >= cla.START_DATE
 	) clae_referral_id,
-	cla.END_DATE clae_cla_episode_ceased,
+	cla.END_DATE clae_cla_episode_ceased_date,
 	pla.REASON_EPISODE_CEASED clae_cla_episode_ceased_reason -- [REVIEW] 290424 RH
 from
 	dm_cla_summaries cla

@@ -172,7 +172,7 @@ nodes:
       \ no parent(s) available to provide for them. A child whose parent(s) decide\
       \ it is in the best interest for the child to be adopted would be included in\
       \ this category"
-  - name: clae_cla_episode_ceased
+  - name: clae_cla_episode_ceased_date
     description: Date Episode Ceased
     item_ref: CLAE005A
     type: datetime
@@ -186,8 +186,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:clae_cla_episode_ceased
-    - mosaic:clae_cla_episode_ceased
+    - liquid_logic:clae_cla_episode_ceased_date
+    - mosaic:clae_cla_episode_ceased_date
     cms_table:
     - liquid_logic:ssd_cla_episodes
     - mosaic:ssd_cla_episodes

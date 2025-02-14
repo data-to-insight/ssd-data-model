@@ -45,7 +45,8 @@ END;
 FROM sys.tables AS t
 INNER JOIN sys.schemas AS s ON t.schema_id = s.schema_id
 WHERE s.name = @schema_name
-AND t.name LIKE 'ssd_%';  -- Filter for tables prefixed with 'ssd_'
+AND t.name LIKE 'ssd_%'  -- Filter for tables prefixed with 'ssd_'
+AND t.name NOT IN ('ssd_change_log_hash', 'ssd_table_metadata', 'ssd_api_data_staging');  -- Exclude specific persistent change tracking tables
 
 -- execute drop tables
 EXEC sp_executesql @sql;

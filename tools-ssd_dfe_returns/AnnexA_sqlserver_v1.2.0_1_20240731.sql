@@ -1555,7 +1555,7 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
                 clae.clae_person_id PersonID,
                 clae.clae_cla_episode_start_date CLAEpiStart,
                 clae.clae_cla_primary_need_code CategoryOfNeed,
-                clae.clae_cla_episode_ceased DateEpisodeCeased,
+                clae.clae_cla_episode_ceased_date DateEpisodeCeased,
                 clae.clae_cla_episode_ceased_reason ReasonEpisodeCeased,
                 clae.clae_cla_last_iro_contact_date LatestIROVisit,
                 DENSE_RANK() OVER(PARTITION BY clae.clae_person_id
@@ -1566,7 +1566,7 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
             INNER JOIN ssd_cla_episodes clae ON clap.clap_cla_id = clae.clae_cla_id
             WHERE
                 COALESCE(clap.clap_cla_placement_end_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
-                AND COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
+                AND COALESCE(clae.clae_cla_episode_ceased_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
         ) claepi
         ON clapl.PersonID = claepi.PersonID
         AND claepi.Rnk = 1
@@ -1715,10 +1715,10 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
             FROM
                 ssd_cla_episodes clae
             WHERE
-                COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -12, GETDATE())
+                COALESCE(clae.clae_cla_episode_ceased_date, '99991231') >= DATEADD(MONTH, -12, GETDATE())
                 AND (clae.clae_cla_episode_start_reason IN ('S', 'P', 'B')
                     OR (clae.clae_cla_episode_start_date <= DATEADD(MONTH, -12, GETDATE())
-                        AND clae.clae_cla_episode_ceased > DATEADD(MONTH, -12, GETDATE())
+                        AND clae.clae_cla_episode_ceased_date > DATEADD(MONTH, -12, GETDATE())
                         AND clae.clae_cla_episode_start_reason IN ('T', 'U')))
             GROUP BY
                 clae.clae_person_id
@@ -1806,7 +1806,7 @@ IF OBJECT_ID('tempdb..#AA_8_children_in_care') IS NOT NULL DROP TABLE #AA_8_chil
             LEFT JOIN ssd_department dpt ON inv.invo_professional_team = dpt.dept_team_id
 
             WHERE
-                COALESCE(clae.clae_cla_episode_ceased, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
+                COALESCE(clae.clae_cla_episode_ceased_date, '99991231') >= DATEADD(MONTH, -@AA_ReportingPeriod, GETDATE())
         ) inv
         ON claepi.PersonID = inv.PersonID
         AND claepi.CLAEpiStart = inv.CLAEpiStart

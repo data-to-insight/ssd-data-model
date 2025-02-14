@@ -5239,7 +5239,7 @@ Dependencies:
 			clae_cla_id								varchar(48),
 			clae_referral_id						varchar(48),
 			clae_cla_last_iro_contact_date			datetime,
-			clae_cla_episode_ceased					datetime,
+			clae_cla_episode_ceased_date			datetime,
 			clae_cla_placement_id					varchar(48),
 			clae_entered_care_date					datetime,
 			clae_cla_episode_ceased_reason			varchar(255)
@@ -5253,7 +5253,7 @@ Dependencies:
 			clae_cla_id,
 			clae_referral_id,
 			clae_cla_last_iro_contact_date,
-			clae_cla_episode_ceased,
+			clae_cla_episode_ceased_date,
 			clae_cla_placement_id,
 			clae_entered_care_date,
 			clae_cla_episode_ceased_reason
@@ -5322,7 +5322,7 @@ Dependencies:
 					and
 					ffa.date_answer <= dbo.future(cla.end_date)
 			) clae_cla_last_iro_contact_date,
-			cla.END_DATE clae_cla_episode_ceased,
+			cla.END_DATE clae_cla_episode_ceased_date,
 			cla.placement_id clae_cla_placement_id,
 			poc.start_date clae_entered_care_date,
 			pla.REASON_EPISODE_CEASED clae_cla_episode_ceased_reason
