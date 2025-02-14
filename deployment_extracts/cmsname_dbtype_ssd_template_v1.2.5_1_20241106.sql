@@ -232,7 +232,7 @@ IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 CREATE TABLE ssd_development.ssd_person (
     pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
     pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"} 
-    pers_forename          NVARCHAR(100),              -- metadata={"item_ref":"PERS015A"}  
+    pers_forename          NVARCHAR(100),               -- metadata={"item_ref":"PERS015A"}  
     pers_surname            NVARCHAR(255),              -- metadata={"item_ref":"PERS016A"}  
     pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If -additional- status to Gender is held, otherwise duplicate pers_gender"}    
     pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown",NULL,"F","U","M","I"]}       
