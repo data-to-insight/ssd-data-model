@@ -10,6 +10,8 @@ nodes:
     categories:
     - looked_after
     - convictions
+    constraints:
+    - pk
     returns:
     - Local
     cms:

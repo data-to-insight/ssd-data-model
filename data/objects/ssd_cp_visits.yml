@@ -11,6 +11,8 @@ nodes:
     - child_protection
     - cp_plan
     - visit
+    constraints:
+    - pk
     returns:
     - Local
     guidance: Row identifier for the ssd_cp_visits table

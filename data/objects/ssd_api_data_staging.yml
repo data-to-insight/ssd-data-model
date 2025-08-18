@@ -1,0 +1,144 @@
+---
+nodes:
+- name: ssd_api_data_staging
+  fields:
+  - name: id
+    description: identifier for json record
+    item_ref: APIS1001A
+    type: nvarchar
+    categories:
+    - admin
+    constraints:
+    - pk
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
+    guidance: SSD ADMIN only table/field
+  - name: person_id
+    description: associated person id with json payload, person_id also duplicated
+      within payload
+    item_ref: APIS1002A
+    type: nvarchar
+    categories:
+    - admin
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
+    guidance: SSD ADMIN only table/field
+  - name: json_payload
+    description: agreed json data payload in line with api specification
+    item_ref: APIS1003A
+    type: nvarchar
+    categories:
+    - admin
+    returns:
+    - Local
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
+    guidance: SSD ADMIN only table/field
+  - name: current_hash
+    description: computed hash from pending or last sent payload
+    item_ref: APIS1004A
+    type: BINARY
+    categories:
+    - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
+    guidance: SSD ADMIN only table/field
+  - name: previous_hash
+    description: computed hash on current data payload
+    item_ref: APIS1005A
+    type: BINARY
+    categories:
+    - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
+    guidance: SSD ADMIN only table/field
+  - name: submission_status
+    description: status flag string of json payload in relation to outgoing transmission
+      - Pending, Sent, Error
+    item_ref: APIS1006A
+    type: nvarchar
+    categories:
+    - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
+    guidance: SSD ADMIN only table/field
+  - name: submission_timestamp
+    description: Generated timestamp from api process GETDATE()
+    item_ref: APIS1007A
+    type: datetime
+    categories:
+    - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
+    guidance: SSD ADMIN only table/field
+  - name: api_response
+    description: reponse code and detail returned from api endpoint
+    item_ref: APIS1008A
+    type: nvarchar
+    categories:
+    - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
+    guidance: SSD ADMIN only table/field
+  - name: row_state
+    description: status flag string describing whether json record contains new, updated,
+      deleted, unchanged data within the record. Only those not flagged unchanged
+      are included in any api transmission.
+    item_ref: APIS1009A
+    type: nvarchar
+    categories:
+    - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
+    guidance: SSD ADMIN only table/field
+  - name: last_updated
+    description: timestamp for the last time the row json record was updated/extracted
+    item_ref: APIS1010A
+    type: datetime
+    categories:
+    - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
+    guidance: SSD ADMIN only table/field

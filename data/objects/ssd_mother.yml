@@ -16,6 +16,8 @@ nodes:
     - identity
     - looked_after
     - mother
+    constraints:
+    - pk
     returns:
     - Local
     cms_field:

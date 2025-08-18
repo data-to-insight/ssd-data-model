@@ -14,6 +14,8 @@ nodes:
     - looked_after
     - permanence
     - adoption
+    constraints:
+    - pk
     returns:
     - Local
     cms:

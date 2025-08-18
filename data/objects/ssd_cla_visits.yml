@@ -10,6 +10,8 @@ nodes:
     categories:
     - looked_after
     - visit
+    constraints:
+    - pk
     returns:
     - Local
     cms:

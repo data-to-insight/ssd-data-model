@@ -10,6 +10,8 @@ nodes:
     categories:
     - looked_after
     - care_plan
+    constraints:
+    - pk
     returns:
     - Local
     cms:

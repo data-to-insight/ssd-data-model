@@ -9,6 +9,8 @@ nodes:
     primary_key: true
     categories:
     - workforce
+    constraints:
+    - pk
     returns:
     - Local
     cms:

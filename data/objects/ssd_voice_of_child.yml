@@ -9,6 +9,8 @@ nodes:
     primary_key: true
     categories:
     - voice_of_child
+    constraints:
+    - pk
     returns:
     - 1bDraft
     cms:

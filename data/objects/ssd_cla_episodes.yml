@@ -14,6 +14,8 @@ nodes:
         enabled: true
     categories:
     - looked_after
+    constraints:
+    - pk
     returns:
     - RIIA
     cms:
@@ -186,8 +188,8 @@ nodes:
     - liquid_logic
     - mosaic
     cms_field:
-    - liquid_logic:clae_cla_episode_ceased_date
-    - mosaic:clae_cla_episode_ceased_date
+    - liquid_logic:clae_cla_episode_ceased
+    - mosaic:clae_cla_episode_ceased
     cms_table:
     - liquid_logic:ssd_cla_episodes
     - mosaic:ssd_cla_episodes

@@ -10,6 +10,8 @@ nodes:
     categories:
     - initial_cp_conference
     - child_protection
+    constraints:
+    - pk
     returns:
     - Local
     cms_table:

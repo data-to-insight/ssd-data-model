@@ -16,6 +16,8 @@ nodes:
     - child_protection
     - cp_plan
     - review
+    constraints:
+    - pk
     returns:
     - Local
     cms:

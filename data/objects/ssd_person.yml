@@ -14,6 +14,8 @@ nodes:
         enabled: true
     categories:
     - identity
+    constraints:
+    - pk
     returns:
     - SSDA903
     - CIN
@@ -40,6 +42,44 @@ nodes:
       \ characters. If a looked-after child is adopted, and subsequently becomes looked-after\
       \ again later, they should have two separate unlinked records \u2013 one for\
       \ pre-adoption and one for post-adoption \u2013 with two different child identifiers."
+  - name: pers_forename
+    description: First/Fore name
+    item_ref: PERS015A
+    type: nvarchar
+    categories:
+    - identity
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - caredirector
+    - azeus
+    cms_field:
+    - liquid_logic:pers_person_id
+    - mosaic:pers_person_id
+    cms_table:
+    - liquid_logic:ssd_person
+    - mosaic:ssd_person
+    guidance: null
+  - name: pers_surname
+    description: LAst/Surname
+    item_ref: PERS016A
+    type: nvarchar
+    categories:
+    - identity
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - caredirector
+    - azeus
+    cms_field:
+    - liquid_logic:pers_person_id
+    - mosaic:pers_person_id
+    cms_table:
+    - liquid_logic:ssd_person
+    - mosaic:ssd_person
+    guidance: null
   - name: pers_sex
     description: Sex
     item_ref: PERS002A

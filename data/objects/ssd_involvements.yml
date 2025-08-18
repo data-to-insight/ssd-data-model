@@ -8,6 +8,8 @@ nodes:
     type: nvarchar
     categories:
     - workforce
+    constraints:
+    - pk
     returns:
     - Local
     cms:

@@ -11,6 +11,8 @@ nodes:
     - looked_after
     - health
     - substance_misuse
+    constraints:
+    - pk
     returns:
     - Local
     cms:

@@ -17,6 +17,8 @@ nodes:
     - ehcp_request
     - ehcp
     - need
+    constraints:
+    - pk
     returns:
     - 1aNotInCMS
     cms:

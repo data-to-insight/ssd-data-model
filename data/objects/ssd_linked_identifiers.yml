@@ -9,6 +9,8 @@ nodes:
     primary_key: true
     categories:
     - linked_identifiers
+    constraints:
+    - pk
     returns:
     - 1aNotInCMS
     cms:

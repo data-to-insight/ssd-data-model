@@ -9,6 +9,8 @@ nodes:
     categories:
     - identity
     - family
+    constraints:
+    - pk
     returns:
     - Local
     guidance: Row identifier for the ssd_family table

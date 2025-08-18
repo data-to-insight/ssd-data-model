@@ -9,6 +9,8 @@ nodes:
     primary_key: true
     categories:
     - finance
+    constraints:
+    - pk
     returns:
     - 1aDraft
     cms:

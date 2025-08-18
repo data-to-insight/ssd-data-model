@@ -8,6 +8,14 @@ nodes:
     type: nvarchar
     categories:
     - admin
+    constraints:
+    - pk
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
     guidance: SSD ADMIN only table/field
   - name: release_date
     description: date of version release
@@ -15,6 +23,12 @@ nodes:
     type: Datetime
     categories:
     - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
     guidance: SSD ADMIN only table/field
   - name: description
     description: brief description of version
@@ -22,6 +36,12 @@ nodes:
     type: nvarchar
     categories:
     - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
     guidance: SSD ADMIN only table/field
   - name: is_current
     description: flag to indicate if this is the current version
@@ -29,6 +49,12 @@ nodes:
     type: Bit
     categories:
     - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
     guidance: SSD ADMIN only table/field
   - name: created_at
     description: timestamp when record was created
@@ -36,6 +62,12 @@ nodes:
     type: Datetime
     categories:
     - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
     guidance: SSD ADMIN only table/field
   - name: created_by
     description: which user created the record
@@ -43,6 +75,12 @@ nodes:
     type: nvarchar
     categories:
     - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
     guidance: SSD ADMIN only table/field
   - name: impact_description
     description: additional notes on the impact of the release
@@ -50,4 +88,10 @@ nodes:
     type: nvarchar
     categories:
     - admin
+    cms:
+    - liquid_logic
+    - mosaic
+    - eclipse
+    - azeus
+    - caredirector
     guidance: SSD ADMIN only table/field

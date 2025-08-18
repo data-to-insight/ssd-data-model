@@ -16,6 +16,8 @@ nodes:
     - send
     - ehcp_request
     - ehcp_assessment
+    constraints:
+    - pk
     returns:
     - 1aNotInCMS
     cms:

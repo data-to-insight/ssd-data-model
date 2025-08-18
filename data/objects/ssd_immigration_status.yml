@@ -14,6 +14,8 @@ nodes:
     - identity
     - immigration
     - uasc
+    constraints:
+    - pk
     returns:
     - Local
     cms:

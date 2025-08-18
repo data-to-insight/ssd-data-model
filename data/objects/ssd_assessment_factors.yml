@@ -10,6 +10,8 @@ nodes:
     categories:
     - child_in_need
     - assessment
+    constraints:
+    - pk
     returns:
     - Local
     cms_field:
