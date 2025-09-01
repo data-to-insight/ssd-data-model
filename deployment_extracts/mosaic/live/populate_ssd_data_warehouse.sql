@@ -6948,6 +6948,275 @@ go
 
 
 
+-- Added calls as identified to be missing in the above:
+
+-- clean up
+IF OBJECT_ID('tempdb..##populate_ssd_s47_enquiry') IS NOT NULL
+    DROP PROCEDURE ##populate_ssd_s47_enquiry;
+GO
+
+CREATE PROCEDURE ##populate_ssd_s47_enquiry
+    @start_date DATETIME,
+    @end_date   DATETIME
+AS
+BEGIN
+/*
+=============================================================================
+Object Name: ssd_s47_enquiry
+Description: Populate ##ssd_s47_enquiry for the window
+Author: D2I
+Version: 1.0
+Status: AwaitingReview
+Remarks:
+Dependencies:
+- dm_workflow_steps_people_vw
+- dm_workflow_links
+- dm_workflow_nxt_action_types
+- dm_workflow_reason_types
+=============================================================================
+*/
+    BEGIN TRY
+        SET NOCOUNT ON;
+
+        IF OBJECT_ID('tempdb..##ssd_s47_enquiry') IS NOT NULL
+            DROP TABLE ##ssd_s47_enquiry;
+
+        CREATE TABLE ##ssd_s47_enquiry (
+            s47e_s47_enquiry_id               INT,
+            s47e_referral_id                  INT,
+            s47e_person_id                    VARCHAR(48),
+            s47e_s47_start_date               DATETIME,
+            s47e_s47_end_date                 DATETIME,
+            s47e_s47_nfa                      CHAR(1),
+            s47e_s47_outcome_json             VARCHAR(1000),
+            s47e_s47_completed_by_worker_id   VARCHAR(48),
+            s47e_s47_completed_by_team        VARCHAR(100)
+        );
+
+        INSERT INTO ##ssd_s47_enquiry (
+            s47e_s47_enquiry_id,
+            s47e_referral_id,
+            s47e_person_id,
+            s47e_s47_start_date,
+            s47e_s47_end_date,
+            s47e_s47_nfa,
+            s47e_s47_outcome_json,
+            s47e_s47_completed_by_worker_id,
+            s47e_s47_completed_by_team
+        )
+        SELECT
+            stp.workflow_step_id,
+            (
+                SELECT MAX(ref.workflow_step_id)
+                FROM dm_workflow_steps_people_vw ref
+                WHERE ref.person_id = stp.person_id
+                  AND ref.is_child_referral = 'Y'
+                  AND ref.started_on <= stp.started_on
+            ) AS s47e_referral_id,
+            stp.person_id,
+            stp.started_on,
+            stp.completed_on,
+            CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM dm_workflow_links lnk
+                    INNER JOIN dm_workflow_nxt_action_types ntyp
+                        ON ntyp.workflow_next_action_type_id = lnk.workflow_next_action_type_id
+                       AND ntyp.is_no_further_action = 'Y'
+                    INNER JOIN dm_workflow_steps_people_vw nstp
+                        ON nstp.workflow_step_id = lnk.target_step_id
+                    WHERE nstp.step_status NOT IN ('CANCELLED', 'PROPOSED')
+                      AND nstp.person_id = stp.person_id
+                )
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM dm_workflow_links lnk
+                    INNER JOIN dm_workflow_nxt_action_types ntyp
+                        ON ntyp.workflow_next_action_type_id = lnk.workflow_next_action_type_id
+                       AND ntyp.is_no_further_action = 'Y'
+                    INNER JOIN dm_workflow_steps_people_vw nstp
+                        ON nstp.workflow_step_id = lnk.target_step_id
+                    WHERE nstp.step_status NOT IN ('CANCELLED', 'PROPOSED')
+                      AND nstp.person_id = stp.person_id
+                )
+                THEN 'Y' ELSE 'N'
+            END AS s47e_s47_nfa,
+            LTRIM(
+                STUFF((
+                    SELECT DISTINCT
+                        ', ' + CASE WHEN rt.description IS NOT NULL
+                                    THEN dbo.append2(n.description, ' / ', rt.description)
+                                    ELSE n.description END
+                    FROM dm_workflow_links l
+                    INNER JOIN dm_workflow_steps_people_vw tgt
+                        ON tgt.workflow_step_id = l.target_step_id
+                       AND tgt.step_status <> 'CANCELLED'
+                    INNER JOIN dm_workflow_nxt_action_types n
+                        ON n.workflow_next_action_type_id = l.workflow_next_action_type_id
+                    LEFT OUTER JOIN dm_workflow_reason_types rt
+                        ON rt.workflow_reason_type_id = l.workflow_reason_type_id
+                    WHERE l.source_step_id = stp.workflow_step_id
+                      AND tgt.person_id = stp.person_id
+                    ORDER BY 1
+                    FOR XML PATH('')
+                ), 1, LEN(','), '')
+            ) AS s47e_s47_outcome_json,
+            stp.assignee_id,
+            stp.responsible_team_id
+        FROM dm_workflow_steps_people_vw stp
+        WHERE stp.is_section_47_enquiry = 'Y'
+          AND dbo.no_time(stp.started_on) <= @end_date
+          AND dbo.future(dbo.no_time(stp.completed_on)) >= @start_date
+          AND stp.step_status IN ('INCOMING', 'STARTED', 'REOPENED', 'COMPLETED');
+
+        RETURN 0;
+    END TRY
+    BEGIN CATCH
+        DECLARE @v_error_number INT, @v_error_message NVARCHAR(4000);
+        SELECT @v_error_number = ERROR_NUMBER(), @v_error_message = ERROR_MESSAGE();
+        RETURN @v_error_number;
+    END CATCH
+END
+GO
+
+
+
+-- clean up
+IF OBJECT_ID('tempdb..##populate_ssd_cin_plans') IS NOT NULL
+    DROP PROCEDURE ##populate_ssd_cin_plans;
+GO
+
+CREATE PROCEDURE ##populate_ssd_cin_plans
+    @start_date DATETIME,
+    @end_date   DATETIME
+AS
+BEGIN
+/*
+=============================================================================
+Object Name: ssd_cin_plans
+Description: Populate ##ssd_cin_plans for the window
+Author: D2I
+Version: 1.0
+Status: AwaitingReview
+Remarks:
+Dependencies:
+- SCF.CIN_Plans
+- raw.mosaic_fw_dm_prof_rel_types
+- raw.mosaic_fw_dm_prof_relationships
+- raw.mosaic_fw_worker_roles
+=============================================================================
+*/
+    BEGIN TRY
+        SET NOCOUNT ON;
+
+        IF OBJECT_ID('tempdb..##ssd_cin_plans') IS NOT NULL
+            DROP TABLE ##ssd_cin_plans;
+
+        CREATE TABLE ##ssd_cin_plans (
+            cin_plan_id                 VARCHAR(48),
+            cinp_referral_id            VARCHAR(48),
+            cinp_person_id              VARCHAR(48),
+            cinp_cin_plan_start_date    DATETIME,
+            cinp_cin_plan_end_date      DATETIME,
+            cinp_cin_plan_team          VARCHAR(100),
+            cinp_cin_plan_worker_id     VARCHAR(48)
+        );
+
+        INSERT INTO ##ssd_cin_plans (
+            cin_plan_id,
+            cinp_referral_id,
+            cinp_person_id,
+            cinp_cin_plan_start_date,
+            cinp_cin_plan_end_date,
+            cinp_cin_plan_team,
+            cinp_cin_plan_worker_id
+        )
+        SELECT
+            cin.cin_plan_id,
+            cin.Referral_Id,
+            cin.Person_ID,
+            cin.CIN_Plan_Start_Date,
+            cin.CIN_Plan_End_Date,
+            (
+                SELECT MAX(wro.ORG_ID)
+                FROM raw.mosaic_fw_dm_prof_rel_types pret
+                INNER JOIN raw.mosaic_fw_dm_prof_relationships prof
+                    ON prof.PROF_REL_TYPE_CODE = pret.PROF_REL_TYPE_CODE
+                   AND pret.DESCRIPTION IN ('C&F Allocated Worker','Allocated Worker')
+                INNER JOIN raw.mosaic_fw_worker_roles wro
+                    ON wro.WORKER_ID = prof.WORKER_ID
+                   AND COALESCE(cin.CIN_Plan_End_Date, CAST(GETDATE() AS DATE))
+                       BETWEEN wro.START_DATE AND COALESCE(wro.END_DATE, '1 January 2300')
+                   AND wro.PRIMARY_JOB = 'Y'
+                WHERE
+                    prof.PERSON_ID = cin.Person_ID
+                    AND COALESCE(cin.CIN_Plan_End_Date, CAST(GETDATE() AS DATE))
+                        BETWEEN prof.START_DATE AND COALESCE(prof.END_DATE, '1 January 2300')
+                    AND REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR, prof.START_DATE, 120), '-', ''), ' ', ''), ':', '')
+                        + '.' + REPLICATE('0', 9 - LEN(CAST(prof.PROF_RELATIONSHIP_ID AS VARCHAR(9))))
+                        + CAST(prof.PROF_RELATIONSHIP_ID AS VARCHAR(9)) =
+                        (
+                            SELECT MAX(
+                                REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR, prof1.START_DATE, 120), '-', ''), ' ', ''), ':', '')
+                                + '.' + REPLICATE('0', 9 - LEN(CAST(prof1.PROF_RELATIONSHIP_ID AS VARCHAR(9))))
+                                + CAST(prof1.PROF_RELATIONSHIP_ID AS VARCHAR(9))
+                            )
+                            FROM raw.mosaic_fw_dm_prof_rel_types pret1
+                            INNER JOIN raw.mosaic_fw_dm_prof_relationships prof1
+                                ON prof1.PROF_REL_TYPE_CODE = pret1.PROF_REL_TYPE_CODE
+                               AND pret1.DESCRIPTION IN ('C&F Allocated Worker','Allocated Worker')
+                            WHERE prof1.PERSON_ID = cin.Person_ID
+                              AND COALESCE(cin.CIN_Plan_End_Date, CAST(GETDATE() AS DATE))
+                                  BETWEEN prof1.START_DATE AND COALESCE(prof1.END_DATE, '1 January 2300')
+                        )
+            ) AS cinp_cin_plan_team,
+            (
+                SELECT MAX(prof.WORKER_ID)
+                FROM raw.mosaic_fw_dm_prof_rel_types pret
+                INNER JOIN raw.mosaic_fw_dm_prof_relationships prof
+                    ON prof.PROF_REL_TYPE_CODE = pret.PROF_REL_TYPE_CODE
+                   AND pret.DESCRIPTION IN ('C&F Allocated Worker','Allocated Worker')
+                WHERE
+                    prof.PERSON_ID = cin.Person_ID
+                    AND COALESCE(cin.CIN_Plan_End_Date, CAST(GETDATE() AS DATE))
+                        BETWEEN prof.START_DATE AND COALESCE(prof.END_DATE, '1 January 2300')
+                    AND REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR, prof.START_DATE, 120), '-', ''), ' ', ''), ':', '')
+                        + '.' + REPLICATE('0', 9 - LEN(CAST(prof.PROF_RELATIONSHIP_ID AS VARCHAR(9))))
+                        + CAST(prof.PROF_RELATIONSHIP_ID AS VARCHAR(9)) =
+                        (
+                            SELECT MAX(
+                                REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR, prof1.START_DATE, 120), '-', ''), ' ', ''), ':', '')
+                                + '.' + REPLICATE('0', 9 - LEN(CAST(prof1.PROF_RELATIONSHIP_ID AS VARCHAR(9))))
+                                + CAST(prof1.PROF_RELATIONSHIP_ID AS VARCHAR(9))
+                            )
+                            FROM raw.mosaic_fw_dm_prof_rel_types pret1
+                            INNER JOIN raw.mosaic_fw_dm_prof_relationships prof1
+                                ON prof1.PROF_REL_TYPE_CODE = pret1.PROF_REL_TYPE_CODE
+                               AND pret1.DESCRIPTION IN ('C&F Allocated Worker','Allocated Worker')
+                            WHERE prof1.PERSON_ID = cin.Person_ID
+                              AND COALESCE(cin.CIN_Plan_End_Date, CAST(GETDATE() AS DATE))
+                                  BETWEEN prof1.START_DATE AND COALESCE(prof1.END_DATE, '1 January 2300')
+                        )
+            ) AS cinp_cin_plan_worker_id
+        FROM SCF.CIN_Plans cin
+        WHERE
+            cin.CIN_Plan_Start_Date <= @end_date
+            AND dbo.future(cin.CIN_Plan_End_Date) >= @start_date;
+
+        RETURN 0;
+    END TRY
+    BEGIN CATCH
+        DECLARE @v_error_number INT, @v_error_message NVARCHAR(4000);
+        SELECT @v_error_number = ERROR_NUMBER(), @v_error_message = ERROR_MESSAGE();
+        RETURN @v_error_number;
+    END CATCH
+END
+GO
+
+-- end of added additional proc [REVIEW]
+
+
+
 --
 if object_id('tempdb..##populate_ssd_main') is not null
 	drop procedure ##populate_ssd_main
@@ -6971,6 +7240,28 @@ begin
 	where
 		rd.curr_day = dbo.today()
 	--
+
+
+CREATE PROCEDURE ##populate_ssd_main (@years_to_include INT) AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @number_of_years_to_include INT,
+            @start_date DATETIME,
+            @end_date   DATETIME;
+
+	-- RH [REVIEW] Replaced with the above as procs expect datetime?
+	-- --No. or financial years to include, including the current one
+	-- declare @number_of_years_to_include int, @start_date varchar(32), @end_date varchar(32)
+
+    SET @number_of_years_to_include = @years_to_include - 1;
+
+    SELECT
+        @start_date = DATEADD(yy, -@number_of_years_to_include, rd.financial_year_start),
+        @end_date   = rd.curr_day
+    FROM report_days rd
+    WHERE rd.curr_day = dbo.today();
+
 
 
 	-- placeholder tables, incl. Non-core cms or SSDF Other DfE projects (1b, 2(a,b) [REVIEW]
@@ -7022,6 +7313,12 @@ begin
 	exec ##populate_ssd_cla_visits @start_date, @end_date;
 	exec ##populate_ssd_cin_visits @start_date, @end_date;
 	exec ##populate_ssd_early_help_episodes @start_date, @end_date;
+
+-- 
+	EXEC ##populate_ssd_cin_plans         @start_date, @end_date;
+    EXEC ##populate_ssd_s47_enquiry       @start_date, @end_date;
+
+
 	--
 end
 go
