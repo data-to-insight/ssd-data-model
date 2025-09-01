@@ -285,7 +285,7 @@ SELECT
     CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
     p.FORENAME, 
     p.SURNAME,
-    p.GENDER_MAIN_CODE, AS pers_sex,        -- Sex/Gender as used in stat-returns
+    p.GENDER_MAIN_CODE AS pers_sex,        -- Sex/Gender as used in stat-returns
     p.GENDER_MAIN_CODE,                     -- Placeholder for those LAs that store sex and gender independently
     p.ETHNICITY_MAIN_CODE,
     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
