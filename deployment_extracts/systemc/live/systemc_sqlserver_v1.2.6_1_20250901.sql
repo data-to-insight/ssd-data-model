@@ -450,7 +450,6 @@ INSERT INTO ssd_development.ssd_family (
     )
 
 
-
 SELECT 
     fc.EXTERNAL_ID                          AS fami_table_id,
     fc.DIM_LOOKUP_FAMILYOFRESIDENCE_ID      AS fami_family_id,
@@ -680,7 +679,8 @@ SELECT
 FROM 
     HDM.Child_Social.FACT_DISABILITY AS fd
 
-WHERE EXISTS 
+WHERE fd.DIM_PERSON_ID <> -1
+    AND EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
     FROM ssd_development.ssd_person p
