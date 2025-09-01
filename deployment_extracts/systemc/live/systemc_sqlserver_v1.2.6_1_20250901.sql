@@ -458,19 +458,11 @@ SELECT
 
 FROM HDM.Child_Social.FACT_CONTACTS AS fc
 
-WHERE EXISTS 
-    ( -- only ssd relevant records
-    SELECT 1 
-    FROM ssd_development.ssd_person p
-    WHERE TRY_CAST(p.pers_person_id AS INT) = fc.DIM_PERSON_ID -- #DtoI-1799
-    );
-
-
 WHERE fc.DIM_PERSON_ID <> -1
     AND EXISTS ( -- only ssd relevant records
         SELECT 1
         FROM ssd_development.ssd_person p
-        WHERE TRY_CAST(p.pers_person_id AS INT) = fc.DIM_PERSON_ID
+        WHERE TRY_CAST(p.pers_person_id AS INT) = fc.DIM_PERSON_ID -- #DtoI-1799
     );
 
 
