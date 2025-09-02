@@ -25,7 +25,7 @@ guidance_link_str = "https://data-to-insight.github.io/ssd-data-model/guidance.h
 returns_maps_link_str = "https://data-to-insight.github.io/ssd-data-model/existingreturnsmap.html"
 change_request_link_str = "https://forms.office.com/e/UysrcGApJ1"
 object_specification_link_str = "https://data-to-insight.github.io/ssd-data-model/object_definitions.pdf"
-object_ddl_tables_link_str = "https://dbdiagram.io/d/SSD-Schema-V1-65cf6008ac844320ae4e8484"  # if publishing DDL diagram via dbdiagram
+#object_ddl_tables_link_str = "https://dbdiagram.io/d/SSD-Schema-V1-65cf6008ac844320ae4e8484"  # if publishing DDL diagram via dbdiagram
 
 #### end of settings
 
@@ -87,7 +87,7 @@ html_content += f"<a href='{guidance_link_str}' class='repo-link'> | Data Item G
 html_content += f"<a href='{returns_maps_link_str}' class='repo-link'> | Existing returns maps</a>"
 html_content += f"<a href='{change_request_link_str}' class='repo-link'> | Submit Change Request</a>"
 html_content += f"<a href='{object_specification_link_str}' class='repo-link'> | Object Spec download(PDF)</a>"
-html_content += f"<a href='{object_ddl_tables_link_str}' class='repo-link'> | Object ER diagram</a>" # if publishing ER diagram via dbdiagram
+#html_content += f"<a href='{object_ddl_tables_link_str}' class='repo-link'> | Object ER diagram</a>" # if publishing ER diagram via dbdiagram
 
 html_content += "</div>"
 
