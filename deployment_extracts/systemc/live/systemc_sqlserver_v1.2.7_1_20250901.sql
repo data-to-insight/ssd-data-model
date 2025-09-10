@@ -183,7 +183,7 @@ VALUES
     ('1.2.1', '2024-08-20', '#DtoI-1820, removed destructive pre-clean-up incl .dbo refs', 0, 'admin', 'priority patch fix'),
     ('1.2.2', '2024-11-06', '#DtoI-1826, META+YML restructure incl. remove opt blocks', 0, 'admin', 'feat/bespoke LA extracts'),
     ('1.2.3', '2024-11-20', 'non-core ssd_flag field removal', 0, 'admin', 'no wider impact'),
-    ('1.2.4', '2025-09-10', 'legacy support for json fields #LEGACY-PRE2016 tags', 0, 'admin', 'all json field alternative sql');
+    ('1.2.4', '2025-09-10', 'legacy support for json fields #LEGACY-PRE2016 tags', 0, 'admin', 'all json field alternative sql'),
     ('1.2.6', '2025-09-10', 'Disable FK definitions by default', 0, 'admin', 'improve deployment compatiblity');
 
 -- META-ELEMENT: {"type": "test"}
@@ -5783,7 +5783,7 @@ SET @TableName = N'ssd_api_data_staging';
 -- META-ELEMENT: {"type": "drop_table"}
 IF OBJECT_ID('ssd_api_data_staging', 'U') IS NOT NULL DROP TABLE ssd_api_data_staging;
 
-
+-- META-ELEMENT: {"type": "create_table"}
 
 -- META-ELEMENT: {"type": "create_idx"}
 
@@ -5795,105 +5795,6 @@ PRINT 'https://github.com/data-to-insight/dfe-csc-api-data-flows/releases'
 
 -- META-ELEMENT: {"type": "insert_data"}
 
--- -- sample|fake rows into the table
--- -- 'Pending' status
--- INSERT INTO ssd_api_data_staging (json_payload, submission_status)
--- VALUES (
---     '{
---         "LA_Child_ID_id": 1,
---         "common_person_id": "C12345",
---         "FirstName": "SSD_PH",
---         "Surname": "SSD_PH",
---         "UPN": "UPN123456",
---         "Former_UPN": "UPN54321",
---         "UPN_Unknown": false,
---         "Date_of_Birth": "2010-05-15",
---         "Expected_Date_of_Birth": null,
---         "Sex": "M",
---         "Ethnicity": "White",
---         "Disabilities": [{"Disability": "D001"}],
---         "Postcode": "BN12 4AX",
---         "UASC": "Yes",
---         "UASC_End_Date": "2023-12-31",
---         "SDQ_Scores": [{"SDQ_Completed_Date": "2023-01-15", "SDQ_Score": 15}],
---         "EHCP": {
---             "EHCP_Request_Date": "2023-02-01",
---             "Assessment": {
---                 "EHCP_Assessment_Outcome_Date": "2023-03-01",
---                 "EHCP_Assessment_Outcome": "Approved",
---                 "Named_Plan": [{"Named_Plan_Start_Date": "2023-04-01"}]
---             }
---         },
---         "CIN_Episodes": [{
---             "Referral_Date": "2022-12-01",
---             "Source_of_Referral": "Social Worker",
---             "Closure_Date": "2023-06-01",
---             "Reason_for_Closure": "Resolved",
---             "CP_Plans": [{"Plan_Start_Date": "2022-12-15", "Plan_End_Date": "2023-05-31"}]
---         }]
---     }',
---     'Pending'
--- );
-
--- -- 'Sent' status
--- INSERT INTO ssd_api_data_staging (json_payload, submission_status, api_response)
--- VALUES (
---     '{
---         "LA_Child_ID_id": 2,
---         "common_person_id": "C67890",
---         "FirstName": "SSD_PH",
---         "Surname": "SSD_PH",
---         "UPN": "UPN987654",
---         "Former_UPN": null,
---         "UPN_Unknown": false,
---         "Date_of_Birth": "2012-11-22",
---         "Expected_Date_of_Birth": null,
---         "Sex": "F",
---         "Ethnicity": "Asian",
---         "Disabilities": [],
---         "Postcode": "BN13 8XR",
---         "UASC": null,
---         "UASC_End_Date": null,
---         "SDQ_Scores": [],
---         "EHCP": null,
---         "CIN_Episodes": [{
---             "Referral_Date": "2023-06-15",
---             "Source_of_Referral": "Police",
---             "Closure_Date": null,
---             "Reason_for_Closure": null,
---             "CP_Plans": []
---         }]
---     }',
---     'Sent',
---     'API response: {"status": "success", "message": "Data submitted successfully"}'
--- );
-
--- -- 'Error' status
--- INSERT INTO ssd_api_data_staging (json_payload, submission_status, api_response)
--- VALUES (
---     '{
---         "LA_Child_ID_id": 3,
---         "common_person_id": "C54321",
---         "FirstName": "SSD_PH",
---         "Surname": "SSD_PH",
---         "UPN": "UPN543210",
---         "Former_UPN": null,
---         "UPN_Unknown": true,
---         "Date_of_Birth": "2008-03-10",
---         "Expected_Date_of_Birth": null,
---         "Sex": "U",
---         "Ethnicity": "Mixed",
---         "Disabilities": [{"Disability": "D002"}, {"Disability": "D003"}],
---         "Postcode": "BN14 7GH",
---         "UASC": "No",
---         "UASC_End_Date": null,
---         "SDQ_Scores": [{"SDQ_Completed_Date": "2023-03-05", "SDQ_Score": 12}],
---         "EHCP": null,
---         "CIN_Episodes": null
---     }',
---     'Error',
---     'API response: {"status": "error", "message": "Invalid UPN format"}'
--- );
 
 
 /* End
