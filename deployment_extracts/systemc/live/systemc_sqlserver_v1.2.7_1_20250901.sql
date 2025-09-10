@@ -5761,39 +5761,40 @@ PRINT 'Table created: ' + @TableName;
 
 
 
-
+/* START
+The following STAGING TABLE(S) object definitions are to be manually added into the SSD script from the API release files */
 
 
 -- META-CONTAINER: {"type": "table", "name": "ssd_api_data_staging"}
 -- =============================================================================
 -- Description: Table for API payload and logging. For most LA's this is a placeholder structure as source data not common|confirmed
 -- Author: D2I
--- Version: 0.1
--- Status: [D]ev
--- Remarks: This object only in use by LA's who have explicitly agreed to API use.
--- Dependencies: 
--- - Yet to be defined
--- - ssd_person
--- -
+-- =============================================================================
+
+
+
+
+-- META-CONTAINER: {"type": "table", "name": "ssd_api_data_staging_ANON"}
+-- =============================================================================
+-- Description: Table for TEST|ANON API payload and logging. 
+-- Author: D2I
 -- =============================================================================
 
 -- META-ELEMENT: {"type": "test"}
-SET @TableName = N'ssd_api_data_staging';
-
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_api_data_staging', 'U') IS NOT NULL DROP TABLE ssd_api_data_staging;
-
--- META-ELEMENT: {"type": "create_table"}
-
--- META-ELEMENT: {"type": "create_idx"}
-
-
--- META-ELEMENT: {"type": "test"}
+-- Console reminder note
 PRINT 'If your LA is part of the DfE API Private Dashboard Early Adopters you need to now run the seperate ssd_populate_api_data_staging.sql script ';
 PRINT 'https://github.com/data-to-insight/dfe-csc-api-data-flows/releases'
 
 
--- META-ELEMENT: {"type": "insert_data"}
+/* END STAGING TABLE(S) object definitions */
+
+
+
+
+
+
+
+
 
 
 
