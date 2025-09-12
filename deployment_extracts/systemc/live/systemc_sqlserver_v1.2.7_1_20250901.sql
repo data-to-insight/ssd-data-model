@@ -684,7 +684,7 @@ FROM
     HDM.Child_Social.FACT_DISABILITY AS fd
 
 WHERE fd.DIM_PERSON_ID <> -1
-AND fd.DIM_LOOKUP_DISAB_CODE NOT NULL
+AND fd.DIM_LOOKUP_DISAB_CODE IS NOT NULL
     AND EXISTS 
     (   -- only ssd relevant records
     SELECT 1 
@@ -1662,156 +1662,148 @@ SET @TableName = N'ssd_assessment_factors';
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
-BEGIN TRY
-BEGIN TRAN;
+DECLARE @Template nvarchar(100) = N'FAMILY ASSESSMENT';
+DECLARE @dbcompat int = (SELECT compatibility_level FROM sys.databases WHERE name = DB_NAME());
+DECLARE @ForceXmlPath bit = 0;  -- set to 1 to force XML PATH on any server, useful for testing
 
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_assessment_factors') IS NOT NULL DROP TABLE ssd_development.ssd_assessment_factors;
-IF OBJECT_ID('tempdb..#ssd_assessment_factors') IS NOT NULL DROP TABLE #ssd_assessment_factors;
+-- clean start
+IF OBJECT_ID('ssd_development.ssd_assessment_factors','U') IS NOT NULL DROP TABLE ssd_development.ssd_assessment_factors;
+IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
+IF OBJECT_ID('tempdb..#d_codes','U') IS NOT NULL DROP TABLE #d_codes;
 
-IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
-IF OBJECT_ID('tempdb..#d_codes') IS NOT NULL DROP TABLE #d_codes;
-    
-
-
--- META-ELEMENT: {"type": "create_table"}
+-- target table, composite key
 CREATE TABLE ssd_development.ssd_assessment_factors (
-    cinf_table_id                   NVARCHAR(48) PRIMARY KEY,       -- metadata={"item_ref":"CINF003A"}
-    cinf_assessment_id              NVARCHAR(48),                   -- metadata={"item_ref":"CINF001A"}
-    cinf_assessment_factors_json    NVARCHAR(MAX)                  -- metadata={"item_ref":"CINF002A"}
+    cinf_table_id                nvarchar(48)  NOT NULL,
+    cinf_assessment_id           nvarchar(48)  NOT NULL,
+    cinf_assessment_factors_json nvarchar(max) NULL,
+    CONSTRAINT PK_ssd_assessment_factors PRIMARY KEY CLUSTERED (cinf_table_id, cinf_assessment_id)
 );
 
--- Create TMP structure with filtered answers
+-- quick sanity counts
+SELECT 
+    total_answers = COUNT(*),
+    template_answers = SUM(CASE WHEN RTRIM(LTRIM(DIM_ASSESSMENT_TEMPLATE_ID_DESC)) = @Template THEN 1 ELSE 0 END),
+    yes_exact = SUM(CASE WHEN RTRIM(LTRIM(DIM_ASSESSMENT_TEMPLATE_ID_DESC)) = @Template AND ANSWER = N'Yes' THEN 1 ELSE 0 END)
+FROM HDM.Child_Social.FACT_FORM_ANSWERS;
 
---------------------------------------------------------------------------------
--- Prefilter rows we care about, limited to assessments present in ssd_cin_assessments
--- If your DB collation is case-insensitive, 'Yes' matches any case and is sargable.
--- If case-sensitive, swap to UPPER(ffa.ANSWER) = 'YES'.
---------------------------------------------------------------------------------
-SELECT
-    ffa.FACT_FORM_ID,
-    ffa.ANSWER_NO,
-    ffa.ANSWER
-INTO #ssd_TMP_PRE_assessment_factors
-FROM HDM.Child_Social.FACT_FORM_ANSWERS AS ffa
-JOIN ssd_development.ssd_cin_assessments AS ca
-  ON ca.cina_assessment_id = ffa.FACT_FORM_ID
-WHERE ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC = 'FAMILY ASSESSMENT'
-  AND ffa.FACT_FORM_ID <> -1                    -- possible admin data present
-  AND ffa.ANSWER = 'Yes'                        -- assumes CI collation, expected [Yes/No/NULL], adds redundancy into resultant field but allows later expansion
-  AND ffa.ANSWER_NO IN (
-        '1A','1B','1C',
-        '2A','2B','2C','3A','3B','3C',
-        '4A','4B','4C',
-        '5A','5B','5C',
-        '6A','6B','6C',
-        '7A',
-        '8B','8C','8D','8E','8F',
-        '9A','10A','11A','12A','13A','14A','15A','16A','17A',
-        '18A','18B','18C',
-        '19A','19B','19C',
-        '20','21',
-        '22A','23A','24A'
-  );
+SELECT total_assessments = COUNT(*), non_admin_assessments = SUM(CASE WHEN EXTERNAL_ID <> -1 THEN 1 ELSE 0 END)
+FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT;
 
--- index(IF you have permissions) and de-dup for aggregation
--- CREATE CLUSTERED INDEX IX_tmp_af ON #ssd_TMP_PRE_assessment_factors(FACT_FORM_ID) INCLUDE (ANSWER_NO);
-SELECT DISTINCT FACT_FORM_ID, ANSWER_NO
-INTO #d_codes
-FROM #ssd_TMP_PRE_assessment_factors;
+SELECT total_rows_in_cin_assessments = COUNT(*) 
+FROM ssd_development.ssd_cin_assessments;
 
+BEGIN TRY
+    BEGIN TRANSACTION;
 
-
--- META-ELEMENT: {"type": "insert_data"} 
-
---------------------------------------------------------------------------------
--- Insert into final|persisent table
--- shape options:
---   OBJECT: {"1A":"Yes","2B":"Yes", ...}         (switch two spots marked [OBJECT])
---   ARRAY : ["1A","2B", ...]                      (default below)
---------------------------------------------------------------------------------
-
-DECLARE @major int = TRY_CAST(SERVERPROPERTY('ProductMajorVersion') AS int);
-
-IF @major >= 14
-BEGIN
-    -- SQL Server >2017+, safe STRING_AGG with nvarchar(max)
-    INSERT INTO ssd_development.ssd_assessment_factors (
-        cinf_table_id,
-        cinf_assessment_id,
-        cinf_assessment_factors_json
-    )
+    -- prefilter rows, only assessments present in ssd_cin_assessments
     SELECT
-        fsa.EXTERNAL_ID AS cinf_table_id,
-        fsa.FACT_FORM_ID AS cinf_assessment_id,
-
-        /* OBJECT shape */
-        /* [JSON] cinf_assessment_factors_json : */
-        -- N'{' + STRING_AGG(CONVERT(nvarchar(max), N'"' + d.ANSWER_NO + N'":"Yes"'), N',') + N'}' AS cinf_assessment_factors_json
-
-        /* [ARRAY] cinf_assessment_factors_json : */
-        N'[' + STRING_AGG(CONVERT(nvarchar(max), QUOTENAME(d.ANSWER_NO, '"')), N',') + N']'
-        
-    FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
-    JOIN #d_codes AS d
-      ON d.FACT_FORM_ID = fsa.FACT_FORM_ID               -- at least one factor
+        ffa.FACT_FORM_ID,
+        ffa.ANSWER_NO,
+        ffa.ANSWER
+    INTO #ssd_TMP_PRE_assessment_factors
+    FROM HDM.Child_Social.FACT_FORM_ANSWERS AS ffa
     JOIN ssd_development.ssd_cin_assessments AS ca
-      ON ca.cina_assessment_id = fsa.FACT_FORM_ID        -- so FK will succeed
-    WHERE fsa.EXTERNAL_ID <> -1
-    GROUP BY fsa.EXTERNAL_ID, fsa.FACT_FORM_ID;
-END
-ELSE
-BEGIN
-    -- legacy compatibility ver 
-    -- SQL Server <2016, XML PATH pattern returns nvarchar(max)
-    INSERT INTO ssd_development.ssd_assessment_factors (
-        cinf_table_id,
-        cinf_assessment_id,
-        cinf_assessment_factors_json
-    )
-    SELECT
-        fsa.EXTERNAL_ID AS cinf_table_id,
-        fsa.FACT_FORM_ID AS cinf_assessment_id,
+      ON ca.cina_assessment_id = ffa.FACT_FORM_ID
+    WHERE RTRIM(LTRIM(ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC)) = @Template
+      AND ffa.FACT_FORM_ID <> -1
+      AND ffa.ANSWER = N'Yes'     -- for CS databases, switch to: AND UPPER(ffa.ANSWER) = N'YES'
+      AND ffa.ANSWER_NO IN (
+            '1A','1B','1C',
+            '2A','2B','2C','3A','3B','3C',
+            '4A','4B','4C',
+            '5A','5B','5C',
+            '6A','6B','6C',
+            '7A',
+            '8B','8C','8D','8E','8F',
+            '9A','10A','11A','12A','13A','14A','15A','16A','17A',
+            '18A','18B','18C',
+            '19A','19B','19C',
+            '20','21',
+            '22A','23A','24A'
+      );
 
-        /* OBJECT shape */
+    -- de-dup codes per assessment
+    SELECT DISTINCT FACT_FORM_ID, ANSWER_NO
+    INTO #d_codes
+    FROM #ssd_TMP_PRE_assessment_factors;
 
-        /* [JSON] swap block below for:*/
-        -- N'{' +
-        -- STUFF((
-        --     SELECT N',"' + t.ANSWER_NO + N'":"Yes"'
-        --     FROM #d_codes AS t
-        --     WHERE t.FACT_FORM_ID = fsa.FACT_FORM_ID
-        --     ORDER BY t.ANSWER_NO
-        --     FOR XML PATH(''), TYPE
-        -- ).value('.', 'nvarchar(max)'), 1, 1, N'') + N'}' AS cinf_assessment_factors_json
+    -- optional indexing if big
+    -- CREATE CLUSTERED INDEX IX_d_codes ON #d_codes(FACT_FORM_ID, ANSWER_NO);
 
-        /* [ARRAY] */
-           N'[' +
-           STUFF((
-               SELECT N',' + QUOTENAME(t.ANSWER_NO, '"')
-               FROM #d_codes AS t
-               WHERE t.FACT_FORM_ID = fsa.FACT_FORM_ID
-               ORDER BY t.ANSWER_NO
-               FOR XML PATH(''), TYPE
-           ).value('.', 'nvarchar(max)'), 1, 1, N'') + N']'
-        
-    FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
-    WHERE fsa.EXTERNAL_ID <> -1
-      AND EXISTS (SELECT 1 FROM #d_codes x WHERE x.FACT_FORM_ID = fsa.FACT_FORM_ID)
-      AND EXISTS (SELECT 1 FROM ssd_development.ssd_cin_assessments ca WHERE ca.cina_assessment_id = fsa.FACT_FORM_ID);
-END
+    IF NOT EXISTS (SELECT 1 FROM #d_codes)
+    BEGIN
+        PRINT 'No qualifying factor codes, check template name, answer case, or code list.';
+    END
 
--- commit here not wrapping index/fk in this due to meta tag
-COMMIT TRAN;
+    /* insert, choose aggregation strategy
+       compat 160 or higher, and not forced to XML, use STRING_AGG WITHIN GROUP ORDER BY
+       otherwise, use ordered XML PATH for deterministic output
+    */
+    IF (@dbcompat >= 160 AND @ForceXmlPath = 0)
+    BEGIN
+        INSERT INTO ssd_development.ssd_assessment_factors (
+            cinf_table_id,
+            cinf_assessment_id,
+            cinf_assessment_factors_json
+        )
+        SELECT
+            fsa.EXTERNAL_ID,
+            fsa.FACT_FORM_ID,
+            N'[' + STRING_AGG(CONVERT(nvarchar(max), QUOTENAME(d.ANSWER_NO, '"')), N',')
+                     WITHIN GROUP (ORDER BY d.ANSWER_NO) + N']'
+        FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
+        JOIN #d_codes AS d
+          ON d.FACT_FORM_ID = fsa.FACT_FORM_ID
+        JOIN ssd_development.ssd_cin_assessments AS ca
+          ON ca.cina_assessment_id = fsa.FACT_FORM_ID
+        WHERE fsa.EXTERNAL_ID <> -1
+        GROUP BY fsa.EXTERNAL_ID, fsa.FACT_FORM_ID;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO ssd_development.ssd_assessment_factors (
+            cinf_table_id,
+            cinf_assessment_id,
+            cinf_assessment_factors_json
+        )
+        SELECT
+            fsa.EXTERNAL_ID AS cinf_table_id,
+            fsa.FACT_FORM_ID AS cinf_assessment_id,
+            N'[' +
+            STUFF((
+                SELECT N',' + QUOTENAME(t.ANSWER_NO, '"')
+                FROM #d_codes AS t
+                WHERE t.FACT_FORM_ID = fsa.FACT_FORM_ID
+                ORDER BY t.ANSWER_NO
+                FOR XML PATH(''), TYPE
+            ).value('.', 'nvarchar(max)'), 1, 1, N'') + N']' AS cinf_assessment_factors_json
+        FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
+        WHERE fsa.EXTERNAL_ID <> -1
+          AND EXISTS (SELECT 1 FROM #d_codes x WHERE x.FACT_FORM_ID = fsa.FACT_FORM_ID)
+          AND EXISTS (SELECT 1 FROM ssd_development.ssd_cin_assessments ca WHERE ca.cina_assessment_id = fsa.FACT_FORM_ID);
+    END
+
+    -- prove output and clean up inside TRY
+    SELECT out_rows = COUNT(*) FROM ssd_development.ssd_assessment_factors;
+
+    DROP TABLE IF EXISTS #d_codes;
+    DROP TABLE IF EXISTS #ssd_TMP_PRE_assessment_factors;
+
+    COMMIT TRANSACTION;
 END TRY
 BEGIN CATCH
-    IF XACT_STATE() <> 0 ROLLBACK TRAN;
-    THROW;
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+
+    -- cleanup on failure too
+    IF OBJECT_ID('tempdb..#d_codes','U') IS NOT NULL DROP TABLE #d_codes;
+    IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
+
+    DECLARE @ErrMsg nvarchar(2048) = ERROR_MESSAGE(),
+            @ErrSev int = ERROR_SEVERITY(),
+            @ErrState int = ERROR_STATE();
+    RAISERROR(@ErrMsg, @ErrSev, @ErrState);
 END CATCH;
 
--- Clean up helpers
-DROP TABLE IF EXISTS #d_codes;
-DROP TABLE IF EXISTS #ssd_TMP_PRE_assessment_factors;
 
 
 -- -- META-ELEMENT: {"type": "create_fk"} 
@@ -4008,7 +4000,7 @@ IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_sco
  
 -- META-ELEMENT: {"type": "create_table"}
 CREATE TABLE ssd_development.ssd_sdq_scores (
-    csdq_table_id               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CSDQ001A"} 
+    csdq_table_id               NVARCHAR(48),               -- metadata={"item_ref":"CSDQ001A"} --  PRIMARY KEY switched off for ESCC
     csdq_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CSDQ002A"}
     csdq_sdq_completed_date     DATETIME,                   -- metadata={"item_ref":"CSDQ003A"}
     csdq_sdq_score              INT,                        -- metadata={"item_ref":"CSDQ005A"}
