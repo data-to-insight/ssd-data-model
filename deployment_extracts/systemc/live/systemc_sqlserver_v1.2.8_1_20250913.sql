@@ -162,7 +162,7 @@ INSERT INTO ssd_development.ssd_version_log
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     -- insert & update for CURRENT version (using MAJOR.MINOR.PATCH)
-    ('1.2.7', '2025-09-10', 'remove ssd_api_data_staging - now part of api release', 1, 'admin', 'patch fix');
+    ('1.2.8', '2025-09-13', 'assessment_factors & cla_episodes refactor', 1, 'admin', 'early adopters suggested patch fix');
 
 
 
@@ -184,7 +184,8 @@ VALUES
     ('1.2.2', '2024-11-06', '#DtoI-1826, META+YML restructure incl. remove opt blocks', 0, 'admin', 'feat/bespoke LA extracts'),
     ('1.2.3', '2024-11-20', 'non-core ssd_flag field removal', 0, 'admin', 'no wider impact'),
     ('1.2.4', '2025-09-10', 'legacy support for json fields #LEGACY-PRE2016 tags', 0, 'admin', 'all json field alternative sql'),
-    ('1.2.6', '2025-09-10', 'Disable FK definitions by default', 0, 'admin', 'improve deployment compatiblity');
+    ('1.2.6', '2025-09-10', 'Disable FK definitions by default', 0, 'admin', 'improve deployment compatiblity'),
+    ('1.2.7', '2025-09-10', 'remove ssd_api_data_staging - now part of api release', 0, 'admin', 'patch fix');
 
 -- META-ELEMENT: {"type": "test"}
 PRINT 'Table created: ' + @TableName;
