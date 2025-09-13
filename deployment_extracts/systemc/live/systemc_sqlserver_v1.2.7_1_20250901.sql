@@ -2748,89 +2748,64 @@ PRINT 'Table created: ' + @TableName;
 
 -- META-END
 
+-- setup, optional
+-- DECLARE @ssd_timeframe_years int = 3;
 
--- META-CONTAINER: {"type": "table", "name": "ssd_cla_episodes"}
--- =============================================================================
--- Description: 
--- Author: D2I
--- Version: 1.1 clae_cla_episode_ceased _ date suffix add 310125 RH
---             1.0: Fix Aggr warnings use of isnull() 310524 RH
---             0.2: primary _need type/size adjustment from revised spec 160524 RH
---             0.1: cla_placement_id added as part of cla_placements review RH 060324
--- Status: [R]elease
--- Remarks: 
--- Dependencies: 
--- - ssd_involvements
--- - ssd_person
--- - HDM.Child_Social.FACT_CLA
--- - HDM.Child_Social.FACT_REFERRALS
--- - HDM.Child_Social.FACT_CARE_EPISODES
--- - HDM.Child_Social.FACT_CASENOTES
--- =============================================================================
+-- drops
+IF OBJECT_ID('tempdb..#ssd_cla_episodes','U') IS NOT NULL DROP TABLE #ssd_cla_episodes;
+IF OBJECT_ID('ssd_development.ssd_cla_episodes','U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_episodes;
 
--- META-ELEMENT: {"type": "test"}
-SET @TableName = N'ssd_cla_episodes';
-
-
--- META-ELEMENT: {"type": "drop_table"}   
-IF OBJECT_ID('ssd_development.ssd_cla_episodes') IS NOT NULL DROP TABLE ssd_development.ssd_cla_episodes;
-IF OBJECT_ID('tempdb..#ssd_cla_episodes') IS NOT NULL DROP TABLE #ssd_cla_episodes;
-
- 
--- META-ELEMENT: {"type": "create_table"}
+-- target
 CREATE TABLE ssd_development.ssd_cla_episodes (
-    clae_cla_episode_id             NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAE001A"}
-    clae_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CLAE002A"}
-    clae_cla_placement_id           NVARCHAR(48),               -- metadata={"item_ref":"CLAE013A"} 
-    clae_cla_episode_start_date     DATETIME,                   -- metadata={"item_ref":"CLAE003A"}
-    clae_cla_episode_start_reason   NVARCHAR(100),              -- metadata={"item_ref":"CLAE004A"}
-    clae_cla_primary_need_code      NVARCHAR(3),                -- metadata={"item_ref":"CLAE009A", "info":"Expecting codes N0-N9"} 
-    clae_cla_episode_ceased_date    DATETIME,                   -- metadata={"item_ref":"CLAE005A"}
-    clae_cla_episode_ceased_reason  NVARCHAR(255),              -- metadata={"item_ref":"CLAE006A"}
-    clae_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAE010A"}
-    clae_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CLAE011A"}
-    clae_cla_last_iro_contact_date  DATETIME,                   -- metadata={"item_ref":"CLAE012A"} 
-    clae_entered_care_date          DATETIME                    -- metadata={"item_ref":"CLAE014A"}
+    clae_cla_episode_id             nvarchar(48) PRIMARY KEY,
+    clae_person_id                  nvarchar(48),
+    clae_cla_placement_id           nvarchar(48),
+    clae_cla_episode_start_date     datetime,
+    clae_cla_episode_start_reason   nvarchar(100),
+    clae_cla_primary_need_code      nvarchar(3),
+    clae_cla_episode_ceased_date    datetime,
+    clae_cla_episode_ceased_reason  nvarchar(255),
+    clae_cla_id                     nvarchar(48),
+    clae_referral_id                nvarchar(48),
+    clae_cla_last_iro_contact_date  datetime,
+    clae_entered_care_date          datetime
 );
 
-
-
--- CTE to filter records
--- approach taken over the [TESTING] version below as (SQL server)execution plan
--- potentially affecting how the EXISTS filter against ssd_person is applied
-WITH FilteredData AS (
+-- filtered source
+;WITH FilteredData AS (
     SELECT
-        fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
-        fce.FACT_CLA_PLACEMENT_ID               AS clae_cla_placement_id,
-        TRY_CAST(fce.DIM_PERSON_ID AS NVARCHAR(48)) AS clae_person_id,
-        fce.CARE_START_DATE                     AS clae_cla_episode_start_date,
-        fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
-        fce.CIN_903_CODE                        AS clae_cla_primary_need_code,
-        fce.CARE_END_DATE                       AS clae_cla_episode_ceased_date,
-        fce.CARE_REASON_END_DESC                AS clae_cla_episode_ceased_reason,
-        fc.FACT_CLA_ID                          AS clae_cla_id,                    
-        fc.FACT_REFERRAL_ID                     AS clae_referral_id,
-        (SELECT MAX(ISNULL(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
-            AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
-            THEN cn.EVENT_DTTM END, '1900-01-01')))                                                      
-                                                AS clae_cla_last_iro_contact_date,
-        fc.START_DTTM                           AS clae_entered_care_date
-    FROM
-        HDM.Child_Social.FACT_CARE_EPISODES AS fce
-
-    JOIN
-        HDM.Child_Social.FACT_CLA AS fc ON fce.FACT_CLA_ID = fc.FACT_CLA_ID
-    LEFT JOIN
-        HDM.Child_Social.FACT_CASENOTES cn ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
-
-    WHERE
-        fce.DIM_PERSON_ID IN (SELECT TRY_CAST(pers_person_id AS INT) FROM ssd_development.ssd_person) -- 
-
-    AND
-        (fce.CARE_END_DATE  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
-        OR fce.CARE_END_DATE IS NULL)
-
-
+        fce.FACT_CARE_EPISODES_ID                 AS clae_cla_episode_id,
+        TRY_CAST(fce.DIM_PERSON_ID AS nvarchar(48)) AS clae_person_id,
+        fce.FACT_CLA_PLACEMENT_ID                 AS clae_cla_placement_id,
+        fce.CARE_START_DATE                       AS clae_cla_episode_start_date,
+        fce.CARE_REASON_DESC                      AS clae_cla_episode_start_reason,
+        fce.CIN_903_CODE                          AS clae_cla_primary_need_code,
+        fce.CARE_END_DATE                         AS clae_cla_episode_ceased_date,
+        fce.CARE_REASON_END_DESC                  AS clae_cla_episode_ceased_reason,
+        fc.FACT_CLA_ID                            AS clae_cla_id,
+        fc.FACT_REFERRAL_ID                       AS clae_referral_id,
+        ISNULL(
+            MAX(CASE
+                    WHEN cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+                    THEN cn.EVENT_DTTM
+                END),
+            CAST('19000101' AS datetime)
+        )                                         AS clae_cla_last_iro_contact_date,
+        fc.START_DTTM                             AS clae_entered_care_date
+    FROM HDM.Child_Social.FACT_CARE_EPISODES AS fce
+    JOIN HDM.Child_Social.FACT_CLA AS fc
+      ON fc.FACT_CLA_ID = fce.FACT_CLA_ID
+    LEFT JOIN HDM.Child_Social.FACT_CASENOTES AS cn
+      ON cn.DIM_PERSON_ID = fce.DIM_PERSON_ID
+    WHERE EXISTS (
+              SELECT 1
+              FROM ssd_development.ssd_person p
+              WHERE TRY_CAST(p.pers_person_id AS int) = fce.DIM_PERSON_ID
+          )
+      AND (
+            fce.CARE_END_DATE >= DATEADD(year, -@ssd_timeframe_years, GETDATE())
+            OR fce.CARE_END_DATE IS NULL
+          )
     GROUP BY
         fce.FACT_CARE_EPISODES_ID,
         fce.DIM_PERSON_ID,
@@ -2840,12 +2815,10 @@ WITH FilteredData AS (
         fce.CIN_903_CODE,
         fce.CARE_END_DATE,
         fce.CARE_REASON_END_DESC,
-        fc.FACT_CLA_ID,                    
+        fc.FACT_CLA_ID,
         fc.FACT_REFERRAL_ID,
-        fc.START_DTTM,
-        cn.DIM_PERSON_ID
+        fc.START_DTTM
 )
--- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cla_episodes (
     clae_cla_episode_id,
     clae_person_id,
@@ -2858,7 +2831,7 @@ INSERT INTO ssd_development.ssd_cla_episodes (
     clae_cla_id,
     clae_referral_id,
     clae_cla_last_iro_contact_date,
-    clae_entered_care_date 
+    clae_entered_care_date
 )
 SELECT
     clae_cla_episode_id,
@@ -2873,8 +2846,7 @@ SELECT
     clae_referral_id,
     clae_cla_last_iro_contact_date,
     clae_entered_care_date
-FROM
-    FilteredData;
+FROM FilteredData;
 
 
 
