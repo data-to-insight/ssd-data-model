@@ -2751,11 +2751,11 @@ PRINT 'Table created: ' + @TableName;
 -- setup, optional
 -- DECLARE @ssd_timeframe_years int = 3;
 
--- drops
+-- META-ELEMENT: {"type": "drop_table"}
 IF OBJECT_ID('tempdb..#ssd_cla_episodes','U') IS NOT NULL DROP TABLE #ssd_cla_episodes;
 IF OBJECT_ID('ssd_development.ssd_cla_episodes','U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_episodes;
 
--- target
+-- META-ELEMENT: {"type": "create_table"}
 CREATE TABLE ssd_development.ssd_cla_episodes (
     clae_cla_episode_id             nvarchar(48) PRIMARY KEY,
     clae_person_id                  nvarchar(48),
@@ -2771,6 +2771,7 @@ CREATE TABLE ssd_development.ssd_cla_episodes (
     clae_entered_care_date          datetime
 );
 
+-- META-ELEMENT: {"type": "insert_data"}
 -- filtered source
 ;WITH FilteredData AS (
     SELECT
