@@ -4760,7 +4760,6 @@ CREATE TABLE ssd_development.ssd_department (
 );
 
 
-
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_department (
     dept_team_id,
