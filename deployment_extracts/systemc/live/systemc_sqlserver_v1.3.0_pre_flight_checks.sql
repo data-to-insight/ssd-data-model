@@ -1,10 +1,11 @@
+-- This is SystemC/LL default. Edit/point to your reporting db
 USE HDM_Local;
 
 
 SET NOCOUNT ON;
 
 --------------------------------------------------------------------------------
--- CONFIG
+-- CONFIG (CMS Data sources)
 --------------------------------------------------------------------------------
 DECLARE @src_db        sysname  = N'HDM';           -- source DB to inspect
 DECLARE @src_schema    sysname  = N'Child_Social';  -- schema to inspect
