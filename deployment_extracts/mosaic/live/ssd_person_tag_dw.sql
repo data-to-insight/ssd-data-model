@@ -26,7 +26,7 @@ select
 	) pers_gender,
 	(
 		select
-			eth.ETHNICITY_DESCRIPTION
+			eth.ETHNICITY_DESCRIPTION -- [REVIEW] Issue ##28 CBDS_ETHNICITY_CODE?
 		from
 			DM_ETHNICITIES eth
 		where

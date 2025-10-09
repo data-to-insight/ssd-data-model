@@ -12,7 +12,7 @@ p.PERSON_ID pers_person_id,
 p.GENDER pers_sex,
 pg.GENDER_CODE pers_gender,
 --p.SUB_ETHNICITY pers_ethnicity,
-e.CIN_ETHNICITY_DESCRIPTION pers_ethnicity,
+e.CIN_ETHNICITY_DESCRIPTION pers_ethnicity, -- [REVIEW] Issue ##28 CBDS_ETHNICITY_CODE?
 CAST(DATE_OF_BIRTH as date) pers_dob,
 r1.REFERENCE pers_common_child_id,
 -- r2.REFERENCE pers_upn, -- [depreciated] [REVIEW]

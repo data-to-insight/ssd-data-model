@@ -2465,7 +2465,7 @@ Dependencies:
 			) pers_gender,
 			(
 				select
-					eth.ETHNICITY_DESCRIPTION
+					eth.ETHNICITY_DESCRIPTION -- [REVIEW] Issue ##28 CBDS_ETHNICITY_CODE?
 				from
 					dm_ETHNICITIES eth
 				where
@@ -7078,6 +7078,9 @@ Dependencies:
     END CATCH
 END
 GO
+
+
+
 
 
 

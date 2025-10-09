@@ -1148,7 +1148,7 @@ CREATE TABLE ssd_development.ssd_cin_episodes
     cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
     cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
     cine_referral_outcome_json      NVARCHAR(4000), -- metadata={"item_ref":"CINE005A"}
-    cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A"}
+    cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A", "info":"Consider for conversion to Bool"}
     cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
     cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
     cine_referral_team              NVARCHAR(48),   -- metadata={"item_ref":"CINE008A"}
@@ -1203,7 +1203,7 @@ SELECT
             ISNULL(fr.OUTCOME_COMMENTS, '')                 AS COMMENTS
         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
         ) AS cine_referral_outcome_json,
-    fr.OUTCOME_NFA_FLAG,
+    fr.OUTCOME_NFA_FLAG, -- Consider conversion straight to bool
     fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
     fr.REFRL_END_DTTM,
     fr.DIM_DEPARTMENT_ID, -- Swap out on DIM_DEPARTMENT_ID_DESC #DtoI-1762

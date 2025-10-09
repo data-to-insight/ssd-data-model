@@ -11,7 +11,7 @@ Select distinct
 p.PersonID pers_person_id,
 p.Sex pers_sex,
 p.pGender pers_gender,
-COALESCE(ec.CINCode,'NOBT') pers_ethnicity,
+COALESCE(ec.CINCode,'NOBT') pers_ethnicity, -- [REVIEW] Issue ##28 CBDS_ETHNICITY_CODE?
 p.PDoB pers_dob,
 p.PNHSNumber pers_common_child_id,
 -- p.PUniquePupilNumber pers_upn, -- [depreciated] [REVIEW]

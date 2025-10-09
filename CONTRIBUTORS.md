@@ -28,6 +28,7 @@ We also extend thanks to our wider circle of contributing LAs, especially those 
 **Trafford Council** 
 **Waltham Forest Borough Council** 
 **North Yorks Council**
+**Merton County Council via DfE Private Dashboard Early Adopters**
 
 Further, we are grateful to the following partner organisations for key contributions to the project: 
 
