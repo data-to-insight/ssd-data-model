@@ -2465,7 +2465,7 @@ Dependencies:
 			) pers_gender,
 			(
 				select
-					eth.ETHNICITY_DESCRIPTION -- [REVIEW] Issue ##28 CBDS_ETHNICITY_CODE?
+					eth.ETHNICITY_DESCRIPTION
 				from
 					dm_ETHNICITIES eth
 				where
@@ -6977,7 +6977,16 @@ Dependencies:
 */
     BEGIN TRY
         SET NOCOUNT ON;
-
+		--
+		declare @further_sw_action_next_actions table (
+			workflow_next_action_type_id	numeric(9),
+			description						varchar(1000)
+		)		
+		insert into @further_sw_action_next_actions 
+		values
+			(1234, 'Initial CP Conference'),
+			(5678, 'Reconvened S47 Enquiry')
+		--
         IF OBJECT_ID('tempdb..##ssd_s47_enquiry') IS NOT NULL
             DROP TABLE ##ssd_s47_enquiry;
 
@@ -7018,28 +7027,43 @@ Dependencies:
             stp.completed_on,
             CASE
                 WHEN EXISTS (
-                    SELECT 1
-                    FROM dm_workflow_links lnk
-                    INNER JOIN dm_workflow_nxt_action_types ntyp
-                        ON ntyp.workflow_next_action_type_id = lnk.workflow_next_action_type_id
-                       AND ntyp.is_no_further_action = 'Y'
-                    INNER JOIN dm_workflow_steps_people_vw nstp
-                        ON nstp.workflow_step_id = lnk.target_step_id
-                    WHERE nstp.step_status NOT IN ('CANCELLED', 'PROPOSED')
-                      AND nstp.person_id = stp.person_id
+					SELECT 
+						1
+					FROM 
+						dm_workflow_links lnk
+					INNER JOIN dm_workflow_nxt_action_types ntyp
+					ON ntyp.workflow_next_action_type_id = lnk.workflow_next_action_type_id
+					AND 
+					ntyp.is_no_further_action = 'Y'
+					INNER JOIN dm_workflow_steps_people_vw nstp
+					ON nstp.workflow_step_id = lnk.target_step_id
+					and 
+					nstp.step_status NOT IN ('CANCELLED', 'PROPOSED')
+					AND 
+					nstp.person_id = stp.person_id									
+					WHERE
+						lnk.source_step_id = stp.workflow_step_id
                 )
                 AND NOT EXISTS (
-                    SELECT 1
-                    FROM dm_workflow_links lnk
-                    INNER JOIN dm_workflow_nxt_action_types ntyp
-                        ON ntyp.workflow_next_action_type_id = lnk.workflow_next_action_type_id
-                       AND ntyp.is_no_further_action = 'Y'
-                    INNER JOIN dm_workflow_steps_people_vw nstp
-                        ON nstp.workflow_step_id = lnk.target_step_id
-                    WHERE nstp.step_status NOT IN ('CANCELLED', 'PROPOSED')
-                      AND nstp.person_id = stp.person_id
+					SELECT 
+						1
+					FROM 
+						dm_workflow_links lnk
+					inner join @further_sw_action_next_actions fa
+					on fa.workflow_next_action_type_id = lnk.workflow_next_action_type_id
+					INNER JOIN dm_workflow_steps_people_vw nstp
+					ON nstp.workflow_step_id = lnk.target_step_id
+					and 
+					nstp.step_status NOT IN ('CANCELLED', 'PROPOSED')
+					AND 
+					nstp.person_id = stp.person_id									
+					WHERE
+						lnk.source_step_id = stp.workflow_step_id
                 )
-                THEN 'Y' ELSE 'N'
+                THEN 
+					'Y' 
+				ELSE 
+					'N'
             END AS s47e_s47_nfa,
             LTRIM(
                 STUFF((
@@ -7078,9 +7102,6 @@ Dependencies:
     END CATCH
 END
 GO
-
-
-
 
 
 
