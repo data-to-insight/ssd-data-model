@@ -6060,9 +6060,9 @@ https://github.com/data-to-insight/dfe-csc-api-data-flows/releases
 
 
 
--- META-CONTAINER: {"type": "table", "name": "ssd_api_data_staging_ANON"}
+-- META-CONTAINER: {"type": "table", "name": "ssd_api_data_staging"}
 -- =============================================================================
--- Description: Table for TEST|ANON API payload and logging. 
+-- Description: ssd_api_data_staging (_anon) tables for LIVE|TEST API payload and logging. 
 -- Author: D2I
 -- =============================================================================
 
