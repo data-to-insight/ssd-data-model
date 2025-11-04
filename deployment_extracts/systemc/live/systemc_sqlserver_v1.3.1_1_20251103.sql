@@ -9,6 +9,11 @@ STANDARD SAFEGUARDING DATASET EXTRACT
 https://data-to-insight.github.io/ssd-data-model/
 
 *We strongly recommend that all initial pilot/trials of SSD scripts occur in a development|test environment.*
+*To make development deployment easier, we have left schema.table references where 'ssd_development.' is a 
+default schema reference that can be easily removed or replaced as required. 
+TO REMOVE: Search and replace the entire script 'ssd_development.' replace with ''(blank/nothing)
+TO REPLACE: Search and replace the entire script 'ssd_development.' replace with 'your_dev_schema_name.'
+- where quotes shown here are NOT used when doing the replacement! 
 
 Script creates labelled persistent(unless set otherwise) tables in your existing|specified database. 
 
@@ -161,7 +166,7 @@ INSERT INTO ssd_development.ssd_version_log
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     -- insert & update for CURRENT version (using MAJOR.MINOR.PATCH)
-    ('1.3.0', '2025-09-24', 'New ssd_cohort for cohort visibility/monitoring', 1, 'admin', 'provides breakdown of cohort origins - later use to ease current EXISTS backchecks on ssd_person');
+    ('1.3.1', '2025-10-03', 'Coventry suggested on ssd_assessment_factors', 1, 'admin', 'adjmts provided by Coventry to provide more robust pulling of assessment factor data where filter might not align with prev-family assessments-');
 
 
 
@@ -186,7 +191,8 @@ VALUES
     ('1.2.6', '2025-09-10', 'Disable FK definitions by default', 0, 'admin', 'improve deployment compatiblity'),
     ('1.2.7', '2025-09-10', 'remove ssd_api_data_staging - now part of api release', 0, 'admin', 'patch fix'),
     ('1.2.8', '2025-09-13', 'assessment_factors & cla_episodes refactor', 0, 'admin', 'early adopters suggested patch fix'),
-    ('1.2.9', '2025-09-22', 'assessment_factors refactor now with pre-aggr, fix pre-compile issue SQL <2016', 0, 'admin', 'improved run time perf, ease of opt A/B toggle');
+    ('1.2.9', '2025-09-22', 'assessment_factors refactor now with pre-aggr, fix pre-compile issue SQL <2016', 0, 'admin', 'improved run time perf, ease of opt A/B toggle'),
+    ('1.3.0', '2025-09-24', 'New ssd_cohort for cohort visibility/monitoring', 0, 'admin', 'provides breakdown of cohort origins - later use to ease current EXISTS backchecks on ssd_person');
 
 
 -- META-ELEMENT: {"type": "test"}
@@ -1956,7 +1962,8 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: 
 -- Author: D2I
--- Version: 1.5 Re-factor around string_agg pre-compile issues for pre 2016/2012 SQL 
+-- Version: 1.6 Family Assessment filter removal+suggested fix from Coventry/Redcar
+--              1.5 Re-factor around string_agg pre-compile issues for pre 2016/2012 SQL 
 --              1.4 introduce selection on string_Agg use from sys compatility settings
 --              1.3 Changes to fix 8k Lob cap on _json field, applied nvarchar(max)
 --              1.2 Handling added for potential empty list into json WHEN LEN(Concat_Result)
@@ -1979,7 +1986,7 @@ SET @TableName = N'ssd_assessment_factors';
 -- META-ELEMENT: {"type": "drop_table"} 
 IF OBJECT_ID('ssd_development.ssd_assessment_factors','U') IS NOT NULL DROP TABLE ssd_development.ssd_assessment_factors;
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
-IF OBJECT_ID('tempdb..#ssd_d_codes','U') IS NOT NULL DROP TABLE #ssd_d_codes;
+IF OBJECT_ID('tempdb..#ssd_d_codes','U') IS NOT NULL DROP TABLE #ssd_d_codes; -- de-duped + precomputed sort keys
 
 -- META-ELEMENT: {"type": "create_table"}
 CREATE TABLE ssd_development.ssd_assessment_factors (
@@ -1989,139 +1996,178 @@ CREATE TABLE ssd_development.ssd_assessment_factors (
     CONSTRAINT PK_ssd_assessment_factors PRIMARY KEY CLUSTERED (cinf_table_id, cinf_assessment_id)
 );
 
+
+
+-- META-ELEMENT: {"type": "insert_data"}
 /* ========================================================================
-   Assessment factors, shared prep + two insert options
-   Option A, XML PATH with pre-aggregation, SQL Server 2012+  (default)
-   Option B, (preferred, faster)STRING_AGG, SQL Server 2022 or Azure SQL  (commented)
+   Assessment factors (dual-path: modern + legacy, with ordered codes table)
+   - Shared prep builds filtered temp rows from Single Assessments
+   - #ssd_d_codes: de-dup + precomputed sort keys + (optional) clustered index
+   - Modern path: STRING_AGG (SQL 2022+/Azure SQL) 
+   - Legacy path: FOR XML PATH (SQL Server 2012+)
    ======================================================================== */
 
 -- META-ELEMENT: {"type": "insert_data"}
-DECLARE @Template nvarchar(100) = N'FAMILY ASSESSMENT';
-SET XACT_ABORT ON
+SET XACT_ABORT ON;
 
 BEGIN TRY
     BEGIN TRANSACTION;
 
     /* -------------------------------------------
-       Shared prep
+       Shared prep (raw filtered rows)
        ------------------------------------------- */
-
-    -- build tmp working set
     SELECT
         ffa.FACT_FORM_ID,
         ffa.ANSWER_NO,
         ffa.ANSWER
     INTO #ssd_TMP_PRE_assessment_factors
-    FROM HDM.Child_Social.FACT_FORM_ANSWERS AS ffa
-    JOIN ssd_development.ssd_cin_assessments AS ca
-      ON ca.cina_assessment_id = ffa.FACT_FORM_ID
-    WHERE RTRIM(LTRIM(ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC)) = @Template
-      AND ffa.FACT_FORM_ID <> -1
-      AND ffa.ANSWER = N'Yes'      -- for CS databases, switch to: AND UPPER(ffa.ANSWER) = N'YES'
-      AND ffa.ANSWER_NO IN (
-            '1A','1B','1C',
-            '2A','2B','2C','3A','3B','3C',
-            '4A','4B','4C',
-            '5A','5B','5C',
-            '6A','6B','6C',
-            '7A',
-            '8B','8C','8D','8E','8F',
-            '9A','10A','11A','12A','13A','14A','15A','16A','17A',
-            '18A','18B','18C',
-            '19A','19B','19C',
-            '20','21',
-            '22A','23A','24A'
-      );
+    FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
+    INNER JOIN HDM.Child_Social.FACT_FORM_ANSWERS   AS ffa
+      ON fsa.FACT_FORM_ID = ffa.FACT_FORM_ID
+    WHERE ffa.ANSWER_NO IN (
+          '1A','1B','1C'
+        ,'2A','2B','2C','3A','3B','3C'
+        ,'4A','4B','4C'
+        ,'5A','5B','5C'
+        ,'6A','6B','6C'
+        ,'7A'
+        ,'8B','8C','8D','8E','8F'
+        ,'9A','10A','11A','12A','13A','14A','15A','16A','17A'
+        ,'18A','18B','18C'
+        ,'19A','19B','19C'
+        ,'20','21'
+        ,'22A','23A','24A'
+    )
+      AND LOWER(ffa.ANSWER) = 'yes'
+      AND ffa.FACT_FORM_ID <> -1;
 
-    -- De dup per assessment
-    SELECT DISTINCT FACT_FORM_ID, ANSWER_NO
+    /* -------------------------------------------
+       Compact codes table (de-dup + sort keys)
+       ------------------------------------------- */
+    SELECT DISTINCT
+        d.FACT_FORM_ID,
+        d.ANSWER_NO,
+        d.ANSWER,
+        -- sort parts: numeric prefix then alpha suffix (or '' if none)
+        TRY_CONVERT(int, LEFT(d.ANSWER_NO,
+            CASE WHEN PATINDEX('%[^0-9]%', d.ANSWER_NO) = 0
+                 THEN LEN(d.ANSWER_NO)
+                 ELSE PATINDEX('%[^0-9]%', d.ANSWER_NO) - 1 END
+        )) AS num_part,
+        CASE WHEN PATINDEX('%[^0-9]%', d.ANSWER_NO) = 0
+             THEN N'' ELSE SUBSTRING(d.ANSWER_NO, PATINDEX('%[^0-9]%', d.ANSWER_NO), 10) END AS alpha_part
     INTO #ssd_d_codes
-    FROM #ssd_TMP_PRE_assessment_factors;
+    FROM #ssd_TMP_PRE_assessment_factors AS d;
 
-    -- Optional index if #ssd_d_codes is large
-    -- CREATE CLUSTERED INDEX IX_ssd_d_codes ON #ssd_d_codes(FACT_FORM_ID, ANSWER_NO);
-
-    /* -------------------------------------------
-       Option A, XML PATH with pre-aggr
-       ------------------------------------------- */
-    ;WITH agg AS (
-      SELECT
-          d.FACT_FORM_ID,
-          json_list =
-            N'[' + STUFF((
-                SELECT N',' + QUOTENAME(t.ANSWER_NO, '"')
-                FROM #ssd_d_codes AS t
-                WHERE t.FACT_FORM_ID = d.FACT_FORM_ID
-                ORDER BY
-                  TRY_CONVERT(int, LEFT(t.ANSWER_NO, NULLIF(PATINDEX('%[^0-9]%', t.ANSWER_NO + 'x') - 1, -1))),
-                  SUBSTRING(t.ANSWER_NO, NULLIF(PATINDEX('%[^0-9]%', t.ANSWER_NO + 'x'), 0), 10)
-                FOR XML PATH(''), TYPE
-            ).value('.', 'nvarchar(max)'), 1, 1, N'') + N']'
-      FROM #ssd_d_codes AS d
-      GROUP BY d.FACT_FORM_ID
-    )
-    INSERT INTO ssd_development.ssd_assessment_factors (
-        cinf_table_id,
-        cinf_assessment_id,
-        cinf_assessment_factors_json
-    )
-    SELECT
-        fsa.EXTERNAL_ID,
-        fsa.FACT_FORM_ID,
-        a.json_list
-    FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
-    JOIN agg AS a
-      ON a.FACT_FORM_ID = fsa.FACT_FORM_ID
-    JOIN ssd_development.ssd_cin_assessments AS ca
-      ON ca.cina_assessment_id = fsa.FACT_FORM_ID
-    WHERE fsa.EXTERNAL_ID <> -1;
+    -- Optional index (IF your LA assessments row count is in the millions)
+    -- CREATE CLUSTERED INDEX IX_codes ON #ssd_d_codes(FACT_FORM_ID, num_part, alpha_part, ANSWER_NO) INCLUDE (ANSWER);
 
     /* -------------------------------------------
-       Option B, STRING_AGG, SQL Server 2022+
-       Leave commented, uncomment to use
+       Path selection (prefer modern when available)
        ------------------------------------------- */
-    /*
-    INSERT INTO ssd_development.ssd_assessment_factors (
-        cinf_table_id,
-        cinf_assessment_id,
-        cinf_assessment_factors_json
-    )
-    SELECT
-        fsa.EXTERNAL_ID,
-        fsa.FACT_FORM_ID,
-        N'[' + STRING_AGG(CONVERT(nvarchar(max), QUOTENAME(d.ANSWER_NO, '"')), N',')
-                 WITHIN GROUP (
-                   ORDER BY
-                     TRY_CONVERT(int, LEFT(d.ANSWER_NO, NULLIF(PATINDEX('%[^0-9]%', d.ANSWER_NO + 'x') - 1, -1))),
-                     SUBSTRING(d.ANSWER_NO, NULLIF(PATINDEX('%[^0-9]%', d.ANSWER_NO + 'x'), 0), 10)
-                 ) + N']'
-    FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
-    JOIN #ssd_d_codes AS d
-      ON d.FACT_FORM_ID = fsa.FACT_FORM_ID
-    JOIN ssd_development.ssd_cin_assessments AS ca
-      ON ca.cina_assessment_id = fsa.FACT_FORM_ID
-    WHERE fsa.EXTERNAL_ID <> -1
-    GROUP BY fsa.EXTERNAL_ID, fsa.FACT_FORM_ID;
-    */
+    DECLARE @UseModern bit = 1;  -- set to 0 force legacy everywhere
+    DECLARE @ProductVersion nvarchar(32) = CONVERT(nvarchar(32), SERVERPROPERTY('ProductVersion'));
+    DECLARE @Major int = TRY_CONVERT(int, PARSENAME(@ProductVersion, 4)); -- 16=SQL 2022, 15=2019, 14=2017, 11=2012
+
+    IF (@UseModern = 1 AND @Major >= 16)
+    BEGIN
+        /* -------------------------------------------
+           Modern path: SQL Server 2022+/Azure SQL
+           Use STRING_AGG with ORDER BY over compact codes set
+           ------------------------------------------- */
+        INSERT INTO ssd_development.ssd_assessment_factors (
+            cinf_table_id,
+            cinf_assessment_id,
+            cinf_assessment_factors_json
+        )
+        SELECT
+            fsa.EXTERNAL_ID AS cinf_table_id,
+            fsa.FACT_FORM_ID AS cinf_assessment_id,
+
+            -- KEY-VALUES output {"1B": "Yes", "2B": "Yes", ...}
+            N'{' + STRING_AGG(
+                    CONCAT('"', c.ANSWER_NO, '": ', QUOTENAME(c.ANSWER, '"')),
+                    N', '
+                 ) WITHIN GROUP (ORDER BY c.num_part, c.alpha_part)
+               + N'}' AS cinf_assessment_factors_json
+
+            -- KEYS-ONLY alternative (swap with lines above if ["1A","2B",...] needed):
+            -- N'[' + STRING_AGG(
+            --         CONCAT('"', c.ANSWER_NO, '"'),
+            --         N', '
+            --      ) WITHIN GROUP (ORDER BY c.num_part, c.alpha_part)
+            --    + N']' AS cinf_assessment_factors_json
+
+
+
+        FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
+        JOIN #ssd_d_codes AS c
+          ON c.FACT_FORM_ID = fsa.FACT_FORM_ID
+        WHERE fsa.EXTERNAL_ID <> -1
+        GROUP BY fsa.EXTERNAL_ID, fsa.FACT_FORM_ID;
+        -- Optional scope:
+        -- AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_development.ssd_cin_assessments)
+    END
+    ELSE
+    BEGIN
+        /* -------------------------------------------
+           Legacy path: SQL Server 2012+
+           Build JSON via FOR XML PATH using ordered #ssd_d_codes
+           ------------------------------------------- */
+        INSERT INTO ssd_development.ssd_assessment_factors (
+            cinf_table_id,
+            cinf_assessment_id,
+            cinf_assessment_factors_json
+        )
+        SELECT
+            fsa.EXTERNAL_ID AS cinf_table_id,
+            fsa.FACT_FORM_ID AS cinf_assessment_id,
+            (
+                SELECT
+                    -- KEY-VALUES output {"1B": "Yes", "2B": "Yes", ...}
+                    '{' +
+                    STUFF((
+                        SELECT
+                            ', "' + x.ANSWER_NO + '": ' + QUOTENAME(x.ANSWER, '"')
+                        FROM #ssd_d_codes AS x
+                        WHERE x.FACT_FORM_ID = fsa.FACT_FORM_ID
+                        ORDER BY x.num_part, x.alpha_part
+                        FOR XML PATH(''), TYPE
+                    ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') +
+                    '}'
+
+                    -- KEYS-ONLY alternative (swap with lines above if ["1A","2B",...] needed):
+                    -- '[' +
+                    -- STUFF((
+                    --     SELECT
+                    --         ', "' + x.ANSWER_NO + '"'
+                    --     FROM #ssd_d_codes AS x
+                    --     WHERE x.FACT_FORM_ID = fsa.FACT_FORM_ID
+                    --     ORDER BY x.num_part, x.alpha_part
+                    --     FOR XML PATH(''), TYPE
+                    -- ).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
+                    -- + ']'
+
+
+            ) AS cinf_assessment_factors_json
+        FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
+        JOIN (SELECT DISTINCT FACT_FORM_ID FROM #ssd_d_codes) AS d
+          ON d.FACT_FORM_ID = fsa.FACT_FORM_ID
+        WHERE fsa.EXTERNAL_ID <> -1;
+        -- Optional scope:
+        -- AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_development.ssd_cin_assessments)
+    END
 
     COMMIT TRANSACTION;
 END TRY
-
 BEGIN CATCH
     IF XACT_STATE() <> 0 ROLLBACK TRANSACTION;  -- handles both 1 and -1 states
-    DECLARE @ErrMsg nvarchar(2048) = ERROR_MESSAGE(),
-            @ErrNum int = ERROR_NUMBER(),
-            @ErrSev int = ERROR_SEVERITY(),
-            @ErrState int = ERROR_STATE();
-    -- Prefer THROW to preserve original error and stack
-    THROW;  -- or, if you must format: RAISERROR(@ErrMsg, @ErrSev, @ErrState);
-END CATCH
+    THROW;  -- preserve original error details
+END CATCH;
 
-
--- Shared cleanup, 2012 compatible
+-- Cleanup
 IF OBJECT_ID('tempdb..#ssd_d_codes','U') IS NOT NULL DROP TABLE #ssd_d_codes;
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
-
 
 
 -- -- META-ELEMENT: {"type": "create_fk"} 
