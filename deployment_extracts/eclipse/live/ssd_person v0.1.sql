@@ -1,16 +1,3 @@
-/*
-=============================================================================
-Object Name: ssd_person
-Description: Person/child details. 
-Author: Lee Hallsworth - City of Wolverhampton Council
-Version: 0.1 Creation - LH - <date>
-Status: Dev
-Remarks:    
-
-Dependencies:
-
-=============================================================================
-*/
 
 WITH EXCLUSIONS AS (
 	SELECT
@@ -29,7 +16,7 @@ WITH EXCLUSIONS AS (
 
 SELECT DISTINCT
 	P.PERSONID               AS "pers_person_id", --metadata={"item_ref:"PERS001A"}
-	P.SURNAME                AS "pers_surname" -- metadata={"item_ref":"PERS016A"}    
+	P.SURNAME                AS "pers_surname",  -- metadata={"item_ref":"PERS016A"}    
 	P.FORENAME               AS "pers_forename",  -- metadata={"item_ref":"PERS015A"}  
 	CASE
 		WHEN P.SEX = 'Male'

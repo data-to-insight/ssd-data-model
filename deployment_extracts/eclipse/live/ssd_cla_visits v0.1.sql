@@ -13,7 +13,7 @@ Dependencies:
 =============================================================================
 */
 
-EXCLUSIONS AS (
+WITH EXCLUSIONS AS (
 	SELECT
 		PV.PERSONID
 	FROM PERSONVIEW PV
