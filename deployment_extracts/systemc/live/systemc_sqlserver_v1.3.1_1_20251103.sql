@@ -98,7 +98,6 @@ DECLARE @CaseloadTimeframeStartDate DATE = DATEADD(YEAR, -@ssd_timeframe_years, 
 -- META-ELEMENT: {"type": "dbschema"}
 -- Point to DB/TABLE_CATALOG if required (SSD tables created here)
 USE HDM_Local;                           -- used in logging (and seperate clean-up script(s))
-DECLARE @schema_name NVARCHAR(128) = N'ssd_development';    -- set your schema name here OR leave empty for default behaviour. Used towards ssd_extract_log
 
 -- Example/Reference
 -- ALTER USER [ESCC\RobertHa] WITH DEFAULT_SCHEMA = [ssd_development];
