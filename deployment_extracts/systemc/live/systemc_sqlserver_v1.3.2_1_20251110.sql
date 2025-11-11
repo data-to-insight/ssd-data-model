@@ -47,7 +47,7 @@ Status:     [B]acklog,          -- To do|for review but not current priority
             [AR]waitingReview,  -- Hand-over to SSD project team for review
             [R]elease,          -- Ready for wider release and secondary data testing
             [Bl]ocked,          -- Data is not held in CMS/accessible, or other stoppage reason
-            [P]laceholder       -- Data not held by any LA, new data, - Future structure added as placeholder
+            [P]laceholder       -- Data not expected to be held by most LAs or new data, - placeholder structure
 
 Development notes:
 Currently in [REVIEW]
@@ -73,8 +73,8 @@ GO
 SET NOCOUNT ON;
 
 -- META-ELEMENT: {"type": "ssd_timeframe"}
-DECLARE @ssd_timeframe_years INT = 6; -- ssd extract time-frame (YRS)
-DECLARE @ssd_sub1_range_years INT = 1;
+DECLARE @ssd_timeframe_years INT = 6;   -- ssd extract time-frame (YRS)
+DECLARE @ssd_sub1_range_years INT = 1;  -- common internal or additional LA use naming
 
 
 
@@ -139,34 +139,38 @@ SET @StartTime = GETDATE(); -- Script start time
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_version_log';
 
+
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_version_log', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_version_log;
-IF OBJECT_ID('tempdb..#ssd_version_log', 'U') IS NOT NULL DROP TABLE #ssd_version_log;
+IF OBJECT_ID('ssd_development.ssd_version_log', 'U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_version_log)
+        TRUNCATE TABLE ssd_development.ssd_version_log;
+END
+ELSE
+BEGIN
+    -- META-ELEMENT: {"type": "create_table"}
+    -- create versioning information object
+    CREATE TABLE ssd_development.ssd_version_log (
+        version_number      NVARCHAR(10) PRIMARY KEY,   -- version num (e.g., "1.0.0")
+        release_date        DATE NOT NULL,              -- date of version release
+        description         NVARCHAR(100),              -- brief description of version
+        is_current          BIT NOT NULL DEFAULT 0,     -- flag to indicate if this is the current version
+        created_at          DATETIME DEFAULT GETDATE(), -- timestamp when record was created
+        created_by          NVARCHAR(10),               -- which user created the record
+        impact_description  NVARCHAR(255)               -- additional notes on the impact of the release
+    );
+END
 
--- META-ELEMENT: {"type": "create_table"}
--- create versioning information object
-CREATE TABLE ssd_development.ssd_version_log (
-    version_number      NVARCHAR(10) PRIMARY KEY,                   -- version num (e.g., "1.0.0")
-    release_date        DATE NOT NULL,                  -- date of version release
-    description         NVARCHAR(100),                  -- brief description of version
-    is_current          BIT NOT NULL DEFAULT 0,         -- flag to indicate if this is the current version
-    created_at          DATETIME DEFAULT GETDATE(),     -- timestamp when record was created
-    created_by          NVARCHAR(10),                   -- which user created the record
-    impact_description  NVARCHAR(255)                   -- additional notes on the impact of the release
-); 
 
-
-
--- ensure any previous current-version flag is set to 0 (not current), before adding new current version
+-- ensure any previous current-version flag is set to 0 (not current), before adding new current version detail
 UPDATE ssd_development.ssd_version_log SET is_current = 0 WHERE is_current = 1;
 
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_version_log 
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
-    -- insert & update for CURRENT version (using MAJOR.MINOR.PATCH)
+    -- CURRENT version (using MAJOR.MINOR.PATCH)
     ('1.3.2', '2025-11-10', 'Block out string_agg on ssd_assessment_factors', 1, 'admin', 'fix needed to prevent legacy sql failing on string_agg in modern selection block');
-
 
 
 -- HISTORIC versioning log data
@@ -238,27 +242,35 @@ SET @TableName = N'ssd_person';
 
 
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_person') IS NOT NULL DROP TABLE ssd_development.ssd_person;
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
+IF OBJECT_ID('ssd_development.ssd_person') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_person)
+        TRUNCATE TABLE ssd_development.ssd_person;
+END
+ELSE
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_person (
-    pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
-    pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"} 
-    pers_forename           NVARCHAR(100),              -- metadata={"item_ref":"PERS015A"}  
-    pers_surname            NVARCHAR(255),              -- metadata={"item_ref":"PERS016A"}  
-    pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If -additional- status to Gender is held, otherwise duplicate pers_gender"}    
-    pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown",NULL,"F","U","M","I"]}       
-    pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A", "expected_data":[NULL, tbc]} 
-    pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
-    pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
-    pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A", "info":"SEN2 guidance suggests size(4)", "expected_data":["UN1-10"]}                                 
-    pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A", "item_status":"P"} 
-    pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}                  
-    pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"} 
-    pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
-    pers_nationality        NVARCHAR(48)               -- metadata={"item_ref":"PERS012A", "expected_data":[NULL, tbc]}   
-);
+BEGIN
+    CREATE TABLE ssd_development.ssd_person (
+        pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
+        pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"} 
+        pers_forename           NVARCHAR(100),              -- metadata={"item_ref":"PERS015A"}  
+        pers_surname            NVARCHAR(255),              -- metadata={"item_ref":"PERS016A"}  
+        pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If -additional- status to Gender is held, otherwise duplicate pers_gender"}    
+        pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown",NULL,"F","U","M","I"]}       
+        pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A", "expected_data":[NULL, tbc]} 
+        pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
+        pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
+        pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A", "info":"SEN2 guidance suggests size(4)", "expected_data":["UN1-10"]}                                 
+        pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A", "item_status":"P"} 
+        pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}                  
+        pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"} 
+        pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
+        pers_nationality        NVARCHAR(48)               -- metadata={"item_ref":"PERS012A", "expected_data":[NULL, tbc]}   
+    );
+END
+
 
 -- META-ELEMENT: {"type": "insert_data"}
 -- CTE to get a no_upn_code 
@@ -279,8 +291,8 @@ INSERT INTO ssd_development.ssd_person (
     pers_person_id,
     pers_forename,
     pers_surname,
-    pers_sex,       -- sex and gender currently extracted as one
-    pers_gender,    -- 
+    pers_sex,       -- as used in stat-returns
+    pers_gender,    -- Placeholder for those LAs that store sex and gender independently
     pers_ethnicity,
     pers_dob,
     pers_common_child_id,                               
@@ -293,33 +305,33 @@ INSERT INTO ssd_development.ssd_person (
     
 )
 SELECT 
-    -- TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING]
+    -- TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING|LA DEBUG]
     p.LEGACY_ID,
     CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
     p.FORENAME, 
     p.SURNAME,
-    p.GENDER_MAIN_CODE AS pers_sex,        -- Sex/Gender as used in stat-returns
+    p.GENDER_MAIN_CODE AS pers_sex,         -- Sex/Gender as used in stat-returns
     p.GENDER_MAIN_CODE,                     -- Placeholder for those LAs that store sex and gender independently
     p.ETHNICITY_MAIN_CODE,
     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
-        THEN p.BIRTH_DTTM -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
-        ELSE NULL 
-    END, -- or NULL
-    NULL AS pers_common_child_id, -- Set to NULL as default(dev) / or set to NHS num
+        THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
+        ELSE NULL                           -- or NULL
+    END, 
+    NULL AS pers_common_child_id,           -- Set to NULL as default(dev) / or set to NHS num
     COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
     p.EHM_SEN_FLAG,
     CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
-        THEN p.BIRTH_DTTM -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
-        ELSE NULL 
-    END, -- or NULL
+        THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
+        ELSE NULL                           -- or NULL
+    END, 
     p.DEATH_DTTM,
     CASE
-        WHEN p.GENDER_MAIN_CODE <> 'M' AND -- Assumption that if male is not mother
+        WHEN p.GENDER_MAIN_CODE <> 'M' AND  -- Assumption that if male is not mother
              EXISTS (SELECT 1 FROM HDM.Child_Social.FACT_PERSON_RELATION fpr
                      WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND
                            fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI') -- check for child relation only
         THEN 'Y'
-        ELSE NULL -- No child relation found
+        ELSE NULL                           -- No child relation found
     END,
     p.NATNL_CODE
 FROM
@@ -327,7 +339,7 @@ FROM
 
 -- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period?
 LEFT JOIN (
-    -- no other accessible location for UPN data than 903 table
+    -- ??other accessible location for UPN data than 903 table?? -- [TESTING|LA DEBUG]
     SELECT 
         dim_person_id, 
         no_upn_code
@@ -376,7 +388,7 @@ WHERE
                 WHERE (fi.DIM_PERSON_ID = p.DIM_PERSON_ID
                 AND (fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE 'KA%' --Key Agencies (External)
 				OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL OR fi.IS_ALLOCATED_CW_FLAG = 'Y')
-				-- AND START_DTTM > '2009-12-04 00:54:49.947' -- #DtoI-1830 care leavers who were aged 22-25 and may not have had Allocated Case Worker relationship for years+.
+				-- AND START_DTTM > '2009-12-04 00:54:49.947' -- #DtoI-1830 care leavers who were aged 22-25 and may not have had Allocated Case Worker relationship for years+
 				AND DIM_WORKER_ID <> '-1' 
                 AND (fi.END_DTTM IS NULL OR fi.END_DTTM > GETDATE()))
             )
@@ -459,14 +471,15 @@ DECLARE @src_schema sysname = N'Child_Social';
 
 
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cohort') IS NOT NULL DROP TABLE ssd_development.ssd_cohort;
-IF OBJECT_ID('ssd_cohort') IS NOT NULL DROP TABLE ssd_cohort;
+IF OBJECT_ID('tempdb..#ssd_cohort', 'U') IS NOT NULL DROP TABLE #ssd_cohort;
 
-IF OBJECT_ID('tempdb..#ssd_cohort') IS NOT NULL DROP TABLE #ssd_cohort;
-
-
+IF OBJECT_ID('ssd_development.ssd_cohort','U') IS NOT NULL
+BEGIN
+  IF EXISTS (SELECT 1 FROM ssd_development.ssd_cohort)
+    TRUNCATE TABLE ssd_development.ssd_cohort;
+END
+ELSE
 -- META-ELEMENT: {"type": "create_table"}
-IF OBJECT_ID('ssd_development.ssd_cohort','U') IS NULL
 BEGIN
   CREATE TABLE ssd_development.ssd_cohort(
     dim_person_id         nvarchar(48)  NOT NULL PRIMARY KEY,
@@ -484,10 +497,6 @@ BEGIN
     last_activity_dttm    datetime      NULL    -- max of contact/referral dates
   );
 END
-ELSE
-BEGIN
-  TRUNCATE TABLE ssd_development.ssd_cohort;
-END;
 
 
 /* Build 3-part prefix once */
@@ -608,9 +617,9 @@ DECLARE @sql nvarchar(max) = REPLACE(@tpl, N'__SRC__', @src3);
 EXEC sp_executesql @sql, N'@ssd_timeframe_years int', @ssd_timeframe_years;
 
 
--- META-ELEMENT: {"type": "create_idx"}
-CREATE INDEX IX_ssd_cohort_has_referral ON ssd_development.ssd_cohort(dim_person_id) WHERE has_referral = 1;
-CREATE INDEX IX_ssd_cohort_has_involvement ON ssd_development.ssd_cohort(dim_person_id) WHERE has_involvement = 1;
+-- -- META-ELEMENT: {"type": "create_idx"}
+-- CREATE INDEX IX_ssd_cohort_has_referral ON ssd_development.ssd_cohort(dim_person_id) WHERE has_referral = 1;
+-- CREATE INDEX IX_ssd_cohort_has_involvement ON ssd_development.ssd_cohort(dim_person_id) WHERE has_involvement = 1;
 
 
 
@@ -652,13 +661,21 @@ DECLARE @cutoff datetime =
   DATEADD(year, -@ssd_timeframe_years, CONVERT(datetime, CONVERT(date, GETDATE())));
 
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('tempdb..#ssd_core_person_cohort') IS NOT NULL DROP TABLE #ssd_core_person_cohort;
-IF OBJECT_ID('tempdb..#ssd_review_cohort')      IS NOT NULL DROP TABLE #ssd_review_cohort;
-
+IF OBJECT_ID('tempdb..#ssd_core_person_cohort') IS NOT NULL
+BEGIN
+  TRUNCATE TABLE #ssd_core_person_cohort;
+END
 -- META-ELEMENT: {"type": "create_table"}
+ELSE
+BEGIN
+  CREATE TABLE #ssd_core_person_cohort(
+    dim_person_id nvarchar(48) NOT NULL PRIMARY KEY
+  );
+END
+
 -- original ssd_person inclusion set (IDs only) - mirrors the EXISTS predicates
+INSERT INTO #ssd_core_person_cohort(dim_person_id)
 SELECT DISTINCT CAST(p.DIM_PERSON_ID AS nvarchar(48)) AS dim_person_id
-INTO #ssd_core_person_cohort
 FROM HDM.Child_Social.DIM_PERSON p
 WHERE p.DIM_PERSON_ID IS NOT NULL
   AND p.DIM_PERSON_ID <> -1
@@ -692,9 +709,21 @@ WHERE p.DIM_PERSON_ID IS NOT NULL
                  AND (fi.END_DTTM IS NULL OR fi.END_DTTM > GETDATE()))
   );
 
+-- META-ELEMENT: {"type": "create_table"}
+IF OBJECT_ID('tempdb..#ssd_review_cohort') IS NOT NULL
+BEGIN
+  TRUNCATE TABLE #ssd_review_cohort;
+END
+ELSE
+BEGIN
+  CREATE TABLE #ssd_review_cohort(
+    dim_person_id nvarchar(48) NOT NULL PRIMARY KEY
+  );
+END
+
 -- cohort-driven inclusion set (parity with ssd_person reasons; deliberately excludes has_903)
+INSERT INTO #ssd_review_cohort(dim_person_id)
 SELECT co.dim_person_id
-INTO #ssd_review_cohort
 FROM ssd_development.ssd_cohort co
 WHERE co.has_contact      = 1
    OR co.has_referral     = 1
@@ -702,6 +731,7 @@ WHERE co.has_contact      = 1
    OR co.has_eligibility  = 1
    OR co.has_client       = 1
    OR co.has_involvement  = 1;
+
 
 -- META-ELEMENT: {"type": "test"}
 -- headline counts: want intersection == review == core (and both "only_*" = 0)
@@ -723,7 +753,7 @@ SELECT
 -- WHERE r.dim_person_id IS NULL
 -- ORDER BY o.dim_person_id;
 
--- note: keep temp tables if wanting to probe further; otherwise drop
+-- temp tables if wanting to probe further; otherwise drop
 -- DROP TABLE #ssd_core_person_cohort;
 -- DROP TABLE #ssd_review_cohort;
 
@@ -754,15 +784,22 @@ SET @TableName = N'ssd_family';
 
 
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_family') IS NOT NULL DROP TABLE ssd_development.ssd_family;
-IF OBJECT_ID('tempdb..#ssd_family') IS NOT NULL DROP TABLE #ssd_family;
+IF OBJECT_ID('tempdb..#ssd_family', 'U') IS NOT NULL DROP TABLE #ssd_family;
 
+IF OBJECT_ID('ssd_development.ssd_family', 'U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_family)
+        TRUNCATE TABLE ssd_development.ssd_family;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_family (
-    fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"FAMI003A"} 
-    fami_family_id  NVARCHAR(48),               -- metadata={"item_ref":"FAMI001A"}
-    fami_person_id  NVARCHAR(48)                -- metadata={"item_ref":"FAMI002A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_family (
+        fami_table_id   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"FAMI003A"} 
+        fami_family_id  NVARCHAR(48),               -- metadata={"item_ref":"FAMI001A"}
+        fami_person_id  NVARCHAR(48)                -- metadata={"item_ref":"FAMI002A"}
+    );
+END
 
 
 -- META-ELEMENT: {"type": "insert_data"}
@@ -824,21 +861,27 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_address';
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_address') IS NOT NULL DROP TABLE ssd_development.ssd_address;
-IF OBJECT_ID('tempdb..#ssd_address') IS NOT NULL DROP TABLE #ssd_address;
+IF OBJECT_ID('tempdb..#ssd_address', 'U') IS NOT NULL DROP TABLE #ssd_address;
 
+IF OBJECT_ID('ssd_development.ssd_address','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_address)
+        TRUNCATE TABLE ssd_development.ssd_address;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_address (
-    addr_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"ADDR007A"}
-    addr_person_id          NVARCHAR(48),               -- metadata={"item_ref":"ADDR002A"} 
-    addr_address_type       NVARCHAR(48),               -- metadata={"item_ref":"ADDR003A"}
-    addr_address_start_date DATETIME,                   -- metadata={"item_ref":"ADDR004A"}
-    addr_address_end_date   DATETIME,                   -- metadata={"item_ref":"ADDR005A"}
-    addr_address_postcode   NVARCHAR(15),               -- metadata={"item_ref":"ADDR006A"}
-    addr_address_json       NVARCHAR(1000)              -- metadata={"item_ref":"ADDR001A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_address (
+        addr_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"ADDR007A"}
+        addr_person_id          NVARCHAR(48),               -- metadata={"item_ref":"ADDR002A"} 
+        addr_address_type       NVARCHAR(48),               -- metadata={"item_ref":"ADDR003A"}
+        addr_address_start_date DATETIME,                   -- metadata={"item_ref":"ADDR004A"}
+        addr_address_end_date   DATETIME,                   -- metadata={"item_ref":"ADDR005A"}
+        addr_address_postcode   NVARCHAR(15),               -- metadata={"item_ref":"ADDR006A"}
+        addr_address_json       NVARCHAR(1000)              -- metadata={"item_ref":"ADDR001A"}
+    );
+END
 
 
 -- META-ELEMENT: {"type": "insert_data"}
@@ -975,18 +1018,24 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_disability';
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_disability') IS NOT NULL DROP TABLE ssd_development.ssd_disability;
-IF OBJECT_ID('tempdb..#ssd_disability') IS NOT NULL DROP TABLE #ssd_disability;
+IF OBJECT_ID('tempdb..#ssd_disability', 'U') IS NOT NULL DROP TABLE #ssd_disability;
 
+IF OBJECT_ID('ssd_development.ssd_disability','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_disability)
+        TRUNCATE TABLE ssd_development.ssd_disability;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_disability
-(
-    disa_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"DISA003A"}
-    disa_person_id          NVARCHAR(48) NOT NULL,      -- metadata={"item_ref":"DISA001A"}
-    disa_disability_code    NVARCHAR(48) NOT NULL       -- metadata={"item_ref":"DISA002A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_disability
+    (
+        disa_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"DISA003A"}
+        disa_person_id          NVARCHAR(48) NOT NULL,      -- metadata={"item_ref":"DISA001A"}
+        disa_disability_code    NVARCHAR(48) NOT NULL       -- metadata={"item_ref":"DISA002A"}
+    );
+END
 
 
 -- META-ELEMENT: {"type": "insert_data"}
@@ -1048,19 +1097,26 @@ PRINT 'Table created: ' + @TableName;
 
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_immigration_status';
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_immigration_status') IS NOT NULL DROP TABLE ssd_development.ssd_immigration_status;
-IF OBJECT_ID('tempdb..#ssd_immigration_status') IS NOT NULL DROP TABLE #ssd_immigration_status;
+IF OBJECT_ID('tempdb..#ssd_immigration_status', 'U') IS NOT NULL DROP TABLE #ssd_immigration_status;
 
+IF OBJECT_ID('ssd_development.ssd_immigration_status','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_immigration_status)
+        TRUNCATE TABLE ssd_development.ssd_immigration_status;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_immigration_status (
-    immi_immigration_status_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"IMMI005A"}
-    immi_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"IMMI001A"}
-    immi_immigration_status_start_date  DATETIME,                   -- metadata={"item_ref":"IMMI003A"}
-    immi_immigration_status_end_date    DATETIME,                   -- metadata={"item_ref":"IMMI004A"}
-    immi_immigration_status             NVARCHAR(100)               -- metadata={"item_ref":"IMMI002A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_immigration_status (
+        immi_immigration_status_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"IMMI005A"}
+        immi_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"IMMI001A"}
+        immi_immigration_status_start_date  DATETIME,                   -- metadata={"item_ref":"IMMI003A"}
+        immi_immigration_status_end_date    DATETIME,                   -- metadata={"item_ref":"IMMI004A"}
+        immi_immigration_status             NVARCHAR(100)               -- metadata={"item_ref":"IMMI002A"}
+    );
+END
+
 
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_immigration_status (
@@ -1136,28 +1192,34 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cin_episodes';
 
-
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cin_episodes') IS NOT NULL DROP TABLE ssd_development.ssd_cin_episodes;
-IF OBJECT_ID('tempdb..#ssd_cin_episodes') IS NOT NULL DROP TABLE #ssd_cin_episodes;
+IF OBJECT_ID('tempdb..#ssd_cin_episodes', 'U') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
+IF OBJECT_ID('ssd_development.ssd_cin_episodes','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cin_episodes)
+        TRUNCATE TABLE ssd_development.ssd_cin_episodes;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cin_episodes
-(
-    cine_referral_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINE001A"}
-    cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
-    cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
-    cine_cin_primary_need_code      NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
-    cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
-    cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
-    cine_referral_outcome_json      NVARCHAR(4000), -- metadata={"item_ref":"CINE005A"}
-    cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A", "info":"Consider for conversion to Bool"}
-    cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
-    cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
-    cine_referral_team              NVARCHAR(48),   -- metadata={"item_ref":"CINE008A"}
-    cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
-); 
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cin_episodes
+    (
+        cine_referral_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINE001A"}
+        cine_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CINE002A"}
+        cine_referral_date              DATETIME,       -- metadata={"item_ref":"CINE003A"}
+        cine_cin_primary_need_code      NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
+        cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
+        cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
+        cine_referral_outcome_json      NVARCHAR(4000), -- metadata={"item_ref":"CINE005A"}
+        cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A", "info":"Consider for conversion to Bool"}
+        cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
+        cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
+        cine_referral_team              NVARCHAR(48),   -- metadata={"item_ref":"CINE008A"}
+        cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
+    );
+END
+
 
 
 -- META-ELEMENT: {"type": "insert_data"}
@@ -1321,19 +1383,25 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_mother';
 
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_mother', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_mother;
-IF OBJECT_ID('tempdb..#ssd_mother') IS NOT NULL DROP TABLE #ssd_mother;
+IF OBJECT_ID('tempdb..#ssd_mother', 'U') IS NOT NULL DROP TABLE #ssd_mother;
 
-
+IF OBJECT_ID('ssd_development.ssd_mother','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_mother)
+        TRUNCATE TABLE ssd_development.ssd_mother;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_mother (
-    moth_table_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"MOTH004A"}
-    moth_person_id          NVARCHAR(48),               -- metadata={"item_ref":"MOTH002A"}
-    moth_childs_person_id   NVARCHAR(48),               -- metadata={"item_ref":"MOTH001A"}
-    moth_childs_dob         DATETIME                    -- metadata={"item_ref":"MOTH003A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_mother (
+        moth_table_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"MOTH004A"}
+        moth_person_id          NVARCHAR(48),               -- metadata={"item_ref":"MOTH002A"}
+        moth_childs_person_id   NVARCHAR(48),               -- metadata={"item_ref":"MOTH001A"}
+        moth_childs_dob         DATETIME                    -- metadata={"item_ref":"MOTH003A"}
+    );
+END
+
  
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_mother (
@@ -1416,20 +1484,26 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_legal_status';
 
-
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_legal_status') IS NOT NULL DROP TABLE ssd_development.ssd_legal_status;
-IF OBJECT_ID('tempdb..#ssd_legal_status') IS NOT NULL DROP TABLE #ssd_legal_status;
+IF OBJECT_ID('tempdb..#ssd_legal_status', 'U') IS NOT NULL DROP TABLE #ssd_legal_status;
 
+IF OBJECT_ID('ssd_development.ssd_legal_status','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_legal_status)
+        TRUNCATE TABLE ssd_development.ssd_legal_status;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_legal_status (
-    lega_legal_status_id            NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"LEGA001A"}
-    lega_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LEGA002A"}
-    lega_legal_status               NVARCHAR(100),              -- metadata={"item_ref":"LEGA003A"}
-    lega_legal_status_start_date    DATETIME,                   -- metadata={"item_ref":"LEGA004A"}
-    lega_legal_status_end_date      DATETIME                    -- metadata={"item_ref":"LEGA005A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_legal_status (
+        lega_legal_status_id            NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LEGA001A"}
+        lega_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LEGA002A"}
+        lega_legal_status               NVARCHAR(100),              -- metadata={"item_ref":"LEGA003A"}
+        lega_legal_status_start_date    DATETIME,                   -- metadata={"item_ref":"LEGA004A"}
+        lega_legal_status_end_date      DATETIME                    -- metadata={"item_ref":"LEGA005A"}
+    );
+END
+
  
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_legal_status (
@@ -1508,19 +1582,26 @@ SET @TableName = N'ssd_contacts';
 
 
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_contacts') IS NOT NULL DROP TABLE ssd_development.ssd_contacts;
-IF OBJECT_ID('tempdb..#ssd_contacts') IS NOT NULL DROP TABLE #ssd_contacts;
+IF OBJECT_ID('tempdb..#ssd_contacts', 'U') IS NOT NULL DROP TABLE #ssd_contacts;
 
-
+IF OBJECT_ID('ssd_development.ssd_contacts','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_contacts)
+        TRUNCATE TABLE ssd_development.ssd_contacts;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_contacts (
-    cont_contact_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CONT001A"}
-    cont_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CONT002A"}
-    cont_contact_date               DATETIME,                   -- metadata={"item_ref":"CONT003A"}
-    cont_contact_source_code        NVARCHAR(48),               -- metadata={"item_ref":"CONT004A"} 
-    cont_contact_source_desc        NVARCHAR(255),              -- metadata={"item_ref":"CONT006A"} 
-    cont_contact_outcome_json       NVARCHAR(4000)              -- metadata={"item_ref":"CONT005A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_contacts (
+        cont_contact_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CONT001A"}
+        cont_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CONT002A"}
+        cont_contact_date               DATETIME,                   -- metadata={"item_ref":"CONT003A"}
+        cont_contact_source_code        NVARCHAR(48),               -- metadata={"item_ref":"CONT004A"} 
+        cont_contact_source_desc        NVARCHAR(255),              -- metadata={"item_ref":"CONT006A"} 
+        cont_contact_outcome_json       NVARCHAR(4000)              -- metadata={"item_ref":"CONT005A"}
+    );
+END
+
 
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_contacts (
@@ -1655,23 +1736,29 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_early_help_episodes';
 
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_early_help_episodes') IS NOT NULL DROP TABLE ssd_development.ssd_early_help_episodes;
-IF OBJECT_ID('tempdb..#ssd_early_help_episodes') IS NOT NULL DROP TABLE #ssd_early_help_episodes;
+IF OBJECT_ID('tempdb..#ssd_early_help_episodes', 'U') IS NOT NULL DROP TABLE #ssd_early_help_episodes;
 
-
+IF OBJECT_ID('ssd_development.ssd_early_help_episodes','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_early_help_episodes)
+        TRUNCATE TABLE ssd_development.ssd_early_help_episodes;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_early_help_episodes (
-    earl_episode_id             NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EARL001A"}
-    earl_person_id              NVARCHAR(48),               -- metadata={"item_ref":"EARL002A"}
-    earl_episode_start_date     DATETIME,                   -- metadata={"item_ref":"EARL003A"}
-    earl_episode_end_date       DATETIME,                   -- metadata={"item_ref":"EARL004A"}
-    earl_episode_reason         NVARCHAR(MAX),              -- metadata={"item_ref":"EARL005A"}
-    earl_episode_end_reason     NVARCHAR(MAX),              -- metadata={"item_ref":"EARL006A"}
-    earl_episode_organisation   NVARCHAR(MAX),              -- metadata={"item_ref":"EARL007A"}
-    earl_episode_worker_id      NVARCHAR(100)               -- metadata={"item_ref":"EARL008A", "item_status": "A", "info":"Consider for removal"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_early_help_episodes (
+        earl_episode_id             NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EARL001A"}
+        earl_person_id              NVARCHAR(48),               -- metadata={"item_ref":"EARL002A"}
+        earl_episode_start_date     DATETIME,                   -- metadata={"item_ref":"EARL003A"}
+        earl_episode_end_date       DATETIME,                   -- metadata={"item_ref":"EARL004A"}
+        earl_episode_reason         NVARCHAR(MAX),              -- metadata={"item_ref":"EARL005A"}
+        earl_episode_end_reason     NVARCHAR(MAX),              -- metadata={"item_ref":"EARL006A"}
+        earl_episode_organisation   NVARCHAR(MAX),              -- metadata={"item_ref":"EARL007A"}
+        earl_episode_worker_id      NVARCHAR(100)               -- metadata={"item_ref":"EARL008A", "item_status": "A", "info":"Consider for removal"}
+    );
+END
+
  
  
 -- META-ELEMENT: {"type": "insert_data"}
@@ -1757,26 +1844,32 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cin_assessments';
 
-
 -- META-ELEMENT: {"type": "drop_table"} 
-IF OBJECT_ID('ssd_development.ssd_cin_assessments') IS NOT NULL DROP TABLE ssd_development.ssd_cin_assessments;
-IF OBJECT_ID('tempdb..#ssd_cin_assessments') IS NOT NULL DROP TABLE #ssd_cin_assessments;
+IF OBJECT_ID('tempdb..#ssd_cin_assessments', 'U') IS NOT NULL DROP TABLE #ssd_cin_assessments;
 
-
+IF OBJECT_ID('ssd_development.ssd_cin_assessments','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cin_assessments)
+        TRUNCATE TABLE ssd_development.ssd_cin_assessments;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cin_assessments
-(
-    cina_assessment_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINA001A"}
-    cina_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CINA002A"}
-    cina_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CINA010A"}
-    cina_assessment_start_date      DATETIME,                   -- metadata={"item_ref":"CINA003A"}
-    cina_assessment_child_seen      NCHAR(1),                   -- metadata={"item_ref":"CINA004A"}
-    cina_assessment_auth_date       DATETIME,                   -- metadata={"item_ref":"CINA005A"}             
-    cina_assessment_outcome_json    NVARCHAR(1000),             -- metadata={"item_ref":"CINA006A"}           
-    cina_assessment_outcome_nfa     NCHAR(1),                   -- metadata={"item_ref":"CINA009A"}
-    cina_assessment_team            NVARCHAR(48),               -- metadata={"item_ref":"CINA007A"}
-    cina_assessment_worker_id       NVARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cin_assessments
+    (
+        cina_assessment_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINA001A"}
+        cina_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CINA002A"}
+        cina_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CINA010A"}
+        cina_assessment_start_date      DATETIME,                   -- metadata={"item_ref":"CINA003A"}
+        cina_assessment_child_seen      NCHAR(1),                   -- metadata={"item_ref":"CINA004A"}
+        cina_assessment_auth_date       DATETIME,                   -- metadata={"item_ref":"CINA005A"}             
+        cina_assessment_outcome_json    NVARCHAR(1000),             -- metadata={"item_ref":"CINA006A"}           
+        cina_assessment_outcome_nfa     NCHAR(1),                   -- metadata={"item_ref":"CINA009A"}
+        cina_assessment_team            NVARCHAR(48),               -- metadata={"item_ref":"CINA007A"}
+        cina_assessment_worker_id       NVARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
+    );
+END
+
 
 -- CTE for the EXISTS
 WITH RelevantPersons AS (
@@ -1979,20 +2072,26 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_assessment_factors';
 
-
-
 -- META-ELEMENT: {"type": "drop_table"} 
-IF OBJECT_ID('ssd_development.ssd_assessment_factors','U') IS NOT NULL DROP TABLE ssd_development.ssd_assessment_factors;
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
 IF OBJECT_ID('tempdb..#ssd_d_codes','U') IS NOT NULL DROP TABLE #ssd_d_codes; -- de-duped + precomputed sort keys
 
+IF OBJECT_ID('ssd_development.ssd_assessment_factors','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_assessment_factors)
+        TRUNCATE TABLE ssd_development.ssd_assessment_factors;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_assessment_factors (
-    cinf_table_id                nvarchar(48)  NOT NULL,
-    cinf_assessment_id           nvarchar(48)  NOT NULL,
-    cinf_assessment_factors_json nvarchar(max) NULL,
-    CONSTRAINT PK_ssd_assessment_factors PRIMARY KEY CLUSTERED (cinf_table_id, cinf_assessment_id)
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_assessment_factors (
+        cinf_table_id                nvarchar(48)  NOT NULL,
+        cinf_assessment_id           nvarchar(48)  NOT NULL,
+        cinf_assessment_factors_json nvarchar(max) NULL,
+        CONSTRAINT PK_ssd_assessment_factors PRIMARY KEY CLUSTERED (cinf_table_id, cinf_assessment_id)
+    );
+END
+
 
 
 
@@ -2013,7 +2112,7 @@ BEGIN TRY
     /* -------------------------------------------
        Shared prep (raw filtered rows)
        ------------------------------------------- */
-    IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
+    
     SELECT
         ffa.FACT_FORM_ID,
         ffa.ANSWER_NO,
@@ -2042,7 +2141,7 @@ BEGIN TRY
     /* -------------------------------------------
        Compact codes table (de-dup + sort keys)
        ------------------------------------------- */
-    IF OBJECT_ID('tempdb..#ssd_d_codes','U') IS NOT NULL DROP TABLE #ssd_d_codes;
+    
     SELECT DISTINCT
         d.FACT_FORM_ID,
         d.ANSWER_NO,
@@ -2192,23 +2291,28 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cin_plans';
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cin_plans', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cin_plans;
 IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL DROP TABLE #ssd_cin_plans;
 
-
+IF OBJECT_ID('ssd_development.ssd_cin_plans','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cin_plans)
+        TRUNCATE TABLE ssd_development.ssd_cin_plans;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cin_plans (
-    cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINP001A"}
-    cinp_referral_id            NVARCHAR(48),               -- metadata={"item_ref":"CINP007A"}
-    cinp_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINP002A"}
-    cinp_cin_plan_start_date    DATETIME,                   -- metadata={"item_ref":"CINP003A"}
-    cinp_cin_plan_end_date      DATETIME,                   -- metadata={"item_ref":"CINP004A"}
-    cinp_cin_plan_team          NVARCHAR(48),               -- metadata={"item_ref":"CINP005A"}
-    cinp_cin_plan_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"CINP006A"}
-);
- 
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cin_plans (
+        cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINP001A"}
+        cinp_referral_id            NVARCHAR(48),               -- metadata={"item_ref":"CINP007A"}
+        cinp_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINP002A"}
+        cinp_cin_plan_start_date    DATETIME,                   -- metadata={"item_ref":"CINP003A"}
+        cinp_cin_plan_end_date      DATETIME,                   -- metadata={"item_ref":"CINP004A"}
+        cinp_cin_plan_team          NVARCHAR(48),               -- metadata={"item_ref":"CINP005A"}
+        cinp_cin_plan_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"CINP006A"}
+    );
+END
+
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cin_plans (
     cinp_cin_plan_id,
@@ -2316,20 +2420,27 @@ SET @TableName = N'ssd_cin_visits';
  
  
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cin_visits') IS NOT NULL DROP TABLE ssd_development.ssd_cin_visits;
-IF OBJECT_ID('tempdb..#ssd_cin_visits') IS NOT NULL DROP TABLE #ssd_cin_visits;
+IF OBJECT_ID('tempdb..#ssd_cin_visits', 'U') IS NOT NULL DROP TABLE #ssd_cin_visits;
  
+IF OBJECT_ID('ssd_development.ssd_cin_visits','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cin_visits)
+        TRUNCATE TABLE ssd_development.ssd_cin_visits;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cin_visits
-(
-    cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINV001A"}      
-    cinv_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINV007A"}
-    cinv_cin_visit_date         DATETIME,                   -- metadata={"item_ref":"CINV003A"}
-    cinv_cin_visit_seen         NCHAR(1),                   -- metadata={"item_ref":"CINV004A"}
-    cinv_cin_visit_seen_alone   NCHAR(1),                   -- metadata={"item_ref":"CINV005A"}
-    cinv_cin_visit_bedroom      NCHAR(1)                    -- metadata={"item_ref":"CINV006A"}
-);
- 
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cin_visits
+    (
+        cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINV001A"}      
+        cinv_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINV007A"}
+        cinv_cin_visit_date         DATETIME,                   -- metadata={"item_ref":"CINV003A"}
+        cinv_cin_visit_seen         NCHAR(1),                   -- metadata={"item_ref":"CINV004A"}
+        cinv_cin_visit_seen_alone   NCHAR(1),                   -- metadata={"item_ref":"CINV005A"}
+        cinv_cin_visit_bedroom      NCHAR(1)                    -- metadata={"item_ref":"CINV006A"}
+    );
+END
+
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cin_visits
 (
@@ -2404,23 +2515,30 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_s47_enquiry';
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_s47_enquiry') IS NOT NULL DROP TABLE ssd_development.ssd_s47_enquiry;
-IF OBJECT_ID('tempdb..#ssd_s47_enquiry') IS NOT NULL DROP TABLE #ssd_s47_enquiry;
+IF OBJECT_ID('tempdb..#ssd_s47_enquiry', 'U') IS NOT NULL DROP TABLE #ssd_s47_enquiry;
 
+IF OBJECT_ID('ssd_development.ssd_s47_enquiry','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_s47_enquiry)
+        TRUNCATE TABLE ssd_development.ssd_s47_enquiry;
+END
 -- META-ELEMENT: {"type": "create_table"} 
-CREATE TABLE ssd_development.ssd_s47_enquiry (
-    s47e_s47_enquiry_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"S47E001A"}
-    s47e_referral_id                    NVARCHAR(48),               -- metadata={"item_ref":"S47E010A"}
-    s47e_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"S47E002A"}
-    s47e_s47_start_date                 DATETIME,                   -- metadata={"item_ref":"S47E004A"}
-    s47e_s47_end_date                   DATETIME,                   -- metadata={"item_ref":"S47E005A"}
-    s47e_s47_nfa                        NCHAR(1),                   -- metadata={"item_ref":"S47E006A"}
-    s47e_s47_outcome_json               NVARCHAR(1000),             -- metadata={"item_ref":"S47E007A"}
-    s47e_s47_completed_by_team          NVARCHAR(48),               -- metadata={"item_ref":"S47E009A"}
-    s47e_s47_completed_by_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"S47E008A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_s47_enquiry (
+        s47e_s47_enquiry_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"S47E001A"}
+        s47e_referral_id                    NVARCHAR(48),               -- metadata={"item_ref":"S47E010A"}
+        s47e_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"S47E002A"}
+        s47e_s47_start_date                 DATETIME,                   -- metadata={"item_ref":"S47E004A"}
+        s47e_s47_end_date                   DATETIME,                   -- metadata={"item_ref":"S47E005A"}
+        s47e_s47_nfa                        NCHAR(1),                   -- metadata={"item_ref":"S47E006A"}
+        s47e_s47_outcome_json               NVARCHAR(1000),             -- metadata={"item_ref":"S47E007A"}
+        s47e_s47_completed_by_team          NVARCHAR(48),               -- metadata={"item_ref":"S47E009A"}
+        s47e_s47_completed_by_worker_id     NVARCHAR(100),              -- metadata={"item_ref":"S47E008A"}
+    );
+END
+
 
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_s47_enquiry(
@@ -2554,29 +2672,34 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_initial_cp_conference';
 
- 
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_initial_cp_conference') IS NOT NULL DROP TABLE ssd_development.ssd_initial_cp_conference;
-IF OBJECT_ID('tempdb..#ssd_initial_cp_conference') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
- 
+ -- META-ELEMENT: {"type": "drop_table"}
+IF OBJECT_ID('tempdb..#ssd_initial_cp_conference', 'U') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
 
--- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_initial_cp_conference (
-    icpc_icpc_id                NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"ICPC001A"}
-    icpc_icpc_meeting_id        NVARCHAR(48),               -- metadata={"item_ref":"ICPC009A"}
-    icpc_s47_enquiry_id         NVARCHAR(48),               -- metadata={"item_ref":"ICPC002A"}
-    icpc_person_id              NVARCHAR(48),               -- metadata={"item_ref":"ICPC010A"}
-    icpc_cp_plan_id             NVARCHAR(48),               -- metadata={"item_ref":"ICPC011A"}
-    icpc_referral_id            NVARCHAR(48),               -- metadata={"item_ref":"ICPC012A"}
-    icpc_icpc_transfer_in       NCHAR(1),                   -- metadata={"item_ref":"ICPC003A"}
-    icpc_icpc_target_date       DATETIME,                   -- metadata={"item_ref":"ICPC004A"}
-    icpc_icpc_date              DATETIME,                   -- metadata={"item_ref":"ICPC005A"}
-    icpc_icpc_outcome_cp_flag   NCHAR(1),                   -- metadata={"item_ref":"ICPC013A"}
-    icpc_icpc_outcome_json      NVARCHAR(1000),             -- metadata={"item_ref":"ICPC006A"}
-    icpc_icpc_team              NVARCHAR(48),               -- metadata={"item_ref":"ICPC007A"}
-    icpc_icpc_worker_id         NVARCHAR(100),              -- metadata={"item_ref":"ICPC008A"}
-);
- 
+IF OBJECT_ID('ssd_development.ssd_initial_cp_conference','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_initial_cp_conference)
+        TRUNCATE TABLE ssd_development.ssd_initial_cp_conference;
+END
+-- META-ELEMENT: {"type": "create_table"} 
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_initial_cp_conference (
+        icpc_icpc_id                NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"ICPC001A"}
+        icpc_icpc_meeting_id        NVARCHAR(48),               -- metadata={"item_ref":"ICPC009A"}
+        icpc_s47_enquiry_id         NVARCHAR(48),               -- metadata={"item_ref":"ICPC002A"}
+        icpc_person_id              NVARCHAR(48),               -- metadata={"item_ref":"ICPC010A"}
+        icpc_cp_plan_id             NVARCHAR(48),               -- metadata={"item_ref":"ICPC011A"}
+        icpc_referral_id            NVARCHAR(48),               -- metadata={"item_ref":"ICPC012A"}
+        icpc_icpc_transfer_in       NCHAR(1),                   -- metadata={"item_ref":"ICPC003A"}
+        icpc_icpc_target_date       DATETIME,                   -- metadata={"item_ref":"ICPC004A"}
+        icpc_icpc_date              DATETIME,                   -- metadata={"item_ref":"ICPC005A"}
+        icpc_icpc_outcome_cp_flag   NCHAR(1),                   -- metadata={"item_ref":"ICPC013A"}
+        icpc_icpc_outcome_json      NVARCHAR(1000),             -- metadata={"item_ref":"ICPC006A"}
+        icpc_icpc_team              NVARCHAR(48),               -- metadata={"item_ref":"ICPC007A"}
+        icpc_icpc_worker_id         NVARCHAR(100),              -- metadata={"item_ref":"ICPC008A"}
+    );
+END
+
  
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_initial_cp_conference(
@@ -2746,25 +2869,30 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_cp_plans';
 
 
-
 -- META-ELEMENT: {"type": "drop_table"} 
-IF OBJECT_ID('ssd_development.ssd_cp_plans') IS NOT NULL DROP TABLE ssd_development.ssd_cp_plans;
-IF OBJECT_ID('tempdb..#ssd_cp_plans') IS NOT NULL DROP TABLE #ssd_cp_plans;
+IF OBJECT_ID('tempdb..#ssd_cp_plans', 'U') IS NOT NULL DROP TABLE #ssd_cp_plans;
 
+IF OBJECT_ID('ssd_development.ssd_cp_plans','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cp_plans)
+        TRUNCATE TABLE ssd_development.ssd_cp_plans;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cp_plans (
-    cppl_cp_plan_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CPPL001A"}
-    cppl_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CPPL007A"}
-    cppl_icpc_id                    NVARCHAR(48),               -- metadata={"item_ref":"CPPL008A"}
-    cppl_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CPPL002A"}
-    cppl_cp_plan_start_date         DATETIME,                   -- metadata={"item_ref":"CPPL003A"}
-    cppl_cp_plan_end_date           DATETIME,                   -- metadata={"item_ref":"CPPL004A"}
-    cppl_cp_plan_ola                NCHAR(1),                   -- metadata={"item_ref":"CPPL011A"}       
-    cppl_cp_plan_initial_category   NVARCHAR(100),              -- metadata={"item_ref":"CPPL009A"}
-    cppl_cp_plan_latest_category    NVARCHAR(100),              -- metadata={"item_ref":"CPPL010A"}
-);
- 
- 
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cp_plans (
+        cppl_cp_plan_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CPPL001A"}
+        cppl_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CPPL007A"}
+        cppl_icpc_id                    NVARCHAR(48),               -- metadata={"item_ref":"CPPL008A"}
+        cppl_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CPPL002A"}
+        cppl_cp_plan_start_date         DATETIME,                   -- metadata={"item_ref":"CPPL003A"}
+        cppl_cp_plan_end_date           DATETIME,                   -- metadata={"item_ref":"CPPL004A"}
+        cppl_cp_plan_ola                NCHAR(1),                   -- metadata={"item_ref":"CPPL011A"}       
+        cppl_cp_plan_initial_category   NVARCHAR(100),              -- metadata={"item_ref":"CPPL009A"}
+        cppl_cp_plan_latest_category    NVARCHAR(100),              -- metadata={"item_ref":"CPPL010A"}
+    );
+END
+
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cp_plans (
     cppl_cp_plan_id,
@@ -2864,21 +2992,28 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cp_visits';
 
- 
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cp_visits') IS NOT NULL DROP TABLE ssd_development.ssd_cp_visits;
-IF OBJECT_ID('tempdb..#ssd_cp_visits') IS NOT NULL DROP TABLE #ssd_cp_visits;
+ -- META-ELEMENT: {"type": "drop_table"}
+IF OBJECT_ID('tempdb..#ssd_cp_visits', 'U') IS NOT NULL DROP TABLE #ssd_cp_visits;
   
+IF OBJECT_ID('ssd_development.ssd_cp_visits','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cp_visits)
+        TRUNCATE TABLE ssd_development.ssd_cp_visits;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cp_visits (
-    cppv_cp_visit_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPV007A"} 
-    cppv_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CPPV008A"}
-    cppv_cp_plan_id                 NVARCHAR(48),   -- metadata={"item_ref":"CPPV001A"}
-    cppv_cp_visit_date              DATETIME,       -- metadata={"item_ref":"CPPV003A"}
-    cppv_cp_visit_seen              NCHAR(1),       -- metadata={"item_ref":"CPPV004A"}
-    cppv_cp_visit_seen_alone        NCHAR(1),       -- metadata={"item_ref":"CPPV005A"}
-    cppv_cp_visit_bedroom           NCHAR(1)        -- metadata={"item_ref":"CPPV006A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cp_visits (
+        cppv_cp_visit_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPV007A"} 
+        cppv_person_id                  NVARCHAR(48),   -- metadata={"item_ref":"CPPV008A"}
+        cppv_cp_plan_id                 NVARCHAR(48),   -- metadata={"item_ref":"CPPV001A"}
+        cppv_cp_visit_date              DATETIME,       -- metadata={"item_ref":"CPPV003A"}
+        cppv_cp_visit_seen              NCHAR(1),       -- metadata={"item_ref":"CPPV004A"}
+        cppv_cp_visit_seen_alone        NCHAR(1),       -- metadata={"item_ref":"CPPV005A"}
+        cppv_cp_visit_bedroom           NCHAR(1)        -- metadata={"item_ref":"CPPV006A"}
+    );
+END
+
 
 -- CTE Ensure unique cases only, most recent has priority-- #DtoI-1715 
 ;WITH UniqueCasenotes AS (
@@ -2987,25 +3122,31 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_cp_reviews';
 
  
- 
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cp_reviews') IS NOT NULL DROP TABLE ssd_development.ssd_cp_reviews;
-IF OBJECT_ID('tempdb..#ssd_cp_reviews') IS NOT NULL DROP TABLE #ssd_cp_reviews;
+ -- META-ELEMENT: {"type": "drop_table"}
+IF OBJECT_ID('tempdb..#ssd_cp_reviews', 'U') IS NOT NULL DROP TABLE #ssd_cp_reviews;
   
- 
+IF OBJECT_ID('ssd_development.ssd_cp_reviews','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cp_reviews)
+        TRUNCATE TABLE ssd_development.ssd_cp_reviews;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cp_reviews
-(
-    cppr_cp_review_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPR001A"}
-    cppr_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"CPPR008A"}
-    cppr_cp_plan_id                     NVARCHAR(48),               -- metadata={"item_ref":"CPPR002A"}  
-    cppr_cp_review_due                  DATETIME NULL,              -- metadata={"item_ref":"CPPR003A"}
-    cppr_cp_review_date                 DATETIME NULL,              -- metadata={"item_ref":"CPPR004A"}
-    cppr_cp_review_meeting_id           NVARCHAR(48),               -- metadata={"item_ref":"CPPR009A"}      
-    cppr_cp_review_outcome_continue_cp  NCHAR(1),                   -- metadata={"item_ref":"CPPR005A"}
-    cppr_cp_review_quorate              NVARCHAR(100),              -- metadata={"item_ref":"CPPR006A"}      
-    cppr_cp_review_participation        NVARCHAR(100)               -- metadata={"item_ref":"CPPR007A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cp_reviews
+    (
+        cppr_cp_review_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPR001A"}
+        cppr_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"CPPR008A"}
+        cppr_cp_plan_id                     NVARCHAR(48),               -- metadata={"item_ref":"CPPR002A"}  
+        cppr_cp_review_due                  DATETIME NULL,              -- metadata={"item_ref":"CPPR003A"}
+        cppr_cp_review_date                 DATETIME NULL,              -- metadata={"item_ref":"CPPR004A"}
+        cppr_cp_review_meeting_id           NVARCHAR(48),               -- metadata={"item_ref":"CPPR009A"}      
+        cppr_cp_review_outcome_continue_cp  NCHAR(1),                   -- metadata={"item_ref":"CPPR005A"}
+        cppr_cp_review_quorate              NVARCHAR(100),              -- metadata={"item_ref":"CPPR006A"}      
+        cppr_cp_review_participation        NVARCHAR(100)               -- metadata={"item_ref":"CPPR007A"}
+    );
+END
+
  
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cp_reviews
@@ -3098,28 +3239,48 @@ PRINT 'Table created: ' + @TableName;
 
 -- META-END
 
--- setup, optional
--- DECLARE @ssd_timeframe_years int = 3;
+-- META-CONTAINER: {"type": "table", "name": "ssd_cla_episodes"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.0
+-- Status: [R]elease
+-- Remarks: 
+-- Dependencies: 
+-- - ssd_person
+-- - HDM.Child_Social.FACT_CARE_EPISODES
+-- - HDM.Child_Social.FACT_CLA
+-- - HDM.Child_Social.FACT_CASENOTES
+-- =============================================================================
+
 
 -- META-ELEMENT: {"type": "drop_table"}
 IF OBJECT_ID('tempdb..#ssd_cla_episodes','U') IS NOT NULL DROP TABLE #ssd_cla_episodes;
-IF OBJECT_ID('ssd_development.ssd_cla_episodes','U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_episodes;
 
+IF OBJECT_ID('ssd_development.ssd_cla_episodes','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cla_episodes)
+        TRUNCATE TABLE ssd_development.ssd_cla_episodes;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cla_episodes (
-    clae_cla_episode_id             nvarchar(48) PRIMARY KEY,
-    clae_person_id                  nvarchar(48),
-    clae_cla_placement_id           nvarchar(48),
-    clae_cla_episode_start_date     datetime,
-    clae_cla_episode_start_reason   nvarchar(100),
-    clae_cla_primary_need_code      nvarchar(3),
-    clae_cla_episode_ceased_date    datetime,
-    clae_cla_episode_ceased_reason  nvarchar(255),
-    clae_cla_id                     nvarchar(48),
-    clae_referral_id                nvarchar(48),
-    clae_cla_last_iro_contact_date  datetime,
-    clae_entered_care_date          datetime
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cla_episodes (
+        clae_cla_episode_id             nvarchar(48) PRIMARY KEY,
+        clae_person_id                  nvarchar(48),
+        clae_cla_placement_id           nvarchar(48),
+        clae_cla_episode_start_date     datetime,
+        clae_cla_episode_start_reason   nvarchar(100),
+        clae_cla_primary_need_code      nvarchar(3),
+        clae_cla_episode_ceased_date    datetime,
+        clae_cla_episode_ceased_reason  nvarchar(255),
+        clae_cla_id                     nvarchar(48),
+        clae_referral_id                nvarchar(48),
+        clae_cla_last_iro_contact_date  datetime,
+        clae_entered_care_date          datetime
+    );
+END
+
 
 -- META-ELEMENT: {"type": "insert_data"}
 -- filtered source
@@ -3310,19 +3471,24 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_cla_convictions';
 
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_convictions;
 IF OBJECT_ID('tempdb..#ssd_cla_convictions', 'U') IS NOT NULL DROP TABLE #ssd_cla_convictions;
 
-
+IF OBJECT_ID('ssd_development.ssd_cla_convictions','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cla_convictions)
+        TRUNCATE TABLE ssd_development.ssd_cla_convictions;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cla_convictions (
-    clac_cla_conviction_id      NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAC001A"}
-    clac_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAC002A"}
-    clac_cla_conviction_date    DATETIME,                   -- metadata={"item_ref":"CLAC003A"}
-    clac_cla_conviction_offence NVARCHAR(1000)              -- metadata={"item_ref":"CLAC004A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cla_convictions (
+        clac_cla_conviction_id      NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAC001A"}
+        clac_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAC002A"}
+        clac_cla_conviction_date    DATETIME,                   -- metadata={"item_ref":"CLAC003A"}
+        clac_cla_conviction_offence NVARCHAR(1000)              -- metadata={"item_ref":"CLAC004A"}
+    );
+END
 
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cla_convictions (
@@ -3385,21 +3551,26 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_health';
 
-
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cla_health', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_health;
 IF OBJECT_ID('tempdb..#ssd_cla_health', 'U') IS NOT NULL DROP TABLE #ssd_cla_health;
 
+IF OBJECT_ID('ssd_development.ssd_cla_health','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cla_health)
+        TRUNCATE TABLE ssd_development.ssd_cla_health;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cla_health (
-    clah_health_check_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAH001A"}
-    clah_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAH002A"}
-    clah_health_check_type      NVARCHAR(500),              -- metadata={"item_ref":"CLAH003A"}
-    clah_health_check_date      DATETIME,                   -- metadata={"item_ref":"CLAH004A"}
-    clah_health_check_status    NVARCHAR(48)                -- metadata={"item_ref":"CLAH005A"}
-);
- 
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cla_health (
+        clah_health_check_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAH001A"}
+        clah_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAH002A"}
+        clah_health_check_type      NVARCHAR(500),              -- metadata={"item_ref":"CLAH003A"}
+        clah_health_check_date      DATETIME,                   -- metadata={"item_ref":"CLAH004A"}
+        clah_health_check_status    NVARCHAR(48)                -- metadata={"item_ref":"CLAH005A"}
+    );
+END
+
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cla_health (
     clah_health_check_id,
@@ -3469,18 +3640,23 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_immunisations';
 
-
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cla_immunisations') IS NOT NULL DROP TABLE ssd_development.ssd_cla_immunisations;
-IF OBJECT_ID('tempdb..#ssd_cla_immunisations') IS NOT NULL DROP TABLE #ssd_cla_immunisations;
+IF OBJECT_ID('tempdb..#ssd_cla_immunisations', 'U') IS NOT NULL DROP TABLE #ssd_cla_immunisations;
 
+IF OBJECT_ID('ssd_development.ssd_cla_immunisations','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cla_immunisations)
+        TRUNCATE TABLE ssd_development.ssd_cla_immunisations;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cla_immunisations (
-    clai_person_id                  NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAI002A"}
-    clai_immunisations_status       NCHAR(1),                   -- metadata={"item_ref":"CLAI004A"}
-    clai_immunisations_status_date  DATETIME                    -- metadata={"item_ref":"CLAI005A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cla_immunisations (
+        clai_person_id                  NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAI002A"}
+        clai_immunisations_status       NCHAR(1),                   -- metadata={"item_ref":"CLAI004A"}
+        clai_immunisations_status_date  DATETIME                    -- metadata={"item_ref":"CLAI005A"}
+    );
+END
 
 -- CTE rank records by LAST_UPDATED_DTTM (on DIM_PERSON_ID)
 ;WITH RankedImmunisations AS (
@@ -3554,20 +3730,26 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_substance_misuse';
 
-
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cla_substance_misuse') IS NOT NULL DROP TABLE ssd_development.ssd_cla_substance_misuse;
-IF OBJECT_ID('tempdb..#ssd_cla_substance_misuse') IS NOT NULL DROP TABLE #ssd_cla_substance_misuse;
+IF OBJECT_ID('tempdb..#ssd_cla_substance_misuse', 'U') IS NOT NULL DROP TABLE #ssd_cla_substance_misuse;
 
+IF OBJECT_ID('ssd_development.ssd_cla_substance_misuse','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cla_substance_misuse)
+        TRUNCATE TABLE ssd_development.ssd_cla_substance_misuse;
+END
 -- META-ELEMENT: {"type": "create_table"} 
-CREATE TABLE ssd_development.ssd_cla_substance_misuse (
-    clas_substance_misuse_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAS001A"}
-    clas_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CLAS002A"}
-    clas_substance_misuse_date      DATETIME,                   -- metadata={"item_ref":"CLAS003A"}
-    clas_substance_misused          NVARCHAR(100),              -- metadata={"item_ref":"CLAS004A"}
-    clas_intervention_received      NCHAR(1)                    -- metadata={"item_ref":"CLAS005A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cla_substance_misuse (
+        clas_substance_misuse_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAS001A"}
+        clas_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CLAS002A"}
+        clas_substance_misuse_date      DATETIME,                   -- metadata={"item_ref":"CLAS003A"}
+        clas_substance_misused          NVARCHAR(100),              -- metadata={"item_ref":"CLAS004A"}
+        clas_intervention_received      NCHAR(1)                    -- metadata={"item_ref":"CLAS005A"}
+    );
+END
+
 
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cla_substance_misuse (
@@ -3634,25 +3816,32 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_cla_placement';
 
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cla_placement', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_placement;
 IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_placement;
   
+IF OBJECT_ID('ssd_development.ssd_cla_placement','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cla_placement)
+        TRUNCATE TABLE ssd_development.ssd_cla_placement;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cla_placement (
-    clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAP001A"}
-    clap_cla_id                         NVARCHAR(48),               -- metadata={"item_ref":"CLAP012A"}
-    clap_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"CLAP013A"}
-    clap_cla_placement_start_date       DATETIME,                   -- metadata={"item_ref":"CLAP003A"}
-    clap_cla_placement_type             NVARCHAR(100),              -- metadata={"item_ref":"CLAP004A"}
-    clap_cla_placement_urn              NVARCHAR(48),               -- metadata={"item_ref":"CLAP005A"}
-    clap_cla_placement_distance         FLOAT,                      -- metadata={"item_ref":"CLAP011A"}
-    clap_cla_placement_provider         NVARCHAR(48),               -- metadata={"item_ref":"CLAP007A"}
-    clap_cla_placement_postcode         NVARCHAR(8),                -- metadata={"item_ref":"CLAP008A"}
-    clap_cla_placement_end_date         DATETIME,                   -- metadata={"item_ref":"CLAP009A"}
-    clap_cla_placement_change_reason    NVARCHAR(100)               -- metadata={"item_ref":"CLAP010A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cla_placement (
+        clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAP001A"}
+        clap_cla_id                         NVARCHAR(48),               -- metadata={"item_ref":"CLAP012A"}
+        clap_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"CLAP013A"}
+        clap_cla_placement_start_date       DATETIME,                   -- metadata={"item_ref":"CLAP003A"}
+        clap_cla_placement_type             NVARCHAR(100),              -- metadata={"item_ref":"CLAP004A"}
+        clap_cla_placement_urn              NVARCHAR(48),               -- metadata={"item_ref":"CLAP005A"}
+        clap_cla_placement_distance         FLOAT,                      -- metadata={"item_ref":"CLAP011A"}
+        clap_cla_placement_provider         NVARCHAR(48),               -- metadata={"item_ref":"CLAP007A"}
+        clap_cla_placement_postcode         NVARCHAR(8),                -- metadata={"item_ref":"CLAP008A"}
+        clap_cla_placement_end_date         DATETIME,                   -- metadata={"item_ref":"CLAP009A"}
+        clap_cla_placement_change_reason    NVARCHAR(100)               -- metadata={"item_ref":"CLAP010A"}
+    );
+END
+
  
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cla_placement (
@@ -3757,20 +3946,27 @@ SET @TableName = N'ssd_cla_reviews';
 
 
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_reviews;
 IF OBJECT_ID('tempdb..#ssd_cla_reviews', 'U') IS NOT NULL DROP TABLE #ssd_cla_reviews;
   
+IF OBJECT_ID('ssd_development.ssd_cla_reviews','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cla_reviews)
+        TRUNCATE TABLE ssd_development.ssd_cla_reviews;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cla_reviews (
-    clar_cla_review_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAR001A"}
-    clar_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAR011A"}
-    clar_cla_review_due_date        DATETIME,                   -- metadata={"item_ref":"CLAR003A"}
-    clar_cla_review_date            DATETIME,                   -- metadata={"item_ref":"CLAR004A"}
-    clar_cla_review_cancelled       NCHAR(1),                   -- metadata={"item_ref":"CLAR012A"}
-    clar_cla_review_participation   NVARCHAR(100)               -- metadata={"item_ref":"CLAR007A"}
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cla_reviews (
+        clar_cla_review_id              NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAR001A"}
+        clar_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAR011A"}
+        clar_cla_review_due_date        DATETIME,                   -- metadata={"item_ref":"CLAR003A"}
+        clar_cla_review_date            DATETIME,                   -- metadata={"item_ref":"CLAR004A"}
+        clar_cla_review_cancelled       NCHAR(1),                   -- metadata={"item_ref":"CLAR012A"}
+        clar_cla_review_participation   NVARCHAR(100)               -- metadata={"item_ref":"CLAR007A"}
     );
+END
+
  
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cla_reviews (
@@ -3876,11 +4072,8 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_previous_permanence';
 
- 
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cla_previous_permanence') IS NOT NULL DROP TABLE ssd_development.ssd_cla_previous_permanence;
+-- META-ELEMENT: {"type": "drop_table"} 
 IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence') IS NOT NULL DROP TABLE #ssd_cla_previous_permanence;
-
 IF OBJECT_ID('tempdb..#ssd_TMP_PRE_previous_permanence') IS NOT NULL DROP TABLE #ssd_TMP_PRE_previous_permanence;
  
 -- META-ELEMENT: {"type": "create_table"} 
@@ -3890,26 +4083,30 @@ SELECT
     ffa.FACT_FORM_ANSWER_ID,
     ffa.ANSWER_NO,
     ffa.ANSWER
- 
 INTO #ssd_TMP_PRE_previous_permanence
-FROM
-    HDM.Child_Social.FACT_FORM_ANSWERS ffa
+FROM HDM.Child_Social.FACT_FORM_ANSWERS ffa
 WHERE
     ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE '%OUTCOME%'
-    AND
-    ffa.ANSWER_NO IN ('ORDERYEAR', 'ORDERMONTH', 'ORDERDATE', 'PREVADOPTORD', 'INENG')
-    AND
-    ffa.ANSWER IS NOT NULL
+    AND ffa.ANSWER_NO IN ('ORDERYEAR', 'ORDERMONTH', 'ORDERDATE', 'PREVADOPTORD', 'INENG')
+    AND ffa.ANSWER IS NOT NULL;
  
+IF OBJECT_ID('ssd_development.ssd_cla_previous_permanence','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cla_previous_permanence)
+        TRUNCATE TABLE ssd_development.ssd_cla_previous_permanence;
+END
 -- META-ELEMENT: {"type": "create_table"}     
-CREATE TABLE ssd_development.ssd_cla_previous_permanence (
-    lapp_table_id                               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LAPP001A"}
-    lapp_person_id                              NVARCHAR(48),   -- metadata={"item_ref":"LAPP002A"}
-    lapp_previous_permanence_option             NVARCHAR(200),  -- metadata={"item_ref":"LAPP003A"}
-    lapp_previous_permanence_la                 NVARCHAR(100),  -- metadata={"item_ref":"LAPP004A"}
-    lapp_previous_permanence_order_date         NVARCHAR(10)    -- metadata={"item_ref":"LAPP005A"}
-);
- 
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cla_previous_permanence (
+        lapp_table_id                               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LAPP001A"}
+        lapp_person_id                              NVARCHAR(48),   -- metadata={"item_ref":"LAPP002A"}
+        lapp_previous_permanence_option             NVARCHAR(200),  -- metadata={"item_ref":"LAPP003A"}
+        lapp_previous_permanence_la                 NVARCHAR(100),  -- metadata={"item_ref":"LAPP004A"}
+        lapp_previous_permanence_order_date         NVARCHAR(10)    -- metadata={"item_ref":"LAPP005A"}
+    );
+END
+
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cla_previous_permanence (
                lapp_table_id,
@@ -4006,22 +4203,43 @@ SET @TableName = N'ssd_cla_care_plan';
 
  
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_care_plan;
 IF OBJECT_ID('tempdb..#ssd_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_cla_care_plan;
-
-
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_pre_cla_care_plan', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_pre_cla_care_plan;
 IF OBJECT_ID('tempdb..#ssd_pre_cla_care_plan', 'U') IS NOT NULL DROP TABLE #ssd_pre_cla_care_plan;
 
+IF OBJECT_ID('ssd_development.ssd_pre_cla_care_plan','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_pre_cla_care_plan)
+        TRUNCATE TABLE ssd_development.ssd_pre_cla_care_plan;
+END
 -- META-ELEMENT: {"type": "create_table"}   
-CREATE TABLE ssd_development.ssd_pre_cla_care_plan (
-    FACT_FORM_ID        NVARCHAR(48),
-    DIM_PERSON_ID       NVARCHAR(48),
-    ANSWER_NO           NVARCHAR(10),
-    ANSWER              NVARCHAR(255),
-    LatestResponseDate  DATETIME
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_pre_cla_care_plan (
+        FACT_FORM_ID        NVARCHAR(48),
+        DIM_PERSON_ID       NVARCHAR(48),
+        ANSWER_NO           NVARCHAR(10),
+        ANSWER              NVARCHAR(255),
+        LatestResponseDate  DATETIME
+    );
+END
+
+IF OBJECT_ID('ssd_development.ssd_cla_care_plan','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cla_care_plan)
+        TRUNCATE TABLE ssd_development.ssd_cla_care_plan;
+END
+-- META-ELEMENT: {"type": "create_table"}
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cla_care_plan (
+        lacp_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"LACP001A"}
+        lacp_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LACP007A"}
+        lacp_cla_care_plan_start_date   DATETIME,                   -- metadata={"item_ref":"LACP004A"}
+        lacp_cla_care_plan_end_date     DATETIME,                   -- metadata={"item_ref":"LACP005A"}
+        lacp_cla_care_plan_json         NVARCHAR(1000)              -- metadata={"item_ref":"LACP003A"}
+    );
+END
+
 
 -- META-ELEMENT: {"type": "insert_data"} 
 WITH MostRecentQuestionResponse AS (
@@ -4070,16 +4288,7 @@ FROM
 ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
 
 
- 
--- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cla_care_plan (
-    lacp_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"LACP001A"}
-    lacp_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LACP007A"}
-    lacp_cla_care_plan_start_date   DATETIME,                   -- metadata={"item_ref":"LACP004A"}
-    lacp_cla_care_plan_end_date     DATETIME,                   -- metadata={"item_ref":"LACP005A"}
-    lacp_cla_care_plan_json         NVARCHAR(1000)              -- metadata={"item_ref":"LACP003A"}
-);
- 
+
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cla_care_plan (
     lacp_table_id,
@@ -4215,21 +4424,27 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_cla_visits';
 
- 
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_cla_visits', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_cla_visits;
+ -- META-ELEMENT: {"type": "drop_table"}
 IF OBJECT_ID('tempdb..#ssd_cla_visits', 'U') IS NOT NULL DROP TABLE #ssd_cla_visits;
 
-
+IF OBJECT_ID('ssd_development.ssd_cla_visits','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_cla_visits)
+        TRUNCATE TABLE ssd_development.ssd_cla_visits;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_cla_visits (
-    clav_cla_visit_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAV001A"}
-    clav_cla_id                 NVARCHAR(48),               -- metadata={"item_ref":"CLAV007A"}
-    clav_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAV008A"}
-    clav_cla_visit_date         DATETIME,                   -- metadata={"item_ref":"CLAV003A"}
-    clav_cla_visit_seen         NCHAR(1),                   -- metadata={"item_ref":"CLAV004A"}
-    clav_cla_visit_seen_alone   NCHAR(1)                    -- metadata={"item_ref":"CLAV005A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_cla_visits (
+        clav_cla_visit_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAV001A"}
+        clav_cla_id                 NVARCHAR(48),               -- metadata={"item_ref":"CLAV007A"}
+        clav_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAV008A"}
+        clav_cla_visit_date         DATETIME,                   -- metadata={"item_ref":"CLAV003A"}
+        clav_cla_visit_seen         NCHAR(1),                   -- metadata={"item_ref":"CLAV004A"}
+        clav_cla_visit_seen_alone   NCHAR(1)                    -- metadata={"item_ref":"CLAV005A"}
+    );
+END
+
  
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cla_visits (
@@ -4315,20 +4530,25 @@ SET @TableName = N'ssd_sdq_scores';
 
  
  
- 
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_sdq_scores;
+ -- META-ELEMENT: {"type": "drop_table"}
 IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
  
- 
+IF OBJECT_ID('ssd_development.ssd_sdq_scores','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_sdq_scores)
+        TRUNCATE TABLE ssd_development.ssd_sdq_scores;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_sdq_scores (
-    csdq_table_id               NVARCHAR(48),               -- metadata={"item_ref":"CSDQ001A"} --  PRIMARY KEY switched off for ESCC
-    csdq_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CSDQ002A"}
-    csdq_sdq_completed_date     DATETIME,                   -- metadata={"item_ref":"CSDQ003A"}
-    csdq_sdq_score              INT,                        -- metadata={"item_ref":"CSDQ005A"}
-    csdq_sdq_reason             NVARCHAR(100)               -- metadata={"item_ref":"CSDQ004A", "item_status":"P"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_sdq_scores (
+        csdq_table_id               NVARCHAR(48),               -- metadata={"item_ref":"CSDQ001A"} --  PRIMARY KEY switched off for ESCC
+        csdq_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CSDQ002A"}
+        csdq_sdq_completed_date     DATETIME,                   -- metadata={"item_ref":"CSDQ003A"}
+        csdq_sdq_score              INT,                        -- metadata={"item_ref":"CSDQ005A"}
+        csdq_sdq_reason             NVARCHAR(100)               -- metadata={"item_ref":"CSDQ004A", "item_status":"P"}
+    );
+END
 
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_sdq_scores (
@@ -4452,21 +4672,27 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_missing';
 
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_missing', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_missing;
 IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL DROP TABLE #ssd_missing;
 
+IF OBJECT_ID('ssd_development.ssd_missing','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_missing)
+        TRUNCATE TABLE ssd_development.ssd_missing;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_missing (
-    miss_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"MISS001A"}
-    miss_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"MISS002A"}
-    miss_missing_episode_start_date DATETIME,                   -- metadata={"item_ref":"MISS003A"}
-    miss_missing_episode_type       NVARCHAR(100),              -- metadata={"item_ref":"MISS004A"}
-    miss_missing_episode_end_date   DATETIME,                   -- metadata={"item_ref":"MISS005A"}
-    miss_missing_rhi_offered        NVARCHAR(2),                -- metadata={"item_ref":"MISS006A", "expected_data":["N","Y","NA", NULL]}                
-    miss_missing_rhi_accepted       NVARCHAR(2)                 -- metadata={"item_ref":"MISS007A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_missing (
+        miss_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"MISS001A"}
+        miss_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"MISS002A"}
+        miss_missing_episode_start_date DATETIME,                   -- metadata={"item_ref":"MISS003A"}
+        miss_missing_episode_type       NVARCHAR(100),              -- metadata={"item_ref":"MISS004A"}
+        miss_missing_episode_end_date   DATETIME,                   -- metadata={"item_ref":"MISS005A"}
+        miss_missing_rhi_offered        NVARCHAR(2),                -- metadata={"item_ref":"MISS006A", "expected_data":["N","Y","NA", NULL]}                
+        miss_missing_rhi_accepted       NVARCHAR(2)                 -- metadata={"item_ref":"MISS007A"}
+    );
+END
 
 
 -- META-ELEMENT: {"type": "insert_data"} 
@@ -4571,28 +4797,33 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_care_leavers';
 
  
- 
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_care_leavers', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_care_leavers;
+ -- META-ELEMENT: {"type": "drop_table"}
 IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
  
- 
+IF OBJECT_ID('ssd_development.ssd_care_leavers','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_care_leavers)
+        TRUNCATE TABLE ssd_development.ssd_care_leavers;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_care_leavers
-(
-    clea_table_id                           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLEA001A"}
-    clea_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"CLEA002A"}
-    clea_care_leaver_eligibility            NVARCHAR(100),              -- metadata={"item_ref":"CLEA003A", "info":"LAC for 13wks(since 14yrs)+LAC since 16yrs"}
-    clea_care_leaver_in_touch               NVARCHAR(100),              -- metadata={"item_ref":"CLEA004A"}
-    clea_care_leaver_latest_contact         DATETIME,                   -- metadata={"item_ref":"CLEA005A"}
-    clea_care_leaver_accommodation          NVARCHAR(100),              -- metadata={"item_ref":"CLEA006A"}
-    clea_care_leaver_accom_suitable         NVARCHAR(100),              -- metadata={"item_ref":"CLEA007A"}
-    clea_care_leaver_activity               NVARCHAR(100),              -- metadata={"item_ref":"CLEA008A"}
-    clea_pathway_plan_review_date           DATETIME,                   -- metadata={"item_ref":"CLEA009A"}
-    clea_care_leaver_personal_advisor       NVARCHAR(100),              -- metadata={"item_ref":"CLEA010A"}
-    clea_care_leaver_allocated_team         NVARCHAR(48),              -- metadata={"item_ref":"CLEA011A"}
-    clea_care_leaver_worker_id              NVARCHAR(100)               -- metadata={"item_ref":"CLEA012A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_care_leavers
+    (
+        clea_table_id                           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLEA001A"}
+        clea_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"CLEA002A"}
+        clea_care_leaver_eligibility            NVARCHAR(100),              -- metadata={"item_ref":"CLEA003A", "info":"LAC for 13wks(since 14yrs)+LAC since 16yrs"}
+        clea_care_leaver_in_touch               NVARCHAR(100),              -- metadata={"item_ref":"CLEA004A"}
+        clea_care_leaver_latest_contact         DATETIME,                   -- metadata={"item_ref":"CLEA005A"}
+        clea_care_leaver_accommodation          NVARCHAR(100),              -- metadata={"item_ref":"CLEA006A"}
+        clea_care_leaver_accom_suitable         NVARCHAR(100),              -- metadata={"item_ref":"CLEA007A"}
+        clea_care_leaver_activity               NVARCHAR(100),              -- metadata={"item_ref":"CLEA008A"}
+        clea_pathway_plan_review_date           DATETIME,                   -- metadata={"item_ref":"CLEA009A"}
+        clea_care_leaver_personal_advisor       NVARCHAR(100),              -- metadata={"item_ref":"CLEA010A"}
+        clea_care_leaver_allocated_team         NVARCHAR(48),              -- metadata={"item_ref":"CLEA011A"}
+        clea_care_leaver_worker_id              NVARCHAR(100)               -- metadata={"item_ref":"CLEA012A"}
+    );
+END
 
 -- META-ELEMENT: {"type": "insert_data"}  
 -- CTE for involvement history incl. worker data
@@ -4764,38 +4995,45 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_permanence';
 
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_permanence', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_permanence;
 IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
 
+IF OBJECT_ID('ssd_development.ssd_permanence','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_permanence)
+        TRUNCATE TABLE ssd_development.ssd_permanence;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_permanence (
-    perm_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"PERM001A"}
-    perm_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"PERM002A"}
-    perm_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"PERM022A"}
-    perm_adm_decision_date          DATETIME,                   -- metadata={"item_ref":"PERM003A"}
-    perm_part_of_sibling_group      NCHAR(1),                   -- metadata={"item_ref":"PERM012A"}
-    perm_siblings_placed_together   INT,                        -- metadata={"item_ref":"PERM013A"}
-    perm_siblings_placed_apart      INT,                        -- metadata={"item_ref":"PERM014A"}
-    perm_ffa_cp_decision_date       DATETIME,                   -- metadata={"item_ref":"PERM004A"}              
-    perm_placement_order_date       DATETIME,                   -- metadata={"item_ref":"PERM006A"}
-    perm_matched_date               DATETIME,                   -- metadata={"item_ref":"PERM008A"}
-    perm_adopter_sex                NVARCHAR(48),               -- metadata={"item_ref":"PERM025A"}
-    perm_adopter_legal_status       NVARCHAR(100),              -- metadata={"item_ref":"PERM026A"}
-    perm_number_of_adopters         INT,                        -- metadata={"item_ref":"PERM027A"}
-    perm_placed_for_adoption_date   DATETIME,                   -- metadata={"item_ref":"PERM007A"}             
-    perm_adopted_by_carer_flag      NCHAR(1),                   -- metadata={"item_ref":"PERM021A"}
-    perm_placed_foster_carer_date   DATETIME,                   -- metadata={"item_ref":"PERM011A"}
-    perm_placed_ffa_cp_date         DATETIME,                   -- metadata={"item_ref":"PERM009A"}
-    perm_placement_provider_urn     NVARCHAR(48),               -- metadata={"item_ref":"PERM015A"}  
-    perm_decision_reversed_date     DATETIME,                   -- metadata={"item_ref":"PERM010A"}                  
-    perm_decision_reversed_reason   NVARCHAR(100),              -- metadata={"item_ref":"PERM016A"}
-    perm_permanence_order_date      DATETIME,                   -- metadata={"item_ref":"PERM017A"}              
-    perm_permanence_order_type      NVARCHAR(100),              -- metadata={"item_ref":"PERM018A"}        
-    perm_adoption_worker_id         NVARCHAR(100)               -- metadata={"item_ref":"PERM023A"}
-    
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_permanence (
+        perm_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"PERM001A"}
+        perm_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"PERM002A"}
+        perm_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"PERM022A"}
+        perm_adm_decision_date          DATETIME,                   -- metadata={"item_ref":"PERM003A"}
+        perm_part_of_sibling_group      NCHAR(1),                   -- metadata={"item_ref":"PERM012A"}
+        perm_siblings_placed_together   INT,                        -- metadata={"item_ref":"PERM013A"}
+        perm_siblings_placed_apart      INT,                        -- metadata={"item_ref":"PERM014A"}
+        perm_ffa_cp_decision_date       DATETIME,                   -- metadata={"item_ref":"PERM004A"}              
+        perm_placement_order_date       DATETIME,                   -- metadata={"item_ref":"PERM006A"}
+        perm_matched_date               DATETIME,                   -- metadata={"item_ref":"PERM008A"}
+        perm_adopter_sex                NVARCHAR(48),               -- metadata={"item_ref":"PERM025A"}
+        perm_adopter_legal_status       NVARCHAR(100),              -- metadata={"item_ref":"PERM026A"}
+        perm_number_of_adopters         INT,                        -- metadata={"item_ref":"PERM027A"}
+        perm_placed_for_adoption_date   DATETIME,                   -- metadata={"item_ref":"PERM007A"}             
+        perm_adopted_by_carer_flag      NCHAR(1),                   -- metadata={"item_ref":"PERM021A"}
+        perm_placed_foster_carer_date   DATETIME,                   -- metadata={"item_ref":"PERM011A"}
+        perm_placed_ffa_cp_date         DATETIME,                   -- metadata={"item_ref":"PERM009A"}
+        perm_placement_provider_urn     NVARCHAR(48),               -- metadata={"item_ref":"PERM015A"}  
+        perm_decision_reversed_date     DATETIME,                   -- metadata={"item_ref":"PERM010A"}                  
+        perm_decision_reversed_reason   NVARCHAR(100),              -- metadata={"item_ref":"PERM016A"}
+        perm_permanence_order_date      DATETIME,                   -- metadata={"item_ref":"PERM017A"}              
+        perm_permanence_order_type      NVARCHAR(100),              -- metadata={"item_ref":"PERM018A"}        
+        perm_adoption_worker_id         NVARCHAR(100)               -- metadata={"item_ref":"PERM023A"}
+        
+    );
+END
+
 
 -- META-ELEMENT: {"type": "insert_data"}  
 WITH RankedPermanenceData AS (
@@ -4981,27 +5219,30 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_professionals';
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_professionals', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_professionals;
 IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL DROP TABLE #ssd_professionals;
 
-
-
-
-
+IF OBJECT_ID('ssd_development.ssd_professionals','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_professionals)
+        TRUNCATE TABLE ssd_development.ssd_professionals;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_professionals (
-    prof_professional_id                NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"PROF001A"}
-    prof_staff_id                       NVARCHAR(48),               -- metadata={"item_ref":"PROF010A"}
-    prof_professional_name              NVARCHAR(300),              -- metadata={"item_ref":"PROF013A"}
-    prof_social_worker_registration_no  NVARCHAR(48),               -- metadata={"item_ref":"PROF002A"}
-    prof_agency_worker_flag             NCHAR(1),                   -- metadata={"item_ref":"PROF014A", "item_status": "P", "info":"Not available in SSD V1"}
-    prof_professional_job_title         NVARCHAR(500),              -- metadata={"item_ref":"PROF007A"}
-    prof_professional_caseload          INT,                        -- metadata={"item_ref":"PROF008A", "item_status": "T"}             
-    prof_professional_department        NVARCHAR(100),              -- metadata={"item_ref":"PROF012A"}
-    prof_full_time_equivalency          FLOAT                       -- metadata={"item_ref":"PROF011A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_professionals (
+        prof_professional_id                NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"PROF001A"}
+        prof_staff_id                       NVARCHAR(48),               -- metadata={"item_ref":"PROF010A"}
+        prof_professional_name              NVARCHAR(300),              -- metadata={"item_ref":"PROF013A"}
+        prof_social_worker_registration_no  NVARCHAR(48),               -- metadata={"item_ref":"PROF002A"}
+        prof_agency_worker_flag             NCHAR(1),                   -- metadata={"item_ref":"PROF014A", "item_status": "P", "info":"Not available in SSD V1"}
+        prof_professional_job_title         NVARCHAR(500),              -- metadata={"item_ref":"PROF007A"}
+        prof_professional_caseload          INT,                        -- metadata={"item_ref":"PROF008A", "item_status": "T"}             
+        prof_professional_department        NVARCHAR(100),              -- metadata={"item_ref":"PROF012A"}
+        prof_full_time_equivalency          FLOAT                       -- metadata={"item_ref":"PROF011A"}
+    );
+END
+
 
 
 -- META-ELEMENT: {"type": "insert_data"}
@@ -5089,19 +5330,25 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_department';
 
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_department', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_department;
 IF OBJECT_ID('tempdb..#ssd_department', 'U') IS NOT NULL DROP TABLE #ssd_department;
 
-
+IF OBJECT_ID('ssd_development.ssd_department','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_department)
+        TRUNCATE TABLE ssd_development.ssd_department;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_department (
-    dept_team_id           NVARCHAR(48) PRIMARY KEY,  -- metadata={"item_ref":"DEPT1001A"}
-    dept_team_name         NVARCHAR(255), -- metadata={"item_ref":"DEPT1002A"}
-    dept_team_parent_id    NVARCHAR(48),  -- metadata={"item_ref":"DEPT1003A", "info":"references ssd_department.dept_team_id"}
-    dept_team_parent_name  NVARCHAR(255)  -- metadata={"item_ref":"DEPT1004A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_department (
+        dept_team_id           NVARCHAR(48) PRIMARY KEY,  -- metadata={"item_ref":"DEPT1001A"}
+        dept_team_name         NVARCHAR(255), -- metadata={"item_ref":"DEPT1002A"}
+        dept_team_parent_id    NVARCHAR(48),  -- metadata={"item_ref":"DEPT1003A", "info":"references ssd_department.dept_team_id"}
+        dept_team_parent_name  NVARCHAR(255)  -- metadata={"item_ref":"DEPT1004A"}
+    );
+END
+
 
 
 -- META-ELEMENT: {"type": "insert_data"}
@@ -5171,23 +5418,30 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_involvements';
 
- 
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_involvements', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_involvements;
+ -- META-ELEMENT: {"type": "drop_table"}
 IF OBJECT_ID('tempdb..#ssd_involvements', 'U') IS NOT NULL DROP TABLE #ssd_involvements;
  
+IF OBJECT_ID('ssd_development.ssd_involvements','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_involvements)
+        TRUNCATE TABLE ssd_development.ssd_involvements;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_involvements (
-    invo_involvements_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"INVO005A"}
-    invo_professional_id        NVARCHAR(48),               -- metadata={"item_ref":"INVO006A"}
-    invo_professional_role_id   NVARCHAR(200),              -- metadata={"item_ref":"INVO007A"}
-    invo_professional_team      NVARCHAR(48),              -- metadata={"item_ref":"INVO009A", "info":"This is a truncated field at 255"}
-    invo_person_id              NVARCHAR(48),               -- metadata={"item_ref":"INVO011A"}
-    invo_involvement_start_date DATETIME,                   -- metadata={"item_ref":"INVO002A"}
-    invo_involvement_end_date   DATETIME,                   -- metadata={"item_ref":"INVO003A"}
-    invo_worker_change_reason   NVARCHAR(200),              -- metadata={"item_ref":"INVO004A"}
-    invo_referral_id            NVARCHAR(48)                -- metadata={"item_ref":"INVO010A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_involvements (
+        invo_involvements_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"INVO005A"}
+        invo_professional_id        NVARCHAR(48),               -- metadata={"item_ref":"INVO006A"}
+        invo_professional_role_id   NVARCHAR(200),              -- metadata={"item_ref":"INVO007A"}
+        invo_professional_team      NVARCHAR(48),               -- metadata={"item_ref":"INVO009A", "info":"This is a truncated field at 255"}
+        invo_person_id              NVARCHAR(48),               -- metadata={"item_ref":"INVO011A"}
+        invo_involvement_start_date DATETIME,                   -- metadata={"item_ref":"INVO002A"}
+        invo_involvement_end_date   DATETIME,                   -- metadata={"item_ref":"INVO003A"}
+        invo_worker_change_reason   NVARCHAR(200),              -- metadata={"item_ref":"INVO004A"}
+        invo_referral_id            NVARCHAR(48)                -- metadata={"item_ref":"INVO010A"}
+    );
+END
+
  
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_involvements (
@@ -5306,18 +5560,28 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_linked_identifiers';
 
 -- META-ELEMENT: {"type": "drop_table"} 
-IF OBJECT_ID('ssd_development.ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_linked_identifiers;
 IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
 
+IF OBJECT_ID('ssd_development.ssd_linked_identifiers','U') IS NOT NULL
+BEGIN
+    -- keep existing rows, no truncate, no drop, no create
+    -- This is the only SSD table that has manually updated user data - hence generic drop|truncate 
+    -- process is not applicable here. 
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_linked_identifiers (
-    link_table_id               NVARCHAR(48) DEFAULT NEWID() PRIMARY KEY,               -- metadata={"item_ref":"LINK001A"}
-    link_person_id              NVARCHAR(48),                               -- metadata={"item_ref":"LINK002A"} 
-    link_identifier_type        NVARCHAR(100),                              -- metadata={"item_ref":"LINK003A"}
-    link_identifier_value       NVARCHAR(100),                              -- metadata={"item_ref":"LINK004A"}
-    link_valid_from_date        DATETIME,                                   -- metadata={"item_ref":"LINK005A"}
-    link_valid_to_date          DATETIME                                    -- metadata={"item_ref":"LINK006A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_linked_identifiers (
+        link_table_id               NVARCHAR(48) DEFAULT NEWID() PRIMARY KEY,               -- metadata={"item_ref":"LINK001A"}
+        link_person_id              NVARCHAR(48),                               -- metadata={"item_ref":"LINK002A"} 
+        link_identifier_type        NVARCHAR(100),                              -- metadata={"item_ref":"LINK003A"}
+        link_identifier_value       NVARCHAR(100),                              -- metadata={"item_ref":"LINK004A"}
+        link_valid_from_date        DATETIME,                                   -- metadata={"item_ref":"LINK005A"}
+        link_valid_to_date          DATETIME                                    -- metadata={"item_ref":"LINK006A"}
+    );
+END
+
+
 
 
 -- Notes: 
@@ -5439,18 +5703,26 @@ SET @TableName = N'ssd_s251_finance';
 
 
 -- META-ELEMENT: {"type": "drop_table"} 
-IF OBJECT_ID('ssd_development.ssd_s251_finance', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_s251_finance;
 IF OBJECT_ID('tempdb..#ssd_s251_finance', 'U') IS NOT NULL DROP TABLE #ssd_s251_finance;
 
+IF OBJECT_ID('ssd_development.ssd_s251_finance','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_s251_finance)
+        TRUNCATE TABLE ssd_development.ssd_s251_finance;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_s251_finance (
-    s251_table_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"S251001A"}
-    s251_cla_placement_id   NVARCHAR(48),               -- metadata={"item_ref":"S251002A"} 
-    s251_placeholder_1      NVARCHAR(48),               -- metadata={"item_ref":"S251003A"}
-    s251_placeholder_2      NVARCHAR(48),               -- metadata={"item_ref":"S251004A"}
-    s251_placeholder_3      NVARCHAR(48),               -- metadata={"item_ref":"S251005A"}
-    s251_placeholder_4      NVARCHAR(48)                -- metadata={"item_ref":"S251006A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_s251_finance (
+        s251_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"S251001A"}
+        s251_cla_placement_id   NVARCHAR(48),               -- metadata={"item_ref":"S251002A"} 
+        s251_placeholder_1      NVARCHAR(48),               -- metadata={"item_ref":"S251003A"}
+        s251_placeholder_2      NVARCHAR(48),               -- metadata={"item_ref":"S251004A"}
+        s251_placeholder_3      NVARCHAR(48),               -- metadata={"item_ref":"S251005A"}
+        s251_placeholder_4      NVARCHAR(48)                -- metadata={"item_ref":"S251006A"}
+    );
+END
+
 
 -- META-ELEMENT: {"type": "insert_data"} 
 -- -- Insert placeholder data [TESTING]
@@ -5502,19 +5774,27 @@ SET @TableName = N'ssd_voice_of_child';
 
 
 -- META-ELEMENT: {"type": "drop_table"} 
-IF OBJECT_ID('ssd_development.ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_voice_of_child;
 IF OBJECT_ID('tempdb..#ssd_voice_of_child', 'U') IS NOT NULL DROP TABLE #ssd_voice_of_child;
 
+IF OBJECT_ID('ssd_development.ssd_voice_of_child','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_voice_of_child)
+        TRUNCATE TABLE ssd_development.ssd_voice_of_child;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_voice_of_child (
-    voch_table_id               NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"VOCH007A"}
-    voch_person_id              NVARCHAR(48),               -- metadata={"item_ref":"VOCH001A"}
-    voch_explained_worries      NCHAR(1),                   -- metadata={"item_ref":"VOCH002A"}
-    voch_story_help_understand  NCHAR(1),                   -- metadata={"item_ref":"VOCH003A"}
-    voch_agree_worker           NCHAR(1),                   -- metadata={"item_ref":"VOCH004A"}
-    voch_plan_safe              NCHAR(1),                   -- metadata={"item_ref":"VOCH005A"}
-    voch_tablet_help_explain    NCHAR(1)                    -- metadata={"item_ref":"VOCH006A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_voice_of_child (
+        voch_table_id               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"VOCH007A"}
+        voch_person_id              NVARCHAR(48),               -- metadata={"item_ref":"VOCH001A"}
+        voch_explained_worries      NCHAR(1),                   -- metadata={"item_ref":"VOCH002A"}
+        voch_story_help_understand  NCHAR(1),                   -- metadata={"item_ref":"VOCH003A"}
+        voch_agree_worker           NCHAR(1),                   -- metadata={"item_ref":"VOCH004A"}
+        voch_plan_safe              NCHAR(1),                   -- metadata={"item_ref":"VOCH005A"}
+        voch_tablet_help_explain    NCHAR(1)                    -- metadata={"item_ref":"VOCH006A"}
+    );
+END
+
 
 -- META-ELEMENT: {"type": "insert_data"} 
 -- -- Insert placeholder data [TESTING]
@@ -5577,38 +5857,44 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_pre_proceedings';
 
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_pre_proceedings;
 IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pre_proceedings;
 
+IF OBJECT_ID('ssd_development.ssd_pre_proceedings','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_pre_proceedings)
+        TRUNCATE TABLE ssd_development.ssd_pre_proceedings;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_pre_proceedings (
-    prep_table_id                           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"PREP024A"}
-    prep_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"PREP001A"}
-    prep_plo_family_id                      NVARCHAR(48),               -- metadata={"item_ref":"PREP002A"}
-    prep_pre_pro_decision_date              DATETIME,                   -- metadata={"item_ref":"PREP003A"}
-    prep_initial_pre_pro_meeting_date       DATETIME,                   -- metadata={"item_ref":"PREP004A"}
-    prep_pre_pro_outcome                    NVARCHAR(100),              -- metadata={"item_ref":"PREP005A"}
-    prep_agree_stepdown_issue_date          DATETIME,                   -- metadata={"item_ref":"PREP006A"}
-    prep_cp_plans_referral_period           INT,                        -- metadata={"item_ref":"PREP007A"}
-    prep_legal_gateway_outcome              NVARCHAR(100),              -- metadata={"item_ref":"PREP008A"}
-    prep_prev_pre_proc_child                INT,                        -- metadata={"item_ref":"PREP009A"}
-    prep_prev_care_proc_child               INT,                        -- metadata={"item_ref":"PREP010A"}
-    prep_pre_pro_letter_date                DATETIME,                   -- metadata={"item_ref":"PREP011A"}
-    prep_care_pro_letter_date               DATETIME,                   -- metadata={"item_ref":"PREP012A"}
-    prep_pre_pro_meetings_num               INT,                        -- metadata={"item_ref":"PREP013A"}
-    prep_pre_pro_parents_legal_rep          NCHAR(1),                   -- metadata={"item_ref":"PREP014A"}
-    prep_parents_legal_rep_point_of_issue   NCHAR(2),                   -- metadata={"item_ref":"PREP015A"}
-    prep_court_reference                    NVARCHAR(48),               -- metadata={"item_ref":"PREP016A"}
-    prep_care_proc_court_hearings           INT,                        -- metadata={"item_ref":"PREP017A"}
-    prep_care_proc_short_notice             NCHAR(1),                   -- metadata={"item_ref":"PREP018A"}
-    prep_proc_short_notice_reason           NVARCHAR(100),              -- metadata={"item_ref":"PREP019A"}
-    prep_la_inital_plan_approved            NCHAR(1),                   -- metadata={"item_ref":"PREP020A"}
-    prep_la_initial_care_plan               NVARCHAR(100),              -- metadata={"item_ref":"PREP021A"}
-    prep_la_final_plan_approved             NCHAR(1),                   -- metadata={"item_ref":"PREP022A"}
-    prep_la_final_care_plan                 NVARCHAR(100)               -- metadata={"item_ref":"PREP023A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_pre_proceedings (
+        prep_table_id                           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PREP024A"}
+        prep_person_id                          NVARCHAR(48),               -- metadata={"item_ref":"PREP001A"}
+        prep_plo_family_id                      NVARCHAR(48),               -- metadata={"item_ref":"PREP002A"}
+        prep_pre_pro_decision_date              DATETIME,                   -- metadata={"item_ref":"PREP003A"}
+        prep_initial_pre_pro_meeting_date       DATETIME,                   -- metadata={"item_ref":"PREP004A"}
+        prep_pre_pro_outcome                    NVARCHAR(100),              -- metadata={"item_ref":"PREP005A"}
+        prep_agree_stepdown_issue_date          DATETIME,                   -- metadata={"item_ref":"PREP006A"}
+        prep_cp_plans_referral_period           INT,                        -- metadata={"item_ref":"PREP007A"}
+        prep_legal_gateway_outcome              NVARCHAR(100),              -- metadata={"item_ref":"PREP008A"}
+        prep_prev_pre_proc_child                INT,                        -- metadata={"item_ref":"PREP009A"}
+        prep_prev_care_proc_child               INT,                        -- metadata={"item_ref":"PREP010A"}
+        prep_pre_pro_letter_date                DATETIME,                   -- metadata={"item_ref":"PREP011A"}
+        prep_care_pro_letter_date               DATETIME,                   -- metadata={"item_ref":"PREP012A"}
+        prep_pre_pro_meetings_num               INT,                        -- metadata={"item_ref":"PREP013A"}
+        prep_pre_pro_parents_legal_rep          NCHAR(1),                   -- metadata={"item_ref":"PREP014A"}
+        prep_parents_legal_rep_point_of_issue   NCHAR(2),                   -- metadata={"item_ref":"PREP015A"}
+        prep_court_reference                    NVARCHAR(48),               -- metadata={"item_ref":"PREP016A"}
+        prep_care_proc_court_hearings           INT,                        -- metadata={"item_ref":"PREP017A"}
+        prep_care_proc_short_notice             NCHAR(1),                   -- metadata={"item_ref":"PREP018A"}
+        prep_proc_short_notice_reason           NVARCHAR(100),              -- metadata={"item_ref":"PREP019A"}
+        prep_la_inital_plan_approved            NCHAR(1),                   -- metadata={"item_ref":"PREP020A"}
+        prep_la_initial_care_plan               NVARCHAR(100),              -- metadata={"item_ref":"PREP021A"}
+        prep_la_final_plan_approved             NCHAR(1),                   -- metadata={"item_ref":"PREP022A"}
+        prep_la_final_care_plan                 NVARCHAR(100)               -- metadata={"item_ref":"PREP023A"}
+    );
+END
 
 -- META-ELEMENT: {"type": "insert_data"} 
 -- -- Insert placeholder data
@@ -5722,19 +6008,25 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_send';
 
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_send') IS NOT NULL DROP TABLE ssd_development.ssd_send;
-IF OBJECT_ID('tempdb..#ssd_send') IS NOT NULL DROP TABLE #ssd_send;
+IF OBJECT_ID('tempdb..#ssd_send', 'U') IS NOT NULL DROP TABLE #ssd_send;
 
+IF OBJECT_ID('ssd_development.ssd_send','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_send)
+        TRUNCATE TABLE ssd_development.ssd_send;
+END
 -- META-ELEMENT: {"type": "create_table"} 
-CREATE TABLE ssd_development.ssd_send (
-    send_table_id       NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"SEND001A"}
-    send_person_id      NVARCHAR(48),               -- metadata={"item_ref":"SEND005A"}
-    send_upn            NVARCHAR(48),               -- metadata={"item_ref":"SEND002A"}
-    send_uln            NVARCHAR(48),               -- metadata={"item_ref":"SEND003A"}
-    send_upn_unknown    NVARCHAR(6)                 -- metadata={"item_ref":"SEND004A"}
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_send (
+        send_table_id       NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"SEND001A"}
+        send_person_id      NVARCHAR(48),               -- metadata={"item_ref":"SEND005A"}
+        send_upn            NVARCHAR(48),               -- metadata={"item_ref":"SEND002A"}
+        send_uln            NVARCHAR(48),               -- metadata={"item_ref":"SEND003A"}
+        send_upn_unknown    NVARCHAR(6)                 -- metadata={"item_ref":"SEND004A"}
     );
+END
 
 -- META-ELEMENT: {"type": "insert_data"} 
 -- for link_identifier_type "FORMER_UPN"
@@ -5798,20 +6090,25 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_sen_need';
 
  
+ -- META-ELEMENT: {"type": "drop_table"}
+IF OBJECT_ID('tempdb..#ssd_sen_need', 'U') IS NOT NULL DROP TABLE #ssd_sen_need;
  
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_sen_need', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_sen_need  ;
-IF OBJECT_ID('tempdb..#ssd_sen_need', 'U') IS NOT NULL DROP TABLE #ssd_sen_need  ;
- 
- 
+IF OBJECT_ID('ssd_development.ssd_sen_need','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_sen_need)
+        TRUNCATE TABLE ssd_development.ssd_sen_need;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_sen_need (
-    senn_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"SENN001A"}
-    senn_active_ehcp_id             NVARCHAR(48),               -- metadata={"item_ref":"SENN002A"}
-    senn_active_ehcp_need_type      NVARCHAR(100),              -- metadata={"item_ref":"SENN003A"}
-    senn_active_ehcp_need_rank      NCHAR(1)                    -- metadata={"item_ref":"SENN004A"}
-);
- 
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_sen_need (
+        senn_table_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"SENN001A"}
+        senn_active_ehcp_id             NVARCHAR(48),               -- metadata={"item_ref":"SENN002A"}
+        senn_active_ehcp_need_type      NVARCHAR(100),              -- metadata={"item_ref":"SENN003A"}
+        senn_active_ehcp_need_rank      NCHAR(1)                    -- metadata={"item_ref":"SENN004A"}
+    );
+END
+
 
 -- -- META-ELEMENT: {"type": "create_fk"} 
 -- ALTER TABLE ssd_development.ssd_sen_need ADD CONSTRAINT FK_send_to_ehcp_active_plans
@@ -5847,21 +6144,26 @@ PRINT 'Table created: ' + @TableName;
 -- META-ELEMENT: {"type": "test"}
 SET @TableName = N'ssd_ehcp_requests ';
 
-
-
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_ehcp_requests ;
 IF OBJECT_ID('tempdb..#ssd_ehcp_requests', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_requests ;
 
-
+IF OBJECT_ID('ssd_development.ssd_ehcp_requests','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_ehcp_requests)
+        TRUNCATE TABLE ssd_development.ssd_ehcp_requests;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_ehcp_requests (
-    ehcr_ehcp_request_id            NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCR001A"}
-    ehcr_send_table_id              NVARCHAR(48),               -- metadata={"item_ref":"EHCR002A"}
-    ehcr_ehcp_req_date              DATETIME,                   -- metadata={"item_ref":"EHCR003A"}
-    ehcr_ehcp_req_outcome_date      DATETIME,                   -- metadata={"item_ref":"EHCR004A"}
-    ehcr_ehcp_req_outcome           NVARCHAR(100)               -- metadata={"item_ref":"EHCR005A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_ehcp_requests (
+        ehcr_ehcp_request_id            NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCR001A"}
+        ehcr_send_table_id              NVARCHAR(48),               -- metadata={"item_ref":"EHCR002A"}
+        ehcr_ehcp_req_date              DATETIME,                   -- metadata={"item_ref":"EHCR003A"}
+        ehcr_ehcp_req_outcome_date      DATETIME,                   -- metadata={"item_ref":"EHCR004A"}
+        ehcr_ehcp_req_outcome           NVARCHAR(100)               -- metadata={"item_ref":"EHCR005A"}
+    );
+END
+
 
 
 
@@ -5913,18 +6215,24 @@ SET @TableName = N'ssd_ehcp_assessment';
 
 
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_ehcp_assessment ;
 IF OBJECT_ID('tempdb..#ssd_ehcp_assessment', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_assessment ;
 
-
+IF OBJECT_ID('ssd_development.ssd_ehcp_assessment','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_ehcp_assessment)
+        TRUNCATE TABLE ssd_development.ssd_ehcp_assessment;
+END
 -- META-ELEMENT: {"type": "create_table"} 
-CREATE TABLE ssd_development.ssd_ehcp_assessment (
-    ehca_ehcp_assessment_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCA001A"}
-    ehca_ehcp_request_id                    NVARCHAR(48),               -- metadata={"item_ref":"EHCA002A"}
-    ehca_ehcp_assessment_outcome_date       DATETIME,                   -- metadata={"item_ref":"EHCA003A"}
-    ehca_ehcp_assessment_outcome            NVARCHAR(100),              -- metadata={"item_ref":"EHCA004A"}
-    ehca_ehcp_assessment_exceptions         NVARCHAR(100)               -- metadata={"item_ref":"EHCA005A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_ehcp_assessment (
+        ehca_ehcp_assessment_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCA001A"}
+        ehca_ehcp_request_id                    NVARCHAR(48),               -- metadata={"item_ref":"EHCA002A"}
+        ehca_ehcp_assessment_outcome_date       DATETIME,                   -- metadata={"item_ref":"EHCA003A"}
+        ehca_ehcp_assessment_outcome            NVARCHAR(100),              -- metadata={"item_ref":"EHCA004A"}
+        ehca_ehcp_assessment_exceptions         NVARCHAR(100)               -- metadata={"item_ref":"EHCA005A"}
+    );
+END
 
 
 
@@ -5979,17 +6287,24 @@ SET @TableName = N'ssd_ehcp_named_plan';
 
 
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_ehcp_named_plan;
 IF OBJECT_ID('tempdb..#ssd_ehcp_named_plan', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_named_plan;
 
+IF OBJECT_ID('ssd_development.ssd_ehcp_named_plan','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_ehcp_named_plan)
+        TRUNCATE TABLE ssd_development.ssd_ehcp_named_plan;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_ehcp_named_plan (
-    ehcn_named_plan_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCN001A"}
-    ehcn_ehcp_asmt_id               NVARCHAR(48),               -- metadata={"item_ref":"EHCN002A"}
-    ehcn_named_plan_start_date      DATETIME,                   -- metadata={"item_ref":"EHCN003A"}
-    ehcn_named_plan_ceased_date     DATETIME,                   -- metadata={"item_ref":"EHCN004A"}     
-    ehcn_named_plan_ceased_reason   NVARCHAR(100)               -- metadata={"item_ref":"EHCN005A"}   
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_ehcp_named_plan (
+        ehcn_named_plan_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EHCN001A"}
+        ehcn_ehcp_asmt_id               NVARCHAR(48),               -- metadata={"item_ref":"EHCN002A"}
+        ehcn_named_plan_start_date      DATETIME,                   -- metadata={"item_ref":"EHCN003A"}
+        ehcn_named_plan_ceased_date     DATETIME,                   -- metadata={"item_ref":"EHCN004A"}     
+        ehcn_named_plan_ceased_reason   NVARCHAR(100)               -- metadata={"item_ref":"EHCN005A"}   
+    );
+END
 
 
 
@@ -6038,15 +6353,22 @@ SET @TableName = N'ssd_ehcp_active_plans';
 
 
 -- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('ssd_development.ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE ssd_development.ssd_ehcp_active_plans  ;
 IF OBJECT_ID('tempdb..#ssd_ehcp_active_plans', 'U') IS NOT NULL DROP TABLE #ssd_ehcp_active_plans  ;
 
+IF OBJECT_ID('ssd_development.ssd_ehcp_active_plans','U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_development.ssd_ehcp_active_plans)
+        TRUNCATE TABLE ssd_development.ssd_ehcp_active_plans;
+END
 -- META-ELEMENT: {"type": "create_table"}
-CREATE TABLE ssd_development.ssd_ehcp_active_plans (
-    ehcp_active_ehcp_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCP001A"}
-    ehcp_ehcp_request_id                NVARCHAR(48),               -- metadata={"item_ref":"EHCP002A"}
-    ehcp_active_ehcp_last_review_date   DATETIME                    -- metadata={"item_ref":"EHCP003A"}
-);
+ELSE
+BEGIN
+    CREATE TABLE ssd_development.ssd_ehcp_active_plans (
+        ehcp_active_ehcp_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EHCP001A"}
+        ehcp_ehcp_request_id                NVARCHAR(48),               -- metadata={"item_ref":"EHCP002A"}
+        ehcp_active_ehcp_last_review_date   DATETIME                    -- metadata={"item_ref":"EHCP003A"}
+    );
+END
 
 
 -- -- META-ELEMENT: {"type": "create_fk"}
