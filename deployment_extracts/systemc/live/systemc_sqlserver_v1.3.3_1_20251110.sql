@@ -170,7 +170,7 @@ INSERT INTO ssd_development.ssd_version_log
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     -- CURRENT version (using MAJOR.MINOR.PATCH)
-    ('1.3.2', '2025-11-10', 'Block out string_agg on ssd_assessment_factors', 1, 'admin', 'fix needed to prevent legacy sql failing on string_agg in modern selection block');
+    ('1.3.3', '2025-11-13', 's-colon pre CTE bug fix', 1, 'admin', 'non-recognised s-colon pre CTEs + introduced commented hard filter on child ids for LA use');
 
 
 -- HISTORIC versioning log data
@@ -196,7 +196,8 @@ VALUES
     ('1.2.8', '2025-09-13', 'assessment_factors & cla_episodes refactor', 0, 'admin', 'early adopters suggested patch fix'),
     ('1.2.9', '2025-09-22', 'assessment_factors refactor now with pre-aggr, fix pre-compile issue SQL <2016', 0, 'admin', 'improved run time perf, ease of opt A/B toggle'),
     ('1.3.0', '2025-09-24', 'New ssd_cohort for cohort visibility/monitoring', 0, 'admin', 'provides breakdown of cohort origins - later use to ease current EXISTS backchecks on ssd_person'),
-    ('1.3.1', '2025-10-03', 'Coventry suggested on ssd_assessment_factors', 0, 'admin', 'adjmts provided by Coventry to provide more robust pulling of assessment factor data where filter might not align with prev-family assessments-');
+    ('1.3.1', '2025-10-03', 'Coventry suggested on ssd_assessment_factors', 0, 'admin', 'adjmts provided by Coventry to provide more robust pulling of assessment factor data where filter might not align with prev-family assessments-'),
+    ('1.3.2', '2025-11-10', 'Block out string_agg on ssd_assessment_factors', 0, 'admin', 'fix needed to prevent legacy sql failing on string_agg in modern selection block');
 
 
 -- META-ELEMENT: {"type": "test"}
