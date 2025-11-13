@@ -15,19 +15,24 @@ TO REMOVE: Search and replace the entire script 'ssd_development.' replace with 
 TO REPLACE: Search and replace the entire script 'ssd_development.' replace with 'your_dev_schema_name.'
 - where quotes shown here are NOT used when doing the replacement! 
 
+#LEGACY-PRE2016
+For LA's running T-SQL 2016-Sp1+, search and re-activate the improved non-legacy blocks in the script. 
+- Search for references to the tag #LEGACY-PRE2016 to find those. You then can remove the default legacy SQL. 
+
 Script creates labelled persistent(unless set otherwise) tables in your existing|specified database. 
 
 Data tables(with data copied from raw CMS tables) and indexes for the SSD are created, and therefore in some 
 cases will need review and support and/or agreement from your IT or Intelligence team. 
 
-The SQL script is non-destructive.
-Reset|Clean-up scripts are available on request seperately, these would then be destructive.
+The SQL script is non-destructive, but...(!)
+The SSD script does use explicitly named DROP TABLE SSD_* commands. It does however not touch anything that is not 
+prefixed SSD_. All SSD componenets are named SSD (indexes IX_SSD_ or UX_SSD_ or CIX_SSD_) to ensure schema clarity/oversight. 
+
 
 Additional notes: 
 A version that instead creates _temp|session tables is also available to enable those LA teams restricted to read access 
 on the cms db|schema. A _temp script can also be created by performing the following adjustments:
     - Replace all instances of 'ssd_development.' with '#'
-    - Set @Run_SSD_As_Temporary_Tables = 0 - This turns off such as FK constraint creation
 
 There remain some [TESTING] [REVIEW] notes as the project iterates wider testing results; similarly some test related 
 console outputs remain to aid such as run-time problem solving. These [TESTING] blocks can/will be removed. 
@@ -403,9 +408,9 @@ WHERE
 
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob               ON ssd_development.ssd_person(pers_dob);
--- CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id   ON ssd_development.ssd_person(pers_common_child_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender       ON ssd_development.ssd_person(pers_ethnicity, pers_gender);
+-- CREATE NONCLUSTERED INDEX IX_ssd_person_pers_dob               ON ssd_development.ssd_person(pers_dob);
+-- CREATE NONCLUSTERED INDEX IX_ssd_person_pers_common_child_id   ON ssd_development.ssd_person(pers_common_child_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_person_ethnicity_gender       ON ssd_development.ssd_person(pers_ethnicity, pers_gender);
 
 
 
@@ -834,8 +839,8 @@ WHERE fc.DIM_PERSON_ID <> -1
 -- FOREIGN KEY (fami_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_family_person_id          ON ssd_development.ssd_family(fami_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_family_fami_family_id     ON ssd_development.ssd_family(fami_family_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_family_person_id          ON ssd_development.ssd_family(fami_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_family_fami_family_id     ON ssd_development.ssd_family(fami_family_id);
 
 
 
@@ -898,36 +903,33 @@ INSERT INTO ssd_development.ssd_address (
     addr_address_json
 )
 
--- version for SQL compatible versions 2016+
--- see below for #LEGACY-PRE2016
-SELECT 
+-- #LEGACY-PRE2016 
+-- SQL compatible versions <2016
+SELECT  
     pa.DIM_PERSON_ADDRESS_ID,
     pa.DIM_PERSON_ID, 
     pa.ADDSS_TYPE_CODE,
     pa.START_DTTM,
     pa.END_DTTM,
     CASE 
-    -- Some clean-up based on known data
+        -- Some clean-up based on known data
         WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', ''))) THEN '' -- clear pcode of containing all X's
         WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''                                -- clear pcode of containing nopostcode
         ELSE REPLACE(pa.POSTCODE, ' ', '')                                                              -- remove all spaces for consistency
     END AS CleanedPostcode,
     (
-    
-    SELECT 
-        -- SSD standard 
-        -- all keys in structure regardless of data presence
-        ISNULL(pa.ROOM_NO, '')    AS ROOM, 
-        ISNULL(pa.FLOOR_NO, '')   AS FLOOR, 
-        ISNULL(pa.FLAT_NO, '')    AS FLAT, 
-        ISNULL(pa.BUILDING, '')   AS BUILDING, 
-        ISNULL(pa.HOUSE_NO, '')   AS HOUSE, 
-        ISNULL(pa.STREET, '')     AS STREET, 
-        ISNULL(pa.TOWN, '')       AS TOWN,
-        ISNULL(pa.UPRN, '')       AS UPRN,
-        ISNULL(pa.EASTING, '')    AS EASTING,
-        ISNULL(pa.NORTHING, '')   AS NORTHING
-    FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        '{' +
+        '"ROOM": "' + ISNULL(TRY_CAST(pa.ROOM_NO AS NVARCHAR(50)), '') + '", ' +
+        '"FLOOR": "' + ISNULL(TRY_CAST(pa.FLOOR_NO AS NVARCHAR(50)), '') + '", ' +
+        '"FLAT": "' + ISNULL(TRY_CAST(pa.FLAT_NO AS NVARCHAR(50)), '') + '", ' +
+        '"BUILDING": "' + ISNULL(pa.BUILDING, '') + '", ' +
+        '"HOUSE": "' + ISNULL(TRY_CAST(pa.HOUSE_NO AS NVARCHAR(50)), '') + '", ' +
+        '"STREET": "' + ISNULL(pa.STREET, '') + '", ' +
+        '"TOWN": "' + ISNULL(pa.TOWN, '') + '", ' +
+        '"UPRN": "' + ISNULL(TRY_CAST(pa.UPRN AS NVARCHAR(50)), '') + '", ' +
+        '"EASTING": "' + ISNULL(TRY_CAST(pa.EASTING AS NVARCHAR(20)), '') + '", ' +
+        '"NORTHING": "' + ISNULL(TRY_CAST(pa.NORTHING AS NVARCHAR(20)), '') + '"' +
+        '}'
     ) AS addr_address_json
 FROM 
     HDM.Child_Social.DIM_PERSON_ADDRESS AS pa
@@ -942,32 +944,35 @@ WHERE pa.DIM_PERSON_ID <> -1
 
 
 -- -- #LEGACY-PRE2016 
--- -- version for SQL compatible versions <2016
--- SELECT  
+-- -- SQL compatible versions >=2016+
+-- SELECT 
 --     pa.DIM_PERSON_ADDRESS_ID,
 --     pa.DIM_PERSON_ID, 
 --     pa.ADDSS_TYPE_CODE,
 --     pa.START_DTTM,
 --     pa.END_DTTM,
 --     CASE 
---         -- Some clean-up based on known data
+--     -- Some clean-up based on known data
 --         WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', ''))) THEN '' -- clear pcode of containing all X's
 --         WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''                                -- clear pcode of containing nopostcode
 --         ELSE REPLACE(pa.POSTCODE, ' ', '')                                                              -- remove all spaces for consistency
 --     END AS CleanedPostcode,
 --     (
---         '{' +
---         '"ROOM": "' + ISNULL(TRY_CAST(pa.ROOM_NO AS NVARCHAR(50)), '') + '", ' +
---         '"FLOOR": "' + ISNULL(TRY_CAST(pa.FLOOR_NO AS NVARCHAR(50)), '') + '", ' +
---         '"FLAT": "' + ISNULL(TRY_CAST(pa.FLAT_NO AS NVARCHAR(50)), '') + '", ' +
---         '"BUILDING": "' + ISNULL(pa.BUILDING, '') + '", ' +
---         '"HOUSE": "' + ISNULL(TRY_CAST(pa.HOUSE_NO AS NVARCHAR(50)), '') + '", ' +
---         '"STREET": "' + ISNULL(pa.STREET, '') + '", ' +
---         '"TOWN": "' + ISNULL(pa.TOWN, '') + '", ' +
---         '"UPRN": "' + ISNULL(TRY_CAST(pa.UPRN AS NVARCHAR(50)), '') + '", ' +
---         '"EASTING": "' + ISNULL(TRY_CAST(pa.EASTING AS NVARCHAR(20)), '') + '", ' +
---         '"NORTHING": "' + ISNULL(TRY_CAST(pa.NORTHING AS NVARCHAR(20)), '') + '"' +
---         '}'
+    
+--     SELECT 
+--         -- SSD standard 
+--         -- all keys in structure regardless of data presence
+--         ISNULL(pa.ROOM_NO, '')    AS ROOM, 
+--         ISNULL(pa.FLOOR_NO, '')   AS FLOOR, 
+--         ISNULL(pa.FLAT_NO, '')    AS FLAT, 
+--         ISNULL(pa.BUILDING, '')   AS BUILDING, 
+--         ISNULL(pa.HOUSE_NO, '')   AS HOUSE, 
+--         ISNULL(pa.STREET, '')     AS STREET, 
+--         ISNULL(pa.TOWN, '')       AS TOWN,
+--         ISNULL(pa.UPRN, '')       AS UPRN,
+--         ISNULL(pa.EASTING, '')    AS EASTING,
+--         ISNULL(pa.NORTHING, '')   AS NORTHING
+--     FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 --     ) AS addr_address_json
 -- FROM 
 --     HDM.Child_Social.DIM_PERSON_ADDRESS AS pa
@@ -982,16 +987,15 @@ WHERE pa.DIM_PERSON_ID <> -1
 
 
 
-
 -- -- META-ELEMENT: {"type": "create_fk"}
 -- ALTER TABLE ssd_development.ssd_address ADD CONSTRAINT FK_ssd_address_person
 -- FOREIGN KEY (addr_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_address_person        ON ssd_development.ssd_address(addr_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_address_start         ON ssd_development.ssd_address(addr_address_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_address_end           ON ssd_development.ssd_address(addr_address_end_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_ssd_address_postcode  ON ssd_development.ssd_address(addr_address_postcode);
+-- CREATE NONCLUSTERED INDEX IX_ssd_address_person        ON ssd_development.ssd_address(addr_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_address_start         ON ssd_development.ssd_address(addr_address_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_address_end           ON ssd_development.ssd_address(addr_address_end_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_ssd_address_postcode  ON ssd_development.ssd_address(addr_address_postcode);
 
 
 
@@ -1070,8 +1074,8 @@ AND fd.DIM_LOOKUP_DISAB_CODE IS NOT NULL
 -- FOREIGN KEY (disa_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_disability_person_id  ON ssd_development.ssd_disability(disa_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_disability_code       ON ssd_development.ssd_disability(disa_disability_code);
+-- CREATE NONCLUSTERED INDEX IX_ssd_disability_person_id  ON ssd_development.ssd_disability(disa_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_disability_code       ON ssd_development.ssd_disability(disa_disability_code);
 
 
 
@@ -1154,9 +1158,9 @@ WHERE
 -- FOREIGN KEY (immi_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_immigration_status_immi_person_id ON ssd_development.ssd_immigration_status(immi_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_immigration_status_start          ON ssd_development.ssd_immigration_status(immi_immigration_status_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_immigration_status_end            ON ssd_development.ssd_immigration_status(immi_immigration_status_end_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_immigration_status_immi_person_id ON ssd_development.ssd_immigration_status(immi_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_immigration_status_start          ON ssd_development.ssd_immigration_status(immi_immigration_status_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_immigration_status_end            ON ssd_development.ssd_immigration_status(immi_immigration_status_end_date);
 
 
 
@@ -1241,52 +1245,49 @@ INSERT INTO ssd_development.ssd_cin_episodes
     cine_referral_team,
     cine_referral_worker_id
 )
-
--- version for SQL compatible versions 2016+
--- see below for #LEGACY-PRE2016
+   
+-- #LEGACY-PRE2016
+-- SQL compatible versions <2016
 SELECT
     fr.FACT_REFERRAL_ID,
     fr.DIM_PERSON_ID,
     fr.REFRL_START_DTTM,
     fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE,
     fr.DIM_LOOKUP_CONT_SORC_ID,
-    fr.DIM_LOOKUP_CONT_SORC_ID_DESC, -- 1
+    fr.DIM_LOOKUP_CONT_SORC_ID_DESC, -- 2
     (
-        SELECT
-            -- SSD standard 
-            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
-            ISNULL(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS SINGLE_ASSESSMENT_FLAG,
-            -- ISNULL(fr.OUTCOME_NFA_FLAG, '')                 AS NFA_FLAG,
-            ISNULL(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS STRATEGY_DISCUSSION_FLAG,
-            ISNULL(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS CLA_REQUEST_FLAG,
-            ISNULL(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS NON_AGENCY_ADOPTION_FLAG,
-            ISNULL(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS PRIVATE_FOSTERING_FLAG,
-            ISNULL(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS CP_TRANSFER_IN_FLAG,
-            ISNULL(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS CP_CONFERENCE_FLAG,
-            ISNULL(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS CARE_LEAVER_FLAG,
-            ISNULL(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS OTHER_OUTCOMES_EXIST_FLAG,
-            CASE 
-                WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL  -- to counter -1 values
+        -- Manual JSON-like concatenation for cine_referral_outcome_json
+        '{' +
+        '"SINGLE_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
+        -- '"NFA_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' + -- Uncomment if needed
+        '"STRATEGY_DISCUSSION_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CLA_REQUEST_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CLA_REQUEST_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"NON_AGENCY_ADOPTION_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PRIVATE_FOSTERING_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CP_TRANSFER_IN_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CP_TRANSFER_IN_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CP_CONFERENCE_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CP_CONFERENCE_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CARE_LEAVER_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CARE_LEAVER_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fr.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"NUMBER_OF_OUTCOMES": ' + 
+            ISNULL(TRY_CAST(CASE 
+                WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL
                 ELSE fr.TOTAL_NO_OF_OUTCOMES 
-            END                                             AS NUMBER_OF_OUTCOMES,
-            ISNULL(fr.OUTCOME_COMMENTS, '')                 AS COMMENTS
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        ) AS cine_referral_outcome_json,
-    fr.OUTCOME_NFA_FLAG, -- Consider conversion straight to bool
+            END AS NVARCHAR(4)), 'null') + ', ' +
+        '"COMMENTS": "' + ISNULL(TRY_CAST(fr.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
+        '}'
+    ) AS cine_referral_outcome_json,
+    fr.OUTCOME_NFA_FLAG,
     fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
     fr.REFRL_END_DTTM,
     fr.DIM_DEPARTMENT_ID, -- Swap out on DIM_DEPARTMENT_ID_DESC #DtoI-1762
     fr.DIM_WORKER_ID_DESC
 FROM
     HDM.Child_Social.FACT_REFERRALS AS fr
- 
 WHERE
     (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())    -- #DtoI-1806
     OR fr.REFRL_END_DTTM IS NULL)
-
 AND
     DIM_PERSON_ID <> -1  -- Exclude rows with -1
-
 AND EXISTS
     ( -- only ssd relevant records
     SELECT 1
@@ -1294,49 +1295,54 @@ AND EXISTS
     WHERE TRY_CAST(p.pers_person_id AS INT) = fr.DIM_PERSON_ID -- #DtoI-1799
     );
 
-    
+
+
+
 -- -- #LEGACY-PRE2016
--- -- version for SQL compatible versions <2016
+-- -- SQL compatible versions >=2016+
 -- SELECT
 --     fr.FACT_REFERRAL_ID,
 --     fr.DIM_PERSON_ID,
 --     fr.REFRL_START_DTTM,
 --     fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE,
 --     fr.DIM_LOOKUP_CONT_SORC_ID,
---     fr.DIM_LOOKUP_CONT_SORC_ID_DESC, -- 2
+--     fr.DIM_LOOKUP_CONT_SORC_ID_DESC, -- 1
 --     (
---         -- Manual JSON-like concatenation for cine_referral_outcome_json
---         '{' +
---         '"SINGLE_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
---         -- '"NFA_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' + -- Uncomment if needed
---         '"STRATEGY_DISCUSSION_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"CLA_REQUEST_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CLA_REQUEST_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"NON_AGENCY_ADOPTION_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"PRIVATE_FOSTERING_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"CP_TRANSFER_IN_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CP_TRANSFER_IN_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"CP_CONFERENCE_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CP_CONFERENCE_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"CARE_LEAVER_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CARE_LEAVER_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fr.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"NUMBER_OF_OUTCOMES": ' + 
---             ISNULL(TRY_CAST(CASE 
---                 WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL
+--         SELECT
+--             -- SSD standard 
+--             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
+--             ISNULL(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS SINGLE_ASSESSMENT_FLAG,
+--             -- ISNULL(fr.OUTCOME_NFA_FLAG, '')                 AS NFA_FLAG,
+--             ISNULL(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS STRATEGY_DISCUSSION_FLAG,
+--             ISNULL(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS CLA_REQUEST_FLAG,
+--             ISNULL(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS NON_AGENCY_ADOPTION_FLAG,
+--             ISNULL(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS PRIVATE_FOSTERING_FLAG,
+--             ISNULL(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS CP_TRANSFER_IN_FLAG,
+--             ISNULL(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS CP_CONFERENCE_FLAG,
+--             ISNULL(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS CARE_LEAVER_FLAG,
+--             ISNULL(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS OTHER_OUTCOMES_EXIST_FLAG,
+--             CASE 
+--                 WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL  -- to counter -1 values
 --                 ELSE fr.TOTAL_NO_OF_OUTCOMES 
---             END AS NVARCHAR(4)), 'null') + ', ' +
---         '"COMMENTS": "' + ISNULL(TRY_CAST(fr.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
---         '}'
---     ) AS cine_referral_outcome_json,
---     fr.OUTCOME_NFA_FLAG,
+--             END                                             AS NUMBER_OF_OUTCOMES,
+--             ISNULL(fr.OUTCOME_COMMENTS, '')                 AS COMMENTS
+--         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--         ) AS cine_referral_outcome_json,
+--     fr.OUTCOME_NFA_FLAG, -- Consider conversion straight to bool
 --     fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
 --     fr.REFRL_END_DTTM,
 --     fr.DIM_DEPARTMENT_ID, -- Swap out on DIM_DEPARTMENT_ID_DESC #DtoI-1762
 --     fr.DIM_WORKER_ID_DESC
 -- FROM
 --     HDM.Child_Social.FACT_REFERRALS AS fr
+ 
 -- WHERE
 --     (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())    -- #DtoI-1806
 --     OR fr.REFRL_END_DTTM IS NULL)
+
 -- AND
 --     DIM_PERSON_ID <> -1  -- Exclude rows with -1
+
 -- AND EXISTS
 --     ( -- only ssd relevant records
 --     SELECT 1
@@ -1346,15 +1352,14 @@ AND EXISTS
 
 
 
-
 -- -- META-ELEMENT: {"type": "create_fk"}
 -- ALTER TABLE ssd_development.ssd_cin_episodes ADD CONSTRAINT FK_ssd_cin_episodes_to_person 
 -- FOREIGN KEY (cine_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_cin_episodes_person_id    ON ssd_development.ssd_cin_episodes(cine_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_cin_referral_date             ON ssd_development.ssd_cin_episodes(cine_referral_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_cin_close_date                ON ssd_development.ssd_cin_episodes(cine_close_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cin_episodes_person_id    ON ssd_development.ssd_cin_episodes(cine_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cin_referral_date             ON ssd_development.ssd_cin_episodes(cine_referral_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cin_close_date                ON ssd_development.ssd_cin_episodes(cine_close_date);
 
 
 
@@ -1458,9 +1463,9 @@ WHERE
 
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON ssd_development.ssd_mother(moth_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON ssd_development.ssd_mother(moth_childs_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON ssd_development.ssd_mother(moth_childs_dob);
+-- CREATE NONCLUSTERED INDEX IX_ssd_mother_moth_person_id ON ssd_development.ssd_mother(moth_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_mother_childs_person_id ON ssd_development.ssd_mother(moth_childs_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_mother_childs_dob ON ssd_development.ssd_mother(moth_childs_dob);
 
 
 
@@ -1544,10 +1549,10 @@ AND EXISTS
 -- FOREIGN KEY (lega_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_legal_status_lega_person_id   ON ssd_development.ssd_legal_status(lega_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_legal_status                  ON ssd_development.ssd_legal_status(lega_legal_status);
--- CREATE NONCLUSTERED INDEX idx_ssd_legal_status_start            ON ssd_development.ssd_legal_status(lega_legal_status_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_legal_status_end              ON ssd_development.ssd_legal_status(lega_legal_status_end_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_legal_status_lega_person_id   ON ssd_development.ssd_legal_status(lega_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_legal_status                  ON ssd_development.ssd_legal_status(lega_legal_status);
+-- CREATE NONCLUSTERED INDEX IX_ssd_legal_status_start            ON ssd_development.ssd_legal_status(lega_legal_status_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_legal_status_end              ON ssd_development.ssd_legal_status(lega_legal_status_end_date);
 
 
 
@@ -1615,38 +1620,38 @@ INSERT INTO ssd_development.ssd_contacts (
     cont_contact_source_desc,
     cont_contact_outcome_json
 )
--- version for SQL compatible versions 2016+
--- see below for #LEGACY-PRE2016
+
+-- #LEGACY-PRE2016
+-- SQL compatible versions <2016
 SELECT 
     fc.FACT_CONTACT_ID,
     fc.DIM_PERSON_ID, 
     fc.CONTACT_DTTM,
     fc.DIM_LOOKUP_CONT_SORC_ID,
-    fc.DIM_LOOKUP_CONT_SORC_ID_DESC, -- 3
-    (   -- Create JSON string for outcomes
-        SELECT 
-            -- SSD standard 
-            -- all keys in structure regardless of data presence
-            ISNULL(fc.OUTCOME_NEW_REFERRAL_FLAG, '')         AS NEW_REFERRAL_FLAG,
-            ISNULL(fc.OUTCOME_EXISTING_REFERRAL_FLAG, '')    AS EXISTING_REFERRAL_FLAG,
-            ISNULL(fc.OUTCOME_CP_ENQUIRY_FLAG, '')           AS CP_ENQUIRY_FLAG,
-            ISNULL(fc.OUTCOME_NFA_FLAG, '')                  AS NFA_FLAG,
-            ISNULL(fc.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '')  AS NON_AGENCY_ADOPTION_FLAG,
-            ISNULL(fc.OUTCOME_PRIVATE_FOSTERING_FLAG, '')    AS PRIVATE_FOSTERING_FLAG,
-            ISNULL(fc.OUTCOME_ADVICE_FLAG, '')               AS ADVICE_FLAG,
-            ISNULL(fc.OUTCOME_MISSING_FLAG, '')              AS MISSING_FLAG,
-            ISNULL(fc.OUTCOME_OLA_CP_FLAG, '')               AS OLA_CP_FLAG,
-            ISNULL(fc.OTHER_OUTCOMES_EXIST_FLAG, '')         AS OTHER_OUTCOMES_EXIST_FLAG,
-            CASE 
-                WHEN fc.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL  -- to counter -1 values
+    fc.DIM_LOOKUP_CONT_SORC_ID_DESC, --4
+    (
+        -- Manual JSON-like concatenation for cont_contact_outcome_json
+        '{' +
+        '"NEW_REFERRAL_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_NEW_REFERRAL_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"EXISTING_REFERRAL_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_EXISTING_REFERRAL_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CP_ENQUIRY_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_CP_ENQUIRY_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"NFA_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"NON_AGENCY_ADOPTION_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_NON_AGENCY_ADOPTION_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PRIVATE_FOSTERING_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"ADVICE_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_ADVICE_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"MISSING_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_MISSING_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"OLA_CP_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_OLA_CP_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fc.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"NUMBER_OF_OUTCOMES": ' + 
+            ISNULL(TRY_CAST(CASE 
+                WHEN fc.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL
                 ELSE fc.TOTAL_NO_OF_OUTCOMES 
-            END                                              AS NUMBER_OF_OUTCOMES,
-            ISNULL(fc.OUTCOME_COMMENTS, '')                  AS COMMENTS
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        ) AS cont_contact_outcome_json
+            END AS NVARCHAR(4)), 'null') + ', ' +
+        '"COMMENTS": "' + ISNULL(TRY_CAST(fc.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
+        '}'
+    ) AS cont_contact_outcome_json
 FROM 
     HDM.Child_Social.FACT_CONTACTS AS fc
-
 WHERE
     (fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())) -- #DtoI-1806
     AND fc.DIM_PERSON_ID <> -1
@@ -1657,37 +1662,39 @@ WHERE
     );
 
 
+
 -- -- #LEGACY-PRE2016
--- -- version for SQL compatible versions <2016
+-- -- SQL compatible versions >=2016+
 -- SELECT 
 --     fc.FACT_CONTACT_ID,
 --     fc.DIM_PERSON_ID, 
 --     fc.CONTACT_DTTM,
 --     fc.DIM_LOOKUP_CONT_SORC_ID,
---     fc.DIM_LOOKUP_CONT_SORC_ID_DESC, --4
---     (
---         -- Manual JSON-like concatenation for cont_contact_outcome_json
---         '{' +
---         '"NEW_REFERRAL_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_NEW_REFERRAL_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"EXISTING_REFERRAL_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_EXISTING_REFERRAL_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"CP_ENQUIRY_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_CP_ENQUIRY_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"NFA_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"NON_AGENCY_ADOPTION_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_NON_AGENCY_ADOPTION_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"PRIVATE_FOSTERING_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"ADVICE_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_ADVICE_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"MISSING_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_MISSING_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"OLA_CP_FLAG": "' + ISNULL(TRY_CAST(fc.OUTCOME_OLA_CP_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fc.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"NUMBER_OF_OUTCOMES": ' + 
---             ISNULL(TRY_CAST(CASE 
---                 WHEN fc.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL
+--     fc.DIM_LOOKUP_CONT_SORC_ID_DESC, -- 3
+--     (   -- Create JSON string for outcomes
+--         SELECT 
+--             -- SSD standard 
+--             -- all keys in structure regardless of data presence
+--             ISNULL(fc.OUTCOME_NEW_REFERRAL_FLAG, '')         AS NEW_REFERRAL_FLAG,
+--             ISNULL(fc.OUTCOME_EXISTING_REFERRAL_FLAG, '')    AS EXISTING_REFERRAL_FLAG,
+--             ISNULL(fc.OUTCOME_CP_ENQUIRY_FLAG, '')           AS CP_ENQUIRY_FLAG,
+--             ISNULL(fc.OUTCOME_NFA_FLAG, '')                  AS NFA_FLAG,
+--             ISNULL(fc.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '')  AS NON_AGENCY_ADOPTION_FLAG,
+--             ISNULL(fc.OUTCOME_PRIVATE_FOSTERING_FLAG, '')    AS PRIVATE_FOSTERING_FLAG,
+--             ISNULL(fc.OUTCOME_ADVICE_FLAG, '')               AS ADVICE_FLAG,
+--             ISNULL(fc.OUTCOME_MISSING_FLAG, '')              AS MISSING_FLAG,
+--             ISNULL(fc.OUTCOME_OLA_CP_FLAG, '')               AS OLA_CP_FLAG,
+--             ISNULL(fc.OTHER_OUTCOMES_EXIST_FLAG, '')         AS OTHER_OUTCOMES_EXIST_FLAG,
+--             CASE 
+--                 WHEN fc.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL  -- to counter -1 values
 --                 ELSE fc.TOTAL_NO_OF_OUTCOMES 
---             END AS NVARCHAR(4)), 'null') + ', ' +
---         '"COMMENTS": "' + ISNULL(TRY_CAST(fc.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
---         '}'
---     ) AS cont_contact_outcome_json
+--             END                                              AS NUMBER_OF_OUTCOMES,
+--             ISNULL(fc.OUTCOME_COMMENTS, '')                  AS COMMENTS
+--         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--         ) AS cont_contact_outcome_json
 -- FROM 
 --     HDM.Child_Social.FACT_CONTACTS AS fc
+
 -- WHERE
 --     (fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())) -- #DtoI-1806
 --     AND fc.DIM_PERSON_ID <> -1
@@ -1699,14 +1706,15 @@ WHERE
 
 
 
+
 -- -- META-ELEMENT: {"type": "create_fk"}
 -- ALTER TABLE ssd_development.ssd_contacts ADD CONSTRAINT FK_ssd_contact_person 
 -- FOREIGN KEY (cont_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_contact_person_id     ON ssd_development.ssd_contacts(cont_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_contact_date          ON ssd_development.ssd_contacts(cont_contact_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_contact_source_code   ON ssd_development.ssd_contacts(cont_contact_source_code);
+-- CREATE NONCLUSTERED INDEX IX_ssd_contact_person_id     ON ssd_development.ssd_contacts(cont_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_contact_date          ON ssd_development.ssd_contacts(cont_contact_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_contact_source_code   ON ssd_development.ssd_contacts(cont_contact_source_code);
 
 
 
@@ -1807,9 +1815,9 @@ AND EXISTS
 -- FOREIGN KEY (earl_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_early_help_episodes_person_id     ON ssd_development.ssd_early_help_episodes(earl_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_early_help_start_date             ON ssd_development.ssd_early_help_episodes(earl_episode_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_early_help_end_date               ON ssd_development.ssd_early_help_episodes(earl_episode_end_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_early_help_episodes_person_id     ON ssd_development.ssd_early_help_episodes(earl_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_early_help_start_date             ON ssd_development.ssd_early_help_episodes(earl_episode_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_early_help_end_date               ON ssd_development.ssd_early_help_episodes(earl_episode_end_date);
 
 
 
@@ -1915,8 +1923,9 @@ INSERT INTO ssd_development.ssd_cin_assessments
     cina_assessment_team,
     cina_assessment_worker_id
 )
--- version for SQL compatible versions 2016+
--- see below for #LEGACY-PRE2016
+
+-- #LEGACY-PRE2016
+-- SQL compatible versions <2016
 SELECT
     fa.FACT_SINGLE_ASSESSMENT_ID,
     fa.DIM_PERSON_ID,
@@ -1929,25 +1938,24 @@ SELECT
     END AS seenYN,
     afa.AssessmentAuthorisedDate,
     (
-        SELECT
-            -- SSD standard 
-            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
-            ISNULL(fa.OUTCOME_NFA_FLAG, '')                     AS NFA_FLAG,
-            ISNULL(fa.OUTCOME_NFA_S47_END_FLAG, '')             AS NFA_S47_END_FLAG,
-            ISNULL(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '')     AS STRATEGY_DISCUSSION_FLAG,
-            ISNULL(fa.OUTCOME_CLA_REQUEST_FLAG, '')             AS CLA_REQUEST_FLAG,
-            ISNULL(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '')       AS PRIVATE_FOSTERING_FLAG,
-            ISNULL(fa.OUTCOME_LEGAL_ACTION_FLAG, '')            AS LEGAL_ACTION_FLAG,
-            ISNULL(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '')        AS PROV_OF_SERVICES_FLAG,
-            ISNULL(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '')         AS PROV_OF_SB_CARE_FLAG,
-            ISNULL(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '')   AS SPECIALIST_ASSESSMENT_FLAG,
-            ISNULL(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '') AS REFERRAL_TO_OTHER_AGENCY_FLAG,
-            ISNULL(fa.OUTCOME_OTHER_ACTIONS_FLAG, '')           AS OTHER_ACTIONS_FLAG,
-            ISNULL(fa.OTHER_OUTCOMES_EXIST_FLAG, '')            AS OTHER_OUTCOMES_EXIST_FLAG,
-            ISNULL(fa.TOTAL_NO_OF_OUTCOMES, '')                 AS TOTAL_NO_OF_OUTCOMES,
-            ISNULL(fa.OUTCOME_COMMENTS, '')                     AS COMMENTS -- dictates a larger _json size
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        ) AS cina_assessment_outcome_json,
+        -- Manual JSON-like concatenation for cina_assessment_outcome_json
+        '{' +
+        '"NFA_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"NFA_S47_END_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_NFA_S47_END_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"STRATEGY_DISCUSSION_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CLA_REQUEST_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_CLA_REQUEST_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PRIVATE_FOSTERING_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"LEGAL_ACTION_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_LEGAL_ACTION_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PROV_OF_SERVICES_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PROV_OF_SB_CARE_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_PROV_OF_SB_CARE_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"SPECIALIST_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"REFERRAL_TO_OTHER_AGENCY_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"OTHER_ACTIONS_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_OTHER_ACTIONS_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fa.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"TOTAL_NO_OF_OUTCOMES": ' + ISNULL(TRY_CAST(fa.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(3)), 'null') + ', ' +
+        '"COMMENTS": "' + ISNULL(TRY_CAST(fa.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
+        '}'
+    ) AS cina_assessment_outcome_json,
     fa.OUTCOME_NFA_FLAG                                         AS cina_assessment_outcome_nfa,
     NULLIF(fa.COMPLETED_BY_DEPT_ID, -1)                         AS cina_assessment_team,             -- replace -1 values with NULL _team_id
     NULLIF(fa.COMPLETED_BY_USER_ID, -1)                         AS cina_assessment_worker_id         -- replace -1 values with NULL for _worker_id
@@ -1974,7 +1982,7 @@ AND EXISTS (
 
 
 -- -- #LEGACY-PRE2016
--- -- version for SQL compatible versions <2016
+-- -- SQL compatible versions >=2016+
 -- SELECT
 --     fa.FACT_SINGLE_ASSESSMENT_ID,
 --     fa.DIM_PERSON_ID,
@@ -1987,24 +1995,25 @@ AND EXISTS (
 --     END AS seenYN,
 --     afa.AssessmentAuthorisedDate,
 --     (
---         -- Manual JSON-like concatenation for cina_assessment_outcome_json
---         '{' +
---         '"NFA_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"NFA_S47_END_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_NFA_S47_END_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"STRATEGY_DISCUSSION_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"CLA_REQUEST_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_CLA_REQUEST_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"PRIVATE_FOSTERING_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"LEGAL_ACTION_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_LEGAL_ACTION_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"PROV_OF_SERVICES_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"PROV_OF_SB_CARE_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_PROV_OF_SB_CARE_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"SPECIALIST_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"REFERRAL_TO_OTHER_AGENCY_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"OTHER_ACTIONS_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_OTHER_ACTIONS_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fa.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"TOTAL_NO_OF_OUTCOMES": ' + ISNULL(TRY_CAST(fa.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(3)), 'null') + ', ' +
---         '"COMMENTS": "' + ISNULL(TRY_CAST(fa.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
---         '}'
---     ) AS cina_assessment_outcome_json,
+--         SELECT
+--             -- SSD standard 
+--             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
+--             ISNULL(fa.OUTCOME_NFA_FLAG, '')                     AS NFA_FLAG,
+--             ISNULL(fa.OUTCOME_NFA_S47_END_FLAG, '')             AS NFA_S47_END_FLAG,
+--             ISNULL(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '')     AS STRATEGY_DISCUSSION_FLAG,
+--             ISNULL(fa.OUTCOME_CLA_REQUEST_FLAG, '')             AS CLA_REQUEST_FLAG,
+--             ISNULL(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '')       AS PRIVATE_FOSTERING_FLAG,
+--             ISNULL(fa.OUTCOME_LEGAL_ACTION_FLAG, '')            AS LEGAL_ACTION_FLAG,
+--             ISNULL(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '')        AS PROV_OF_SERVICES_FLAG,
+--             ISNULL(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '')         AS PROV_OF_SB_CARE_FLAG,
+--             ISNULL(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '')   AS SPECIALIST_ASSESSMENT_FLAG,
+--             ISNULL(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '') AS REFERRAL_TO_OTHER_AGENCY_FLAG,
+--             ISNULL(fa.OUTCOME_OTHER_ACTIONS_FLAG, '')           AS OTHER_ACTIONS_FLAG,
+--             ISNULL(fa.OTHER_OUTCOMES_EXIST_FLAG, '')            AS OTHER_OUTCOMES_EXIST_FLAG,
+--             ISNULL(fa.TOTAL_NO_OF_OUTCOMES, '')                 AS TOTAL_NO_OF_OUTCOMES,
+--             ISNULL(fa.OUTCOME_COMMENTS, '')                     AS COMMENTS -- dictates a larger _json size
+--         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--         ) AS cina_assessment_outcome_json,
 --     fa.OUTCOME_NFA_FLAG                                         AS cina_assessment_outcome_nfa,
 --     NULLIF(fa.COMPLETED_BY_DEPT_ID, -1)                         AS cina_assessment_team,             -- replace -1 values with NULL _team_id
 --     NULLIF(fa.COMPLETED_BY_USER_ID, -1)                         AS cina_assessment_worker_id         -- replace -1 values with NULL for _worker_id
@@ -2030,15 +2039,17 @@ AND EXISTS (
 -- );
 
 
+
+
 -- -- META-ELEMENT: {"type": "create_fk"}
 -- ALTER TABLE ssd_development.ssd_cin_assessments ADD CONSTRAINT FK_ssd_cin_assessments_to_person 
 -- FOREIGN KEY (cina_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_cin_assessments_person_id     ON ssd_development.ssd_cin_assessments(cina_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_cina_assessment_start_date    ON ssd_development.ssd_cin_assessments(cina_assessment_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_cina_assessment_auth_date     ON ssd_development.ssd_cin_assessments(cina_assessment_auth_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_cina_referral_id              ON ssd_development.ssd_cin_assessments(cina_referral_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cin_assessments_person_id     ON ssd_development.ssd_cin_assessments(cina_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cina_assessment_start_date    ON ssd_development.ssd_cin_assessments(cina_assessment_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cina_assessment_auth_date     ON ssd_development.ssd_cin_assessments(cina_assessment_auth_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cina_referral_id              ON ssd_development.ssd_cin_assessments(cina_referral_id);
 
 
 
@@ -2263,7 +2274,7 @@ IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TAB
 -- FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_development.ssd_cin_assessments(cina_assessment_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_cinf_assessment_id ON ssd_development.ssd_assessment_factors(cinf_assessment_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cinf_assessment_id ON ssd_development.ssd_assessment_factors(cinf_assessment_id);
 
 
 
@@ -2387,10 +2398,10 @@ GROUP BY
 -- FOREIGN KEY (cinp_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_cin_plans_person_id       ON ssd_development.ssd_cin_plans(cinp_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_cinp_cin_plan_start_date  ON ssd_development.ssd_cin_plans(cinp_cin_plan_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_cinp_cin_plan_end_date    ON ssd_development.ssd_cin_plans(cinp_cin_plan_end_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_cinp_referral_id          ON ssd_development.ssd_cin_plans(cinp_referral_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cin_plans_person_id       ON ssd_development.ssd_cin_plans(cinp_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cinp_cin_plan_start_date  ON ssd_development.ssd_cin_plans(cinp_cin_plan_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cinp_cin_plan_end_date    ON ssd_development.ssd_cin_plans(cinp_cin_plan_end_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cinp_referral_id          ON ssd_development.ssd_cin_plans(cinp_referral_id);
 
 
 
@@ -2485,8 +2496,8 @@ AND EXISTS ( -- only ssd relevant records
 -- FOREIGN KEY (cinv_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_cinv_person_id        ON ssd_development.ssd_cin_visits(cinv_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_cinv_cin_visit_date   ON ssd_development.ssd_cin_visits(cinv_cin_visit_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cinv_person_id        ON ssd_development.ssd_cin_visits(cinv_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cinv_cin_visit_date   ON ssd_development.ssd_cin_visits(cinv_cin_visit_date);
 
 
 
@@ -2555,8 +2566,9 @@ INSERT INTO ssd_development.ssd_s47_enquiry(
     s47e_s47_completed_by_team,
     s47e_s47_completed_by_worker_id
 )
--- version for SQL compatible versions 2016+
--- see below for #LEGACY-PRE2016
+
+-- #LEGACY-PRE2016 
+-- SQL compatible versions <2016
 SELECT 
     s47.FACT_S47_ID,
     s47.FACT_REFERRAL_ID,
@@ -2565,39 +2577,35 @@ SELECT
     s47.END_DTTM,
     s47.OUTCOME_NFA_FLAG,
     (
-        SELECT 
-            -- SSD standard 
-            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
-            ISNULL(s47.OUTCOME_NFA_FLAG, '')                   AS NFA_FLAG,
-            ISNULL(s47.OUTCOME_LEGAL_ACTION_FLAG, '')          AS LEGAL_ACTION_FLAG,
-            ISNULL(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '')      AS PROV_OF_SERVICES_FLAG,
-            ISNULL(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '')       AS PROV_OF_SB_CARE_FLAG,
-            ISNULL(s47.OUTCOME_CP_CONFERENCE_FLAG, '')         AS CP_CONFERENCE_FLAG,
-            ISNULL(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '')   AS NFA_CONTINUE_SINGLE_FLAG,
-            ISNULL(s47.OUTCOME_MONITOR_FLAG, '')               AS MONITOR_FLAG,
-            ISNULL(s47.OTHER_OUTCOMES_EXIST_FLAG, '')          AS OTHER_OUTCOMES_EXIST_FLAG,
-            ISNULL(s47.TOTAL_NO_OF_OUTCOMES, '')               AS TOTAL_NO_OF_OUTCOMES,
-            ISNULL(s47.OUTCOME_COMMENTS, '')                   AS OUTCOME_COMMENTS
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        )                                                      AS s47e_s47_outcome_json,
+        -- Manual JSON-like concatenation for s47e_s47_outcome_json
+        '{' +
+        '"NFA_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"LEGAL_ACTION_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_LEGAL_ACTION_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PROV_OF_SERVICES_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PROV_OF_SB_CARE_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_PROV_OF_SB_CARE_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CP_CONFERENCE_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_CP_CONFERENCE_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"NFA_CONTINUE_SINGLE_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"MONITOR_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_MONITOR_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(s47.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"TOTAL_NO_OF_OUTCOMES": ' + ISNULL(TRY_CAST(s47.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(3)), 'null') + ', ' +
+        '"OUTCOME_COMMENTS": "' + ISNULL(TRY_CAST(s47.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
+        '}'
+    ) AS s47e_s47_outcome_json,
     s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
     s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker_id
-
 FROM 
     HDM.Child_Social.FACT_S47 AS s47
-
 WHERE
     (s47.END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
     OR s47.END_DTTM IS NULL)
-
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
     FROM ssd_development.ssd_person p
     WHERE TRY_CAST(p.pers_person_id AS INT) = s47.DIM_PERSON_ID -- #DtoI-1799
-    ) ;
+);
 
--- -- #LEGACY-PRE2016
--- -- version for SQL compatible versions <2016
+-- -- #LEGACY-PRE2016 
+-- -- SQL compatible versions >=2016+
 -- SELECT 
 --     s47.FACT_S47_ID,
 --     s47.FACT_REFERRAL_ID,
@@ -2606,33 +2614,36 @@ AND EXISTS ( -- only ssd relevant records
 --     s47.END_DTTM,
 --     s47.OUTCOME_NFA_FLAG,
 --     (
---         -- Manual JSON-like concatenation for s47e_s47_outcome_json
---         '{' +
---         '"NFA_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"LEGAL_ACTION_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_LEGAL_ACTION_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"PROV_OF_SERVICES_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"PROV_OF_SB_CARE_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_PROV_OF_SB_CARE_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"CP_CONFERENCE_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_CP_CONFERENCE_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"NFA_CONTINUE_SINGLE_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"MONITOR_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_MONITOR_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(s47.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
---         '"TOTAL_NO_OF_OUTCOMES": ' + ISNULL(TRY_CAST(s47.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(3)), 'null') + ', ' +
---         '"OUTCOME_COMMENTS": "' + ISNULL(TRY_CAST(s47.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
---         '}'
---     ) AS s47e_s47_outcome_json,
+--         SELECT 
+--             -- SSD standard 
+--             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
+--             ISNULL(s47.OUTCOME_NFA_FLAG, '')                   AS NFA_FLAG,
+--             ISNULL(s47.OUTCOME_LEGAL_ACTION_FLAG, '')          AS LEGAL_ACTION_FLAG,
+--             ISNULL(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '')      AS PROV_OF_SERVICES_FLAG,
+--             ISNULL(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '')       AS PROV_OF_SB_CARE_FLAG,
+--             ISNULL(s47.OUTCOME_CP_CONFERENCE_FLAG, '')         AS CP_CONFERENCE_FLAG,
+--             ISNULL(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '')   AS NFA_CONTINUE_SINGLE_FLAG,
+--             ISNULL(s47.OUTCOME_MONITOR_FLAG, '')               AS MONITOR_FLAG,
+--             ISNULL(s47.OTHER_OUTCOMES_EXIST_FLAG, '')          AS OTHER_OUTCOMES_EXIST_FLAG,
+--             ISNULL(s47.TOTAL_NO_OF_OUTCOMES, '')               AS TOTAL_NO_OF_OUTCOMES,
+--             ISNULL(s47.OUTCOME_COMMENTS, '')                   AS OUTCOME_COMMENTS
+--         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--         )                                                      AS s47e_s47_outcome_json,
 --     s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
 --     s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker_id
+
 -- FROM 
 --     HDM.Child_Social.FACT_S47 AS s47
+
 -- WHERE
 --     (s47.END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
 --     OR s47.END_DTTM IS NULL)
+
 -- AND EXISTS ( -- only ssd relevant records
 --     SELECT 1
 --     FROM ssd_development.ssd_person p
 --     WHERE TRY_CAST(p.pers_person_id AS INT) = s47.DIM_PERSON_ID -- #DtoI-1799
--- );
-
+--     ) ;
 
 
 -- -- META-ELEMENT: {"type": "create_fk"}    
@@ -2640,10 +2651,10 @@ AND EXISTS ( -- only ssd relevant records
 -- FOREIGN KEY (s47e_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_person_id     ON ssd_development.ssd_s47_enquiry(s47e_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_start_date    ON ssd_development.ssd_s47_enquiry(s47e_s47_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_end_date      ON ssd_development.ssd_s47_enquiry(s47e_s47_end_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_s47_enquiry_referral_id   ON ssd_development.ssd_s47_enquiry(s47e_referral_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_s47_enquiry_person_id     ON ssd_development.ssd_s47_enquiry(s47e_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_s47_enquiry_start_date    ON ssd_development.ssd_s47_enquiry(s47e_s47_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_s47_enquiry_end_date      ON ssd_development.ssd_s47_enquiry(s47e_s47_end_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_s47_enquiry_referral_id   ON ssd_development.ssd_s47_enquiry(s47e_referral_id);
 
 
 
@@ -2687,7 +2698,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_initial_cp_conference (
-        icpc_icpc_id                NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"ICPC001A"}
+        icpc_icpc_id                NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"ICPC001A"}
         icpc_icpc_meeting_id        NVARCHAR(48),               -- metadata={"item_ref":"ICPC009A"}
         icpc_s47_enquiry_id         NVARCHAR(48),               -- metadata={"item_ref":"ICPC002A"}
         icpc_person_id              NVARCHAR(48),               -- metadata={"item_ref":"ICPC010A"}
@@ -2720,8 +2731,8 @@ INSERT INTO ssd_development.ssd_initial_cp_conference(
     icpc_icpc_team,
     icpc_icpc_worker_id
 )
--- version for SQL compatible versions <2016
--- See below for #LEGACY-PRE2016
+-- #LEGACY-PRE2016
+-- SQL compatible versions <2016
 SELECT
     fcpc.FACT_CP_CONFERENCE_ID,
     fcpc.FACT_MEETING_ID,
@@ -2736,20 +2747,19 @@ SELECT
     fcpc.DUE_DTTM,
     fm.ACTUAL_DTTM,
     fcpc.OUTCOME_CP_FLAG,
-    (
-        SELECT
-            -- SSD standard 
-            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
-            ISNULL(fcpc.OUTCOME_NFA_FLAG, '')                       AS NFA_FLAG,
-            ISNULL(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS REFERRAL_TO_OTHER_AGENCY_FLAG,
-            ISNULL(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS SINGLE_ASSESSMENT_FLAG,
-            ISNULL(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS PROV_OF_SERVICES_FLAG,
-            ISNULL(fcpc.OUTCOME_CP_FLAG, '')                        AS CP_FLAG,
-            ISNULL(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')              AS OTHER_OUTCOMES_EXIST_FLAG,
-            ISNULL(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS TOTAL_NO_OF_OUTCOMES,
-            ISNULL(fcpc.OUTCOME_COMMENTS, '')                       AS COMMENTS
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
-        )                                                           AS icpc_icpc_outcome_json,
+        (
+            -- Manual JSON-like concatenation for icpc_icpc_outcome_json
+            '{' +
+            '"NFA_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"REFERRAL_TO_OTHER_AGENCY_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"SINGLE_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"PROV_OF_SERVICES_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"CP_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_CP_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fcpc.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"TOTAL_NO_OF_OUTCOMES": ' + ISNULL(TRY_CAST(fcpc.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(4)), 'null') + ', ' +
+            '"COMMENTS": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
+            '}'
+        ) AS icpc_icpc_outcome_json,
     fcpc.ORGANISED_BY_DEPT_ID                                       AS icpc_icpc_team,          -- was fcpc.ORGANISED_BY_DEPT_NAME #DtoI-1762
     fcpc.ORGANISED_BY_USER_STAFF_ID                                 AS icpc_icpc_worker_id      -- was fcpc.ORGANISED_BY_USER_NAME
  
@@ -2771,8 +2781,8 @@ AND EXISTS ( -- only ssd relevant records
     WHERE TRY_CAST(p.pers_person_id AS INT) = fcpc.DIM_PERSON_ID -- #DtoI-1799
     ) ;
 
--- -- #LEGACY-PRE2016
--- -- version for SQL compatible versions <2016
+-- -- #LEGACY-PRE2016 
+-- -- SQL compatible versions >=2016+
 -- SELECT
 --     fcpc.FACT_CP_CONFERENCE_ID,
 --     fcpc.FACT_MEETING_ID,
@@ -2787,19 +2797,20 @@ AND EXISTS ( -- only ssd relevant records
 --     fcpc.DUE_DTTM,
 --     fm.ACTUAL_DTTM,
 --     fcpc.OUTCOME_CP_FLAG,
-        -- (
-        --     -- Manual JSON-like concatenation for icpc_icpc_outcome_json
-        --     '{' +
-        --     '"NFA_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
-        --     '"REFERRAL_TO_OTHER_AGENCY_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG AS NVARCHAR(3)), '') + '", ' +
-        --     '"SINGLE_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
-        --     '"PROV_OF_SERVICES_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '') + '", ' +
-        --     '"CP_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_CP_FLAG AS NVARCHAR(3)), '') + '", ' +
-        --     '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fcpc.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
-        --     '"TOTAL_NO_OF_OUTCOMES": ' + ISNULL(TRY_CAST(fcpc.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(4)), 'null') + ', ' +
-        --     '"COMMENTS": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
-        --     '}'
-        -- ) AS icpc_icpc_outcome_json,
+--     (
+--         SELECT
+--             -- SSD standard 
+--             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
+--             ISNULL(fcpc.OUTCOME_NFA_FLAG, '')                       AS NFA_FLAG,
+--             ISNULL(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS REFERRAL_TO_OTHER_AGENCY_FLAG,
+--             ISNULL(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS SINGLE_ASSESSMENT_FLAG,
+--             ISNULL(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS PROV_OF_SERVICES_FLAG,
+--             ISNULL(fcpc.OUTCOME_CP_FLAG, '')                        AS CP_FLAG,
+--             ISNULL(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')              AS OTHER_OUTCOMES_EXIST_FLAG,
+--             ISNULL(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS TOTAL_NO_OF_OUTCOMES,
+--             ISNULL(fcpc.OUTCOME_COMMENTS, '')                       AS COMMENTS
+--         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--         )                                                           AS icpc_icpc_outcome_json,
 --     fcpc.ORGANISED_BY_DEPT_ID                                       AS icpc_icpc_team,          -- was fcpc.ORGANISED_BY_DEPT_NAME #DtoI-1762
 --     fcpc.ORGANISED_BY_USER_STAFF_ID                                 AS icpc_icpc_worker_id      -- was fcpc.ORGANISED_BY_USER_NAME
  
@@ -2822,7 +2833,6 @@ AND EXISTS ( -- only ssd relevant records
 --     ) ;
 
 
-
 -- -- META-ELEMENT: {"type": "create_fk"} 
 -- ALTER TABLE ssd_development.ssd_initial_cp_conference ADD CONSTRAINT FK_ssd_icpc_person_id
 -- FOREIGN KEY (icpc_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
@@ -2833,10 +2843,10 @@ AND EXISTS ( -- only ssd relevant records
 
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_icpc_person_id        ON ssd_development.ssd_initial_cp_conference(icpc_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_icpc_s47_enquiry_id   ON ssd_development.ssd_initial_cp_conference(icpc_s47_enquiry_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_icpc_referral_id      ON ssd_development.ssd_initial_cp_conference(icpc_referral_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_icpc_icpc_date        ON ssd_development.ssd_initial_cp_conference(icpc_icpc_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_icpc_person_id        ON ssd_development.ssd_initial_cp_conference(icpc_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_icpc_s47_enquiry_id   ON ssd_development.ssd_initial_cp_conference(icpc_s47_enquiry_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_icpc_referral_id      ON ssd_development.ssd_initial_cp_conference(icpc_referral_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_icpc_icpc_date        ON ssd_development.ssd_initial_cp_conference(icpc_icpc_date);
 
 
 
@@ -2955,11 +2965,11 @@ AND EXISTS ( -- only ssd relevant records
 --   and cppl_icpc_id <> -1;
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_person_id ON ssd_development.ssd_cp_plans(cppl_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_icpc_id ON ssd_development.ssd_cp_plans(cppl_icpc_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_referral_id ON ssd_development.ssd_cp_plans(cppl_referral_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_start_date ON ssd_development.ssd_cp_plans(cppl_cp_plan_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_cp_plans_end_date ON ssd_development.ssd_cp_plans(cppl_cp_plan_end_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cp_plans_person_id ON ssd_development.ssd_cp_plans(cppl_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cp_plans_icpc_id ON ssd_development.ssd_cp_plans(cppl_icpc_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cp_plans_referral_id ON ssd_development.ssd_cp_plans(cppl_referral_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cp_plans_start_date ON ssd_development.ssd_cp_plans(cppl_cp_plan_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cp_plans_end_date ON ssd_development.ssd_cp_plans(cppl_cp_plan_end_date);
 
 
 
@@ -3084,9 +3094,9 @@ WHERE
 
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_cppv_person_id        ON ssd_development.ssd_cp_visits(cppv_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_plan_id       ON ssd_development.ssd_cp_visits(cppv_cp_plan_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_cppv_cp_visit_date    ON ssd_development.ssd_cp_visits(cppv_cp_visit_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cppv_person_id        ON ssd_development.ssd_cp_visits(cppv_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cppv_cp_plan_id       ON ssd_development.ssd_cp_visits(cppv_cp_plan_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cppv_cp_visit_date    ON ssd_development.ssd_cp_visits(cppv_cp_visit_date);
 
 
 
@@ -3225,11 +3235,11 @@ GROUP BY cpr.FACT_CP_REVIEW_ID,
 -- FOREIGN KEY (cppr_cp_plan_id) REFERENCES ssd_development.ssd_cp_plans(cppl_cp_plan_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_cppr_person_id ON ssd_development.ssd_cp_reviews(cppr_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_plan_id ON ssd_development.ssd_cp_reviews(cppr_cp_plan_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_due ON ssd_development.ssd_cp_reviews(cppr_cp_review_due);
--- CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_date ON ssd_development.ssd_cp_reviews(cppr_cp_review_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_cppr_cp_review_meeting_id ON ssd_development.ssd_cp_reviews(cppr_cp_review_meeting_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cppr_person_id ON ssd_development.ssd_cp_reviews(cppr_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cppr_cp_plan_id ON ssd_development.ssd_cp_reviews(cppr_cp_plan_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cppr_cp_review_due ON ssd_development.ssd_cp_reviews(cppr_cp_review_due);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cppr_cp_review_date ON ssd_development.ssd_cp_reviews(cppr_cp_review_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_cppr_cp_review_meeting_id ON ssd_development.ssd_cp_reviews(cppr_cp_review_meeting_id);
 
 
 
@@ -3442,12 +3452,12 @@ FROM FilteredData;
 -- FOREIGN KEY (clae_cla_placement_id) REFERENCES ssd_development.ssd_cla_placements (clap_cla_placement_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_clae_person_id ON ssd_development.ssd_cla_episodes(clae_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_start_date ON ssd_development.ssd_cla_episodes(clae_cla_episode_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_clae_episode_ceased_date ON ssd_development.ssd_cla_episodes(clae_cla_episode_ceased_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_clae_referral_id ON ssd_development.ssd_cla_episodes(clae_referral_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_clae_cla_last_iro_contact_date ON ssd_development.ssd_cla_episodes(clae_cla_last_iro_contact_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_clae_cla_placement_id ON ssd_development.ssd_cla_episodes(clae_cla_placement_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clae_person_id ON ssd_development.ssd_cla_episodes(clae_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clae_episode_start_date ON ssd_development.ssd_cla_episodes(clae_cla_episode_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clae_episode_ceased_date ON ssd_development.ssd_cla_episodes(clae_cla_episode_ceased_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clae_referral_id ON ssd_development.ssd_cla_episodes(clae_referral_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clae_cla_last_iro_contact_date ON ssd_development.ssd_cla_episodes(clae_cla_last_iro_contact_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clae_cla_placement_id ON ssd_development.ssd_cla_episodes(clae_cla_placement_id);
 
 
 
@@ -3523,8 +3533,8 @@ WHERE EXISTS
 
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_clac_person_id ON ssd_development.ssd_cla_convictions(clac_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_clac_conviction_date ON ssd_development.ssd_cla_convictions(clac_cla_conviction_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clac_person_id ON ssd_development.ssd_cla_convictions(clac_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clac_conviction_date ON ssd_development.ssd_cla_convictions(clac_cla_conviction_date);
 
 
 
@@ -3611,9 +3621,9 @@ AND EXISTS ( -- only ssd relevant records
 -- FOREIGN KEY (clah_person_id) REFERENCES ssd_development.ssd_cla_episodes(clae_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_clah_person_id ON ssd_development.ssd_cla_health (clah_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_date ON ssd_development.ssd_cla_health(clah_health_check_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_clah_health_check_status ON ssd_development.ssd_cla_health(clah_health_check_status);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clah_person_id ON ssd_development.ssd_cla_health (clah_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clah_health_check_date ON ssd_development.ssd_cla_health(clah_health_check_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clah_health_check_status ON ssd_development.ssd_cla_health(clah_health_check_status);
 
 
 
@@ -3701,8 +3711,8 @@ WHERE
 -- FOREIGN KEY (clai_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_clai_person_id ON ssd_development.ssd_cla_immunisations(clai_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_clai_immunisations_status ON ssd_development.ssd_cla_immunisations(clai_immunisations_status);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clai_person_id ON ssd_development.ssd_cla_immunisations(clai_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clai_immunisations_status ON ssd_development.ssd_cla_immunisations(clai_immunisations_status);
 
 
 
@@ -3785,8 +3795,8 @@ WHERE EXISTS
 -- FOREIGN KEY (clas_person_id) REFERENCES ssd_development.ssd_cla_episodes (clae_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_clas_person_id ON ssd_development.ssd_cla_substance_misuse (clas_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_clas_substance_misuse_date ON ssd_development.ssd_cla_substance_misuse(clas_substance_misuse_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clas_person_id ON ssd_development.ssd_cla_substance_misuse (clas_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clas_substance_misuse_date ON ssd_development.ssd_cla_substance_misuse(clas_substance_misuse_date);
 
 
 
@@ -3906,12 +3916,12 @@ AND
 -- FOREIGN KEY (clap_cla_id) REFERENCES ssd_development.ssd_cla_episodes(clae_cla_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_clap_cla_placement_urn ON ssd_development.ssd_cla_placement (clap_cla_placement_urn);
--- CREATE NONCLUSTERED INDEX idx_ssd_clap_cla_id ON ssd_development.ssd_cla_placement(clap_cla_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_start_date ON ssd_development.ssd_cla_placement(clap_cla_placement_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_end_date ON ssd_development.ssd_cla_placement(clap_cla_placement_end_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_postcode ON ssd_development.ssd_cla_placement(clap_cla_placement_postcode);
--- CREATE NONCLUSTERED INDEX idx_ssd_clap_placement_type ON ssd_development.ssd_cla_placement(clap_cla_placement_type);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clap_cla_placement_urn ON ssd_development.ssd_cla_placement (clap_cla_placement_urn);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clap_cla_id ON ssd_development.ssd_cla_placement(clap_cla_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clap_placement_start_date ON ssd_development.ssd_cla_placement(clap_cla_placement_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clap_placement_end_date ON ssd_development.ssd_cla_placement(clap_cla_placement_end_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clap_placement_postcode ON ssd_development.ssd_cla_placement(clap_cla_placement_postcode);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clap_placement_type ON ssd_development.ssd_cla_placement(clap_cla_placement_type);
 
 
 
@@ -4039,9 +4049,9 @@ GROUP BY fcr.FACT_CLA_REVIEW_ID,
 -- FOREIGN KEY (clar_cla_id) REFERENCES ssd_development.ssd_cla_episodes(clae_cla_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_clar_cla_id ON ssd_development.ssd_cla_reviews(clar_cla_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_clar_review_due_date ON ssd_development.ssd_cla_reviews(clar_cla_review_due_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_clar_review_date ON ssd_development.ssd_cla_reviews(clar_cla_review_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clar_cla_id ON ssd_development.ssd_cla_reviews(clar_cla_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clar_review_due_date ON ssd_development.ssd_cla_reviews(clar_cla_review_due_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clar_review_date ON ssd_development.ssd_cla_reviews(clar_cla_review_date);
 
 
 
@@ -4168,8 +4178,8 @@ GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
 -- FOREIGN KEY (lapp_person_id) REFERENCES ssd_development.ssd_cla_episodes(clae_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_lapp_person_id ON ssd_development.ssd_cla_previous_permanence(lapp_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_lapp_previous_permanence_option ON ssd_development.ssd_cla_previous_permanence(lapp_previous_permanence_option);
+-- CREATE NONCLUSTERED INDEX IX_ssd_lapp_person_id ON ssd_development.ssd_cla_previous_permanence(lapp_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_lapp_previous_permanence_option ON ssd_development.ssd_cla_previous_permanence(lapp_previous_permanence_option);
 
 
 
@@ -4300,88 +4310,89 @@ INSERT INTO ssd_development.ssd_cla_care_plan (
     lacp_cla_care_plan_end_date,
     lacp_cla_care_plan_json
 )
--- version for SQL compatible versions 2016+
--- see below for #LEGACY-PRE2016
+
+-- #LEGACY-PRE2016
+-- SQL compatible versions <2016
 SELECT
     fcp.FACT_CARE_PLAN_ID          AS lacp_table_id,
     fcp.DIM_PERSON_ID              AS lacp_person_id,
     fcp.START_DTTM                 AS lacp_cla_care_plan_start_date,
     fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
     (
-        SELECT  -- Combined _json field with 'ICP' responses
-            -- SSD standard 
-            -- all keys in structure regardless of data presence ISNULL() not NULLIF()
-            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN tmp_cpl.ANSWER END, '')), NULL) AS REMAINSUP,
-            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN1M,
-            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN6M,
-            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURNEV,
-            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN tmp_cpl.ANSWER END, '')), NULL) AS LTRELFR,
-            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN tmp_cpl.ANSWER END, '')), NULL) AS LTFOST18,
-            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RESPLMT,
-            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN tmp_cpl.ANSWER END, '')), NULL) AS SUPPLIV,
-            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER END, '')), NULL) AS ADOPTION,
-            COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END, '')), NULL) AS OTHERPLN
-        FROM
-            -- #ssd_TMP_PRE_cla_care_plan tmp_cpl
-            ssd_development.ssd_pre_cla_care_plan tmp_cpl
-
-        WHERE
-            tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
- 
-        GROUP BY tmp_cpl.DIM_PERSON_ID
-        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+        -- Manual JSON-like concatenation for lacp_cla_care_plan_json
+        '{' +
+        '"REMAINSUP": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"RETURN1M": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"RETURN6M": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"RETURNEV": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"LTRELFR": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"LTFOST18": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"RESPLMT": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"SUPPLIV": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"ADOPTION": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"OTHERPLN": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '"' +
+        '}'
     ) AS lacp_cla_care_plan_json
- 
 FROM
     HDM.Child_Social.FACT_CARE_PLANS AS fcp
-
-
-WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
+LEFT JOIN 
+    ssd_development.ssd_pre_cla_care_plan tmp_cpl 
+    ON tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+WHERE 
+    fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
     AND EXISTS (
         SELECT 1
         FROM ssd_development.ssd_person p
         WHERE TRY_CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID -- #DtoI-1799
-    );
- 
--- -- #LEGACY-PRE2016
--- -- version for SQL compatible versions <2016
+    )
+GROUP BY
+    fcp.FACT_CARE_PLAN_ID,
+    fcp.DIM_PERSON_ID,
+    fcp.START_DTTM,
+    fcp.END_DTTM;
+
+-- -- #LEGACY-PRE2016 
+-- -- SQL compatible versions >=2016+
 -- SELECT
 --     fcp.FACT_CARE_PLAN_ID          AS lacp_table_id,
 --     fcp.DIM_PERSON_ID              AS lacp_person_id,
 --     fcp.START_DTTM                 AS lacp_cla_care_plan_start_date,
 --     fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
 --     (
---         -- Manual JSON-like concatenation for lacp_cla_care_plan_json
---         '{' +
---         '"REMAINSUP": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
---         '"RETURN1M": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
---         '"RETURN6M": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
---         '"RETURNEV": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
---         '"LTRELFR": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
---         '"LTFOST18": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
---         '"RESPLMT": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
---         '"SUPPLIV": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
---         '"ADOPTION": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
---         '"OTHERPLN": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '"' +
---         '}'
+--         SELECT  -- Combined _json field with 'ICP' responses
+--             -- SSD standard 
+--             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
+--             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN tmp_cpl.ANSWER END, '')), NULL) AS REMAINSUP,
+--             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN1M,
+--             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN6M,
+--             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURNEV,
+--             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN tmp_cpl.ANSWER END, '')), NULL) AS LTRELFR,
+--             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN tmp_cpl.ANSWER END, '')), NULL) AS LTFOST18,
+--             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RESPLMT,
+--             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN tmp_cpl.ANSWER END, '')), NULL) AS SUPPLIV,
+--             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER END, '')), NULL) AS ADOPTION,
+--             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END, '')), NULL) AS OTHERPLN
+--         FROM
+--             -- #ssd_TMP_PRE_cla_care_plan tmp_cpl
+--             ssd_development.ssd_pre_cla_care_plan tmp_cpl
+
+--         WHERE
+--             tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+ 
+--         GROUP BY tmp_cpl.DIM_PERSON_ID
+--         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 --     ) AS lacp_cla_care_plan_json
+ 
 -- FROM
 --     HDM.Child_Social.FACT_CARE_PLANS AS fcp
--- LEFT JOIN 
---     ssd_development.ssd_pre_cla_care_plan tmp_cpl 
---     ON tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
--- WHERE 
---     fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
+
+
+-- WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
 --     AND EXISTS (
 --         SELECT 1
 --         FROM ssd_development.ssd_person p
 --         WHERE TRY_CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID -- #DtoI-1799
---     )
--- GROUP BY
---     fcp.FACT_CARE_PLAN_ID,
---     fcp.DIM_PERSON_ID,
---     fcp.START_DTTM,
---     fcp.END_DTTM;
+--     );
 
 
 -- -- META-ELEMENT: {"type": "create_fk"}
@@ -4389,9 +4400,9 @@ WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
 -- FOREIGN KEY (lacp_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_lacp_person_id ON ssd_development.ssd_cla_care_plan(lacp_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_start_date ON ssd_development.ssd_cla_care_plan(lacp_cla_care_plan_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_lacp_care_plan_end_date ON ssd_development.ssd_cla_care_plan(lacp_cla_care_plan_end_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_lacp_person_id ON ssd_development.ssd_cla_care_plan(lacp_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_lacp_care_plan_start_date ON ssd_development.ssd_cla_care_plan(lacp_cla_care_plan_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_lacp_care_plan_end_date ON ssd_development.ssd_cla_care_plan(lacp_cla_care_plan_end_date);
 
 
 
@@ -4496,9 +4507,9 @@ AND EXISTS ( -- only ssd relevant records
 -- FOREIGN KEY (clav_person_id) REFERENCES ssd_development.ssd_cla_episodes(clae_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_clav_person_id ON ssd_development.ssd_cla_visits(clav_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_clav_visit_date ON ssd_development.ssd_cla_visits(clav_cla_visit_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_clav_cla_id ON ssd_development.ssd_cla_visits(clav_cla_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clav_person_id ON ssd_development.ssd_cla_visits(clav_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clav_visit_date ON ssd_development.ssd_cla_visits(clav_cla_visit_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clav_cla_id ON ssd_development.ssd_cla_visits(clav_cla_id);
 
 
 
@@ -4642,7 +4653,7 @@ WHERE csdq_table_id IN (
 -- FOREIGN KEY (csdq_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_csdq_person_id ON ssd_development.ssd_sdq_scores(csdq_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_csdq_person_id ON ssd_development.ssd_sdq_scores(csdq_person_id);
 
 
 
@@ -4750,11 +4761,11 @@ AND EXISTS
 -- FOREIGN KEY (miss_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_miss_person_id        ON ssd_development.ssd_missing(miss_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_start    ON ssd_development.ssd_missing(miss_missing_episode_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_miss_episode_end      ON ssd_development.ssd_missing(miss_missing_episode_end_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_offered      ON ssd_development.ssd_missing(miss_missing_rhi_offered);
--- CREATE NONCLUSTERED INDEX idx_ssd_miss_rhi_accepted     ON ssd_development.ssd_missing(miss_missing_rhi_accepted);
+-- CREATE NONCLUSTERED INDEX IX_ssd_miss_person_id        ON ssd_development.ssd_missing(miss_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_miss_episode_start    ON ssd_development.ssd_missing(miss_missing_episode_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_miss_episode_end      ON ssd_development.ssd_missing(miss_missing_episode_end_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_miss_rhi_offered      ON ssd_development.ssd_missing(miss_missing_rhi_offered);
+-- CREATE NONCLUSTERED INDEX IX_ssd_miss_rhi_accepted     ON ssd_development.ssd_missing(miss_missing_rhi_accepted);
 
 
 
@@ -4950,9 +4961,9 @@ GROUP BY
 -- FOREIGN KEY (clea_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_clea_person_id                    ON ssd_development.ssd_care_leavers(clea_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_clea_care_leaver_latest_contact   ON ssd_development.ssd_care_leavers(clea_care_leaver_latest_contact);
--- CREATE NONCLUSTERED INDEX idx_ssd_clea_pathway_plan_review_date     ON ssd_development.ssd_care_leavers(clea_pathway_plan_review_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clea_person_id                    ON ssd_development.ssd_care_leavers(clea_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clea_care_leaver_latest_contact   ON ssd_development.ssd_care_leavers(clea_care_leaver_latest_contact);
+-- CREATE NONCLUSTERED INDEX IX_ssd_clea_pathway_plan_review_date     ON ssd_development.ssd_care_leavers(clea_pathway_plan_review_date);
 
 
 
@@ -5183,9 +5194,9 @@ AND EXISTS
 -- FOREIGN KEY (perm_person_id) REFERENCES ssd_development.ssd_cla_episodes(clae_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_perm_person_id            ON ssd_development.ssd_permanence(perm_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_perm_adm_decision_date    ON ssd_development.ssd_permanence(perm_adm_decision_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_perm_order_date           ON ssd_development.ssd_permanence(perm_permanence_order_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_perm_person_id            ON ssd_development.ssd_permanence(perm_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_perm_adm_decision_date    ON ssd_development.ssd_permanence(perm_adm_decision_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_perm_order_date           ON ssd_development.ssd_permanence(perm_permanence_order_date);
 
 
 
@@ -5303,9 +5314,9 @@ WHERE
 -- -- META-ELEMENT: {"type": "create_fk"}    
 
 -- -- META-ELEMENT: {"type": "create_idx"} 
--- CREATE NONCLUSTERED INDEX idx_ssd_prof_professional_id      ON ssd_development.ssd_professionals (prof_professional_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_prof_staff_id             ON ssd_development.ssd_professionals (prof_staff_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_prof_social_worker_reg_no ON ssd_development.ssd_professionals(prof_social_worker_registration_no);
+-- CREATE NONCLUSTERED INDEX IX_ssd_prof_professional_id      ON ssd_development.ssd_professionals (prof_professional_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_prof_staff_id             ON ssd_development.ssd_professionals (prof_staff_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_prof_social_worker_reg_no ON ssd_development.ssd_professionals(prof_social_worker_registration_no);
 
 
 
@@ -5381,7 +5392,7 @@ WHERE dpt.dim_department_id <> -1;
 -- FOREIGN KEY (dept_team_parent_id) REFERENCES ssd_development.ssd_department(dept_team_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE INDEX idx_ssd_dept_team_id ON ssd_development.ssd_department (dept_team_id);
+-- CREATE INDEX IX_ssd_dept_team_id ON ssd_development.ssd_department (dept_team_id);
 
 
 
@@ -5515,12 +5526,12 @@ AND EXISTS
 
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_invo_professional_id          ON ssd_development.ssd_involvements(invo_professional_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_invo_person_id                ON ssd_development.ssd_involvements(invo_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_invo_professional_role_id     ON ssd_development.ssd_involvements(invo_professional_role_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_invo_involvement_start_date   ON ssd_development.ssd_involvements(invo_involvement_start_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_invo_involvement_end_date     ON ssd_development.ssd_involvements(invo_involvement_end_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_invo_referral_id              ON ssd_development.ssd_involvements(invo_referral_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_invo_professional_id          ON ssd_development.ssd_involvements(invo_professional_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_invo_person_id                ON ssd_development.ssd_involvements(invo_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_invo_professional_role_id     ON ssd_development.ssd_involvements(invo_professional_role_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_invo_involvement_start_date   ON ssd_development.ssd_involvements(invo_involvement_start_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_invo_involvement_end_date     ON ssd_development.ssd_involvements(invo_involvement_end_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_invo_referral_id              ON ssd_development.ssd_involvements(invo_referral_id);
 
 -- META-ELEMENT: {"type": "test"}
 PRINT 'Table created: ' + @TableName;
@@ -5658,9 +5669,9 @@ WHERE
 -- FOREIGN KEY (link_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_link_person_id        ON ssd_development.ssd_linked_identifiers(link_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_link_valid_from_date  ON ssd_development.ssd_linked_identifiers(link_valid_from_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_link_valid_to_date    ON ssd_development.ssd_linked_identifiers(link_valid_to_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_link_person_id        ON ssd_development.ssd_linked_identifiers(link_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_link_valid_from_date  ON ssd_development.ssd_linked_identifiers(link_valid_from_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_link_valid_to_date    ON ssd_development.ssd_linked_identifiers(link_valid_to_date);
 
 
 
@@ -5744,7 +5755,7 @@ END
 -- FOREIGN KEY (s251_cla_placement_id) REFERENCES ssd_development.ssd_cla_placement(clap_cla_placement_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_s251_cla_placement_id ON ssd_development.ssd_s251_finance(s251_cla_placement_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_s251_cla_placement_id ON ssd_development.ssd_s251_finance(s251_cla_placement_id);
 
 
 -- META-ELEMENT: {"type": "test"}
@@ -5828,7 +5839,7 @@ END
 -- FOREIGN KEY (voch_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_voice_of_child_voch_person_id ON ssd_development.ssd_voice_of_child(voch_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_voice_of_child_voch_person_id ON ssd_development.ssd_voice_of_child(voch_person_id);
 
 
 
@@ -5956,9 +5967,9 @@ END
 -- FOREIGN KEY (prep_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_prep_person_id                ON ssd_development.ssd_pre_proceedings (prep_person_id);
--- CREATE NONCLUSTERED INDEX idx_ssd_prep_pre_pro_decision_date    ON ssd_development.ssd_pre_proceedings (prep_pre_pro_decision_date);
--- CREATE NONCLUSTERED INDEX idx_ssd_prep_legal_gateway_outcome    ON ssd_development.ssd_pre_proceedings (prep_legal_gateway_outcome);
+-- CREATE NONCLUSTERED INDEX IX_ssd_prep_person_id                ON ssd_development.ssd_pre_proceedings (prep_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_prep_pre_pro_decision_date    ON ssd_development.ssd_pre_proceedings (prep_pre_pro_decision_date);
+-- CREATE NONCLUSTERED INDEX IX_ssd_prep_legal_gateway_outcome    ON ssd_development.ssd_pre_proceedings (prep_legal_gateway_outcome);
 
 
 
@@ -6065,7 +6076,7 @@ WHERE
 -- FOREIGN KEY (send_person_id) REFERENCES ssd_development.ssd_person(pers_person_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX idx_ssd_send_person_id ON ssd_development.ssd_send (send_person_id);
+-- CREATE NONCLUSTERED INDEX IX_ssd_send_person_id ON ssd_development.ssd_send (send_person_id);
 
 
 -- META-ELEMENT: {"type": "test"}
@@ -6415,7 +6426,7 @@ https://github.com/data-to-insight/dfe-csc-api-data-flows/releases
 
 
 
--- META-CONTAINER: {"type": "table", "name": "ssd_api_data_staging"}
+-- META-CONTAINER: {"type": "table", "name": "ssd_api_data_staging_anon"}
 -- =============================================================================
 -- Description: ssd_api_data_staging (_anon) tables for LIVE|TEST API payload and logging. 
 -- Author: D2I
