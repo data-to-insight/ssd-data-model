@@ -275,7 +275,7 @@ END
 -- META-ELEMENT: {"type": "insert_data"}
 -- CTE to get a no_upn_code 
 -- (assumption here is that all codes will be the same/current)
-WITH f903_data_CTE AS (
+;WITH f903_data_CTE AS (
     SELECT 
         -- get the most recent no_upn_code if exists
         dim_person_id, 
@@ -353,6 +353,9 @@ ON
     p.DIM_PERSON_ID = f903.dim_person_id
 
 WHERE 
+
+    -- p.DIM_PERSON_ID IN (1, 2, 3) AND --  -- hard filter on CMS person ids for LA reduced cohort testing
+
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
     -- AND YEAR(p.BIRTH_DTTM) != 1900 -- #DtoI-1814
@@ -395,15 +398,13 @@ WHERE
             )
         )
     )
-    ;
+;
 
 
-
-
--- META-ELEMENT: {"type": "create_idx"}
-CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob               ON ssd_development.ssd_person(pers_dob);
-CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id   ON ssd_development.ssd_person(pers_common_child_id);
-CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender       ON ssd_development.ssd_person(pers_ethnicity, pers_gender);
+-- -- META-ELEMENT: {"type": "create_idx"}
+-- CREATE NONCLUSTERED INDEX idx_ssd_person_pers_dob               ON ssd_development.ssd_person(pers_dob);
+-- CREATE NONCLUSTERED INDEX idx_ssd_person_pers_common_child_id   ON ssd_development.ssd_person(pers_common_child_id);
+-- CREATE NONCLUSTERED INDEX idx_ssd_person_ethnicity_gender       ON ssd_development.ssd_person(pers_ethnicity, pers_gender);
 
 
 
@@ -1455,10 +1456,10 @@ WHERE
 -- CHECK (moth_person_id <> moth_childs_person_id);
 
 
--- META-ELEMENT: {"type": "create_idx"}
-CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON ssd_development.ssd_mother(moth_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON ssd_development.ssd_mother(moth_childs_person_id);
-CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON ssd_development.ssd_mother(moth_childs_dob);
+-- -- META-ELEMENT: {"type": "create_idx"}
+-- CREATE NONCLUSTERED INDEX idx_ssd_mother_moth_person_id ON ssd_development.ssd_mother(moth_person_id);
+-- CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_person_id ON ssd_development.ssd_mother(moth_childs_person_id);
+-- CREATE NONCLUSTERED INDEX idx_ssd_mother_childs_dob ON ssd_development.ssd_mother(moth_childs_dob);
 
 
 
@@ -1873,7 +1874,7 @@ END
 
 
 -- CTE for the EXISTS
-WITH RelevantPersons AS (
+;WITH RelevantPersons AS (
     SELECT p.pers_person_id
     FROM ssd_development.ssd_person p
 ),
@@ -4243,7 +4244,7 @@ END
 
 
 -- META-ELEMENT: {"type": "insert_data"} 
-WITH MostRecentQuestionResponse AS (
+;WITH MostRecentQuestionResponse AS (
     SELECT  -- Return the most recent response for each question for each persons
         ff.DIM_PERSON_ID,
         ffa.ANSWER_NO,
@@ -4829,7 +4830,7 @@ END
 -- META-ELEMENT: {"type": "insert_data"}  
 -- CTE for involvement history incl. worker data
 -- aggregate/extract current worker infos, allocated team, and p.advisor ID
-WITH InvolvementHistoryCTE AS (
+;WITH InvolvementHistoryCTE AS (
     SELECT
         fi.DIM_PERSON_ID,
         -- worker, alloc team, and p.advisor dets <<per involvement type>>
@@ -5037,7 +5038,7 @@ END
 
 
 -- META-ELEMENT: {"type": "insert_data"}  
-WITH RankedPermanenceData AS (
+;WITH RankedPermanenceData AS (
     -- CTE to rank permanence rows for each person
     -- used to assist in dup filtering on/towards perm_table_id
 
@@ -5563,25 +5564,23 @@ SET @TableName = N'ssd_linked_identifiers';
 -- META-ELEMENT: {"type": "drop_table"} 
 IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
 
-IF OBJECT_ID('ssd_development.ssd_linked_identifiers','U') IS NOT NULL
-BEGIN
-    -- keep existing rows, no truncate, no drop, no create
-    -- This is the only SSD table that has manually updated user data - hence generic drop|truncate 
-    -- process is not applicable here. 
-END
+
+    -- keep existing rows in persistent identifiers table, no truncate, no drop
+    -- This is the only SSD table that has manually updated user data - hence 
+    -- generic drop|truncate process NOT applicable here. 
+
 -- META-ELEMENT: {"type": "create_table"}
-ELSE
+IF OBJECT_ID('ssd_development.ssd_linked_identifiers', 'U') IS NULL
 BEGIN
     CREATE TABLE ssd_development.ssd_linked_identifiers (
-        link_table_id               NVARCHAR(48) DEFAULT NEWID() PRIMARY KEY,               -- metadata={"item_ref":"LINK001A"}
-        link_person_id              NVARCHAR(48),                               -- metadata={"item_ref":"LINK002A"} 
-        link_identifier_type        NVARCHAR(100),                              -- metadata={"item_ref":"LINK003A"}
-        link_identifier_value       NVARCHAR(100),                              -- metadata={"item_ref":"LINK004A"}
-        link_valid_from_date        DATETIME,                                   -- metadata={"item_ref":"LINK005A"}
-        link_valid_to_date          DATETIME                                    -- metadata={"item_ref":"LINK006A"}
+        link_table_id               NVARCHAR(48) DEFAULT NEWID() PRIMARY KEY,  -- metadata={"item_ref":"LINK001A"}
+        link_person_id              NVARCHAR(48),                              -- metadata={"item_ref":"LINK002A"} 
+        link_identifier_type        NVARCHAR(100),                             -- metadata={"item_ref":"LINK003A"}
+        link_identifier_value       NVARCHAR(100),                             -- metadata={"item_ref":"LINK004A"}
+        link_valid_from_date        DATETIME,                                  -- metadata={"item_ref":"LINK005A"}
+        link_valid_to_date          DATETIME                                   -- metadata={"item_ref":"LINK006A"}
     );
-END
-
+END;
 
 
 
