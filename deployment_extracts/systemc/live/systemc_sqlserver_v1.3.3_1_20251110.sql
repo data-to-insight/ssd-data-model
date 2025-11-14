@@ -247,6 +247,12 @@ PRINT 'Table created: ' + @TableName;
 SET @TableName = N'ssd_person';
 
 
+/* START - Temp Hard drop and recreate due to d2i structure changes  */
+IF OBJECT_ID(N'ssd_development.ssd_person', N'U') IS NOT NULL
+    DROP TABLE ssd_development.ssd_person;
+/* END - remove this tmp block once SSD has run once for v1.3.3!  */
+
+
 -- META-ELEMENT: {"type": "drop_table"}
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
@@ -261,13 +267,14 @@ BEGIN
     CREATE TABLE ssd_development.ssd_person (
         pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A"}               
         pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"} 
+        pers_upn                NVARCHAR(13),               -- metadata={"item_ref":"PERS006A"} 
         pers_forename           NVARCHAR(100),              -- metadata={"item_ref":"PERS015A"}  
         pers_surname            NVARCHAR(255),              -- metadata={"item_ref":"PERS016A"}  
         pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If -additional- status to Gender is held, otherwise duplicate pers_gender"}    
         pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown",NULL,"F","U","M","I"]}       
         pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A", "expected_data":[NULL, tbc]} 
         pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
-        pers_common_child_id    NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
+        pers_single_unique_id   NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
         pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A", "info":"SEN2 guidance suggests size(4)", "expected_data":["UN1-10"]}                                 
         pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A", "item_status":"P"} 
         pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}                  
@@ -295,13 +302,14 @@ END
 INSERT INTO ssd_development.ssd_person (
     pers_legacy_id,
     pers_person_id,
+    pers_upn,
     pers_forename,
     pers_surname,
     pers_sex,       -- as used in stat-returns
     pers_gender,    -- Placeholder for those LAs that store sex and gender independently
     pers_ethnicity,
     pers_dob,
-    pers_common_child_id,                               
+    pers_single_unique_id,                               
     pers_upn_unknown,                                  
     pers_send_flag,
     pers_expected_dob,
@@ -314,6 +322,7 @@ SELECT
     -- TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING|LA DEBUG]
     p.LEGACY_ID,
     CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
+    p.UPN,
     p.FORENAME, 
     p.SURNAME,
     p.GENDER_MAIN_CODE AS pers_sex,         -- Sex/Gender as used in stat-returns
@@ -323,9 +332,9 @@ SELECT
         THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL                           -- or NULL
     END, 
-    NULL AS pers_common_child_id,           -- Set to NULL as default(dev) / or set to NHS num / or set to Single Unique Identifier(SUI)
+    NULL AS pers_single_unique_id,           -- Set to NULL as default(dev) / or set to NHS num / or set to Single Unique Identifier(SUI)
     -- COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
-    f903.NO_UPN_CODE AS NO_UPN_CODE, 
+    f903.NO_UPN_CODE AS pers_upn_unknown, 
     p.EHM_SEN_FLAG,
     CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
@@ -346,7 +355,7 @@ FROM
 
 -- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period?
 LEFT JOIN (
-    -- ??other accessible location for UPN data than 903 table?? -- [TESTING|LA DEBUG]
+    -- ??other accessible location for NO_UPN data than 903 table?? -- [TESTING|LA DEBUG]
     SELECT 
         dim_person_id, 
         no_upn_code
@@ -451,7 +460,7 @@ PRINT 'Table created: ' + @TableName;
 -- Version: 1.0
 --          
 -- Status: [D]ev
--- Remarks: This is an in dev table in order to better optimise the process of getting SSD cohort 
+-- Remarks: This is an in-dev table in order to better optimise the process of getting SSD cohort 
 --          details into other related tables and help flag why they are included. 
 --          Provides stable join pattern everywhere, shift from ssd_person
 --          for WHERE EXISTS to reduce scan loads during ssd deployment. Provide 
@@ -634,10 +643,10 @@ EXEC sp_executesql @sql, N'@ssd_timeframe_years int', @ssd_timeframe_years;
 -- META-ELEMENT: {"type": "test"}
 PRINT 'Table created: ' + @TableName;
 
-/* summary (optional) 
-Show breakdown of why/source of records included in the ssd cohort */
+/* SSD summary 
+Show breakdown of why/source of records included in ssd cohort */
 SELECT
-  COUNT(*) AS cohort_rows,
+  COUNT(*) AS ssd_cohort_rows,
   SUM(CASE WHEN has_contact=1      THEN 1 ELSE 0 END) AS with_contacts,
   SUM(CASE WHEN has_referral=1     THEN 1 ELSE 0 END) AS with_referrals,
   SUM(CASE WHEN has_903=1          THEN 1 ELSE 0 END) AS in_903,
@@ -647,68 +656,81 @@ SELECT
   SUM(CASE WHEN has_involvement=1  THEN 1 ELSE 0 END) AS with_involvement
 FROM ssd_development.ssd_cohort;
 
+
+
 -- META-END
+
 
 
 -- META-CONTAINER: {"type": "table", "name": "ADMIN COHORT VERIFICATION ONLY"}
 -- =============================================================================
--- Description: Enables sanity comparison against ssd_person & for use in EXISTS
--- Author: D2I
--- Version: 1.0
---          
--- Status: [D]ev
--- Remarks:  Verification: compare original ssd_person inclusion vs cohort-driven inclusion
---          Assumes @ssd_timeframe_years is already declared (INT). Uses same midnight cutoff 
---          rule as ssd_cohort build. 
--- Dependencies:
-
+-- Purpose: Compare orig ssd_person inclusion, ssd_cohort driven inclusion, and API cohort
+-- Notes: assumes @ssd_timeframe_years INT declared
 -- =============================================================================
 
+SET NOCOUNT ON;
 
-DECLARE @cutoff datetime =
-  DATEADD(year, -@ssd_timeframe_years, CONVERT(datetime, CONVERT(date, GETDATE())));
+-- reset tmp tables
+IF OBJECT_ID('tempdb..#ssd_core_cohort')   IS NOT NULL DROP TABLE #ssd_core_cohort;
+IF OBJECT_ID('tempdb..#ssd_review_cohort') IS NOT NULL DROP TABLE #ssd_review_cohort;
+IF OBJECT_ID('tempdb..#ssd_api_cohort')    IS NOT NULL DROP TABLE #ssd_api_cohort;
 
--- META-ELEMENT: {"type": "drop_table"}
-IF OBJECT_ID('tempdb..#ssd_core_person_cohort') IS NOT NULL
+-- declare per session
+IF OBJECT_ID('tempdb..#ssd_scope_marker') IS NULL
 BEGIN
-  TRUNCATE TABLE #ssd_core_person_cohort;
-END
--- META-ELEMENT: {"type": "create_table"}
-ELSE
-BEGIN
-  CREATE TABLE #ssd_core_person_cohort(
-    dim_person_id nvarchar(48) NOT NULL PRIMARY KEY
-  );
+  DECLARE @ssd_cutoff         datetime;
+  DECLARE @ssd_run_date       date;
+  DECLARE @ssd_months_back    int;
+  DECLARE @ssd_fy_start_month int;
+  DECLARE @ssd_anchor         date;
+  DECLARE @ssd_fy_start_year  int;
+  DECLARE @ssd_window_start   date;
+  DECLARE @ssd_window_end     date;
+
+  SELECT 1 AS mk INTO #ssd_scope_marker;
 END
 
--- original ssd_person inclusion set (IDs only) - mirrors the EXISTS predicates
-INSERT INTO #ssd_core_person_cohort(dim_person_id)
-SELECT DISTINCT CAST(p.DIM_PERSON_ID AS nvarchar(48)) AS dim_person_id
+-- reinitialise vals each run
+
+-- parity cutoff for core, midnight today minus @ssd_timeframe_years
+SET @ssd_cutoff = DATEADD(year, -@ssd_timeframe_years, CONVERT(datetime, CONVERT(date, GETDATE())));
+
+-- API cohort window, 24 months back to FY start on 1 April
+SET @ssd_run_date       = CONVERT(date, GETDATE());
+SET @ssd_months_back    = 24;
+SET @ssd_fy_start_month = 4;
+SET @ssd_anchor         = DATEADD(month, -@ssd_months_back, @ssd_run_date);
+SET @ssd_fy_start_year  = YEAR(@ssd_anchor) - CASE WHEN MONTH(@ssd_anchor) < @ssd_fy_start_month THEN 1 ELSE 0 END;
+SET @ssd_window_start   = DATEFROMPARTS(@ssd_fy_start_year, @ssd_fy_start_month, 1);
+SET @ssd_window_end     = @ssd_run_date;
+
+------------------------------------------------------------
+-- A) Core cohort, rebuilds original ssd_person EXISTS logic over HDM
+------------------------------------------------------------
+CREATE TABLE #ssd_core_cohort(dim_person_id nvarchar(48) NOT NULL PRIMARY KEY);
+
+INSERT INTO #ssd_core_cohort(dim_person_id)
+SELECT DISTINCT CAST(p.DIM_PERSON_ID AS nvarchar(48))
 FROM HDM.Child_Social.DIM_PERSON p
 WHERE p.DIM_PERSON_ID IS NOT NULL
   AND p.DIM_PERSON_ID <> -1
   AND (
-    p.IS_CLIENT = 'Y'                                                        -- client flag
-    OR EXISTS (SELECT 1                                                     -- recent contact
-               FROM HDM.Child_Social.FACT_CONTACTS fc
+    p.IS_CLIENT = 'Y'
+    OR EXISTS (SELECT 1 FROM HDM.Child_Social.FACT_CONTACTS fc
                WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
-                 AND fc.CONTACT_DTTM >= @cutoff)
-    OR EXISTS (SELECT 1                                                     -- referral start/end in window OR open
-               FROM HDM.Child_Social.FACT_REFERRALS fr
+                 AND fc.CONTACT_DTTM >= @ssd_cutoff)
+    OR EXISTS (SELECT 1 FROM HDM.Child_Social.FACT_REFERRALS fr
                WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
-                 AND ( fr.REFRL_START_DTTM >= @cutoff
-                    OR fr.REFRL_END_DTTM   >= @cutoff
+                 AND ( fr.REFRL_START_DTTM >= @ssd_cutoff
+                    OR fr.REFRL_END_DTTM   >= @ssd_cutoff
                     OR fr.REFRL_END_DTTM IS NULL ))
-    OR EXISTS (SELECT 1                                                     -- care leaver contact in window
-               FROM HDM.Child_Social.FACT_CLA_CARE_LEAVERS fccl
+    OR EXISTS (SELECT 1 FROM HDM.Child_Social.FACT_CLA_CARE_LEAVERS fccl
                WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
-                 AND fccl.IN_TOUCH_DTTM >= @cutoff)
-    OR EXISTS (SELECT 1                                                     -- eligibility present
-               FROM HDM.Child_Social.DIM_CLA_ELIGIBILITY dce
+                 AND fccl.IN_TOUCH_DTTM >= @ssd_cutoff)
+    OR EXISTS (SELECT 1 FROM HDM.Child_Social.DIM_CLA_ELIGIBILITY dce
                WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
                  AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL)
-    OR EXISTS (SELECT 1                                                     -- involvement meets rules; still active
-               FROM HDM.Child_Social.FACT_INVOLVEMENTS fi
+    OR EXISTS (SELECT 1 FROM HDM.Child_Social.FACT_INVOLVEMENTS fi
                WHERE fi.DIM_PERSON_ID = p.DIM_PERSON_ID
                  AND ( fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE 'KA%'
                     OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL
@@ -717,19 +739,12 @@ WHERE p.DIM_PERSON_ID IS NOT NULL
                  AND (fi.END_DTTM IS NULL OR fi.END_DTTM > GETDATE()))
   );
 
--- META-ELEMENT: {"type": "create_table"}
-IF OBJECT_ID('tempdb..#ssd_review_cohort') IS NOT NULL
-BEGIN
-  TRUNCATE TABLE #ssd_review_cohort;
-END
-ELSE
-BEGIN
-  CREATE TABLE #ssd_review_cohort(
-    dim_person_id nvarchar(48) NOT NULL PRIMARY KEY
-  );
-END
+------------------------------------------------------------
+-- B) Review cohort, same inclusion set but via ssd_cohort flags
+--    excludes has_903. Keep to prove flag path equals the heavy EXISTS path
+------------------------------------------------------------
+CREATE TABLE #ssd_review_cohort(dim_person_id nvarchar(48) NOT NULL PRIMARY KEY);
 
--- cohort-driven inclusion set (parity with ssd_person reasons; deliberately excludes has_903)
 INSERT INTO #ssd_review_cohort(dim_person_id)
 SELECT co.dim_person_id
 FROM ssd_development.ssd_cohort co
@@ -739,34 +754,149 @@ WHERE co.has_contact      = 1
    OR co.has_eligibility  = 1
    OR co.has_client       = 1
    OR co.has_involvement  = 1;
+-- optional to include 903 in the parity set
+--   OR co.has_903          = 1;
 
+------------------------------------------------------------
+-- C) API cohort, same rules as payload window
+------------------------------------------------------------
+CREATE TABLE #ssd_api_cohort(person_id nvarchar(48) NOT NULL PRIMARY KEY);
 
--- META-ELEMENT: {"type": "test"}
--- headline counts: want intersection == review == core (and both "only_*" = 0)
+;WITH
+EligibleBySpec AS (  -- unborn or ever age 25 or below within the window, includes deceased
+  SELECT TRY_CONVERT(nvarchar(48), p.pers_person_id) AS person_id
+  FROM ssd_development.ssd_person p
+  WHERE p.pers_expected_dob IS NOT NULL
+     OR (p.pers_dob IS NOT NULL AND DATEADD(year, 26, p.pers_dob) >= @ssd_window_start)
+),
+ActiveReferral AS (
+  SELECT DISTINCT cine.cine_person_id AS person_id
+  FROM ssd_cin_episodes cine
+  WHERE cine.cine_referral_date <= @ssd_window_end
+    AND (cine.cine_close_date IS NULL OR cine.cine_close_date >= @ssd_window_start)
+    AND (cine.cine_close_date IS NULL OR cine.cine_close_date >  @ssd_run_date)
+),
+WaitingAssessment AS (
+  SELECT DISTINCT cine.cine_person_id AS person_id
+  FROM ssd_cin_episodes cine
+  WHERE cine.cine_close_date IS NULL
+    AND NOT EXISTS (
+          SELECT 1
+          FROM ssd_cin_assessments ca
+          WHERE ca.cina_referral_id = cine.cine_referral_id
+            AND ca.cina_assessment_start_date IS NOT NULL
+    )
+),
+HasCINPlan AS (
+  SELECT DISTINCT cinp.cinp_person_id AS person_id
+  FROM ssd_cin_plans cinp
+  WHERE cinp.cinp_cin_plan_start_date <= @ssd_window_end
+    AND (cinp.cinp_cin_plan_end_date IS NULL OR cinp.cinp_cin_plan_end_date >= @ssd_window_start)
+),
+HasCPPlan AS (
+  SELECT DISTINCT cppl.cppl_person_id AS person_id
+  FROM ssd_cp_plans cppl
+  WHERE cppl.cppl_cp_plan_start_date <= @ssd_window_end
+    AND (cppl.cppl_cp_plan_end_date IS NULL OR cppl.cppl_cp_plan_end_date >= @ssd_window_start)
+),
+HasLAC AS (
+  SELECT DISTINCT clae.clae_person_id AS person_id
+  FROM ssd_cla_episodes clae
+  JOIN ssd_cin_episodes cine
+    ON cine.cine_referral_id = clae.clae_referral_id
+  WHERE cine.cine_referral_date <= @ssd_window_end
+    AND (cine.cine_close_date IS NULL OR cine.cine_close_date >= @ssd_window_start)
+
+  UNION
+
+  SELECT DISTINCT clae2.clae_person_id AS person_id
+  FROM ssd_cla_episodes clae2
+  JOIN ssd_cla_placement clap
+    ON clap.clap_cla_id = clae2.clae_cla_id
+  WHERE clap.clap_cla_placement_start_date <= @ssd_window_end
+    AND (clap.clap_cla_placement_end_date IS NULL OR clap.clap_cla_placement_end_date >= @ssd_window_start)
+),
+IsCareLeaver16to25 AS (
+  SELECT DISTINCT clea.clea_person_id AS person_id
+  FROM ssd_care_leavers clea
+  JOIN ssd_development.ssd_person p
+    ON p.pers_person_id = clea.clea_person_id
+  WHERE clea.clea_care_leaver_latest_contact BETWEEN @ssd_window_start AND @ssd_window_end
+    AND (
+          (p.pers_dob IS NOT NULL AND DATEDIFF(year, p.pers_dob, @ssd_run_date) BETWEEN 16 AND 25)
+       OR (p.pers_dob IS NULL AND p.pers_expected_dob IS NOT NULL)
+    )
+),
+IsDisabled AS (
+  SELECT DISTINCT d.disa_person_id AS person_id
+  FROM ssd_disability d
+  WHERE NULLIF(LTRIM(RTRIM(d.disa_disability_code)), '') IS NOT NULL
+),
+SpecInclusion AS (
+  SELECT person_id FROM ActiveReferral
+  UNION SELECT person_id FROM WaitingAssessment
+  UNION SELECT person_id FROM HasCINPlan
+  UNION SELECT person_id FROM HasCPPlan
+  UNION SELECT person_id FROM HasLAC
+  UNION SELECT person_id FROM IsCareLeaver16to25
+  UNION SELECT person_id FROM IsDisabled
+),
+ApiCohortIDs AS (
+  SELECT e.person_id
+  FROM EligibleBySpec e
+  JOIN SpecInclusion s
+    ON s.person_id = e.person_id
+)
+INSERT INTO #ssd_api_cohort(person_id)
+SELECT DISTINCT person_id
+FROM ApiCohortIDs;
+
+------------------------------------------------------------
+-- D) Headline counts
+--   core_count, live recompute from HDM using orig EXISTS path and @ssd_cutoff
+--   ssd_cohort_count, from persisted flag table ssd_development.ssd_cohort
+--     By default flags count has_contact or has_referral or is_care_leaver or has_eligibility or has_client or has_involvement
+--     deliberate exclude has_903 here, uncomment below if include
+--   api_count, people who pass EligibleBySpec unborn or <= 25 within window and appear in >1+ SpecInclusion group
+------------------------------------------------------------
 SELECT
-  (SELECT COUNT(*) FROM #ssd_core_person_cohort) AS orig_count,
-  (SELECT COUNT(*) FROM #ssd_review_cohort)      AS cohort_count,
-  (SELECT COUNT(*) FROM #ssd_core_person_cohort o
-    WHERE EXISTS (SELECT 1 FROM #ssd_review_cohort c WHERE c.dim_person_id = o.dim_person_id)) AS intersection,
-  (SELECT COUNT(*) FROM #ssd_core_person_cohort o
-    WHERE NOT EXISTS (SELECT 1 FROM #ssd_review_cohort c WHERE c.dim_person_id = o.dim_person_id)) AS only_in_orig,
-  (SELECT COUNT(*) FROM #ssd_review_cohort c
-    WHERE NOT EXISTS (SELECT 1 FROM #ssd_core_person_cohort o WHERE o.dim_person_id = c.dim_person_id)) AS only_in_cohort;
+  c.core_count,
+  h.ssd_cohort_count,
+  a.api_count
+  -- , h903.ssd_cohort_incl903_count  --  include 903 rows
+FROM
+  (SELECT COUNT(*) AS core_count
+   FROM #ssd_core_cohort) AS c
+CROSS JOIN
+  (SELECT COUNT(*) AS ssd_cohort_count
+   FROM ssd_development.ssd_cohort
+   WHERE has_contact = 1
+      OR has_referral = 1
+      OR is_care_leaver = 1
+      OR has_eligibility = 1
+      OR has_client = 1
+      OR has_involvement = 1
+      -- OR has_903 = 1  -- uncomment to include 903 rows in counts
+  ) AS h
+CROSS JOIN
+  (SELECT COUNT(*) AS api_count
+   FROM #ssd_api_cohort) AS a
+-- optional extra cross join to show include 903 variant alongside default
+-- CROSS JOIN
+--   (SELECT COUNT(*) AS ssd_cohort_incl903_count
+--    FROM ssd_development.ssd_cohort
+--    WHERE has_contact = 1
+--       OR has_referral = 1
+--       OR is_care_leaver = 1
+--       OR has_eligibility = 1
+--       OR has_client = 1
+--       OR has_involvement = 1
+--       OR has_903 = 1
+--   ) AS h903
+;
 
--- -- why-diff sample: show cohort flags for rows only in ssd_person (twds diagnose parity gaps)
--- SELECT TOP 100 o.dim_person_id, co.*
--- FROM #ssd_core_person_cohort o
--- LEFT JOIN #ssd_review_cohort r ON r.dim_person_id = o.dim_person_id
--- LEFT JOIN ssd_development.ssd_cohort co ON co.dim_person_id = o.dim_person_id
--- WHERE r.dim_person_id IS NULL
--- ORDER BY o.dim_person_id;
+-- END "ADMIN COHORT VERIFICATION ONLY"
 
--- temp tables if wanting to probe further; otherwise drop
--- DROP TABLE #ssd_core_person_cohort;
--- DROP TABLE #ssd_review_cohort;
-
-
--- -- END "ADMIN COHORT VERIFICATION ONLY"
 -- META-END
 
 
@@ -6479,9 +6609,6 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 
  
 
-
-
-
 /* Start
 
         SSD Extract Logging
@@ -6492,6 +6619,52 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 -- META-ELEMENT: {"type": "console_output"} 
 -- output for ref most recent/current ssd version and last update
 SELECT * FROM ssd_development.ssd_version_log WHERE is_current = 1;
+
+
+-- duplicated from -- META-CONTAINER: {"type": "table", "name": "ADMIN COHORT VERIFICATION ONLY"}
+--------------------------------------------------------------------------------------------------------------------------------
+-- Headline counts
+--   core_count, from HDM using orig EXISTS path and @ssd_cutoff
+--   ssd_cohort_count, from persisted flag table ssd_development.ssd_cohort
+--     By default flags count has_contact or has_referral or is_care_leaver or has_eligibility or has_client or has_involvement
+--     deliberate exclude has_903 here, uncomment below if include
+--   api_count, records who pass EligibleBySpec unborn or <= 25 within window and appear in >1+ SpecInclusion group
+--------------------------------------------------------------------------------------------------------------------------------
+SELECT
+  c.core_count,
+  h.ssd_cohort_count,
+  a.api_count
+  -- , h903.ssd_cohort_incl903_count  --  include 903 rows
+FROM
+  (SELECT COUNT(*) AS core_count
+   FROM #ssd_core_cohort) AS c
+CROSS JOIN
+  (SELECT COUNT(*) AS ssd_cohort_count
+   FROM ssd_development.ssd_cohort
+   WHERE has_contact = 1
+      OR has_referral = 1
+      OR is_care_leaver = 1
+      OR has_eligibility = 1
+      OR has_client = 1
+      OR has_involvement = 1
+      -- OR has_903 = 1  -- uncomment to include 903 rows in counts
+  ) AS h
+CROSS JOIN
+  (SELECT COUNT(*) AS api_count
+   FROM #ssd_api_cohort) AS a
+-- optional extra cross join to show include 903 variant alongside default
+-- CROSS JOIN
+--   (SELECT COUNT(*) AS ssd_cohort_incl903_count
+--    FROM ssd_development.ssd_cohort
+--    WHERE has_contact = 1
+--       OR has_referral = 1
+--       OR is_care_leaver = 1
+--       OR has_eligibility = 1
+--       OR has_client = 1
+--       OR has_involvement = 1
+--       OR has_903 = 1
+--   ) AS h903
+;
 
 
 -- META-END
