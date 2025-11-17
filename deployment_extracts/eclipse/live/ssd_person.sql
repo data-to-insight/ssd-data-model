@@ -1,8 +1,8 @@
 -- =============================================================================
 -- META-ELEMENT: {"type": "drop_table"}
--- Note: 
+-- Note: uncomment only if dropping to apply new structural update(s)
 -- =============================================================================
--- DROP TABLE IF EXISTS ssd_person;  -- uncomment only if dropping to apply new structural update(s)
+-- DROP TABLE IF EXISTS ssd_person; 
 
 -- =============================================================================
 -- META-ELEMENT: {"type": "create_table"}
