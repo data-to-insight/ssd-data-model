@@ -1,4 +1,42 @@
+-- =============================================================================
+-- META-ELEMENT: {"type": "drop_table"}
+-- Note: uncomment only if dropping to apply new structural update(s)
+-- =============================================================================
+-- DROP TABLE IF EXISTS ssd_cin_episodes;
 
+-- META-ELEMENT: {"type": "create_table"}
+CREATE TABLE IF NOT EXISTS ssd_cin_episodes
+(
+    cine_referral_id                VARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINE001A"}
+    cine_person_id                  VARCHAR(48),               -- metadata={"item_ref":"CINE002A"}
+    cine_referral_date              TIMESTAMP,                 -- metadata={"item_ref":"CINE003A"}
+    cine_cin_primary_need_code      VARCHAR(3),                -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
+    cine_referral_source_code       VARCHAR(48),               -- metadata={"item_ref":"CINE004A"}  
+    cine_referral_source_desc       VARCHAR(255),              -- metadata={"item_ref":"CINE012A"}
+    cine_referral_outcome_json      VARCHAR(4000),             -- metadata={"item_ref":"CINE005A"}
+    cine_referral_nfa               CHAR(1),                   -- metadata={"item_ref":"CINE011A", "info":"Consider for conversion to Bool"}
+    cine_close_reason               VARCHAR(100),              -- metadata={"item_ref":"CINE006A"}
+    cine_close_date                 TIMESTAMP,                 -- metadata={"item_ref":"CINE007A"}
+    cine_referral_team              VARCHAR(48),               -- metadata={"item_ref":"CINE008A"}
+    cine_referral_worker_id         VARCHAR(100)               -- metadata={"item_ref":"CINE009A"}
+);
+
+TRUNCATE TABLE ssd_cin_episodes;
+
+INSERT INTO ssd_cin_episodes (
+    cine_referral_id,
+    cine_person_id,
+    cine_referral_date,
+    cine_cin_primary_need_code,
+    cine_referral_source_code,
+    cine_referral_source_desc,
+    cine_referral_outcome_json,
+    cine_referral_nfa,
+    cine_close_reason,
+    cine_close_date,
+    cine_referral_team,
+    cine_referral_worker_id
+)
 WITH EXCLUSIONS AS (
 	SELECT
 		PV.PERSONID
@@ -150,10 +188,10 @@ CIN_EPISODE AS (
 
     
 SELECT
-	CIN_EPISODE.REFERRALID                                                                             AS "cine_referral_id",             -- metadata={"item_ref":"CINE001A"}
-	CIN_EPISODE.PERSONID                                                                               AS "cine_person_id",               -- metadata={"item_ref":"CINE002A"}
-	CIN_EPISODE.DATE_OF_REFERRAL                                                                       AS "cine_referral_date",           -- metadata={"item_ref":"CINE003A"}
-	CIN_EPISODE.PRIMARY_NEED_RANK                                                                      AS "cine_cin_primary_need_code",   -- metadata={"item_ref":"CINE010A"}
+	CIN_EPISODE.REFERRALID                                                                             AS cine_referral_id,             -- metadata={"item_ref":"CINE001A"}
+	CIN_EPISODE.PERSONID                                                                               AS cine_person_id,               -- metadata={"item_ref":"CINE002A"}
+	CIN_EPISODE.DATE_OF_REFERRAL                                                                       AS cine_referral_date,           -- metadata={"item_ref":"CINE003A"}
+	CIN_EPISODE.PRIMARY_NEED_RANK                                                                      AS cine_cin_primary_need_code,   -- metadata={"item_ref":"CINE010A"}
 	CASE WHEN CIN_EPISODE.REFERRAL_SOURCE = 'Acquaintance'                               THEN '1B'
 	     WHEN CIN_EPISODE.REFERRAL_SOURCE = 'A & E'                                      THEN '3E'
 	     WHEN CIN_EPISODE.REFERRAL_SOURCE = 'Anonymous'                                  THEN '9'
@@ -176,8 +214,8 @@ SELECT
 	     WHEN CIN_EPISODE.REFERRAL_SOURCE = 'Self'                                       THEN '1C'
 	     WHEN CIN_EPISODE.REFERRAL_SOURCE = 'Social care e.g. adult social care'         THEN '5A'
 	     WHEN CIN_EPISODE.REFERRAL_SOURCE = 'Unknown'                                    THEN '10'
-	END                                                                                              AS "cine_referral_source_code",       -- metadata={"item_ref":"CINE004A"}  
-	CIN_EPISODE.REFERRAL_SOURCE                                                                      AS "cine_referral_source_desc",       -- metadata={"item_ref":"CINE012A"}
+	END                                                                                              AS cine_referral_source_code,       -- metadata={"item_ref":"CINE004A"}  
+	CIN_EPISODE.REFERRAL_SOURCE                                                                      AS cine_referral_source_desc,       -- metadata={"item_ref":"CINE012A"}
 	JSON_BUILD_OBJECT( 
 	'OUTCOME_SINGLE_ASSESSMENT_FLAG',  CASE WHEN CIN_EPISODE.NEXT_STEP IN ('Assessment','Family Help Discussion (10 days)','Family Help Discussion (CAT) -10 days','Family Help Discussion (DCYP)- 10 days')
 	                                        THEN 'Y'
@@ -211,11 +249,11 @@ SELECT
                                                                    'Early Intervention','Universal Services')
 	                                        THEN 'Y'
 	                                        ELSE 'N'
-	                                   END)                                                    	AS "cine_referral_outcome_json", --metadata={"item_ref:"CINE005A"}
+	                                   END)                                                    	::TEXT AS cine_referral_outcome_json, --metadata={"item_ref:"CINE005A"}
 	CASE WHEN CIN_EPISODE.NEXT_STEP = 'No further action'
 	     THEN 'Y'
 	     ELSE 'N'
-	END                                                                                         AS "cine_referral_nfa",          -- metadata={"item_ref":"CINE011A"} 
+	END                                                                                         AS cine_referral_nfa,          -- metadata={"item_ref":"CINE011A"} 
 	CASE WHEN CIN_EPISODE.CINE_REASON_END IN ('Adopted','Adopted - Consent dispensed with', 
 	            'Adopted - Application unopposed', 'Adopted - PRE 2000', 'PRE-Adopted', 'Adopted consent dispensed with by court',
 	            'ADOPTED/FREED FOR ADOPTION - PRE 2000','Adopted - application for an adoption order unopposed')                        THEN 'RC1' 
@@ -233,12 +271,12 @@ SELECT
 		                                       'Case closed after assessment, referred to EH')                                          THEN 'RC9'
 		WHEN CIN_EPISODE.CINE_CLOSE_DATE IS NULL                                                                                        THEN ''
 		                                                                                                                                ELSE 'RC7'
-	END                                                                                          AS "cine_close_reason",        -- metadata={"item_ref":"CINE006A"}
+	END                                                                                          AS cine_close_reason,        -- metadata={"item_ref":"CINE006A"}
 	--CIN_EPISODE.CINE_CLOSE_REASON, 
-	CIN_EPISODE.CINE_CLOSE_DATE                                                                  AS "cine_close_date",          -- metadata={"item_ref":"CINE007A"}
+	CIN_EPISODE.CINE_CLOSE_DATE                                                                  AS cine_close_date,          -- metadata={"item_ref":"CINE007A"}
 	--TEAM.ORGANISATIONID                                                                          AS "cine_referral_team",
-	NULL                                                                                         AS "cine_referral_team",       -- metadata={"item_ref":"CINE008A"}   
-	CIN_EPISODE.SUBMITTERPERSONID                                                                   AS "cine_referral_worker_id"   -- metadata={"item_ref":"CINE009A"}
+	NULL                                                                                         AS cine_referral_team,       -- metadata={"item_ref":"CINE008A"}   
+	CIN_EPISODE.SUBMITTERPERSONID                                                                AS cine_referral_worker_id   -- metadata={"item_ref":"CINE009A"}
     
 FROM CIN_EPISODE	
-        
+;
