@@ -1,6 +1,6 @@
 -- =============================================================================
 -- META-ELEMENT: {"type": "drop_table"}
--- Uncomment the DROP if you genuinely want to force full rebuild.
+-- Note: uncomment only if dropping to apply new structural update(s)
 -- =============================================================================
 -- DROP TABLE IF EXISTS ssd_address;
 
