@@ -223,7 +223,9 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: Person/child details. This the most connected table in the SSD.
 -- Author: D2I
--- Version: 1.3
+-- Version: 
+--              1.4: pers_common_child_id renamed - to pers_single_unique_id (TAG|System C approved (NHS IG Toolkit))
+--              1.3: upn reinstated as pulled from dim_person 171125 RH
 --              1.2: forename and surname added to aid onward data project on api 220125 RH
 --             1.1: ssd_flag added for phase 2 non-core filter testing [1,0] 010824 RH
 --             1.0: fixes to where filter in-line with existing cincplac reorting 040724 JH

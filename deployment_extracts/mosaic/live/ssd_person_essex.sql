@@ -6,8 +6,8 @@ select
 		when per.date_of_birth <= convert(datetime, convert(varchar, getdate(), 103), 103)  then
 			per.date_of_birth
 	end pers_dob,
-	per.NHS_ID pers_common_child_id,
-	-- per.UPN_ID pers_upn, -- [depreciated] [REVIEW]
+	per.NHS_ID pers_single_unique_id, 	-- renamed from pers_common_child_id [REVIEW]
+	per.UPN_ID pers_upn, 				-- [reinstated] [REVIEW]
 	null pers_upn_unknown,
 	null pers_send_flag,
 	case

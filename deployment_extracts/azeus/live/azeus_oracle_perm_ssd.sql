@@ -70,7 +70,8 @@ SELECT
     usr.CURRENT_GENDER                  AS pers_gender,
     usr.ETHNIC_ORIGIN                   AS pers_ethnicity,
     TO_DATE(usr.DOB_DAY || '/' || usr.DOB_MTH || '/' || usr.DOB_YR, 'DD/MM/YYYY') AS pers_dob,
-    PLACEHOLDER_DATA                    AS pers_common_child_id,
+    PLACEHOLDER_DATA                    AS pers_single_unique_id,
+    -- UPN number needed
     PLACEHOLDER_DATA                    AS pers_legacy_id,
     usr_id.ID_NO                        AS pers_upn_unknown,
     PLACEHOLDER_DATA                    AS pers_send,

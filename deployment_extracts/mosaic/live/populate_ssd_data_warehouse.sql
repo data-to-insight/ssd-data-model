@@ -2378,24 +2378,20 @@ Description:
 
 Author: D2I
 
-Version: 1.0
+Version: 1.2
+	1.1 UPN re-instated as being part of ssd_person; creates known duplication within ssd_send and _linked_identifers [in review]
+	1.0: renamed pers_common_child_id to pers_single_unique_id to align with revised sector SUI work (TAG|System C approved (NHS IG Toolkit))
 
 Status: AwaitingReview
 
 Remarks:
 
 Dependencies:
-
 - reference_data
-
 - mo_person_gender_identities
-
 - dm_ETHNICITIES
-
 - dm_PERSONAL_RELATIONSHIPS
-
 - dm_COUNTRIES_OF_BIRTH
-
 - dm_persons
 =============================================================================
 
@@ -2412,8 +2408,8 @@ Dependencies:
 			pers_gender						varchar(48),
 			pers_ethnicity					varchar(48),
 			pers_dob						datetime,
-			pers_common_child_id			varchar(48),
-			-- pers_upn						varchar(48), -- [depreciated] [REVIEW]
+			pers_single_unique_id			varchar(48),	-- renamed from pers_common_child_id [REVIEW]
+			pers_upn						varchar(48), 	-- [reinstated 171125] [REVIEW]
 			pers_upn_unknown				varchar(20),
 			pers_send_flag					varchar(1),
 			pers_expected_dob				datetime,
@@ -2428,8 +2424,8 @@ Dependencies:
 			pers_gender,
 			pers_ethnicity,
 			pers_dob,
-			pers_common_child_id,
-			-- pers_upn,
+			pers_single_unique_id, -- [renamed 171125] [REVIEW]
+			pers_upn, -- [reinstated 171125] [REVIEW]
 			pers_upn_unknown,
 			pers_send_flag,
 			pers_expected_dob,
@@ -2475,8 +2471,8 @@ Dependencies:
 				when per.DATE_OF_BIRTH <= dbo.today() then
 					per.DATE_OF_BIRTH
 			end pers_dob,
-			per.nhs_id pers_common_child_id,
-			-- per.UPN_ID pers_upn, -- [depreciated] [REVIEW]
+			per.nhs_id pers_single_unique_id, 	-- renamed from pers_common_child_id [REVIEW]
+			per.UPN_ID pers_upn, 				-- [reinstated 171125] [REVIEW]
 			null pers_upn_unknown,
 			null pers_send_flag,
 			case

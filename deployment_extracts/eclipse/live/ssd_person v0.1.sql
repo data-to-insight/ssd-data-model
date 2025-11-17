@@ -75,7 +75,7 @@ SELECT DISTINCT
 			 	THEN P.DUEDATE
 		END
 	)                          AS "pers_dob", --metadata={"item_ref:"PERS005A"}
-	P.NHSNUMBER "pers_common_child_id", --metadata={"item_ref:"PERS013A"}
+	P.NHSNUMBER "pers_single_unique_id", --metadata={"item_ref:"PERS013A"}
 	P.CAREFIRSTID "pers_legacy_id", --metadata={"item_ref:"PERS014A"}
 	COALESCE(UPN.UPN,UN_UPN.UN_UPN,
 			--factor in those under 5
