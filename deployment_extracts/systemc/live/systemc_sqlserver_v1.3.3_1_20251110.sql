@@ -6545,7 +6545,7 @@ PRINT 'Table created: ' + @TableName;
 
 /* START
 The following STAGING TABLE(S) object definitions are to be manually added into the SSD script from the API release files 
-Please take the the populate staging table .sql from the most recent release here:
+Please take the populate staging table .sql from the most recent release here:
 https://github.com/data-to-insight/dfe-csc-api-data-flows/releases
 */
 
