@@ -324,7 +324,7 @@ SELECT
     -- TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING|LA DEBUG]
     p.LEGACY_ID,
     CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
-    p.UPN,
+    p.UPN,                                  --     
     p.FORENAME, 
     p.SURNAME,
     p.GENDER_MAIN_CODE AS pers_sex,         -- Sex/Gender as used in stat-returns
