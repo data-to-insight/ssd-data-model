@@ -28,9 +28,9 @@ WITH EXCLUSIONS AS (
     SELECT
         PV.PERSONID
     FROM PERSONVIEW PV
-    WHERE PV.PERSONID IN (  -- remove admin or OLM test records
-            1,2,3,4,5,6
-        )
+	WHERE PV.PERSONID IN ( -- hard filter admin/test/duplicate records on system
+			1,2,3,4,5,6
+		)
         OR COALESCE(PV.DUPLICATED, '?') IN ('DUPLICATE')
         OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
         OR UPPER(PV.SURNAME) LIKE '%DUPLICATE%'
