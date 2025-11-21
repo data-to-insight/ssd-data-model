@@ -175,7 +175,7 @@ INSERT INTO ssd_development.ssd_version_log
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     -- CURRENT version (using MAJOR.MINOR.PATCH)
-    ('1.3.3', '2025-11-13', 's-colon pre CTE bug fix', 1, 'admin', 'non-recognised s-colon pre CTEs + introduced commented hard filter on child ids for LA use');
+    ('1.3.4', '2025-11-20', 'sdq scores and score date fix', 1, 'admin', 'patch to address missing sdq scores data and incorrect hard-coded sdq date field');
 
 
 -- HISTORIC versioning log data
@@ -202,7 +202,8 @@ VALUES
     ('1.2.9', '2025-09-22', 'assessment_factors refactor now with pre-aggr, fix pre-compile issue SQL <2016', 0, 'admin', 'improved run time perf, ease of opt A/B toggle'),
     ('1.3.0', '2025-09-24', 'New ssd_cohort for cohort visibility/monitoring', 0, 'admin', 'provides breakdown of cohort origins - later use to ease current EXISTS backchecks on ssd_person'),
     ('1.3.1', '2025-10-03', 'Coventry suggested on ssd_assessment_factors', 0, 'admin', 'adjmts provided by Coventry to provide more robust pulling of assessment factor data where filter might not align with prev-family assessments-'),
-    ('1.3.2', '2025-11-10', 'Block out string_agg on ssd_assessment_factors', 0, 'admin', 'fix needed to prevent legacy sql failing on string_agg in modern selection block');
+    ('1.3.2', '2025-11-10', 'Block out string_agg on ssd_assessment_factors', 0, 'admin', 'fix needed to prevent legacy sql failing on string_agg in modern selection block'),
+    ('1.3.3', '2025-11-13', 's-colon pre CTE bug fix', 0, 'admin', 'non-recognised s-colon pre CTEs + introduced commented hard filter on child ids for LA use');
 
 
 -- META-ELEMENT: {"type": "test"}
@@ -4706,30 +4707,60 @@ INSERT INTO ssd_development.ssd_sdq_scores (
 )
 
 SELECT
-    ff.FACT_FORM_ID                     AS csdq_table_id,
-    ff.DIM_PERSON_ID                    AS csdq_person_id,
-    CAST('1900-01-01' AS DATETIME)      AS csdq_sdq_completed_date,
-    (
-        SELECT TOP 1
-            CASE
-                WHEN ISNUMERIC(ffa_inner.ANSWER) = 1 THEN TRY_CAST(ffa_inner.ANSWER AS INT)
-                ELSE NULL
-            END
-        FROM HDM.Child_Social.FACT_FORM_ANSWERS ffa_inner
-        WHERE ffa_inner.FACT_FORM_ID = ff.FACT_FORM_ID
-            AND ffa_inner.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
-            AND ffa_inner.ANSWER_NO = 'SDQScore'
-            AND ffa_inner.ANSWER IS NOT NULL
-        ORDER BY ffa_inner.ANSWER DESC
-    )                                   AS csdq_sdq_score,
-    'SSD_PH'                            AS csdq_sdq_reason
-FROM
-    HDM.Child_Social.FACT_FORMS ff
-JOIN
-    HDM.Child_Social.FACT_FORM_ANSWERS ffa ON ff.FACT_FORM_ID = ffa.FACT_FORM_ID
-    AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
-    AND ffa.ANSWER_NO IN ('FormEndDate', 'SDQScore')
-    AND ffa.ANSWER IS NOT NULL
+    ff.FACT_FORM_ID                         AS csdq_table_id,
+    ff.DIM_PERSON_ID                        AS csdq_person_id,
+
+    -- SDQ Completed date
+    -- Prefer FormEndDate, or fall back to SDQScore answer time
+    COALESCE(fed.FormEndDttm, sdq.SdqDttm)  AS csdq_sdq_completed_date,
+
+    -- Numeric SDQ score for form
+    sdq.SdqScoreNumeric                     AS csdq_sdq_score,
+
+    'SSD_PH'                                AS csdq_sdq_reason   -- placeholder / reason [REVIEW]
+FROM HDM.Child_Social.FACT_FORMS ff
+
+-- Pull SDQ score (1 per form)
+OUTER APPLY (
+    SELECT TOP 1
+        CASE 
+            WHEN ISNUMERIC(ffa.ANSWER) = 1 
+                THEN TRY_CAST(ffa.ANSWER AS INT)
+            ELSE NULL
+        END                        AS SdqScoreNumeric,
+        ffa.ANSWERED_DTTM          AS SdqDttm
+    FROM HDM.Child_Social.FACT_FORM_ANSWERS ffa
+    WHERE ffa.FACT_FORM_ID = ff.FACT_FORM_ID
+      AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+      AND ffa.ANSWER_NO = 'SDQScore'
+      AND ffa.ANSWER IS NOT NULL
+    ORDER BY ffa.ANSWERED_DTTM DESC   -- if multiple SDQScore answers exist on form, take latest
+) sdq
+
+-- FormEndDate for this form if exists
+OUTER APPLY (
+    SELECT TOP 1
+        ffa2.ANSWERED_DTTM AS FormEndDttm
+    FROM HDM.Child_Social.FACT_FORM_ANSWERS ffa2
+    WHERE ffa2.FACT_FORM_ID = ff.FACT_FORM_ID
+      AND ffa2.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+      AND ffa2.ANSWER_NO = 'FormEndDate'
+      AND ffa2.ANSWER IS NOT NULL
+    ORDER BY ffa2.ANSWERED_DTTM DESC
+) fed
+
+-- Limit FACT_FORMS to related to SDQ template
+WHERE EXISTS (
+    SELECT 1
+    FROM HDM.Child_Social.FACT_FORM_ANSWERS fchk
+    WHERE fchk.FACT_FORM_ID = ff.FACT_FORM_ID
+      AND fchk.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+)
+-- only rows with data
+AND (
+       sdq.SdqScoreNumeric IS NOT NULL
+    -- OR fed.FormEndDttm     IS NOT NULL
+)
 WHERE EXISTS (
     SELECT 1
     FROM ssd_development.ssd_person p
