@@ -20,27 +20,24 @@ INSERT INTO ssd_mother (
     moth_childs_person_id,
     moth_childs_dob
 )
-WITH EXCLUSIONS AS (
-	SELECT
-		PV.PERSONID
-	FROM PERSONVIEW PV
-	WHERE PV.PERSONID IN ( -- hard filter admin/test/duplicate records on system
-			1,2,3,4,5,6
-		)
-		OR COALESCE(PV.DUPLICATED,'?') IN ('DUPLICATE')
-		OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
-		OR UPPER(PV.SURNAME) LIKE '%DUPLICATE%'
-)
-
 SELECT
-	PPR.PERSONRELATIONSHIPRECORDID  AS moth_table_id,           --metadata={"item_ref:"MOTH004A"}
-	PPR.ROLEAPERSONID               AS moth_person_id,          --metadata={"item_ref:"MOTH002A"}
-	PPR.ROLEBPERSONID               AS moth_childs_person_id,   --metadata={"item_ref:"MOTH001A"}
-	PDV.DATEOFBIRTH                 AS moth_childs_dob          --metadata={"item_ref:"MOTH003A"}
+    PPR.PERSONRELATIONSHIPRECORDID  AS moth_table_id,          -- metadata={"item_ref":"MOTH004A"}
+    PPR.ROLEAPERSONID               AS moth_person_id,         -- metadata={"item_ref":"MOTH002A"}
+    PPR.ROLEBPERSONID               AS moth_childs_person_id,  -- metadata={"item_ref":"MOTH001A"}
+    PDV.DATEOFBIRTH                 AS moth_childs_dob         -- metadata={"item_ref":"MOTH003A"}
 FROM RELATIONSHIPPERSONVIEW PPR
 LEFT JOIN PERSONDEMOGRAPHICSVIEW PDV 
        ON PDV.PERSONID = PPR.ROLEBPERSONID
 WHERE PPR.RELATIONSHIP = 'Mother'
-    AND PPR.ROLEAPERSONID NOT IN (SELECT E.PERSONID FROM EXCLUSIONS E)
-    AND PPR.ROLEBPERSONID NOT IN (SELECT E.PERSONID FROM EXCLUSIONS E)
-;
+  -- mother in SSD cohort
+  AND EXISTS (
+        SELECT 1
+        FROM ssd_person sp_mother
+        WHERE sp_mother.pers_person_id = PPR.ROLEAPERSONID
+      )
+  -- child in SSD cohort 
+  AND EXISTS (
+        SELECT 1
+        FROM ssd_person sp_child
+        WHERE sp_child.pers_person_id = PPR.ROLEBPERSONID
+      );

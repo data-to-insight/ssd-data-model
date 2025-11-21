@@ -29,19 +29,19 @@ INSERT INTO ssd_cin_plans (
     cinp_cin_plan_worker_id
 )
 
-WITH EXCLUSIONS AS (
-	SELECT
-		PV.PERSONID
-	FROM PERSONVIEW PV
-	WHERE PV.PERSONID IN ( -- hard filter admin/test/duplicate records on system
-			1,2,3,4,5,6
-		)
-		OR COALESCE(PV.DUPLICATED,'?') IN ('DUPLICATE')
-		OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
-		OR UPPER(PV.SURNAME) LIKE '%DUPLICATE%'
-),
+-- WITH EXCLUSIONS AS (
+--     SELECT
+--         PV.PERSONID
+--     FROM PERSONVIEW PV
+--     WHERE PV.PERSONID IN ( -- hard filter admin/test/duplicate records on system
+--             1,2,3,4,5,6
+--         )
+--         OR COALESCE(PV.DUPLICATED,'?') IN ('DUPLICATE')
+--         OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
+--         OR UPPER(PV.SURNAME)  LIKE '%DUPLICATE%'
+-- ),
 
-WORKER AS (    -------Responsible social worker 
+WITH WORKER AS (    -- Responsible social worker 
     SELECT 
         PPR.PERSONRELATIONSHIPRECORDID       AS id,
         PPR.PERSONID                         AS personid,
@@ -52,7 +52,7 @@ WORKER AS (    -------Responsible social worker
     WHERE ALLOCATEDWORKERCODE = 'AW' 
 ),
 
-TEAM AS (    -------Responsible team
+TEAM AS (    -- Responsible team
     SELECT 
         PPR.RELATIONSHIPID                   AS id,
         PPR.PERSONID                         AS personid,
@@ -75,8 +75,8 @@ ALL_CIN_EPISODES AS (
             CLA.ENDREASON
         FROM CLASSIFICATIONPERSONVIEW CLA
         WHERE CLA.STATUS NOT IN ('DELETED')
-          AND (CLA.CLASSIFICATIONPATHID IN (4, 51) -- CIN & CP classification
-               OR CLA.CLASSIFICATIONCODEID IN (1270))    -- FAMILY Help CIN classification
+          AND (CLA.CLASSIFICATIONPATHID IN (4, 51)   -- CIN and CP classification
+               OR CLA.CLASSIFICATIONCODEID IN (1270)) -- FAMILY Help CIN classification
         UNION ALL 
         SELECT
             CLA_EPISODE.PERSONID,
@@ -126,7 +126,7 @@ REFERRAL AS (
                     THEN FAPV.DATEANSWERVALUE
                 END)                AS date_of_referral    
         FROM FORMANSWERPERSONVIEW FAPV
-        WHERE FAPV.DESIGNGUID IN ('e6d9de9a-b56c-49d0-ab87-0f913ca8fc5f') --Child: Referral
+        WHERE FAPV.DESIGNGUID IN ('e6d9de9a-b56c-49d0-ab87-0f913ca8fc5f') -- Child: Referral
           AND FAPV.INSTANCESTATE = 'COMPLETE'
         GROUP BY FAPV.ANSWERFORSUBJECTID,
                  FAPV.INSTANCEID,
@@ -157,7 +157,10 @@ CIN_EPISODE AS (
         FROM (
             SELECT  
                 *,
-                SUM(next_start_flag) OVER (PARTITION BY personid ORDER BY personid, episode_startdate) AS episode,
+                SUM(next_start_flag) OVER (
+                    PARTITION BY personid 
+                    ORDER BY personid, episode_startdate
+                ) AS episode,
                 CASE WHEN next_start_flag = 1
                      THEN episodeid
                 END AS episode_id     
@@ -180,7 +183,7 @@ CIN_EPISODE AS (
                                  ),
                                  CURRENT_DATE
                              ) + INTERVAL '1 day' 
-                        THEN 0
+                            THEN 0
                         ELSE 1
                     END AS next_start_flag     
                 FROM ALL_CIN_EPISODES CLA
@@ -245,9 +248,14 @@ CIN_PLAN AS (
                 END AS next_start_flag     
             FROM CLASSIFICATIONPERSONVIEW CLA
             WHERE CLA.STATUS NOT IN ('DELETED')
-              AND (CLA.CLASSIFICATIONPATHID IN (4) -- CIN classification
-                   OR CLA.CLASSIFICATIONCODEID IN (1270))    -- FAMILY Help CIN classification
-              AND CLA.PERSONID NOT IN (SELECT E.PERSONID FROM EXCLUSIONS E)
+              AND (CLA.CLASSIFICATIONPATHID IN (4)   -- CIN classification
+                   OR CLA.CLASSIFICATIONCODEID IN (1270)) -- FAMILY Help CIN classification
+              -- back check person exists in ssd_person cohort, exclusions applied
+              AND EXISTS (
+                    SELECT 1
+                    FROM ssd_person sp
+                    WHERE sp.pers_person_id = CLA.PERSONID
+                )
             ORDER BY CLA.PERSONID,
                      CLA.ENDDATE DESC NULLS FIRST,
                      CLA.STARTDATE DESC 
@@ -258,12 +266,12 @@ CIN_PLAN AS (
 
 SELECT
     CIN_PLAN.claid           AS cinp_cin_plan_id,         -- metadata={"item_ref":"CINP001A"}
-    CIN_EPISODE.referralid   AS cinp_referral_id,         -- metadata={"item_ref:"CINP007A"}
-    CIN_PLAN.personid        AS cinp_person_id,           -- metadata={"item_ref:"CINP002A"}
-    CIN_PLAN.startdate       AS cinp_cin_plan_start_date, -- metadata={"item_ref:"CINP003A"}
-    CIN_PLAN.enddate         AS cinp_cin_plan_end_date,   -- metadata={"item_ref:"CINP004A"}
-    TEAM.allocated_team      AS cinp_cin_plan_team,       -- metadata={"item_ref:"CINP005A"}
-    WORKER.allocated_worker  AS cinp_cin_plan_worker_id   -- metadata={"item_ref:"CINP006A"}
+    CIN_EPISODE.referralid   AS cinp_referral_id,         -- metadata={"item_ref":"CINP007A"}
+    CIN_PLAN.personid        AS cinp_person_id,           -- metadata={"item_ref":"CINP002A"}
+    CIN_PLAN.startdate       AS cinp_cin_plan_start_date, -- metadata={"item_ref":"CINP003A"}
+    CIN_PLAN.enddate         AS cinp_cin_plan_end_date,   -- metadata={"item_ref":"CINP004A"}
+    TEAM.allocated_team      AS cinp_cin_plan_team,       -- metadata={"item_ref":"CINP005A"}
+    WORKER.allocated_worker  AS cinp_cin_plan_worker_id   -- metadata={"item_ref":"CINP006A"}
 FROM CIN_PLAN 
 LEFT JOIN LATERAL (
     SELECT

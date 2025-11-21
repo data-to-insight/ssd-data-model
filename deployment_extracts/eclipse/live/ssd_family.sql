@@ -29,25 +29,30 @@ INSERT INTO ssd_family (
     fami_family_id,
     fami_person_id
 )
-WITH EXCLUSIONS AS (
-    SELECT
-        PV.PERSONID
-    FROM PERSONVIEW PV
-	WHERE PV.PERSONID IN ( -- hard filter admin/test/duplicate records on system
-			1,2,3,4,5,6
-		)
-        OR COALESCE(PV.DUPLICATED, '?') IN ('DUPLICATE')
-        OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
-        OR UPPER(PV.SURNAME) LIKE '%DUPLICATE%'
-)
+-- WITH EXCLUSIONS AS (
+--     SELECT
+--         PV.PERSONID
+--     FROM PERSONVIEW PV
+-- 	WHERE PV.PERSONID IN ( -- hard filter admin/test/duplicate records on system
+-- 			1,2,3,4,5,6
+-- 		)
+--         OR COALESCE(PV.DUPLICATED, '?') IN ('DUPLICATE')
+--         OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
+--         OR UPPER(PV.SURNAME) LIKE '%DUPLICATE%'
+-- )
 
 SELECT
     -- table row id is concat of group and person
-    CAST(RFAMILY.GROUPID AS TEXT) || CAST(RFAMILY.PERSONID AS TEXT) AS fami_table_id,  -- metadata={"item_ref":"FAMI003A"}
-    RFAMILY.GROUPID                                                 AS fami_family_id,  -- metadata={"item_ref":"FAMI001A"}
-    RFAMILY.PERSONID                                                AS fami_person_id   -- metadata={"item_ref":"FAMI002A"}
-FROM GROUPPERSONVIEW RFAMILY
-LEFT JOIN GROUPVIEW ON GROUPVIEW.GROUPID = RFAMILY.GROUPID
-WHERE GROUPVIEW.GROUPTYPE = 'Family'
-  AND RFAMILY.PERSONID NOT IN (SELECT E.PERSONID FROM EXCLUSIONS E)
-;
+    CAST(rf.GROUPID AS TEXT) || CAST(rf.PERSONID AS TEXT) AS fami_table_id,  -- metadata={"item_ref":"FAMI003A"}
+    rf.GROUPID                                            AS fami_family_id,  -- metadata={"item_ref":"FAMI001A"}
+    rf.PERSONID                                           AS fami_person_id   -- metadata={"item_ref":"FAMI002A"}
+FROM GROUPPERSONVIEW rf
+LEFT JOIN GROUPVIEW gv
+       ON gv.GROUPID = rf.GROUPID
+WHERE gv.GROUPTYPE = 'Family'
+  -- person exists in ssd_person cohort, exclusions applied
+  AND EXISTS (
+        SELECT 1
+        FROM ssd_person sp
+        WHERE sp.pers_person_id = rf.PERSONID
+      );

@@ -28,18 +28,7 @@ INSERT INTO ssd_missing (
     miss_missing_rhi_offered,
     miss_missing_rhi_accepted
 )
-WITH EXCLUSIONS AS (
-    SELECT
-        PV.PERSONID
-    FROM PERSONVIEW PV
-	WHERE PV.PERSONID IN ( -- hard filter admin/test/duplicate records on system
-			1,2,3,4,5,6
-		)
-        OR COALESCE(PV.DUPLICATED, '?') IN ('DUPLICATE')
-        OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
-        OR UPPER(PV.SURNAME) LIKE '%DUPLICATE%'
-),
-MISSING_BASE AS (
+WITH MISSING_BASE AS (
     SELECT 
         FAPV.INSTANCEID                             AS miss_table_id,
         FAPV.SUBJECTID                              AS miss_person_id,
@@ -74,9 +63,16 @@ MISSING_BASE AS (
             END
         )                                           AS miss_missing_rhi_accepted
     FROM FORMANSWERPERSONVIEW FAPV
-    WHERE FAPV.DESIGNGUID IN ('e112bee8-4f50-4904-8ebc-842e2fd33994')  -- Missing, child reported missing
-        AND FAPV.INSTANCESTATE = 'COMPLETE'
-        AND FAPV.ANSWERFORSUBJECTID NOT IN (SELECT E.PERSONID FROM EXCLUSIONS E)
+    WHERE FAPV.DESIGNGUID IN (
+              'e112bee8-4f50-4904-8ebc-842e2fd33994'   -- Missing, child reported missing
+          )
+      AND FAPV.INSTANCESTATE = 'COMPLETE'
+          -- back check person exists in ssd_person cohort, exclusions applied
+      AND EXISTS (
+            SELECT 1
+            FROM ssd_person sp
+            WHERE sp.pers_person_id = FAPV.ANSWERFORSUBJECTID
+          )
     GROUP BY
         FAPV.INSTANCEID,
         FAPV.SUBJECTID,

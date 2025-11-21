@@ -56,18 +56,26 @@ INSERT INTO ssd_person (
     pers_is_mother,
     pers_nationality
 )
-WITH EXCLUSIONS AS (
+
+
+WITH allowed_persons(personid) AS (
+    VALUES
+    -- INCLUDE - hard filter
+    -- LA's to define pre-alpha cohort Child IDs here (1-10x live records)
+        (EG111111), (EG222222), (EG333333)
+),
+EXCLUSIONS AS (
+    -- EXCLUDE - hard filter
     SELECT
         PV.PERSONID
     FROM PERSONVIEW PV
-	WHERE PV.PERSONID IN ( -- hard filter admin/test/duplicate records on system
-			1,2,3,4,5,6
-		)
+    WHERE PV.PERSONID IN (   -- admin or test or duplicate records on system
+            1,2,3,4,5,6
+        )
         OR COALESCE(PV.DUPLICATED,'?') IN ('DUPLICATE')
         OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
-        OR UPPER(PV.SURNAME) LIKE '%DUPLICATE%'
+        OR UPPER(PV.SURNAME)  LIKE '%DUPLICATE%'
 )
-
 SELECT DISTINCT
     P.CAREFIRSTID              AS pers_legacy_id,          -- metadata={"item_ref":"PERS014A"}               
     P.PERSONID                 AS pers_person_id,          -- metadata={"item_ref":"PERS001A"}
@@ -168,18 +176,22 @@ SELECT DISTINCT
     P.COUNTRYOFBIRTHCODE       AS pers_nationality         -- metadata={"item_ref":"PERS012A"}
 FROM PERSONDEMOGRAPHICSVIEW P
 LEFT JOIN (
-    SELECT DISTINCT
+    SELECT
         RNPV.PERSONID,
         RNPV.REFERENCENUMBER AS UPN,
-        -- open on the system first, then followed by the most recent
         ROW_NUMBER() OVER (
-            PARTITION BY PERSONID
-            ORDER BY COALESCE(RNPV.ENDDATE,CURRENT_TIMESTAMP) DESC, STARTDATE DESC
+            PARTITION BY RNPV.PERSONID
+            ORDER BY
+                CASE WHEN RNPV.ENDDATE IS NULL THEN 0 ELSE 1 END,
+                RNPV.ENDDATE DESC,
+                RNPV.STARTDATE DESC
         ) AS RN
     FROM REFERENCENUMBERPERSONVIEW RNPV
     WHERE RNPV.REFERENCETYPECODE = 'UPN'
-) UPN ON P.PERSONID = UPN.PERSONID
+) UPN
+    ON P.PERSONID = UPN.PERSONID
    AND UPN.RN = 1
+   
 LEFT JOIN (
     SELECT DISTINCT
         A.PERSONID,
@@ -272,7 +284,14 @@ LEFT JOIN (
       AND COALESCE(PV.DATEOFBIRTH,CURRENT_DATE) >= PV2.DATEOFBIRTH
       AND PV2.GENDER = 'Female'
 ) MOTHER ON P.PERSONID = MOTHER.PERSONID
+
 WHERE P.PERSONID NOT IN (SELECT E.PERSONID FROM EXCLUSIONS E)
+
+  AND (
+        NOT EXISTS (SELECT 1 FROM allowed_persons)   -- list empty, do not filter
+        OR p.personid IN (SELECT personid FROM allowed_persons)
+      );
+
 -- Limit this down to the SSD Cohort if required
 /*
 WHERE EXISTS (

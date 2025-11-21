@@ -80,17 +80,17 @@ TEAM AS (      -- responsible team
     FROM PERSONORGRELATIONSHIPVIEW PPR
     WHERE ALLOCATEDTEAMCODE = 'AT'
 ),
-EXCLUSIONS AS (
-    SELECT
-        PV.PERSONID
-    FROM PERSONVIEW PV
-    WHERE PV.PERSONID IN (   -- remove admin or OLM test records
-            1,2,3,4,5,6
-        )
-        OR COALESCE(PV.DUPLICATED, '?') IN ('DUPLICATE')
-        OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
-        OR UPPER(PV.SURNAME) LIKE '%DUPLICATE%'
-),
+-- EXCLUSIONS AS (
+--     SELECT
+--         PV.PERSONID
+--     FROM PERSONVIEW PV
+--     WHERE PV.PERSONID IN (   -- remove admin or OLM test records
+--             1,2,3,4,5,6
+--         )
+--         OR COALESCE(PV.DUPLICATED, '?') IN ('DUPLICATE')
+--         OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
+--         OR UPPER(PV.SURNAME)  LIKE '%DUPLICATE%'
+-- ),
 CARELEAVER AS (
     SELECT
         CARELEAVER.CARELEAVERID,
@@ -109,7 +109,13 @@ CARELEAVER AS (
             ORDER BY CARELEAVER.CONTACTDATE DESC
         ) AS LATEST_RECORD
     FROM CLACARELEAVERDETAILSVIEW CARELEAVER
-    WHERE CARELEAVER.PERSONID NOT IN (SELECT E.PERSONID FROM EXCLUSIONS E)
+    WHERE
+        -- back check person exists in ssd_person cohort, exclusions applied
+        EXISTS (
+            SELECT 1
+            FROM ssd_person sp
+            WHERE sp.pers_person_id = CARELEAVER.PERSONID
+        )
 )
 SELECT
     CARELEAVER.CARELEAVERID          AS clea_table_id,                     -- metadata={"item_ref":"CLEA001A"}
