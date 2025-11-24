@@ -81,7 +81,10 @@ SET NOCOUNT ON;
 DECLARE @ssd_timeframe_years INT = 6;   -- ssd extract time-frame (YRS)
 DECLARE @ssd_sub1_range_years INT = 1;  -- common internal or additional LA use naming
 
-
+-- avoid recomputing DATEADD|CONVERT every predicate[in dev] (nb. datetime used)
+DECLARE @ssd_timeframe_years INT = 6;
+DECLARE @ssd_window_end   datetime = CAST(CAST(GETDATE() AS date) AS datetime);
+DECLARE @ssd_window_start datetime = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
 
 -- CASELOAD count Date (Currently: September 30th)
 DECLARE @CaseloadLastSept30th DATE; 
@@ -175,7 +178,7 @@ INSERT INTO ssd_development.ssd_version_log
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     -- CURRENT version (using MAJOR.MINOR.PATCH)
-    ('1.3.4', '2025-11-20', 'sdq scores and score date fix', 1, 'admin', 'patch to address missing sdq scores data and incorrect hard-coded sdq date field');
+    ('1.3.5', '2025-11-21', 'new pre-computed window_start filter added', 1, 'admin', 'Initially applied to sdq scores as timeframe filter. Will be applied throughout');
 
 
 -- HISTORIC versioning log data
@@ -203,7 +206,8 @@ VALUES
     ('1.3.0', '2025-09-24', 'New ssd_cohort for cohort visibility/monitoring', 0, 'admin', 'provides breakdown of cohort origins - later use to ease current EXISTS backchecks on ssd_person'),
     ('1.3.1', '2025-10-03', 'Coventry suggested on ssd_assessment_factors', 0, 'admin', 'adjmts provided by Coventry to provide more robust pulling of assessment factor data where filter might not align with prev-family assessments-'),
     ('1.3.2', '2025-11-10', 'Block out string_agg on ssd_assessment_factors', 0, 'admin', 'fix needed to prevent legacy sql failing on string_agg in modern selection block'),
-    ('1.3.3', '2025-11-13', 's-colon pre CTE bug fix', 0, 'admin', 'non-recognised s-colon pre CTEs + introduced commented hard filter on child ids for LA use');
+    ('1.3.3', '2025-11-13', 's-colon pre CTE bug fix', 0, 'admin', 'non-recognised s-colon pre CTEs + introduced commented hard filter on child ids for LA use'),
+    ('1.3.4', '2025-11-20', 'sdq scores history, score date and timeframe fix', 0, 'admin', 'patch missing sdq scores history, incorrect hard-coded sdq date field');
 
 
 -- META-ELEMENT: {"type": "test"}
@@ -3974,7 +3978,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_cla_placement (
-        clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAP001A"}
+        clap_cla_placement_id               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAP001A"}
         clap_cla_id                         NVARCHAR(48),               -- metadata={"item_ref":"CLAP012A"}
         clap_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"CLAP013A"}
         clap_cla_placement_start_date       DATETIME,                   -- metadata={"item_ref":"CLAP003A"}
@@ -4705,7 +4709,6 @@ INSERT INTO ssd_development.ssd_sdq_scores (
     csdq_sdq_score, 
     csdq_sdq_reason
 )
-
 SELECT
     ff.FACT_FORM_ID                         AS csdq_table_id,
     ff.DIM_PERSON_ID                        AS csdq_person_id,
@@ -4757,58 +4760,45 @@ WHERE EXISTS (
       AND fchk.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
 )
 -- only rows with data
-AND (
-       sdq.SdqScoreNumeric IS NOT NULL
-    -- OR fed.FormEndDttm     IS NOT NULL
-)
-WHERE EXISTS (
+AND sdq.SdqScoreNumeric IS NOT NULL
+-- apply rolling timeframe based on completed date [align to TAG SSD ver]
+AND COALESCE(fed.FormEndDttm, sdq.SdqDttm) >= @ssd_window_start
+AND EXISTS (
     SELECT 1
     FROM ssd_development.ssd_person p
     WHERE TRY_CAST(p.pers_person_id AS INT) = ff.DIM_PERSON_ID -- #DtoI-1799
 );
 
--- Rank the records within the main table
-;WITH RankedSDQScores AS (
+-- remove exact dupl SDQ rows
+-- keep distinct scores and dates per person and form
+;WITH Dedup AS (
     SELECT
         csdq_table_id,
         csdq_person_id,
         csdq_sdq_completed_date,
         csdq_sdq_score,
         csdq_sdq_reason,
-        -- Assign unique row nums <within each partition> of csdq_person_id,
-        -- the most recent csdq _form_ id/csdq_table_id will have a row number of 1.
-        ROW_NUMBER() OVER (PARTITION BY csdq_person_id ORDER BY csdq_table_id DESC) AS rn
+        ROW_NUMBER() OVER (
+            PARTITION BY 
+                csdq_table_id,
+                csdq_person_id,
+                csdq_sdq_completed_date,
+                csdq_sdq_score,
+                csdq_sdq_reason
+            ORDER BY csdq_table_id
+        ) AS rn
     FROM ssd_development.ssd_sdq_scores
 )
+DELETE s
+FROM ssd_development.ssd_sdq_scores s
+JOIN Dedup d
+  ON s.csdq_table_id           = d.csdq_table_id
+ AND s.csdq_person_id          = d.csdq_person_id
+ AND s.csdq_sdq_completed_date = d.csdq_sdq_completed_date
+ AND s.csdq_sdq_score          = d.csdq_sdq_score
+ AND s.csdq_sdq_reason         = d.csdq_sdq_reason
+WHERE d.rn > 1;
 
--- delete all records from the ssd_sdq_scores table where row number(rn) > 1
--- i.e. keep only the most recent
-DELETE FROM ssd_development.ssd_sdq_scores
-WHERE csdq_table_id IN (
-    SELECT csdq_table_id
-    FROM RankedSDQScores
-    WHERE rn > 1
-);
-
--- Identify and remove exact duplicates
-;WITH DuplicateSDQScores AS (
-    SELECT
-        csdq_table_id,
-        csdq_person_id,
-        csdq_sdq_completed_date,
-        csdq_sdq_score,
-        csdq_sdq_reason,
-        -- Assign row num to each set of dups,
-        -- partitioned by all columns that could potentially make a row unique
-        ROW_NUMBER() OVER (PARTITION BY csdq_table_id, csdq_person_id ORDER BY csdq_table_id) AS row_num
-    FROM ssd_development.ssd_sdq_scores
-)
-DELETE FROM ssd_development.ssd_sdq_scores
-WHERE csdq_table_id IN (
-    SELECT csdq_table_id
-    FROM DuplicateSDQScores
-    WHERE row_num > 1
-);
 
 
 -- -- META-ELEMENT: {"type": "create_fk"}    
