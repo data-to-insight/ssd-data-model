@@ -8,12 +8,13 @@ DECLARE
 
 
 /*Form Data*/
-Select
-a.FormID sdq_sdq_id, -- [REVIEW] should this be csdq_sdq_id - which has subsequently changed to csdq_table_id 
-a.PersonID sdq_person_id,
-CAST(a.DateOfAssessment as date) sdq_sdq_completed_date,
-NULL sdq_sdq_reason,
-a.TotalScore sdq_sdq_score
+/* naming standardised RH 241125 to avoid confusion/brittle future refactors */
+select
+    a.FormID                         as csdq_table_id,
+    a.PersonID                       as csdq_person_id,
+    cast(a.DateOfAssessment as date) as csdq_sdq_completed_date,
+    null                             as csdq_sdq_reason,
+    a.TotalScore                     as csdq_sdq_score
 
 from Mosaic.F.SDQ a
 
@@ -24,17 +25,17 @@ UNION
 
 /*Health Assessments Screen*/
 Select
-a.PERSON_HEALTH_INTERVENTION_ID sdq_sdq_id,
-b.PERSON_ID sdq_person_id,
-CAST(b.INTERVENTION_DATE as date) sdq_sdq_completed_date,
+a.PERSON_HEALTH_INTERVENTION_ID csdq_table_id,
+b.PERSON_ID csdq_person_id,
+CAST(b.INTERVENTION_DATE as date) csdq_sdq_completed_date,
 CASE
 	when a.REASON = 'INVALID_AGE' then 'SDQ1'
 	when a.REASON = 'CARER_REFUS_QUES' then 'SDQ2'
 	when a.REASON = 'SEV_CHILD_DISAB' then 'SDQ3'
 	when a.REASON = 'OTHER' then 'SDQ4'
 	when a.REASON = 'COYRA' then 'SDQ5'
-END sdq_sdq_reason,
-a.SCORE sdq_sdq_score
+END csdq_sdq_reason,
+a.SCORE csdq_sdq_score
 
 from Mosaic.M.PERSON_HEALTH_INTERVENTION_SDQ a
 inner join Mosaic.M.PERSON_HEALTH_INTERVENTIONS b on a.PERSON_HEALTH_INTERVENTION_ID = b.ID
