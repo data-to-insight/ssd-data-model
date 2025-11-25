@@ -133,7 +133,7 @@ INITIAL_ASESSMENT AS (
                         THEN FAPV.ANSWERVALUE
                 END
             )                        AS next_step
-        FROM FORMANSWERPERSONVIEW FAPV
+        FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
         WHERE FAPV.DESIGNGUID IN ('21e01e2e-fd65-439d-a8aa-a179106a3d45') --Child: Record of meeting(s) and plan
           AND FAPV.INSTANCESTATE = 'COMPLETE'
           AND FAPV.DESIGNSUBNAME = 'Child Protection - Initial Conference'

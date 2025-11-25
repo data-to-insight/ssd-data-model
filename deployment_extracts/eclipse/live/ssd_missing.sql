@@ -62,7 +62,7 @@ WITH MISSING_BASE AS (
                     THEN FAPV.ANSWERVALUE
             END
         )                                           AS miss_missing_rhi_accepted
-    FROM FORMANSWERPERSONVIEW FAPV
+    FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
     WHERE FAPV.DESIGNGUID IN (
               'e112bee8-4f50-4904-8ebc-842e2fd33994'   -- Missing, child reported missing
           )

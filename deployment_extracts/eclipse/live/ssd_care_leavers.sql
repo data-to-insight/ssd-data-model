@@ -52,7 +52,7 @@ WITH CARELEAVER_REVIEW AS (
                         THEN FAPV.DATEANSWERVALUE
                 END
             ) AS REIEW_DATE
-        FROM FORMANSWERPERSONVIEW FAPV
+        FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
         WHERE FAPV.DESIGNGUID IN ('c17d1557-513d-443f-8013-a31eb541455b')  -- Care leavers, Pathway needs assessment and plan
           AND FAPV.INSTANCESTATE = 'COMPLETE'
         GROUP BY

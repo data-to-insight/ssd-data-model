@@ -149,7 +149,7 @@ REFERRAL AS (
                         THEN FAPV.DATEANSWERVALUE
                 END
             ) AS DATE_OF_REFERRAL    
-        FROM FORMANSWERPERSONVIEW FAPV
+        FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
         WHERE FAPV.DESIGNGUID IN ('e6d9de9a-b56c-49d0-ab87-0f913ca8fc5f') --Child: Referral
           AND FAPV.INSTANCESTATE = 'COMPLETE'
         GROUP BY 

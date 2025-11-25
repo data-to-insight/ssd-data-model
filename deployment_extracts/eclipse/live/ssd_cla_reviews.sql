@@ -56,7 +56,7 @@ CLA_REVIEW AS (
                      THEN FAPV.ANSWERVALUE
                 END
             )::DATE                 AS DATE_OF_REVIEW
-        FROM FORMANSWERPERSONVIEW FAPV
+        FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
         WHERE FAPV.DESIGNGUID IN ('b5c5c8d8-5ba7-4919-a3cd-9722e8e90aaf') -- Child in Care: IRO decisions
           AND FAPV.INSTANCESTATE = 'COMPLETE'
           AND FAPV.ANSWERFORSUBJECTID NOT IN (SELECT E.PERSONID FROM EXCLUSIONS E)
@@ -84,7 +84,7 @@ IRO_REVIEW AS (
                  THEN FAPV.ANSWERVALUE
             END
         )::DATE                AS DATE_OF_MEETING
-    FROM FORMANSWERPERSONVIEW FAPV
+    FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
     WHERE FAPV.DESIGNGUID IN ('79f3495c-134f-4e69-b00f-7621925419f7') -- Independent Reviewing Officer: Quality assurance
       AND FAPV.INSTANCESTATE = 'COMPLETE'
       AND FAPV.DESIGNSUBNAME = 'Child/young person in care review'

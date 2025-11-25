@@ -95,7 +95,7 @@ SELECT DISTINCT
             THEN fapv.dateanswervalue 
         END)::timestamp                                  AS "clah_health_check_date",
     fapv.instancestate                                   AS "clah_health_check_status"
-FROM formanswerpersonview fapv 
+FROM formanswerpersonview fapv -- [REVIEW] GUID must match (LA to review/update)
 WHERE fapv.designguid = '36c62558-e07b-41bb-b3d1-1dd850d55472'
   AND fapv.controlname IN ('dateLastHealthCheckCompleted')
   AND fapv.instancestate IN ('COMPLETE')
@@ -117,7 +117,7 @@ SELECT DISTINCT
             THEN fapv.dateanswervalue 
         END)::timestamp                                  AS "clah_health_check_date",
     fapv.instancestate                                   AS "clah_health_check_status"
-FROM formanswerpersonview fapv 
+FROM formanswerpersonview fapv  -- [REVIEW] GUID must match (LA to review/update)
 WHERE fapv.designguid = '36c62558-e07b-41bb-b3d1-1dd850d55472'
   AND fapv.controlname IN ('dateLastDentalCheckCompleted')
   AND fapv.instancestate IN ('COMPLETE')
@@ -139,7 +139,7 @@ SELECT DISTINCT
             THEN fapv.dateanswervalue 
         END)::timestamp                                  AS "clah_health_check_date",
     fapv.instancestate                                   AS "clah_health_check_status"
-FROM formanswerpersonview fapv 
+FROM formanswerpersonview fapv -- [REVIEW] GUID must match (LA to review/update)
 WHERE fapv.designguid = '36c62558-e07b-41bb-b3d1-1dd850d55472'
   AND fapv.controlname IN ('dateLastOpticianCheckCompleted')
   AND fapv.instancestate IN ('COMPLETE')

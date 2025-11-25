@@ -236,7 +236,7 @@ FROM (
                 THEN FAPV.SHORTANSWERVALUE 
             ELSE NULL 
         END) AS ALLEGED_PERP_PHYS_ABUSE
-    FROM FORMANSWERPERSONVIEW FAPV
+    FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
     -- Child: Assessment
     WHERE FAPV.DESIGNGUID = '94b3f530-a918-4f33-85c2-0ae355c9c2fd'   -- Child: Assessment
       AND FAPV.INSTANCESTATE IN ('COMPLETE')

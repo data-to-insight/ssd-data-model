@@ -119,7 +119,7 @@ CLOSURE AS (
                   OR FAPV.CONTROLNAME = 'dateCaseClosed'
                 THEN FAPV.ANSWERVALUE
             END)::DATE               AS CLOSURE_DATE
-    FROM FORMANSWERPERSONVIEW FAPV
+    FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
     WHERE (FAPV.DESIGNGUID IN ('12bb8ca2-e585-4a09-a6dd-d5b6e910a3f0') --Early Help: Closure
            OR FAPV.DESIGNGUID IN ('57eef045-0dbb-4df4-8dbd-bb07acf99e99')) --Family Help: Closure
       AND FAPV.INSTANCESTATE = 'COMPLETE'

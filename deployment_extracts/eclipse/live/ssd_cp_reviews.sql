@@ -117,7 +117,7 @@ CP_REVIEW AS (
                 THEN FAPV.ANSWERVALUE
             END
         )::DATE                    AS DATE_OF_MEETING   
-    FROM FORMANSWERPERSONVIEW FAPV
+    FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
     WHERE FAPV.DESIGNGUID IN ('21e01e2e-fd65-439d-a8aa-a179106a3d45') --Child: Record of meeting(s) and plan
       AND FAPV.INSTANCESTATE = 'COMPLETE'
       AND FAPV.DESIGNSUBNAME = 'Child Protection - Review Conference'
@@ -142,7 +142,7 @@ IRO_REVIEW AS (
                 THEN FAPV.ANSWERVALUE
             END
         )::DATE                    AS DATE_OF_MEETING       
-    FROM FORMANSWERPERSONVIEW FAPV
+    FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
     WHERE FAPV.DESIGNGUID IN ('79f3495c-134f-4e69-b00f-7621925419f7') --Independent Reviewing Officer: Quality assurance
       AND FAPV.INSTANCESTATE = 'COMPLETE'
       AND FAPV.DESIGNSUBNAME = 'Child protection conference' 

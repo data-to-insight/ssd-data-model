@@ -150,7 +150,7 @@ FAPV AS (
                 WHEN FAPV.CONTROLNAME IN ('CINCensus_outcomeOfSection47Enquiry')
                 THEN FAPV.ANSWERVALUE
             END)                 AS summary_utcome
-    FROM FORMANSWERPERSONVIEW FAPV
+    FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
     WHERE FAPV.DESIGNGUID IN ('fdca0a95-8578-43ca-97ff-ad3a8adf57de') --Child Protection: Section 47 Assessment
       AND FAPV.INSTANCESTATE = 'COMPLETE'
       AND FAPV.ANSWERFORSUBJECTID NOT IN (SELECT E.PERSONID FROM EXCLUSIONS E)	

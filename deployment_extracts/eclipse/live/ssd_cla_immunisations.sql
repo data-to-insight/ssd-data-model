@@ -49,7 +49,7 @@ SELECT
             THEN FAPV.ANSWERVALUE 
         END
     )::DATE                           AS "clai_immunisations_status_date" --metadata={"item_ref:"CLAI005A"}
-FROM FORMANSWERPERSONVIEW FAPV
+FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
 WHERE FAPV.DESIGNGUID = '0438ab4f-0d93-40d3-ab73-f97455646041'
   AND FAPV.INSTANCESTATE IN ('COMPLETE')	
   AND FAPV.DESIGNSUBNAME IN ('Immunisation check ')

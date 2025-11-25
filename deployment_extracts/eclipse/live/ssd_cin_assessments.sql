@@ -108,7 +108,7 @@ REFERRAL AS (
                     WHEN FAPV.CONTROLNAME = 'CINCensus_DateOfReferral'
                         THEN FAPV.DATEANSWERVALUE
                 END)                                                      AS DATE_OF_REFERRAL    
-        FROM  FORMANSWERPERSONVIEW FAPV
+        FROM  FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
         WHERE FAPV.DESIGNGUID IN ('e6d9de9a-b56c-49d0-ab87-0f913ca8fc5f') -- Child: Referral
           AND FAPV.INSTANCESTATE = 'COMPLETE'
         GROUP BY FAPV.ANSWERFORSUBJECTID,
@@ -230,7 +230,7 @@ ASSESSMENT AS (
                 WHEN FAPV.CONTROLNAME = 'WorkerOutcome'
                     THEN FAPV.ANSWERVALUE
             END)	                                                           AS OUTCOME  
-    FROM FORMANSWERPERSONVIEW FAPV
+    FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
     WHERE FAPV.DESIGNGUID IN ('94b3f530-a918-4f33-85c2-0ae355c9c2fd') -- Child: Assessment
       AND FAPV.INSTANCESTATE = 'COMPLETE'
       AND FAPV.CONTROLNAME IN ('SeenAlone', 'CINCensus_startDateOfForm','WorkerOutcome')
@@ -266,7 +266,7 @@ ASSESSMENT AS (
                 WHEN FAPV.CONTROLNAME = 'outcomes2'
                     THEN FAPV.ANSWERVALUE
             END)	                                                           AS OUTCOME  
-    FROM FORMANSWERPERSONVIEW FAPV
+    FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
     WHERE FAPV.DESIGNGUID IN ('6d3b942a-37ad-40ef-8cc6-b202d2cd1c0e') -- Family Help: Discussion
       AND FAPV.INSTANCESTATE = 'COMPLETE'
       AND FAPV.CONTROLNAME IN ('wasTheChildSeen', 'dateOfDocument','outcomes2')

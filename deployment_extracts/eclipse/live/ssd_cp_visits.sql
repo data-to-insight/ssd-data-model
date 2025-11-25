@@ -71,7 +71,7 @@ FAPV AS (
                          END     
             END
         )                       AS CHILD_SEEN_ALONE
-    FROM FORMANSWERPERSONVIEW FAPV
+    FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
     WHERE FAPV.DESIGNGUID IN ('7b04f2b4-1170-44a2-8f2f-111d51d8a90f') --Child: Visit
       AND FAPV.INSTANCESTATE = 'COMPLETE'
       AND FAPV.DESIGNSUBNAME = 'Child Protection '

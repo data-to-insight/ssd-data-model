@@ -51,7 +51,7 @@ SDQ_BASE AS (
                 WHEN FAPV.CONTROLNAME = 'youngPersonsStrengthsAndDifficultiesQuestionnaireScore'
                 THEN FAPV.ANSWERVALUE
             END)                    AS score
-    FROM FORMANSWERPERSONVIEW FAPV
+    FROM FORMANSWERPERSONVIEW FAPV -- [REVIEW] GUID must match (LA to review/update)
     WHERE FAPV.DESIGNGUID IN ('fb7f6ffc-e8a1-4b45-8eaa-356a5be33895')  -- Child in Care: SDQ scores
         AND FAPV.INSTANCESTATE = 'COMPLETE'
         AND FAPV.ANSWERFORSUBJECTID NOT IN (SELECT E.PERSONID FROM EXCLUSIONS E)
