@@ -16,10 +16,10 @@ from datetime import date
 
 def main() -> None:
     # Fixed path inside the Codespace workspace
-    live_dir = Path("/workspaces/ssd-data-model/deployment_extracts/mosaic/live").resolve()
-
-    if not live_dir.is_dir():
-        raise SystemExit(f"Live directory not found: {live_dir}")
+    live_dir = Path("/workspaces/ssd-data-model/deployment_extracts/mosaic/live/").resolve()
+    live_input_dir = live_dir+"ssd_mosaic_deployment_individual_files/"
+    if not live_input_dir.is_dir():
+        raise SystemExit(f"Live directory not found: {live_input_dir}")
 
     # Filename like 2025-11-18-ssd_mosaic_deployment_download.zip
     today_str = date.today().strftime("%Y-%m-%d")
@@ -28,7 +28,7 @@ def main() -> None:
 
     # Collect files to zip, skipping any existing deployment zip bundles
     files_to_zip = []
-    for path in live_dir.rglob("*"):
+    for path in live_input_dir.rglob("*"):
         if path.is_file():
             # Avoid including current or earlier deployment bundles
             if path.name.endswith("ssd_mosaic_deployment_download.zip"):
@@ -36,7 +36,7 @@ def main() -> None:
             files_to_zip.append(path)
 
     if not files_to_zip:
-        raise SystemExit(f"No files to zip in {live_dir}")
+        raise SystemExit(f"No files to zip in {live_input_dir}")
 
     # mode="w" will create or replace the zip file
     with zipfile.ZipFile(zip_path, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
