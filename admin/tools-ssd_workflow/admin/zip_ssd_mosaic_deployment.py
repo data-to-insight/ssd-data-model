@@ -17,7 +17,7 @@ from datetime import date
 def main() -> None:
     # Fixed path inside the Codespace workspace
     live_dir = Path("/workspaces/ssd-data-model/deployment_extracts/mosaic/live/").resolve()
-    live_input_dir = live_dir+"ssd_mosaic_deployment_individual_files/"
+    live_input_dir = Path(f"{live_dir}/ssd_mosaic_deployment_individual_files/").resolve()
     if not live_input_dir.is_dir():
         raise SystemExit(f"Live directory not found: {live_input_dir}")
 
