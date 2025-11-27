@@ -360,7 +360,7 @@ SELECT
 FROM
     HDM.Child_Social.DIM_PERSON AS p
 
--- [TESTING][PLACEHOLDER] 903 table refresh only in reporting period?
+-- [TESTING] 903 table refresh only in reporting period?
 LEFT JOIN (
     -- ??other accessible location for NO_UPN data than 903 table?? -- [TESTING|LA DEBUG]
     SELECT 
@@ -375,13 +375,17 @@ ON
     p.DIM_PERSON_ID = f903.dim_person_id
 
 WHERE 
+    /* EXCLUSIONS */
 
     -- p.DIM_PERSON_ID IN (1, 2, 3) AND --  -- hard filter on CMS person ids for LA reduced cohort testing
 
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
-    -- AND YEAR(p.BIRTH_DTTM) != 1900 -- #DtoI-1814
+    -- AND YEAR(p.BIRTH_DTTM) != 1900 -- Remove admin records hard-filter -- #DtoI-1814 
+
+    /* INCLUSIONS */
     AND (p.IS_CLIENT = 'Y'
+
         OR (
             EXISTS (
                 SELECT 1 
