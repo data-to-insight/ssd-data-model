@@ -11,10 +11,13 @@ Select distinct
 p.PersonID pers_person_id,
 p.Sex pers_sex,
 p.pGender pers_gender,
-COALESCE(ec.CINCode,'NOBT') pers_ethnicity, -- [REVIEW] Issue ##28 CBDS_ETHNICITY_CODE?
+
+COALESCE(ec.CINCode,'NOBT') pers_ethnicity, -- [REVIEW] Depreciated. LA Reference. 
+-- COALESCE(e.CBDS_ETHNICITY_CODE, 'NOBT') pers_ethnicity,  -- [REVIEW] Issue #28
+
 p.PDoB pers_dob,
 p.PNHSNumber pers_common_child_id,
--- p.PUniquePupilNumber pers_upn, -- [depreciated] [REVIEW]
+p.PUniquePupilNumber pers_upn, -- [reinstated 171125] [REVIEW] Issue #55
 NULL pers_upn_unknown,
 CASE when ehcp.PersonID is not null then 'Y' END pers_send_flag,
 p.PDoBEstimated pers_expected_dob,
@@ -24,6 +27,10 @@ NULL pers_nationality
 
 from Mosaic.D.PersonData p
 left join Mosaic.DS.EthnicityConversion ec on p.pEthnicityCode = ec.SubEthnicityCode
+
+-- -- working blind here but in order to obtain e.CBDS_ETHNICITY_CODE above??
+--left join Schema.DM_ETHNICITIES e on e.CIN_ETHNICITY_CODE = ec.CINCode  -- or e.ETHNICITY_CODE = ec.SubEthnicityCode
+
 left join EMS.D.INVOLVEMENTS_EHCP ehcp on p.PEMSNumber = ehcp.PersonID
 	and EHCPCompleteDate is not null /*PW - Will give EHCP / SEN Statement ever, may need to add date criteria to show current or within reporting period*/
 left join Mosaic.D.Relationships r on p.PersonID = r.RelSourcePerson /*PW - will return 'Y' if any 'Mother - Child Relationship, may need to add criterea to show if child born while LAC or open to CSC*/
