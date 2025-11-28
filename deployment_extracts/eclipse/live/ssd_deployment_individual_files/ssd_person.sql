@@ -99,7 +99,8 @@ SELECT DISTINCT
         ELSE '09'
     END                        AS pers_gender,             -- metadata={"item_ref":"PERS003A"}
     CASE
-        WHEN P.ETHNICITYCODE = 'ARAB' THEN '??'
+        WHEN P.ETHNICITYCODE = 'ARAB' THEN 'ORAB'           -- Code taken from ESCC data
+        -- WHEN P.ETHNICITYCODE = 'ARAB_OTHER' THEN 'OARA'  -- Option taken from ESCC data
         WHEN P.ETHNICITYCODE = 'BANGLADESHI' THEN 'ABAN'
         WHEN P.ETHNICITYCODE = 'INDIAN' THEN 'AIND'
         WHEN P.ETHNICITYCODE = 'OTHER_ASIAN' THEN 'AOTH'
