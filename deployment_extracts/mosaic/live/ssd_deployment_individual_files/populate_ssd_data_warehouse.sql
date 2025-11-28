@@ -2461,7 +2461,8 @@ Dependencies:
 			) pers_gender,
 			(
 				select
-					eth.ETHNICITY_DESCRIPTION
+					eth.CBDS_ETHNICITY_CODE			-- [REVIEW] Issue #28 Fix	
+					-- eth.ETHNICITY_DESCRIPTION 	-- [REVIEW] Depreciated. LA Reference. 
 				from
 					dm_ETHNICITIES eth
 				where
