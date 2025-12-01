@@ -1056,10 +1056,12 @@ SELECT
     pa.START_DTTM,
     pa.END_DTTM,
     CASE 
-        -- Some clean-up based on known data
-        WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', ''))) THEN '' -- clear pcode of containing all X's
-        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''                                -- clear pcode of containing nopostcode
-        ELSE REPLACE(pa.POSTCODE, ' ', '')                                                              -- remove all spaces for consistency
+        WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', '')))
+            THEN ''  -- clear postcode containing all X's
+        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode'
+            THEN ''  -- clear 'nopostcode' strs
+        ELSE
+            LTRIM(RTRIM(pa.POSTCODE))  -- keep internal space(s)
     END AS CleanedPostcode,
     (
         '{' +
@@ -1096,10 +1098,12 @@ WHERE pa.DIM_PERSON_ID <> -1
 --     pa.START_DTTM,
 --     pa.END_DTTM,
 --     CASE 
---     -- Some clean-up based on known data
---         WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', ''))) THEN '' -- clear pcode of containing all X's
---         WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode' THEN ''                                -- clear pcode of containing nopostcode
---         ELSE REPLACE(pa.POSTCODE, ' ', '')                                                              -- remove all spaces for consistency
+--         WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', '')))
+--             THEN ''  -- clear postcode containing all X's
+--         WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode'
+--             THEN ''  -- clear postcode containing 'nopostcode'
+--         ELSE
+--             LTRIM(RTRIM(pa.POSTCODE))  -- keep any internal space(s), just trim ends
 --     END AS CleanedPostcode,
 --     (
     
