@@ -257,7 +257,7 @@ SET @TableName = N'ssd_person';
 /* START - Temp Hard drop and recreate due to d2i structure changes  */
 IF OBJECT_ID(N'ssd_development.ssd_person', N'U') IS NOT NULL
     DROP TABLE ssd_development.ssd_person;
-/* END - remove this tmp block once SSD has run once for v1.3.3!  */
+/* END - remove this tmp block once SSD has run once for v1.3.5+!  */
 
 
 -- META-ELEMENT: {"type": "drop_table"}
@@ -334,7 +334,7 @@ SELECT
     p.SURNAME,
     p.GENDER_MAIN_CODE AS pers_sex,         -- Sex/Gender as used in stat-returns
     p.GENDER_MAIN_CODE,                     -- Placeholder for those LAs that store sex and gender independently
-    p.ETHNICITY_MAIN_CODE,
+    p.ETHNICITY_MAIN_CODE,                  -- [REVIEW] LEFT(p.ETHNICITY_MAIN_CODE, 4)
     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL                           -- or NULL
@@ -356,7 +356,7 @@ SELECT
         THEN 'Y'
         ELSE NULL                           -- No child relation found
     END,
-    p.NATNL_CODE
+    p.NATNL_CODE                            -- [REVIEW] LEFT(p.NATNL_CODE, 2)    
 FROM
     HDM.Child_Social.DIM_PERSON AS p
 
@@ -501,7 +501,10 @@ DECLARE @src_schema sysname = N'Child_Social';
 -- META-ELEMENT: {"type": "drop_table"}
 IF OBJECT_ID('tempdb..#ssd_cohort', 'U') IS NOT NULL DROP TABLE #ssd_cohort;
 
-IF OBJECT_ID('ssd_development.ssd_cohort','U') IS NOT NULL
+-- IF OBJECT_ID(N'ssd_development.ssd_cohort', N'U') IS NOT NULL
+-- DROP TABLE ssd_development.ssd_cohort;
+
+IF OBJECT_ID('ssd_development.ssd_cohort', 'U') IS NOT NULL
 BEGIN
   IF EXISTS (SELECT 1 FROM ssd_development.ssd_cohort)
     TRUNCATE TABLE ssd_development.ssd_cohort;
@@ -5435,7 +5438,7 @@ SELECT
     LTRIM(RTRIM(dw.STAFF_ID))               AS prof_staff_id,                       -- Note that this is trimmed for non-printing chars
     CONCAT(dw.FORENAME, ' ', dw.SURNAME)    AS prof_professional_name,              -- used also as Allocated Worker|Assigned Worker
     dw.WORKER_ID_CODE                       AS prof_social_worker_registration_no,  -- Not tied to WORKER_ID, this is the social work reg number IF entered
-    ''                                      AS prof_agency_worker_flag,             -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
+    NULL                                    AS prof_agency_worker_flag,             -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
     dw.JOB_TITLE                            AS prof_professional_job_title,
     ISNULL(rc.OpenCases, 0)                 AS prof_professional_caseload,          -- 0 when no open cases on given date.
     dw.DEPARTMENT_NAME                      AS prof_professional_department,
