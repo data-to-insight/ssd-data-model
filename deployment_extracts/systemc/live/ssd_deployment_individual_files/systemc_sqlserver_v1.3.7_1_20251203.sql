@@ -273,6 +273,7 @@ SET @TableName = N'ssd_person';
 /* START - Temp Hard drop and recreate due to d2i structure changes  */
 IF OBJECT_ID(N'ssd_development.ssd_person', N'U') IS NOT NULL
     DROP TABLE ssd_development.ssd_person;
+GO
 /* END - remove this tmp block once SSD has run once for v1.3.5+!  */
 
 
@@ -345,7 +346,7 @@ SELECT
     -- TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING|LA DEBUG]
     p.LEGACY_ID,
     CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
-    p.UPN,                                  --     
+    LEFT(LTRIM(RTRIM(p.UPN)), 13)           -- Coerce data to expected 13+strip, to avoid downstream fallover     
     p.FORENAME, 
     p.SURNAME,
     p.GENDER_MAIN_CODE AS pers_sex,         -- Sex/Gender as used in stat-returns
@@ -817,7 +818,7 @@ WHERE co.has_contact      = 1
    OR co.has_referral     = 1
    OR co.is_care_leaver   = 1
    OR co.has_eligibility  = 1
-   OR co.has_client       = 1
+   OR co.has_client_flag  = 1
    OR co.has_involvement  = 1;
 -- optional to include 903 in the parity set
 --   OR co.has_903          = 1;
@@ -941,7 +942,7 @@ CROSS JOIN
       OR has_referral = 1
       OR is_care_leaver = 1
       OR has_eligibility = 1
-      OR has_client = 1
+      OR has_client_flag = 1
       OR has_involvement = 1
       -- OR has_903 = 1  -- uncomment to include 903 rows in counts
   ) AS h
@@ -956,7 +957,7 @@ CROSS JOIN
 --       OR has_referral = 1
 --       OR is_care_leaver = 1
 --       OR has_eligibility = 1
---       OR has_client = 1
+--       OR has_client_flag = 1
 --       OR has_involvement = 1
 --       OR has_903 = 1
 --   ) AS h903
@@ -6713,7 +6714,7 @@ SELECT * FROM ssd_development.ssd_version_log WHERE is_current = 1;
 -- Headline counts
 --   core_count, from HDM using orig EXISTS path and @ssd_cutoff
 --   ssd_cohort_count, from persisted flag table ssd_development.ssd_cohort
---     By default flags count has_contact or has_referral or is_care_leaver or has_eligibility or has_client or has_involvement
+--     By default flags count has_contact or has_referral or is_care_leaver or has_eligibility or has_client_flag or has_involvement
 --     deliberate exclude has_903 here, uncomment below if include
 --   api_count, records who pass EligibleBySpec unborn or <= 25 within window and appear in >1+ SpecInclusion group
 --------------------------------------------------------------------------------------------------------------------------------
@@ -6732,7 +6733,7 @@ CROSS JOIN
       OR has_referral = 1
       OR is_care_leaver = 1
       OR has_eligibility = 1
-      OR has_client = 1
+      OR has_client_flag = 1
       OR has_involvement = 1
       -- OR has_903 = 1  -- uncomment to include 903 rows in counts
   ) AS h
@@ -6747,7 +6748,7 @@ CROSS JOIN
 --       OR has_referral = 1
 --       OR is_care_leaver = 1
 --       OR has_eligibility = 1
---       OR has_client = 1
+--       OR has_client_flag = 1
 --       OR has_involvement = 1
 --       OR has_903 = 1
 --   ) AS h903
