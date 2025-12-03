@@ -87,9 +87,13 @@ DECLARE @ssd_sub1_range_years INT = 1;  -- ssd sub-window internal or additional
 DECLARE @today_date  date     = CONVERT(date, GETDATE());
 DECLARE @today_dt    datetime = CONVERT(datetime, @today_date);
 
+-- -- Main SSD window, based on today
+-- DECLARE @ssd_window_end   datetime = @today_dt;
+-- DECLARE @ssd_window_start datetime = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+
 -- Main SSD window, based on today
-DECLARE @ssd_window_end   datetime = @today_dt;
-DECLARE @ssd_window_start datetime = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+DECLARE @ssd_window_end   date = @today_date;
+DECLARE @ssd_window_start date = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
 
 
 -- CASELOAD count Date (Currently anchored: September 30th)
@@ -112,6 +116,10 @@ DECLARE @CaseloadTimeframeStartDate date =
 -- META-ELEMENT: {"type": "dbschema"}
 -- Point to DB/TABLE_CATALOG if required (SSD tables created here)
 USE HDM_Local;                           -- used in logging (and seperate clean-up script(s))
+
+DECLARE @src_db     sysname = N'HDM';
+DECLARE @src_schema sysname = N'Child_Social';
+
 
 -- Example/Reference
 -- ALTER USER [ESCC\RobertHa] WITH DEFAULT_SCHEMA = [ssd_development];
@@ -184,7 +192,7 @@ INSERT INTO ssd_development.ssd_version_log
     (version_number, release_date, description, is_current, created_by, impact_description)
 VALUES 
     -- CURRENT version (using MAJOR.MINOR.PATCH)
-    ('1.3.6', '2025-12-03', 'drop use of ssd_cutoff, correction in cohort verification', 1, 'admin', 'drop @ssd_cutoff, reuse @ssd_window_start as core timeframe anchor');
+    ('1.3.7', '2025-12-03', 'date fix on ssd_person', 1, 'admin', 'apply @ssd_window_start as core ssd_person timeframe anchor');
 
 
 -- HISTORIC versioning log data
@@ -214,7 +222,8 @@ VALUES
     ('1.3.2', '2025-11-10', 'Block out string_agg on ssd_assessment_factors', 0, 'admin', 'fix needed to prevent legacy sql failing on string_agg in modern selection block'),
     ('1.3.3', '2025-11-13', 's-colon pre CTE bug fix', 0, 'admin', 'non-recognised s-colon pre CTEs + introduced commented hard filter on child ids for LA use'),
     ('1.3.4', '2025-11-20', 'sdq scores history, score date and timeframe fix', 0, 'admin', 'patch missing sdq scores history, incorrect hard-coded sdq date field'),
-    ('1.3.5', '2025-11-21', 'new pre-computed window_start filter added', 0, 'admin', 'Initially applied to sdq scores as timeframe filter. Will be applied throughout');
+    ('1.3.5', '2025-11-21', 'new pre-computed window_start filter added', 0, 'admin', 'Initially applied to sdq scores as timeframe filter. Will be applied throughout'),
+    ('1.3.6', '2025-12-03', 'drop use of ssd_cutoff, correction in cohort verification', 1, 'admin', 'drop @ssd_cutoff, reuse @ssd_window_start as core timeframe anchor');
 
 
 -- META-ELEMENT: {"type": "test"}
@@ -391,47 +400,65 @@ WHERE
     -- AND YEAR(p.BIRTH_DTTM) != 1900 -- Remove admin records hard-filter -- #DtoI-1814 
 
     /* INCLUSIONS */
-    AND (p.IS_CLIENT = 'Y'
+    AND (
+        p.IS_CLIENT = 'Y'
 
         OR (
+            -- Contacts in SSD window
             EXISTS (
                 SELECT 1 
                 FROM HDM.Child_Social.FACT_CONTACTS fc
                 WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
-                AND fc.CONTACT_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+                  AND fc.CONTACT_DTTM >= @ssd_window_start
+                  -- Optional upper bound, if needing a closed window
+                  -- AND fc.CONTACT_DTTM < DATEADD(day, 1, @ssd_window_end)
             )
+
+            -- Referrals that touch the SSD window
             OR EXISTS (
                 SELECT 1 
                 FROM HDM.Child_Social.FACT_REFERRALS fr
                 WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
                 AND (
-                    fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
-                    OR fr.REFRL_END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) 
+                       fr.REFRL_START_DTTM >= @ssd_window_start
+                    OR fr.REFRL_END_DTTM   >= @ssd_window_start
                     OR fr.REFRL_END_DTTM IS NULL
                 )
             )
+
+            -- Care leaver in touch in SSD window
             OR EXISTS (
-                SELECT 1 FROM HDM.Child_Social.FACT_CLA_CARE_LEAVERS fccl
+                SELECT 1 
+                FROM HDM.Child_Social.FACT_CLA_CARE_LEAVERS fccl
                 WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
-                AND fccl.IN_TOUCH_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+                  AND fccl.IN_TOUCH_DTTM >= @ssd_window_start
+                  -- Optional upper bound
+                  -- AND fccl.IN_TOUCH_DTTM < DATEADD(day, 1, @ssd_window_end)
             )
+
+            -- Eligibility flag 
             OR EXISTS (
-                SELECT 1 FROM HDM.Child_Social.DIM_CLA_ELIGIBILITY dce
+                SELECT 1 
+                FROM HDM.Child_Social.DIM_CLA_ELIGIBILITY dce
                 WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
-                AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
+                  AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
             )
+
+            -- Involvements
             OR EXISTS (
-                SELECT 1 FROM HDM.Child_Social.FACT_INVOLVEMENTS fi
+                SELECT 1 
+                FROM HDM.Child_Social.FACT_INVOLVEMENTS fi
                 WHERE (fi.DIM_PERSON_ID = p.DIM_PERSON_ID
                 AND (fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE 'KA%' --Key Agencies (External)
-				OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL OR fi.IS_ALLOCATED_CW_FLAG = 'Y')
+				     OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL 
+                     OR fi.IS_ALLOCATED_CW_FLAG = 'Y')
 				-- AND START_DTTM > '2009-12-04 00:54:49.947' -- #DtoI-1830 care leavers who were aged 22-25 and may not have had Allocated Case Worker relationship for years+
 				AND DIM_WORKER_ID <> '-1' 
-                AND (fi.END_DTTM IS NULL OR fi.END_DTTM > GETDATE()))
+                
+                AND (fi.END_DTTM IS NULL OR fi.END_DTTM > @ssd_window_start))
             )
         )
-    )
-;
+    );
 
 
 -- -- META-ELEMENT: {"type": "create_idx"}
@@ -500,9 +527,6 @@ SET @TableName = N'ssd_cohort';
 -- SELECT DATEADD(year, -@ssd_timeframe_years, CONVERT(datetime, CONVERT(date, GETDATE()))) AS current_cutoff_local;
 
 SET NOCOUNT ON;
-
-DECLARE @src_db     sysname = N'HDM';
-DECLARE @src_schema sysname = N'Child_Social';
 
 
 -- META-ELEMENT: {"type": "drop_table"}
