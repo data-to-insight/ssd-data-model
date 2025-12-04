@@ -1605,7 +1605,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_mother (
-        moth_table_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"MOTH004A"}
+        moth_table_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"MOTH004A"}
         moth_person_id          NVARCHAR(48),               -- metadata={"item_ref":"MOTH002A"}
         moth_childs_person_id   NVARCHAR(48),               -- metadata={"item_ref":"MOTH001A"}
         moth_childs_dob         DATETIME                    -- metadata={"item_ref":"MOTH003A"}
@@ -1803,7 +1803,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_contacts (
-        cont_contact_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CONT001A"}
+        cont_contact_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CONT001A"}
         cont_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CONT002A"}
         cont_contact_date               DATETIME,                   -- metadata={"item_ref":"CONT003A"}
         cont_contact_source_code        NVARCHAR(48),               -- metadata={"item_ref":"CONT004A"} 
@@ -1961,7 +1961,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_early_help_episodes (
-        earl_episode_id             NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"EARL001A"}
+        earl_episode_id             NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"EARL001A"}
         earl_person_id              NVARCHAR(48),               -- metadata={"item_ref":"EARL002A"}
         earl_episode_start_date     DATETIME,                   -- metadata={"item_ref":"EARL003A"}
         earl_episode_end_date       DATETIME,                   -- metadata={"item_ref":"EARL004A"}
@@ -2070,7 +2070,7 @@ ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_cin_assessments
     (
-        cina_assessment_id              NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINA001A"}
+        cina_assessment_id              NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINA001A"}
         cina_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CINA002A"}
         cina_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CINA010A"}
         cina_assessment_start_date      DATETIME,                   -- metadata={"item_ref":"CINA003A"}
@@ -2519,7 +2519,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_cin_plans (
-        cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINP001A"}
+        cinp_cin_plan_id            NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINP001A"}
         cinp_referral_id            NVARCHAR(48),               -- metadata={"item_ref":"CINP007A"}
         cinp_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINP002A"}
         cinp_cin_plan_start_date    DATETIME,                   -- metadata={"item_ref":"CINP003A"}
@@ -2648,7 +2648,7 @@ ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_cin_visits
     (
-        cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CINV001A"}      
+        cinv_cin_visit_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINV001A"}      
         cinv_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CINV007A"}
         cinv_cin_visit_date         DATETIME,                   -- metadata={"item_ref":"CINV003A"}
         cinv_cin_visit_seen         NCHAR(1),                   -- metadata={"item_ref":"CINV004A"}
@@ -3096,7 +3096,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_cp_plans (
-        cppl_cp_plan_id                 NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CPPL001A"}
+        cppl_cp_plan_id                 NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CPPL001A"}
         cppl_referral_id                NVARCHAR(48),               -- metadata={"item_ref":"CPPL007A"}
         cppl_icpc_id                    NVARCHAR(48),               -- metadata={"item_ref":"CPPL008A"}
         cppl_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CPPL002A"}
@@ -3698,7 +3698,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_cla_convictions (
-        clac_cla_conviction_id      NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAC001A"}
+        clac_cla_conviction_id      NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAC001A"}
         clac_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAC002A"}
         clac_cla_conviction_date    DATETIME,                   -- metadata={"item_ref":"CLAC003A"}
         clac_cla_conviction_offence NVARCHAR(1000)              -- metadata={"item_ref":"CLAC004A"}
@@ -3778,7 +3778,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_cla_health (
-        clah_health_check_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAH001A"}
+        clah_health_check_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAH001A"}
         clah_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAH002A"}
         clah_health_check_type      NVARCHAR(500),              -- metadata={"item_ref":"CLAH003A"}
         clah_health_check_date      DATETIME,                   -- metadata={"item_ref":"CLAH004A"}
@@ -3867,7 +3867,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_cla_immunisations (
-        clai_person_id                  NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAI002A"}
+        clai_person_id                  NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAI002A"}
         clai_immunisations_status       NCHAR(1),                   -- metadata={"item_ref":"CLAI004A"}
         clai_immunisations_status_date  DATETIME                    -- metadata={"item_ref":"CLAI005A"}
     );
@@ -3957,7 +3957,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_cla_substance_misuse (
-        clas_substance_misuse_id        NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAS001A"}
+        clas_substance_misuse_id        NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAS001A"}
         clas_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"CLAS002A"}
         clas_substance_misuse_date      DATETIME,                   -- metadata={"item_ref":"CLAS003A"}
         clas_substance_misused          NVARCHAR(100),              -- metadata={"item_ref":"CLAS004A"}
@@ -4447,7 +4447,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_cla_care_plan (
-        lacp_table_id                   NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"LACP001A"}
+        lacp_table_id                   NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"LACP001A"}
         lacp_person_id                  NVARCHAR(48),               -- metadata={"item_ref":"LACP007A"}
         lacp_cla_care_plan_start_date   DATETIME,                   -- metadata={"item_ref":"LACP004A"}
         lacp_cla_care_plan_end_date     DATETIME,                   -- metadata={"item_ref":"LACP005A"}
@@ -4652,7 +4652,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_cla_visits (
-        clav_cla_visit_id           NVARCHAR(48) PRIMARY KEY,               -- metadata={"item_ref":"CLAV001A"}
+        clav_cla_visit_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAV001A"}
         clav_cla_id                 NVARCHAR(48),               -- metadata={"item_ref":"CLAV007A"}
         clav_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAV008A"}
         clav_cla_visit_date         DATETIME,                   -- metadata={"item_ref":"CLAV003A"}
@@ -4758,7 +4758,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE ssd_development.ssd_sdq_scores (
-        csdq_table_id               NVARCHAR(48),               -- metadata={"item_ref":"CSDQ001A"} --  PRIMARY KEY switched off for ESCC
+        csdq_table_id               NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CSDQ001A"} --  PRIMARY KEY switched off for ESCC
         csdq_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CSDQ002A"}
         csdq_sdq_completed_date     DATETIME,                   -- metadata={"item_ref":"CSDQ003A"}
         csdq_sdq_score              INT,                        -- metadata={"item_ref":"CSDQ005A"}
