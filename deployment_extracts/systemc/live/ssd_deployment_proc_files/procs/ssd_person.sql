@@ -12,7 +12,7 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks:    
+-- Remarks: [EA_API_PRIORITY_TABLE]
 --             Note: Due to part reliance on 903 table, be aware that if 903 not populated pre-ssd run, 
 --             this/subsequent queries can return v.low|unexpected row counts.
 -- Dependencies:
@@ -99,7 +99,7 @@ SELECT
     -- TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING|LA DEBUG]
     p.LEGACY_ID,
     CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
-    LEFT(LTRIM(RTRIM(p.UPN)), 13)           -- Coerce data to expected 13+strip, to avoid downstream fallover     
+    LEFT(LTRIM(RTRIM(p.UPN)), 13),           -- Coerce data to expected 13+strip, to avoid downstream fallover     
     p.FORENAME, 
     p.SURNAME,
     p.GENDER_MAIN_CODE AS pers_sex,         -- Sex/Gender as used in stat-returns

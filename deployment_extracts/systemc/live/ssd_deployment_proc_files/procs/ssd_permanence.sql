@@ -12,7 +12,7 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks: 
+-- Remarks: [EA_API_PRIORITY_TABLE]
 --         DEV: 181223: Assumed that only one permanence order per child. 
 --         - In order to handle/reflect the v.rare cases where this has broken down, further work is required.
 

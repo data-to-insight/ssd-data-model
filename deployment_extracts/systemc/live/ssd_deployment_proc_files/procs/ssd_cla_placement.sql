@@ -12,7 +12,8 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks: DEV: filtering for OFSTED_URN LIKE ''SC%''
+-- Remarks: [EA_API_PRIORITY_TABLE] 
+--          DEV: filtering for OFSTED_URN LIKE ''SC%''
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_CLA_PLACEMENT

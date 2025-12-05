@@ -12,7 +12,8 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks: Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
 --             increased field size to 100
 -- Dependencies:
 -- - ssd_person

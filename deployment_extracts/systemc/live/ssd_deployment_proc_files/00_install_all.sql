@@ -45,6 +45,5 @@
 :r "procs/ssd_sdq_scores.sql"
 :r "procs/ssd_sen_need.sql"
 :r "procs/ssd_send.sql"
-:r "procs/ssd_version_log.sql"
 :r "procs/ssd_voice_of_child.sql"
 :r "populate_ssd_data_warehouse.sql"

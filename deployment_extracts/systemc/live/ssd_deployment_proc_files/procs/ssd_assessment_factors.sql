@@ -12,7 +12,8 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks: This object referrences some large source tables- Instances of 45m+. 
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          This object referrences some large source tables- Instances of 45m+. 
 -- Dependencies: 
 -- - #ssd_TMP_PRE_assessment_factors (as staged pre-processing)
 -- - ssd_cin_assessments

@@ -12,7 +12,7 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks:    v1.2 revisions backtrack prev changes in favour of dept/hist ID fields
+-- Remarks: [EA_API_PRIORITY_TABLE]
 
 --             [TESTING] The below towards v1.0 for ref. only
 --             Regarding the increased size/len on invo_professional_team

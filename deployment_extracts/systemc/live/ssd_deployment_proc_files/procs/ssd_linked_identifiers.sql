@@ -12,7 +12,8 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks: Have temporarily disabled populating UPN & ULN as these access non-core
+-- Remarks: [EA_API_PRIORITY_TABLE] 
+--              Have temporarily disabled populating UPN & ULN as these access non-core
 --             CMS modules. Can be re-enabled on a localised basis. 
 
 --         The list of allowed identifier_type codes are:

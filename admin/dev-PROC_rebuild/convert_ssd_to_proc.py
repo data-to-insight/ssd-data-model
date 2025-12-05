@@ -9,7 +9,7 @@ IN_STEM  = Path("/workspaces/ssd-data-model/deployment_extracts/systemc/live/")
 OUT_STEM = IN_STEM  # same in/out folder
 
 # names
-INPUT_NAME  = "ssd_deployment_individual_files/systemc_sqlserver_v1.3.7_1_20251203.sql"
+INPUT_NAME  = "ssd_deployment_individual_files/systemc_sqlserver_v1.3.8_1_20251205.sql"
 OUTDIR_NAME = "ssd_deployment_proc_files"
 ZIP_NAME    = "ssd_deployment_proc_files.zip"
 

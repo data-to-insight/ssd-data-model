@@ -9,24 +9,6 @@ BEGIN TRY
     DECLARE @schema_name sysname = (SELECT TOP 1 src_schema FROM ##ssd_runtime_settings);
     DECLARE @p nvarchar(514), @pc nvarchar(514), @sql nvarchar(max);
 
-    -- proc_ssd_version_log
-    IF NULLIF(@schema_name, N'') IS NULL
-    BEGIN
-        SET @p  = N'proc_ssd_version_log';
-        SET @pc = N'proc_ssd_version_log_custom';
-    END
-    ELSE
-    BEGIN
-        SET @p  = QUOTENAME(@schema_name) + N'.proc_ssd_version_log';
-        SET @pc = @p + N'_custom';
-    END
-    IF OBJECT_ID(@pc, N'P') IS NOT NULL
-        SET @sql = N'EXEC ' + @pc;
-    ELSE
-        SET @sql = N'EXEC ' + @p;
-    PRINT @sql;
-    EXEC(@sql);
-
     -- proc_ssd_person
     IF NULLIF(@schema_name, N'') IS NULL
     BEGIN

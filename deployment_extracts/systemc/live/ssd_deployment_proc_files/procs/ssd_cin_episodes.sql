@@ -12,7 +12,7 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks: Requires #LEGACY-PRE2016 changes
+-- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies: 
 -- - @ssd_timeframe_years
 -- - HDM.Child_Social.FACT_REFERRALS

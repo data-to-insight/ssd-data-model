@@ -12,7 +12,8 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks: Requires #LEGACY-PRE2016 changes
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          Requires #LEGACY-PRE2016 changes
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_S47

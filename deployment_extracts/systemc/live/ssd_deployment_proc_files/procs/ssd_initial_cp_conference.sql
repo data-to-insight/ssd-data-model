@@ -12,7 +12,7 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks:
+-- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies:
 -- - HDM.Child_Social.FACT_CP_CONFERENCE
 -- - HDM.Child_Social.FACT_MEETINGS

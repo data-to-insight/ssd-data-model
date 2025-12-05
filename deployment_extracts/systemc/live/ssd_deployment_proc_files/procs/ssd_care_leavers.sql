@@ -12,7 +12,8 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--              Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
 --             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
 --             Dev: Revised V3/4 to aid performance on large involvements table aggr
 

@@ -1,76 +1,129 @@
-
 -- META-ELEMENT: {"type": "header"}
-
-
 /*
+
 *********************************************************************************************************
-STANDARD SAFEGUARDING DATASET EXTRACT 
-https://data-to-insight.github.io/ssd-data-model/
+STANDARD SAFEGUARDING DATASET (SSD) EXTRACT
+Project home: https://data-to-insight.github.io/ssd-data-model/
+T SQL compatibility: SQL Server 2012 to 2022
 
-*We strongly recommend that all initial pilot/trials of SSD scripts occur in a development|test environment.*
-*To make development deployment easier, we have left schema.table references where 'ssd_development.' is a 
-default schema reference that can be easily removed or replaced as required. 
-TO REMOVE: Search and replace the entire script 'ssd_development.' replace with ''(blank/nothing)
-TO REPLACE: Search and replace the entire script 'ssd_development.' replace with 'your_dev_schema_name.'
-- where quotes shown here are NOT used when doing the replacement! 
+1. Purpose and scope
+- Builds Standard Safeguarding Dataset layer from source CMS tables
+- Creates SSD prefixed persistent tables and supporting indexes in target database
+- Database and schema configurable within script before deployment
 
-#LEGACY-PRE2016
-For LA's running T-SQL 2016-Sp1+, search and re-activate the improved non-legacy blocks in the script. 
-- Search for references to the tag #LEGACY-PRE2016 to find those. You then can remove the default legacy SQL. 
+2. Safe pilot and test usage
+- Initial pilots and trials should run in non production environment
+  eg. development or test
+- By default all SSD objects created under ssd_development schema to
+  simplify early adoption and review
 
-Script creates labelled persistent(unless set otherwise) tables in your existing|specified database. 
+3. Changing schema name
+To change or remove default schema reference:
 
-Data tables(with data copied from raw CMS tables) and indexes for the SSD are created, and therefore in some 
-cases will need review and support and/or agreement from your IT or Intelligence team. 
+- Remove schema prefix completely
+  - Search whole script for string: ssd_development. (including trailing dot)
+  - Replace with empty string
 
-The SQL script is non-destructive, but...(!)
-The SSD script does use explicitly named DROP TABLE SSD_* commands. It does however not touch anything that is not 
-prefixed SSD_. All SSD componenets are named SSD (indexes IX_SSD_ or UX_SSD_ or CIX_SSD_) to ensure schema clarity/oversight. 
+- Replace with local schema
+  - Search whole script for string: ssd_development. (including trailing dot)
+  - Replace with: your_schema_name. (no quotes)
 
+4. Legacy compatibility blocks (#LEGACY-PRE2016)
+For local authorities running SQL Server 2016 SP1 or later enable
+improved non legacy blocks:
 
-Additional notes: 
-A version that instead creates _temp|session tables is also available to enable those LA teams restricted to read access 
-on the cms db|schema. A _temp script can also be created by performing the following adjustments:
-    - Replace all instances of 'ssd_development.' with '#'
+- Search script for marker: #LEGACY-PRE2016
+- At each location follow inline comments to
+  - enable modern T SQL block
+  - optionally remove legacy default block after testing
 
-There remain some [TESTING] [REVIEW] notes as the project iterates wider testing results; similarly some test related 
-console outputs remain to aid such as run-time problem solving. These [TESTING] blocks can/will be removed. 
-********************************************************************************************************** */
+5. Object naming and drop behaviour
+- Script designed to be non destructive outside SSD namespace
+- Explicit DROP TABLE statements used only for tables whose names start
+  with SSD_
+- All SSD related components use consistent SSD naming convention
+  eg.
+  - tables:   SSD_*
+  - indexes:  IX_SSD_*, UX_SSD_*, CIX_SSD_*
+  This supports clear auditing and operational oversight
+
+6. Relationship to local CMS and governance
+- SSD tables copy data from raw CMS tables into reporting friendly structure
+- Creation of additional tables and indexes may require review, support and
+  approval from local IT, data and intelligence teams
+
+7. Alternative temp table variant
+Some local authorities only have read access to CMS database or schema
+For those teams a temp table variant of this script can be generated:
+
+- Replace every instance of string: ssd_development. (including trailing dot)
+- With: #
+- This converts SSD tables into session scoped temp tables
+- Review any local deployment constraints before using temp variant
+  in production like workloads
+
+8. Testing notes and inline markers
+Script still contains some inline testing markers while wider local
+authority testing in progress:
+
+- [TESTING] marks temporary diagnostics or console style output to help with
+  run time problem solving
+- [REVIEW] identifies items where SSD project team review requested
+
+These markers and any [TESTING] blocks can be removed locally once they are
+no longer needed
+*********************************************************************************************************
+*/
+
 
 -- META-ELEMENT: {
 --   "type": "version_history_ref",
 --   "file": "https://github.com/data-to-insight/ssd-data-model/tree/main/deployment_extracts/ssd_version_history.yml"
 -- }
 
--- META-ELEMENT: {"type": "deployment_status_note"}
 /*
 **********************************************************************************************************
-Dev Object & Item Status Flags (~in this order):
-Status:     [B]acklog,          -- To do|for review but not current priority
-            [D]ev,              -- Currently being developed 
-            [T]est,             -- Dev work being tested/run time script tests
-            [DT]ataTesting,     -- Sense checking of extract data ongoing
-            [AR]waitingReview,  -- Hand-over to SSD project team for review
-            [R]elease,          -- Ready for wider release and secondary data testing
-            [Bl]ocked,          -- Data is not held in CMS/accessible, or other stoppage reason
-            [P]laceholder       -- Data not expected to be held by most LAs or new data, - placeholder structure
+Development object and item status flags
+Flags applied in approximate lifecycle order
 
-Development notes:
-Currently in [REVIEW]
-- DfE returns expect dd/mm/YYYY formating on dates, SSD Extract initially maintains DATETIME not DATE.
-- Extended default field sizes - Some are exagerated e.g. family_id NVARCHAR(48), to ensure cms/la compatibility
-- Caseload counts - should these be restricted to SSD timeframe counts(currently this) or full system counts?
-- ITEM level metadata using the format/key labels: 
-- metadata={
-            "item_ref"      :"AAAA000A", 
+Status codes
+- [B]   Backlog         To do or for review, not current priority
+- [D]   Dev             In active development
+- [T]   Test            Under developer or run time testing
+- [DT]  DataTesting     Extract data being sense checked
+- [AR]  AwaitingReview  Awaiting SSD project team review and sign off
+- [R]   Release         Ready for wider release and secondary data testing
+- [Bl]  Blocked         Data not held in CMS or not accessible, or blocked
+                        for another reason
+- [P]   Placeholder     Data not expected to be held by most LAs, or new data
+                        where structure currently placeholder
 
-            -- and where applicable any of the following: 
-            "item_status"   :"[B], [D].." As per the above status list, 
-            "expected_data" :[csv list of "strings" or nums]
-            "info"          : "short string desc"
-            }
+Current development notes
+- Overall script status: [REVIEW]
+- DfE returns expect dates formatted as dd/mm/YYYY
+  SSD extracts initially retain DATETIME types rather than DATE
+- Some default field sizes intentionally generous, eg.
+  family_id NVARCHAR(48), to maximise compatibility across CMS and  local authority implementations
+- Caseload count logic under review, open question whether to restrict counts to SSD timeframe window or use full system history
+
+Item level metadata pattern
+Where used, item level metadata follows simple key value structure. Example:
+
+  metadata = {
+      "item_ref"      : "AAAA000A",
+
+      // optional fields
+      "item_status"   : "[B], [D]..."        // as per status list above
+      "expected_data" : ["value1", "value2"],
+      "info"          : "short description"
+  }
+
 **********************************************************************************************************
 */
+-- META-ELEMENT: {"type": "header-end"}
+
+
+
 -- META-ELEMENT: {"type": "config_metadata"}
 -- Optional notes from la config file 
 
@@ -159,15 +212,15 @@ SET @StartTime = GETDATE(); -- Script start time
 -- Description: Person/child details. This the most connected table in the SSD.
 -- Author: D2I
 -- Version: 
---              1.4: pers_common_child_id renamed - to pers_single_unique_id (TAG|System C approved (NHS IG Toolkit))
---              1.3: upn reinstated as pulled from dim_person 171125 RH
---              1.2: forename and surname added to aid onward data project on api 220125 RH
+--             1.4: pers_common_child_id renamed - to pers_single_unique_id (TAG|System C approved (NHS IG Toolkit))
+--             1.3: upn reinstated as pulled from dim_person 171125 RH
+--             1.2: forename and surname added to aid onward data project on api 220125 RH
 --             1.1: ssd_flag added for phase 2 non-core filter testing [1,0] 010824 RH
 --             1.0: fixes to where filter in-line with existing cincplac reorting 040724 JH
 --             0.2: upn _unknown size change in line with DfE to 4 160524 RH
 --             0.1: Additional inclusion criteria added to capture care leavers 120324 JH
 -- Status: [R]elease
--- Remarks:    
+-- Remarks: [EA_API_PRIORITY_TABLE]
 --             Note: Due to part reliance on 903 table, be aware that if 903 not populated pre-ssd run, 
 --             this/subsequent queries can return v.low|unexpected row counts.
 -- Dependencies:
@@ -260,7 +313,7 @@ SELECT
     -- TOP 100                              -- Limit returned rows to speed up run-time tests [TESTING|LA DEBUG]
     p.LEGACY_ID,
     CAST(p.DIM_PERSON_ID AS NVARCHAR(48)),  -- Ensure DIM_PERSON_ID is cast to NVARCHAR(48)
-    LEFT(LTRIM(RTRIM(p.UPN)), 13)           -- Coerce data to expected 13+strip, to avoid downstream fallover     
+    LEFT(LTRIM(RTRIM(p.UPN)), 13),           -- Coerce data to expected 13+strip, to avoid downstream fallover     
     p.FORENAME, 
     p.SURNAME,
     p.GENDER_MAIN_CODE AS pers_sex,         -- Sex/Gender as used in stat-returns
@@ -970,7 +1023,8 @@ PRINT 'Table created: ' + @TableName;
 -- Author: D2I
 -- Version: 1.0
 -- Status: [R]elease
--- Remarks: Need to verify json obj structure on pre-2014 SQL server instances
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          Need to verify json obj structure on pre-2014 SQL server instances
 --          Requires #LEGACY-PRE2016 changes
 -- Dependencies: 
 -- - ssd_person
@@ -1131,7 +1185,7 @@ PRINT 'Table created: ' + @TableName;
 -- Version: 1.0
 --             0.1: Removed disability_code replace() into Y/N flag 130324 RH
 -- Status: [R]elease
--- Remarks: 
+-- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_DISABILITY
@@ -1210,7 +1264,8 @@ PRINT 'Table created: ' + @TableName;
 -- Version: 1.0
 --             0.9 rem ims.DIM_LOOKUP_IMMGR_STATUS_DESC rpld with _CODE 270324 JH 
 -- Status: [R]elease
--- Remarks: Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
 --             increased field size to 100
 -- Dependencies:
 -- - ssd_person
@@ -1305,7 +1360,7 @@ PRINT 'Table created: ' + @TableName;
 --             0.2: primary _need type/size adjustment from revised spec 160524 RH
 --             0.1: contact_source_desc added, _source now populated with ID 141223 RH
 -- Status: [R]elease
--- Remarks: Requires #LEGACY-PRE2016 changes
+-- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies: 
 -- - @ssd_timeframe_years
 -- - HDM.Child_Social.FACT_REFERRALS
@@ -1960,7 +2015,8 @@ PRINT 'Table created: ' + @TableName;
 --             0.2: cina_assessment_child_seen type change from nvarchar 100524 RH
 --             0.1: fa.COMPLETED_BY_USER_NAME replaces fa.COMPLETED_BY_USER_STAFF_ID 080524
 -- Status: [R]elease
--- Remarks: Requires #LEGACY-PRE2016 changes
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          Requires #LEGACY-PRE2016 changes
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_SINGLE_ASSESSMENT
@@ -2191,7 +2247,8 @@ PRINT 'Table created: ' + @TableName;
 --              1.1: ensure only factors with associated cina_assessment_id #DtoI-1769 090724 RH
 --              1.0: New alternative structure for assessment_factors_json 250624 RH
 -- Status: [R]elease
--- Remarks: This object referrences some large source tables- Instances of 45m+. 
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          This object referrences some large source tables- Instances of 45m+. 
 -- Dependencies: 
 -- - #ssd_TMP_PRE_assessment_factors (as staged pre-processing)
 -- - ssd_cin_assessments
@@ -2411,7 +2468,7 @@ PRINT 'Table created: ' + @TableName;
 --             1.0: Fix Aggr warnings use of isnull() 310524 RH
 --             0.1: Update fix returning new row for each revision of the plan JH 070224
 -- Status: [R]elease
--- Remarks: 
+-- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_CARE_PLANS
@@ -2635,7 +2692,8 @@ PRINT 'Table created: ' + @TableName;
 -- Version: 1.2
 --             1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
 -- Status: [R]elease
--- Remarks: Requires #LEGACY-PRE2016 changes
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          Requires #LEGACY-PRE2016 changes
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_S47
@@ -2792,7 +2850,7 @@ PRINT 'Table created: ' + @TableName;
 --             0.2 Updated the worker fields 020424 JH
 --             0.1 Re-instated the worker details 010224 JH
 -- Status: [R]elease
--- Remarks:
+-- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies:
 -- - HDM.Child_Social.FACT_CP_CONFERENCE
 -- - HDM.Child_Social.FACT_MEETINGS
@@ -2986,7 +3044,7 @@ PRINT 'Table created: ' + @TableName;
 --             which need to be excluded from statutory returns 090224 JCH
 --             0.2: removed depreciated team/worker id fields RH
 -- Status: [R]elease
--- Remarks:
+-- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies:
 -- - ssd_person
 -- - ssd_initial_cp_conference
@@ -3374,7 +3432,7 @@ PRINT 'Table created: ' + @TableName;
 -- Author: D2I
 -- Version: 1.0
 -- Status: [R]elease
--- Remarks: 
+-- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_CARE_EPISODES
@@ -3934,7 +3992,8 @@ PRINT 'Table created: ' + @TableName;
 --             0.2: 060324 JH
 --             0.1: Corrected/removal of placement_la & episode_id 090124 RH
 -- Status: [R]elease
--- Remarks: DEV: filtering for OFSTED_URN LIKE 'SC%'
+-- Remarks: [EA_API_PRIORITY_TABLE] 
+--          DEV: filtering for OFSTED_URN LIKE 'SC%'
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_CLA_PLACEMENT
@@ -4645,7 +4704,8 @@ PRINT 'Table created: ' + @TableName;
 -- Author: D2I
 -- Version: 1.0
 -- Status: [R]elease
--- Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
 --         Removed csdq _form_ id as the form id is also being used as csdq_table_id
 --         Added placeholder for csdq_sdq_reason
 --         Removed PRIMARY KEY stipulation for csdq_table_id
@@ -4923,7 +4983,8 @@ PRINT 'Table created: ' + @TableName;
 --             0.2: switch field _worker)nm and _team_nm around as in wrong order RH
 --             0.1: worker/p.a id field changed to descriptive name towards AA reporting JH
 -- Status: [R]elease
--- Remarks:    Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--              Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
 --             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_development.ssd_person> references in the CTEs(added for performance)
 --             Dev: Revised V3/4 to aid performance on large involvements table aggr
 
@@ -5121,7 +5182,7 @@ PRINT 'Table created: ' + @TableName;
 --             0.2: perm_placed_foster_carer_date (from fc.START_DTTM) removed RH
 --             0.1: perm_adopter_sex, perm_adopter_legal_status added RH
 -- Status: [R]elease
--- Remarks: 
+-- Remarks: [EA_API_PRIORITY_TABLE]
 --         DEV: 181223: Assumed that only one permanence order per child. 
 --         - In order to handle/reflect the v.rare cases where this has broken down, further work is required.
 
@@ -5352,7 +5413,7 @@ PRINT 'Table created: ' + @TableName;
 --             0.9: prof_professional_id now becomes staff_id 090424 JH
 --             0.8: prof _table_ id(prof _system_ id) becomes prof _professional_ id 090424 JH
 -- Status: [R]elease
--- Remarks: 
+-- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies: 
 -- - @CaseloadLastSept30th
 -- - @CaseloadTimeframeStartDate
@@ -5546,7 +5607,7 @@ PRINT 'Table created: ' + @TableName;
 --             1.0: Trancated professional_team field IF comment data populates 110624 RH
 --             0.9: added person_id and changed source of professional_team 090424 JH
 -- Status: [R]elease
--- Remarks:    v1.2 revisions backtrack prev changes in favour of dept/hist ID fields
+-- Remarks: [EA_API_PRIORITY_TABLE]
 
 --             [TESTING] The below towards v1.0 for ref. only
 --             Regarding the increased size/len on invo_professional_team
@@ -5681,7 +5742,8 @@ PRINT 'Table created: ' + @TableName;
 --             1.0: added source data for UPN+FORMER_UPN 140624 RH
             
 -- Status: [R]elease
--- Remarks: Have temporarily disabled populating UPN & ULN as these access non-core
+-- Remarks: [EA_API_PRIORITY_TABLE] 
+--              Have temporarily disabled populating UPN & ULN as these access non-core
 --             CMS modules. Can be re-enabled on a localised basis. 
 
 --         The list of allowed identifier_type codes are:

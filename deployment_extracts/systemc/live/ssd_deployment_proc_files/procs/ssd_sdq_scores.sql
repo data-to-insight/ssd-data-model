@@ -12,7 +12,8 @@ BEGIN
 -- Author: D2I
 -- Version: 1.0
 -- Status: [D]ev-
--- Remarks: ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          ASSESSMENT_TEMPLATE_ID_CODEs ranges validated at 12/12/23
 --         Removed csdq _form_ id as the form id is also being used as csdq_table_id
 --         Added placeholder for csdq_sdq_reason
 --         Removed PRIMARY KEY stipulation for csdq_table_id
