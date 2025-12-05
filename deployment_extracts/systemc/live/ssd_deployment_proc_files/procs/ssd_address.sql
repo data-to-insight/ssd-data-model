@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_address', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_address AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_address
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_address
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description: Contains full address details for every person 
@@ -20,9 +44,9 @@ BEGIN
 -- - HDM.Child_Social.DIM_PERSON_ADDRESS
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_address'', ''U'') IS NOT NULL DROP TABLE #ssd_address;
+IF OBJECT_ID('tempdb..#ssd_address', 'U') IS NOT NULL DROP TABLE #ssd_address;
 
-IF OBJECT_ID(''ssd_address'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_address','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_address)
         TRUNCATE TABLE ssd_address;
@@ -60,26 +84,26 @@ SELECT
     pa.START_DTTM,
     pa.END_DTTM,
     CASE 
-        WHEN REPLACE(pa.POSTCODE, '' '', '''') = REPLICATE(''X'', LEN(REPLACE(pa.POSTCODE, '' '', '''')))
-            THEN ''''  -- clear postcode containing all X''s
-        WHEN LOWER(REPLACE(pa.POSTCODE, '' '', '''')) = ''nopostcode''
-            THEN ''''  -- clear ''nopostcode'' strs
+        WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', '')))
+            THEN ''  -- clear postcode containing all X's
+        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode'
+            THEN ''  -- clear 'nopostcode' strs
         ELSE
             LTRIM(RTRIM(pa.POSTCODE))  -- keep internal space(s)
     END AS CleanedPostcode,
     (
-        ''{'' +
-        ''"ROOM": "'' + ISNULL(TRY_CAST(pa.ROOM_NO AS NVARCHAR(50)), '''') + ''", '' +
-        ''"FLOOR": "'' + ISNULL(TRY_CAST(pa.FLOOR_NO AS NVARCHAR(50)), '''') + ''", '' +
-        ''"FLAT": "'' + ISNULL(TRY_CAST(pa.FLAT_NO AS NVARCHAR(50)), '''') + ''", '' +
-        ''"BUILDING": "'' + ISNULL(pa.BUILDING, '''') + ''", '' +
-        ''"HOUSE": "'' + ISNULL(TRY_CAST(pa.HOUSE_NO AS NVARCHAR(50)), '''') + ''", '' +
-        ''"STREET": "'' + ISNULL(pa.STREET, '''') + ''", '' +
-        ''"TOWN": "'' + ISNULL(pa.TOWN, '''') + ''", '' +
-        ''"UPRN": "'' + ISNULL(TRY_CAST(pa.UPRN AS NVARCHAR(50)), '''') + ''", '' +
-        ''"EASTING": "'' + ISNULL(TRY_CAST(pa.EASTING AS NVARCHAR(20)), '''') + ''", '' +
-        ''"NORTHING": "'' + ISNULL(TRY_CAST(pa.NORTHING AS NVARCHAR(20)), '''') + ''"'' +
-        ''}''
+        '{' +
+        '"ROOM": "' + ISNULL(TRY_CAST(pa.ROOM_NO AS NVARCHAR(50)), '') + '", ' +
+        '"FLOOR": "' + ISNULL(TRY_CAST(pa.FLOOR_NO AS NVARCHAR(50)), '') + '", ' +
+        '"FLAT": "' + ISNULL(TRY_CAST(pa.FLAT_NO AS NVARCHAR(50)), '') + '", ' +
+        '"BUILDING": "' + ISNULL(pa.BUILDING, '') + '", ' +
+        '"HOUSE": "' + ISNULL(TRY_CAST(pa.HOUSE_NO AS NVARCHAR(50)), '') + '", ' +
+        '"STREET": "' + ISNULL(pa.STREET, '') + '", ' +
+        '"TOWN": "' + ISNULL(pa.TOWN, '') + '", ' +
+        '"UPRN": "' + ISNULL(TRY_CAST(pa.UPRN AS NVARCHAR(50)), '') + '", ' +
+        '"EASTING": "' + ISNULL(TRY_CAST(pa.EASTING AS NVARCHAR(20)), '') + '", ' +
+        '"NORTHING": "' + ISNULL(TRY_CAST(pa.NORTHING AS NVARCHAR(20)), '') + '"' +
+        '}'
     ) AS addr_address_json
 FROM 
     HDM.Child_Social.DIM_PERSON_ADDRESS AS pa
@@ -102,10 +126,10 @@ WHERE pa.DIM_PERSON_ID <> -1
 --     pa.START_DTTM,
 --     pa.END_DTTM,
 --     CASE 
---         WHEN REPLACE(pa.POSTCODE, '' '', '''') = REPLICATE(''X'', LEN(REPLACE(pa.POSTCODE, '' '', '''')))
---             THEN ''''  -- clear postcode containing all X''s
---         WHEN LOWER(REPLACE(pa.POSTCODE, '' '', '''')) = ''nopostcode''
---             THEN ''''  -- clear postcode containing ''nopostcode''
+--         WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', '')))
+--             THEN ''  -- clear postcode containing all X's
+--         WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode'
+--             THEN ''  -- clear postcode containing 'nopostcode'
 --         ELSE
 --             LTRIM(RTRIM(pa.POSTCODE))  -- keep any internal space(s), just trim ends
 --     END AS CleanedPostcode,
@@ -114,16 +138,16 @@ WHERE pa.DIM_PERSON_ID <> -1
 --     SELECT 
 --         -- SSD standard 
 --         -- all keys in structure regardless of data presence
---         ISNULL(pa.ROOM_NO, '''')    AS ROOM, 
---         ISNULL(pa.FLOOR_NO, '''')   AS FLOOR, 
---         ISNULL(pa.FLAT_NO, '''')    AS FLAT, 
---         ISNULL(pa.BUILDING, '''')   AS BUILDING, 
---         ISNULL(pa.HOUSE_NO, '''')   AS HOUSE, 
---         ISNULL(pa.STREET, '''')     AS STREET, 
---         ISNULL(pa.TOWN, '''')       AS TOWN,
---         ISNULL(pa.UPRN, '''')       AS UPRN,
---         ISNULL(pa.EASTING, '''')    AS EASTING,
---         ISNULL(pa.NORTHING, '''')   AS NORTHING
+--         ISNULL(pa.ROOM_NO, '')    AS ROOM, 
+--         ISNULL(pa.FLOOR_NO, '')   AS FLOOR, 
+--         ISNULL(pa.FLAT_NO, '')    AS FLAT, 
+--         ISNULL(pa.BUILDING, '')   AS BUILDING, 
+--         ISNULL(pa.HOUSE_NO, '')   AS HOUSE, 
+--         ISNULL(pa.STREET, '')     AS STREET, 
+--         ISNULL(pa.TOWN, '')       AS TOWN,
+--         ISNULL(pa.UPRN, '')       AS UPRN,
+--         ISNULL(pa.EASTING, '')    AS EASTING,
+--         ISNULL(pa.NORTHING, '')   AS NORTHING
 --     FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 --     ) AS addr_address_json
 -- FROM 
@@ -157,4 +181,5 @@ WHERE pa.DIM_PERSON_ID <> -1
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

@@ -5,9 +5,21 @@ meta:
   owner: "Data to Insight"
   status: "Release"
 
-current_version: "1.3.7"
+current_version: "1.3.8"
 
 releases:
+  - version_number: "1.3.8" 
+    release_date: "2025-12-05" 
+    includes_changes: >
+      fix run-time error missing comma on LEFT(LTRIM(RTRIM(p.UPN)), 13),  main ssd script
+      BETA proc build running changes. build process now omits dynamic double quotes and passes declared var vals + depreciates ssd_setup.sql
+      Ported, and depreciated ssd_version table to siloed yml file as part of ongoing script de-bloat
+    impact_description: >
+      1.3.7 would not run, this a syntax fix
+      1.3.7 BETA proc build adjustments for Coventry
+    impacts_cms_deployment:
+      - "systemc"
+
   - version_number: "1.3.7"
     release_date: "2025-12-03"
     includes_changes: >

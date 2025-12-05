@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_cin_assessments', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_cin_assessments AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_cin_assessments
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_cin_assessments
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description: 
@@ -21,9 +45,9 @@ BEGIN
 -- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_cin_assessments'', ''U'') IS NOT NULL DROP TABLE #ssd_cin_assessments;
+IF OBJECT_ID('tempdb..#ssd_cin_assessments', 'U') IS NOT NULL DROP TABLE #ssd_cin_assessments;
 
-IF OBJECT_ID(''ssd_cin_assessments'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_cin_assessments','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_cin_assessments)
         TRUNCATE TABLE ssd_cin_assessments;
@@ -61,15 +85,15 @@ FormAnswers AS (
         ffa.ANSWER,
         ffa.DIM_ASSESSMENT_TEMPLATE_QUESTION_ID_DESC
     FROM HDM.Child_Social.FACT_FORM_ANSWERS ffa
-    WHERE ffa.ANSWER_NO IN (''seenYN'', ''FormEndDate'')
+    WHERE ffa.ANSWER_NO IN ('seenYN', 'FormEndDate')
 ),
  
 -- CTE for aggregating form answers
 AggregatedFormAnswers AS (
     SELECT
         ffa.FACT_FORM_ID,
-        MAX(ISNULL(CASE WHEN ffa.ANSWER_NO = ''seenYN'' THEN ffa.ANSWER ELSE NULL END, ''''))                                       AS seenYN, -- [REVIEW] 310524 RH
-        MAX(ISNULL(CASE WHEN ffa.ANSWER_NO = ''FormEndDate'' THEN TRY_CAST(ffa.ANSWER AS DATETIME) ELSE NULL END, ''1900-01-01''))  AS AssessmentAuthorisedDate -- [REVIEW] 310524 RH
+        MAX(ISNULL(CASE WHEN ffa.ANSWER_NO = 'seenYN' THEN ffa.ANSWER ELSE NULL END, ''))                                       AS seenYN, -- [REVIEW] 310524 RH
+        MAX(ISNULL(CASE WHEN ffa.ANSWER_NO = 'FormEndDate' THEN TRY_CAST(ffa.ANSWER AS DATETIME) ELSE NULL END, '1900-01-01'))  AS AssessmentAuthorisedDate -- [REVIEW] 310524 RH
     FROM FormAnswers ffa
     GROUP BY ffa.FACT_FORM_ID
 ) 
@@ -96,29 +120,29 @@ SELECT
     fa.FACT_REFERRAL_ID,
     fa.START_DTTM,
     CASE
-        WHEN UPPER(afa.seenYN) = ''YES''  THEN ''Y''
-        WHEN UPPER(afa.seenYN) = ''NO''   THEN ''N''
+        WHEN UPPER(afa.seenYN) = 'YES'  THEN 'Y'
+        WHEN UPPER(afa.seenYN) = 'NO'   THEN 'N'
         ELSE NULL
     END AS seenYN,
     afa.AssessmentAuthorisedDate,
     (
         -- Manual JSON-like concatenation for cina_assessment_outcome_json
-        ''{'' +
-        ''"NFA_FLAG": "'' + ISNULL(TRY_CAST(fa.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"NFA_S47_END_FLAG": "'' + ISNULL(TRY_CAST(fa.OUTCOME_NFA_S47_END_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"STRATEGY_DISCUSSION_FLAG": "'' + ISNULL(TRY_CAST(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"CLA_REQUEST_FLAG": "'' + ISNULL(TRY_CAST(fa.OUTCOME_CLA_REQUEST_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"PRIVATE_FOSTERING_FLAG": "'' + ISNULL(TRY_CAST(fa.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"LEGAL_ACTION_FLAG": "'' + ISNULL(TRY_CAST(fa.OUTCOME_LEGAL_ACTION_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"PROV_OF_SERVICES_FLAG": "'' + ISNULL(TRY_CAST(fa.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"PROV_OF_SB_CARE_FLAG": "'' + ISNULL(TRY_CAST(fa.OUTCOME_PROV_OF_SB_CARE_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"SPECIALIST_ASSESSMENT_FLAG": "'' + ISNULL(TRY_CAST(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"REFERRAL_TO_OTHER_AGENCY_FLAG": "'' + ISNULL(TRY_CAST(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"OTHER_ACTIONS_FLAG": "'' + ISNULL(TRY_CAST(fa.OUTCOME_OTHER_ACTIONS_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"OTHER_OUTCOMES_EXIST_FLAG": "'' + ISNULL(TRY_CAST(fa.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"TOTAL_NO_OF_OUTCOMES": '' + ISNULL(TRY_CAST(fa.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(3)), ''null'') + '', '' +
-        ''"COMMENTS": "'' + ISNULL(TRY_CAST(fa.OUTCOME_COMMENTS AS NVARCHAR(900)), '''') + ''"'' +
-        ''}''
+        '{' +
+        '"NFA_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"NFA_S47_END_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_NFA_S47_END_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"STRATEGY_DISCUSSION_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CLA_REQUEST_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_CLA_REQUEST_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PRIVATE_FOSTERING_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"LEGAL_ACTION_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_LEGAL_ACTION_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PROV_OF_SERVICES_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PROV_OF_SB_CARE_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_PROV_OF_SB_CARE_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"SPECIALIST_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"REFERRAL_TO_OTHER_AGENCY_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"OTHER_ACTIONS_FLAG": "' + ISNULL(TRY_CAST(fa.OUTCOME_OTHER_ACTIONS_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fa.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"TOTAL_NO_OF_OUTCOMES": ' + ISNULL(TRY_CAST(fa.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(3)), 'null') + ', ' +
+        '"COMMENTS": "' + ISNULL(TRY_CAST(fa.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
+        '}'
     ) AS cina_assessment_outcome_json,
     fa.OUTCOME_NFA_FLAG                                         AS cina_assessment_outcome_nfa,
     NULLIF(fa.COMPLETED_BY_DEPT_ID, -1)                         AS cina_assessment_team,             -- replace -1 values with NULL _team_id
@@ -131,7 +155,7 @@ LEFT JOIN
     -- access pre-processed data in CTE
     AggregatedFormAnswers afa ON fa.FACT_FORM_ID = afa.FACT_FORM_ID
  
-WHERE fa.DIM_LOOKUP_STEP_SUBSTATUS_CODE NOT IN (''X'',''D'')        --Excludes draft and cancelled assessments
+WHERE fa.DIM_LOOKUP_STEP_SUBSTATUS_CODE NOT IN ('X','D')        --Excludes draft and cancelled assessments
  
 AND 
     (afa.AssessmentAuthorisedDate >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
@@ -153,8 +177,8 @@ AND EXISTS (
 --     fa.FACT_REFERRAL_ID,
 --     fa.START_DTTM,
 --     CASE
---         WHEN UPPER(afa.seenYN) = ''YES''  THEN ''Y''
---         WHEN UPPER(afa.seenYN) = ''NO''   THEN ''N''
+--         WHEN UPPER(afa.seenYN) = 'YES'  THEN 'Y'
+--         WHEN UPPER(afa.seenYN) = 'NO'   THEN 'N'
 --         ELSE NULL
 --     END AS seenYN,
 --     afa.AssessmentAuthorisedDate,
@@ -162,20 +186,20 @@ AND EXISTS (
 --         SELECT
 --             -- SSD standard 
 --             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
---             ISNULL(fa.OUTCOME_NFA_FLAG, '''')                     AS NFA_FLAG,
---             ISNULL(fa.OUTCOME_NFA_S47_END_FLAG, '''')             AS NFA_S47_END_FLAG,
---             ISNULL(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '''')     AS STRATEGY_DISCUSSION_FLAG,
---             ISNULL(fa.OUTCOME_CLA_REQUEST_FLAG, '''')             AS CLA_REQUEST_FLAG,
---             ISNULL(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '''')       AS PRIVATE_FOSTERING_FLAG,
---             ISNULL(fa.OUTCOME_LEGAL_ACTION_FLAG, '''')            AS LEGAL_ACTION_FLAG,
---             ISNULL(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '''')        AS PROV_OF_SERVICES_FLAG,
---             ISNULL(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '''')         AS PROV_OF_SB_CARE_FLAG,
---             ISNULL(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '''')   AS SPECIALIST_ASSESSMENT_FLAG,
---             ISNULL(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '''') AS REFERRAL_TO_OTHER_AGENCY_FLAG,
---             ISNULL(fa.OUTCOME_OTHER_ACTIONS_FLAG, '''')           AS OTHER_ACTIONS_FLAG,
---             ISNULL(fa.OTHER_OUTCOMES_EXIST_FLAG, '''')            AS OTHER_OUTCOMES_EXIST_FLAG,
---             ISNULL(fa.TOTAL_NO_OF_OUTCOMES, '''')                 AS TOTAL_NO_OF_OUTCOMES,
---             ISNULL(fa.OUTCOME_COMMENTS, '''')                     AS COMMENTS -- dictates a larger _json size
+--             ISNULL(fa.OUTCOME_NFA_FLAG, '')                     AS NFA_FLAG,
+--             ISNULL(fa.OUTCOME_NFA_S47_END_FLAG, '')             AS NFA_S47_END_FLAG,
+--             ISNULL(fa.OUTCOME_STRATEGY_DISCUSSION_FLAG, '')     AS STRATEGY_DISCUSSION_FLAG,
+--             ISNULL(fa.OUTCOME_CLA_REQUEST_FLAG, '')             AS CLA_REQUEST_FLAG,
+--             ISNULL(fa.OUTCOME_PRIVATE_FOSTERING_FLAG, '')       AS PRIVATE_FOSTERING_FLAG,
+--             ISNULL(fa.OUTCOME_LEGAL_ACTION_FLAG, '')            AS LEGAL_ACTION_FLAG,
+--             ISNULL(fa.OUTCOME_PROV_OF_SERVICES_FLAG, '')        AS PROV_OF_SERVICES_FLAG,
+--             ISNULL(fa.OUTCOME_PROV_OF_SB_CARE_FLAG, '')         AS PROV_OF_SB_CARE_FLAG,
+--             ISNULL(fa.OUTCOME_SPECIALIST_ASSESSMENT_FLAG, '')   AS SPECIALIST_ASSESSMENT_FLAG,
+--             ISNULL(fa.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '') AS REFERRAL_TO_OTHER_AGENCY_FLAG,
+--             ISNULL(fa.OUTCOME_OTHER_ACTIONS_FLAG, '')           AS OTHER_ACTIONS_FLAG,
+--             ISNULL(fa.OTHER_OUTCOMES_EXIST_FLAG, '')            AS OTHER_OUTCOMES_EXIST_FLAG,
+--             ISNULL(fa.TOTAL_NO_OF_OUTCOMES, '')                 AS TOTAL_NO_OF_OUTCOMES,
+--             ISNULL(fa.OUTCOME_COMMENTS, '')                     AS COMMENTS -- dictates a larger _json size
 --         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 --         ) AS cina_assessment_outcome_json,
 --     fa.OUTCOME_NFA_FLAG                                         AS cina_assessment_outcome_nfa,
@@ -189,7 +213,7 @@ AND EXISTS (
 --     -- access pre-processed data in CTE
 --     AggregatedFormAnswers afa ON fa.FACT_FORM_ID = afa.FACT_FORM_ID
  
--- WHERE fa.DIM_LOOKUP_STEP_SUBSTATUS_CODE NOT IN (''X'',''D'')        --Excludes draft and cancelled assessments
+-- WHERE fa.DIM_LOOKUP_STEP_SUBSTATUS_CODE NOT IN ('X','D')        --Excludes draft and cancelled assessments
  
 -- AND 
 --     (afa.AssessmentAuthorisedDate >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
@@ -223,4 +247,5 @@ AND EXISTS (
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

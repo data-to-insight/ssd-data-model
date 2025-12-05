@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_care_leavers', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_care_leavers AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_care_leavers
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_care_leavers
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description:
@@ -29,9 +53,9 @@ BEGIN
 -- - HDM.Child_Social.FACT_CARE_PLANS
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_care_leavers'', ''U'') IS NOT NULL DROP TABLE #ssd_care_leavers;
+IF OBJECT_ID('tempdb..#ssd_care_leavers', 'U') IS NOT NULL DROP TABLE #ssd_care_leavers;
  
-IF OBJECT_ID(''ssd_care_leavers'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_care_leavers','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_care_leavers)
         TRUNCATE TABLE ssd_care_leavers;
@@ -62,9 +86,9 @@ END
     SELECT
         fi.DIM_PERSON_ID,
         -- worker, alloc team, and p.advisor dets <<per involvement type>>
-        MAX(CASE WHEN fi.RecentInvolvement = ''CW'' THEN NULLIF(fi.DIM_WORKER_ID, 0) ELSE NULL END)   AS CurrentWorker,       -- c.w name for the ''CW'' inv type
-        MAX(CASE WHEN fi.RecentInvolvement = ''CW'' THEN NULLIF(NULLIF(fi.FACT_WORKER_HISTORY_DEPARTMENT_ID, -1), 0) ELSE NULL END) AS AllocatedTeam, -- team desc for the ''CW'' inv type
-        MAX(CASE WHEN fi.RecentInvolvement = ''16PLUS'' THEN fi.DIM_WORKER_ID ELSE NULL END)          AS PersonalAdvisor      -- p.a. for the ''16PLUS'' inv type
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN NULLIF(fi.DIM_WORKER_ID, 0) ELSE NULL END)   AS CurrentWorker,       -- c.w name for the 'CW' inv type
+        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN NULLIF(NULLIF(fi.FACT_WORKER_HISTORY_DEPARTMENT_ID, -1), 0) ELSE NULL END) AS AllocatedTeam, -- team desc for the 'CW' inv type
+        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS' THEN fi.DIM_WORKER_ID ELSE NULL END)          AS PersonalAdvisor      -- p.a. for the '16PLUS' inv type
         -- was fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC & fi.FACT_WORKER_NAME. fi.DIM_DEPARTMENT_ID also available
     
     FROM (
@@ -74,19 +98,19 @@ END
                 PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE
                 ORDER BY FACT_INVOLVEMENTS_ID DESC
             ) AS rn,
-            -- Mark the involvement type (''CW'' or ''16PLUS'')
+            -- Mark the involvement type ('CW' or '16PLUS')
             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
         FROM HDM.Child_Social.FACT_INVOLVEMENTS
         WHERE
-            -- Filter records to just ''CW'' and ''16PLUS'' inv types
-            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN (''CW'', ''16PLUS'')
+            -- Filter records to just 'CW' and '16PLUS' inv types
+            DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IN ('CW', '16PLUS')
                                                     -- Switched off in v1.6 [TESTING]
-            -- AND END_DTTM IS NULL                 -- Switch on if certainty exists that we will always find a ''current'' ''open'' record for both types
+            -- AND END_DTTM IS NULL                 -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
             -- AND DIM_WORKER_ID IS NOT NULL        -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
             AND DIM_WORKER_ID <> -1                 -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
  
-            -- where the inv type is ''CW'' + flagged as allocated
-            AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> ''CW'' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = ''CW'' AND IS_ALLOCATED_CW_FLAG = ''Y''))
+            -- where the inv type is 'CW' + flagged as allocated
+            AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
                                                     -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
     ) fi
  
@@ -116,7 +140,7 @@ SELECT
     dce.DIM_PERSON_ID                                       AS clea_person_id,
     CASE WHEN
         dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NULL
-        THEN ''No Current Eligibility''
+        THEN 'No Current Eligibility'
         ELSE dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC END     AS clea_care_leaver_eligibility,
     fccl.DIM_LOOKUP_IN_TOUCH_CODE_CODE                      AS clea_care_leaver_in_touch,
     fccl.IN_TOUCH_DTTM                                      AS clea_care_leaver_latest_contact,
@@ -125,12 +149,12 @@ SELECT
     fccl.DIM_LOOKUP_MAIN_ACTIVITY_DESC                      AS clea_care_leaver_activity,
  
     -- MAX(CASE WHEN fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
-    --     AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = ''PATH''
+    --     AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH'
     --     THEN fcp.MODIF_DTTM END)                            AS clea_pathway_plan_review_date,
 
  MAX(ISNULL(CASE WHEN fccl.DIM_PERSON_ID = fcp.DIM_PERSON_ID 
-    AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = ''PATH'' 
-    THEN fcp.MODIF_DTTM END, ''1900-01-01''))                 AS clea_pathway_plan_review_date,
+    AND fcp.DIM_LOOKUP_PLAN_TYPE_ID_CODE = 'PATH' 
+    THEN fcp.MODIF_DTTM END, '1900-01-01'))                 AS clea_pathway_plan_review_date,
 
     ih.PersonalAdvisor                                      AS clea_care_leaver_personal_advisor,
     ih.AllocatedTeam                                        AS clea_care_leaver_allocated_team,
@@ -189,4 +213,5 @@ GROUP BY
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_initial_cp_conference', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_initial_cp_conference AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_initial_cp_conference
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_initial_cp_conference
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description:
@@ -19,9 +43,9 @@ BEGIN
 -- - HDM.Child_Social.FACT_CP_PLAN
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_initial_cp_conference'', ''U'') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
+IF OBJECT_ID('tempdb..#ssd_initial_cp_conference', 'U') IS NOT NULL DROP TABLE #ssd_initial_cp_conference;
 
-IF OBJECT_ID(''ssd_initial_cp_conference'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_initial_cp_conference','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_initial_cp_conference)
         TRUNCATE TABLE ssd_initial_cp_conference;
@@ -67,7 +91,7 @@ SELECT
     fcpc.FACT_CP_CONFERENCE_ID,
     fcpc.FACT_MEETING_ID,
     CASE 
-        WHEN fcpc.FACT_S47_ID IN (''-1'', -1) THEN NULL
+        WHEN fcpc.FACT_S47_ID IN ('-1', -1) THEN NULL
         ELSE fcpc.FACT_S47_ID 
     END AS icpc_s47_enquiry_id,
     fcpc.DIM_PERSON_ID,
@@ -79,16 +103,16 @@ SELECT
     fcpc.OUTCOME_CP_FLAG,
         (
             -- Manual JSON-like concatenation for icpc_icpc_outcome_json
-            ''{'' +
-            ''"NFA_FLAG": "'' + ISNULL(TRY_CAST(fcpc.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-            ''"REFERRAL_TO_OTHER_AGENCY_FLAG": "'' + ISNULL(TRY_CAST(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-            ''"SINGLE_ASSESSMENT_FLAG": "'' + ISNULL(TRY_CAST(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-            ''"PROV_OF_SERVICES_FLAG": "'' + ISNULL(TRY_CAST(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-            ''"CP_FLAG": "'' + ISNULL(TRY_CAST(fcpc.OUTCOME_CP_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-            ''"OTHER_OUTCOMES_EXIST_FLAG": "'' + ISNULL(TRY_CAST(fcpc.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-            ''"TOTAL_NO_OF_OUTCOMES": '' + ISNULL(TRY_CAST(fcpc.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(4)), ''null'') + '', '' +
-            ''"COMMENTS": "'' + ISNULL(TRY_CAST(fcpc.OUTCOME_COMMENTS AS NVARCHAR(900)), '''') + ''"'' +
-            ''}''
+            '{' +
+            '"NFA_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"REFERRAL_TO_OTHER_AGENCY_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"SINGLE_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"PROV_OF_SERVICES_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"CP_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_CP_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fcpc.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"TOTAL_NO_OF_OUTCOMES": ' + ISNULL(TRY_CAST(fcpc.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(4)), 'null') + ', ' +
+            '"COMMENTS": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
+            '}'
         ) AS icpc_icpc_outcome_json,
     fcpc.ORGANISED_BY_DEPT_ID                                       AS icpc_icpc_team,          -- was fcpc.ORGANISED_BY_DEPT_NAME #DtoI-1762
     fcpc.ORGANISED_BY_USER_STAFF_ID                                 AS icpc_icpc_worker_id      -- was fcpc.ORGANISED_BY_USER_NAME
@@ -101,7 +125,7 @@ LEFT JOIN
     HDM.Child_Social.FACT_CP_PLAN AS fcpp ON fcpc.FACT_CP_CONFERENCE_ID = fcpp.FACT_INITIAL_CP_CONFERENCE_ID
 
 WHERE
-    fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = ''CPConference''
+    fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
 AND
     (fm.ACTUAL_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
     OR fm.ACTUAL_DTTM IS NULL)
@@ -117,7 +141,7 @@ AND EXISTS ( -- only ssd relevant records
 --     fcpc.FACT_CP_CONFERENCE_ID,
 --     fcpc.FACT_MEETING_ID,
 --     CASE 
---         WHEN fcpc.FACT_S47_ID IN (''-1'', -1) THEN NULL
+--         WHEN fcpc.FACT_S47_ID IN ('-1', -1) THEN NULL
 --         ELSE fcpc.FACT_S47_ID 
 --     END AS icpc_s47_enquiry_id,
 --     fcpc.DIM_PERSON_ID,
@@ -131,14 +155,14 @@ AND EXISTS ( -- only ssd relevant records
 --         SELECT
 --             -- SSD standard 
 --             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
---             ISNULL(fcpc.OUTCOME_NFA_FLAG, '''')                       AS NFA_FLAG,
---             ISNULL(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '''')  AS REFERRAL_TO_OTHER_AGENCY_FLAG,
---             ISNULL(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '''')         AS SINGLE_ASSESSMENT_FLAG,
---             ISNULL(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '''')          AS PROV_OF_SERVICES_FLAG,
---             ISNULL(fcpc.OUTCOME_CP_FLAG, '''')                        AS CP_FLAG,
---             ISNULL(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '''')              AS OTHER_OUTCOMES_EXIST_FLAG,
---             ISNULL(fcpc.TOTAL_NO_OF_OUTCOMES, '''')                   AS TOTAL_NO_OF_OUTCOMES,
---             ISNULL(fcpc.OUTCOME_COMMENTS, '''')                       AS COMMENTS
+--             ISNULL(fcpc.OUTCOME_NFA_FLAG, '')                       AS NFA_FLAG,
+--             ISNULL(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS REFERRAL_TO_OTHER_AGENCY_FLAG,
+--             ISNULL(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS SINGLE_ASSESSMENT_FLAG,
+--             ISNULL(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS PROV_OF_SERVICES_FLAG,
+--             ISNULL(fcpc.OUTCOME_CP_FLAG, '')                        AS CP_FLAG,
+--             ISNULL(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')              AS OTHER_OUTCOMES_EXIST_FLAG,
+--             ISNULL(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS TOTAL_NO_OF_OUTCOMES,
+--             ISNULL(fcpc.OUTCOME_COMMENTS, '')                       AS COMMENTS
 --         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 --         )                                                           AS icpc_icpc_outcome_json,
 --     fcpc.ORGANISED_BY_DEPT_ID                                       AS icpc_icpc_team,          -- was fcpc.ORGANISED_BY_DEPT_NAME #DtoI-1762
@@ -152,7 +176,7 @@ AND EXISTS ( -- only ssd relevant records
 --     HDM.Child_Social.FACT_CP_PLAN AS fcpp ON fcpc.FACT_CP_CONFERENCE_ID = fcpp.FACT_INITIAL_CP_CONFERENCE_ID
 
 -- WHERE
---     fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = ''CPConference''
+--     fm.DIM_LOOKUP_MTG_TYPE_ID_CODE = 'CPConference'
 -- AND
 --     (fm.ACTUAL_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
 --     OR fm.ACTUAL_DTTM IS NULL)
@@ -186,4 +210,5 @@ AND EXISTS ( -- only ssd relevant records
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

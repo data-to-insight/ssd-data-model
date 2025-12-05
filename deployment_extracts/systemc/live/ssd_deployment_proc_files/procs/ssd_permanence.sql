@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_permanence', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_permanence AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_permanence
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_permanence
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description: 
@@ -27,9 +51,9 @@ BEGIN
 -- - HDM.Child_Social.FACT_CLA
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_permanence'', ''U'') IS NOT NULL DROP TABLE #ssd_permanence;
+IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL DROP TABLE #ssd_permanence;
 
-IF OBJECT_ID(''ssd_permanence'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_permanence','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_permanence)
         TRUNCATE TABLE ssd_permanence;
@@ -88,15 +112,15 @@ END
         fa.DIM_LOOKUP_ADOPTER_LEGAL_STATUS_CODE           AS perm_adopter_legal_status,
         fa.NO_OF_ADOPTERS                                 AS perm_number_of_adopters,
         CASE 
-            WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN (''A3'',''A4'',''A5'',''A6'')
+            WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
             THEN fcpl.START_DTTM 
             ELSE NULL 
         END                                               AS perm_placed_for_adoption_date,
         fa.ADOPTED_BY_CARER_FLAG                          AS perm_adopted_by_carer_flag,
-        CAST(''1900/01/01'' AS DATETIME)                    AS perm_placed_foster_carer_date,         -- [PLACEHOLDER_DATA] [TESTING] 
+        CAST('1900/01/01' AS DATETIME)                    AS perm_placed_foster_carer_date,         -- [PLACEHOLDER_DATA] [TESTING] 
         fa.FOSTER_TO_ADOPT_DTTM                           AS perm_placed_ffa_cp_date,
         CASE 
-            WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN (''A3'',''A4'',''A5'',''A6'')
+            WHEN fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3','A4','A5','A6')
             THEN fce.OFSTED_URN 
             ELSE NULL 
         END                                               AS perm_placement_provider_urn,
@@ -104,9 +128,9 @@ END
         fa.DIM_LOOKUP_ADOP_REASON_CEASED_CODE             AS perm_decision_reversed_reason,
         fce.PLACEND                                       AS perm_permanence_order_date,
         CASE
-            WHEN fce.CARE_REASON_END_CODE IN (''E1'', ''E12'', ''E11'') THEN ''Adoption''
-            WHEN fce.CARE_REASON_END_CODE IN (''E48'', ''E44'', ''E43'', ''45'', ''E45'', ''E47'', ''E46'') THEN ''Special Guardianship Order''
-            WHEN fce.CARE_REASON_END_CODE IN (''45'', ''E41'') THEN ''Child Arrangements/ Residence Order''
+            WHEN fce.CARE_REASON_END_CODE IN ('E1', 'E12', 'E11') THEN 'Adoption'
+            WHEN fce.CARE_REASON_END_CODE IN ('E48', 'E44', 'E43', '45', 'E45', 'E47', 'E46') THEN 'Special Guardianship Order'
+            WHEN fce.CARE_REASON_END_CODE IN ('45', 'E41') THEN 'Child Arrangements/ Residence Order'
             ELSE NULL
         END                                               AS perm_permanence_order_type,
         fa.ADOPTION_SOCIAL_WORKER_ID                      AS perm_adoption_worker_id,
@@ -123,14 +147,14 @@ END
     LEFT JOIN HDM.Child_Social.FACT_ADOPTION AS fa ON fa.DIM_PERSON_ID = fce.DIM_PERSON_ID AND fa.START_DTTM IS NOT NULL
     LEFT JOIN HDM.Child_Social.FACT_CLA AS fc ON fc.FACT_CLA_ID = fce.FACT_CLA_ID -- [TESTING] IS this still requ if fc.START_DTTM not in use here? 
     LEFT JOIN HDM.Child_Social.FACT_CLA_PLACEMENT AS fcpl ON fcpl.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
-        AND fcpl.FACT_CLA_PLACEMENT_ID <> ''-1''
-        AND (fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN (''A3'', ''A4'', ''A5'', ''A6'') OR fcpl.FFA_IS_PLAN_DATE IS NOT NULL)
+        AND fcpl.FACT_CLA_PLACEMENT_ID <> '-1'
+        AND (fcpl.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A3', 'A4', 'A5', 'A6') OR fcpl.FFA_IS_PLAN_DATE IS NOT NULL)
 
     LEFT JOIN HDM.Child_Social.DIM_PERSON p ON fce.DIM_PERSON_ID = p.DIM_PERSON_ID
 
     WHERE ((fce.PLACEND IS NULL AND fa.START_DTTM IS NOT NULL)
-        OR fce.CARE_REASON_END_CODE IN (''E48'', ''E1'', ''E44'', ''E12'', ''E11'', ''E43'', ''45'', ''E41'', ''E45'', ''E47'', ''E46''))
-        AND fce.DIM_PERSON_ID <> ''-1''
+        OR fce.CARE_REASON_END_CODE IN ('E48', 'E1', 'E44', 'E12', 'E11', 'E43', '45', 'E41', 'E45', 'E47', 'E46'))
+        AND fce.DIM_PERSON_ID <> '-1'
 
         -- -- Exclusion block commented for further [TESTING] 
         -- AND EXISTS ( -- ssd records only
@@ -221,4 +245,5 @@ AND EXISTS
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

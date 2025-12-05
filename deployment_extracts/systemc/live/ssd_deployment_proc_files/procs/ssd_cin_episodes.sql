@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_cin_episodes', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_cin_episodes AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_cin_episodes
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_cin_episodes
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description: 
@@ -18,9 +42,9 @@ BEGIN
 -- - HDM.Child_Social.FACT_REFERRALS
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_cin_episodes'', ''U'') IS NOT NULL DROP TABLE #ssd_cin_episodes;
+IF OBJECT_ID('tempdb..#ssd_cin_episodes', 'U') IS NOT NULL DROP TABLE #ssd_cin_episodes;
 
-IF OBJECT_ID(''ssd_cin_episodes'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_cin_episodes','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_cin_episodes)
         TRUNCATE TABLE ssd_cin_episodes;
@@ -72,24 +96,24 @@ SELECT
     fr.DIM_LOOKUP_CONT_SORC_ID_DESC, -- 2
     (
         -- Manual JSON-like concatenation for cine_referral_outcome_json
-        ''{'' +
-        ''"SINGLE_ASSESSMENT_FLAG": "'' + ISNULL(TRY_CAST(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        -- ''"NFA_FLAG": "'' + ISNULL(TRY_CAST(fr.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '''') + ''", '' + -- Uncomment if needed
-        ''"STRATEGY_DISCUSSION_FLAG": "'' + ISNULL(TRY_CAST(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"CLA_REQUEST_FLAG": "'' + ISNULL(TRY_CAST(fr.OUTCOME_CLA_REQUEST_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"NON_AGENCY_ADOPTION_FLAG": "'' + ISNULL(TRY_CAST(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"PRIVATE_FOSTERING_FLAG": "'' + ISNULL(TRY_CAST(fr.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"CP_TRANSFER_IN_FLAG": "'' + ISNULL(TRY_CAST(fr.OUTCOME_CP_TRANSFER_IN_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"CP_CONFERENCE_FLAG": "'' + ISNULL(TRY_CAST(fr.OUTCOME_CP_CONFERENCE_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"CARE_LEAVER_FLAG": "'' + ISNULL(TRY_CAST(fr.OUTCOME_CARE_LEAVER_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"OTHER_OUTCOMES_EXIST_FLAG": "'' + ISNULL(TRY_CAST(fr.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"NUMBER_OF_OUTCOMES": '' + 
+        '{' +
+        '"SINGLE_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
+        -- '"NFA_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' + -- Uncomment if needed
+        '"STRATEGY_DISCUSSION_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CLA_REQUEST_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CLA_REQUEST_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"NON_AGENCY_ADOPTION_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PRIVATE_FOSTERING_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CP_TRANSFER_IN_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CP_TRANSFER_IN_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CP_CONFERENCE_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CP_CONFERENCE_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CARE_LEAVER_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CARE_LEAVER_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fr.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"NUMBER_OF_OUTCOMES": ' + 
             ISNULL(TRY_CAST(CASE 
                 WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL
                 ELSE fr.TOTAL_NO_OF_OUTCOMES 
-            END AS NVARCHAR(4)), ''null'') + '', '' +
-        ''"COMMENTS": "'' + ISNULL(TRY_CAST(fr.OUTCOME_COMMENTS AS NVARCHAR(900)), '''') + ''"'' +
-        ''}''
+            END AS NVARCHAR(4)), 'null') + ', ' +
+        '"COMMENTS": "' + ISNULL(TRY_CAST(fr.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
+        '}'
     ) AS cine_referral_outcome_json,
     fr.OUTCOME_NFA_FLAG,
     fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
@@ -126,21 +150,21 @@ AND EXISTS
 --         SELECT
 --             -- SSD standard 
 --             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
---             ISNULL(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '''')   AS SINGLE_ASSESSMENT_FLAG,
---             -- ISNULL(fr.OUTCOME_NFA_FLAG, '''')                 AS NFA_FLAG,
---             ISNULL(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '''') AS STRATEGY_DISCUSSION_FLAG,
---             ISNULL(fr.OUTCOME_CLA_REQUEST_FLAG, '''')         AS CLA_REQUEST_FLAG,
---             ISNULL(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '''') AS NON_AGENCY_ADOPTION_FLAG,
---             ISNULL(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '''')   AS PRIVATE_FOSTERING_FLAG,
---             ISNULL(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '''')      AS CP_TRANSFER_IN_FLAG,
---             ISNULL(fr.OUTCOME_CP_CONFERENCE_FLAG, '''')       AS CP_CONFERENCE_FLAG,
---             ISNULL(fr.OUTCOME_CARE_LEAVER_FLAG, '''')         AS CARE_LEAVER_FLAG,
---             ISNULL(fr.OTHER_OUTCOMES_EXIST_FLAG, '''')        AS OTHER_OUTCOMES_EXIST_FLAG,
+--             ISNULL(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS SINGLE_ASSESSMENT_FLAG,
+--             -- ISNULL(fr.OUTCOME_NFA_FLAG, '')                 AS NFA_FLAG,
+--             ISNULL(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS STRATEGY_DISCUSSION_FLAG,
+--             ISNULL(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS CLA_REQUEST_FLAG,
+--             ISNULL(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS NON_AGENCY_ADOPTION_FLAG,
+--             ISNULL(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS PRIVATE_FOSTERING_FLAG,
+--             ISNULL(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS CP_TRANSFER_IN_FLAG,
+--             ISNULL(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS CP_CONFERENCE_FLAG,
+--             ISNULL(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS CARE_LEAVER_FLAG,
+--             ISNULL(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS OTHER_OUTCOMES_EXIST_FLAG,
 --             CASE 
 --                 WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL  -- to counter -1 values
 --                 ELSE fr.TOTAL_NO_OF_OUTCOMES 
 --             END                                             AS NUMBER_OF_OUTCOMES,
---             ISNULL(fr.OUTCOME_COMMENTS, '''')                 AS COMMENTS
+--             ISNULL(fr.OUTCOME_COMMENTS, '')                 AS COMMENTS
 --         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 --         ) AS cine_referral_outcome_json,
 --     fr.OUTCOME_NFA_FLAG, -- Consider conversion straight to bool
@@ -184,4 +208,5 @@ AND EXISTS
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

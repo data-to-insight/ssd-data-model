@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_cla_placement', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_cla_placement AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_cla_placement
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_cla_placement
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description: 
@@ -13,16 +37,16 @@ BEGIN
 -- Version: 1.0
 -- Status: [D]ev-
 -- Remarks: [EA_API_PRIORITY_TABLE] 
---          DEV: filtering for OFSTED_URN LIKE ''SC%''
+--          DEV: filtering for OFSTED_URN LIKE 'SC%'
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_CLA_PLACEMENT
 -- - HDM.Child_Social.FACT_CARE_EPISODES
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_cla_placement'', ''U'') IS NOT NULL DROP TABLE #ssd_cla_placement;
+IF OBJECT_ID('tempdb..#ssd_cla_placement', 'U') IS NOT NULL DROP TABLE #ssd_cla_placement;
   
-IF OBJECT_ID(''ssd_cla_placement'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_cla_placement','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_cla_placement)
         TRUNCATE TABLE ssd_cla_placement;
@@ -69,7 +93,7 @@ SELECT
             TOP(1) fce.OFSTED_URN
             FROM   HDM.Child_Social.FACT_CARE_EPISODES fce
             WHERE  fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
-            AND    fce.OFSTED_URN LIKE ''SC%''
+            AND    fce.OFSTED_URN LIKE 'SC%'
             AND fce.OFSTED_URN IS NOT NULL        
     )                                           AS clap_cla_placement_urn,
  
@@ -89,9 +113,9 @@ FROM
 -- JOIN
 --     HDM.Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID    -- [TESTING]
  
-WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN (''A1'',''A2'',''A3'',''A4'',''A5'',''A6'',''F1'',''F2'',''F3'',''F4'',''F5'',''F6'',''H1'',''H2'',''H3'',
-                                            ''H4'',''H5'',''H5a'',''K1'',''K2'',''M2'',''M3'',''P1'',''P2'',''Q1'',''Q2'',''R1'',''R2'',''R3'',
-                                            ''R5'',''S1'',''T0'',''T1'',''U1'',''U2'',''U3'',''U4'',''U5'',''U6'',''Z1'')
+WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1','F2','F3','F4','F5','F6','H1','H2','H3',
+                                            'H4','H5','H5a','K1','K2','M2','M3','P1','P2','Q1','Q2','R1','R2','R3',
+                                            'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
 
 AND
     (fcp.END_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
@@ -119,4 +143,5 @@ AND
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

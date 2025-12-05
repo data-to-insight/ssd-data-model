@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_cla_episodes', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_cla_episodes AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_cla_episodes
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_cla_episodes
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description: 
@@ -20,9 +44,9 @@ BEGIN
 -- - HDM.Child_Social.FACT_CASENOTES
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_cla_episodes'',''U'') IS NOT NULL DROP TABLE #ssd_cla_episodes;
+IF OBJECT_ID('tempdb..#ssd_cla_episodes','U') IS NOT NULL DROP TABLE #ssd_cla_episodes;
 
-IF OBJECT_ID(''ssd_cla_episodes'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_cla_episodes','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_cla_episodes)
         TRUNCATE TABLE ssd_cla_episodes;
@@ -61,10 +85,10 @@ END
         fc.FACT_REFERRAL_ID                       AS clae_referral_id,
         ISNULL(
             MAX(CASE
-                    WHEN cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = ''IRO''
+                    WHEN cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
                     THEN cn.EVENT_DTTM
                 END),
-            CAST(''19000101'' AS datetime)
+            CAST('19000101' AS datetime)
         )                                         AS clae_cla_last_iro_contact_date,
         fc.START_DTTM                             AS clae_entered_care_date
     FROM HDM.Child_Social.FACT_CARE_EPISODES AS fce
@@ -153,8 +177,8 @@ FROM FilteredData;
 --     fc.FACT_CLA_ID                          AS clae_cla_id,                    
 --     fc.FACT_REFERRAL_ID                     AS clae_referral_id,
 --     (SELECT MAX(ISNULL(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
---         AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = ''IRO''
---         THEN cn.EVENT_DTTM END, ''1900-01-01'')))                                                      
+--         AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+--         THEN cn.EVENT_DTTM END, '1900-01-01')))                                                      
 --                                             AS clae_cla_last_iro_contact_date,
 --     fc.START_DTTM                           AS clae_entered_care_date
 -- FROM
@@ -217,4 +241,5 @@ FROM FilteredData;
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

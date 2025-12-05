@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_assessment_factors', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_assessment_factors AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_assessment_factors
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_assessment_factors
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description: 
@@ -21,10 +45,10 @@ BEGIN
 -- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_TMP_PRE_assessment_factors'',''U'') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
-IF OBJECT_ID(''tempdb..#ssd_d_codes'',''U'') IS NOT NULL DROP TABLE #ssd_d_codes; -- de-duped + precomputed sort keys
+IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
+IF OBJECT_ID('tempdb..#ssd_d_codes','U') IS NOT NULL DROP TABLE #ssd_d_codes; -- de-duped + precomputed sort keys
 
-IF OBJECT_ID(''ssd_assessment_factors'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_assessment_factors','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_assessment_factors)
         TRUNCATE TABLE ssd_assessment_factors;
@@ -66,20 +90,20 @@ BEGIN TRY
     INNER JOIN HDM.Child_Social.FACT_FORM_ANSWERS   AS ffa
       ON fsa.FACT_FORM_ID = ffa.FACT_FORM_ID
     WHERE ffa.ANSWER_NO IN (
-          ''1A'',''1B'',''1C''
-        ,''2A'',''2B'',''2C'',''3A'',''3B'',''3C''
-        ,''4A'',''4B'',''4C''
-        ,''5A'',''5B'',''5C''
-        ,''6A'',''6B'',''6C''
-        ,''7A''
-        ,''8B'',''8C'',''8D'',''8E'',''8F''
-        ,''9A'',''10A'',''11A'',''12A'',''13A'',''14A'',''15A'',''16A'',''17A''
-        ,''18A'',''18B'',''18C''
-        ,''19A'',''19B'',''19C''
-        ,''20'',''21''
-        ,''22A'',''23A'',''24A''
+          '1A','1B','1C'
+        ,'2A','2B','2C','3A','3B','3C'
+        ,'4A','4B','4C'
+        ,'5A','5B','5C'
+        ,'6A','6B','6C'
+        ,'7A'
+        ,'8B','8C','8D','8E','8F'
+        ,'9A','10A','11A','12A','13A','14A','15A','16A','17A'
+        ,'18A','18B','18C'
+        ,'19A','19B','19C'
+        ,'20','21'
+        ,'22A','23A','24A'
     )
-      AND LOWER(ffa.ANSWER) = ''yes''
+      AND LOWER(ffa.ANSWER) = 'yes'
       AND ffa.FACT_FORM_ID <> -1;
 
     /* -------------------------------------------
@@ -90,14 +114,14 @@ BEGIN TRY
         d.FACT_FORM_ID,
         d.ANSWER_NO,
         d.ANSWER,
-        -- sort parts: numeric prefix then alpha suffix (or '''' if none)
+        -- sort parts: numeric prefix then alpha suffix (or '' if none)
         TRY_CONVERT(int, LEFT(d.ANSWER_NO,
-            CASE WHEN PATINDEX(''%[^0-9]%'', d.ANSWER_NO) = 0
+            CASE WHEN PATINDEX('%[^0-9]%', d.ANSWER_NO) = 0
                  THEN LEN(d.ANSWER_NO)
-                 ELSE PATINDEX(''%[^0-9]%'', d.ANSWER_NO) - 1 END
+                 ELSE PATINDEX('%[^0-9]%', d.ANSWER_NO) - 1 END
         )) AS num_part,
-        CASE WHEN PATINDEX(''%[^0-9]%'', d.ANSWER_NO) = 0
-             THEN N'''' ELSE SUBSTRING(d.ANSWER_NO, PATINDEX(''%[^0-9]%'', d.ANSWER_NO), 10) END AS alpha_part
+        CASE WHEN PATINDEX('%[^0-9]%', d.ANSWER_NO) = 0
+             THEN N'' ELSE SUBSTRING(d.ANSWER_NO, PATINDEX('%[^0-9]%', d.ANSWER_NO), 10) END AS alpha_part
     INTO #ssd_d_codes
     FROM #ssd_TMP_PRE_assessment_factors AS d;
 
@@ -119,29 +143,29 @@ BEGIN TRY
         (
             SELECT
                 -- KEY-VALUES output {"1B": "Yes", "2B": "Yes", ...}
-                ''{'' +
+                '{' +
                 STUFF((
                     SELECT
-                        '', "'' + x.ANSWER_NO + ''": '' + QUOTENAME(x.ANSWER, ''"'')
+                        ', "' + x.ANSWER_NO + '": ' + QUOTENAME(x.ANSWER, '"')
                     FROM #ssd_d_codes AS x
                     WHERE x.FACT_FORM_ID = fsa.FACT_FORM_ID
                     ORDER BY x.num_part, x.alpha_part
-                    FOR XML PATH(''''), TYPE
-                ).value(''.'', ''NVARCHAR(MAX)''), 1, 2, '''') +
-                ''}''
+                    FOR XML PATH(''), TYPE
+                ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') +
+                '}'
 
                 -- Awaiting LA/DfE approval
                 -- KEYS-ONLY alternative (swap with lines above if ["1A","2B",...] needed):
-                -- ''['' +
+                -- '[' +
                 -- STUFF((
                 --     SELECT
-                --         '', "'' + x.ANSWER_NO + ''"''
+                --         ', "' + x.ANSWER_NO + '"'
                 --     FROM #ssd_d_codes AS x
                 --     WHERE x.FACT_FORM_ID = fsa.FACT_FORM_ID
                 --     ORDER BY x.num_part, x.alpha_part
-                --     FOR XML PATH(''''), TYPE
-                -- ).value(''.'', ''NVARCHAR(MAX)''), 1, 2, '''')
-                -- + '']''
+                --     FOR XML PATH(''), TYPE
+                -- ).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
+                -- + ']'
 
         ) AS cinf_assessment_factors_json
     FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
@@ -159,8 +183,8 @@ BEGIN CATCH
 END CATCH;
 
 -- Cleanup
-IF OBJECT_ID(''tempdb..#ssd_d_codes'',''U'') IS NOT NULL DROP TABLE #ssd_d_codes;
-IF OBJECT_ID(''tempdb..#ssd_TMP_PRE_assessment_factors'',''U'') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
+IF OBJECT_ID('tempdb..#ssd_d_codes','U') IS NOT NULL DROP TABLE #ssd_d_codes;
+IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
 
 -- -------------------------------------------------------------------------
 -- Modern path: SQL Server 2022 or Azure SQL only
@@ -177,18 +201,18 @@ IF OBJECT_ID(''tempdb..#ssd_TMP_PRE_assessment_factors'',''U'') IS NOT NULL DROP
 --     fsa.FACT_FORM_ID AS cinf_assessment_id,
 --
 --     -- KEY-VALUES output {"1B": "Yes", "2B": "Yes", ...}
---     N''{'' + STRING_AGG(
---             CONCAT(''"'', c.ANSWER_NO, ''": '', QUOTENAME(c.ANSWER, ''"'')),
---             N'', ''
+--     N'{' + STRING_AGG(
+--             CONCAT('"', c.ANSWER_NO, '": ', QUOTENAME(c.ANSWER, '"')),
+--             N', '
 --          ) WITHIN GROUP (ORDER BY c.num_part, c.alpha_part)
---        + N''}'' AS cinf_assessment_factors_json
+--        + N'}' AS cinf_assessment_factors_json
 --
 --     -- KEYS-ONLY alternative (swap with lines above if ["1A","2B",...] needed):
---     -- N''['' + STRING_AGG(
---     --         CONCAT(''"'', c.ANSWER_NO, ''"''),
---     --         N'', ''
+--     -- N'[' + STRING_AGG(
+--     --         CONCAT('"', c.ANSWER_NO, '"'),
+--     --         N', '
 --     --      ) WITHIN GROUP (ORDER BY c.num_part, c.alpha_part)
---     --    + N'']'' AS cinf_assessment_factors_json
+--     --    + N']' AS cinf_assessment_factors_json
 --
 -- FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
 -- JOIN #ssd_d_codes AS c
@@ -214,4 +238,5 @@ IF OBJECT_ID(''tempdb..#ssd_TMP_PRE_assessment_factors'',''U'') IS NOT NULL DROP
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

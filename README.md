@@ -51,6 +51,7 @@ As part of the projects research and initial scoping, the team have considered i
 ### Local Authorities guiding development
 
 **Hertfordshire CC** : Bid Lead | **Knowsley CC** : Steering Group | **Data2Insight** : Project Lead | **East Sussex CC** : Host Authority | Essex CC : Project Management and Mosaic Pilot Development | **ADCS North West** (hosted by **Stockport Council**) | **Blackpool CC** : Mosaic Pilot Development | **East Riding CC** : Azeus Pilot Development  
+and subsequently **Coventry CC** : DfE Early Adopters Pilot Development | **Redcar and Cleveland CC** : DfE Early Adopters Pilot Development | **Merton CC** : DfE Early Adopters Pilot Development
 
 Repo forks, and direct involvement with the project are welcomed and you can find more information about Data2Insight on our website [https://www.datatoinsight.org/](https://www.datatoinsight.org/)
 

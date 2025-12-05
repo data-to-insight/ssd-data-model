@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_cp_reviews', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_cp_reviews AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_cp_reviews
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_cp_reviews
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description:
@@ -15,7 +39,7 @@ BEGIN
 -- Remarks:    cppr_cp_review_participation - ON HOLD/Not included in SSD Ver/Iteration 1
 --             Resolved issue with linking to Quoracy information. Added fm.FACT_MEETING_ID
 --             so users can identify conferences including multiple children. Reviews held
---             pre-LCS implementation don''t have a CP_PLAN_ID recorded so have added
+--             pre-LCS implementation don't have a CP_PLAN_ID recorded so have added
 --             cpr.DIM_PERSON_ID for linking reviews to the ssd_cp_plans object.
 --             Re-named cppr_cp_review_outcome_continue_cp for clarity.
 -- Dependencies:
@@ -27,9 +51,9 @@ BEGIN
 -- - HDM.Child_Social.FACT_FORM_ANSWERS [Participation info - ON HOLD/Not included in SSD Ver/Iteration 1]
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_cp_reviews'', ''U'') IS NOT NULL DROP TABLE #ssd_cp_reviews;
+IF OBJECT_ID('tempdb..#ssd_cp_reviews', 'U') IS NOT NULL DROP TABLE #ssd_cp_reviews;
   
-IF OBJECT_ID(''ssd_cp_reviews'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_cp_reviews','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_cp_reviews)
         TRUNCATE TABLE ssd_cp_reviews;
@@ -71,10 +95,10 @@ SELECT
     cpr.MEETING_DTTM                            AS cppr_cp_review_date,
     fm.FACT_MEETING_ID                          AS cppr_cp_review_meeting_id,
     cpr.OUTCOME_CONTINUE_CP_FLAG                AS cppr_cp_review_outcome_continue_cp,
-    (CASE WHEN ffa.ANSWER_NO = ''WasConf''
+    (CASE WHEN ffa.ANSWER_NO = 'WasConf'
         AND fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
         THEN ffa.ANSWER END)                    AS cppr_cp_review_quorate,    
-    ''SSD_PH''                                    AS cppr_cp_review_participation
+    'SSD_PH'                                    AS cppr_cp_review_participation
  
 FROM
     HDM.Child_Social.FACT_CP_REVIEW as cpr
@@ -88,9 +112,9 @@ LEFT JOIN
  
 LEFT JOIN    
     HDM.Child_Social.FACT_FORM_ANSWERS ffa          ON fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
-    AND ffa.ANSWER_NO = ''WasConf''
+    AND ffa.ANSWER_NO = 'WasConf'
     AND fms.FACT_OUTCM_FORM_ID IS NOT NULL
-    AND fms.FACT_OUTCM_FORM_ID <> ''-1''
+    AND fms.FACT_OUTCM_FORM_ID <> '-1'
  
 LEFT JOIN
     HDM.Child_Social.DIM_PERSON p ON cpr.DIM_PERSON_ID = p.DIM_PERSON_ID
@@ -134,4 +158,5 @@ GROUP BY cpr.FACT_CP_REVIEW_ID,
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

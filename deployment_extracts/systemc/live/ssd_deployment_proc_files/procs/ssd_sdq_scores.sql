@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_sdq_scores', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_sdq_scores AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_sdq_scores
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_sdq_scores
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description:
@@ -23,9 +47,9 @@ BEGIN
 -- - HDM.Child_Social.FACT_FORM_ANSWERS
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_sdq_scores'', ''U'') IS NOT NULL DROP TABLE #ssd_sdq_scores;
+IF OBJECT_ID('tempdb..#ssd_sdq_scores', 'U') IS NOT NULL DROP TABLE #ssd_sdq_scores;
  
-IF OBJECT_ID(''ssd_sdq_scores'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_sdq_scores','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_sdq_scores)
         TRUNCATE TABLE ssd_sdq_scores;
@@ -60,7 +84,7 @@ SELECT
     -- Numeric SDQ score for form
     sdq.SdqScoreNumeric                     AS csdq_sdq_score,
 
-    ''SSD_PH''                                AS csdq_sdq_reason   -- placeholder / reason [REVIEW]
+    'SSD_PH'                                AS csdq_sdq_reason   -- placeholder / reason [REVIEW]
 FROM HDM.Child_Social.FACT_FORMS ff
 
 -- Pull SDQ score (1 per form)
@@ -74,8 +98,8 @@ OUTER APPLY (
         ffa.ANSWERED_DTTM          AS SdqDttm
     FROM HDM.Child_Social.FACT_FORM_ANSWERS ffa
     WHERE ffa.FACT_FORM_ID = ff.FACT_FORM_ID
-      AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE ''Strengths and Difficulties Questionnaire%''
-      AND ffa.ANSWER_NO = ''SDQScore''
+      AND ffa.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+      AND ffa.ANSWER_NO = 'SDQScore'
       AND ffa.ANSWER IS NOT NULL
     ORDER BY ffa.ANSWERED_DTTM DESC   -- if multiple SDQScore answers exist on form, take latest
 ) sdq
@@ -86,8 +110,8 @@ OUTER APPLY (
         ffa2.ANSWERED_DTTM AS FormEndDttm
     FROM HDM.Child_Social.FACT_FORM_ANSWERS ffa2
     WHERE ffa2.FACT_FORM_ID = ff.FACT_FORM_ID
-      AND ffa2.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE ''Strengths and Difficulties Questionnaire%''
-      AND ffa2.ANSWER_NO = ''FormEndDate''
+      AND ffa2.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
+      AND ffa2.ANSWER_NO = 'FormEndDate'
       AND ffa2.ANSWER IS NOT NULL
     ORDER BY ffa2.ANSWERED_DTTM DESC
 ) fed
@@ -97,7 +121,7 @@ WHERE EXISTS (
     SELECT 1
     FROM HDM.Child_Social.FACT_FORM_ANSWERS fchk
     WHERE fchk.FACT_FORM_ID = ff.FACT_FORM_ID
-      AND fchk.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE ''Strengths and Difficulties Questionnaire%''
+      AND fchk.DIM_ASSESSMENT_TEMPLATE_ID_DESC LIKE 'Strengths and Difficulties Questionnaire%'
 )
 -- only rows with data
 AND sdq.SdqScoreNumeric IS NOT NULL
@@ -156,4 +180,5 @@ WHERE d.rn > 1;
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

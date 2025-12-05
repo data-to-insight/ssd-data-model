@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_linked_identifiers', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_linked_identifiers AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_linked_identifiers
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_linked_identifiers
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description: 
@@ -17,15 +41,15 @@ BEGIN
 --             CMS modules. Can be re-enabled on a localised basis. 
 
 --         The list of allowed identifier_type codes are:
---             [''Case Number'', 
---             ''Unique Pupil Number'', 
---             ''NHS Number'', 
---             ''Home Office Registration'', 
---             ''National Insurance Number'', 
---             ''YOT Number'', 
---             ''Court Case Number'', 
---             ''RAA ID'', 
---             ''Incident ID'']
+--             ['Case Number', 
+--             'Unique Pupil Number', 
+--             'NHS Number', 
+--             'Home Office Registration', 
+--             'National Insurance Number', 
+--             'YOT Number', 
+--             'Court Case Number', 
+--             'RAA ID', 
+--             'Incident ID']
 --             To have any further codes agreed into the standard, issue a change request
 
 -- Dependencies: 
@@ -34,14 +58,14 @@ BEGIN
 -- - HDM.Child_Social.DIM_PERSON
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_linked_identifiers'', ''U'') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
+IF OBJECT_ID('tempdb..#ssd_linked_identifiers', 'U') IS NOT NULL DROP TABLE #ssd_linked_identifiers;
 
 
     -- keep existing rows in persistent identifiers table, no truncate, no drop
     -- This is the only SSD table that has manually updated user data - hence 
     -- generic drop|truncate process NOT applicable here. 
 
-IF OBJECT_ID(''ssd_linked_identifiers'', ''U'') IS NULL
+IF OBJECT_ID('ssd_linked_identifiers', 'U') IS NULL
 BEGIN
     CREATE TABLE ssd_linked_identifiers (
         link_table_id               NVARCHAR(48) DEFAULT NEWID() PRIMARY KEY,  -- metadata={"item_ref":"LINK001A"}
@@ -71,8 +95,8 @@ INSERT INTO ssd_linked_identifiers (
 )
 SELECT
     csp.dim_person_id                   AS link_person_id,
-    ''Former Unique Pupil Number''        AS link_identifier_type,
-    ''SSD_PH''                            AS link_identifier_value,       -- csp.former_upn [TESTING] Removed for compatibility
+    'Former Unique Pupil Number'        AS link_identifier_type,
+    'SSD_PH'                            AS link_identifier_value,       -- csp.former_upn [TESTING] Removed for compatibility
     NULL                                AS link_valid_from_date,        -- NULL for valid_from_date
     NULL                                AS link_valid_to_date           -- NULL for valid_to_date
 FROM
@@ -80,7 +104,7 @@ FROM
 WHERE
     csp.former_upn IS NOT NULL
 
--- AND (link_valid_to_date IS NULL OR link_valid_to_date > GETDATE()) -- We can''t yet apply this until source(s) defined. 
+-- AND (link_valid_to_date IS NULL OR link_valid_to_date > GETDATE()) -- We can't yet apply this until source(s) defined. 
 -- Filter shown here for future reference #DtoI-1806
 
  AND EXISTS (
@@ -101,8 +125,8 @@ INSERT INTO ssd_linked_identifiers (
 )
 SELECT
     csp.dim_person_id                   AS link_person_id,
-    ''Unique Pupil Number''               AS link_identifier_type,
-    ''SSD_PH''                            AS link_identifier_value,       -- csp.upn [TESTING] Removed for compatibility
+    'Unique Pupil Number'               AS link_identifier_type,
+    'SSD_PH'                            AS link_identifier_value,       -- csp.upn [TESTING] Removed for compatibility
     NULL                                AS link_valid_from_date,        -- NULL for valid_from_date
     NULL                                AS link_valid_to_date           -- NULL for valid_to_date
 FROM
@@ -157,4 +181,5 @@ WHERE
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

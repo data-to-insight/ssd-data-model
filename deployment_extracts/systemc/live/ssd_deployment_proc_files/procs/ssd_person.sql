@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_person', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_person AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_person
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_person
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description: Person/child details. This the most connected table in the SSD.
@@ -28,14 +52,14 @@ BEGIN
 
 
 /* START - Temp Hard drop and recreate due to d2i structure changes  */
-IF OBJECT_ID(N''ssd_person'', N''U'') IS NOT NULL
+IF OBJECT_ID(N'ssd_person', N'U') IS NOT NULL
     DROP TABLE ssd_person;
 
 /* END - remove this tmp block once SSD has run once for v1.3.5+!  */
 
-IF OBJECT_ID(''tempdb..#ssd_person'') IS NOT NULL DROP TABLE #ssd_person;
+IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
-IF OBJECT_ID(''ssd_person'') IS NOT NULL
+IF OBJECT_ID('ssd_person') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_person)
         TRUNCATE TABLE ssd_person;
@@ -105,25 +129,25 @@ SELECT
     p.GENDER_MAIN_CODE AS pers_sex,         -- Sex/Gender as used in stat-returns
     p.GENDER_MAIN_CODE,                     -- Placeholder for those LAs that store sex and gender independently
     p.ETHNICITY_MAIN_CODE,                  -- [REVIEW] LEFT(p.ETHNICITY_MAIN_CODE, 4)
-    CASE WHEN (p.DOB_ESTIMATED) = ''N''              
-        THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = ''N''
+    CASE WHEN (p.DOB_ESTIMATED) = 'N'              
+        THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL                           -- or NULL
     END, 
     NULL AS pers_single_unique_id,           -- Set to NULL as default(dev) / or set to NHS num / or set to Single Unique Identifier(SUI)
-    -- COALESCE(f903.NO_UPN_CODE, ''SSD_PH'') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or ''SSD_PH'' as placeholder
+    -- COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
     f903.NO_UPN_CODE AS pers_upn_unknown, 
     p.EHM_SEN_FLAG,
-    CASE WHEN (p.DOB_ESTIMATED) = ''Y''              
-        THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = ''Y''
+    CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
+        THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
         ELSE NULL                           -- or NULL
     END, 
     p.DEATH_DTTM,
     CASE
-        WHEN p.GENDER_MAIN_CODE <> ''M'' AND  -- Assumption that if male is not mother
+        WHEN p.GENDER_MAIN_CODE <> 'M' AND  -- Assumption that if male is not mother
              EXISTS (SELECT 1 FROM HDM.Child_Social.FACT_PERSON_RELATION fpr
                      WHERE fpr.DIM_PERSON_ID = p.DIM_PERSON_ID AND
-                           fpr.DIM_LOOKUP_RELTN_TYPE_CODE = ''CHI'') -- check for child relation only
-        THEN ''Y''
+                           fpr.DIM_LOOKUP_RELTN_TYPE_CODE = 'CHI') -- check for child relation only
+        THEN 'Y'
         ELSE NULL                           -- No child relation found
     END,
     p.NATNL_CODE                            -- [REVIEW] LEFT(p.NATNL_CODE, 2)    
@@ -155,7 +179,7 @@ WHERE
 
     /* INCLUSIONS */
     AND (
-        p.IS_CLIENT = ''Y''
+        p.IS_CLIENT = 'Y'
 
         OR (
             -- Contacts in SSD window
@@ -203,11 +227,11 @@ WHERE
                 SELECT 1 
                 FROM HDM.Child_Social.FACT_INVOLVEMENTS fi
                 WHERE (fi.DIM_PERSON_ID = p.DIM_PERSON_ID
-                AND (fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE ''KA%'' --Key Agencies (External)
+                AND (fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE 'KA%' --Key Agencies (External)
 				     OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL 
-                     OR fi.IS_ALLOCATED_CW_FLAG = ''Y'')
-				-- AND START_DTTM > ''2009-12-04 00:54:49.947'' -- #DtoI-1830 care leavers who were aged 22-25 and may not have had Allocated Case Worker relationship for years+
-				AND DIM_WORKER_ID <> ''-1'' 
+                     OR fi.IS_ALLOCATED_CW_FLAG = 'Y')
+				-- AND START_DTTM > '2009-12-04 00:54:49.947' -- #DtoI-1830 care leavers who were aged 22-25 and may not have had Allocated Case Worker relationship for years+
+				AND DIM_WORKER_ID <> '-1' 
                 
                 AND (fi.END_DTTM IS NULL OR fi.END_DTTM > @ssd_window_start))
             )
@@ -251,4 +275,5 @@ WHERE
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO

@@ -1,4 +1,3 @@
-:r "procs/ssd_setup.sql"
 :r "procs/ssd_address.sql"
 :r "procs/ssd_assessment_factors.sql"
 :r "procs/ssd_care_leavers.sql"

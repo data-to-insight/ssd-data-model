@@ -1,11 +1,35 @@
 IF OBJECT_ID(N'proc_ssd_s47_enquiry', N'P') IS NULL
-BEGIN
     EXEC(N'CREATE PROCEDURE proc_ssd_s47_enquiry AS BEGIN SET NOCOUNT ON; RETURN; END');
-END;
-EXEC(N'CREATE OR ALTER PROCEDURE proc_ssd_s47_enquiry
+GO
+CREATE OR ALTER PROCEDURE proc_ssd_s47_enquiry
+    @src_db sysname = NULL,
+    @src_schema sysname = NULL,
+    @ssd_timeframe_years int = NULL,
+    @ssd_sub1_range_years int = NULL,
+    @today_date date = NULL,
+    @today_dt datetime = NULL,
+    @ssd_window_start date = NULL,
+    @ssd_window_end date = NULL,
+    @CaseloadLastSept30th date = NULL,
+    @CaseloadTimeframeStartDate date = NULL
+
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- normalise defaults if not provided
+    IF @src_db IS NULL SET @src_db = DB_NAME();
+    IF @src_schema IS NULL SET @src_schema = SCHEMA_NAME();
+    IF @ssd_timeframe_years IS NULL SET @ssd_timeframe_years = 6;
+    IF @ssd_sub1_range_years IS NULL SET @ssd_sub1_range_years = 1;
+    IF @today_date IS NULL SET @today_date = CONVERT(date, GETDATE());
+    IF @today_dt   IS NULL SET @today_dt   = CONVERT(datetime, @today_date);
+    IF @ssd_window_end   IS NULL SET @ssd_window_end   = @today_date;
+    IF @ssd_window_start IS NULL SET @ssd_window_start = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
+    IF @CaseloadLastSept30th IS NULL SET @CaseloadLastSept30th = CASE
+        WHEN @today_date > DATEFROMPARTS(YEAR(@today_date), 9, 30) THEN DATEFROMPARTS(YEAR(@today_date), 9, 30)
+        ELSE DATEFROMPARTS(YEAR(@today_date) - 1, 9, 30) END;
+    IF @CaseloadTimeframeStartDate IS NULL SET @CaseloadTimeframeStartDate = DATEADD(year, -@ssd_timeframe_years, @CaseloadLastSept30th);
+
     BEGIN TRY
 -- =============================================================================
 -- Description: 
@@ -20,9 +44,9 @@ BEGIN
 -- - HDM.Child_Social.FACT_CP_CONFERENCE
 -- =============================================================================
 
-IF OBJECT_ID(''tempdb..#ssd_s47_enquiry'', ''U'') IS NOT NULL DROP TABLE #ssd_s47_enquiry;
+IF OBJECT_ID('tempdb..#ssd_s47_enquiry', 'U') IS NOT NULL DROP TABLE #ssd_s47_enquiry;
 
-IF OBJECT_ID(''ssd_s47_enquiry'',''U'') IS NOT NULL
+IF OBJECT_ID('ssd_s47_enquiry','U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM ssd_s47_enquiry)
         TRUNCATE TABLE ssd_s47_enquiry;
@@ -66,18 +90,18 @@ SELECT
     s47.OUTCOME_NFA_FLAG,
     (
         -- Manual JSON-like concatenation for s47e_s47_outcome_json
-        ''{'' +
-        ''"NFA_FLAG": "'' + ISNULL(TRY_CAST(s47.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"LEGAL_ACTION_FLAG": "'' + ISNULL(TRY_CAST(s47.OUTCOME_LEGAL_ACTION_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"PROV_OF_SERVICES_FLAG": "'' + ISNULL(TRY_CAST(s47.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"PROV_OF_SB_CARE_FLAG": "'' + ISNULL(TRY_CAST(s47.OUTCOME_PROV_OF_SB_CARE_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"CP_CONFERENCE_FLAG": "'' + ISNULL(TRY_CAST(s47.OUTCOME_CP_CONFERENCE_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"NFA_CONTINUE_SINGLE_FLAG": "'' + ISNULL(TRY_CAST(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"MONITOR_FLAG": "'' + ISNULL(TRY_CAST(s47.OUTCOME_MONITOR_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"OTHER_OUTCOMES_EXIST_FLAG": "'' + ISNULL(TRY_CAST(s47.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '''') + ''", '' +
-        ''"TOTAL_NO_OF_OUTCOMES": '' + ISNULL(TRY_CAST(s47.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(3)), ''null'') + '', '' +
-        ''"OUTCOME_COMMENTS": "'' + ISNULL(TRY_CAST(s47.OUTCOME_COMMENTS AS NVARCHAR(900)), '''') + ''"'' +
-        ''}''
+        '{' +
+        '"NFA_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"LEGAL_ACTION_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_LEGAL_ACTION_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PROV_OF_SERVICES_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"PROV_OF_SB_CARE_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_PROV_OF_SB_CARE_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"CP_CONFERENCE_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_CP_CONFERENCE_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"NFA_CONTINUE_SINGLE_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"MONITOR_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_MONITOR_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(s47.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
+        '"TOTAL_NO_OF_OUTCOMES": ' + ISNULL(TRY_CAST(s47.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(3)), 'null') + ', ' +
+        '"OUTCOME_COMMENTS": "' + ISNULL(TRY_CAST(s47.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
+        '}'
     ) AS s47e_s47_outcome_json,
     s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
     s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker_id
@@ -105,16 +129,16 @@ AND EXISTS ( -- only ssd relevant records
 --         SELECT 
 --             -- SSD standard 
 --             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
---             ISNULL(s47.OUTCOME_NFA_FLAG, '''')                   AS NFA_FLAG,
---             ISNULL(s47.OUTCOME_LEGAL_ACTION_FLAG, '''')          AS LEGAL_ACTION_FLAG,
---             ISNULL(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '''')      AS PROV_OF_SERVICES_FLAG,
---             ISNULL(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '''')       AS PROV_OF_SB_CARE_FLAG,
---             ISNULL(s47.OUTCOME_CP_CONFERENCE_FLAG, '''')         AS CP_CONFERENCE_FLAG,
---             ISNULL(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '''')   AS NFA_CONTINUE_SINGLE_FLAG,
---             ISNULL(s47.OUTCOME_MONITOR_FLAG, '''')               AS MONITOR_FLAG,
---             ISNULL(s47.OTHER_OUTCOMES_EXIST_FLAG, '''')          AS OTHER_OUTCOMES_EXIST_FLAG,
---             ISNULL(s47.TOTAL_NO_OF_OUTCOMES, '''')               AS TOTAL_NO_OF_OUTCOMES,
---             ISNULL(s47.OUTCOME_COMMENTS, '''')                   AS OUTCOME_COMMENTS
+--             ISNULL(s47.OUTCOME_NFA_FLAG, '')                   AS NFA_FLAG,
+--             ISNULL(s47.OUTCOME_LEGAL_ACTION_FLAG, '')          AS LEGAL_ACTION_FLAG,
+--             ISNULL(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '')      AS PROV_OF_SERVICES_FLAG,
+--             ISNULL(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '')       AS PROV_OF_SB_CARE_FLAG,
+--             ISNULL(s47.OUTCOME_CP_CONFERENCE_FLAG, '')         AS CP_CONFERENCE_FLAG,
+--             ISNULL(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '')   AS NFA_CONTINUE_SINGLE_FLAG,
+--             ISNULL(s47.OUTCOME_MONITOR_FLAG, '')               AS MONITOR_FLAG,
+--             ISNULL(s47.OTHER_OUTCOMES_EXIST_FLAG, '')          AS OTHER_OUTCOMES_EXIST_FLAG,
+--             ISNULL(s47.TOTAL_NO_OF_OUTCOMES, '')               AS TOTAL_NO_OF_OUTCOMES,
+--             ISNULL(s47.OUTCOME_COMMENTS, '')                   AS OUTCOME_COMMENTS
 --         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 --         )                                                      AS s47e_s47_outcome_json,
 --     s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
@@ -152,4 +176,5 @@ AND EXISTS ( -- only ssd relevant records
         DECLARE @ErrState int = ERROR_STATE();
         RAISERROR(@ErrMsg, @ErrSev, @ErrState);
     END CATCH
-END');
+END
+GO
