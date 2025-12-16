@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # chmod +x 5_zip_ssd_deployment_individual_files.py
+# 081225 added this script to main ssd workflow processes
 
 # Check release details in deployment_extracts/ssd_version_history.yml has been updated before running this
 # as resultant file names and versioning are pulled from this file and prefixed/suffixed to output .zip release files
@@ -14,7 +15,7 @@ import yaml
 
 def find_deployment_extracts_root() -> Path:
     """
-    Walk up from this script until finding 'deployment_extracts/' folder.
+    Walk up from this script until it finds 'deployment_extracts/' folder
     """
     script_path = Path(__file__).resolve()
 
@@ -24,7 +25,7 @@ def find_deployment_extracts_root() -> Path:
             return candidate
 
     raise SystemExit(
-        "Couldn't find 'deployment_extracts' folder by walking up from script location"
+        "Couldn't find 'deployment_extracts' folder walking up from script location"
     )
 
 
@@ -98,7 +99,7 @@ def build_vendor_bundle(
     deployment_extracts_root: Path,
 ) -> None:
     """
-    Build zip bundle for each single CMS folder, for example:
+    Build zip bundle for each single CMS folder, eg.:
       deployment_extracts/mosaic/live
       deployment_extracts/eclipse/live
 
@@ -110,12 +111,12 @@ def build_vendor_bundle(
 
     Output (per vendor):
       <release_date>-ssd_<vendor>_deployment_v<version>.zip
-      for example:
+      eg.:
       2025-12-03-ssd_mosaic_deployment_v1.3.7.zip
 
       and if found:
       <release_date>-ssd_<vendor>_deployment_proc_v<version>.zip
-      for example:
+      eg.:
       2025-12-03-ssd_systemc_deployment_proc_v1.3.7.zip
 
     Also injects into each bundle (if present):
@@ -156,7 +157,7 @@ def build_vendor_bundle(
     else:
         print(f"Warning: {readme_file} not found, will not be included in bundles")
 
-    # Main bundle, for example:
+    # Main bundle, eg.:
     # 2025-12-03-ssd_mosaic_deployment_v1.3.7.zip
     zip_name = f"{release_date_str}-ssd_{vendor_name}_deployment_v{version_number}.zip"
     zip_path = live_dir / zip_name
@@ -167,20 +168,21 @@ def build_vendor_bundle(
             arcname = file_path.relative_to(live_dir)
             zf.write(file_path, arcname)
 
-        # Common files at top level of the zip
+        # Common files at top level of zip
         for extra_path, arcname in extra_files:
             zf.write(extra_path, arcname)
 
     print(f"Created zip for {vendor_name}: {zip_path}")
 
-    # Optional second bundle: ssd_deployment_proc_files/
+    # Optional 2nd bundle: ssd_deployment_proc_files/
+    # if we have split file/proce based version... package both options up for LA deployment
     proc_root = live_dir / "ssd_deployment_proc_files"
     if proc_root.is_dir():
         proc_candidates = list(proc_root.rglob("*.sql"))
         proc_files_to_zip = [p for p in proc_candidates if p.is_file()]
 
         if proc_files_to_zip:
-            # For example:
+            # e.g.
             # 2025-12-03-ssd_systemc_deployment_proc_v1.3.7.zip
             proc_zip_name = f"{release_date_str}-ssd_{vendor_name}_deployment_proc_v{version_number}.zip"
             proc_zip_path = live_dir / proc_zip_name
@@ -196,23 +198,28 @@ def build_vendor_bundle(
 
             print(f"Created proc zip for {vendor_name}: {proc_zip_path}")
         else:
-            print(f"Skipping {vendor_name} proc bundle (no .sql files to zip in {proc_root})")
+            print(f"Skipped {vendor_name} proc bundle (no .sql files to zip in {proc_root})")
     else:
-        print(f"Skipping {vendor_name} proc bundle (no ssd_deployment_proc_files/ at {proc_root})")
+        print(f"Skipped {vendor_name} proc bundle (no ssd_deployment_proc_files/ at {proc_root})")
 
 
 def main() -> None:
     deployment_extracts_root = find_deployment_extracts_root()
     version_number, release_date_str = load_current_version_info(deployment_extracts_root)
 
+    # # Overide release date(added to output files) from version history YML with TODAY
+    # today_str = date.today().strftime("%Y-%m-%d")
+    # release_date_str = today_str
+
     print(
         f"Using SSD version {version_number} with release date {release_date_str} "
         f"from ssd_version_history.yml"
     )
 
+
     any_built = False
 
-    # Iterate CMS folders, for example mosaic, eclipse
+    # Iterate each CMS folder, i.e mosaic, eclipse, ...
     for vendor_dir in sorted(deployment_extracts_root.iterdir()):
         if not vendor_dir.is_dir():
             continue
@@ -220,7 +227,7 @@ def main() -> None:
         any_built = True
 
     if not any_built:
-        raise SystemExit("No deployment bundles created. Check folders and contents under deployment_extracts/")
+        raise SystemExit("No deployment bundles created. Check folders within deployment_extracts/")
 
 
 if __name__ == "__main__":

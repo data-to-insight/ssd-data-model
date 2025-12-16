@@ -51,3 +51,21 @@ subprocess.run(['python3', paths['ssd_tools'] + '3_generate_html_readme.py'])
 # Run script to re-create object spec pdf download report
 subprocess.run(['python3', paths['ssd_tools'] + '3_generate_dataset_pdf_report.py'])
 
+
+# Generate LA deployment files
+
+# Generate/refresh SSD deployment files (pick and chose from the below)
+
+# # Run script to re-create LA SSD extract deployments [IN DEV not in use]
+# subprocess.run(['python3', paths['ssd_tools'] + '4_generate_cms_extract_sql.py'])
+
+
+# # Run script to convert single main/master SSD extract[Legacy SystemC only] to split PROC files [Future deployment method]
+# subprocess.run(['python3', paths['ssd_tools'] + '5_convert_ssd_to_proc.py'])
+
+# # Run script to create single deployment ZIP for each CMS type for ease of LA download
+# subprocess.run(['python3', paths['ssd_tools'] + '5_zip_ssd_deployment_individual_files.py'])
+
+
+
+
