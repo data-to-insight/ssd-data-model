@@ -264,7 +264,7 @@ BEGIN
         pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If -additional- status to Gender is held, otherwise duplicate pers_gender"}    
         pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown",NULL,"F","U","M","I"]}       
         pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A", "expected_data":[NULL, tbc]} 
-        pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
+        pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A", "info": "SSD dat values render as 2024-12-10 00:00:00.000"} 
         pers_single_unique_id   NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
         pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A", "info":"SEN2 guidance suggests size(4)", "expected_data":["UN1-10"]}                                 
         pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A", "item_status":"P"} 
@@ -3483,13 +3483,10 @@ END
         fce.CARE_REASON_END_DESC                  AS clae_cla_episode_ceased_reason,
         fc.FACT_CLA_ID                            AS clae_cla_id,
         fc.FACT_REFERRAL_ID                       AS clae_referral_id,
-        ISNULL(
-            MAX(CASE
-                    WHEN cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
-                    THEN cn.EVENT_DTTM
-                END),
-            CAST('19000101' AS datetime)
-        )                                         AS clae_cla_last_iro_contact_date,
+        MAX(CASE
+                WHEN cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+                THEN cn.EVENT_DTTM
+            END)                                  AS clae_cla_last_iro_contact_date
         fc.START_DTTM                             AS clae_entered_care_date
     FROM HDM.Child_Social.FACT_CARE_EPISODES AS fce
     JOIN HDM.Child_Social.FACT_CLA AS fc
