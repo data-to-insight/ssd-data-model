@@ -1182,13 +1182,15 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: Contains the Y/N flag for persons with disability
 -- Author: D2I
--- Version: 1.0
---             0.1: Removed disability_code replace() into Y/N flag 130324 RH
+-- Version: 1.1
+--              1.0: Replacement source for disab_code now from DIM_LOOKUP_DISAB.NAT_ID  
+--              0.1: Removed disability_code replace() into Y/N flag 130324 RH
 -- Status: [R]elease
 -- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies: 
 -- - ssd_person
 -- - HDM.Child_Social.FACT_DISABILITY
+-- - HDM.Child_Social.DIM_LOOKUP_DISAB
 -- =============================================================================
 
 
@@ -1221,21 +1223,23 @@ INSERT INTO ssd_development.ssd_disability (
     disa_person_id, 
     disa_disability_code
 )
-SELECT 
-    fd.FACT_DISABILITY_ID       AS disa_table_id,  -- #TESTING|Debug, bringing NULL values through? 
-    fd.DIM_PERSON_ID            AS disa_person_id, 
-    fd.DIM_LOOKUP_DISAB_CODE    AS disa_disability_code
-FROM 
-    HDM.Child_Social.FACT_DISABILITY AS fd
-
+SELECT
+    fd.FACT_DISABILITY_ID         AS disa_table_id,
+    fd.DIM_PERSON_ID              AS disa_person_id,
+    LTRIM(RTRIM(dislup.NAT_ID))   AS disa_disability_code
+FROM HDM.Child_Social.FACT_DISABILITY AS fd
+INNER JOIN HDM.Child_Social.DIM_LOOKUP_DISAB AS dislup
+    -- if the internal disa code has associated NAT_ID 
+    ON dislup.MAIN_CODE = fd.DIM_LOOKUP_DISAB_CODE
 WHERE fd.DIM_PERSON_ID <> -1
-AND fd.DIM_LOOKUP_DISAB_CODE IS NOT NULL
-    AND EXISTS 
-    (   -- only ssd relevant records
-    SELECT 1 
-    FROM ssd_development.ssd_person p
-    WHERE TRY_CAST(p.pers_person_id AS INT) = fd.DIM_PERSON_ID -- #DtoI-1799
-    );
+  AND fd.DIM_LOOKUP_DISAB_CODE IS NOT NULL
+  AND (fd.END_DTTM IS NULL OR fd.END_DTTM > GETDATE()) -- only current disa codes
+  AND NULLIF(LTRIM(RTRIM(dislup.NAT_ID)), '') IS NOT NULL 
+  AND EXISTS ( -- only ssd relevant records
+      SELECT 1
+      FROM ssd_development.ssd_person p
+      WHERE TRY_CAST(p.pers_person_id AS INT) = fd.DIM_PERSON_ID -- #DtoI-1799
+  );
 
 
 
