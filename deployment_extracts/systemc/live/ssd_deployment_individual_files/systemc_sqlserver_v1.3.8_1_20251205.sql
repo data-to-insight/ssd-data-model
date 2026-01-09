@@ -128,7 +128,6 @@ Where used, item level metadata follows simple key value structure. Example:
 -- Optional notes from la config file 
 
 -- META-ELEMENT: {"type": "dev_set_up"}
-GO 
 SET NOCOUNT ON;
 
 -- META-ELEMENT: {"type": "ssd_timeframe"}
@@ -237,11 +236,11 @@ SET @StartTime = GETDATE(); -- Script start time
 SET @TableName = N'ssd_person';
 
 
-/* START - Temp Hard drop and recreate due to d2i structure changes  */
-IF OBJECT_ID(N'ssd_development.ssd_person', N'U') IS NOT NULL
-    DROP TABLE ssd_development.ssd_person;
-GO
-/* END - remove this tmp block once SSD has run once for v1.3.5+!  */
+-- /* START - Temp Hard drop and recreate due to d2i structure changes  */
+-- IF OBJECT_ID(N'ssd_development.ssd_person', N'U') IS NOT NULL
+--     DROP TABLE ssd_development.ssd_person;
+-- GO
+-- /* END - remove this tmp block once SSD has run once for v1.3.5+!  */
 
 
 -- META-ELEMENT: {"type": "drop_table"}
@@ -317,8 +316,8 @@ SELECT
     p.FORENAME, 
     p.SURNAME,
     p.GENDER_MAIN_CODE AS pers_sex,         -- Sex/Gender as used in stat-returns
-    p.GENDER_MAIN_CODE,                     -- Placeholder for those LAs that store sex and gender independently
-    p.ETHNICITY_MAIN_CODE,                  -- [REVIEW] LEFT(p.ETHNICITY_MAIN_CODE, 4)
+    p.GENDER_MAIN_CODE,                     -- Placeholder for those LAs that store sex and gender independently             
+    dlde.NAT_ID,                            -- COV change to align with national ID was LEFT(p.ETHNICITY_MAIN_CODE, 4) [REVIEW] 
     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL                           -- or NULL
@@ -358,10 +357,15 @@ LEFT JOIN (
 ON 
     p.DIM_PERSON_ID = f903.dim_person_id
 
+LEFT JOIN 
+    -- align with national ID
+    HDM.Child_Social.DIM_LOOKUP_DFE_ETHNIC dlde
+        ON p.ETHNICITY_MAIN_CODE = dlde.MAIN_CODE
+
 WHERE 
     /* EXCLUSIONS */
 
-    -- p.DIM_PERSON_ID IN (1, 2, 3) AND --  -- hard filter on CMS person ids for LA reduced cohort testing
+    -- p.DIM_PERSON_ID IN (1, 2, 3) AND --  -- hard filter on CMS person ids for LA reduced tiny cohort testing
 
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
@@ -3490,7 +3494,7 @@ END
         MAX(CASE
                 WHEN cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
                 THEN cn.EVENT_DTTM
-            END)                                  AS clae_cla_last_iro_contact_date
+            END)                                  AS clae_cla_last_iro_contact_date,
         fc.START_DTTM                             AS clae_entered_care_date
     FROM HDM.Child_Social.FACT_CARE_EPISODES AS fce
     JOIN HDM.Child_Social.FACT_CLA AS fc
