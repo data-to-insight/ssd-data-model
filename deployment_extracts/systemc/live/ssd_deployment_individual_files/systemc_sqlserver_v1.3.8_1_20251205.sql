@@ -2369,30 +2369,32 @@ BEGIN TRY
         fsa.FACT_FORM_ID AS cinf_assessment_id,
         (
             SELECT
-                -- KEY-VALUES output {"1B": "Yes", "2B": "Yes", ...}
-                '{' +
-                STUFF((
-                    SELECT
-                        ', "' + x.ANSWER_NO + '": ' + QUOTENAME(x.ANSWER, '"')
-                    FROM #ssd_d_codes AS x
-                    WHERE x.FACT_FORM_ID = fsa.FACT_FORM_ID
-                    ORDER BY x.num_part, x.alpha_part
-                    FOR XML PATH(''), TYPE
-                ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') +
-                '}'
-
-                -- Awaiting LA/DfE approval
-                -- KEYS-ONLY alternative (swap with lines above if ["1A","2B",...] needed):
-                -- '[' +
+                -- -- KEY-VALUES output e.g. {"1B": "Yes", "2B": "Yes", ...}  (alternative 1):
+                -- '{' +
                 -- STUFF((
                 --     SELECT
-                --         ', "' + x.ANSWER_NO + '"'
+                --         ', "' + x.ANSWER_NO + '": ' + QUOTENAME(x.ANSWER, '"')
                 --     FROM #ssd_d_codes AS x
                 --     WHERE x.FACT_FORM_ID = fsa.FACT_FORM_ID
                 --     ORDER BY x.num_part, x.alpha_part
                 --     FOR XML PATH(''), TYPE
-                -- ).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
-                -- + ']'
+                -- ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') +
+                -- '}'
+
+                -- Awaiting LA/DfE approval
+                -- KEYS-ONLY output e.g. ["1A","2B", ...] (alternative 2):
+                '[' +
+                STUFF((
+                    SELECT
+                        ', "' + x.ANSWER_NO + '"'
+                    FROM #ssd_d_codes AS x
+                    WHERE x.FACT_FORM_ID = fsa.FACT_FORM_ID
+                    -- Opt: ignore NULL codes so they dont vanish silently in concat
+                    -- AND x.ANSWER_NO IS NOT NULL
+                    ORDER BY x.num_part, x.alpha_part
+                    FOR XML PATH(''), TYPE
+                ).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
+                + ']'
 
         ) AS cinf_assessment_factors_json
     FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
