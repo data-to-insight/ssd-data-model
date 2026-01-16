@@ -29,6 +29,8 @@ We also extend thanks to our wider circle of contributing LAs, especially those 
 **Waltham Forest Borough Council** 
 **North Yorks Council**
 **Merton County Council via DfE Private Dashboard Early Adopters**
+**Coventry County Council via DfE Private Dashboard Early Adopters**
+**Redcar and Cleveland County Council via DfE Private Dashboard Early Adopters**
 
 Further, we are grateful to the following partner organisations for key contributions to the project: 
 
@@ -48,12 +50,15 @@ In no particular order:
 - **Sam Fergerson** - Mosaic development work for both T-SQL and Oracle - 
 - **Keith Thomas** - Mosaic development work for both T-SQL and Oracle - 
 - **Lee Hallsworth** - Eclipse development work for Postgress - 
-- **Kate Jagger** - Championing involvement for Azeus users
-- **Esther Thompson** - Azeus guidance and development - 
+- **Kate Jagger** - Championing involvement for Azeus users -  
+- **Esther Thompson** - Azeus guidance and development -  
+- **Michael Simmons** - SystemC Data testing, guidance and development -  
+- **Jo Russell** - SystemC Data testing, guidance and development -   
+- **Albert Chau** - Mosaic Data testing, bug and solution finding -  
 
 ## Special Thanks
 
-- **Knowsley County Council** - For providing the projects first testing access thus enabling rapid early cross-LA development and testing
+- **Knowsley County Council** - For providing the project's v.first testing access thus enabling rapid early cross-LA development and testing
 
 ## How to Contribute
 
@@ -61,7 +66,7 @@ If you'd like to contribute to the SSD, contact us for more details on how to ge
 
 ## Contact
 
-For general inquiries or to reach out to the project team, please email us at [project@example.com](mailto:project@example.com).
+For general inquiries or to reach out to the project team, please [email us](mailto:datatoinsight.enquiries@gmail.com?subject=[SDD]%SSD%Feedback).
 
 ---
 
