@@ -3368,7 +3368,7 @@ SELECT
     (CASE WHEN ffa.ANSWER_NO = 'WasConf'
         AND fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
         THEN ffa.ANSWER END)                    AS cppr_cp_review_quorate,    
-    'SSD_PH'                                    AS cppr_cp_review_participation
+    NULL                                        AS cppr_cp_review_participation                     -- [REVIEW] Placeholder
  
 FROM
     HDM.Child_Social.FACT_CP_REVIEW as cpr
@@ -5844,8 +5844,8 @@ INSERT INTO ssd_development.ssd_linked_identifiers (
 )
 SELECT
     csp.dim_person_id                   AS link_person_id,
-    'Unique Pupil Number'               AS link_identifier_type,
-    'SSD_PH'                            AS link_identifier_value,       -- csp.upn [TESTING] Removed for compatibility
+    'Unique Pupil Number'               AS link_identifier_type,        -- [REVIEW]
+    NULL                                AS link_identifier_value,       -- csp.upn [TESTING] Removed for compatibility [REVIEW]
     NULL                                AS link_valid_from_date,        -- NULL for valid_from_date
     NULL                                AS link_valid_to_date           -- NULL for valid_to_date
 FROM
