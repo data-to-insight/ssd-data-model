@@ -9,6 +9,10 @@ DECLARE @src_schema sysname = N'';    -- empty uses caller default schema
 DECLARE @ssd_timeframe_years INT = 6;
 DECLARE @ssd_sub1_range_years INT = 1;
 
+
+
+
+
 DECLARE @today_date  date     = CONVERT(date, GETDATE());
 DECLARE @today_dt    datetime = CONVERT(datetime, @today_date);
 

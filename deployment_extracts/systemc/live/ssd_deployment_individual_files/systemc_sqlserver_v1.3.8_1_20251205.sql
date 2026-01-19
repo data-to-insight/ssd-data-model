@@ -136,15 +136,15 @@ SET NOCOUNT ON;
 DECLARE @ssd_timeframe_years INT = 6;   -- ssd extract time-frame (YRS)
 DECLARE @ssd_sub1_range_years INT = 1;  -- ssd sub-window internal or additional LA use
 
--- Fix <today>
+-- Get <today> as run-point anchor
 DECLARE @today_date  date     = CONVERT(date, GETDATE());
 DECLARE @today_dt    datetime = CONVERT(datetime, @today_date);
 
--- -- Main SSD window, based on today
+-- -- Main SSD window, based on today (dtime)
 -- DECLARE @ssd_window_end   datetime = @today_dt;
 -- DECLARE @ssd_window_start datetime = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
 
--- Main SSD window, based on today
+-- Main SSD window, based on today (date)
 DECLARE @ssd_window_end   date = @today_date;
 DECLARE @ssd_window_start date = DATEADD(year, -@ssd_timeframe_years, @ssd_window_end);
 
