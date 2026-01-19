@@ -323,8 +323,7 @@ SELECT
         ELSE NULL                           -- or NULL
     END, 
     NULL AS pers_single_unique_id,           -- Set to NULL as default(dev) / or set to NHS num / or set to Single Unique Identifier(SUI)
-    -- COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
-    f903.NO_UPN_CODE AS pers_upn_unknown, 
+    f903.NO_UPN_CODE AS pers_upn_unknown,    -- Source of upn_unknown likely to vary between LAs [REVIEW]
     p.EHM_SEN_FLAG,
     CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
@@ -6253,9 +6252,9 @@ INSERT INTO ssd_development.ssd_send (
 SELECT
     NEWID() AS send_table_id,          -- generate unique id
     csp.dim_person_id AS send_person_id,
-    'SSD_PH' AS send_upn,               -- csp.upn # only available with Education schema
-    'SSD_PH' AS send_uln,               -- ep.uln # only available with Education schema              
-    'SSD_PH' AS send_upn_unknown      
+    NULL AS send_upn,               -- csp.upn # only available with Education schema
+    NULL AS send_uln,               -- ep.uln # only available with Education schema              
+    NULL AS send_upn_unknown      
 FROM
     HDM.Child_Social.DIM_PERSON csp
 
