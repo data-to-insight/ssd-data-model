@@ -51,11 +51,11 @@ BEGIN
 
 
 
-/* START - Temp Hard drop and recreate due to d2i structure changes  */
-IF OBJECT_ID(N'ssd_person', N'U') IS NOT NULL
-    DROP TABLE ssd_person;
-
-/* END - remove this tmp block once SSD has run once for v1.3.5+!  */
+-- /* START - Temp Hard drop and recreate due to d2i structure changes  */
+-- IF OBJECT_ID(N'ssd_person', N'U') IS NOT NULL
+--     DROP TABLE ssd_person;
+-- GO
+-- /* END - remove this tmp block once SSD has run once for v1.3.5+!  */
 
 IF OBJECT_ID('tempdb..#ssd_person') IS NOT NULL DROP TABLE #ssd_person;
 
@@ -76,7 +76,7 @@ BEGIN
         pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "item_status":"P", "info":"If -additional- status to Gender is held, otherwise duplicate pers_gender"}    
         pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "item_status":"R", "expected_data":["unknown",NULL,"F","U","M","I"]}       
         pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A", "expected_data":[NULL, tbc]} 
-        pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"} 
+        pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A", "info": "SSD dat values render as 2024-12-10 00:00:00.000"} 
         pers_single_unique_id   NVARCHAR(48),               -- metadata={"item_ref":"PERS013A", "item_status":"P", "info":"Populate from NHS number if available"}                           
         pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A", "info":"SEN2 guidance suggests size(4)", "expected_data":["UN1-10"]}                                 
         pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A", "item_status":"P"} 
@@ -127,15 +127,14 @@ SELECT
     p.FORENAME, 
     p.SURNAME,
     p.GENDER_MAIN_CODE AS pers_sex,         -- Sex/Gender as used in stat-returns
-    p.GENDER_MAIN_CODE,                     -- Placeholder for those LAs that store sex and gender independently
-    p.ETHNICITY_MAIN_CODE,                  -- [REVIEW] LEFT(p.ETHNICITY_MAIN_CODE, 4)
+    p.GENDER_MAIN_CODE,                     -- Placeholder for those LAs that store sex and gender independently             
+    dlde.NAT_ID,                            -- COV change to align with national ID was LEFT(p.ETHNICITY_MAIN_CODE, 4) [REVIEW] 
     CASE WHEN (p.DOB_ESTIMATED) = 'N'              
         THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'N'
         ELSE NULL                           -- or NULL
     END, 
     NULL AS pers_single_unique_id,           -- Set to NULL as default(dev) / or set to NHS num / or set to Single Unique Identifier(SUI)
-    -- COALESCE(f903.NO_UPN_CODE, 'SSD_PH') AS NO_UPN_CODE, -- Use NO_UPN_CODE from f903 or 'SSD_PH' as placeholder
-    f903.NO_UPN_CODE AS pers_upn_unknown, 
+    f903.NO_UPN_CODE AS pers_upn_unknown,    -- Source of upn_unknown likely to vary between LAs [REVIEW]
     p.EHM_SEN_FLAG,
     CASE WHEN (p.DOB_ESTIMATED) = 'Y'              
         THEN p.BIRTH_DTTM                   -- Set to BIRTH_DTTM when DOB_ESTIMATED = 'Y'
@@ -168,10 +167,15 @@ LEFT JOIN (
 ON 
     p.DIM_PERSON_ID = f903.dim_person_id
 
+LEFT JOIN 
+    -- align with national ID
+    HDM.Child_Social.DIM_LOOKUP_DFE_ETHNIC dlde
+        ON p.ETHNICITY_MAIN_CODE = dlde.MAIN_CODE
+
 WHERE 
     /* EXCLUSIONS */
 
-    -- p.DIM_PERSON_ID IN (1, 2, 3) AND --  -- hard filter on CMS person ids for LA reduced cohort testing
+    -- p.DIM_PERSON_ID IN (1, 2, 3) AND --  -- hard filter on CMS person ids for LA reduced tiny cohort testing
 
     p.DIM_PERSON_ID IS NOT NULL
     AND p.DIM_PERSON_ID <> -1
