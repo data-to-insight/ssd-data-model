@@ -2281,7 +2281,7 @@ BEGIN
     CREATE TABLE ssd_development.ssd_assessment_factors (
         cinf_table_id                nvarchar(48)  NOT NULL,
         cinf_assessment_id           nvarchar(48)  NOT NULL,
-        cinf_assessment_factors_json nvarchar(max) NULL,
+        cinf_assessment_factors      nvarchar(max) NULL,
         CONSTRAINT PK_ssd_assessment_factors PRIMARY KEY CLUSTERED (cinf_table_id, cinf_assessment_id)
     );
 END
@@ -2308,6 +2308,7 @@ BEGIN TRY
        ------------------------------------------- */
     
     SELECT
+        fsa.FACT_SINGLE_ASSESSMENT_ID,
         ffa.FACT_FORM_ID,
         ffa.ANSWER_NO,
         ffa.ANSWER
@@ -2337,19 +2338,23 @@ BEGIN TRY
        ------------------------------------------- */
     
     SELECT DISTINCT
+        d.FACT_SINGLE_ASSESSMENT_ID,
         d.FACT_FORM_ID,
         d.ANSWER_NO,
         d.ANSWER,
         -- sort parts: numeric prefix then alpha suffix (or '' if none)
-        TRY_CONVERT(int, LEFT(d.ANSWER_NO,
-            CASE WHEN PATINDEX('%[^0-9]%', d.ANSWER_NO) = 0
-                 THEN LEN(d.ANSWER_NO)
-                 ELSE PATINDEX('%[^0-9]%', d.ANSWER_NO) - 1 END
-        )) AS num_part,
-        CASE WHEN PATINDEX('%[^0-9]%', d.ANSWER_NO) = 0
-             THEN N'' ELSE SUBSTRING(d.ANSWER_NO, PATINDEX('%[^0-9]%', d.ANSWER_NO), 10) END AS alpha_part
+        TRY_CONVERT(int, LEFT(d.ANSWER_NO, CASE
+            WHEN PATINDEX('%[^0-9]%', d.ANSWER_NO) = 0 THEN LEN(d.ANSWER_NO)
+            ELSE PATINDEX('%[^0-9]%', d.ANSWER_NO) - 1
+        END)) AS num_part,
+        CASE
+            WHEN PATINDEX('%[^0-9]%', d.ANSWER_NO) = 0 THEN N''
+            ELSE SUBSTRING(d.ANSWER_NO, PATINDEX('%[^0-9]%', d.ANSWER_NO), 10)
+        END AS alpha_part
     INTO #ssd_d_codes
     FROM #ssd_TMP_PRE_assessment_factors AS d;
+
+
 
     -- Optional index (IF your LA assessments row count is millions)
     -- CREATE CLUSTERED INDEX IX_codes ON #ssd_d_codes(FACT_FORM_ID, num_part, alpha_part, ANSWER_NO) INCLUDE (ANSWER);
@@ -2361,47 +2366,44 @@ BEGIN TRY
     INSERT INTO ssd_development.ssd_assessment_factors (
         cinf_table_id,
         cinf_assessment_id,
-        cinf_assessment_factors_json
+        cinf_assessment_factors
     )
     SELECT
         fsa.EXTERNAL_ID AS cinf_table_id,
-        fsa.FACT_FORM_ID AS cinf_assessment_id,
+        fsa.FACT_SINGLE_ASSESSMENT_ID AS cinf_assessment_id,
         (
-            SELECT
+
                 -- -- KEY-VALUES output e.g. {"1B": "Yes", "2B": "Yes", ...}  (alternative 1):
                 -- '{' +
                 -- STUFF((
                 --     SELECT
                 --         ', "' + x.ANSWER_NO + '": ' + QUOTENAME(x.ANSWER, '"')
                 --     FROM #ssd_d_codes AS x
-                --     WHERE x.FACT_FORM_ID = fsa.FACT_FORM_ID
+                --     WHERE x.FACT_SINGLE_ASSESSMENT_ID = fsa.FACT_SINGLE_ASSESSMENT_ID
                 --     ORDER BY x.num_part, x.alpha_part
                 --     FOR XML PATH(''), TYPE
                 -- ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') +
                 -- '}'
 
+
                 -- Awaiting LA/DfE approval
                 -- KEYS-ONLY output e.g. ["1A","2B", ...] (alternative 2):
-                '[' +
-                STUFF((
-                    SELECT
-                        ', "' + x.ANSWER_NO + '"'
-                    FROM #ssd_d_codes AS x
-                    WHERE x.FACT_FORM_ID = fsa.FACT_FORM_ID
-                    -- Opt: ignore NULL codes so they dont vanish silently in concat
-                    -- AND x.ANSWER_NO IS NOT NULL
-                    ORDER BY x.num_part, x.alpha_part
-                    FOR XML PATH(''), TYPE
-                ).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
-                + ']'
-
-        ) AS cinf_assessment_factors_json
+            '[' + STUFF((
+                SELECT ', "' + x.ANSWER_NO + '"'
+                FROM #ssd_d_codes AS x
+                WHERE x.FACT_SINGLE_ASSESSMENT_ID = fsa.FACT_SINGLE_ASSESSMENT_ID
+                AND x.ANSWER_NO IS NOT NULL
+                ORDER BY x.num_part, x.alpha_part
+                FOR XML PATH(''), TYPE
+            ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') + ']'
+        ) AS cinf_assessment_factors
     FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
-    JOIN (SELECT DISTINCT FACT_FORM_ID FROM #ssd_d_codes) AS d
-      ON d.FACT_FORM_ID = fsa.FACT_FORM_ID
-    WHERE fsa.EXTERNAL_ID <> -1;
+    JOIN (SELECT DISTINCT FACT_SINGLE_ASSESSMENT_ID FROM #ssd_d_codes) AS d
+    ON d.FACT_SINGLE_ASSESSMENT_ID = fsa.FACT_SINGLE_ASSESSMENT_ID
+    WHERE fsa.EXTERNAL_ID <> -1
+    AND fsa.DIM_LOOKUP_STEP_SUBSTATUS_CODE NOT IN ('X','D'); -- filter consistent with cin_assessments (exclude drafts and cancelled)
     -- Optional scope:
-    -- AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_development.ssd_cin_assessments)
+    -- AND fsa.FACT_SINGLE_ASSESSMENT_ID IN (SELECT cina_assessment_id FROM ssd_development.ssd_cin_assessments)
 
     COMMIT TRANSACTION;
 END TRY
@@ -2422,33 +2424,37 @@ IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TAB
 -- INSERT INTO ssd_development.ssd_assessment_factors (
 --     cinf_table_id,
 --     cinf_assessment_id,
---     cinf_assessment_factors_json
+--     cinf_assessment_factors
 -- )
 -- SELECT
 --     fsa.EXTERNAL_ID AS cinf_table_id,
---     fsa.FACT_FORM_ID AS cinf_assessment_id,
+--     fsa.FACT_SINGLE_ASSESSMENT_ID AS cinf_assessment_id,
+
 --
 --     -- KEY-VALUES output {"1B": "Yes", "2B": "Yes", ...}
 --     N'{' + STRING_AGG(
 --             CONCAT('"', c.ANSWER_NO, '": ', QUOTENAME(c.ANSWER, '"')),
 --             N', '
 --          ) WITHIN GROUP (ORDER BY c.num_part, c.alpha_part)
---        + N'}' AS cinf_assessment_factors_json
+--        + N'}' AS cinf_assessment_factors
 --
 --     -- KEYS-ONLY alternative (swap with lines above if ["1A","2B",...] needed):
 --     -- N'[' + STRING_AGG(
 --     --         CONCAT('"', c.ANSWER_NO, '"'),
 --     --         N', '
 --     --      ) WITHIN GROUP (ORDER BY c.num_part, c.alpha_part)
---     --    + N']' AS cinf_assessment_factors_json
+--     --    + N']' AS cinf_assessment_factors
 --
 -- FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
 -- JOIN #ssd_d_codes AS c
---   ON c.FACT_FORM_ID = fsa.FACT_FORM_ID
+--   ON c.FACT_SINGLE_ASSESSMENT_ID = fsa.FACT_SINGLE_ASSESSMENT_ID
+
 -- WHERE fsa.EXTERNAL_ID <> -1
--- GROUP BY fsa.EXTERNAL_ID, fsa.FACT_FORM_ID;
+--   AND fsa.DIM_LOOKUP_STEP_SUBSTATUS_CODE NOT IN ('X','D')
+
+-- GROUP BY fsa.EXTERNAL_ID, fsa.FACT_SINGLE_ASSESSMENT_ID;
 -- -- Optional scope:
--- -- AND fsa.FACT_FORM_ID IN (SELECT cina_assessment_id FROM ssd_development.ssd_cin_assessments)
+-- -- AND fsa.FACT_SINGLE_ASSESSMENT_ID IN (SELECT cina_assessment_id FROM ssd_development.ssd_cin_assessments)
 
 
 -- -- META-ELEMENT: {"type": "create_fk"} 
@@ -2456,8 +2462,7 @@ IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TAB
 -- FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_development.ssd_cin_assessments(cina_assessment_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
--- CREATE NONCLUSTERED INDEX IX_ssd_cinf_assessment_id ON ssd_development.ssd_assessment_factors(cinf_assessment_id);
-
+-- CREATE CLUSTERED INDEX IX_codes ON #ssd_d_codes(FACT_SINGLE_ASSESSMENT_ID, num_part, alpha_part, ANSWER_NO) INCLUDE (ANSWER, FACT_FORM_ID);
 
 
 -- META-ELEMENT: {"type": "test"}
