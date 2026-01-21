@@ -83,13 +83,10 @@ END
         fce.CARE_REASON_END_DESC                  AS clae_cla_episode_ceased_reason,
         fc.FACT_CLA_ID                            AS clae_cla_id,
         fc.FACT_REFERRAL_ID                       AS clae_referral_id,
-        ISNULL(
-            MAX(CASE
-                    WHEN cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
-                    THEN cn.EVENT_DTTM
-                END),
-            CAST('19000101' AS datetime)
-        )                                         AS clae_cla_last_iro_contact_date,
+        MAX(CASE
+                WHEN cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+                THEN cn.EVENT_DTTM
+            END)                                  AS clae_cla_last_iro_contact_date,
         fc.START_DTTM                             AS clae_entered_care_date
     FROM HDM.Child_Social.FACT_CARE_EPISODES AS fce
     JOIN HDM.Child_Social.FACT_CLA AS fc
