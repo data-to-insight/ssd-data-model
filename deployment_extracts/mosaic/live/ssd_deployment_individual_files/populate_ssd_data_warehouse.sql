@@ -5848,19 +5848,41 @@ Dependencies:
 			cinf_assessment_id,
 			cinf_assessment_factors_json
 		)
-		select
-			null cinf_table_id,
-			fact.ASSESSMENT_ID cinf_assessment_id,
-			fact.FACTOR_VALUE cinf_assessment_factors_json
-		from
-			dm_cin_assess_factors fact
-		inner join dm_workflow_steps stp
-		on stp.workflow_step_id = fact.assessment_id
-		where
+		SELECT
+			NULL AS cinf_table_id,
+			fact.ASSESSMENT_ID AS cinf_assessment_id,
+			N'[' +
+			STUFF((
+				SELECT N', ' + QUOTENAME(x.FACTOR_VALUE, '"')
+				FROM (
+					SELECT DISTINCT
+						f2.ASSESSMENT_ID,
+						NULLIF(LTRIM(RTRIM(f2.FACTOR_VALUE)), '') AS FACTOR_VALUE,
+						TRY_CONVERT(int, LEFT(NULLIF(LTRIM(RTRIM(f2.FACTOR_VALUE)), ''), CASE
+							WHEN PATINDEX('%[^0-9]%', NULLIF(LTRIM(RTRIM(f2.FACTOR_VALUE)), '')) = 0 THEN LEN(NULLIF(LTRIM(RTRIM(f2.FACTOR_VALUE)), ''))
+							ELSE PATINDEX('%[^0-9]%', NULLIF(LTRIM(RTRIM(f2.FACTOR_VALUE)), '')) - 1
+						END)) AS num_part,
+						CASE
+							WHEN PATINDEX('%[^0-9]%', NULLIF(LTRIM(RTRIM(f2.FACTOR_VALUE)), '')) = 0 THEN N''
+							ELSE SUBSTRING(NULLIF(LTRIM(RTRIM(f2.FACTOR_VALUE)), ''), PATINDEX('%[^0-9]%', NULLIF(LTRIM(RTRIM(f2.FACTOR_VALUE)), '')), 10)
+						END AS alpha_part
+					FROM dm_cin_assess_factors f2
+				) AS x
+				WHERE x.ASSESSMENT_ID = fact.ASSESSMENT_ID
+				AND x.FACTOR_VALUE IS NOT NULL
+				ORDER BY x.num_part, x.alpha_part, x.FACTOR_VALUE
+				FOR XML PATH(''), TYPE
+			).value('.', 'NVARCHAR(MAX)'), 1, 2, N'')
+			+ N']' AS cinf_assessment_factors_json
+		FROM dm_cin_assess_factors fact
+		INNER JOIN dm_workflow_steps stp
+			ON stp.workflow_step_id = fact.assessment_id
+		WHERE
 			--CRITERIA: Assessment was ongoing in the period
-			coalesce(stp.STARTED_ON, stp.incoming_on) <= @end_date
-			and
-			dbo.future(stp.completed_on) >= @start_date
+			COALESCE(stp.STARTED_ON, stp.incoming_on) <= @end_date
+			AND dbo.future(stp.completed_on) >= @start_date
+		GROUP BY
+			fact.ASSESSMENT_ID
 		--
 		return 0
 	end try
@@ -7249,7 +7271,16 @@ begin
 	set nocount on
 	--
 	--No. or financial years to include, including the current one
-	declare @number_of_years_to_include int, @start_date varchar(32), @end_date varchar(32)
+	-- declare @number_of_years_to_include 	int, 
+	-- 		@start_date 					varchar(32), 
+	-- 		@end_date 						varchar(32)
+
+	-- No. or financial years to include, including the current one
+	-- RH [REVIEW] Awaiting LA direct feedback on this. Procs expect datetime.. 
+    DECLARE @number_of_years_to_include 		INT,
+            @start_date 						DATETIME,
+            @end_date   						DATETIME;
+
 	--
 	set @number_of_years_to_include = @years_to_include - 1
 	--
@@ -7261,28 +7292,6 @@ begin
 	where
 		rd.curr_day = dbo.today()
 	--
-
-
-CREATE PROCEDURE ##populate_ssd_main (@years_to_include INT) AS
-BEGIN
-    SET NOCOUNT ON;
-
-    DECLARE @number_of_years_to_include INT,
-            @start_date DATETIME,
-            @end_date   DATETIME;
-
-	-- RH [REVIEW] Replaced with the above as procs expect datetime?
-	-- --No. or financial years to include, including the current one
-	-- declare @number_of_years_to_include int, @start_date varchar(32), @end_date varchar(32)
-
-    SET @number_of_years_to_include = @years_to_include - 1;
-
-    SELECT
-        @start_date = DATEADD(yy, -@number_of_years_to_include, rd.financial_year_start),
-        @end_date   = rd.curr_day
-    FROM report_days rd
-    WHERE rd.curr_day = dbo.today();
-
 
 
 	-- placeholder tables, incl. Non-core cms or SSDF Other DfE projects (1b, 2(a,b) [REVIEW]
