@@ -74,9 +74,9 @@ INSERT INTO ssd_send (
 SELECT
     NEWID() AS send_table_id,          -- generate unique id
     csp.dim_person_id AS send_person_id,
-    'SSD_PH' AS send_upn,               -- csp.upn # only available with Education schema
-    'SSD_PH' AS send_uln,               -- ep.uln # only available with Education schema              
-    'SSD_PH' AS send_upn_unknown      
+    NULL AS send_upn,               -- csp.upn # only available with Education schema
+    NULL AS send_uln,               -- ep.uln # only available with Education schema              
+    NULL AS send_upn_unknown      
 FROM
     HDM.Child_Social.DIM_PERSON csp
 
