@@ -2,16 +2,12 @@
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
--- shared vars, passed to every proc
+-- shared variables declared once and passed to every proc
 DECLARE @src_db     sysname = N'HDM';
 DECLARE @src_schema sysname = N'';    -- empty uses caller default schema
 
 DECLARE @ssd_timeframe_years INT = 6;
 DECLARE @ssd_sub1_range_years INT = 1;
-
-
-
-
 
 DECLARE @today_date  date     = CONVERT(date, GETDATE());
 DECLARE @today_dt    datetime = CONVERT(datetime, @today_date);
