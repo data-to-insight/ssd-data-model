@@ -98,7 +98,7 @@ SELECT
     (CASE WHEN ffa.ANSWER_NO = 'WasConf'
         AND fms.FACT_OUTCM_FORM_ID = ffa.FACT_FORM_ID
         THEN ffa.ANSWER END)                    AS cppr_cp_review_quorate,    
-    'SSD_PH'                                    AS cppr_cp_review_participation
+    NULL                                        AS cppr_cp_review_participation                     -- [REVIEW] Placeholder
  
 FROM
     HDM.Child_Social.FACT_CP_REVIEW as cpr
