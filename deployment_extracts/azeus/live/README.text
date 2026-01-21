@@ -1,0 +1,7 @@
+Changes still to come through/implement into this dev/cms stream:
+
+assessment_factors.assessment_factors_json to be json [] array 
+upn to be included on ssd_person.pers_upn
+remove all ssd_ph and 1900 date placeholder values
+reference new version_history.yml file
+has_client field changed to has_client_flag for LA clarity
