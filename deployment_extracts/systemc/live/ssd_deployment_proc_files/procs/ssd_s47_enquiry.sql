@@ -100,7 +100,16 @@ SELECT
         '"MONITOR_FLAG": "' + ISNULL(TRY_CAST(s47.OUTCOME_MONITOR_FLAG AS NVARCHAR(3)), '') + '", ' +
         '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(s47.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
         '"TOTAL_NO_OF_OUTCOMES": ' + ISNULL(TRY_CAST(s47.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(3)), 'null') + ', ' +
-        '"OUTCOME_COMMENTS": "' + ISNULL(TRY_CAST(s47.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
+        '"OUTCOME_COMMENTS": "' +
+            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                ISNULL(TRY_CAST(s47.OUTCOME_COMMENTS AS NVARCHAR(900)), ''),
+                CHAR(0),  ''),
+                '\',      '\\'),
+                '"',      '\"'),
+                CHAR(13), '\r'),
+                CHAR(10), '\n'),
+                CHAR(9),  '\t')
+        + '"' +
         '}'
     ) AS s47e_s47_outcome_json,
     s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
@@ -108,12 +117,24 @@ SELECT
 FROM 
     HDM.Child_Social.FACT_S47 AS s47
 WHERE
-    (s47.END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
-    OR s47.END_DTTM IS NULL)
+    -- overlap predicate (any activity in last X years)
+    -- incl. records started earlier but still open &  ended within ssd window
+    -- excl. filter future start stamped records
+    CONVERT(date, s47.START_DTTM) <= CONVERT(date, GETDATE()) 
+    AND (
+           s47.END_DTTM IS NULL -- is open, or closed within window
+        OR CONVERT(date, s47.END_DTTM) >= DATEADD(YEAR, -@ssd_timeframe_years, CONVERT(date, GETDATE())) 
+    )
+
 AND EXISTS ( -- only ssd relevant records
     SELECT 1
     FROM ssd_person p
-    WHERE TRY_CAST(p.pers_person_id AS INT) = s47.DIM_PERSON_ID -- #DtoI-1799
+    WHERE
+        -- handling if pers_person_id becomes INT 
+        (
+            TRY_CONVERT(int, p.pers_person_id) = s47.DIM_PERSON_ID
+            OR p.pers_person_id = CONVERT(nvarchar(48), s47.DIM_PERSON_ID)
+        )
 );
 
 -- -- #LEGACY-PRE2016 
@@ -125,22 +146,32 @@ AND EXISTS ( -- only ssd relevant records
 --     s47.START_DTTM,
 --     s47.END_DTTM,
 --     s47.OUTCOME_NFA_FLAG,
---     (
---         SELECT 
+
+--         (
 --             -- SSD standard 
 --             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
---             ISNULL(s47.OUTCOME_NFA_FLAG, '')                   AS NFA_FLAG,
---             ISNULL(s47.OUTCOME_LEGAL_ACTION_FLAG, '')          AS LEGAL_ACTION_FLAG,
---             ISNULL(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '')      AS PROV_OF_SERVICES_FLAG,
---             ISNULL(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '')       AS PROV_OF_SB_CARE_FLAG,
---             ISNULL(s47.OUTCOME_CP_CONFERENCE_FLAG, '')         AS CP_CONFERENCE_FLAG,
---             ISNULL(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '')   AS NFA_CONTINUE_SINGLE_FLAG,
---             ISNULL(s47.OUTCOME_MONITOR_FLAG, '')               AS MONITOR_FLAG,
---             ISNULL(s47.OTHER_OUTCOMES_EXIST_FLAG, '')          AS OTHER_OUTCOMES_EXIST_FLAG,
---             ISNULL(s47.TOTAL_NO_OF_OUTCOMES, '')               AS TOTAL_NO_OF_OUTCOMES,
---             ISNULL(s47.OUTCOME_COMMENTS, '')                   AS OUTCOME_COMMENTS
---         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
---         )                                                      AS s47e_s47_outcome_json,
+--             SELECT 
+--                 ISNULL(s47.OUTCOME_NFA_FLAG, '')                  AS NFA_FLAG,
+--                 ISNULL(s47.OUTCOME_LEGAL_ACTION_FLAG, '')         AS LEGAL_ACTION_FLAG,
+--                 ISNULL(s47.OUTCOME_PROV_OF_SERVICES_FLAG, '')     AS PROV_OF_SERVICES_FLAG,
+--                 ISNULL(s47.OUTCOME_PROV_OF_SB_CARE_FLAG, '')      AS PROV_OF_SB_CARE_FLAG,
+--                 ISNULL(s47.OUTCOME_CP_CONFERENCE_FLAG, '')        AS CP_CONFERENCE_FLAG,
+--                 ISNULL(s47.OUTCOME_NFA_CONTINUE_SINGLE_FLAG, '')  AS NFA_CONTINUE_SINGLE_FLAG,
+--                 ISNULL(s47.OUTCOME_MONITOR_FLAG, '')              AS MONITOR_FLAG,
+--                 ISNULL(s47.OTHER_OUTCOMES_EXIST_FLAG, '')         AS OTHER_OUTCOMES_EXIST_FLAG,
+
+--                 TRY_CONVERT(int, s47.TOTAL_NO_OF_OUTCOMES)        AS TOTAL_NO_OF_OUTCOMES,
+
+--                 ISNULL(
+--                     REPLACE(
+--                         TRY_CAST(s47.OUTCOME_COMMENTS AS nvarchar(900)),
+--                         CHAR(0), ''
+--                     ),
+--                     ''
+--                 ) AS OUTCOME_COMMENTS
+--             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--         ) AS s47e_s47_outcome_json,
+
 --     s47.COMPLETED_BY_DEPT_ID AS s47e_s47_completed_by_team,
 --     s47.COMPLETED_BY_USER_STAFF_ID AS s47e_s47_completed_by_worker_id
 
@@ -148,15 +179,24 @@ AND EXISTS ( -- only ssd relevant records
 --     HDM.Child_Social.FACT_S47 AS s47
 
 -- WHERE
---     (s47.END_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
---     OR s47.END_DTTM IS NULL)
+--     -- overlap predicate (any activity in last X years)
+--     -- incl. records started earlier but still open &  ended within ssd window
+--     CONVERT(date, s47.START_DTTM) <= CONVERT(date, GETDATE())
+--     AND (
+--            s47.END_DTTM IS NULL
+--         OR CONVERT(date, s47.END_DTTM) >= DATEADD(YEAR, -@ssd_timeframe_years, CONVERT(date, GETDATE()))
+--     )
 
 -- AND EXISTS ( -- only ssd relevant records
 --     SELECT 1
 --     FROM ssd_person p
---     WHERE TRY_CAST(p.pers_person_id AS INT) = s47.DIM_PERSON_ID -- #DtoI-1799
---     ) ;
-
+--     WHERE
+--         -- handling if pers_person_id becomes INT 
+--         (
+--             TRY_CONVERT(int, p.pers_person_id) = s47.DIM_PERSON_ID
+--             OR p.pers_person_id = CONVERT(nvarchar(48), s47.DIM_PERSON_ID)
+--         )
+-- );
 
 -- -- META-ELEMENT: {"type": "create_fk"}    
 -- ALTER TABLE ssd_s47_enquiry ADD CONSTRAINT FK_ssd_s47_person

@@ -102,17 +102,26 @@ SELECT
     fm.ACTUAL_DTTM,
     fcpc.OUTCOME_CP_FLAG,
         (
-            -- Manual JSON-like concatenation for icpc_icpc_outcome_json
-            '{' +
-            '"NFA_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' +
-            '"REFERRAL_TO_OTHER_AGENCY_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG AS NVARCHAR(3)), '') + '", ' +
-            '"SINGLE_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
-            '"PROV_OF_SERVICES_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG AS NVARCHAR(3)), '') + '", ' +
-            '"CP_FLAG": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_CP_FLAG AS NVARCHAR(3)), '') + '", ' +
-            '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fcpc.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
-            '"TOTAL_NO_OF_OUTCOMES": ' + ISNULL(TRY_CAST(fcpc.TOTAL_NO_OF_OUTCOMES AS NVARCHAR(4)), 'null') + ', ' +
-            '"COMMENTS": "' + ISNULL(TRY_CAST(fcpc.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
-            '}'
+        -- Manual JSON-like concatenation for icpc_icpc_outcome_json
+        N'{' +
+        N'"NFA_FLAG":"' + ISNULL(TRY_CAST(fcpc.OUTCOME_NFA_FLAG AS nvarchar(3)), N'') + N'",' +
+        N'"REFERRAL_TO_OTHER_AGENCY_FLAG":"' + ISNULL(TRY_CAST(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG AS nvarchar(3)), N'') + N'",' +
+        N'"SINGLE_ASSESSMENT_FLAG":"' + ISNULL(TRY_CAST(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG AS nvarchar(3)), N'') + N'",' +
+        N'"PROV_OF_SERVICES_FLAG":"' + ISNULL(TRY_CAST(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG AS nvarchar(3)), N'') + N'",' +
+        N'"CP_FLAG":"' + ISNULL(TRY_CAST(fcpc.OUTCOME_CP_FLAG AS nvarchar(3)), N'') + N'",' +
+        N'"OTHER_OUTCOMES_EXIST_FLAG":"' + ISNULL(TRY_CAST(fcpc.OTHER_OUTCOMES_EXIST_FLAG AS nvarchar(3)), N'') + N'",' +
+        N'"TOTAL_NO_OF_OUTCOMES":' +
+            COALESCE(TRY_CAST(fcpc.TOTAL_NO_OF_OUTCOMES AS nvarchar(10)), N'null') + N',' +
+        N'"COMMENTS":"' +
+            REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
+                ISNULL(TRY_CAST(fcpc.OUTCOME_COMMENTS AS nvarchar(900)), N''),
+                N'\', N'\\'),
+                N'"', N'\"'),
+                CHAR(13), N'\r'),
+                CHAR(10), N'\n'),
+                CHAR(9),  N'\t')
+            + N'"' +
+        N'}'
         ) AS icpc_icpc_outcome_json,
     fcpc.ORGANISED_BY_DEPT_ID                                       AS icpc_icpc_team,          -- was fcpc.ORGANISED_BY_DEPT_NAME #DtoI-1762
     fcpc.ORGANISED_BY_USER_STAFF_ID                                 AS icpc_icpc_worker_id      -- was fcpc.ORGANISED_BY_USER_NAME
@@ -151,20 +160,30 @@ AND EXISTS ( -- only ssd relevant records
 --     fcpc.DUE_DTTM,
 --     fm.ACTUAL_DTTM,
 --     fcpc.OUTCOME_CP_FLAG,
---     (
---         SELECT
---             -- SSD standard 
---             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
---             ISNULL(fcpc.OUTCOME_NFA_FLAG, '')                       AS NFA_FLAG,
---             ISNULL(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '')  AS REFERRAL_TO_OTHER_AGENCY_FLAG,
---             ISNULL(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')         AS SINGLE_ASSESSMENT_FLAG,
---             ISNULL(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')          AS PROV_OF_SERVICES_FLAG,
---             ISNULL(fcpc.OUTCOME_CP_FLAG, '')                        AS CP_FLAG,
---             ISNULL(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')              AS OTHER_OUTCOMES_EXIST_FLAG,
---             ISNULL(fcpc.TOTAL_NO_OF_OUTCOMES, '')                   AS TOTAL_NO_OF_OUTCOMES,
---             ISNULL(fcpc.OUTCOME_COMMENTS, '')                       AS COMMENTS
---         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
---         )                                                           AS icpc_icpc_outcome_json,
+-- (
+-- SELECT
+--     ISNULL(fcpc.OUTCOME_NFA_FLAG, '')                      AS NFA_FLAG,
+--     ISNULL(fcpc.OUTCOME_REFERRAL_TO_OTHER_AGENCY_FLAG, '') AS REFERRAL_TO_OTHER_AGENCY_FLAG,
+--     ISNULL(fcpc.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')        AS SINGLE_ASSESSMENT_FLAG,
+--     ISNULL(fcpc.OUTCOME_PROV_OF_SERVICES_FLAG, '')         AS PROV_OF_SERVICES_FLAG,
+--     ISNULL(fcpc.OUTCOME_CP_FLAG, '')                       AS CP_FLAG,
+--     ISNULL(fcpc.OTHER_OUTCOMES_EXIST_FLAG, '')             AS OTHER_OUTCOMES_EXIST_FLAG,
+
+--     -- numeric or null
+--     TRY_CONVERT(int, fcpc.TOTAL_NO_OF_OUTCOMES)            AS TOTAL_NO_OF_OUTCOMES,
+
+--     -- pre-clean comments(only of non-printing chars), FOR JSON escape quotes
+--     ISNULL(
+--     REPLACE(REPLACE(REPLACE(
+--         TRY_CAST(fcpc.OUTCOME_COMMENTS AS nvarchar(900)),
+--         CHAR(13), '\r'),
+--         CHAR(10), '\n'),
+--         CHAR(9),  '\t'
+--     ),
+--     ''
+--     ) AS COMMENTS
+-- FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+-- ) AS icpc_icpc_outcome_json,
 --     fcpc.ORGANISED_BY_DEPT_ID                                       AS icpc_icpc_team,          -- was fcpc.ORGANISED_BY_DEPT_NAME #DtoI-1762
 --     fcpc.ORGANISED_BY_USER_STAFF_ID                                 AS icpc_icpc_worker_id      -- was fcpc.ORGANISED_BY_USER_NAME
  
