@@ -179,6 +179,49 @@ BEGIN TRY
     -- Optional scope:
     -- AND fsa.FACT_SINGLE_ASSESSMENT_ID IN (SELECT cina_assessment_id FROM ssd_cin_assessments)
 
+
+    -- /* -------------------------------------------
+    --    Modern path: SQL Server 2022 or Azure SQL only
+    --    enable on modern servers, comment out legacy INSERT above and 
+    --    uncomment this whole block
+    --    ------------------------------------------- */
+
+        -- INSERT INTO ssd_assessment_factors (
+        --     cinf_table_id,
+        --     cinf_assessment_id,
+        --     cinf_assessment_factors_json
+        -- )
+        -- SELECT
+        --     fsa.EXTERNAL_ID AS cinf_table_id,
+        --     fsa.FACT_SINGLE_ASSESSMENT_ID AS cinf_assessment_id,
+
+
+        --     -- -- KEY-VALUES output {"1B": "Yes", "2B": "Yes", ...}
+        --     -- N'{' + STRING_AGG(
+        --     --         CONCAT('"', c.ANSWER_NO, '": ', QUOTENAME(c.ANSWER, '"')),
+        --     --         N', '
+        --     --     ) WITHIN GROUP (ORDER BY c.num_part, c.alpha_part)
+        --     -- + N'}' AS cinf_assessment_factors_json
+
+        --     -- KEYS-ONLY alternative ["1A","2B",...] 
+        --     N'[' + STRING_AGG(
+        --             CONCAT('"', c.ANSWER_NO, '"'),
+        --             N', '
+        --          ) WITHIN GROUP (ORDER BY c.num_part, c.alpha_part)
+        --        + N']' AS cinf_assessment_factors_json
+
+        -- FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
+        -- JOIN #ssd_d_codes AS c
+        -- ON c.FACT_SINGLE_ASSESSMENT_ID = fsa.FACT_SINGLE_ASSESSMENT_ID
+
+        -- WHERE fsa.EXTERNAL_ID <> -1
+        -- AND fsa.DIM_LOOKUP_STEP_SUBSTATUS_CODE NOT IN ('X','D')
+
+        -- GROUP BY fsa.EXTERNAL_ID, fsa.FACT_SINGLE_ASSESSMENT_ID;
+        -- -- Optional scope:
+        -- -- AND fsa.FACT_SINGLE_ASSESSMENT_ID IN (SELECT cina_assessment_id FROM ssd_cin_assessments)
+
+
     COMMIT TRANSACTION;
 END TRY
 BEGIN CATCH
@@ -186,57 +229,16 @@ BEGIN CATCH
     THROW;  -- preserve original error details
 END CATCH;
 
--- Cleanup
-IF OBJECT_ID('tempdb..#ssd_d_codes','U') IS NOT NULL DROP TABLE #ssd_d_codes;
-IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
-
--- -------------------------------------------------------------------------
--- Modern path: SQL Server 2022 or Azure SQL only
--- enable on modern servers, comment out legacy INSERT above and
--- uncomment this whole block
--- -------------------------------------------------------------------------
--- INSERT INTO ssd_assessment_factors (
---     cinf_table_id,
---     cinf_assessment_id,
---     cinf_assessment_factors_json
--- )
--- SELECT
---     fsa.EXTERNAL_ID AS cinf_table_id,
---     fsa.FACT_SINGLE_ASSESSMENT_ID AS cinf_assessment_id,
-
---
---     -- KEY-VALUES output {"1B": "Yes", "2B": "Yes", ...}
---     N'{' + STRING_AGG(
---             CONCAT('"', c.ANSWER_NO, '": ', QUOTENAME(c.ANSWER, '"')),
---             N', '
---          ) WITHIN GROUP (ORDER BY c.num_part, c.alpha_part)
---        + N'}' AS cinf_assessment_factors_json
---
---     -- KEYS-ONLY alternative (swap with lines above if ["1A","2B",...] needed):
---     -- N'[' + STRING_AGG(
---     --         CONCAT('"', c.ANSWER_NO, '"'),
---     --         N', '
---     --      ) WITHIN GROUP (ORDER BY c.num_part, c.alpha_part)
---     --    + N']' AS cinf_assessment_factors_json
---
--- FROM HDM.Child_Social.FACT_SINGLE_ASSESSMENT AS fsa
--- JOIN #ssd_d_codes AS c
---   ON c.FACT_SINGLE_ASSESSMENT_ID = fsa.FACT_SINGLE_ASSESSMENT_ID
-
--- WHERE fsa.EXTERNAL_ID <> -1
---   AND fsa.DIM_LOOKUP_STEP_SUBSTATUS_CODE NOT IN ('X','D')
-
--- GROUP BY fsa.EXTERNAL_ID, fsa.FACT_SINGLE_ASSESSMENT_ID;
--- -- Optional scope:
--- -- AND fsa.FACT_SINGLE_ASSESSMENT_ID IN (SELECT cina_assessment_id FROM ssd_cin_assessments)
-
-
 -- -- META-ELEMENT: {"type": "create_fk"} 
 -- ALTER TABLE ssd_assessment_factors ADD CONSTRAINT FK_ssd_cinf_assessment_id
 -- FOREIGN KEY (cinf_assessment_id) REFERENCES ssd_cin_assessments(cina_assessment_id);
 
 -- -- META-ELEMENT: {"type": "create_idx"}
 -- CREATE CLUSTERED INDEX IX_codes ON #ssd_d_codes(FACT_SINGLE_ASSESSMENT_ID, num_part, alpha_part, ANSWER_NO) INCLUDE (ANSWER, FACT_FORM_ID);
+
+-- Cleanup
+IF OBJECT_ID('tempdb..#ssd_d_codes','U') IS NOT NULL DROP TABLE #ssd_d_codes;
+IF OBJECT_ID('tempdb..#ssd_TMP_PRE_assessment_factors','U') IS NOT NULL DROP TABLE #ssd_TMP_PRE_assessment_factors;
 
     END TRY
     BEGIN CATCH
