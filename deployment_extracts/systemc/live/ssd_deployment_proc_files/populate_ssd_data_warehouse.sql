@@ -26,6 +26,35 @@ BEGIN TRY
     DECLARE @schema_name sysname = NULLIF(@src_schema, N'');
     DECLARE @proc nvarchar(512);
 
+    -- proc_ssd_dim_date
+    IF @schema_name IS NULL
+        SET @proc = N'proc_ssd_dim_date_custom';
+    ELSE
+        SET @proc = QUOTENAME(@schema_name) + N'.proc_ssd_dim_date_custom';
+
+    IF OBJECT_ID(@proc, N'P') IS NOT NULL
+    BEGIN
+        EXEC @proc
+             @src_db=@src_db, @src_schema=@src_schema,
+             @ssd_timeframe_years=@ssd_timeframe_years, @ssd_sub1_range_years=@ssd_sub1_range_years,
+             @today_date=@today_date, @today_dt=@today_dt,
+             @ssd_window_start=@ssd_window_start, @ssd_window_end=@ssd_window_end,
+             @CaseloadLastSept30th=@CaseloadLastSept30th,
+             @CaseloadTimeframeStartDate=@CaseloadTimeframeStartDate;
+    END
+    ELSE
+    BEGIN
+        IF @schema_name IS NULL SET @proc = N'proc_ssd_dim_date';
+        ELSE              SET @proc = QUOTENAME(@schema_name) + N'.proc_ssd_dim_date';
+        EXEC @proc
+             @src_db=@src_db, @src_schema=@src_schema,
+             @ssd_timeframe_years=@ssd_timeframe_years, @ssd_sub1_range_years=@ssd_sub1_range_years,
+             @today_date=@today_date, @today_dt=@today_dt,
+             @ssd_window_start=@ssd_window_start, @ssd_window_end=@ssd_window_end,
+             @CaseloadLastSept30th=@CaseloadLastSept30th,
+             @CaseloadTimeframeStartDate=@CaseloadTimeframeStartDate;
+    END
+
     -- proc_ssd_person
     IF @schema_name IS NULL
         SET @proc = N'proc_ssd_person_custom';

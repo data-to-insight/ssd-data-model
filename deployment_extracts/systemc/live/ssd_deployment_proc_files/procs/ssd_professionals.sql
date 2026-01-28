@@ -87,11 +87,12 @@ SELECT
     LTRIM(RTRIM(dw.STAFF_ID))               AS prof_staff_id,                       -- Note that this is trimmed for non-printing chars
     CONCAT(dw.FORENAME, ' ', dw.SURNAME)    AS prof_professional_name,              -- used also as Allocated Worker|Assigned Worker
     dw.WORKER_ID_CODE                       AS prof_social_worker_registration_no,  -- Not tied to WORKER_ID, this is the social work reg number IF entered
-    NULL                                    AS prof_agency_worker_flag,             -- Not available in SSD Ver/Iteration 1 [TESTING] [PLACEHOLDER_DATA]
+    NULL                                    AS prof_agency_worker_flag,             -- Not available in SSD Ver/Iteration 1 [REVIEW] [PLACEHOLDER_DATA]
     dw.JOB_TITLE                            AS prof_professional_job_title,
     ISNULL(rc.OpenCases, 0)                 AS prof_professional_caseload,          -- 0 when no open cases on given date.
     dw.DEPARTMENT_NAME                      AS prof_professional_department,
     dw.FULL_TIME_EQUIVALENCY                AS prof_full_time_equivalency
+
 FROM 
     HDM.Child_Social.DIM_WORKER AS dw
 
@@ -101,13 +102,16 @@ LEFT JOIN (
         -- [REVIEW][TESTING] count within restricted ssd timeframe only
         DIM_WORKER_ID,
         COUNT(*) AS OpenCases
+
     FROM 
-        HDM.Child_Social.FACT_REFERRALS
+        HDM.Child_Social.FACT_INVOLVEMENTS
 
     WHERE 
-        REFRL_START_DTTM <= @CaseloadLastSept30th AND 
-        (REFRL_END_DTTM IS NULL OR REFRL_END_DTTM >= @CaseloadLastSept30th) AND
-        REFRL_START_DTTM >= @CaseloadTimeframeStartDate  -- ssd timeframe constraint
+        START_DTTM <= @CaseloadLastSept30th AND 
+        (END_DTTM IS NULL OR END_DTTM >= @CaseloadLastSept30th) AND
+        START_DTTM >= @CaseloadTimeframeStartDate -- ssd timeframe constraint
+        and IS_ALLOCATED_CW_FLAG = 'y'
+    
     GROUP BY 
         DIM_WORKER_ID
 ) AS rc ON dw.DIM_WORKER_ID = rc.DIM_WORKER_ID
@@ -115,8 +119,6 @@ WHERE
     dw.DIM_WORKER_ID <> -1
     AND LTRIM(RTRIM(dw.STAFF_ID)) IS NOT NULL           -- in theory would not occur
     AND LOWER(LTRIM(RTRIM(dw.STAFF_ID))) <> 'unknown';  -- data seen in some LAs
-
-
 
 
 

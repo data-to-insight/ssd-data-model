@@ -226,7 +226,7 @@ WHERE
                   AND COALESCE(fi.IS_ALLOCATED_CW_FLAG, 'N') <> 'Y'
               )
 
-              -- AND fi.START_DTTM > '2009-12-04 00:54:49.947' -- #DtoI-1830 care leavers who were aged 22-25 and may not have had Allocated Case Worker relationship for years+
+              -- AND fi.START_DTTM > '2009-12-04 00:54:49.947'   -- #DtoI-1830 optional
               AND fi.DIM_WORKER_ID <> '-1'
               AND (fi.END_DTTM IS NULL OR fi.END_DTTM > @ssd_window_start)
         )

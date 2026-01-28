@@ -20,6 +20,7 @@
 :r "procs\\ssd_cp_reviews.sql"
 :r "procs\\ssd_cp_visits.sql"
 :r "procs\\ssd_department.sql"
+:r "procs\\ssd_dim_date.sql"
 :r "procs\\ssd_disability.sql"
 :r "procs\\ssd_early_help_episodes.sql"
 :r "procs\\ssd_ehcp_active_plans.sql"
