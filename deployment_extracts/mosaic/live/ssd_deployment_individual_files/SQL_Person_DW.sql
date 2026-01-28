@@ -9,10 +9,11 @@ DECLARE
 
 Select distinct
 p.PersonID pers_person_id,
+NULL pers_legacy_id,						-- [REVIEW] Compatibility field/Can also be used locally
 p.Sex pers_sex,
 p.pGender pers_gender,
 
-COALESCE(ec.CINCode,'NOBT') pers_ethnicity, -- [REVIEW] Depreciated. LA Reference. 
+COALESCE(ec.CINCode,'NOBT') pers_ethnicity, 	-- [REVIEW] Depreciated. LA Reference. 
 -- COALESCE(e.CBDS_ETHNICITY_CODE, 'NOBT') pers_ethnicity,  -- [REVIEW] Issue #28
 
 p.PDoB pers_dob,

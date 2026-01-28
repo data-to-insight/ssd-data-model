@@ -2404,6 +2404,7 @@ Dependencies:
 		--
 		create table ##ssd_person (
 			pers_person_id					varchar(48),
+			pers_legacy_id					varchar(48),
 			pers_sex						varchar(48),
 			pers_gender						varchar(48),
 			pers_ethnicity					varchar(48),
@@ -2420,6 +2421,7 @@ Dependencies:
 		--
 		insert into ##ssd_person (
 			pers_person_id,
+			pers_legacy_id,
 			pers_sex,
 			pers_gender,
 			pers_ethnicity,
@@ -2435,6 +2437,7 @@ Dependencies:
 		)
 		select
 			per.PERSON_ID pers_person_id,
+			null pers_legacy_id,
 			(
 				select
 					rd.ref_description

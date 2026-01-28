@@ -9,6 +9,7 @@ DECLARE
 
 Select distinct
 p.PERSON_ID pers_person_id,
+NULL pers_legacy_id,						-- [REVIEW] Compatibility field/Can also be used locally
 p.GENDER pers_sex,
 pg.GENDER_CODE pers_gender,
 
