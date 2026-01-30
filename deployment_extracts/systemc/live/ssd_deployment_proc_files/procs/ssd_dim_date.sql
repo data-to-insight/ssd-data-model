@@ -37,7 +37,7 @@ BEGIN
 -- Version: 1.0
 -- Status: [D]ev-
 -- Remarks: [EA_API_PRIORITY_TABLE]
---          This is a new inclusion for the SSD and as such is being phased in. 
+--          This is an in DEvelopment inclusion for the SSD and as such is being phased in. 
 --          Added here for both visibility and LA feedback, but not yet fully integrated. 
 --          The table set to replace declarations within: META-ELEMENT: {"type": "ssd_timeframe"}
 -- Dependencies:
@@ -83,6 +83,7 @@ CREATE TABLE ssd_dim_date
     CONSTRAINT PK_ssd_dim_date PRIMARY KEY CLUSTERED (date_key),
     CONSTRAINT UQ_ssd_dim_date_full_date UNIQUE (full_date)
 );
+
 
 DECLARE @StartDate date = '2015-01-01';
 DECLARE @EndDate   date = CONVERT(date, GETDATE());  -- end at today
@@ -236,53 +237,69 @@ FROM Base b;
 -- CREATE INDEX IX_ssd_dim_date_iso_year_week
 -- ON ssd_dim_date (iso_year, iso_week)
 -- INCLUDE (full_date, date_key);
--- GO
 
-CREATE OR ALTER VIEW ssd_vw_current_time_windows
-AS
-WITH x AS
-(
-    SELECT CONVERT(date, GETDATE()) AS run_date
-),
-p AS
-(
-    /* Centralised params */
-    SELECT
-        CAST(24 AS int) AS ea_months_back,          -- Early Adopters
-        CAST(6  AS int) AS ssd_timeframe_years      -- SSD main
-)
-SELECT
-    x.run_date AS ssd_run_date,
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 1.0
+-- Status: [D]ev-
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          This is an in Development inclusion for the SSD and as such is being phased in. 
+--          Added here for both visibility and LA feedback, but not yet fully integrated.
+--          VIEW currently commented as use of GO mid-single-script resets var declarations, 
+--          and VIEW definitions required to be first running object. *LA's can run seperately as needed* 
+--          The table set to replace declarations within: META-ELEMENT: {"type": "ssd_timeframe"}
+-- Dependencies:
+-- 
+-- =============================================================================
 
-    /* SSD main timeframe (start and end exclusive) */
-    DATEADD(year, -p.ssd_timeframe_years, x.run_date) AS ssd_window_start,
-    DATEADD(day, 1, x.run_date) AS ssd_window_end,
+-- CREATE OR ALTER VIEW ssd_vw_current_time_windows
+-- AS
+-- WITH x AS
+-- (
+--     SELECT CONVERT(date, GETDATE()) AS run_date
+-- ),
+-- p AS
+-- (
+--     /* Centralised params */
+--     SELECT
+--         CAST(24 AS int) AS ea_months_back,          -- Early Adopters
+--         CAST(6  AS int) AS ssd_timeframe_years      -- SSD main
+-- )
+-- SELECT
+--     x.run_date AS ssd_run_date,
 
-    /* EA window (24 months back, then FY start for that anchor date) */
-    p.ea_months_back AS ea_months_back,
-    DATEADD(month, -p.ea_months_back, x.run_date) AS ea_anchor_date,
-    ea.fiscal_year_start_date AS ea_window_start,
-    DATEADD(day, 1, x.run_date) AS ea_window_end,
+--     /* SSD main timeframe (start and end exclusive) */
+--     DATEADD(year, -p.ssd_timeframe_years, x.run_date) AS ssd_window_start,
+--     DATEADD(day, 1, x.run_date) AS ssd_window_end,
 
-    /* Caseload anchor (last Sept 30 on or before run_date) */
-    p.ssd_timeframe_years AS ssd_timeframe_years,
-    caseload.last_sept30 AS sw_caseload_anchor,
-    DATEADD(year, -p.ssd_timeframe_years, caseload.last_sept30) AS sw_caseload_window_start
-FROM x
-CROSS JOIN p
-JOIN ssd_dim_date ea
-  ON ea.full_date = DATEADD(month, -p.ea_months_back, x.run_date)
-CROSS APPLY
-(
-    SELECT MAX(d.full_date) AS last_sept30
-    FROM ssd_dim_date d
-    WHERE d.month_number = 9
-      AND d.day_of_month = 30
-      AND d.full_date <= x.run_date
-) caseload;
+--     /* EA window (24 months back, then FY start for that anchor date) */
+--     p.ea_months_back AS ea_months_back,
+--     DATEADD(month, -p.ea_months_back, x.run_date) AS ea_anchor_date,
+--     ea.fiscal_year_start_date AS ea_window_start,
+--     DATEADD(day, 1, x.run_date) AS ea_window_end,
+
+--     /* Caseload anchor (last Sept 30 on or before run_date) */
+--     p.ssd_timeframe_years AS ssd_timeframe_years,
+--     caseload.last_sept30 AS sw_caseload_anchor,
+--     DATEADD(year, -p.ssd_timeframe_years, caseload.last_sept30) AS sw_caseload_window_start
+-- FROM x
+-- CROSS JOIN p
+-- JOIN ssd_dim_date ea
+--   ON ea.full_date = DATEADD(month, -p.ea_months_back, x.run_date)
+-- CROSS APPLY
+-- (
+--     SELECT MAX(d.full_date) AS last_sept30
+--     FROM ssd_dim_date d
+--     WHERE d.month_number = 9
+--       AND d.day_of_month = 30
+--       AND d.full_date <= x.run_date
+-- ) caseload;
 
 
-select * from ssd_vw_current_time_windows;
+-- select * from ssd_vw_current_time_windows;
+
+-- -- META-END
 
     END TRY
     BEGIN CATCH

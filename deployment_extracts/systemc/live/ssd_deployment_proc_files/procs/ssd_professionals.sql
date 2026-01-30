@@ -104,7 +104,7 @@ LEFT JOIN (
         COUNT(*) AS OpenCases
 
     FROM 
-        HDM.Child_Social.FACT_INVOLVEMENTS
+        HDM.Child_Social.FACT_INVOLVEMENTS -- [REVIEW]
 
     WHERE 
         START_DTTM <= @CaseloadLastSept30th AND 
