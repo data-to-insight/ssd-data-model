@@ -9,9 +9,13 @@ current_version: "1.3.9"
 
 releases:
   - version_number: "1.3.9" 
-    release_date: "2025-01-21" 
+    release_date: "2025-01-29" 
     includes_changes: >
       assessment_factors_json field structure fixes on Mosaic_SystemC fixes for issues/73, /issues/75, issues/269
+      ssd_dim_dates, ssd_vw_current_time_windows added but commented for now, towards centralised time-frame 
+      minor commenting changes
+      comment/free text fields in _json fields with additional json friendly non-printing-char cleaning
+      disability and ethnicity codes now taken from NAT_ID
     impact_description: >
       change in list structure within ssd_assessment_factors.assessment_factors_json from {"key":"val", "key":"val2,..} to ["val", "val",..]
     impacts_cms_deployment:
