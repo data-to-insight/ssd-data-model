@@ -207,9 +207,9 @@ SET @StartTime = GETDATE(); -- Script start time
 -- Description: Centralised time-frame references for SSD and upstream reporting|tools
 -- Author: D2I
 -- Version: 0.1
--- Status: [R]elease
+-- Status: [D]ev
 -- Remarks: [EA_API_PRIORITY_TABLE]
---          This is a new inclusion for the SSD and as such is being phased in. 
+--          This is an in DEvelopment inclusion for the SSD and as such is being phased in. 
 --          Added here for both visibility and LA feedback, but not yet fully integrated. 
 --          The table set to replace declarations within: META-ELEMENT: {"type": "ssd_timeframe"}
 -- Dependencies:
@@ -255,7 +255,7 @@ CREATE TABLE ssd_development.ssd_dim_date
     CONSTRAINT PK_ssd_dim_date PRIMARY KEY CLUSTERED (date_key),
     CONSTRAINT UQ_ssd_dim_date_full_date UNIQUE (full_date)
 );
-GO
+
 
 DECLARE @StartDate date = '2015-01-01';
 DECLARE @EndDate   date = CONVERT(date, GETDATE());  -- end at today
@@ -392,7 +392,6 @@ SELECT
         END
     )) AS fiscal_quarter_end_date
 FROM Base b;
-GO
 
 -- -- Suggested indexes as required
 -- CREATE INDEX IX_ssd_dim_date_full_date
@@ -410,60 +409,72 @@ GO
 -- CREATE INDEX IX_ssd_dim_date_iso_year_week
 -- ON ssd_development.ssd_dim_date (iso_year, iso_week)
 -- INCLUDE (full_date, date_key);
--- GO
-
-
-GO
 
 
 
-CREATE OR ALTER VIEW ssd_development.ssd_vw_current_time_windows
-AS
-WITH x AS
-(
-    SELECT CONVERT(date, GETDATE()) AS run_date
-),
-p AS
-(
-    /* Centralised params */
-    SELECT
-        CAST(24 AS int) AS ea_months_back,          -- Early Adopters
-        CAST(6  AS int) AS ssd_timeframe_years      -- SSD main
-)
-SELECT
-    x.run_date AS ssd_run_date,
+-- META-CONTAINER: {"type": "table", "name": "ssd_vw_current_time_windows"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 0.1
+-- Status: [D]ev
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          This is an in Development inclusion for the SSD and as such is being phased in. 
+--          Added here for both visibility and LA feedback, but not yet fully integrated.
+--          VIEW currently commented as use of GO mid-single-script resets var declarations, 
+--          and VIEW definitions required to be first running object. *LA's can run seperately as needed* 
+--          The table set to replace declarations within: META-ELEMENT: {"type": "ssd_timeframe"}
+-- Dependencies:
+-- 
+-- =============================================================================
 
-    /* SSD main timeframe (start and end exclusive) */
-    DATEADD(year, -p.ssd_timeframe_years, x.run_date) AS ssd_window_start,
-    DATEADD(day, 1, x.run_date) AS ssd_window_end,
+-- CREATE OR ALTER VIEW ssd_development.ssd_vw_current_time_windows
+-- AS
+-- WITH x AS
+-- (
+--     SELECT CONVERT(date, GETDATE()) AS run_date
+-- ),
+-- p AS
+-- (
+--     /* Centralised params */
+--     SELECT
+--         CAST(24 AS int) AS ea_months_back,          -- Early Adopters
+--         CAST(6  AS int) AS ssd_timeframe_years      -- SSD main
+-- )
+-- SELECT
+--     x.run_date AS ssd_run_date,
 
-    /* EA window (24 months back, then FY start for that anchor date) */
-    p.ea_months_back AS ea_months_back,
-    DATEADD(month, -p.ea_months_back, x.run_date) AS ea_anchor_date,
-    ea.fiscal_year_start_date AS ea_window_start,
-    DATEADD(day, 1, x.run_date) AS ea_window_end,
+--     /* SSD main timeframe (start and end exclusive) */
+--     DATEADD(year, -p.ssd_timeframe_years, x.run_date) AS ssd_window_start,
+--     DATEADD(day, 1, x.run_date) AS ssd_window_end,
 
-    /* Caseload anchor (last Sept 30 on or before run_date) */
-    p.ssd_timeframe_years AS ssd_timeframe_years,
-    caseload.last_sept30 AS sw_caseload_anchor,
-    DATEADD(year, -p.ssd_timeframe_years, caseload.last_sept30) AS sw_caseload_window_start
-FROM x
-CROSS JOIN p
-JOIN ssd_development.ssd_dim_date ea
-  ON ea.full_date = DATEADD(month, -p.ea_months_back, x.run_date)
-CROSS APPLY
-(
-    SELECT MAX(d.full_date) AS last_sept30
-    FROM ssd_development.ssd_dim_date d
-    WHERE d.month_number = 9
-      AND d.day_of_month = 30
-      AND d.full_date <= x.run_date
-) caseload;
+--     /* EA window (24 months back, then FY start for that anchor date) */
+--     p.ea_months_back AS ea_months_back,
+--     DATEADD(month, -p.ea_months_back, x.run_date) AS ea_anchor_date,
+--     ea.fiscal_year_start_date AS ea_window_start,
+--     DATEADD(day, 1, x.run_date) AS ea_window_end,
+
+--     /* Caseload anchor (last Sept 30 on or before run_date) */
+--     p.ssd_timeframe_years AS ssd_timeframe_years,
+--     caseload.last_sept30 AS sw_caseload_anchor,
+--     DATEADD(year, -p.ssd_timeframe_years, caseload.last_sept30) AS sw_caseload_window_start
+-- FROM x
+-- CROSS JOIN p
+-- JOIN ssd_development.ssd_dim_date ea
+--   ON ea.full_date = DATEADD(month, -p.ea_months_back, x.run_date)
+-- CROSS APPLY
+-- (
+--     SELECT MAX(d.full_date) AS last_sept30
+--     FROM ssd_development.ssd_dim_date d
+--     WHERE d.month_number = 9
+--       AND d.day_of_month = 30
+--       AND d.full_date <= x.run_date
+-- ) caseload;
 
 
-select * from ssd_development.ssd_vw_current_time_windows;
+-- select * from ssd_development.ssd_vw_current_time_windows;
 
--- META-END
+-- -- META-END
 
 
 /* ********************************************************************************************************** */
@@ -976,246 +987,231 @@ FROM ssd_development.ssd_cohort;
 
 
 
--- META-CONTAINER: {"type": "table", "name": "ADMIN COHORT VERIFICATION ONLY"}
--- =============================================================================
--- Purpose: Compare orig ssd_person inclusion, ssd_cohort driven inclusion, and API cohort
--- Notes: assumes already declared:
---        @ssd_timeframe_years, @today_date, @ssd_window_start, @ssd_window_end
--- =============================================================================
+-- -- META-CONTAINER: {"type": "table", "name": "ADMIN COHORT VERIFICATION ONLY"}
+-- -- =============================================================================
+-- -- Purpose: Compare orig ssd_person inclusion, ssd_cohort driven inclusion, and API cohort
+-- -- Notes: assumes already declared:
+-- --        @ssd_timeframe_years, @today_date, @ssd_window_start, @ssd_window_end
+-- -- =============================================================================
 
-SET NOCOUNT ON;
+-- SET NOCOUNT ON;
 
--- reset tmp tables
-IF OBJECT_ID('tempdb..#ssd_core_cohort')   IS NOT NULL DROP TABLE #ssd_core_cohort;
-IF OBJECT_ID('tempdb..#ssd_review_cohort') IS NOT NULL DROP TABLE #ssd_review_cohort;
-IF OBJECT_ID('tempdb..#ssd_api_cohort')    IS NOT NULL DROP TABLE #ssd_api_cohort;
+-- -- reset tmp tables
+-- IF OBJECT_ID('tempdb..#ssd_core_cohort')   IS NOT NULL DROP TABLE #ssd_core_cohort;
+-- IF OBJECT_ID('tempdb..#ssd_review_cohort') IS NOT NULL DROP TABLE #ssd_review_cohort;
+-- IF OBJECT_ID('tempdb..#ssd_api_cohort')    IS NOT NULL DROP TABLE #ssd_api_cohort;
 
--- declare per session
-IF OBJECT_ID('tempdb..#ssd_scope_marker') IS NULL
-BEGIN
-  -- EA or API cohort window variables, separate from core SSD N year window
-  DECLARE @ea_months_back    int; -- 24
-  DECLARE @ea_fy_start_month int; -- 4/April
-  DECLARE @ea_anchor         date;
-  DECLARE @ea_fy_start_year  int; -- EA financial year start yr, to build @ea_window_start April 1 in financial year for 24 month EA window
-  DECLARE @ea_window_start   date;
-  DECLARE @ea_window_end     date;
--- Logic e.g. If @ea_anchor is 02 December 2023, mth 12 is not less than 4, so @ea_fy_start_year = 2023; @ea_window_start becomes 01 April 2023.
+-- -- declare per session
+-- IF OBJECT_ID('tempdb..#ssd_scope_marker') IS NULL
+-- BEGIN
+--   -- EA or API cohort window variables, separate from core SSD N year window
+--   DECLARE @ea_months_back    int; -- 24
+--   DECLARE @ea_fy_start_month int; -- 4/April
+--   DECLARE @ea_anchor         date;
+--   DECLARE @ea_fy_start_year  int; -- EA financial year start yr, to build @ea_window_start April 1 in financial year for 24 month EA window
+--   DECLARE @ea_window_start   date;
+--   DECLARE @ea_window_end     date;
+-- -- Logic e.g. If @ea_anchor is 02 December 2023, mth 12 is not less than 4, so @ea_fy_start_year = 2023; @ea_window_start becomes 01 April 2023.
 
-  SELECT 1 AS mk INTO #ssd_scope_marker;
-END;
+--   SELECT 1 AS mk INTO #ssd_scope_marker;
+-- END;
 
--- reinitialise EA or API window each run
-SET @ea_months_back    = 24;
-SET @ea_fy_start_month = 4;
-SET @ea_anchor         = DATEADD(month, -@ea_months_back, @today_date);
-SET @ea_fy_start_year  = YEAR(@ea_anchor)
-                         - CASE WHEN MONTH(@ea_anchor) < @ea_fy_start_month THEN 1 ELSE 0 END;
-SET @ea_window_start   = DATEFROMPARTS(@ea_fy_start_year, @ea_fy_start_month, 1);
-SET @ea_window_end     = @today_date;
+-- -- reinitialise EA or API window each run
+-- SET @ea_months_back    = 24;
+-- SET @ea_fy_start_month = 4;
+-- SET @ea_anchor         = DATEADD(month, -@ea_months_back, @today_date);
+-- SET @ea_fy_start_year  = YEAR(@ea_anchor)
+--                          - CASE WHEN MONTH(@ea_anchor) < @ea_fy_start_month THEN 1 ELSE 0 END;
+-- SET @ea_window_start   = DATEFROMPARTS(@ea_fy_start_year, @ea_fy_start_month, 1);
+-- SET @ea_window_end     = @today_date;
 
-------------------------------------------------------------
--- A) Core cohort, rebuilds original ssd_person EXISTS logic over HDM
---    anchored on SSD core window @ssd_window_start
-------------------------------------------------------------
-CREATE TABLE #ssd_core_cohort(dim_person_id nvarchar(48) NOT NULL PRIMARY KEY);
+-- ------------------------------------------------------------
+-- -- A) Core cohort, rebuilds original ssd_person EXISTS logic over HDM
+-- --    anchored on SSD core window @ssd_window_start
+-- ------------------------------------------------------------
+-- CREATE TABLE #ssd_core_cohort(dim_person_id nvarchar(48) NOT NULL PRIMARY KEY);
 
-INSERT INTO #ssd_core_cohort(dim_person_id)
-SELECT DISTINCT CAST(p.DIM_PERSON_ID AS nvarchar(48))
-FROM HDM.Child_Social.DIM_PERSON p
-WHERE p.DIM_PERSON_ID IS NOT NULL
-  AND p.DIM_PERSON_ID <> -1
-  AND (
-    p.IS_CLIENT = 'Y'
-    OR EXISTS (
-          SELECT 1
-          FROM HDM.Child_Social.FACT_CONTACTS fc
-          WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
-            AND fc.CONTACT_DTTM >= @ssd_window_start
-        )
-    OR EXISTS (
-          SELECT 1
-          FROM HDM.Child_Social.FACT_REFERRALS fr
-          WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
-            AND (
-                 fr.REFRL_START_DTTM >= @ssd_window_start
-              OR fr.REFRL_END_DTTM   >= @ssd_window_start
-              OR fr.REFRL_END_DTTM IS NULL
-            )
-        )
-    OR EXISTS (
-          SELECT 1
-          FROM HDM.Child_Social.FACT_CLA_CARE_LEAVERS fccl
-          WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
-            AND fccl.IN_TOUCH_DTTM >= @ssd_window_start
-        )
-    OR EXISTS (
-          SELECT 1
-          FROM HDM.Child_Social.DIM_CLA_ELIGIBILITY dce
-          WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
-            AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
-        )
-    OR EXISTS (
-          SELECT 1
-          FROM HDM.Child_Social.FACT_INVOLVEMENTS fi
-          WHERE fi.DIM_PERSON_ID = p.DIM_PERSON_ID
-            AND (
-                  fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE 'KA%'
-               OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL
-               OR fi.IS_ALLOCATED_CW_FLAG = 'Y'
-            )
-            AND fi.DIM_WORKER_ID <> '-1'
-            AND (fi.END_DTTM IS NULL OR fi.END_DTTM > GETDATE())
-        )
-  );
+-- INSERT INTO #ssd_core_cohort(dim_person_id)
+-- SELECT DISTINCT CAST(p.DIM_PERSON_ID AS nvarchar(48))
+-- FROM HDM.Child_Social.DIM_PERSON p
+-- WHERE p.DIM_PERSON_ID IS NOT NULL
+--   AND p.DIM_PERSON_ID <> -1
+--   AND (
+--     p.IS_CLIENT = 'Y'
+--     OR EXISTS (
+--           SELECT 1
+--           FROM HDM.Child_Social.FACT_CONTACTS fc
+--           WHERE fc.DIM_PERSON_ID = p.DIM_PERSON_ID
+--             AND fc.CONTACT_DTTM >= @ssd_window_start
+--         )
+--     OR EXISTS (
+--           SELECT 1
+--           FROM HDM.Child_Social.FACT_REFERRALS fr
+--           WHERE fr.DIM_PERSON_ID = p.DIM_PERSON_ID
+--             AND (
+--                  fr.REFRL_START_DTTM >= @ssd_window_start
+--               OR fr.REFRL_END_DTTM   >= @ssd_window_start
+--               OR fr.REFRL_END_DTTM IS NULL
+--             )
+--         )
+--     OR EXISTS (
+--           SELECT 1
+--           FROM HDM.Child_Social.FACT_CLA_CARE_LEAVERS fccl
+--           WHERE fccl.DIM_PERSON_ID = p.DIM_PERSON_ID
+--             AND fccl.IN_TOUCH_DTTM >= @ssd_window_start
+--         )
+--     OR EXISTS (
+--           SELECT 1
+--           FROM HDM.Child_Social.DIM_CLA_ELIGIBILITY dce
+--           WHERE dce.DIM_PERSON_ID = p.DIM_PERSON_ID
+--             AND dce.DIM_LOOKUP_ELIGIBILITY_STATUS_DESC IS NOT NULL
+--         )
+--     OR EXISTS (
+--           SELECT 1
+--           FROM HDM.Child_Social.FACT_INVOLVEMENTS fi
+--           WHERE fi.DIM_PERSON_ID = p.DIM_PERSON_ID
+--             AND (
+--                   fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE 'KA%'
+--                OR fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL
+--                OR fi.IS_ALLOCATED_CW_FLAG = 'Y'
+--             )
+--             AND fi.DIM_WORKER_ID <> '-1'
+--             AND (fi.END_DTTM IS NULL OR fi.END_DTTM > GETDATE())
+--         )
+--   );
 
-------------------------------------------------------------
--- B) Review cohort, same inclusion set but via ssd_cohort flags
---    excludes has_903. Keeps to prove flag path equals the heavy EXISTS path
-------------------------------------------------------------
-CREATE TABLE #ssd_review_cohort(dim_person_id nvarchar(48) NOT NULL PRIMARY KEY);
+-- ------------------------------------------------------------
+-- -- B) Review cohort, same inclusion set but via ssd_cohort flags
+-- --    excludes has_903. Keeps to prove flag path equals the heavy EXISTS path
+-- ------------------------------------------------------------
+-- CREATE TABLE #ssd_review_cohort(dim_person_id nvarchar(48) NOT NULL PRIMARY KEY);
 
-INSERT INTO #ssd_review_cohort(dim_person_id)
-SELECT co.dim_person_id
-FROM ssd_development.ssd_cohort co
-WHERE co.has_contact      = 1
-   OR co.has_referral     = 1
-   OR co.is_care_leaver   = 1
-   OR co.has_eligibility  = 1
-   OR co.has_client_flag  = 1
-   OR co.has_involvement  = 1;
--- optional to include 903 in the parity set
---   OR co.has_903          = 1;
+-- INSERT INTO #ssd_review_cohort(dim_person_id)
+-- SELECT co.dim_person_id
+-- FROM ssd_development.ssd_cohort co
+-- WHERE co.has_contact      = 1
+--    OR co.has_referral     = 1
+--    OR co.is_care_leaver   = 1
+--    OR co.has_eligibility  = 1
+--    OR co.has_client_flag  = 1
+--    OR co.has_involvement  = 1;
+-- -- optional to include 903 in the parity set
+-- --   OR co.has_903          = 1;
 
-------------------------------------------------------------
--- C) API cohort, same rules as payload window
---    uses EA window (@ea_window_start, @ea_window_end) not SSD core window
-------------------------------------------------------------
-CREATE TABLE #ssd_api_cohort(person_id nvarchar(48) NOT NULL PRIMARY KEY);
+-- ------------------------------------------------------------
+-- -- C) API cohort, same rules as payload window
+-- --    uses EA window (@ea_window_start, @ea_window_end) not SSD core window
+-- ------------------------------------------------------------
+-- CREATE TABLE #ssd_api_cohort(person_id nvarchar(48) NOT NULL PRIMARY KEY);
 
-;WITH
-EligibleBySpec AS (  -- unborn or ever age 25 or below within the EA window, includes deceased
-  SELECT TRY_CONVERT(nvarchar(48), p.pers_person_id) AS person_id
-  FROM ssd_development.ssd_person p
-  WHERE p.pers_expected_dob IS NOT NULL
-     OR (
-          p.pers_dob IS NOT NULL
-      AND DATEADD(year, 26, p.pers_dob) >= @ea_window_start
-        )
-),
-ActiveReferral AS (
-  SELECT DISTINCT cine.cine_person_id AS person_id
-  FROM ssd_cin_episodes cine
-  WHERE cine.cine_referral_date <= @ea_window_end
-    AND (cine.cine_close_date IS NULL OR cine.cine_close_date >= @ea_window_start)
-    AND (cine.cine_close_date IS NULL OR cine.cine_close_date >  @ea_window_end)
-),
-WaitingAssessment AS (
-  SELECT DISTINCT cine.cine_person_id AS person_id
-  FROM ssd_cin_episodes cine
-  WHERE cine.cine_close_date IS NULL
-    AND NOT EXISTS (
-          SELECT 1
-          FROM ssd_cin_assessments ca
-          WHERE ca.cina_referral_id = cine.cine_referral_id
-            AND ca.cina_assessment_start_date IS NOT NULL
-    )
-),
-HasCINPlan AS (
-  SELECT DISTINCT cinp.cinp_person_id AS person_id
-  FROM ssd_cin_plans cinp
-  WHERE cinp.cinp_cin_plan_start_date <= @ea_window_end
-    AND (cinp.cinp_cin_plan_end_date IS NULL OR cinp.cinp_cin_plan_end_date >= @ea_window_start)
-),
-HasCPPlan AS (
-  SELECT DISTINCT cppl.cppl_person_id AS person_id
-  FROM ssd_cp_plans cppl
-  WHERE cppl.cppl_cp_plan_start_date <= @ea_window_end
-    AND (cppl.cppl_cp_plan_end_date IS NULL OR cppl.cppl_cp_plan_end_date >= @ea_window_start)
-),
-HasLAC AS (
-  SELECT DISTINCT clae.clae_person_id AS person_id
-  FROM ssd_cla_episodes clae
-  JOIN ssd_cin_episodes cine
-    ON cine.cine_referral_id = clae.clae_referral_id
-  WHERE cine.cine_referral_date <= @ea_window_end
-    AND (cine.cine_close_date IS NULL OR cine.cine_close_date >= @ea_window_start)
+-- ;WITH
+-- EligibleBySpec AS (  -- unborn or ever age 25 or below within the EA window, includes deceased
+--   SELECT TRY_CONVERT(nvarchar(48), p.pers_person_id) AS person_id
+--   FROM ssd_development.ssd_person p
+--   WHERE p.pers_expected_dob IS NOT NULL
+--      OR (
+--           p.pers_dob IS NOT NULL
+--       AND DATEADD(year, 26, p.pers_dob) >= @ea_window_start
+--         )
+-- ),
+-- ActiveReferral AS (
+--   SELECT DISTINCT cine.cine_person_id AS person_id
+--   FROM ssd_cin_episodes cine
+--   WHERE cine.cine_referral_date <= @ea_window_end
+--     AND (cine.cine_close_date IS NULL OR cine.cine_close_date >= @ea_window_start)
+--     AND (cine.cine_close_date IS NULL OR cine.cine_close_date >  @ea_window_end)
+-- ),
+-- WaitingAssessment AS (
+--   SELECT DISTINCT cine.cine_person_id AS person_id
+--   FROM ssd_cin_episodes cine
+--   WHERE cine.cine_close_date IS NULL
+--     AND NOT EXISTS (
+--           SELECT 1
+--           FROM ssd_cin_assessments ca
+--           WHERE ca.cina_referral_id = cine.cine_referral_id
+--             AND ca.cina_assessment_start_date IS NOT NULL
+--     )
+-- ),
+-- HasCINPlan AS (
+--   SELECT DISTINCT cinp.cinp_person_id AS person_id
+--   FROM ssd_cin_plans cinp
+--   WHERE cinp.cinp_cin_plan_start_date <= @ea_window_end
+--     AND (cinp.cinp_cin_plan_end_date IS NULL OR cinp.cinp_cin_plan_end_date >= @ea_window_start)
+-- ),
+-- HasCPPlan AS (
+--   SELECT DISTINCT cppl.cppl_person_id AS person_id
+--   FROM ssd_cp_plans cppl
+--   WHERE cppl.cppl_cp_plan_start_date <= @ea_window_end
+--     AND (cppl.cppl_cp_plan_end_date IS NULL OR cppl.cppl_cp_plan_end_date >= @ea_window_start)
+-- ),
+-- HasLAC AS (
+--   SELECT DISTINCT clae.clae_person_id AS person_id
+--   FROM ssd_cla_episodes clae
+--   JOIN ssd_cin_episodes cine
+--     ON cine.cine_referral_id = clae.clae_referral_id
+--   WHERE cine.cine_referral_date <= @ea_window_end
+--     AND (cine.cine_close_date IS NULL OR cine.cine_close_date >= @ea_window_start)
 
-  UNION
+--   UNION
 
-  SELECT DISTINCT clae2.clae_person_id AS person_id
-  FROM ssd_cla_episodes clae2
-  JOIN ssd_cla_placement clap
-    ON clap.clap_cla_id = clae2.clae_cla_id
-  WHERE clap.clap_cla_placement_start_date <= @ea_window_end
-    AND (clap.clap_cla_placement_end_date IS NULL OR clap.clap_cla_placement_end_date >= @ea_window_start)
-),
-IsCareLeaver16to25 AS (
-  SELECT DISTINCT clea.clea_person_id AS person_id
-  FROM ssd_care_leavers clea
-  JOIN ssd_development.ssd_person p
-    ON p.pers_person_id = clea.clea_person_id
-  WHERE clea.clea_care_leaver_latest_contact BETWEEN @ea_window_start AND @ea_window_end
-    AND (
-          (p.pers_dob IS NOT NULL AND DATEDIFF(year, p.pers_dob, @ea_window_end) BETWEEN 16 AND 25)
-       OR (p.pers_dob IS NULL AND p.pers_expected_dob IS NOT NULL)
-    )
-),
-IsDisabled AS (
-  SELECT DISTINCT d.disa_person_id AS person_id
-  FROM ssd_disability d
-  WHERE NULLIF(LTRIM(RTRIM(d.disa_disability_code)), '') IS NOT NULL
-),
-SpecInclusion AS (
-  SELECT person_id FROM ActiveReferral
-  UNION SELECT person_id FROM WaitingAssessment
-  UNION SELECT person_id FROM HasCINPlan
-  UNION SELECT person_id FROM HasCPPlan
-  UNION SELECT person_id FROM HasLAC
-  UNION SELECT person_id FROM IsCareLeaver16to25
-  UNION SELECT person_id FROM IsDisabled
-),
-ApiCohortIDs AS (
-  SELECT e.person_id
-  FROM EligibleBySpec e
-  JOIN SpecInclusion s
-    ON s.person_id = e.person_id
-)
-INSERT INTO #ssd_api_cohort(person_id)
-SELECT DISTINCT person_id
-FROM ApiCohortIDs;
+--   SELECT DISTINCT clae2.clae_person_id AS person_id
+--   FROM ssd_cla_episodes clae2
+--   JOIN ssd_cla_placement clap
+--     ON clap.clap_cla_id = clae2.clae_cla_id
+--   WHERE clap.clap_cla_placement_start_date <= @ea_window_end
+--     AND (clap.clap_cla_placement_end_date IS NULL OR clap.clap_cla_placement_end_date >= @ea_window_start)
+-- ),
+-- IsCareLeaver16to25 AS (
+--   SELECT DISTINCT clea.clea_person_id AS person_id
+--   FROM ssd_care_leavers clea
+--   JOIN ssd_development.ssd_person p
+--     ON p.pers_person_id = clea.clea_person_id
+--   WHERE clea.clea_care_leaver_latest_contact BETWEEN @ea_window_start AND @ea_window_end
+--     AND (
+--           (p.pers_dob IS NOT NULL AND DATEDIFF(year, p.pers_dob, @ea_window_end) BETWEEN 16 AND 25)
+--        OR (p.pers_dob IS NULL AND p.pers_expected_dob IS NOT NULL)
+--     )
+-- ),
+-- IsDisabled AS (
+--   SELECT DISTINCT d.disa_person_id AS person_id
+--   FROM ssd_disability d
+--   WHERE NULLIF(LTRIM(RTRIM(d.disa_disability_code)), '') IS NOT NULL
+-- ),
+-- SpecInclusion AS (
+--   SELECT person_id FROM ActiveReferral
+--   UNION SELECT person_id FROM WaitingAssessment
+--   UNION SELECT person_id FROM HasCINPlan
+--   UNION SELECT person_id FROM HasCPPlan
+--   UNION SELECT person_id FROM HasLAC
+--   UNION SELECT person_id FROM IsCareLeaver16to25
+--   UNION SELECT person_id FROM IsDisabled
+-- ),
+-- ApiCohortIDs AS (
+--   SELECT e.person_id
+--   FROM EligibleBySpec e
+--   JOIN SpecInclusion s
+--     ON s.person_id = e.person_id
+-- )
+-- INSERT INTO #ssd_api_cohort(person_id)
+-- SELECT DISTINCT person_id
+-- FROM ApiCohortIDs;
 
-------------------------------------------------------------
--- D) Headline counts
---   core_count, live recompute from HDM using orig EXISTS path and SSD core window @ssd_window_start
---   ssd_cohort_count, from persisted flag table ssd_development.ssd_cohort
---   api_count, EA cohort window based on @ea_window_start and @ea_window_end
-------------------------------------------------------------
-SELECT
-  c.core_count,
-  h.ssd_cohort_count,
-  a.api_count
-  -- , h903.ssd_cohort_incl903_count  -- include 903 rows
-FROM
-  (SELECT COUNT(*) AS core_count
-   FROM #ssd_core_cohort) AS c
-CROSS JOIN
-  (SELECT COUNT(*) AS ssd_cohort_count
-   FROM ssd_development.ssd_cohort
-   WHERE has_contact = 1
-      OR has_referral = 1
-      OR is_care_leaver = 1
-      OR has_eligibility = 1
-      OR has_client_flag = 1
-      OR has_involvement = 1
-      -- OR has_903 = 1  -- uncomment to include 903 rows in counts
-  ) AS h
-CROSS JOIN
-  (SELECT COUNT(*) AS api_count
-   FROM #ssd_api_cohort) AS a;
--- optional extra cross join to show include 903 variant alongside default
+-- ------------------------------------------------------------
+-- -- D) Headline counts
+-- --   core_count, live recompute from HDM using orig EXISTS path and SSD core window @ssd_window_start
+-- --   ssd_cohort_count, from persisted flag table ssd_development.ssd_cohort
+-- --   api_count, EA cohort window based on @ea_window_start and @ea_window_end
+-- ------------------------------------------------------------
+-- SELECT
+--   c.core_count,
+--   h.ssd_cohort_count,
+--   a.api_count
+--   -- , h903.ssd_cohort_incl903_count  -- include 903 rows
+-- FROM
+--   (SELECT COUNT(*) AS core_count
+--    FROM #ssd_core_cohort) AS c
 -- CROSS JOIN
---   (SELECT COUNT(*) AS ssd_cohort_incl903_count
+--   (SELECT COUNT(*) AS ssd_cohort_count
 --    FROM ssd_development.ssd_cohort
 --    WHERE has_contact = 1
 --       OR has_referral = 1
@@ -1223,11 +1219,26 @@ CROSS JOIN
 --       OR has_eligibility = 1
 --       OR has_client_flag = 1
 --       OR has_involvement = 1
---       OR has_903 = 1
---   ) AS h903
-;
+--       -- OR has_903 = 1  -- uncomment to include 903 rows in counts
+--   ) AS h
+-- CROSS JOIN
+--   (SELECT COUNT(*) AS api_count
+--    FROM #ssd_api_cohort) AS a;
+-- -- optional extra cross join to show include 903 variant alongside default
+-- -- CROSS JOIN
+-- --   (SELECT COUNT(*) AS ssd_cohort_incl903_count
+-- --    FROM ssd_development.ssd_cohort
+-- --    WHERE has_contact = 1
+-- --       OR has_referral = 1
+-- --       OR is_care_leaver = 1
+-- --       OR has_eligibility = 1
+-- --       OR has_client_flag = 1
+-- --       OR has_involvement = 1
+-- --       OR has_903 = 1
+-- --   ) AS h903
+-- ;
 
--- END "ADMIN COHORT VERIFICATION ONLY"
+-- -- END "ADMIN COHORT VERIFICATION ONLY"
 
 -- META-END
 
@@ -5856,7 +5867,7 @@ LEFT JOIN (
         COUNT(*) AS OpenCases
 
     FROM 
-        HDM.Child_Social.FACT_INVOLVEMENTS
+        HDM.Child_Social.FACT_INVOLVEMENTS -- [REVIEW]
 
     WHERE 
         START_DTTM <= @CaseloadLastSept30th AND 
@@ -7048,57 +7059,6 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
         SSD Extract Logging
         */
 
-
-
--- META-ELEMENT: {"type": "console_output"} 
--- output for ref most recent/current ssd version and last update
-SELECT * FROM ssd_development.ssd_version_log WHERE is_current = 1;
-
-
--- duplicated from -- META-CONTAINER: {"type": "table", "name": "ADMIN COHORT VERIFICATION ONLY"}
---------------------------------------------------------------------------------------------------------------------------------
--- Headline counts
---   core_count, from HDM using orig EXISTS path and @ssd_cutoff
---   ssd_cohort_count, from persisted flag table ssd_development.ssd_cohort
---     By default flags count has_contact or has_referral or is_care_leaver or has_eligibility or has_client_flag or has_involvement
---     deliberate exclude has_903 here, uncomment below if include
---   api_count, records who pass EligibleBySpec unborn or <= 25 within window and appear in >1+ SpecInclusion group
---------------------------------------------------------------------------------------------------------------------------------
-SELECT
-  c.core_count,
-  h.ssd_cohort_count,
-  a.api_count
-  -- , h903.ssd_cohort_incl903_count  --  include 903 rows
-FROM
-  (SELECT COUNT(*) AS core_count
-   FROM #ssd_core_cohort) AS c
-CROSS JOIN
-  (SELECT COUNT(*) AS ssd_cohort_count
-   FROM ssd_development.ssd_cohort
-   WHERE has_contact = 1
-      OR has_referral = 1
-      OR is_care_leaver = 1
-      OR has_eligibility = 1
-      OR has_client_flag = 1
-      OR has_involvement = 1
-      -- OR has_903 = 1  -- uncomment to include 903 rows in counts
-  ) AS h
-CROSS JOIN
-  (SELECT COUNT(*) AS api_count
-   FROM #ssd_api_cohort) AS a
--- optional extra cross join to show include 903 variant alongside default
--- CROSS JOIN
---   (SELECT COUNT(*) AS ssd_cohort_incl903_count
---    FROM ssd_development.ssd_cohort
---    WHERE has_contact = 1
---       OR has_referral = 1
---       OR is_care_leaver = 1
---       OR has_eligibility = 1
---       OR has_client_flag = 1
---       OR has_involvement = 1
---       OR has_903 = 1
---   ) AS h903
-;
 
 
 -- META-END
