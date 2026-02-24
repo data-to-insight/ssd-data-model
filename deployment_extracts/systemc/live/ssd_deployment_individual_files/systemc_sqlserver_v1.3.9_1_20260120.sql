@@ -411,70 +411,10 @@ FROM Base b;
 -- INCLUDE (full_date, date_key);
 
 
-
--- META-CONTAINER: {"type": "table", "name": "ssd_vw_current_time_windows"}
--- =============================================================================
--- Description: 
--- Author: D2I
--- Version: 0.1
--- Status: [D]ev
--- Remarks: [EA_API_PRIORITY_TABLE]
---          This is an in Development inclusion for the SSD and as such is being phased in. 
---          Added here for both visibility and LA feedback, but not yet fully integrated.
---          VIEW currently commented as use of GO mid-single-script resets var declarations, 
---          and VIEW definitions required to be first running object. *LA's can run seperately as needed* 
---          The table set to replace declarations within: META-ELEMENT: {"type": "ssd_timeframe"}
--- Dependencies:
--- 
--- =============================================================================
-
--- CREATE OR ALTER VIEW ssd_development.ssd_vw_current_time_windows
--- AS
--- WITH x AS
--- (
---     SELECT CONVERT(date, GETDATE()) AS run_date
--- ),
--- p AS
--- (
---     /* Centralised params */
---     SELECT
---         CAST(24 AS int) AS ea_months_back,          -- Early Adopters
---         CAST(6  AS int) AS ssd_timeframe_years      -- SSD main
--- )
--- SELECT
---     x.run_date AS ssd_run_date,
-
---     /* SSD main timeframe (start and end exclusive) */
---     DATEADD(year, -p.ssd_timeframe_years, x.run_date) AS ssd_window_start,
---     DATEADD(day, 1, x.run_date) AS ssd_window_end,
-
---     /* EA window (24 months back, then FY start for that anchor date) */
---     p.ea_months_back AS ea_months_back,
---     DATEADD(month, -p.ea_months_back, x.run_date) AS ea_anchor_date,
---     ea.fiscal_year_start_date AS ea_window_start,
---     DATEADD(day, 1, x.run_date) AS ea_window_end,
-
---     /* Caseload anchor (last Sept 30 on or before run_date) */
---     p.ssd_timeframe_years AS ssd_timeframe_years,
---     caseload.last_sept30 AS sw_caseload_anchor,
---     DATEADD(year, -p.ssd_timeframe_years, caseload.last_sept30) AS sw_caseload_window_start
--- FROM x
--- CROSS JOIN p
--- JOIN ssd_development.ssd_dim_date ea
---   ON ea.full_date = DATEADD(month, -p.ea_months_back, x.run_date)
--- CROSS APPLY
--- (
---     SELECT MAX(d.full_date) AS last_sept30
---     FROM ssd_development.ssd_dim_date d
---     WHERE d.month_number = 9
---       AND d.day_of_month = 30
---       AND d.full_date <= x.run_date
--- ) caseload;
+-- META-END
 
 
--- select * from ssd_development.ssd_vw_current_time_windows;
 
--- -- META-END
 
 
 /* ********************************************************************************************************** */
@@ -7000,6 +6940,8 @@ https://github.com/data-to-insight/dfe-csc-api-data-flows/releases
 -- =============================================================================
 
 
+-- META-END
+
 
 -- META-CONTAINER: {"type": "table", "name": "ssd_api_data_staging_anon"}
 -- =============================================================================
@@ -7007,20 +6949,7 @@ https://github.com/data-to-insight/dfe-csc-api-data-flows/releases
 -- Author: D2I
 -- =============================================================================
 
--- META-ELEMENT: {"type": "test"}
--- Console reminder note
-PRINT 'If your LA is part of the DfE API Private Dashboard Early Adopters you need to now run the seperate ssd_populate_api_data_staging.sql script ';
-PRINT 'https://github.com/data-to-insight/dfe-csc-api-data-flows/releases'
-
-
-/* END STAGING TABLE(S) object definitions */
-
-
-
-
-
-
-
+-- META-END
 
 
 
@@ -7031,18 +6960,6 @@ PRINT 'https://github.com/data-to-insight/dfe-csc-api-data-flows/releases'
         
         */
 
-
-
-
--- META-ELEMENT: {"type": "test"} -- Get & print run time 
-/* ********************************************************************************************************** */
-/* Development clean up */
-
-SET @EndTime = GETDATE();
-PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) AS NVARCHAR(50)) + ' ms';
-
-
-/* ********************************************************************************************************** */
 
 
 /* Start
@@ -7061,8 +6978,106 @@ PRINT 'Run time duration: ' + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) A
 
 
 
+
+
+
+-- META-ELEMENT: {"type": "test"}
+-- Console reminder note
+PRINT ''
+PRINT '***'
+PRINT 'If your LA is part of the DfE API Private Dashboard Early Adopters you need to now run the seperate ssd_populate_api_data_staging.sql script ';
+PRINT 'https://github.com/data-to-insight/dfe-csc-api-data-flows/releases'
+PRINT '***'
+
+/* END STAGING TABLE(S) object definitions */
+
+
 -- META-END
 
+
+-- META-ELEMENT: {"type": "test"} 
+/* ********************************************************************************************************** */
+/* Development clean up */
+
+SET @EndTime = GETDATE();
+PRINT 'Run time duration: '
+  + CAST(DATEDIFF(MILLISECOND, @StartTime, @EndTime) / 60000 AS nvarchar(20)) + ' min '
+  + CAST((DATEDIFF(MILLISECOND, @StartTime, @EndTime) % 60000) / 1000 AS nvarchar(20)) + ' sec';
+
+/* ********************************************************************************************************** */
+
+
+-- META-END
+
+
+-- META-CONTAINER: {"type": "view", "name": "ssd_vw_current_time_windows"}
+-- =============================================================================
+-- Description: 
+-- Author: D2I
+-- Version: 0.1
+-- Status: [D]ev
+-- Remarks: [EA_API_PRIORITY_TABLE]
+--          This is an in Development inclusion for the SSD and as such is being phased in. 
+--          Added here for both visibility and LA feedback, but not yet fully integrated.
+--          VIEW currently commented as use of GO mid-single-script resets var declarations, 
+--          and VIEW definitions required to be first running object. *LA's can run seperately as needed* 
+--          The table set to replace declarations within: META-ELEMENT: {"type": "ssd_timeframe"}
+-- Dependencies:
+-- 
+-- =============================================================================
+
+/* GO - remove in Proc based deployment */
+GO
+
+CREATE OR ALTER VIEW ssd_development.ssd_vw_current_time_windows
+AS
+WITH x AS
+(
+    SELECT CONVERT(date, GETDATE()) AS run_date
+),
+p AS
+(
+    /* Centralised params */
+    SELECT
+        CAST(24 AS int) AS ea_months_back,          -- Early Adopters
+        CAST(6  AS int) AS ssd_timeframe_years      -- SSD main
+)
+SELECT
+    x.run_date AS ssd_run_date,
+
+    /* SSD main timeframe (start and end exclusive) */
+    DATEADD(year, -p.ssd_timeframe_years, x.run_date) AS ssd_window_start,
+    DATEADD(day, 1, x.run_date) AS ssd_window_end,
+
+    /* EA window (24 months back, then FY start for that anchor date) */
+    p.ea_months_back AS ea_months_back,
+    DATEADD(month, -p.ea_months_back, x.run_date) AS ea_anchor_date,
+    ea.fiscal_year_start_date AS ea_window_start,
+    DATEADD(day, 1, x.run_date) AS ea_window_end,
+
+    /* Caseload anchor (last Sept 30 on or before run_date) */
+    p.ssd_timeframe_years AS ssd_timeframe_years,
+    caseload.last_sept30 AS sw_caseload_anchor,
+    DATEADD(year, -p.ssd_timeframe_years, caseload.last_sept30) AS sw_caseload_window_start
+FROM x
+CROSS JOIN p
+JOIN ssd_development.ssd_dim_date ea
+  ON ea.full_date = DATEADD(month, -p.ea_months_back, x.run_date)
+CROSS APPLY
+(
+    SELECT MAX(d.full_date) AS last_sept30
+    FROM ssd_development.ssd_dim_date d
+    WHERE d.month_number = 9
+      AND d.day_of_month = 30
+      AND d.full_date <= x.run_date
+) caseload;
+
+
+/* GO - remove in Proc based deployment */
+GO
+select * from ssd_development.ssd_vw_current_time_windows;
+
+-- META-END
 
 
 
