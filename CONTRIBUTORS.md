@@ -1,64 +1,68 @@
 # Contributors
 
-This file lists all the individuals who have contributed to the SSD project. We appreciate the efforts of all contributors, big and small, in making this project a success. Thank you!
+This file lists all the individuals who have contributed to the SSD project. We appreciate the efforts of all contributors, in making this project a success. Thank you!
 
 ## Contributors
 
-We are particularly grateful to our steering group, made up of colleagues from: 
+We are particularly grateful to our steering group, made up of colleagues from:  
 
-**Data to Insight** - hosted by East Sussex County Council 
-**Essex County Council**
-**Hertfordshire County Council**
-**Knowsley Council**
-**North-West Association of Directors of Children’s Services**
+**Data to Insight** - hosted by East Sussex County Council  
+**Essex County Council**  
+**Hertfordshire County Council**  
+**Knowsley Council**  
+**North-West Association of Directors of Children’s Services**  
 
 We also extend thanks to our wider circle of contributing LAs, especially those which endorsed our project bid, or later assisted with developing or testing our research and technical products: 
 
-**East Sussex County Council**
-**Knowlsey Council**
-**Blackpool Council**
-**City of Wolverhampton Council**
-**Dorset Council**
-**East Riding of Yorkshire Council**
-**London Innovation and Improvement Alliance**
-**Manchester City Council**
-**Newham Council** 
-**Staffordshire County Council**
-**Sutton Council**
-**Trafford Council** 
-**Waltham Forest Borough Council** 
-**North Yorks Council**
-**Merton County Council via DfE Private Dashboard Early Adopters**
-**Coventry County Council via DfE Private Dashboard Early Adopters**
-**Redcar and Cleveland County Council via DfE Private Dashboard Early Adopters**
+**East Sussex County Council**  
+**Knowlsey Council**  
+**Blackpool Council**  
+**City of Wolverhampton Council**  
+**Dorset Council**  
+**East Riding of Yorkshire Council**  
+**London Innovation and Improvement Alliance**  
+**Manchester City Council**  
+**Newham Council**   
+**Staffordshire County Council**  
+**Sutton Council**  
+**Trafford Council**   
+**Waltham Forest Borough Council**  
+**North Yorks Council**  
+**Merton County Council** via DfE Private Dashboard Early Adopters   
+**Coventry County Council** via DfE Private Dashboard Early Adopters  
+**Redcar and Cleveland County Council** via DfE Private Dashboard Early Adopters  
 
-Further, we are grateful to the following partner organisations for key contributions to the project: 
+Further, we are grateful to the following partner organisations for key contributions to the project:  
 
-**Association of Directors of Children’s Services**
-**Coram Voice**
-**Department for Education**
-**LiquidLogic/System C**
-**Ofsted**
-**University of Sussex**
+**Association of Directors of Children’s Services**  
+**Coram Voice**  
+**Department for Education**  
+**LiquidLogic/System C**  
+**Ofsted**  
+**University of Sussex**  
 
 Finally, we are indebted to around 100 other colleagues from LAs and other organisations who contributed to our anonymous research exercises. Without this work, the project would have been immeasurably poorer. 
 
 ## Further Development Contributors 
 In no particular order:
 
-- **Phil Weir** - Early project champion & SQL development in Mosaic and the AA return -
-- **Sam Fergerson** - Mosaic development work for both T-SQL and Oracle - 
-- **Keith Thomas** - Mosaic development work for both T-SQL and Oracle - 
+- **Phil Weir** - Early project champion & SQL development in Mosaic and the AA return -  
+- **Sam Fergerson** - Mosaic development work for both T-SQL and Oracle -  
+- **Keith Thomas** - Mosaic development work for both T-SQL and Oracle -  
 - **Lee Hallsworth** - Eclipse development work for Postgress - 
-- **Kate Jagger** - Championing involvement for Azeus users -  
-- **Esther Thompson** - Azeus guidance and development -  
-- **Michael Simmons** - SystemC Data testing, guidance and development -  
+- **Nady Cash** - Eclipse development work for Postgress -   
+- **Kate Jagger** - Championing involvement for Azeus users -   
+- **Esther Thompson** - Azeus guidance and development -   
+- **Michael Simmons** - (& Coventry EA Team) SystemC Data testing, guidance and development -   
 - **Jo Russell** - SystemC Data testing, guidance and development -   
-- **Albert Chau** - Mosaic Data testing, bug and solution finding -  
+- **Albert Chau** - (& Merton EA Team) Mosaic Data testing, bug and solution finding -  
+- **Humaira Farhan** - Azeus development work -   
+- **Antony Bateman** - Azeus development work -   
+
 
 ## Special Thanks
 
-- **Knowsley County Council** - For providing the project's v.first testing access thus enabling rapid early cross-LA development and testing
+- **Knowsley County Council** - For providing the project's v.first testing access thus enabling rapid early cross-LA development and testing  
 
 ## How to Contribute
 
