@@ -10,15 +10,18 @@ DECLARE
 Select distinct
 p.PERSON_ID pers_person_id,
 NULL pers_legacy_id,						-- [REVIEW] Compatibility field/Can also be used locally
+-- NULL pers_forename, 
+-- NULL pers_surname,
 p.GENDER pers_sex,
 pg.GENDER_CODE pers_gender,
 
 e.CBDS_ETHNICITY_CODE pers_ethnicity,			-- [REVIEW] Issue #28 
--- e.CIN_ETHNICITY_DESCRIPTION pers_ethnicity, 	-- [REVIEW] Depreciated. LA Reference. 
--- p.SUB_ETHNICITY pers_ethnicity, 				-- [REVIEW] Depreciated. LA Reference. 
+-- e.CIN_ETHNICITY_DESCRIPTION pers_ethnicity, 	-- [REVIEW] Depreciated. LA Reference only 
+-- p.SUB_ETHNICITY pers_ethnicity, 				-- [REVIEW] Depreciated. LA Reference only
 
 CAST(DATE_OF_BIRTH as date) pers_dob,
-r1.REFERENCE pers_common_child_id,
+
+NULL pers_single_unique_id, 		-- Placeholder. Long term this might be derived from r1.REFERENCE|p.PNHSNumber
 r2.REFERENCE pers_upn, -- [reinstated 171125] [REVIEW] Issue #55
 NULL pers_upn_unknown,
 NULL pers_send_flag,	/*PW - Information held in Education System*/

@@ -1,5 +1,10 @@
 select
 	per.PERSON_ID pers_person_id,
+	null legacy_id,
+
+	-- null pers_forename, 
+	-- null pers_surname,
+
 	(
 		select
 			rd.ref_description
@@ -36,7 +41,7 @@ select
 		when per.DATE_OF_BIRTH <= dbo.today() then
 			per.DATE_OF_BIRTH
 	end pers_dob,
-	per.nhs_id pers_single_unique_id, 	-- renamed from pers_common_child_id [REVIEW]
+	null pers_single_unique_id, 		-- renamed from pers_common_child_id [REVIEW] . Possible use of per.nhs_id
 	per.UPN_ID pers_upn, 				-- [reinstated] [REVIEW]
 	null pers_upn_unknown,
 	null pers_send_flag,

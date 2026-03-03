@@ -10,6 +10,8 @@ DECLARE
 Select distinct
 p.PersonID pers_person_id,
 NULL pers_legacy_id,						-- [REVIEW] Compatibility field/Can also be used locally
+-- NULL pers_forename, 
+-- NULL pers_surname,
 p.Sex pers_sex,
 p.pGender pers_gender,
 
@@ -17,8 +19,8 @@ COALESCE(ec.CINCode,'NOBT') pers_ethnicity, 	-- [REVIEW] Depreciated. LA Referen
 -- COALESCE(e.CBDS_ETHNICITY_CODE, 'NOBT') pers_ethnicity,  -- [REVIEW] Issue #28
 
 p.PDoB pers_dob,
-p.PNHSNumber pers_common_child_id,
-p.PUniquePupilNumber pers_upn, -- [reinstated 171125] [REVIEW] Issue #55
+NULL pers_single_unique_id, 		-- Placeholder. Long term this might be derived from p.PNHSNumber
+p.PUniquePupilNumber pers_upn, 		-- [reinstated 171125] [REVIEW] Issue #55
 NULL pers_upn_unknown,
 CASE when ehcp.PersonID is not null then 'Y' END pers_send_flag,
 p.PDoBEstimated pers_expected_dob,
