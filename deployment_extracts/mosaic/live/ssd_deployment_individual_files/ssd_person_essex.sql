@@ -1,5 +1,10 @@
 select
 	per.PERSON_ID per_person_id,
+	null legacy_id,
+
+	-- null pers_forename, 
+	-- null pers_surname,
+
 	per.GENDER pers_gender,
 	per.FULL_ETHNICITY_CODE pers_ethnicity,
 	case

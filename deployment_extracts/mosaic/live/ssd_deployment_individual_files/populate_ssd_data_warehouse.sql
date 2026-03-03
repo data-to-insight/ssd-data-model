@@ -2405,6 +2405,8 @@ Dependencies:
 		create table ##ssd_person (
 			pers_person_id					varchar(48),
 			pers_legacy_id					varchar(48),
+			pers_forename					varchar(100),
+			pers_surname					varchar(255),
 			pers_sex						varchar(48),
 			pers_gender						varchar(48),
 			pers_ethnicity					varchar(48),
@@ -2422,6 +2424,8 @@ Dependencies:
 		insert into ##ssd_person (
 			pers_person_id,
 			pers_legacy_id,
+			pers_forename,
+			pers_surname,
 			pers_sex,
 			pers_gender,
 			pers_ethnicity,
@@ -2438,6 +2442,8 @@ Dependencies:
 		select
 			per.PERSON_ID pers_person_id,
 			null pers_legacy_id,
+			-- pers_forename,
+			-- pers_surname,
 			(
 				select
 					rd.ref_description
@@ -2475,7 +2481,7 @@ Dependencies:
 				when per.DATE_OF_BIRTH <= dbo.today() then
 					per.DATE_OF_BIRTH
 			end pers_dob,
-			per.nhs_id pers_single_unique_id, 	-- renamed from pers_common_child_id [REVIEW]
+			null pers_single_unique_id, 		-- renamed from pers_common_child_id [REVIEW] | Possible use of per.nhs_id
 			per.UPN_ID pers_upn, 				-- [reinstated 171125] [REVIEW]
 			null pers_upn_unknown,
 			null pers_send_flag,
