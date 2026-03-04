@@ -73,26 +73,32 @@ END
 -- filtered source
 ;WITH FilteredData AS (
     SELECT
-        fce.FACT_CARE_EPISODES_ID                 AS clae_cla_episode_id,
-        TRY_CAST(fce.DIM_PERSON_ID AS nvarchar(48)) AS clae_person_id,
-        fce.FACT_CLA_PLACEMENT_ID                 AS clae_cla_placement_id,
-        fce.CARE_START_DATE                       AS clae_cla_episode_start_date,
-        fce.CARE_REASON_DESC                      AS clae_cla_episode_start_reason,
-        fce.CIN_903_CODE                          AS clae_cla_primary_need_code,
-        fce.CARE_END_DATE                         AS clae_cla_episode_ceased_date,
-        fce.CARE_REASON_END_DESC                  AS clae_cla_episode_ceased_reason,
-        fc.FACT_CLA_ID                            AS clae_cla_id,
-        fc.FACT_REFERRAL_ID                       AS clae_referral_id,
-        MAX(CASE
-                WHEN cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
-                THEN cn.EVENT_DTTM
-            END)                                  AS clae_cla_last_iro_contact_date,
-        fc.START_DTTM                             AS clae_entered_care_date
+        fce.FACT_CARE_EPISODES_ID                    AS clae_cla_episode_id,
+        TRY_CAST(fce.DIM_PERSON_ID AS nvarchar(48))  AS clae_person_id,
+        fce.FACT_CLA_PLACEMENT_ID                    AS clae_cla_placement_id,
+        fce.CARE_START_DATE                          AS clae_cla_episode_start_date,
+        fce.CARE_REASON_DESC                         AS clae_cla_episode_start_reason,
+        fce.CIN_903_CODE                             AS clae_cla_primary_need_code,
+        fce.CARE_END_DATE                            AS clae_cla_episode_ceased_date,
+        fce.CARE_REASON_END_DESC                     AS clae_cla_episode_ceased_reason,
+        fc.FACT_CLA_ID                               AS clae_cla_id,
+        fc.FACT_REFERRAL_ID                          AS clae_referral_id,
+        iro.clae_cla_last_iro_contact_date           AS clae_cla_last_iro_contact_date,
+        fc.START_DTTM                                AS clae_entered_care_date
     FROM HDM.Child_Social.FACT_CARE_EPISODES AS fce
     JOIN HDM.Child_Social.FACT_CLA AS fc
       ON fc.FACT_CLA_ID = fce.FACT_CLA_ID
-    LEFT JOIN HDM.Child_Social.FACT_CASENOTES AS cn
-      ON cn.DIM_PERSON_ID = fce.DIM_PERSON_ID
+
+    OUTER APPLY (   -- [REVIEW] RH 04/03/26 to address NULL aggr issue
+        SELECT
+            MAX(cn.EVENT_DTTM) AS clae_cla_last_iro_contact_date
+        FROM HDM.Child_Social.FACT_CASENOTES AS cn
+        WHERE
+            cn.DIM_PERSON_ID = fce.DIM_PERSON_ID
+            AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+            AND cn.EVENT_DTTM IS NOT NULL
+    ) AS iro
+
     WHERE EXISTS (
               SELECT 1
               FROM ssd_person p
@@ -102,18 +108,6 @@ END
             fce.CARE_END_DATE >= DATEADD(year, -@ssd_timeframe_years, GETDATE())
             OR fce.CARE_END_DATE IS NULL
           )
-    GROUP BY
-        fce.FACT_CARE_EPISODES_ID,
-        fce.DIM_PERSON_ID,
-        fce.FACT_CLA_PLACEMENT_ID,
-        fce.CARE_START_DATE,
-        fce.CARE_REASON_DESC,
-        fce.CIN_903_CODE,
-        fce.CARE_END_DATE,
-        fce.CARE_REASON_END_DESC,
-        fc.FACT_CLA_ID,
-        fc.FACT_REFERRAL_ID,
-        fc.START_DTTM
 )
 INSERT INTO ssd_cla_episodes (
     clae_cla_episode_id,
@@ -143,75 +137,6 @@ SELECT
     clae_cla_last_iro_contact_date,
     clae_entered_care_date
 FROM FilteredData;
-
-
-
--- -- META-ELEMENT: {"type": "insert_data"}
--- -- [TESTING]
--- INSERT INTO ssd_cla_episodes (
---     clae_cla_episode_id,
---     clae_person_id,
---     clae_cla_placement_id,
---     clae_cla_episode_start_date,
---     clae_cla_episode_start_reason,
---     clae_cla_primary_need_code,
---     clae_cla_episode_ceased_date,
---     clae_cla_episode_ceased_reason,
---     clae_cla_id,
---     clae_referral_id,
---     clae_cla_last_iro_contact_date,
---     clae_entered_care_date 
--- )
--- SELECT
---     fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
---     fce.FACT_CLA_PLACEMENT_ID               AS clae_cla_placement_id,
---     fce.DIM_PERSON_ID                       AS clae_person_id,
---     fce.CARE_START_DATE                     AS clae_cla_episode_start_date,
---     fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
---     fce.CIN_903_CODE                        AS clae_cla_primary_need_code,
---     fce.CARE_END_DATE                       AS clae_cla_episode_ceased_date,
---     fce.CARE_REASON_END_DESC                AS clae_cla_episode_ceased_reason,
---     fc.FACT_CLA_ID                          AS clae_cla_id,                    
---     fc.FACT_REFERRAL_ID                     AS clae_referral_id,
---     (SELECT MAX(ISNULL(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
---         AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
---         THEN cn.EVENT_DTTM END, '1900-01-01')))                                                      
---                                             AS clae_cla_last_iro_contact_date,
---     fc.START_DTTM                           AS clae_entered_care_date
--- FROM
---     HDM.Child_Social.FACT_CARE_EPISODES AS fce
--- JOIN
---     HDM.Child_Social.FACT_CLA AS fc ON fce.FACT_CLA_ID = fc.FACT_CLA_ID
--- LEFT JOIN
---     HDM.Child_Social.FACT_CASENOTES cn ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
-    
--- WHERE EXISTS (
---     SELECT 1
---     FROM ssd_person p
---      WHERE TRY_CAST(p.pers_person_id AS INT) = fce.DIM_PERSON_ID -- #DtoI-1799
--- )
--- -- WHERE
--- --     fce.DIM_PERSON_ID IN (SELECT pers_person_id FROM ssd_person)
-
--- GROUP BY
---     fce.FACT_CARE_EPISODES_ID,
---     fce.DIM_PERSON_ID,
---     fce.FACT_CLA_PLACEMENT_ID,
---     fce.CARE_START_DATE,
---     fce.CARE_REASON_DESC,
---     fce.CIN_903_CODE,
---     fce.CARE_END_DATE,
---     fce.CARE_REASON_END_DESC,
---     fc.FACT_CLA_ID,                    
---     fc.FACT_REFERRAL_ID,
---     fc.START_DTTM,
---     cn.DIM_PERSON_ID;
-
--- -- [TESTING]
--- SELECT DISTINCT clae_person_id FROM ssd_cla_episodes WHERE clae_person_id NOT IN (SELECT pers_person_id FROM ssd_person);
-
-
-
 
 
 -- -- META-ELEMENT: {"type": "create_fk"}  

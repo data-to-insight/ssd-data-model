@@ -1,0 +1,6 @@
+changed proc files - COV notes 040326:
+ssd_pre_cla_care_plan.sql (ffa.FACT_FORM_ID IS NOT NULL and ELSE '' END) on lacp_cla_care_plan_json builder, also - chk this shouldnt be contained within parent cla_care_plan.sql)
+ssd_care_leavers.sql (InvolvementHistoryCTE)
+ssd_cla_episodes.sql ( outer apply getting MAX(cn.EVENT_DTTM) AS clae_cla_last_iro_contact_date)
+ssd_cla_previous_permanence.sql (using ELSE '' and removed COALESCE on MAX CASE blocks all)
+ssd_dim_date.sql (new)

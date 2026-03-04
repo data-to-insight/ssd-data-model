@@ -37,11 +37,9 @@ BEGIN
 -- Version: 1.0
 -- Status: [D]ev-
 -- Remarks: [EA_API_PRIORITY_TABLE]
---              Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
---             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_person> references in the CTEs(added for performance)
 --             Dev: Revised V3/4 to aid performance on large involvements table aggr
-
---             This table the cohort of children who are preparing to leave care, typically 15/16/17yrs+; 
+--
+--             This table the cohort of children who are preparing to leave care, typically 15/16/17yrs+
 --             Not those who are finishing a period of care. 
 --             clea_care_leaver_eligibility == LAC for 13wks+(since 14yrs)+LAC since 16yrs 
 
@@ -83,22 +81,43 @@ END
 -- CTE for involvement history incl. worker data
 -- aggregate/extract current worker infos, allocated team, and p.advisor ID
 ;WITH InvolvementHistoryCTE AS (
+    -- [REVIEW] aggregated expression passed to MAX() now always non null (0 when nothing applies) issues/275 040326 RH
     SELECT
         fi.DIM_PERSON_ID,
         -- worker, alloc team, and p.advisor dets <<per involvement type>>
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN NULLIF(fi.DIM_WORKER_ID, 0) ELSE NULL END)   AS CurrentWorker,       -- c.w name for the 'CW' inv type
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN NULLIF(NULLIF(fi.FACT_WORKER_HISTORY_DEPARTMENT_ID, -1), 0) ELSE NULL END) AS AllocatedTeam, -- team desc for the 'CW' inv type
-        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS' THEN fi.DIM_WORKER_ID ELSE NULL END)          AS PersonalAdvisor      -- p.a. for the '16PLUS' inv type
+        NULLIF(
+            MAX(CASE WHEN fi.RecentInvolvement = 'CW'
+                     THEN ISNULL(NULLIF(fi.DIM_WORKER_ID, 0), 0)
+                     ELSE 0
+                END),
+            0
+        ) AS CurrentWorker,       -- c.w name for 'CW' inv type
+
+        NULLIF(
+            MAX(CASE WHEN fi.RecentInvolvement = 'CW'
+                     THEN ISNULL(NULLIF(NULLIF(fi.FACT_WORKER_HISTORY_DEPARTMENT_ID, -1), 0), 0)
+                     ELSE 0
+                END),
+            0
+        ) AS AllocatedTeam,       -- team desc for 'CW' inv type
+
+        NULLIF(
+            MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'
+                     THEN ISNULL(NULLIF(fi.DIM_WORKER_ID, 0), 0)
+                     ELSE 0
+                END),
+            0
+        ) AS PersonalAdvisor      -- p.a. for the '16PLUS' inv type
         -- was fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC & fi.FACT_WORKER_NAME. fi.DIM_DEPARTMENT_ID also available
-    
+
     FROM (
         SELECT *,
-            -- Assign a row number, partition by p + inv type
+            -- Assign row number, partition by p + inv type
             ROW_NUMBER() OVER (
                 PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE
                 ORDER BY FACT_INVOLVEMENTS_ID DESC
             ) AS rn,
-            -- Mark the involvement type ('CW' or '16PLUS')
+            -- Mark involvement type ('CW' or '16PLUS')
             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
         FROM HDM.Child_Social.FACT_INVOLVEMENTS
         WHERE
@@ -108,12 +127,12 @@ END
             -- AND END_DTTM IS NULL                 -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
             -- AND DIM_WORKER_ID IS NOT NULL        -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
             AND DIM_WORKER_ID <> -1                 -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
- 
-            -- where the inv type is 'CW' + flagged as allocated
+
+            -- where inv type is 'CW' + flagged as allocated
             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
                                                     -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
     ) fi
- 
+    WHERE fi.rn = 1
     -- aggregate the result(s)
     GROUP BY
         fi.DIM_PERSON_ID
