@@ -3752,7 +3752,8 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: 
 -- Author: D2I
--- Version: 1.0
+-- Version: 1.1
+--          1.0 Fix on issues/275 outer apply added to per filter nulls 040326 RH
 -- Status: [R]elease
 -- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies: 
@@ -3762,6 +3763,10 @@ PRINT 'Table created: ' + @TableName;
 -- - HDM.Child_Social.FACT_CASENOTES
 -- =============================================================================
 
+
+
+-- META-ELEMENT: {"type": "test"}
+SET @TableName = N'ssd_cla_episodes';
 
 -- META-ELEMENT: {"type": "drop_table"}
 IF OBJECT_ID('tempdb..#ssd_cla_episodes','U') IS NOT NULL DROP TABLE #ssd_cla_episodes;
@@ -3795,26 +3800,32 @@ END
 -- filtered source
 ;WITH FilteredData AS (
     SELECT
-        fce.FACT_CARE_EPISODES_ID                 AS clae_cla_episode_id,
-        TRY_CAST(fce.DIM_PERSON_ID AS nvarchar(48)) AS clae_person_id,
-        fce.FACT_CLA_PLACEMENT_ID                 AS clae_cla_placement_id,
-        fce.CARE_START_DATE                       AS clae_cla_episode_start_date,
-        fce.CARE_REASON_DESC                      AS clae_cla_episode_start_reason,
-        fce.CIN_903_CODE                          AS clae_cla_primary_need_code,
-        fce.CARE_END_DATE                         AS clae_cla_episode_ceased_date,
-        fce.CARE_REASON_END_DESC                  AS clae_cla_episode_ceased_reason,
-        fc.FACT_CLA_ID                            AS clae_cla_id,
-        fc.FACT_REFERRAL_ID                       AS clae_referral_id,
-        MAX(CASE
-                WHEN cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
-                THEN cn.EVENT_DTTM
-            END)                                  AS clae_cla_last_iro_contact_date,
-        fc.START_DTTM                             AS clae_entered_care_date
+        fce.FACT_CARE_EPISODES_ID                    AS clae_cla_episode_id,
+        TRY_CAST(fce.DIM_PERSON_ID AS nvarchar(48))  AS clae_person_id,
+        fce.FACT_CLA_PLACEMENT_ID                    AS clae_cla_placement_id,
+        fce.CARE_START_DATE                          AS clae_cla_episode_start_date,
+        fce.CARE_REASON_DESC                         AS clae_cla_episode_start_reason,
+        fce.CIN_903_CODE                             AS clae_cla_primary_need_code,
+        fce.CARE_END_DATE                            AS clae_cla_episode_ceased_date,
+        fce.CARE_REASON_END_DESC                     AS clae_cla_episode_ceased_reason,
+        fc.FACT_CLA_ID                               AS clae_cla_id,
+        fc.FACT_REFERRAL_ID                          AS clae_referral_id,
+        iro.clae_cla_last_iro_contact_date           AS clae_cla_last_iro_contact_date,
+        fc.START_DTTM                                AS clae_entered_care_date
     FROM HDM.Child_Social.FACT_CARE_EPISODES AS fce
     JOIN HDM.Child_Social.FACT_CLA AS fc
       ON fc.FACT_CLA_ID = fce.FACT_CLA_ID
-    LEFT JOIN HDM.Child_Social.FACT_CASENOTES AS cn
-      ON cn.DIM_PERSON_ID = fce.DIM_PERSON_ID
+
+    OUTER APPLY (   -- [REVIEW] RH 04/03/26 to address NULL aggr issue
+        SELECT
+            MAX(cn.EVENT_DTTM) AS clae_cla_last_iro_contact_date
+        FROM HDM.Child_Social.FACT_CASENOTES AS cn
+        WHERE
+            cn.DIM_PERSON_ID = fce.DIM_PERSON_ID
+            AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
+            AND cn.EVENT_DTTM IS NOT NULL
+    ) AS iro
+
     WHERE EXISTS (
               SELECT 1
               FROM ssd_development.ssd_person p
@@ -3824,18 +3835,6 @@ END
             fce.CARE_END_DATE >= DATEADD(year, -@ssd_timeframe_years, GETDATE())
             OR fce.CARE_END_DATE IS NULL
           )
-    GROUP BY
-        fce.FACT_CARE_EPISODES_ID,
-        fce.DIM_PERSON_ID,
-        fce.FACT_CLA_PLACEMENT_ID,
-        fce.CARE_START_DATE,
-        fce.CARE_REASON_DESC,
-        fce.CIN_903_CODE,
-        fce.CARE_END_DATE,
-        fce.CARE_REASON_END_DESC,
-        fc.FACT_CLA_ID,
-        fc.FACT_REFERRAL_ID,
-        fc.START_DTTM
 )
 INSERT INTO ssd_development.ssd_cla_episodes (
     clae_cla_episode_id,
@@ -3865,75 +3864,6 @@ SELECT
     clae_cla_last_iro_contact_date,
     clae_entered_care_date
 FROM FilteredData;
-
-
-
--- -- META-ELEMENT: {"type": "insert_data"}
--- -- [TESTING]
--- INSERT INTO ssd_development.ssd_cla_episodes (
---     clae_cla_episode_id,
---     clae_person_id,
---     clae_cla_placement_id,
---     clae_cla_episode_start_date,
---     clae_cla_episode_start_reason,
---     clae_cla_primary_need_code,
---     clae_cla_episode_ceased_date,
---     clae_cla_episode_ceased_reason,
---     clae_cla_id,
---     clae_referral_id,
---     clae_cla_last_iro_contact_date,
---     clae_entered_care_date 
--- )
--- SELECT
---     fce.FACT_CARE_EPISODES_ID               AS clae_cla_episode_id,
---     fce.FACT_CLA_PLACEMENT_ID               AS clae_cla_placement_id,
---     fce.DIM_PERSON_ID                       AS clae_person_id,
---     fce.CARE_START_DATE                     AS clae_cla_episode_start_date,
---     fce.CARE_REASON_DESC                    AS clae_cla_episode_start_reason,
---     fce.CIN_903_CODE                        AS clae_cla_primary_need_code,
---     fce.CARE_END_DATE                       AS clae_cla_episode_ceased_date,
---     fce.CARE_REASON_END_DESC                AS clae_cla_episode_ceased_reason,
---     fc.FACT_CLA_ID                          AS clae_cla_id,                    
---     fc.FACT_REFERRAL_ID                     AS clae_referral_id,
---     (SELECT MAX(ISNULL(CASE WHEN fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
---         AND cn.DIM_LOOKUP_CASNT_TYPE_ID_CODE = 'IRO'
---         THEN cn.EVENT_DTTM END, '1900-01-01')))                                                      
---                                             AS clae_cla_last_iro_contact_date,
---     fc.START_DTTM                           AS clae_entered_care_date
--- FROM
---     HDM.Child_Social.FACT_CARE_EPISODES AS fce
--- JOIN
---     HDM.Child_Social.FACT_CLA AS fc ON fce.FACT_CLA_ID = fc.FACT_CLA_ID
--- LEFT JOIN
---     HDM.Child_Social.FACT_CASENOTES cn ON fce.DIM_PERSON_ID = cn.DIM_PERSON_ID
-    
--- WHERE EXISTS (
---     SELECT 1
---     FROM ssd_development.ssd_person p
---      WHERE TRY_CAST(p.pers_person_id AS INT) = fce.DIM_PERSON_ID -- #DtoI-1799
--- )
--- -- WHERE
--- --     fce.DIM_PERSON_ID IN (SELECT pers_person_id FROM ssd_development.ssd_person)
-
--- GROUP BY
---     fce.FACT_CARE_EPISODES_ID,
---     fce.DIM_PERSON_ID,
---     fce.FACT_CLA_PLACEMENT_ID,
---     fce.CARE_START_DATE,
---     fce.CARE_REASON_DESC,
---     fce.CIN_903_CODE,
---     fce.CARE_END_DATE,
---     fce.CARE_REASON_END_DESC,
---     fc.FACT_CLA_ID,                    
---     fc.FACT_REFERRAL_ID,
---     fc.START_DTTM,
---     cn.DIM_PERSON_ID;
-
--- -- [TESTING]
--- SELECT DISTINCT clae_person_id FROM ssd_development.ssd_cla_episodes WHERE clae_person_id NOT IN (SELECT pers_person_id FROM ssd_development.ssd_person);
-
-
-
 
 
 -- -- META-ELEMENT: {"type": "create_fk"}  
@@ -4563,12 +4493,12 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description:
 -- Author: D2I
--- Version: 1.1 
---             1.0: Fix Aggr warnings use of isnull() 310524 RH
+-- Version: 1.2
+--              1.1 Further aggr null fix on CASE producing nulls for non matching rows 040326 RH
+--              1.0: Fix Aggr warnings use of isnull() 310524 RH
 -- Status: [R]elease
--- Remarks: Adapted from 1.3 ver, needs re-test also with Knowsley.
---         1.5 JH tmp table was not being referenced, updated query and reduced running
---         time considerably, also filtered out rows where ANSWER IS NULL
+-- Remarks: 
+--
 -- Dependencies:
 -- - ssd_person
 -- - HDM.Child_Social.FACT_903_DATA [depreciated]
@@ -4626,31 +4556,34 @@ INSERT INTO ssd_development.ssd_cla_previous_permanence (
 SELECT
     tmp_ffa.FACT_FORM_ID AS lapp_table_id,
     ff.DIM_PERSON_ID AS lapp_person_id,
-    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN ISNULL(tmp_ffa.ANSWER, '') END), '') AS lapp_previous_permanence_option,
-    COALESCE(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG' THEN ISNULL(tmp_ffa.ANSWER, '') END), '') AS lapp_previous_permanence_la,
+
+    MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'PREVADOPTORD' THEN tmp_ffa.ANSWER ELSE '' END) AS lapp_previous_permanence_option,
+    MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'INENG'       THEN tmp_ffa.ANSWER ELSE '' END) AS lapp_previous_permanence_la,
+
     CASE 
-        WHEN PATINDEX('%[^0-9]%', ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '')) = 0 AND 
-             TRY_CAST(ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '0') AS INT) BETWEEN 1 AND 31 THEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER END), '') 
+        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER ELSE '' END)) = 0
+         AND TRY_CAST(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER ELSE '0' END) AS INT) BETWEEN 1 AND 31
+        THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERDATE' THEN tmp_ffa.ANSWER ELSE '' END)
         ELSE 'zz' 
     END + '/' + 
     CASE 
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('January', 'Jan')  THEN '01'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('February', 'Feb') THEN '02'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('March', 'Mar')    THEN '03'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('April', 'Apr')    THEN '04'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('May')             THEN '05'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('June', 'Jun')     THEN '06'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('July', 'Jul')     THEN '07'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('August', 'Aug')   THEN '08'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('September', 'Sep') THEN '09'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') 
-        IN ('October', 'Oct')  THEN '10'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('November', 'Nov') THEN '11'
-        WHEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER END), '') IN ('December', 'Dec') THEN '12'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('January', 'Jan')   THEN '01'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('February', 'Feb')  THEN '02'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('March', 'Mar')     THEN '03'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('April', 'Apr')     THEN '04'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('May')              THEN '05'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('June', 'Jun')      THEN '06'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('July', 'Jul')      THEN '07'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('August', 'Aug')    THEN '08'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('September', 'Sep') THEN '09'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('October', 'Oct')   THEN '10'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('November', 'Nov')  THEN '11'
+        WHEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERMONTH' THEN tmp_ffa.ANSWER ELSE '' END) IN ('December', 'Dec')  THEN '12'
         ELSE 'zz' 
     END + '/' + 
     CASE 
-        WHEN PATINDEX('%[^0-9]%', ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END), '')) = 0 THEN ISNULL(MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER END), '') 
+        WHEN PATINDEX('%[^0-9]%', MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER ELSE '' END)) = 0
+        THEN MAX(CASE WHEN tmp_ffa.ANSWER_NO = 'ORDERYEAR' THEN tmp_ffa.ANSWER ELSE '' END)
         ELSE 'zzzz' 
     END
     AS lapp_previous_permanence_order_date
@@ -4664,7 +4597,6 @@ AND EXISTS (
     WHERE TRY_CAST(p.pers_person_id AS INT) = ff.DIM_PERSON_ID -- #DtoI-1799
 )
 GROUP BY tmp_ffa.FACT_FORM_ID, ff.FACT_FORM_ID, ff.DIM_PERSON_ID;
-
 
 
 -- -- META-ELEMENT: {"type": "create_fk"}   
@@ -4690,16 +4622,15 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description:
 -- Author: D2I
--- Version: 1.1
---             1.0: Fix Aggr warnings use of isnull() 310524 RH
---             0.1: Altered _json keys and groupby towards > clarity 190224 JH
+-- Version: 1.2
+--              1.1 Added AND ffa.FACT_FORM_ID ! NULL chk and ELSE '' issues/275 040326 RH
+--              1.0: Fix Aggr warnings use of isnull() 310524 RH
+--              0.1: Altered _json keys and groupby towards > clarity 190224 JH
 -- Status: [R]elease
--- Remarks:    Added short codes to plan type questions to improve readability.
---             Removed form type filter, only filtering ffa. on ANSWER_NO.
---             Requires #LEGACY-PRE2016 changes.
+-- Remarks: 
 -- Dependencies:
 -- - ssd_person
--- - #ssd_TMP_PRE_cla_care_plan - Used to stage/prep most recent relevant form response
+-- - #ssd_TMP_PRE_cla_care_plan - stage/prep most recent relevant form response
 -- - HDM.Child_Social.FACT_CARE_PLANS
 -- - HDM.Child_Social.FACT_FORMS
 -- - HDM.Child_Social.FACT_FORM_ANSWERS
@@ -4759,7 +4690,9 @@ END
     JOIN
         HDM.Child_Social.FACT_FORMS ff ON ffa.FACT_FORM_ID = ff.FACT_FORM_ID    -- obtain the relevant person_id
     WHERE
-        ffa.ANSWER_NO    IN ('CPFUP1', 'CPFUP10', 'CPFUP2', 'CPFUP3', 'CPFUP4', 'CPFUP5', 'CPFUP6', 'CPFUP7', 'CPFUP8', 'CPFUP9')
+        ffa.ANSWER_NO IN ('CPFUP1','CPFUP10','CPFUP2','CPFUP3','CPFUP4','CPFUP5','CPFUP6','CPFUP7','CPFUP8','CPFUP9')
+        AND ffa.FACT_FORM_ID IS NOT NULL -- [REVIEW] Added to assist null filter 
+
     GROUP BY
         ff.DIM_PERSON_ID,
         ffa.ANSWER_NO
@@ -4815,16 +4748,16 @@ SELECT
     (
         -- Manual JSON-like concatenation for lacp_cla_care_plan_json
         '{' +
-        '"REMAINSUP": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RETURN1M": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RETURN6M": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RETURNEV": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"LTRELFR": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"LTFOST18": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RESPLMT": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"SUPPLIV": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"ADOPTION": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"OTHERPLN": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END), '') AS NVARCHAR(50)), '') + '"' +
+        '"REMAINSUP": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"RETURN1M": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"RETURN6M": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"RETURNEV": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"LTRELFR": "'   + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"LTFOST18": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"RESPLMT": "'   + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"SUPPLIV": "'   + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"ADOPTION": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
+        '"OTHERPLN": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '"' +
         '}'
     ) AS lacp_cla_care_plan_json
 FROM
@@ -4839,13 +4772,16 @@ WHERE
         FROM ssd_development.ssd_person p
         WHERE TRY_CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID -- #DtoI-1799
     )
+
 GROUP BY
     fcp.FACT_CARE_PLAN_ID,
     fcp.DIM_PERSON_ID,
     fcp.START_DTTM,
     fcp.END_DTTM;
 
--- -- #LEGACY-PRE2016 
+
+
+-- -- #LEGACY-PRE2016  
 -- -- SQL compatible versions >=2016+
 -- SELECT
 --     fcp.FACT_CARE_PLAN_ID          AS lacp_table_id,
@@ -4856,37 +4792,34 @@ GROUP BY
 --         SELECT  -- Combined _json field with 'ICP' responses
 --             -- SSD standard 
 --             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
---             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN tmp_cpl.ANSWER END, '')), NULL) AS REMAINSUP,
---             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN1M,
---             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURN6M,
---             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RETURNEV,
---             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN tmp_cpl.ANSWER END, '')), NULL) AS LTRELFR,
---             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN tmp_cpl.ANSWER END, '')), NULL) AS LTFOST18,
---             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN tmp_cpl.ANSWER END, '')), NULL) AS RESPLMT,
---             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN tmp_cpl.ANSWER END, '')), NULL) AS SUPPLIV,
---             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER END, '')), NULL) AS ADOPTION,
---             COALESCE(MAX(ISNULL(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER END, '')), NULL) AS OTHERPLN
+--             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS REMAINSUP,
+--             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RETURN1M,
+--             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RETURN6M,
+--             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RETURNEV,
+--             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS LTRELFR,
+--             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS LTFOST18,
+--             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RESPLMT,
+--             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS SUPPLIV,
+--             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS ADOPTION,
+--             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS OTHERPLN
 --         FROM
 --             -- #ssd_TMP_PRE_cla_care_plan tmp_cpl
 --             ssd_development.ssd_pre_cla_care_plan tmp_cpl
-
 --         WHERE
 --             tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
- 
 --         GROUP BY tmp_cpl.DIM_PERSON_ID
 --         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 --     ) AS lacp_cla_care_plan_json
- 
 -- FROM
 --     HDM.Child_Social.FACT_CARE_PLANS AS fcp
-
-
 -- WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
 --     AND EXISTS (
 --         SELECT 1
 --         FROM ssd_development.ssd_person p
 --         WHERE TRY_CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID -- #DtoI-1799
 --     );
+
+
 
 
 -- -- META-ELEMENT: {"type": "create_fk"}
@@ -4897,8 +4830,6 @@ GROUP BY
 -- CREATE NONCLUSTERED INDEX IX_ssd_lacp_person_id ON ssd_development.ssd_cla_care_plan(lacp_person_id);
 -- CREATE NONCLUSTERED INDEX IX_ssd_lacp_care_plan_start_date ON ssd_development.ssd_cla_care_plan(lacp_cla_care_plan_start_date);
 -- CREATE NONCLUSTERED INDEX IX_ssd_lacp_care_plan_end_date ON ssd_development.ssd_cla_care_plan(lacp_cla_care_plan_end_date);
-
-
 
 
 
@@ -5294,7 +5225,8 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description:
 -- Author: D2I
--- Version: 1.3:
+-- Version: 1.4
+--              1.3: Revised InvolvementHistoryCTE remove NULLs before MAX then convert back to NULL issues/275 040326 RH
 --             1.2: Added NULLIF(NULLIF(... fixes for CurrentWorker & AllocatedTeam 290724 RH
 --             1.1: Roll-back to use of worker_id #DtoI-1755 040624 RH
 --             1.0: Fix Aggr warnings use of isnull() 310524 RH
@@ -5303,11 +5235,9 @@ PRINT 'Table created: ' + @TableName;
 --             0.1: worker/p.a id field changed to descriptive name towards AA reporting JH
 -- Status: [R]elease
 -- Remarks: [EA_API_PRIORITY_TABLE]
---              Dev: Note that <multiple> refs to ssd_person need changing when porting code to tempdb.. versions.
---             Dev: Ensure index on ssd_person.pers_person_id is intact to ensure performance on <FROM ssd_development.ssd_person> references in the CTEs(added for performance)
 --             Dev: Revised V3/4 to aid performance on large involvements table aggr
-
---             This table the cohort of children who are preparing to leave care, typically 15/16/17yrs+; 
+--
+--             This table the cohort of children who are preparing to leave care, typically 15/16/17yrs+
 --             Not those who are finishing a period of care. 
 --             clea_care_leaver_eligibility == LAC for 13wks+(since 14yrs)+LAC since 16yrs 
 
@@ -5355,22 +5285,43 @@ END
 -- CTE for involvement history incl. worker data
 -- aggregate/extract current worker infos, allocated team, and p.advisor ID
 ;WITH InvolvementHistoryCTE AS (
+    -- [REVIEW] aggregated expression passed to MAX() now always non null (0 when nothing applies) issues/275 040326 RH
     SELECT
         fi.DIM_PERSON_ID,
         -- worker, alloc team, and p.advisor dets <<per involvement type>>
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN NULLIF(fi.DIM_WORKER_ID, 0) ELSE NULL END)   AS CurrentWorker,       -- c.w name for the 'CW' inv type
-        MAX(CASE WHEN fi.RecentInvolvement = 'CW' THEN NULLIF(NULLIF(fi.FACT_WORKER_HISTORY_DEPARTMENT_ID, -1), 0) ELSE NULL END) AS AllocatedTeam, -- team desc for the 'CW' inv type
-        MAX(CASE WHEN fi.RecentInvolvement = '16PLUS' THEN fi.DIM_WORKER_ID ELSE NULL END)          AS PersonalAdvisor      -- p.a. for the '16PLUS' inv type
+        NULLIF(
+            MAX(CASE WHEN fi.RecentInvolvement = 'CW'
+                     THEN ISNULL(NULLIF(fi.DIM_WORKER_ID, 0), 0)
+                     ELSE 0
+                END),
+            0
+        ) AS CurrentWorker,       -- c.w name for 'CW' inv type
+
+        NULLIF(
+            MAX(CASE WHEN fi.RecentInvolvement = 'CW'
+                     THEN ISNULL(NULLIF(NULLIF(fi.FACT_WORKER_HISTORY_DEPARTMENT_ID, -1), 0), 0)
+                     ELSE 0
+                END),
+            0
+        ) AS AllocatedTeam,       -- team desc for 'CW' inv type
+
+        NULLIF(
+            MAX(CASE WHEN fi.RecentInvolvement = '16PLUS'
+                     THEN ISNULL(NULLIF(fi.DIM_WORKER_ID, 0), 0)
+                     ELSE 0
+                END),
+            0
+        ) AS PersonalAdvisor      -- p.a. for the '16PLUS' inv type
         -- was fi.FACT_WORKER_HISTORY_DEPARTMENT_DESC & fi.FACT_WORKER_NAME. fi.DIM_DEPARTMENT_ID also available
-    
+
     FROM (
         SELECT *,
-            -- Assign a row number, partition by p + inv type
+            -- Assign row number, partition by p + inv type
             ROW_NUMBER() OVER (
                 PARTITION BY DIM_PERSON_ID, DIM_LOOKUP_INVOLVEMENT_TYPE_CODE
                 ORDER BY FACT_INVOLVEMENTS_ID DESC
             ) AS rn,
-            -- Mark the involvement type ('CW' or '16PLUS')
+            -- Mark involvement type ('CW' or '16PLUS')
             DIM_LOOKUP_INVOLVEMENT_TYPE_CODE AS RecentInvolvement
         FROM HDM.Child_Social.FACT_INVOLVEMENTS
         WHERE
@@ -5380,12 +5331,12 @@ END
             -- AND END_DTTM IS NULL                 -- Switch on if certainty exists that we will always find a 'current' 'open' record for both types
             -- AND DIM_WORKER_ID IS NOT NULL        -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
             AND DIM_WORKER_ID <> -1                 -- Suggests missing data|other non-caseworker record / cannot be associated CW or +16 CW
- 
-            -- where the inv type is 'CW' + flagged as allocated
+
+            -- where inv type is 'CW' + flagged as allocated
             AND (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE <> 'CW' OR (DIM_LOOKUP_INVOLVEMENT_TYPE_CODE = 'CW' AND IS_ALLOCATED_CW_FLAG = 'Y'))
                                                     -- Leaving only involvement records <with> worker data that are CW+Allocated and/or 16PLUS
     ) fi
- 
+    WHERE fi.rn = 1
     -- aggregate the result(s)
     GROUP BY
         fi.DIM_PERSON_ID
