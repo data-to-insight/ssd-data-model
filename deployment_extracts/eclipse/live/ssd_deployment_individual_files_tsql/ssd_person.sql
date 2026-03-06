@@ -317,11 +317,3 @@ WHERE
         OR CONVERT(NVARCHAR(48), P.PERSONID) IN (SELECT personid FROM @allowed_persons)
     );
 
--- From
--- Classificationpersonview
-
--- where
-
--- Classificationpersonview.classificationpathid in (17,21,43,50)
--- and 
--- Classificationpersonview.enddate is null
