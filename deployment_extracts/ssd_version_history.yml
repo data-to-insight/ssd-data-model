@@ -5,9 +5,23 @@ meta:
   owner: "Data to Insight"
   status: "Release"
 
-current_version: "1.3.9"
+current_version: "1.4.0"
 
 releases:
+  - version_number: "1.4.0" 
+    release_date: "2025-03-04" 
+    includes_changes: >
+      ssd_pre_cla_care_plan.sql (ffa.FACT_FORM_ID IS NOT NULL and ELSE '' END) on lacp_cla_care_plan_json builder
+      ssd_care_leavers.sql (InvolvementHistoryCTE)
+      ssd_cla_episodes.sql (outer apply getting MAX(cn.EVENT_DTTM) AS clae_cla_last_iro_contact_date)
+      ssd_cla_previous_permanence.sql (using ELSE '' and removed COALESCE on MAX CASE blocks all)
+
+    impact_description: >
+      to provide increased|robust null handling in tables flagged by LAs as diplaying common warnings in SSD build
+    impacts_cms_deployment:
+      - "systemc"
+
+
   - version_number: "1.3.9" 
     release_date: "2025-01-29" 
     includes_changes: >
