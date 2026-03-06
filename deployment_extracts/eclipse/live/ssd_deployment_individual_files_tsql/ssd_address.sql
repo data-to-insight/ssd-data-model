@@ -2,8 +2,8 @@
 -- =============================================================================
 -- Description: Contains full address details for every person
 -- Author: D2I
--- Version: 1.0
--- Status: [R]elease
+-- Version: 0.1: new RH
+-- Status: [D]ev
 -- Remarks: [EA_API_PRIORITY_TABLE]
 --          JSON built via string concat for legacy SQL Server compatibility
 --          Requires #LEGACY-PRE2016 changes if wider script assumes newer JSON funcs

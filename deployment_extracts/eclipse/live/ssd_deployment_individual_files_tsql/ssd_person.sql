@@ -2,9 +2,8 @@
 -- =============================================================================
 -- Description: Person/child details. 
 -- Author: D2I
--- Version:
---             0.1: new RH
--- Status: [R]elease
+-- Version: 0.1: new RH
+-- Status: [D]ev
 -- Remarks: [EA_API_PRIORITY_TABLE]
 
 -- Dependencies:
