@@ -2,7 +2,8 @@
 -- =============================================================================
 -- Description: Contains full address details for every person
 -- Author: D2I
--- Version: 0.1: new RH
+-- Version: 0.2 Fixed run order and ; use 
+--          0.1: new RH
 -- Status: [D]ev
 -- Remarks: [EA_API_PRIORITY_TABLE]
 --          JSON built via string concat for legacy SQL Server compatibility
@@ -38,15 +39,6 @@ END
 
 
 /* META-ELEMENT: {"type": "insert_data"} */
-INSERT INTO ssd_development.ssd_address (
-    addr_table_id,
-    addr_person_id,
-    addr_address_type,
-    addr_address_start_date,
-    addr_address_end_date,
-    addr_address_postcode,
-    addr_address_json
-)
 ;WITH EXCLUSIONS AS (
     SELECT
         PV.PERSONID
@@ -56,6 +48,15 @@ INSERT INTO ssd_development.ssd_address (
         OR ISNULL(PV.DUPLICATED, '?') IN ('DUPLICATE')
         OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
         OR UPPER(PV.SURNAME)  LIKE '%DUPLICATE%'
+)
+INSERT INTO ssd_development.ssd_address (
+    addr_table_id,
+    addr_person_id,
+    addr_address_type,
+    addr_address_start_date,
+    addr_address_end_date,
+    addr_address_postcode,
+    addr_address_json
 )
 SELECT
     CONVERT(NVARCHAR(48), PERSADDRESS.ADDRESSID) AS addr_table_id,              -- metadata={"item_ref":"ADDR007A"}

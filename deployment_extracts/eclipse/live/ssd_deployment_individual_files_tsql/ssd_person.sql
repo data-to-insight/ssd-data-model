@@ -2,7 +2,8 @@
 -- =============================================================================
 -- Description: Person/child details. 
 -- Author: D2I
--- Version: 0.1: new RH
+-- Version: 0.2 Fixed run order and ; use 
+--          0.1: new RH
 -- Status: [D]ev
 -- Remarks: [EA_API_PRIORITY_TABLE]
 
@@ -58,24 +59,6 @@ VALUES
 
 
 /* META-ELEMENT: {"type": "insert_data"} */
-INSERT INTO ssd_development.ssd_person (
-    pers_legacy_id,
-    pers_person_id,
-    pers_upn,
-    pers_forename,
-    pers_surname,
-    pers_sex,
-    pers_gender,
-    pers_ethnicity,
-    pers_dob,
-    pers_single_unique_id,
-    pers_upn_unknown,
-    pers_send_flag,
-    pers_expected_dob,
-    pers_death_date,
-    pers_is_mother,
-    pers_nationality
-)
 ;WITH EXCLUSIONS AS (
     SELECT CONVERT(NVARCHAR(48), PV.PERSONID) AS PERSONID
     FROM PERSONVIEW PV
@@ -180,6 +163,24 @@ CLASS_FILTER AS (
     FROM Classificationpersonview CPV
     WHERE CPV.classificationpathid IN (17,21,43,50)
       AND CPV.enddate IS NULL
+)
+INSERT INTO ssd_development.ssd_person (
+    pers_legacy_id,
+    pers_person_id,
+    pers_upn,
+    pers_forename,
+    pers_surname,
+    pers_sex,
+    pers_gender,
+    pers_ethnicity,
+    pers_dob,
+    pers_single_unique_id,
+    pers_upn_unknown,
+    pers_send_flag,
+    pers_expected_dob,
+    pers_death_date,
+    pers_is_mother,
+    pers_nationality
 )
 SELECT DISTINCT
     CONVERT(NVARCHAR(48), P.CAREFIRSTID)  AS pers_legacy_id,        -- PERS014A
@@ -316,4 +317,3 @@ WHERE
         NOT EXISTS (SELECT 1 FROM @allowed_persons)
         OR CONVERT(NVARCHAR(48), P.PERSONID) IN (SELECT personid FROM @allowed_persons)
     );
-
