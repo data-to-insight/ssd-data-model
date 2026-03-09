@@ -60,6 +60,7 @@ VALUES
 
 
 /* META-ELEMENT: {"type": "insert_data"} */
+/* META-ELEMENT: {"type": "insert_data"} */
 ;WITH EXCLUSIONS AS (
     SELECT CONVERT(NVARCHAR(48), PV.PERSONID) AS PERSONID
     FROM [eclipseDelta].[dbo].[PERSONVIEW] PV
@@ -273,11 +274,12 @@ SELECT DISTINCT
 
     P.DIEDDATE                            AS pers_death_date,      -- PERS010A
 
-    NULL                                   AS pers_is_mother,       -- PERS011A
+    'N'                                   AS pers_is_mother,       -- PERS011A
 
     CONVERT(NVARCHAR(48), P.COUNTRYOFBIRTHCODE) AS pers_nationality -- PERS012A
 
-FROM [eclipseDelta].[dbo].[PERSONDEMOGRAPHICSVIEW] P
+-- FROM [eclipseDelta].[dbo].[PERSONDEMOGRAPHICSVIEW] P
+FROM [eclipseDelta].[dbo].[PERSONVIEW] P
 INNER JOIN CLASS_FILTER CF
     ON CF.PERSONID = CONVERT(NVARCHAR(48), P.PERSONID)
 
