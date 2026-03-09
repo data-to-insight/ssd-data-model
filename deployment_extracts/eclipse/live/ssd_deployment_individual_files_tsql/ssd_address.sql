@@ -18,15 +18,15 @@
 /* META-ELEMENT: {"type": "drop_table"} */
 IF OBJECT_ID('tempdb..#ssd_address', 'U') IS NOT NULL DROP TABLE #ssd_address;
 
-IF OBJECT_ID('ssd_development.ssd_address', 'U') IS NOT NULL
+IF OBJECT_ID('ssd_address', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM ssd_development.ssd_address)
-        TRUNCATE TABLE ssd_development.ssd_address;
+    IF EXISTS (SELECT 1 FROM ssd_address)
+        TRUNCATE TABLE ssd_address;
 END
 ELSE
 BEGIN
     /* META-ELEMENT: {"type": "create_table"} */
-    CREATE TABLE ssd_development.ssd_address (
+    CREATE TABLE ssd_address (
         addr_table_id           NVARCHAR(48)  NOT NULL PRIMARY KEY,  -- metadata={"item_ref":"ADDR007A"}
         addr_person_id          NVARCHAR(48)  NULL,                  -- metadata={"item_ref":"ADDR002A"}
         addr_address_type       NVARCHAR(48)  NULL,                  -- metadata={"item_ref":"ADDR003A"}
@@ -42,14 +42,14 @@ END
 ;WITH EXCLUSIONS AS (
     SELECT
         PV.PERSONID
-    FROM PERSONVIEW PV
+    FROM [eclipseDelta].[dbo].[PERSONVIEW] PV
     WHERE
         PV.PERSONID IN (1,2,3,4,5,6) -- hard filter admin,test,duplicate records on system
         OR ISNULL(PV.DUPLICATED, '?') IN ('DUPLICATE')
         OR UPPER(PV.FORENAME) LIKE '%DUPLICATE%'
         OR UPPER(PV.SURNAME)  LIKE '%DUPLICATE%'
 )
-INSERT INTO ssd_development.ssd_address (
+INSERT INTO ssd_address (
     addr_table_id,
     addr_person_id,
     addr_address_type,
@@ -85,7 +85,7 @@ SELECT
         + '"NORTHING":""'
         + '}'
     ) AS addr_address_json                                                -- metadata={"item_ref":"ADDR001A"}
-FROM ADDRESSPERSONVIEW PERSADDRESS
+FROM [eclipseDelta].[dbo].[ADDRESSPERSONVIEW] PERSADDRESS
 WHERE NOT EXISTS (
     SELECT 1
     FROM EXCLUSIONS E
