@@ -1,3 +1,4 @@
+
 -- META-CONTAINER: {"type": "table", "name": "ssd_person"}
 -- =============================================================================
 -- Description: Person/child details. 
@@ -56,7 +57,6 @@ DECLARE @allowed_persons TABLE (personid NVARCHAR(48) NOT NULL PRIMARY KEY);
 INSERT INTO @allowed_persons (personid)
 VALUES
     (N'EG111111'), (N'EG222222'), (N'EG333333');  -- swap to live record IDs, or delete these rows to disable filtering
-
 
 
 /* META-ELEMENT: {"type": "insert_data"} */
@@ -143,21 +143,21 @@ VALUES
 --     WHERE UPPER(CG.CODE) = 'ASY_STAT'
 --       AND CLA.ID = 423
 -- ),
-MOTHER AS (
-    SELECT DISTINCT
-        CONVERT(NVARCHAR(48), PV2.PERSONID) AS PERSONID
-    FROM [eclipseDelta].[dbo].[PERSONDEMOGRAPHICSVIEW] PV
-    INNER JOIN PERSON_PER_RELATIONSHIP PPR
-        ON (PV.PERSONID = PPR.ROLE_A_PERSON_FK OR PV.PERSONID = PPR.ROLE_B_PERSON_FK)
-    INNER JOIN PERSONVIEW PV2
-        ON (PPR.ROLE_B_PERSON_FK = PV2.PERSONID OR PPR.ROLE_A_PERSON_FK = PV2.PERSONID)
-    INNER JOIN RELATIONSHIP_TYPE RT
-        ON PPR.PERSON_PER_REL_TYPE_FK = RT.ID
-       AND RT.ID IN (17)
-    WHERE PV.PERSONID <> ISNULL(PV2.PERSONID, 0)
-      AND ISNULL(PV.DATEOFBIRTH, CAST(GETDATE() AS DATE)) >= PV2.DATEOFBIRTH
-      AND PV2.GENDER = 'Female'
-),
+-- MOTHER AS (
+--     SELECT DISTINCT
+--         CONVERT(NVARCHAR(48), PV2.PERSONID) AS PERSONID
+--     FROM [eclipseDelta].[dbo].[PERSONDEMOGRAPHICSVIEW] PV
+--     INNER JOIN PERSON_PER_RELATIONSHIP PPR
+--         ON (PV.PERSONID = PPR.ROLE_A_PERSON_FK OR PV.PERSONID = PPR.ROLE_B_PERSON_FK)
+--     INNER JOIN PERSONVIEW PV2
+--         ON (PPR.ROLE_B_PERSON_FK = PV2.PERSONID OR PPR.ROLE_A_PERSON_FK = PV2.PERSONID)
+--     INNER JOIN RELATIONSHIP_TYPE RT
+--         ON PPR.PERSON_PER_REL_TYPE_FK = RT.ID
+--        AND RT.ID IN (17)
+--     WHERE PV.PERSONID <> ISNULL(PV2.PERSONID, 0)
+--       AND ISNULL(PV.DATEOFBIRTH, CAST(GETDATE() AS DATE)) >= PV2.DATEOFBIRTH
+--       AND PV2.GENDER = 'Female'
+-- ),
 CLASS_FILTER AS (
     SELECT DISTINCT
         CONVERT(NVARCHAR(48), CPV.PERSONID) AS PERSONID
@@ -273,19 +273,13 @@ SELECT DISTINCT
 
     P.DIEDDATE                            AS pers_death_date,      -- PERS010A
 
-    CASE
-        WHEN M.PERSONID IS NOT NULL THEN 'Y'
-        ELSE 'N'
-    END                                   AS pers_is_mother,       -- PERS011A
+    NULL                                   AS pers_is_mother,       -- PERS011A
 
     CONVERT(NVARCHAR(48), P.COUNTRYOFBIRTHCODE) AS pers_nationality -- PERS012A
 
 FROM [eclipseDelta].[dbo].[PERSONDEMOGRAPHICSVIEW] P
 INNER JOIN CLASS_FILTER CF
     ON CF.PERSONID = CONVERT(NVARCHAR(48), P.PERSONID)
-
-LEFT JOIN MOTHER M
-    ON M.PERSONID = CONVERT(NVARCHAR(48), P.PERSONID)
 
 WHERE
     NOT EXISTS (
