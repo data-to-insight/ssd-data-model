@@ -1,3 +1,63 @@
+-- META-CONTAINER: {"type": "table", "name": "ssd_person"}
+-- =============================================================================
+-- Description: Person/child details. 
+-- Author: D2I
+-- Version: 0.2 Fixed run order and ; use 
+--          0.1: new RH
+-- Status: [D]ev
+-- Remarks: [EA_API_PRIORITY_TABLE]
+
+-- Dependencies:
+-- - PERSONVIEW
+-- - PERSONDEMOGRAPHICSVIEW
+-- - REFERENCENUMBERPERSONVIEW
+-- - CLASSIFICATION, CLASSIFICATION_GROUP, CLASSIFICATION_ASSIGNMENT
+-- - SUBJECT_CLASSIFICATION_ASSIGNM, PERSON_CLASSIFICATION_ASSIGNME
+-- - PERSON_PER_RELATIONSHIP, RELATIONSHIP_TYPE
+-- =============================================================================
+
+
+/* META-ELEMENT: {"type": "drop_table"} */
+IF OBJECT_ID('tempdb..#ssd_person', 'U') IS NOT NULL DROP TABLE #ssd_person;
+
+IF OBJECT_ID('ssd_person', 'U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_person)
+        TRUNCATE TABLE ssd_person;
+END
+ELSE
+BEGIN
+    /* META-ELEMENT: {"type": "create_table"} */
+    CREATE TABLE ssd_person (
+        pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A", "info": "Legacy systems identifier. Common to SystemC"}
+        pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}
+        pers_upn                NVARCHAR(13),               -- metadata={"item_ref":"PERS006A"}
+        pers_forename           NVARCHAR(100),              -- metadata={"item_ref":"PERS015A"}
+        pers_surname            NVARCHAR(255),              -- metadata={"item_ref":"PERS016A"}
+        pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A"}
+        pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A"}
+        pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"}
+        pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"}
+        pers_single_unique_id   NVARCHAR(48),               -- metadata={"item_ref":"PERS013A"}
+        pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A"}
+        pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A"}
+        pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}
+        pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"}
+        pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
+        pers_nationality        NVARCHAR(48)                -- metadata={"item_ref":"PERS012A"}
+    );
+END
+
+
+/* Cohort filter list, optional
+   Replace placeholders with real IDs, adjust type if PERSONID is numeric on your system
+*/
+DECLARE @allowed_persons TABLE (personid NVARCHAR(48) NOT NULL PRIMARY KEY);
+INSERT INTO @allowed_persons (personid)
+VALUES
+    (N'EG111111'), (N'EG222222'), (N'EG333333');  -- swap to live record IDs, or delete these rows to disable filtering
+
+
 /* META-ELEMENT: {"type": "insert_data"} */
 ;WITH EXCLUSIONS AS (
     SELECT CONVERT(NVARCHAR(48), PV.PERSONID) AS PERSONID
@@ -125,7 +185,7 @@ INSERT INTO ssd_person (
 SELECT DISTINCT
     CONVERT(NVARCHAR(48), P.CAREFIRSTID)  AS pers_legacy_id,        -- PERS014A
     CONVERT(NVARCHAR(48), P.PERSONID)     AS pers_person_id,        -- PERS001A
-    NULL                                  AS pers_upn,              -- PERS006A
+    CONVERT(NVARCHAR(13), U.UPN)          AS pers_upn,              -- PERS006A
     CONVERT(NVARCHAR(100), P.FORENAME)    AS pers_forename,         -- PERS015A
     CONVERT(NVARCHAR(255), P.SURNAME)     AS pers_surname,          -- PERS016A
 
@@ -188,20 +248,25 @@ SELECT DISTINCT
 
     CONVERT(NVARCHAR(48), P.NHSNUMBER)    AS pers_single_unique_id, -- PERS013A
 
-    CASE
-        WHEN P.DATEOFBIRTH IS NOT NULL
-             AND (
-                 DATEDIFF(YEAR, P.DATEOFBIRTH, COALESCE(P.DIEDDATE, SYSDATETIME()))
-                 - CASE
-                       WHEN DATEADD(YEAR, DATEDIFF(YEAR, P.DATEOFBIRTH, COALESCE(P.DIEDDATE, SYSDATETIME())), P.DATEOFBIRTH)
-                            > COALESCE(P.DIEDDATE, SYSDATETIME())
-                           THEN 1
-                       ELSE 0
-                   END
-             ) < 5
-            THEN 'UN1'
-        ELSE NULL
-    END                                   AS pers_upn_unknown,     -- PERS007A
+    COALESCE(
+        U.UPN,
+        UU.UN_UPN,
+        CASE
+            WHEN P.DATEOFBIRTH IS NOT NULL
+                 AND (
+                     DATEDIFF(YEAR, P.DATEOFBIRTH, COALESCE(P.DIEDDATE, SYSDATETIME()))
+                     - CASE
+                           WHEN DATEADD(YEAR, DATEDIFF(YEAR, P.DATEOFBIRTH, COALESCE(P.DIEDDATE, SYSDATETIME())), P.DATEOFBIRTH)
+                                > COALESCE(P.DIEDDATE, SYSDATETIME())
+                               THEN 1
+                           ELSE 0
+                       END
+                 ) < 5
+                THEN 'UN1'
+            WHEN UASCPERSON.PERSONID IS NOT NULL
+                THEN 'UN2'
+        END
+    )                                     AS pers_upn_unknown,     -- PERS007A
 
     NULL                                  AS pers_send_flag,       -- PERS008A
 
@@ -222,6 +287,22 @@ SELECT DISTINCT
 FROM [eclipseDelta].[dbo].[PERSONDEMOGRAPHICSVIEW] P
 INNER JOIN CLASS_FILTER CF
     ON CF.PERSONID = CONVERT(NVARCHAR(48), P.PERSONID)
+
+LEFT JOIN UPN U
+    ON U.PERSONID = CONVERT(NVARCHAR(48), P.PERSONID)
+   AND U.RN = 1
+
+LEFT JOIN UN_UPN UU
+    ON UU.PERSONID = CONVERT(NVARCHAR(48), P.PERSONID)
+
+LEFT JOIN (
+    SELECT PERSONID
+    FROM UASC
+    WHERE RN = 1
+      AND COALESCE(END_DATE, CAST(GETDATE() AS DATE)) >= CAST(GETDATE() AS DATE)
+      AND START_DATE <= CAST(GETDATE() AS DATE)
+) UASCPERSON
+    ON UASCPERSON.PERSONID = CONVERT(NVARCHAR(48), P.PERSONID)
 
 LEFT JOIN MOTHER M
     ON M.PERSONID = CONVERT(NVARCHAR(48), P.PERSONID)
