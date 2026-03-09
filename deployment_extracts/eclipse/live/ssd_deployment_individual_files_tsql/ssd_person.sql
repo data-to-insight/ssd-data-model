@@ -1,3 +1,64 @@
+-- META-CONTAINER: {"type": "table", "name": "ssd_person"}
+-- =============================================================================
+-- Description: Person/child details. 
+-- Author: D2I
+-- Version: 0.2 Fixed run order and ; use 
+--          0.1: new RH
+-- Status: [D]ev
+-- Remarks: [EA_API_PRIORITY_TABLE]
+
+-- Dependencies:
+-- - PERSONVIEW
+-- - PERSONDEMOGRAPHICSVIEW
+-- - REFERENCENUMBERPERSONVIEW
+-- - CLASSIFICATION, CLASSIFICATION_GROUP, CLASSIFICATION_ASSIGNMENT
+-- - SUBJECT_CLASSIFICATION_ASSIGNM, PERSON_CLASSIFICATION_ASSIGNME
+-- - PERSON_PER_RELATIONSHIP, RELATIONSHIP_TYPE
+-- =============================================================================
+
+
+/* META-ELEMENT: {"type": "drop_table"} */
+IF OBJECT_ID('tempdb..#ssd_person', 'U') IS NOT NULL DROP TABLE #ssd_person;
+
+IF OBJECT_ID('ssd_person', 'U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM ssd_person)
+        TRUNCATE TABLE ssd_person;
+END
+ELSE
+BEGIN
+    /* META-ELEMENT: {"type": "create_table"} */
+    CREATE TABLE ssd_person (
+        pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A", "info": "Legacy systems identifier. Common to SystemC"}
+        pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}
+        pers_upn                NVARCHAR(13),               -- metadata={"item_ref":"PERS006A"}
+        pers_forename           NVARCHAR(100),              -- metadata={"item_ref":"PERS015A"}
+        pers_surname            NVARCHAR(255),              -- metadata={"item_ref":"PERS016A"}
+        pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A"}
+        pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A"}
+        pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"}
+        pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"}
+        pers_single_unique_id   NVARCHAR(48),               -- metadata={"item_ref":"PERS013A"}
+        pers_upn_unknown        NVARCHAR(6),                -- metadata={"item_ref":"PERS007A"}
+        pers_send_flag          NCHAR(5),                   -- metadata={"item_ref":"PERS008A"}
+        pers_expected_dob       DATETIME,                   -- metadata={"item_ref":"PERS009A"}
+        pers_death_date         DATETIME,                   -- metadata={"item_ref":"PERS010A"}
+        pers_is_mother          NCHAR(1),                   -- metadata={"item_ref":"PERS011A"}
+        pers_nationality        NVARCHAR(48)                -- metadata={"item_ref":"PERS012A"}
+    );
+END
+
+
+/* Cohort filter list, optional
+   Replace placeholders with real IDs, adjust type if PERSONID is numeric on your system
+*/
+DECLARE @allowed_persons TABLE (personid NVARCHAR(48) NOT NULL PRIMARY KEY);
+INSERT INTO @allowed_persons (personid)
+VALUES
+    (N'EG111111'), (N'EG222222'), (N'EG333333');  -- swap to live record IDs, or delete these rows to disable filtering
+
+
+
 /* META-ELEMENT: {"type": "insert_data"} */
 ;WITH EXCLUSIONS AS (
     SELECT CONVERT(NVARCHAR(48), PV.PERSONID) AS PERSONID
