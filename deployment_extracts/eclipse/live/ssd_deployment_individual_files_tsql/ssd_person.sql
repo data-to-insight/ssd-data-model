@@ -35,8 +35,8 @@ BEGIN
         pers_upn                NVARCHAR(13),               -- metadata={"item_ref":"PERS006A"}
         pers_forename           NVARCHAR(100),              -- metadata={"item_ref":"PERS015A"}
         pers_surname            NVARCHAR(255),              -- metadata={"item_ref":"PERS016A"}
-        pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A"}
-        pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A"}
+        pers_sex                NVARCHAR(20),               -- metadata={"item_ref":"PERS002A", "info": "Eclipse: SEX==GENDER==SEX"}
+        pers_gender             NVARCHAR(10),               -- metadata={"item_ref":"PERS003A", "info": "Eclipse: GENDER==SEX==GENDER"}
         pers_ethnicity          NVARCHAR(48),               -- metadata={"item_ref":"PERS004A"}
         pers_dob                DATETIME,                   -- metadata={"item_ref":"PERS005A"}
         pers_single_unique_id   NVARCHAR(48),               -- metadata={"item_ref":"PERS013A"}
@@ -192,8 +192,8 @@ SELECT DISTINCT
     CONVERT(NVARCHAR(255), P.SURNAME)     AS pers_surname,          -- PERS016A
 
     CASE
-        WHEN P.SEX = 'Male'   THEN 'M'
-        WHEN P.SEX = 'Female' THEN 'F'
+        WHEN P.GENDER = 'Male'   THEN 'M'
+        WHEN P.GENDER = 'Female' THEN 'F'
         ELSE 'U'
     END                                   AS pers_sex,             -- PERS002A
 
