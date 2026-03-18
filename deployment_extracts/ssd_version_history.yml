@@ -15,9 +15,11 @@ releases:
       ssd_care_leavers.sql (InvolvementHistoryCTE)
       ssd_cla_episodes.sql (outer apply getting MAX(cn.EVENT_DTTM) AS clae_cla_last_iro_contact_date)
       ssd_cla_previous_permanence.sql (using ELSE '' and removed COALESCE on MAX CASE blocks all)
+      duplication of DECLARE vars within ssd_vw_current_time_windows to enable GO
 
     impact_description: >
       to provide increased|robust null handling in tables flagged by LAs as diplaying common warnings in SSD build
+      to address issue of unavaiable timeframe var within newly added ssd_vw_current_time_windows 
     impacts_cms_deployment:
       - "systemc"
 
