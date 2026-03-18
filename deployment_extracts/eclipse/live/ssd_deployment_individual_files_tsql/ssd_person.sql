@@ -50,13 +50,13 @@ BEGIN
 END
 
 
-/* Cohort filter list, optional
-   Replace placeholders with real IDs, adjust type if PERSONID is numeric on your system
-*/
-DECLARE @allowed_persons TABLE (personid NVARCHAR(48) NOT NULL PRIMARY KEY);
-INSERT INTO @allowed_persons (personid)
-VALUES
-    (N'EG111111'), (N'EG222222'), (N'EG333333');  -- swap to live record IDs, or delete these rows to disable filtering
+-- /* Cohort filter list, optional
+--    Replace placeholders with real IDs, adjust type if PERSONID is numeric on your system
+-- */
+-- DECLARE @allowed_persons TABLE (personid NVARCHAR(48) NOT NULL PRIMARY KEY);
+-- INSERT INTO @allowed_persons (personid)
+-- VALUES
+--     (N'EG111111'), (N'EG222222'), (N'EG333333');  -- swap to live record IDs, or delete these rows to disable filtering
 
 
 /* META-ELEMENT: {"type": "insert_data"} */
@@ -289,7 +289,8 @@ WHERE
         FROM EXCLUSIONS E
         WHERE E.PERSONID = CONVERT(NVARCHAR(48), P.PERSONID)
     )
-    AND (
-        NOT EXISTS (SELECT 1 FROM @allowed_persons)
-        OR CONVERT(NVARCHAR(48), P.PERSONID) IN (SELECT personid FROM @allowed_persons)
-    );
+    -- AND (
+    --     NOT EXISTS (SELECT 1 FROM @allowed_persons)
+    --     OR CONVERT(NVARCHAR(48), P.PERSONID) IN (SELECT personid FROM @allowed_persons)
+    -- )
+    ;
