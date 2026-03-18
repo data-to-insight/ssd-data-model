@@ -209,12 +209,18 @@ SET @StartTime = GETDATE(); -- Script start time
 -- Version: 0.1
 -- Status: [D]ev
 -- Remarks: [EA_API_PRIORITY_TABLE]
---          This is an in DEvelopment inclusion for the SSD and as such is being phased in. 
---          Added here for both visibility and LA feedback, but not yet fully integrated. 
---          The table set to replace declarations within: META-ELEMENT: {"type": "ssd_timeframe"}
+--          This is an in-DEvelopment inclusion for the SSD and as such is being phased in. 
+--          Added here for both visibility and LA feedback, but --not yet fully integrated--. 
+--          The table expected to replace declarations within: META-ELEMENT: {"type": "ssd_timeframe"}
 -- Dependencies:
 -- 
 -- =============================================================================
+
+
+-- these specific to the dim_dates set up & not used elsewhere
+DECLARE @StartDate date = '2015-01-01';
+DECLARE @EndDate   date = CONVERT(date, GETDATE());  -- end at today
+
 
 
 IF OBJECT_ID('ssd_development.ssd_dim_date', 'U') IS NOT NULL
@@ -256,9 +262,6 @@ CREATE TABLE ssd_development.ssd_dim_date
     CONSTRAINT UQ_ssd_dim_date_full_date UNIQUE (full_date)
 );
 
-
-DECLARE @StartDate date = '2015-01-01';
-DECLARE @EndDate   date = CONVERT(date, GETDATE());  -- end at today
 
 ;WITH N AS
 (
@@ -6978,7 +6981,7 @@ PRINT 'Run time duration: '
 -- =============================================================================
 
 /* GO - remove in Proc based deployment */
-GO
+-- GO
 
 CREATE OR ALTER VIEW ssd_development.ssd_vw_current_time_windows
 AS
@@ -7025,7 +7028,7 @@ CROSS APPLY
 
 
 /* GO - remove in Proc based deployment */
-GO
+--GO
 select * from ssd_development.ssd_vw_current_time_windows;
 
 -- META-END
