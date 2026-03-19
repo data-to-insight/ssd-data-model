@@ -6983,12 +6983,6 @@ PRINT 'Run time duration: '
 /* GO - remove in Proc based deployment */
 GO
 
--- replicated here in case above use of GO required
--- Core SSD timeframe parameter
-DECLARE @ssd_timeframe_years INT = 6;   -- ssd extract time-frame (YRS)
-DECLARE @ssd_sub1_range_years INT = 1;  -- ssd sub-window internal or additional LA use
-
-
 CREATE OR ALTER VIEW ssd_development.ssd_vw_current_time_windows
 AS
 WITH x AS
