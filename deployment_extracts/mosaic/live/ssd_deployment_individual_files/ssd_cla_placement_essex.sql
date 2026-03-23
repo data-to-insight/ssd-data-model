@@ -7,7 +7,8 @@ select
 	cla.OFSTED_URN clap_cla_placement_urn,
 	cla.DISTANCE_FROM_HOME clap_cla_placement_distance,
 	cla.period_of_care_id clap_cla_id,
-	cla.PLACEMENT_COUNTY clap_cla_placement_la,
+	CAST(NULL AS VARCHAR(48)) AS clap_person_id,
+	cla.PLACEMENT_COUNTY clap_cla_placement_la, -- [REVIEW] believed incorrect field name or invalid field [RH]
 	cla.PROVIDER_NAME clap_cla_placement_provider, 
 	cla.PLACEMENT_POSTCODE clap_cla_placement_postcode,
 	cla.PLACEMENT_END clap_cla_placement_end_date,

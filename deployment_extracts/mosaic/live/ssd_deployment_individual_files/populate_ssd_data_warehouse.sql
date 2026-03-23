@@ -2218,6 +2218,7 @@ Dependencies:
 			clap_cla_placement_urn				varchar(48),
 			clap_cla_placement_distance			decimal(7,2),
 			clap_cla_id							varchar(48),
+			clap_person_id						varchar(48),
 			clap_cla_placement_provider			varchar(48),
 			clap_cla_placement_postcode			varchar(8),
 			clap_cla_placement_end_date			datetime,
@@ -2231,6 +2232,7 @@ Dependencies:
 			clap_cla_placement_urn,
 			clap_cla_placement_distance,
 			clap_cla_id,
+			clap_person_id,
 			clap_cla_placement_provider,
 			clap_cla_placement_postcode,
 			clap_cla_placement_end_date,
@@ -2271,6 +2273,7 @@ Dependencies:
 			) clap_cla_placement_urn,
 			null clap_cla_placement_distance,
 			pla.PERIOD_OF_CARE_ID clap_cla_id,
+			CAST(NULL AS VARCHAR(48)) AS clap_person_id,
 			(
 				select
 					max(pld.CIN_PROVIDER_CATEGORY_CODE)

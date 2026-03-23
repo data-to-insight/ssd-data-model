@@ -3,7 +3,7 @@ select
 	-- null clap_ cla_ episode_ id, --a placement can fall in multiple CLA episodes.  Should this be period of care id? -- [REVIEW] depreciated
 	pla.START_DATE clap_cla_placement_start_date,
 	pla.PLACEMENT_TYPE clap_cla_placement_type,
-	pla.split_number,
+	pla.split_number, -- keep only if not inserting directly to ##ssd_cla_placement
 	(
 		select
 			max(pld.OFSTED_URN)
