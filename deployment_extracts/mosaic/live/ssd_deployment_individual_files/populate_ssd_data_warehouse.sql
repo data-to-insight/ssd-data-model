@@ -1700,18 +1700,21 @@ Dependencies:
 		create table ##ssd_cla_convictions (
 			clac_cla_conviction_id			varchar(48),
 			clac_person_id					varchar(48),
-			clac_cla_conviction_date		datetime
+			clac_cla_conviction_date		datetime,
+			clac_cla_conviction_offence 	varchar(1000) -- D2I omitted specification field added but source tbc/NULL
 		)
 		--
 		insert into ##ssd_cla_convictions (
 			clac_cla_conviction_id,
 			clac_person_id,
-			clac_cla_conviction_date
+			clac_cla_conviction_date,
+			clac_cla_conviction_offence 
 		)
 		select
 			o.offence_id clac_cla_conviction_id,
 			o.person_id clac_person_id,
-			dbo.no_time(o.offence_date) clac_cla_conviction_date
+			dbo.no_time(o.offence_date) clac_cla_conviction_date,
+			CAST(NULL AS VARCHAR(1000)) AS clac_cla_conviction_offence
 		from 
 			dm_offences o
 		where 
