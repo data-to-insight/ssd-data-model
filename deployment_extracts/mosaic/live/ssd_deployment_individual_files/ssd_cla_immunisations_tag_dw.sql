@@ -72,7 +72,9 @@ where
 --
 select 
 	sub.clai_person_id,
-	sub.clai_immunisations_status
+	sub.clai_immunisations_status,
+    CAST(NULL AS DATETIME) AS clai_immunisations_status_date
+
 from 
 	(
 	select 

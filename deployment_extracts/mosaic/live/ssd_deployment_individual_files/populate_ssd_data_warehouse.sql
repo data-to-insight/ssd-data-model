@@ -1524,9 +1524,8 @@ Dependencies:
 		create table ##ssd_cla_immunisations (
 			--clai_table_id					varchar(48), -- [REVIEW] re-purposed from -- clai_immunisations_id
 			clai_person_id					varchar(48),
-			clai_immunisations_status		varchar(1)
-			-- clai_immunisations_status_date datetime -- [REVIEW] is currently missing added here for ref
-		)
+			clai_immunisations_status		varchar(1),
+			clai_immunisations_status_date 	datetime -- D2I omitted specification field added but source tbc/NULL
 		--
 		declare @immunisation_workflow_step_types table (
 			workflow_step_type_id	numeric(9),
@@ -1599,12 +1598,14 @@ Dependencies:
 		insert into ##ssd_cla_immunisations (
 			--clai_table_id, -- [REVIEW] depreciated 310524 re-purposed from -- clai_immunisations_id
 			clai_person_id,
-			clai_immunisations_status
+			clai_immunisations_status,
+    		clai_immunisations_status_date
 		)
 		select 
     		--sub.clai_table_id, -- [REVIEW] depreciated 310524 re-purposed from -- clai_immunisations_id
 			sub.clai_person_id,
-			sub.clai_immunisations_status
+			sub.clai_immunisations_status,
+			CAST(NULL AS DATETIME) AS clai_immunisations_status_date
 		from 
 			(
 			select 
