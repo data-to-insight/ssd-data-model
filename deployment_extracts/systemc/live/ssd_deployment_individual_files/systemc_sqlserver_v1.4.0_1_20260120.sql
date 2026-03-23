@@ -721,7 +721,8 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: Test deployment to avoid EXISTS hits on ssd_person + enable source checks 
 -- Author: D2I
--- Version: 1.0
+-- Version: 1.1
+--          1.0 Address aggregation warnings from LA feedback 23/03/26 RH
 --          
 -- Status: [D]ev
 -- Remarks: This is an in-dev table in order to better optimise the process of getting SSD cohort 
@@ -790,8 +791,10 @@ DECLARE @tpl nvarchar(max) = N'
 ;WITH contacts AS (
   SELECT
     TRY_CONVERT(nvarchar(48), c.DIM_PERSON_ID) AS dim_person_id,
-    MAX(TRY_CONVERT(datetime, c.CONTACT_DTTM)) AS last_contact_dttm,
-    MIN(TRY_CONVERT(datetime, c.CONTACT_DTTM)) AS first_contact_dttm
+    MAX(CASE WHEN TRY_CONVERT(datetime, c.CONTACT_DTTM) IS NOT NULL 
+             THEN TRY_CONVERT(datetime, c.CONTACT_DTTM) END) AS last_contact_dttm,
+    MIN(CASE WHEN TRY_CONVERT(datetime, c.CONTACT_DTTM) IS NOT NULL 
+             THEN TRY_CONVERT(datetime, c.CONTACT_DTTM) END) AS first_contact_dttm
   FROM __SRC__FACT_CONTACTS AS c
   WHERE (@ssd_timeframe_years IS NULL
          OR c.CONTACT_DTTM >= DATEADD(year, -@ssd_timeframe_years, CONVERT(datetime, CONVERT(date, GETDATE()))))
@@ -812,8 +815,10 @@ clients AS (
 refs AS (
   SELECT
     TRY_CONVERT(nvarchar(48), r.DIM_PERSON_ID) AS dim_person_id,
-    MAX(TRY_CONVERT(datetime, r.REFRL_START_DTTM)) AS last_ref_dttm,
-    MIN(TRY_CONVERT(datetime, r.REFRL_START_DTTM)) AS first_ref_dttm
+    MAX(CASE WHEN TRY_CONVERT(datetime, r.REFRL_START_DTTM) IS NOT NULL 
+             THEN TRY_CONVERT(datetime, r.REFRL_START_DTTM) END) AS last_ref_dttm,
+    MIN(CASE WHEN TRY_CONVERT(datetime, r.REFRL_START_DTTM) IS NOT NULL 
+             THEN TRY_CONVERT(datetime, r.REFRL_START_DTTM) END) AS first_ref_dttm
   FROM __SRC__FACT_REFERRALS r
   WHERE r.DIM_PERSON_ID <> -1
     AND (
@@ -839,9 +844,10 @@ involvements AS (
   SELECT DISTINCT TRY_CONVERT(nvarchar(48), i.DIM_PERSON_ID) AS dim_person_id
   FROM __SRC__FACT_INVOLVEMENTS i
   WHERE i.DIM_PERSON_ID <> -1
-    AND (i.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE ''KA%'' 
-         OR i.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL
-         OR i.IS_ALLOCATED_CW_FLAG = ''Y'')
+    AND (
+         (i.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL AND i.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE ''KA%'')
+      OR i.IS_ALLOCATED_CW_FLAG = ''Y''
+    )
     AND i.DIM_WORKER_ID <> ''-1''
     AND (i.END_DTTM IS NULL OR i.END_DTTM > GETDATE())
 ),
@@ -877,7 +883,7 @@ INSERT ssd_development.ssd_cohort(
 )
 SELECT
   r.dim_person_id,
-  MAX(dp.LEGACY_ID) AS legacy_id,
+  MAX(CASE WHEN dp.LEGACY_ID IS NOT NULL THEN dp.LEGACY_ID END) AS legacy_id,
   r.has_contact, r.has_referral, r.has_903, r.is_care_leaver, r.has_eligibility,
   r.has_client_flag, r.has_involvement,        
   r.first_activity_dttm, r.last_activity_dttm
@@ -885,22 +891,21 @@ FROM rollup AS r
 LEFT JOIN __SRC__DIM_PERSON AS dp
   ON dp.DIM_PERSON_ID = TRY_CONVERT(int, r.dim_person_id)
 GROUP BY r.dim_person_id, r.has_contact, r.has_referral, r.has_903, r.is_care_leaver,
-         r.has_eligibility, r.has_client_flag, r.has_involvement,  -- <<< keep in GROUP BY too
+         r.has_eligibility, r.has_client_flag, r.has_involvement,
          r.first_activity_dttm, r.last_activity_dttm;
 ';
 
 /* Swap in 3-part prefix once */
 DECLARE @sql nvarchar(max) = REPLACE(@tpl, N'__SRC__', @src3);
 
--- Optional: inspect generated SQL around contacts CTE if needed
--- PRINT LEFT(@sql, 2000);
-
-
+/* Execute */
 -- passing just scalar needed
 EXEC sp_executesql
     @sql,
     N'@ssd_timeframe_years int',
     @ssd_timeframe_years = @ssd_timeframe_years;
+
+
 
 -- -- META-ELEMENT: {"type": "create_idx"}
 -- CREATE INDEX IX_ssd_cohort_has_referral ON ssd_development.ssd_cohort(dim_person_id) WHERE has_referral = 1;
@@ -1645,16 +1650,14 @@ BEGIN
         cine_cin_primary_need_code      NVARCHAR(3),    -- metadata={"item_ref":"CINE010A", "info":"Expecting codes N0-N9"} 
         cine_referral_source_code       NVARCHAR(48),   -- metadata={"item_ref":"CINE004A"}  
         cine_referral_source_desc       NVARCHAR(255),  -- metadata={"item_ref":"CINE012A"}
-        cine_referral_outcome_json      NVARCHAR(4000), -- metadata={"item_ref":"CINE005A"}
+        cine_referral_outcome_json      NVARCHAR(4000),  -- metadata={"item_ref":"CINE005A"}
         cine_referral_nfa               NCHAR(1),       -- metadata={"item_ref":"CINE011A", "info":"Consider for conversion to Bool"}
         cine_close_reason               NVARCHAR(100),  -- metadata={"item_ref":"CINE006A"}
         cine_close_date                 DATETIME,       -- metadata={"item_ref":"CINE007A"}
         cine_referral_team              NVARCHAR(48),   -- metadata={"item_ref":"CINE008A"}
-        cine_referral_worker_id         NVARCHAR(100),  -- metadata={"item_ref":"CINE009A"}
+        cine_referral_worker_id         NVARCHAR(48),   -- metadata={"item_ref":"CINE009A"}
     );
 END
-
-
 
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cin_episodes
@@ -1672,110 +1675,133 @@ INSERT INTO ssd_development.ssd_cin_episodes
     cine_referral_team,
     cine_referral_worker_id
 )
-   
+
 -- #LEGACY-PRE2016
 -- SQL compatible versions <2016
 SELECT
-    fr.FACT_REFERRAL_ID,
-    fr.DIM_PERSON_ID,
-    fr.REFRL_START_DTTM,
-    fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE,
-    fr.DIM_LOOKUP_CONT_SORC_ID,
-    fr.DIM_LOOKUP_CONT_SORC_ID_DESC, -- 2
+    LEFT(TRY_CONVERT(nvarchar(200), fr.FACT_REFERRAL_ID), 48),
+    LEFT(TRY_CONVERT(nvarchar(200), fr.DIM_PERSON_ID), 48),
+    TRY_CONVERT(datetime, fr.REFRL_START_DTTM),
+    LEFT(TRY_CONVERT(nvarchar(50), fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE), 3),
+    LEFT(TRY_CONVERT(nvarchar(200), fr.DIM_LOOKUP_CONT_SORC_ID), 48),
+    LEFT(TRY_CONVERT(nvarchar(max), fr.DIM_LOOKUP_CONT_SORC_ID_DESC), 255),  -- 2
     (
         -- Manual JSON-like concatenation for cine_referral_outcome_json
-        '{' +
-        '"SINGLE_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
-        -- '"NFA_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' + -- Uncomment if needed
-        '"STRATEGY_DISCUSSION_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG AS NVARCHAR(3)), '') + '", ' +
-        '"CLA_REQUEST_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CLA_REQUEST_FLAG AS NVARCHAR(3)), '') + '", ' +
-        '"NON_AGENCY_ADOPTION_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG AS NVARCHAR(3)), '') + '", ' +
-        '"PRIVATE_FOSTERING_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '') + '", ' +
-        '"CP_TRANSFER_IN_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CP_TRANSFER_IN_FLAG AS NVARCHAR(3)), '') + '", ' +
-        '"CP_CONFERENCE_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CP_CONFERENCE_FLAG AS NVARCHAR(3)), '') + '", ' +
-        '"CARE_LEAVER_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CARE_LEAVER_FLAG AS NVARCHAR(3)), '') + '", ' +
-        '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fr.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
-        '"NUMBER_OF_OUTCOMES": ' + 
-            ISNULL(TRY_CAST(CASE 
-                WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL
-                ELSE fr.TOTAL_NO_OF_OUTCOMES 
-            END AS NVARCHAR(4)), 'null') + ', ' +
-        '"COMMENTS": "' + ISNULL(TRY_CAST(fr.OUTCOME_COMMENTS AS NVARCHAR(900)), '') + '"' +
-        '}'
+        LEFT(
+            '{' +
+            '"SINGLE_ASSESSMENT_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG AS NVARCHAR(3)), '') + '", ' +
+            -- '"NFA_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_NFA_FLAG AS NVARCHAR(3)), '') + '", ' + -- Uncomment if needed
+            '"STRATEGY_DISCUSSION_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"CLA_REQUEST_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CLA_REQUEST_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"NON_AGENCY_ADOPTION_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"PRIVATE_FOSTERING_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_PRIVATE_FOSTERING_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"CP_TRANSFER_IN_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CP_TRANSFER_IN_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"CP_CONFERENCE_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CP_CONFERENCE_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"CARE_LEAVER_FLAG": "' + ISNULL(TRY_CAST(fr.OUTCOME_CARE_LEAVER_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"OTHER_OUTCOMES_EXIST_FLAG": "' + ISNULL(TRY_CAST(fr.OTHER_OUTCOMES_EXIST_FLAG AS NVARCHAR(3)), '') + '", ' +
+            '"NUMBER_OF_OUTCOMES": ' + 
+                ISNULL(TRY_CAST(CASE 
+                    WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL
+                    ELSE fr.TOTAL_NO_OF_OUTCOMES 
+                END AS NVARCHAR(4)), 'null') + ', ' +
+            '"COMMENTS": "' +
+                ISNULL(
+                    LEFT(TRY_CAST(fr.OUTCOME_COMMENTS AS NVARCHAR(max)), 900),   -- clamp to 900 as per metadata
+                '') +
+            '"' +
+            '}'
+        , 4000)  -- final clamp to NVARCHAR(4000)
     ) AS cine_referral_outcome_json,
-    fr.OUTCOME_NFA_FLAG,
-    fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
-    fr.REFRL_END_DTTM,
-    fr.DIM_DEPARTMENT_ID, -- Swap out on DIM_DEPARTMENT_ID_DESC #DtoI-1762
-    fr.DIM_WORKER_ID_DESC
+    CASE
+        WHEN fr.OUTCOME_NFA_FLAG IS NULL THEN NULL
+        WHEN LEN(fr.OUTCOME_NFA_FLAG) = 1 THEN fr.OUTCOME_NFA_FLAG
+        WHEN fr.OUTCOME_NFA_FLAG IN (N'YES', N'TRUE', N'1') THEN N'Y'
+        WHEN fr.OUTCOME_NFA_FLAG IN (N'NO', N'FALSE', N'0') THEN N'N'
+        ELSE LEFT(TRY_CONVERT(nvarchar(10), fr.OUTCOME_NFA_FLAG), 1)  -- last-resort clamp
+    END,
+
+    LEFT(TRY_CONVERT(nvarchar(max), fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE), 100),
+    TRY_CONVERT(datetime, fr.REFRL_END_DTTM),
+    LEFT(TRY_CONVERT(nvarchar(200), fr.DIM_DEPARTMENT_ID), 48),   -- Swap out via #DtoI-1762
+    LEFT(TRY_CONVERT(nvarchar(max), fr.DIM_WORKER_ID_DESC), 100)
+
 FROM
     HDM.Child_Social.FACT_REFERRALS AS fr
-WHERE
-    (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())    -- #DtoI-1806
-    OR fr.REFRL_END_DTTM IS NULL)
-AND
-    DIM_PERSON_ID <> -1  -- Exclude rows with -1
-AND EXISTS
-    ( -- only ssd relevant records
-    SELECT 1
-    FROM ssd_development.ssd_person p
-    WHERE TRY_CAST(p.pers_person_id AS INT) = fr.DIM_PERSON_ID -- #DtoI-1799
-    );
 
+WHERE
+    (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())  -- #DtoI-1806
+     OR fr.REFRL_END_DTTM IS NULL)
+    AND fr.DIM_PERSON_ID <> -1  -- Exclude rows with -1
+
+    AND EXISTS (   -- only ssd relevant records
+        SELECT 1
+        FROM ssd_development.ssd_person p
+        WHERE TRY_CAST(p.pers_person_id AS INT) = fr.DIM_PERSON_ID  -- #DtoI-1799
+    );
 
 
 
 -- -- #LEGACY-PRE2016
 -- -- SQL compatible versions >=2016+
 -- SELECT
---     fr.FACT_REFERRAL_ID,
---     fr.DIM_PERSON_ID,
---     fr.REFRL_START_DTTM,
---     fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE,
---     fr.DIM_LOOKUP_CONT_SORC_ID,
---     fr.DIM_LOOKUP_CONT_SORC_ID_DESC, -- 1
---     (
---         SELECT
---             -- SSD standard 
---             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
---             ISNULL(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS SINGLE_ASSESSMENT_FLAG,
---             -- ISNULL(fr.OUTCOME_NFA_FLAG, '')                 AS NFA_FLAG,
---             ISNULL(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS STRATEGY_DISCUSSION_FLAG,
---             ISNULL(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS CLA_REQUEST_FLAG,
---             ISNULL(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS NON_AGENCY_ADOPTION_FLAG,
---             ISNULL(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS PRIVATE_FOSTERING_FLAG,
---             ISNULL(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS CP_TRANSFER_IN_FLAG,
---             ISNULL(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS CP_CONFERENCE_FLAG,
---             ISNULL(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS CARE_LEAVER_FLAG,
---             ISNULL(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS OTHER_OUTCOMES_EXIST_FLAG,
---             CASE 
---                 WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL  -- to counter -1 values
---                 ELSE fr.TOTAL_NO_OF_OUTCOMES 
---             END                                             AS NUMBER_OF_OUTCOMES,
---             ISNULL(fr.OUTCOME_COMMENTS, '')                 AS COMMENTS
---         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
---         ) AS cine_referral_outcome_json,
---     fr.OUTCOME_NFA_FLAG, -- Consider conversion straight to bool
---     fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE,
---     fr.REFRL_END_DTTM,
---     fr.DIM_DEPARTMENT_ID, -- Swap out on DIM_DEPARTMENT_ID_DESC #DtoI-1762
---     fr.DIM_WORKER_ID_DESC
+--     LEFT(TRY_CONVERT(nvarchar(200), fr.FACT_REFERRAL_ID), 48),
+--     LEFT(TRY_CONVERT(nvarchar(200), fr.DIM_PERSON_ID), 48),
+--     TRY_CONVERT(datetime, fr.REFRL_START_DTTM),
+--     LEFT(TRY_CONVERT(nvarchar(50), fr.DIM_LOOKUP_CATEGORY_OF_NEED_CODE), 3),
+--     LEFT(TRY_CONVERT(nvarchar(200), fr.DIM_LOOKUP_CONT_SORC_ID), 48),
+--     LEFT(TRY_CONVERT(nvarchar(max), fr.DIM_LOOKUP_CONT_SORC_ID_DESC), 255),   -- 1
+
+--     /* FOR JSON PATH block — clamped to NVARCHAR(4000) */
+--     LEFT(
+--         (
+--             SELECT
+--                 ISNULL(fr.OUTCOME_SINGLE_ASSESSMENT_FLAG, '')   AS SINGLE_ASSESSMENT_FLAG,
+--                 -- ISNULL(fr.OUTCOME_NFA_FLAG, '')                 AS NFA_FLAG,
+--                 ISNULL(fr.OUTCOME_STRATEGY_DISCUSSION_FLAG, '') AS STRATEGY_DISCUSSION_FLAG,
+--                 ISNULL(fr.OUTCOME_CLA_REQUEST_FLAG, '')         AS CLA_REQUEST_FLAG,
+--                 ISNULL(fr.OUTCOME_NON_AGENCY_ADOPTION_FLAG, '') AS NON_AGENCY_ADOPTION_FLAG,
+--                 ISNULL(fr.OUTCOME_PRIVATE_FOSTERING_FLAG, '')   AS PRIVATE_FOSTERING_FLAG,
+--                 ISNULL(fr.OUTCOME_CP_TRANSFER_IN_FLAG, '')      AS CP_TRANSFER_IN_FLAG,
+--                 ISNULL(fr.OUTCOME_CP_CONFERENCE_FLAG, '')       AS CP_CONFERENCE_FLAG,
+--                 ISNULL(fr.OUTCOME_CARE_LEAVER_FLAG, '')         AS CARE_LEAVER_FLAG,
+--                 ISNULL(fr.OTHER_OUTCOMES_EXIST_FLAG, '')        AS OTHER_OUTCOMES_EXIST_FLAG,
+--                 CASE 
+--                     WHEN fr.TOTAL_NO_OF_OUTCOMES < 0 THEN NULL
+--                     ELSE fr.TOTAL_NO_OF_OUTCOMES
+--                 END                                             AS NUMBER_OF_OUTCOMES,
+--                 LEFT(ISNULL(fr.OUTCOME_COMMENTS, ''), 900)      AS COMMENTS
+--             FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--         ),
+--     4000) AS cine_referral_outcome_json,
+
+--     /* cine_referral_nfa clamped */
+--     CASE
+--         WHEN fr.OUTCOME_NFA_FLAG IS NULL THEN NULL
+--         WHEN LEN(fr.OUTCOME_NFA_FLAG) = 1 THEN fr.OUTCOME_NFA_FLAG
+--         WHEN fr.OUTCOME_NFA_FLAG IN (N'YES', N'TRUE', N'1') THEN N'Y'
+--         WHEN fr.OUTCOME_NFA_FLAG IN (N'NO', N'FALSE', N'0') THEN N'N'
+--         ELSE LEFT(TRY_CONVERT(nvarchar(20), fr.OUTCOME_NFA_FLAG), 1)
+--     END,
+
+--     LEFT(TRY_CONVERT(nvarchar(max), fr.DIM_LOOKUP_REFRL_ENDRSN_ID_CODE), 100),
+--     TRY_CONVERT(datetime, fr.REFRL_END_DTTM),
+--     LEFT(TRY_CONVERT(nvarchar(200), fr.DIM_DEPARTMENT_ID), 48),         -- #DtoI‑1762
+--     LEFT(TRY_CONVERT(nvarchar(max), fr.DIM_WORKER_ID_DESC), 100)
+
 -- FROM
 --     HDM.Child_Social.FACT_REFERRALS AS fr
- 
+
 -- WHERE
---     (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())    -- #DtoI-1806
---     OR fr.REFRL_END_DTTM IS NULL)
+--     (fr.REFRL_START_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())    -- #DtoI‑1806
+--      OR fr.REFRL_END_DTTM IS NULL)
+--     AND fr.DIM_PERSON_ID <> -1
 
--- AND
---     DIM_PERSON_ID <> -1  -- Exclude rows with -1
-
--- AND EXISTS
---     ( -- only ssd relevant records
---     SELECT 1
---     FROM ssd_development.ssd_person p
---     WHERE TRY_CAST(p.pers_person_id AS INT) = fr.DIM_PERSON_ID -- #DtoI-1799
+--     AND EXISTS (
+--         SELECT 1
+--         FROM ssd_development.ssd_person p
+--         WHERE TRY_CAST(p.pers_person_id AS INT) = fr.DIM_PERSON_ID   -- #DtoI‑1799
 --     );
+
 
 
 
@@ -4625,7 +4651,8 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description:
 -- Author: D2I
--- Version: 1.2
+-- Version:     1.3
+--              1.2 address ongoing aggr based null warnings. Refactored around new outer apply and null join filter 23/03/26 RH
 --              1.1 Added AND ffa.FACT_FORM_ID ! NULL chk and ELSE '' issues/275 040326 RH
 --              1.0: Fix Aggr warnings use of isnull() 310524 RH
 --              0.1: Altered _json keys and groupby towards > clarity 190224 JH
@@ -4732,6 +4759,7 @@ ORDER BY lr.DIM_PERSON_ID DESC, lr.ANSWER_NO;
 
 
 
+
 -- META-ELEMENT: {"type": "insert_data"}
 INSERT INTO ssd_development.ssd_cla_care_plan (
     lacp_table_id,
@@ -4740,7 +4768,6 @@ INSERT INTO ssd_development.ssd_cla_care_plan (
     lacp_cla_care_plan_end_date,
     lacp_cla_care_plan_json
 )
-
 -- #LEGACY-PRE2016
 -- SQL compatible versions <2016
 SELECT
@@ -4748,39 +4775,122 @@ SELECT
     fcp.DIM_PERSON_ID              AS lacp_person_id,
     fcp.START_DTTM                 AS lacp_cla_care_plan_start_date,
     fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
-    (
-        -- Manual JSON-like concatenation for lacp_cla_care_plan_json
+    /* Manual JSON-like concatenation for lacp_cla_care_plan_json (no aggregates) */
+    LEFT(
         '{' +
-        '"REMAINSUP": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RETURN1M": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RETURN6M": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RETURNEV": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"LTRELFR": "'   + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"LTFOST18": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RESPLMT": "'   + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"SUPPLIV": "'   + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"ADOPTION": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"OTHERPLN": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '"' +
+        '"REMAINSUP": "' + ISNULL(TRY_CAST(a1.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"RETURN1M": "'  + ISNULL(TRY_CAST(a2.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"RETURN6M": "'  + ISNULL(TRY_CAST(a3.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"RETURNEV": "'  + ISNULL(TRY_CAST(a4.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"LTRELFR": "'   + ISNULL(TRY_CAST(a5.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"LTFOST18": "'  + ISNULL(TRY_CAST(a6.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"RESPLMT": "'   + ISNULL(TRY_CAST(a7.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"SUPPLIV": "'   + ISNULL(TRY_CAST(a8.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"ADOPTION": "'  + ISNULL(TRY_CAST(a9.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"OTHERPLN": "'  + ISNULL(TRY_CAST(a10.ANSWER AS NVARCHAR(50)), '') + '"' +
         '}'
-    ) AS lacp_cla_care_plan_json
+    , 1000) AS lacp_cla_care_plan_json
 FROM
     HDM.Child_Social.FACT_CARE_PLANS AS fcp
-LEFT JOIN 
-    ssd_development.ssd_pre_cla_care_plan tmp_cpl 
-    ON tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+
+/* Latest answer per code, per person — no aggrs */
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_development.ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP1'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a1
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_development.ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP2'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a2
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_development.ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP3'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a3
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_development.ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP4'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a4
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_development.ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP5'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a5
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_development.ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP6'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a6
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_development.ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP7'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a7
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_development.ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP8'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a8
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_development.ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP9'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a9
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_development.ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP10'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a10
+
 WHERE 
     fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
     AND EXISTS (
         SELECT 1
         FROM ssd_development.ssd_person p
-        WHERE TRY_CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID -- #DtoI-1799
-    )
-
-GROUP BY
-    fcp.FACT_CARE_PLAN_ID,
-    fcp.DIM_PERSON_ID,
-    fcp.START_DTTM,
-    fcp.END_DTTM;
+        WHERE TRY_CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID  -- #DtoI-1799
+    );
 
 
 
@@ -4791,37 +4901,121 @@ GROUP BY
 --     fcp.DIM_PERSON_ID              AS lacp_person_id,
 --     fcp.START_DTTM                 AS lacp_cla_care_plan_start_date,
 --     fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
+
 --     (
---         SELECT  -- Combined _json field with 'ICP' responses
---             -- SSD standard 
---             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS REMAINSUP,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RETURN1M,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RETURN6M,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RETURNEV,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS LTRELFR,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS LTFOST18,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RESPLMT,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS SUPPLIV,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS ADOPTION,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS OTHERPLN
---         FROM
---             -- #ssd_TMP_PRE_cla_care_plan tmp_cpl
---             ssd_development.ssd_pre_cla_care_plan tmp_cpl
---         WHERE
---             tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
---         GROUP BY tmp_cpl.DIM_PERSON_ID
+--         SELECT
+--             ISNULL(a1.ANSWER,  '') AS REMAINSUP,
+--             ISNULL(a2.ANSWER,  '') AS RETURN1M,
+--             ISNULL(a3.ANSWER,  '') AS RETURN6M,
+--             ISNULL(a4.ANSWER,  '') AS RETURNEV,
+--             ISNULL(a5.ANSWER,  '') AS LTRELFR,
+--             ISNULL(a6.ANSWER,  '') AS LTFOST18,
+--             ISNULL(a7.ANSWER,  '') AS RESPLMT,
+--             ISNULL(a8.ANSWER,  '') AS SUPPLIV,
+--             ISNULL(a9.ANSWER,  '') AS ADOPTION,
+--             ISNULL(a10.ANSWER, '') AS OTHERPLN
 --         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 --     ) AS lacp_cla_care_plan_json
--- FROM
---     HDM.Child_Social.FACT_CARE_PLANS AS fcp
+
+-- FROM HDM.Child_Social.FACT_CARE_PLANS AS fcp
+
+-- /* OUTER APPLY: latest answer per code, no aggr */
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_development.ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP1'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a1
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_development.ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP2'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a2
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_development.ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP3'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a3
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_development.ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP4'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a4
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_development.ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP5'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a5
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_development.ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP6'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a6
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_development.ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP7'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a7
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_development.ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP8'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a8
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_development.ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP9'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a9
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_development.ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP10'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a10
+
 -- WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
---     AND EXISTS (
+--   AND EXISTS (
 --         SELECT 1
 --         FROM ssd_development.ssd_person p
 --         WHERE TRY_CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID -- #DtoI-1799
 --     );
-
 
 
 
@@ -4834,6 +5028,9 @@ GROUP BY
 -- CREATE NONCLUSTERED INDEX IX_ssd_lacp_care_plan_start_date ON ssd_development.ssd_cla_care_plan(lacp_cla_care_plan_start_date);
 -- CREATE NONCLUSTERED INDEX IX_ssd_lacp_care_plan_end_date ON ssd_development.ssd_cla_care_plan(lacp_cla_care_plan_end_date);
 
+-- -- Additionally towards APPLY lookups:
+-- CREATE INDEX IX_ssd_pre_cla_person_code_form ON ssd_development.ssd_pre_cla_care_plan
+-- (DIM_PERSON_ID, ANSWER_NO, FACT_FORM_ID DESC) INCLUDE (ANSWER, LatestResponseDate);
 
 
 
