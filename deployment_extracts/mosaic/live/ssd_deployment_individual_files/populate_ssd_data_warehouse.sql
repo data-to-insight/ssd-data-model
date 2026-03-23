@@ -5448,7 +5448,7 @@ Dependencies:
 			cine_cin_primary_need_code				varchar(16),
 			cine_referral_source_code				varchar(48),
 			cine_referral_source_desc				varchar(255),
-			cine_referral_outcome_json				varchar(500),
+			cine_referral_outcome_json				varchar(4000),
 			cine_referral_nfa						varchar(1),
 			cine_close_reason						varchar(100),
 			cine_close_date							datetime,
