@@ -19,12 +19,12 @@ CREATE TABLE #t
 
 INSERT #t
 (
-    prof_professional_id, -- [REVIEW] Change to prof_ profesional_ id?
+    prof_professional_id, 
     prof_staff_id,
 	prof_professional_name, -- [REVIEW] 
     --FIRST_NAMES,
     --LAST_NAMES,
-    --prof_social_worker_registration_no,
+    --prof_social_worker_registration_no, -- D2I note: field commented? But active later in script is this correct? 
     prof_agency_worker_flag,
     prof_professional_job_title,
     prof_professional_department,
@@ -36,7 +36,7 @@ SELECT
 	d.prof_professional_name, --[REVIEW] Used null as placholder until source field is identified
     --d.FIRST_NAMES,
     --d.LAST_NAMES,
-    --d.prof_social_worker_registration_no,
+    --d.prof_social_worker_registration_no, -- D2I note: field commented? But active later in script is this correct? 
     d.prof_agency_worker_flag,
     d.prof_professional_job_title,
     d.prof_professional_department,
@@ -137,7 +137,7 @@ SELECT
 	t.prof_professional_name,
     --t.FIRST_NAMES,
     --t.LAST_NAMES,
-    t.prof_social_worker_registration_no,
+    t.prof_social_worker_registration_no, -- D2I note: field active but commented out above? Is this correct? 
     t.prof_agency_worker_flag,
     t.prof_professional_job_title,
     t.prof_professional_caseload,
