@@ -3725,7 +3725,8 @@ Dependencies:
 			invo_referral_id				varchar(48),
 			invo_involvement_start_date		datetime,
 			invo_involvement_end_date		datetime,
-			invo_worker_change_reason		varchar(200)
+			invo_worker_change_reason		varchar(200),
+			invo_person_id              	VARCHAR(48)               
 		)
 		--
 		insert into ##ssd_involvements (
@@ -3736,7 +3737,8 @@ Dependencies:
 			invo_referral_id,
 			invo_involvement_start_date,
 			invo_involvement_end_date,
-			invo_worker_change_reason
+			invo_worker_change_reason,
+			invo_person_id              	  
 		)
 		select
 			prof.PROF_RELATIONSHIP_ID invo_involvements_id,
@@ -3776,7 +3778,8 @@ Dependencies:
 					rd.ref_code = prof.END_DATE_REASON
 					and
 					rd.REF_DOMAIN = 'WORKER_END_DATE_REASON'
-			)
+			),
+			CAST(prof.PERSON_ID AS VARCHAR(48)) AS invo_person_id -- D2I: added issues/276
 		from
 			dm_prof_relationships prof
 		where
