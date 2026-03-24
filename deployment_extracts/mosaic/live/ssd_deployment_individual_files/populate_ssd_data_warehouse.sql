@@ -1148,8 +1148,8 @@ Dependencies:
 		--
 		create table ##ssd_cp_visits (
 			cppv_cp_visit_id				varchar(48),
+			cppv_person_id                  NVARCHAR(48),
 			cppv_cp_plan_id					varchar(48),
-			cppv_cp_visit_id				varchar(48),
 			cppv_cp_visit_date				datetime,
 			cppv_cp_visit_seen				varchar(1),
 			cppv_cp_visit_seen_alone		varchar(1),
@@ -1181,15 +1181,16 @@ Dependencies:
 		--
 		insert into ##ssd_cp_visits (
 			cppv_cp_visit_id,
+			cppv_person_id,           
 			cppv_cp_plan_id,
-			cppv_cp_visit_id,
 			cppv_cp_visit_date,
 			cppv_cp_visit_seen,
 			cppv_cp_visit_seen_alone,
 			cppv_cp_visit_bedroom
 		)
 		select
-			null cppv_cp_visit_id,
+			vis.VISIT_ID cppv_cp_visit_id,
+			CAST(vis.person_id AS NVARCHAR(48)) AS cppv_person_id,
 			(
 				select
 					max(cpp.registration_id)
@@ -1204,7 +1205,7 @@ Dependencies:
 					and
 					vis.ACTUAL_DATE between cpp.REGISTRATION_START_DATE and dbo.future(cpp.DEREGISTRATION_DATE)
 			) cppv_cp_plan_id,
-			vis.VISIT_ID cppv_cp_visit_id,
+
 			vis.ACTUAL_DATE cppv_cp_visit_date,
 			coalesce(
 				case
