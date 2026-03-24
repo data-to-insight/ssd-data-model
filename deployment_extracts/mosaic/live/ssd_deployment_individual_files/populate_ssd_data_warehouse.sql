@@ -1941,8 +1941,9 @@ Dependencies:
 		create table ##ssd_professionals (
 			prof_professional_id					varchar(48),
 			prof_staff_id							varchar(48),
+			prof_professional_name              	varchar(300),   
 			prof_social_worker_registration_no		varchar(48),
-			prof_agency_worker_flag					varchar(100),
+			prof_agency_worker_flag					varchar(1),
 			prof_professional_job_title				varchar(500),
 			prof_professional_caseload				int,
 			prof_professional_department			varchar(100),
@@ -1952,6 +1953,7 @@ Dependencies:
 		insert into ##ssd_professionals (
 			prof_professional_id,
 			prof_staff_id,
+			prof_professional_name,
 			prof_social_worker_registration_no,
 			prof_agency_worker_flag,
 			prof_professional_job_title,
@@ -1962,6 +1964,7 @@ Dependencies:
 		select
 			null prof_professional_id,
 			wkr.WORKER_ID prof_staff_id,
+			null prof_professional_name,
 			null prof_social_worker_registration_no,
 			null prof_agency_worker_flag,
 			null prof_professional_job_title,
