@@ -159,6 +159,7 @@ where
 --
 select
 	sub.cppv_cp_visit_id,
+	CAST(sub.person_id AS NVARCHAR(48)) AS cppv_person_id,
 	(
 	select 
 		reg.registration_id
@@ -179,7 +180,6 @@ select
 	where
 		reg.seq = 1
 	) cppv_cp_plan_id,
-	sub.cppv_cp_visit_id,
 	sub.cppv_cp_visit_date,
 	sub.cppv_cp_visit_seen,
 	sub.cppv_cp_visit_seen_alone,
