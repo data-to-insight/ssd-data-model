@@ -4426,6 +4426,7 @@ BEGIN
     CREATE TABLE ssd_development.ssd_cla_reviews (
         clar_cla_review_id              NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAR001A"}
         clar_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAR011A"}
+        clar_cla_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAR002A"}
         clar_cla_review_due_date        DATETIME,                   -- metadata={"item_ref":"CLAR003A"}
         clar_cla_review_date            DATETIME,                   -- metadata={"item_ref":"CLAR004A"}
         clar_cla_review_cancelled       NCHAR(1),                   -- metadata={"item_ref":"CLAR012A"}
@@ -4438,6 +4439,7 @@ END
 INSERT INTO ssd_development.ssd_cla_reviews (
     clar_cla_review_id,
     clar_cla_id,
+    clar_cla_person_id,
     clar_cla_review_due_date,
     clar_cla_review_date,
     clar_cla_review_cancelled,
@@ -4446,6 +4448,7 @@ INSERT INTO ssd_development.ssd_cla_reviews (
 SELECT
     fcr.FACT_CLA_REVIEW_ID                          AS clar_cla_review_id,
     fcr.FACT_CLA_ID                                 AS clar_cla_id,                
+    CAST(fcr.DIM_PERSON_ID AS NVARCHAR(48))         AS clar_cla_person_id,
     fcr.DUE_DTTM                                    AS clar_cla_review_due_date,
     fcr.MEETING_DTTM                                AS clar_cla_review_date,
     fm.CANCELLED                                    AS clar_cla_review_cancelled,
@@ -4484,16 +4487,17 @@ AND EXISTS ( -- only ssd relevant records
     WHERE TRY_CAST(p.pers_person_id AS INT) = fcr.DIM_PERSON_ID -- #DtoI-1799
     )
  
-GROUP BY fcr.FACT_CLA_REVIEW_ID,
-    fcr.FACT_CLA_ID,                                            
-    fcr.DIM_PERSON_ID,                              
-    fcr.DUE_DTTM,                                    
-    fcr.MEETING_DTTM,                              
+
+GROUP BY 
+    fcr.FACT_CLA_REVIEW_ID,
+    fcr.FACT_CLA_ID,
+    fcr.DIM_PERSON_ID,
+    fcr.DUE_DTTM,
+    fcr.MEETING_DTTM,
     fm.CANCELLED,
     fms.FACT_MEETINGS_ID,
     ff.FACT_FORM_ID,
-    ff.DIM_LOOKUP_FORM_TYPE_ID_CODE
-    ;
+    ff.DIM_LOOKUP_FORM_TYPE_ID_CODE;
 
 
 
