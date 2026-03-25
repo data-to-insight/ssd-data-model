@@ -8,27 +8,27 @@
 -- Dependencies:
 -- - GROUPPERSONVIEW
 -- - GROUPVIEW
--- - ssd_development.ssd_person
+-- - ssd_person
 --
 -- =============================================================================
 
 IF OBJECT_ID('tempdb..#ssd_family', 'U') IS NOT NULL DROP TABLE #ssd_family;
 
-IF OBJECT_ID('ssd_development.ssd_family', 'U') IS NOT NULL
+IF OBJECT_ID('ssd_family', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM ssd_development.ssd_family)
-        TRUNCATE TABLE ssd_development.ssd_family;
+    IF EXISTS (SELECT 1 FROM ssd_family)
+        TRUNCATE TABLE ssd_family;
 END
 ELSE
 BEGIN
-    CREATE TABLE ssd_development.ssd_family (
+    CREATE TABLE ssd_family (
         fami_table_id   NVARCHAR(48) NOT NULL PRIMARY KEY,  -- metadata={"item_ref":"FAMI003A"}
         fami_family_id  NVARCHAR(48) NULL,                  -- metadata={"item_ref":"FAMI001A"}
         fami_person_id  NVARCHAR(48) NULL                   -- metadata={"item_ref":"FAMI002A"}
     );
 END;
 
-INSERT INTO ssd_development.ssd_family (
+INSERT INTO ssd_family (
     fami_table_id,
     fami_family_id,
     fami_person_id
@@ -43,6 +43,6 @@ LEFT JOIN GROUPVIEW gv
 WHERE gv.GROUPTYPE = 'Family'
   AND EXISTS (
         SELECT 1
-        FROM ssd_development.ssd_person sp
+        FROM ssd_person sp
         WHERE sp.pers_person_id = CONVERT(NVARCHAR(48), rf.PERSONID)
       );
