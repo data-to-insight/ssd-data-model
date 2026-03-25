@@ -13,7 +13,8 @@ select
 		grp.group_name = 'Child CIN Referral Source'
 		where
 			ssd.WORKFLOW_STEP_ID = con.WORKFLOW_STEP_ID
-	) cont_contact_source_code,
+	) cont_contact_source_code, -- [REVIEW] Added D2I towards issues/276
+
 	(
 		select
 			styp.DESCRIPTION

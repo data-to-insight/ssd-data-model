@@ -16,6 +16,7 @@ select
 	cpp.PERSON_ID cppl_person_id,
 	cpp.REGISTRATION_START_DATE cppl_cp_plan_start_date,
 	cpp.DEREGISTRATION_DATE cppl_cp_plan_end_date,
+	null cppl_cp_plan_ola, -- [REVIEW] Added D2I towards issues/276
 	case
 		when (
 				select

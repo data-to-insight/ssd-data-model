@@ -11,6 +11,7 @@ Select
 a.WorkflowStepID cont_contact_id,
 a.PersonID cont_person_id,
 a.StartDate cont_contact_date,
+null cont_contact_source_code, -- [REVIEW] Pending data source. Added D2I towards issues/276
 a.ContactSource cont_contact_source,
 CASE
 	when a.Outcome = 'Social Care' then 'CIN Referral'
