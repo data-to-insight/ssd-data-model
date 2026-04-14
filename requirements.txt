@@ -96,7 +96,7 @@ nvidia-nvtx-cu11==11.7.91
 openpyxl==3.1.2
 overrides==7.3.1
 packaging==23.1
-pandas==2.0.2
+pandas>=2.2,<2.3
 pandocfilters==1.5.0
 parso==0.8.3
 pexpect==4.8.0
