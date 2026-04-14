@@ -1,27 +1,28 @@
 #!/bin/bash
+set -e
 
+# Sys packages
+sudo apt-get update
+sudo apt-get install -y graphviz libgraphviz-dev pkg-config libjpeg-dev zlib1g-dev
 
-# Install Python dependencies
+# Py dependencies
 pip install -r requirements.txt
-
-# Install additional system-level dependencies/packages
-sudo apt-get update                                         # requ' to run the below
-sudo apt-get install graphviz libgraphviz-dev pkg-config    # creating ERD/graphviz diagrams/images
-pip install pygraphviz                                      # creating ERD/graphviz diagrams/images
-pip install graphviz
-pip install openpyxl                                        # create repo tree reference file in xls
-pip install tabulate                                        # create change log table formatting
+pip install openpyxl
+pip install tabulate
 pip install reportlab
 pip install markdown
 pip install sqlparse
 
-# Install or update Poetry
+# if not in requirements.txt
+pip install pygraphviz
+pip install graphviz
+
+# Install|update Poetry
 if ! command -v poetry &>/dev/null; then
     pip install poetry
 else
     pip install --upgrade poetry
 fi
 
-
-# Install the Python extension for Visual Studio Code
-code --install-extension ms-python.python --force
+# VS Code ext
+code --install-extension ms-python.python --force || true

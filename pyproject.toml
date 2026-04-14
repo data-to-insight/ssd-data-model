@@ -6,8 +6,6 @@ authors = ["Data to Insight"]
 license = "MIT License"
 readme = "README.md"
 packages = [{ include = "ssd_data_model_3" }]
-
-[tool.poetry]
 urls = { homepage = "https://github.com/data-to-insight/ssd-data-model", specification = "https://data-to-insight.github.io/ssd-data-model/" }
 
 
@@ -21,8 +19,9 @@ scipy = ">=1.11.2,<2.0"
 scikit-learn = "^1.4.2"
 GitPython = "^3.1.24"
 
+[tool.poetry.scripts]
+your-command = "your_package.module:main"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[project.scripts]
