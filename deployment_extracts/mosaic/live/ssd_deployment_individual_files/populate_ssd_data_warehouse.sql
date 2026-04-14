@@ -4473,6 +4473,7 @@ Dependencies:
 			cppl_person_id						varchar(48),
 			cppl_cp_plan_start_date				datetime,
 			cppl_cp_plan_end_date				datetime,
+			cppl_cp_plan_ola                	varchar(1),
 			cppl_cp_plan_initial_category		varchar(100),
 			cppl_cp_plan_latest_category		varchar(100)
 		);
@@ -4484,6 +4485,7 @@ Dependencies:
 			cppl_person_id,
 			cppl_cp_plan_start_date,
 			cppl_cp_plan_end_date,
+			cppl_cp_plan_ola,
 			cppl_cp_plan_initial_category,
 			cppl_cp_plan_latest_category
 		)
@@ -4505,6 +4507,7 @@ Dependencies:
 			cpp.PERSON_ID cppl_person_id,
 			cpp.REGISTRATION_START_DATE cppl_cp_plan_start_date,
 			cpp.DEREGISTRATION_DATE cppl_cp_plan_end_date,
+			null cppl_cp_plan_ola -- [REVIEW] Needs data source. added D2I issues/276
 			case
 				when (
 						select
@@ -4629,6 +4632,7 @@ Dependencies:
 			cont_contact_id						varchar(48),
 			cont_person_id						varchar(48),
 			cont_contact_date					datetime,
+			cont_contact_source_code        	VARCHAR(48),  -- [REVIEW] Added D2I towards issues/276
 			cont_contact_source_desc			varchar(255),
 			cont_contact_outcome_json			varchar(500)
 		);
@@ -4637,6 +4641,7 @@ Dependencies:
 			cont_contact_id,
 			cont_person_id,
 			cont_contact_date,
+			cont_contact_source_code, 
 			cont_contact_source_desc,
 			cont_contact_outcome_json
 		)
@@ -4644,6 +4649,7 @@ Dependencies:
 			con.WORKFLOW_STEP_ID cont_contact_id,
 			sgs.SUBJECT_COMPOUND_ID cont_person_id,
 			con.STARTED_ON cont_contact_date,
+			null cont_contact_source_code, -- [REVIEW] Added D2I towards issues/276
 			(
 				select
 					styp.DESCRIPTION

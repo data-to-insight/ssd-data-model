@@ -33,7 +33,7 @@ Recommended approach for initial adoption
 
 ## Changing schema name
 
-To change or remove the default `ssd_development` schema reference
+To change or remove the default `ssd_development` schema reference (applies to SystemC/Eclipse only)
 
 ### Remove schema prefix completely
 
@@ -41,7 +41,7 @@ To change or remove the default `ssd_development` schema reference
    `ssd_development.`  
 2. Replace with an empty string ie. ``
 
-This removes the schema prefix and allows use of the database default schema  
+This removes the schema prefix and allows use of database default schema  
 eg. `dbo`
 
 ### Replace with local schema
@@ -65,7 +65,7 @@ For local authorities running SQL Server 2016 SP1 or later an improved, non lega
   - enable modern T SQL block  
   - optionally remove legacy default block after testing  
 
-This keeps SQL Server 2012 compatibility available while allowing later LAs to use cleaner features where appropriate
+This keeps SQL Server 2012 compatibility available while allowing later LAs to use cleaner features where appropriate. We have an open support ticket to refine this manual process into a more deployment friendly/non-alpha-like action. 
 
 ## Object naming and drop behaviour
 
@@ -101,7 +101,7 @@ Steps
 1. Replace every instance of string  
    `ssd_development.`  
 2. With  
-   `#`  
+   `#`  or global `##`
 
 This converts SSD tables into session scoped temp tables
 
@@ -114,9 +114,10 @@ Notes
 
 Script still contains inline testing markers while wider local authority testing continues
 
-- `[TESTING]` marks temporary diagnostics or console style output  
+e.g
+- `[TESTING]` marks temporary diags or console style output  
   these assist with run time problem solving and early adoption  
-- `[REVIEW]` identifies items where SSD project team review is requested  
+- `[REVIEW]` identifies items where SSD project team review requested|needed  
 
 Local authorities may
 

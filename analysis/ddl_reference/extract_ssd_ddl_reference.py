@@ -18,9 +18,9 @@ produces normalised ref that is easy to compare e.g:
 
 use
 -------------
-python extract_ssd_ddl_reference_v2.py
+python extract_ssd_ddl_reference.py
 
-python extract_ssd_ddl_reference_v2.py \
+python extract_ssd_ddl_reference.py \
   --output-dir ./analysis/ddl_reference \
   --prefix ssd_
 """

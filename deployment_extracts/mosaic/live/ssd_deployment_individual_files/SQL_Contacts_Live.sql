@@ -93,6 +93,7 @@ Select
 ws.WORKFLOW_STEP_ID cont_contact_id,
 s.SUBJECT_COMPOUND_ID cont_person_id,
 CAST(fa.DATE_ANSWER as date) cont_contact_date,
+null cont_contact_source_code, -- [REVIEW] Pending data source. Added D2I towards issues/276
 ql2.ANSWER cont_contact_source,
 CASE
 	when sc.cont_contact_id is not null then 'CIN Referral'
