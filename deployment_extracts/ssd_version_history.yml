@@ -5,9 +5,22 @@ meta:
   owner: "Data to Insight"
   status: "Release"
 
-current_version: "1.4.0"
+current_version: "1.4.1"
 
 releases:
+  - version_number: "1.4.1" 
+    release_date: "2025-04-14" 
+    includes_changes: >
+      ssd_development.ssd_cla_reviews.clar_cla_person_id added in SystemC
+
+    impact_description: >
+      As a result of a cross-CMS consistency check, some previously ommited or inconsistency fields are being added or amended
+      in both SystemC, Mosaic and Eclipse SSD deployments. 
+    impacts_cms_deployment:
+      - "systemc"
+      - "mosaic"
+      - "eclipse"
+
   - version_number: "1.4.0" 
     release_date: "2025-03-04" 
     includes_changes: >
