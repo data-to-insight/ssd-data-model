@@ -1,0 +1,13 @@
+graphviz
+importlib-metadata; python_version < "3.10"
+markdown
+matplotlib>=3.10,<4
+openpyxl>=3.1.5,<4
+pandas>=2.2,<2.3
+Pillow>=12.2,<13
+plotly>=6.7,<7
+pygraphviz
+PyYAML>=6.0.3,<7
+reportlab>=4.4,<5
+sqlparse
+tabulate>=0.9,<1

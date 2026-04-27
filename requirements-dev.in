@@ -1,0 +1,14 @@
+-c requirements.txt
+
+pip-tools
+pip-audit
+
+pytest
+ruff
+black
+
+ipykernel
+jupyterlab
+jupyterlab-git
+nbconvert
+nbdime
