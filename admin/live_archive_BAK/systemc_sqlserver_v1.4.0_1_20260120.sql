@@ -194,6 +194,16 @@ DECLARE @TableName NVARCHAR(128) = N'table_name_placeholder'; -- Note: also/sepe
 DECLARE @StartTime DATETIME, @EndTime DATETIME;
 SET @StartTime = GETDATE(); -- Script start time
 
+
+-- -- Suggested possible indexes towards performance on DfE API Daily Data Flows staging script
+-- CREATE INDEX IX_ssd_cin_episodes_dates      ON ssd_cin_episodes(cine_person_id, cine_referral_date, cine_close_date);
+-- CREATE INDEX IX_ssd_cin_plans_dates         ON ssd_cin_plans(cinp_person_id, cinp_cin_plan_start_date, cinp_cin_plan_end_date);
+-- CREATE INDEX IX_ssd_cp_plans_dates          ON ssd_cp_plans(cppl_person_id, cppl_cp_plan_start_date, cppl_cp_plan_end_date);
+-- CREATE INDEX IX_ssd_cla_placements_dates    ON ssd_cla_placement(clap_cla_id, clap_cla_placement_start_date, clap_cla_placement_end_date);
+-- CREATE INDEX IX_ssd_care_leavers_date       ON ssd_care_leavers(clea_person_id, clea_care_leaver_latest_contact);
+-- CREATE INDEX IX_ssd_sdq_date                ON ssd_sdq_scores(csdq_person_id, csdq_sdq_completed_date);
+
+
 -- META-END
 
 
