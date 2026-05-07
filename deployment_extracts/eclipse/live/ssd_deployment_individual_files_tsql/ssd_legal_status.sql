@@ -10,24 +10,27 @@
 -- - ssd_person
 --
 -- =============================================================================
+IF OBJECT_ID('tempdb..#ssd_legal_status', 'U') IS NOT NULL
+    DROP TABLE #ssd_legal_status;
 
-IF OBJECT_ID('tempdb..#ssd_legal_status', 'U') IS NOT NULL DROP TABLE #ssd_legal_status;
-
-IF OBJECT_ID('ssd_legal_status', 'U') IS NOT NULL
+IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_legal_status]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM ssd_legal_status)
-        TRUNCATE TABLE ssd_legal_status;
+    IF EXISTS (
+        SELECT 1
+        FROM [eclipseDelta].[dbo].[ssd_legal_status]
+    )
+        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_legal_status];
 END
 ELSE
 BEGIN
-    CREATE TABLE ssd_legal_status (
+    CREATE TABLE [eclipseDelta].[dbo].[ssd_legal_status] (
         lega_legal_status_id         NVARCHAR(48)  NOT NULL PRIMARY KEY,
         lega_person_id               NVARCHAR(48)  NULL,
         lega_legal_status            NVARCHAR(100) NULL,
         lega_legal_status_start_date DATETIME      NULL,
         lega_legal_status_end_date   DATETIME      NULL
     );
-END
+END;
 
 ;WITH EPISODES AS (
     SELECT
@@ -36,11 +39,12 @@ END
         CONVERT(NVARCHAR(100), EPIS.LEGALSTATUS)    AS legalstatus,
         CAST(EPIS.EOCSTARTDATE AS DATE)             AS eocstartdate,
         CAST(EPIS.EOCENDDATE   AS DATE)             AS eocenddate
-    FROM CLAEPISODEOFCAREVIEW EPIS
+    FROM [eclipseDelta].[dbo].[CLAEPISODEOFCAREVIEW] EPIS
     WHERE EXISTS (
         SELECT 1
-        FROM ssd_person sp
-        WHERE sp.pers_person_id = CONVERT(NVARCHAR(48), EPIS.PERSONID)
+        FROM [eclipseDelta].[dbo].[ssd_person] sp
+        WHERE sp.pers_person_id =
+              CONVERT(VARCHAR(48), EPIS.PERSONID)
     )
 ),
 FLAGGED AS (
@@ -48,11 +52,24 @@ FLAGGED AS (
         e.*,
         CASE
             WHEN e.eocstartdate BETWEEN
-                 LAG(e.eocstartdate) OVER (PARTITION BY e.personid, e.legalstatus ORDER BY e.eocstartdate, CASE WHEN e.eocenddate IS NULL THEN 1 ELSE 0 END, e.eocenddate)
-                 AND DATEADD(DAY, 1, ISNULL(
-                        LAG(e.eocenddate) OVER (PARTITION BY e.personid, e.legalstatus ORDER BY e.eocstartdate, CASE WHEN e.eocenddate IS NULL THEN 1 ELSE 0 END, e.eocenddate),
-                        CAST(GETDATE() AS DATE)
-                 ))
+                 LAG(e.eocstartdate) OVER (
+                     PARTITION BY e.personid, e.legalstatus
+                     ORDER BY e.eocstartdate,
+                              CASE WHEN e.eocenddate IS NULL THEN 1 ELSE 0 END,
+                              e.eocenddate
+                 )
+                 AND DATEADD(
+                     DAY, 1,
+                     ISNULL(
+                         LAG(e.eocenddate) OVER (
+                             PARTITION BY e.personid, e.legalstatus
+                             ORDER BY e.eocstartdate,
+                                      CASE WHEN e.eocenddate IS NULL THEN 1 ELSE 0 END,
+                                      e.eocenddate
+                         ),
+                         CAST(GETDATE() AS DATE)
+                     )
+                 )
                 THEN 0
             ELSE 1
         END AS start_flag
@@ -61,7 +78,11 @@ FLAGGED AS (
 GROUPED AS (
     SELECT
         f.*,
-        SUM(f.start_flag) OVER (PARTITION BY f.personid, f.legalstatus ORDER BY f.eocstartdate ROWS UNBOUNDED PRECEDING) AS grp
+        SUM(f.start_flag) OVER (
+            PARTITION BY f.personid, f.legalstatus
+            ORDER BY f.eocstartdate
+            ROWS UNBOUNDED PRECEDING
+        ) AS grp
     FROM FLAGGED f
 ),
 ROLLED AS (
@@ -69,7 +90,11 @@ ROLLED AS (
         g.personid,
         g.legalstatus,
         MIN(g.eocstartdate) AS eocstartdate,
-        CASE WHEN MAX(CASE WHEN g.eocenddate IS NULL THEN 1 ELSE 0 END) = 1 THEN NULL ELSE MAX(g.eocenddate) END AS eocenddate
+        CASE
+            WHEN MAX(CASE WHEN g.eocenddate IS NULL THEN 1 ELSE 0 END) = 1
+                THEN NULL
+            ELSE MAX(g.eocenddate)
+        END AS eocenddate
     FROM GROUPED g
     GROUP BY g.personid, g.legalstatus, g.grp
 ),
@@ -90,7 +115,7 @@ LS_START AS (
         ORDER BY e.eocstartdate
     ) x
 )
-INSERT INTO ssd_legal_status (
+INSERT INTO [eclipseDelta].[dbo].[ssd_legal_status] (
     lega_legal_status_id,
     lega_person_id,
     lega_legal_status,
@@ -98,13 +123,13 @@ INSERT INTO ssd_legal_status (
     lega_legal_status_end_date
 )
 SELECT
-    ls.episodeofcareid                   AS lega_legal_status_id,
-    r.personid                           AS lega_person_id,
-    r.legalstatus                        AS lega_legal_status,
-    CAST(r.eocstartdate AS DATETIME)     AS lega_legal_status_start_date,
-    CAST(r.eocenddate   AS DATETIME)     AS lega_legal_status_end_date
+    ls.episodeofcareid                 AS lega_legal_status_id,
+    r.personid                         AS lega_person_id,
+    r.legalstatus                      AS lega_legal_status,
+    CAST(r.eocstartdate AS DATETIME)   AS lega_legal_status_start_date,
+    CAST(r.eocenddate   AS DATETIME)   AS lega_legal_status_end_date
 FROM ROLLED r
 LEFT JOIN LS_START ls
-    ON ls.personid = r.personid
+    ON ls.personid    = r.personid
    AND ls.legalstatus = r.legalstatus
    AND ls.eocstartdate = r.eocstartdate;

@@ -9,17 +9,17 @@
 -- - ssd_person
 --
 -- =============================================================================
+IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL
+    DROP TABLE #ssd_pre_proceedings;
 
-IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL DROP TABLE #ssd_pre_proceedings;
-
-IF OBJECT_ID('ssd_pre_proceedings', 'U') IS NOT NULL
+IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_pre_proceedings]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM ssd_pre_proceedings)
-        TRUNCATE TABLE ssd_pre_proceedings;
+    IF EXISTS (SELECT 1 FROM [eclipseDelta].[dbo].[ssd_pre_proceedings])
+        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_pre_proceedings];
 END
 ELSE
 BEGIN
-    CREATE TABLE ssd_pre_proceedings (
+    CREATE TABLE [eclipseDelta].[dbo].[ssd_pre_proceedings] (
         prep_table_id                         NVARCHAR(48)  NOT NULL PRIMARY KEY,
         prep_person_id                        NVARCHAR(48)  NULL,
         prep_plo_family_id                    NVARCHAR(48)  NULL,
@@ -45,11 +45,11 @@ BEGIN
         prep_la_final_plan_approved           NCHAR(1)      NULL,
         prep_la_final_care_plan               NVARCHAR(100) NULL
     );
-END
+END;
 
-TRUNCATE TABLE ssd_pre_proceedings;
+TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_pre_proceedings];
 
-INSERT INTO ssd_pre_proceedings (
+INSERT INTO [eclipseDelta].[dbo].[ssd_pre_proceedings] (
     prep_table_id,
     prep_person_id,
     prep_plo_family_id,
@@ -100,5 +100,5 @@ SELECT
     NULL AS prep_la_initial_care_plan,
     NULL AS prep_la_final_plan_approved,
     NULL AS prep_la_final_care_plan
-FROM ssd_person sp
+FROM [eclipseDelta].[dbo].[ssd_person] sp
 WHERE 1 = 0;

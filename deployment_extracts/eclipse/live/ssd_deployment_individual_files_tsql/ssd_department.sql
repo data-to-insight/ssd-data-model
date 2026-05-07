@@ -10,35 +10,39 @@
 --
 -- =============================================================================
 
-IF OBJECT_ID('tempdb..#ssd_department', 'U') IS NOT NULL DROP TABLE #ssd_department;
+IF OBJECT_ID('tempdb..#ssd_department', 'U') IS NOT NULL
+    DROP TABLE #ssd_department;
 
-IF OBJECT_ID('ssd_department', 'U') IS NOT NULL
+IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_department]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM ssd_department)
-        TRUNCATE TABLE ssd_department;
+    IF EXISTS (
+        SELECT 1
+        FROM [eclipseDelta].[dbo].[ssd_department]
+    )
+        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_department];
 END
 ELSE
 BEGIN
-    CREATE TABLE ssd_department (
+    CREATE TABLE [eclipseDelta].[dbo].[ssd_department] (
         dept_team_id          NVARCHAR(48)  NOT NULL PRIMARY KEY,  -- metadata={"item_ref":"DEPT1001A"}
         dept_team_name        NVARCHAR(255) NULL,                  -- metadata={"item_ref":"DEPT1002A"}
-        dept_team_parent_id   NVARCHAR(48)  NULL,                  -- metadata={"item_ref":"DEPT1003A", "info":"references ssd_department.dept_team_id"}
+        dept_team_parent_id   NVARCHAR(48)  NULL,                  -- metadata={"item_ref":"DEPT1003A","info":"references ssd_department.dept_team_id"}
         dept_team_parent_name NVARCHAR(255) NULL                   -- metadata={"item_ref":"DEPT1004A"}
     );
 END;
 
-INSERT INTO ssd_department (
+INSERT INTO [eclipseDelta].[dbo].[ssd_department] (
     dept_team_id,
     dept_team_name,
     dept_team_parent_id,
     dept_team_parent_name
 )
 SELECT
-    CONVERT(NVARCHAR(48), ORGANISATIONID) AS dept_team_id,
-    CONVERT(NVARCHAR(255), DESCRIPTION)   AS dept_team_name,
-    NULL                                  AS dept_team_parent_id,
-    NULL                                  AS dept_team_parent_name
-FROM ORGANISATIONVIEW
-WHERE ORGANISATIONCLASS = 'TEAM'
-  AND ISNULL(SECTOR, '') NOT IN ('CHARITY', 'PRIVATE')
-  AND ISNULL(SECTORSUBTYPE, '') NOT IN ('ADULT_SOCIAL_SERVICES', 'EDUCATION');
+    CONVERT(NVARCHAR(48), OV.ORGANISATIONID) AS dept_team_id,
+    CONVERT(NVARCHAR(255), OV.DESCRIPTION)   AS dept_team_name,
+    NULL                                     AS dept_team_parent_id,
+    NULL                                     AS dept_team_parent_name
+FROM [eclipseDelta].[dbo].[ORGANISATIONVIEW] OV
+WHERE OV.ORGANISATIONCLASS = 'TEAM'
+  AND ISNULL(OV.SECTOR, '') NOT IN ('CHARITY', 'PRIVATE')
+  AND ISNULL(OV.SECTORSUBTYPE, '') NOT IN ('ADULT_SOCIAL_SERVICES', 'EDUCATION');

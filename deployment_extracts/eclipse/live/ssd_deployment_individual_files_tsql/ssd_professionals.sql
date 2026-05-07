@@ -10,17 +10,17 @@
 -- - REFERENCENUMBERPERSONVIEW
 --
 -- =============================================================================
+IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL
+    DROP TABLE #ssd_professionals;
 
-IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL DROP TABLE #ssd_professionals;
-
-IF OBJECT_ID('ssd_professionals', 'U') IS NOT NULL
+IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_professionals]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM ssd_professionals)
-        TRUNCATE TABLE ssd_professionals;
+    IF EXISTS (SELECT 1 FROM [eclipseDelta].[dbo].[ssd_professionals])
+        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_professionals];
 END
 ELSE
 BEGIN
-    CREATE TABLE ssd_professionals (
+    CREATE TABLE [eclipseDelta].[dbo].[ssd_professionals] (
         prof_professional_id               NVARCHAR(48)  NOT NULL PRIMARY KEY,
         prof_staff_id                      NVARCHAR(48)  NULL,
         prof_professional_name             NVARCHAR(300) NULL,
@@ -31,9 +31,9 @@ BEGIN
         prof_professional_department       NVARCHAR(100) NULL,
         prof_full_time_equivalency         FLOAT         NULL
     );
-END
+END;
 
-INSERT INTO ssd_professionals (
+INSERT INTO [eclipseDelta].[dbo].[ssd_professionals] (
     prof_professional_id,
     prof_staff_id,
     prof_professional_name,
@@ -54,7 +54,7 @@ SELECT
     NULL AS prof_professional_caseload,
     NULL AS prof_professional_department,
     NULL AS prof_full_time_equivalency
-FROM RELATIONSHIPPROFESSIONALVIEW PPR
-LEFT JOIN REFERENCENUMBERPERSONVIEW PROFNUM
+FROM [eclipseDelta].[dbo].[RELATIONSHIPPROFESSIONALVIEW] PPR
+LEFT JOIN [eclipseDelta].[dbo].[REFERENCENUMBERPERSONVIEW] PROFNUM
        ON PROFNUM.PERSONID = PPR.PROFESSIONALRELATIONSHIPPERSONID
       AND PROFNUM.REFERENCETYPE = 'Social Work England number';
