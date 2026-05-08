@@ -1,14 +1,14 @@
 -- META-ELEMENT: {"type": "create_table"}
 IF OBJECT_ID('tempdb..#ssd_mother', 'U') IS NOT NULL DROP TABLE #ssd_mother;
 
-IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_mother]', 'U') IS NOT NULL
+IF OBJECT_ID('[SSD].[ssd_mother]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM [eclipseDelta].[dbo].[ssd_mother])
-        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_mother];
+    IF EXISTS (SELECT 1 FROM [SSD].[ssd_mother])
+        TRUNCATE TABLE [SSD].[ssd_mother];
 END
 ELSE
 BEGIN
-    CREATE TABLE [eclipseDelta].[dbo].[ssd_mother] (
+    CREATE TABLE [SSD].[ssd_mother] (
         moth_table_id           NVARCHAR(48) NOT NULL PRIMARY KEY, -- metadata={"item_ref":"MOTH004A"}
         moth_person_id          NVARCHAR(48) NULL,               -- metadata={"item_ref":"MOTH002A"}
         moth_childs_person_id   NVARCHAR(48) NULL,               -- metadata={"item_ref":"MOTH001A"}
@@ -16,9 +16,9 @@ BEGIN
     );
 END;
 
-TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_mother];
+TRUNCATE TABLE [SSD].[ssd_mother];
 
-INSERT INTO [eclipseDelta].[dbo].[ssd_mother] (
+INSERT INTO [SSD].[ssd_mother] (
     moth_table_id,
     moth_person_id,
     moth_childs_person_id,
@@ -36,14 +36,14 @@ WHERE PPR.RELATIONSHIP = 'Mother'
   -- mother in SSD cohort
   AND EXISTS (
         SELECT 1
-        FROM [eclipseDelta].[dbo].[ssd_person] sp_mother
+        FROM [SSD].[ssd_person] sp_mother
         WHERE sp_mother.pers_person_id =
               CONVERT(VARCHAR(48), PPR.ROLEAPERSONID)
       )
   -- child in SSD cohort 
   AND EXISTS (
         SELECT 1
-        FROM [eclipseDelta].[dbo].[ssd_person] sp_child
+        FROM [SSD].[ssd_person] sp_child
         WHERE sp_child.pers_person_id =
               CONVERT(VARCHAR(48), PPR.ROLEBPERSONID)
       );

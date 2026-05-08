@@ -13,17 +13,17 @@
 IF OBJECT_ID('tempdb..#ssd_legal_status', 'U') IS NOT NULL
     DROP TABLE #ssd_legal_status;
 
-IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_legal_status]', 'U') IS NOT NULL
+IF OBJECT_ID('[SSD].[ssd_legal_status]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [eclipseDelta].[dbo].[ssd_legal_status]
+        FROM [SSD].[ssd_legal_status]
     )
-        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_legal_status];
+        TRUNCATE TABLE [SSD].[ssd_legal_status];
 END
 ELSE
 BEGIN
-    CREATE TABLE [eclipseDelta].[dbo].[ssd_legal_status] (
+    CREATE TABLE [SSD].[ssd_legal_status] (
         lega_legal_status_id         NVARCHAR(48)  NOT NULL PRIMARY KEY,
         lega_person_id               NVARCHAR(48)  NULL,
         lega_legal_status            NVARCHAR(100) NULL,
@@ -42,7 +42,7 @@ END;
     FROM [eclipseDelta].[dbo].[CLAEPISODEOFCAREVIEW] EPIS
     WHERE EXISTS (
         SELECT 1
-        FROM [eclipseDelta].[dbo].[ssd_person] sp
+        FROM [SSD].[ssd_person] sp
         WHERE sp.pers_person_id =
               CONVERT(VARCHAR(48), EPIS.PERSONID)
     )
@@ -115,7 +115,7 @@ LS_START AS (
         ORDER BY e.eocstartdate
     ) x
 )
-INSERT INTO [eclipseDelta].[dbo].[ssd_legal_status] (
+INSERT INTO [SSD].[ssd_legal_status] (
     lega_legal_status_id,
     lega_person_id,
     lega_legal_status,

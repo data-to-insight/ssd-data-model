@@ -14,17 +14,17 @@
 IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL
     DROP TABLE #ssd_permanence;
 
-IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_permanence]', 'U') IS NOT NULL
+IF OBJECT_ID('[SSD].[ssd_permanence]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [eclipseDelta].[dbo].[ssd_permanence]
+        FROM [SSD].[ssd_permanence]
     )
-        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_permanence];
+        TRUNCATE TABLE [SSD].[ssd_permanence];
 END
 ELSE
 BEGIN
-    CREATE TABLE [eclipseDelta].[dbo].[ssd_permanence] (
+    CREATE TABLE [SSD].[ssd_permanence] (
         perm_table_id                 NVARCHAR(48)  NOT NULL PRIMARY KEY, -- metadata={"item_ref":"PERM001A"}
         perm_person_id                NVARCHAR(48)  NULL,                 -- metadata={"item_ref":"PERM002A"}
         perm_cla_id                   NVARCHAR(48)  NULL,                 -- metadata={"item_ref":"PERM022A"}
@@ -51,7 +51,7 @@ BEGIN
     );
 END;
 
-INSERT INTO [eclipseDelta].[dbo].[ssd_permanence] (
+INSERT INTO [SSD].[ssd_permanence] (
     perm_table_id,
     perm_person_id,
     perm_cla_id,
@@ -119,7 +119,7 @@ OUTER APPLY (
 ) CLA
 WHERE EXISTS (
     SELECT 1
-    FROM [eclipseDelta].[dbo].[ssd_person] sp
+    FROM [SSD].[ssd_person] sp
     WHERE sp.pers_person_id =
           CONVERT(VARCHAR(48), ADOP.PERSONID)
 );

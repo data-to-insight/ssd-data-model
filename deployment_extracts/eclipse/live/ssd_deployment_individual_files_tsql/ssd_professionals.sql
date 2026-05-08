@@ -13,14 +13,14 @@
 IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL
     DROP TABLE #ssd_professionals;
 
-IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_professionals]', 'U') IS NOT NULL
+IF OBJECT_ID('[SSD].[ssd_professionals]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM [eclipseDelta].[dbo].[ssd_professionals])
-        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_professionals];
+    IF EXISTS (SELECT 1 FROM [SSD].[ssd_professionals])
+        TRUNCATE TABLE [SSD].[ssd_professionals];
 END
 ELSE
 BEGIN
-    CREATE TABLE [eclipseDelta].[dbo].[ssd_professionals] (
+    CREATE TABLE [SSD].[ssd_professionals] (
         prof_professional_id               NVARCHAR(48)  NOT NULL PRIMARY KEY,
         prof_staff_id                      NVARCHAR(48)  NULL,
         prof_professional_name             NVARCHAR(300) NULL,
@@ -33,7 +33,7 @@ BEGIN
     );
 END;
 
-INSERT INTO [eclipseDelta].[dbo].[ssd_professionals] (
+INSERT INTO [SSD].[ssd_professionals] (
     prof_professional_id,
     prof_staff_id,
     prof_professional_name,

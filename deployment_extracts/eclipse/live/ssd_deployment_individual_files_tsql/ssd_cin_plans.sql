@@ -18,14 +18,14 @@
 IF OBJECT_ID('tempdb..#ssd_cin_plans', 'U') IS NOT NULL
     DROP TABLE #ssd_cin_plans;
 
-IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_cin_plans]', 'U') IS NOT NULL
+IF OBJECT_ID('[SSD].[ssd_cin_plans]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM [eclipseDelta].[dbo].[ssd_cin_plans])
-        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_cin_plans];
+    IF EXISTS (SELECT 1 FROM [SSD].[ssd_cin_plans])
+        TRUNCATE TABLE [SSD].[ssd_cin_plans];
 END
 ELSE
 BEGIN
-    CREATE TABLE [eclipseDelta].[dbo].[ssd_cin_plans] (
+    CREATE TABLE [SSD].[ssd_cin_plans] (
         cinp_cin_plan_id         NVARCHAR(48)  NOT NULL PRIMARY KEY,
         cinp_referral_id         NVARCHAR(48)  NULL,
         cinp_person_id           NVARCHAR(48)  NULL,
@@ -83,7 +83,7 @@ CIN_PLAN_ROWS AS (
       AND (CLA.CLASSIFICATIONPATHID = 4 OR CLA.CLASSIFICATIONCODEID = 1270)
       AND EXISTS (
           SELECT 1
-          FROM [eclipseDelta].[dbo].[ssd_person] sp
+          FROM [SSD].[ssd_person] sp
           WHERE sp.pers_person_id = CONVERT(VARCHAR(48), CLA.PERSONID)
       )
 ),
@@ -101,7 +101,7 @@ CIN_PLAN AS (
     FROM CIN_PLAN_TAGGED
     GROUP BY personid, grp
 )
-INSERT INTO [eclipseDelta].[dbo].[ssd_cin_plans] (
+INSERT INTO [SSD].[ssd_cin_plans] (
     cinp_cin_plan_id,
     cinp_person_id,
     cinp_cin_plan_start_date,

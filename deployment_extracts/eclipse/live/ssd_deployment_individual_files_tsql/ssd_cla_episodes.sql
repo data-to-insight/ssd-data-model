@@ -16,14 +16,14 @@
 IF OBJECT_ID('tempdb..#ssd_cla_episodes', 'U') IS NOT NULL
     DROP TABLE #ssd_cla_episodes;
 
-IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_cla_episodes]', 'U') IS NOT NULL
+IF OBJECT_ID('[SSD].[ssd_cla_episodes]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM [eclipseDelta].[dbo].[ssd_cla_episodes])
-        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_cla_episodes];
+    IF EXISTS (SELECT 1 FROM [SSD].[ssd_cla_episodes])
+        TRUNCATE TABLE [SSD].[ssd_cla_episodes];
 END
 ELSE
 BEGIN
-    CREATE TABLE [eclipseDelta].[dbo].[ssd_cla_episodes] (
+    CREATE TABLE [SSD].[ssd_cla_episodes] (
         clae_cla_episode_id             NVARCHAR(48)  NOT NULL PRIMARY KEY,
         clae_person_id                  NVARCHAR(48)  NULL,
         clae_cla_placement_id           NVARCHAR(48)  NULL,
@@ -90,7 +90,7 @@ IRO_MEETING AS (
         F.APV.ANSWERFORSUBJECTID,
         F.APV.INSTANCEID
 )
-INSERT INTO [eclipseDelta].[dbo].[ssd_cla_episodes] (
+INSERT INTO [SSD].[ssd_cla_episodes] (
     clae_cla_episode_id,
     clae_person_id,
     clae_cla_episode_start_date,
@@ -149,6 +149,6 @@ OUTER APPLY (
 ) IROA
 WHERE EXISTS (
     SELECT 1
-    FROM [eclipseDelta].[dbo].[ssd_person] sp
+    FROM [SSD].[ssd_person] sp
     WHERE sp.pers_person_id = CONVERT(VARCHAR(48), CE.PERSONID)
 );

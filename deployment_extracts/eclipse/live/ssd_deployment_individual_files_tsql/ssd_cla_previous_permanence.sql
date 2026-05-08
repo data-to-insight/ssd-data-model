@@ -12,17 +12,17 @@
 IF OBJECT_ID('tempdb..#ssd_cla_previous_permanence', 'U') IS NOT NULL
     DROP TABLE #ssd_cla_previous_permanence;
 
-IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_cla_previous_permanence]', 'U') IS NOT NULL
+IF OBJECT_ID('[SSD].[ssd_cla_previous_permanence]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [eclipseDelta].[dbo].[ssd_cla_previous_permanence]
+        FROM [SSD].[ssd_cla_previous_permanence]
     )
-        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_cla_previous_permanence];
+        TRUNCATE TABLE [SSD].[ssd_cla_previous_permanence];
 END
 ELSE
 BEGIN
-    CREATE TABLE [eclipseDelta].[dbo].[ssd_cla_previous_permanence] (
+    CREATE TABLE [SSD].[ssd_cla_previous_permanence] (
         lapp_table_id                       NVARCHAR(48)  NOT NULL PRIMARY KEY,  -- metadata={"item_ref":"LAPP001A"}
         lapp_person_id                      NVARCHAR(48)  NULL,                  -- metadata={"item_ref":"LAPP002A"}
         lapp_previous_permanence_option     NVARCHAR(200) NULL,                  -- metadata={"item_ref":"LAPP003A"}
@@ -31,7 +31,7 @@ BEGIN
     );
 END;
 
-INSERT INTO [eclipseDelta].[dbo].[ssd_cla_previous_permanence] (
+INSERT INTO [SSD].[ssd_cla_previous_permanence] (
     lapp_table_id,
     lapp_person_id,
     lapp_previous_permanence_option,
@@ -44,5 +44,5 @@ SELECT
     NULL AS lapp_previous_permanence_option,
     NULL AS lapp_previous_permanence_la,
     NULL AS lapp_previous_permanence_order_date
-FROM [eclipseDelta].[dbo].[ssd_person] sp
+FROM [SSD].[ssd_person] sp
 WHERE 1 = 0;

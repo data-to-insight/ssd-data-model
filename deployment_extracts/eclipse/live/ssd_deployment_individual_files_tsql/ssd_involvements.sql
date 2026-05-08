@@ -15,17 +15,17 @@
 IF OBJECT_ID('tempdb..#ssd_involvements', 'U') IS NOT NULL
     DROP TABLE #ssd_involvements;
 
-IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_involvements]', 'U') IS NOT NULL
+IF OBJECT_ID('[SSD].[ssd_involvements]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [eclipseDelta].[dbo].[ssd_involvements]
+        FROM [SSD].[ssd_involvements]
     )
-        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_involvements];
+        TRUNCATE TABLE [SSD].[ssd_involvements];
 END
 ELSE
 BEGIN
-    CREATE TABLE [eclipseDelta].[dbo].[ssd_involvements] (
+    CREATE TABLE [SSD].[ssd_involvements] (
         invo_involvements_id        NVARCHAR(48)  NOT NULL PRIMARY KEY,
         invo_professional_id        NVARCHAR(48)  NULL,
         invo_professional_role_id   NVARCHAR(200) NULL,
@@ -60,7 +60,7 @@ CIN_EPISODE_BASE AS (
       AND CLA.CLASSIFICATIONPATHID IN (23, 10)
       AND EXISTS (
             SELECT 1
-            FROM [eclipseDelta].[dbo].[ssd_person] sp
+            FROM [SSD].[ssd_person] sp
             WHERE sp.pers_person_id =
                   CONVERT(VARCHAR(48), CLA.PERSONID)
       )
@@ -118,7 +118,7 @@ CIN_EPISODE AS (
     FROM CIN_EPISODE_GROUPED
     GROUP BY personid, grp
 )
-INSERT INTO [eclipseDelta].[dbo].[ssd_involvements] (
+INSERT INTO [SSD].[ssd_involvements] (
     invo_involvements_id,
     invo_professional_id,
     invo_professional_role_id,
@@ -153,7 +153,7 @@ LEFT JOIN TEAM T
             < ISNULL(T.team_end_date, CAST(GETDATE() AS DATE))
 WHERE EXISTS (
     SELECT 1
-    FROM [eclipseDelta].[dbo].[ssd_person] sp
+    FROM [SSD].[ssd_person] sp
     WHERE sp.pers_person_id =
           CONVERT(VARCHAR(48), PPR.PERSONID)
 );

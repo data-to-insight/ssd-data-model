@@ -10,17 +10,17 @@
 -- =============================================================================
 
 IF OBJECT_ID('tempdb..#ssd_address', 'U') IS NOT NULL DROP TABLE #ssd_address;
-IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_address]', 'U') IS NOT NULL
+IF OBJECT_ID('[SSD].[ssd_address]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [eclipseDelta].[dbo].[ssd_address]
+        FROM [SSD].[ssd_address]
     )
-        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_address];
+        TRUNCATE TABLE [SSD].[ssd_address];
 END
 ELSE
 BEGIN
-    CREATE TABLE [eclipseDelta].[dbo].[ssd_address] (
+    CREATE TABLE [SSD].[ssd_address] (
         addr_table_id           NVARCHAR(48)   NOT NULL PRIMARY KEY,
         addr_person_id          NVARCHAR(48)   NULL,
         addr_address_type       NVARCHAR(48)   NULL,
@@ -31,7 +31,7 @@ BEGIN
     );
 END;
 
-INSERT INTO [eclipseDelta].[dbo].[ssd_address] (
+INSERT INTO [SSD].[ssd_address] (
     addr_table_id,
     addr_person_id,
     addr_address_type,
@@ -82,9 +82,9 @@ SELECT
         + '"NORTHING":""'
         + '}'
     ) AS addr_address_json
-FROM [eclipseDelta].[dbo].[ADDRESSPERSONVIEW] PERSADDRESS
+FROM [SSD].[ADDRESSPERSONVIEW] PERSADDRESS
 WHERE EXISTS (
     SELECT 1
-    FROM [eclipseDelta].[dbo].[ssd_person] SP
+    FROM [SSD].[ssd_person] SP
     WHERE SP.pers_person_id = CONVERT(VARCHAR(48), PERSADDRESS.PERSONID)
 );

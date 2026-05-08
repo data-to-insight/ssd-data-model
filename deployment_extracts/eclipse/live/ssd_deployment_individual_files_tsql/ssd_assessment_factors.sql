@@ -14,17 +14,17 @@
 IF OBJECT_ID('tempdb..#ssd_assessment_factors', 'U') IS NOT NULL
     DROP TABLE #ssd_assessment_factors;
 
-IF OBJECT_ID('[eclipseDelta].[dbo].[ssd_assessment_factors]', 'U') IS NOT NULL
+IF OBJECT_ID('[SSD].[ssd_assessment_factors]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [eclipseDelta].[dbo].[ssd_assessment_factors]
+        FROM [SSD].[ssd_assessment_factors]
     )
-        TRUNCATE TABLE [eclipseDelta].[dbo].[ssd_assessment_factors];
+        TRUNCATE TABLE [SSD].[ssd_assessment_factors];
 END
 ELSE
 BEGIN
-    CREATE TABLE [eclipseDelta].[dbo].[ssd_assessment_factors] (
+    CREATE TABLE [SSD].[ssd_assessment_factors] (
         cinf_table_id                NVARCHAR(48)  NOT NULL,
         cinf_assessment_id           NVARCHAR(48)  NOT NULL,
         cinf_assessment_factors_json NVARCHAR(MAX) NULL,
@@ -96,7 +96,7 @@ END;
       AND ISNULL(FAPV.DESIGNSUBNAME, '?') IN ('Reassessment', 'Single assessment')
       AND EXISTS (
             SELECT 1
-            FROM [eclipseDelta].[dbo].[ssd_person] sp
+            FROM [SSD].[ssd_person] sp
             WHERE sp.pers_person_id =
                   CONVERT(VARCHAR(48), FAPV.ANSWERFORSUBJECTID)
       )
@@ -106,7 +106,7 @@ END;
         FAPV.DATESTARTED,
         FAPV.DATECOMPLETED
 )
-INSERT INTO [eclipseDelta].[dbo].[ssd_assessment_factors] (
+INSERT INTO [SSD].[ssd_assessment_factors] (
     cinf_table_id,
     cinf_assessment_id,
     cinf_assessment_factors_json
