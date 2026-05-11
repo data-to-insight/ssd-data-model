@@ -15,14 +15,14 @@
 IF OBJECT_ID('tempdb..#ssd_cp_plans', 'U') IS NOT NULL
     DROP TABLE #ssd_cp_plans;
 
-IF OBJECT_ID('[SSD].[ssd_cp_plans]', 'U') IS NOT NULL
+IF OBJECT_ID('[ssd_cp_plans]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM [SSD].[ssd_cp_plans])
-        TRUNCATE TABLE [SSD].[ssd_cp_plans];
+    IF EXISTS (SELECT 1 FROM [ssd_cp_plans])
+        TRUNCATE TABLE [ssd_cp_plans];
 END
 ELSE
 BEGIN
-    CREATE TABLE [SSD].[ssd_cp_plans] (
+    CREATE TABLE [ssd_cp_plans] (
         cppl_cp_plan_id               NVARCHAR(48)  NOT NULL PRIMARY KEY, -- metadata={"item_ref":"CPPL001A"}
         cppl_referral_id              NVARCHAR(48)  NULL,                 -- metadata={"item_ref":"CPPL007A"}
         cppl_icpc_id                  NVARCHAR(48)  NULL,                 -- metadata={"item_ref":"CPPL008A"}
@@ -52,7 +52,7 @@ END;
       AND FAPV.DESIGNSUBNAME = 'Child Protection - Initial Conference'
       AND EXISTS (
             SELECT 1
-            FROM [SSD].[ssd_person] sp
+            FROM [ssd_person] sp
             WHERE sp.pers_person_id =
                   CONVERT(VARCHAR(48), FAPV.ANSWERFORSUBJECTID)
       )
@@ -72,7 +72,7 @@ CP_CATEGORY AS (
       AND CPV.STATUS <> 'DELETED'
       AND EXISTS (
             SELECT 1
-            FROM [SSD].[ssd_person] sp
+            FROM [ssd_person] sp
             WHERE sp.pers_person_id =
                   CONVERT(VARCHAR(48), CPV.PERSONID)
       )
@@ -90,7 +90,7 @@ ALL_CIN_EPISODES AS (
            OR CLA.CLASSIFICATIONCODEID = 1270)
       AND EXISTS (
             SELECT 1
-            FROM [SSD].[ssd_person] sp
+            FROM [ssd_person] sp
             WHERE sp.pers_person_id =
                   CONVERT(VARCHAR(48), CLA.PERSONID)
       )
@@ -106,7 +106,7 @@ ALL_CIN_EPISODES AS (
     FROM [eclipseDelta].[dbo].[CLAEPISODEOFCAREVIEW] CE
     WHERE EXISTS (
             SELECT 1
-            FROM [SSD].[ssd_person] sp
+            FROM [ssd_person] sp
             WHERE sp.pers_person_id =
                   CONVERT(VARCHAR(48), CE.PERSONID)
       )
@@ -129,7 +129,7 @@ REFERRAL_BASE AS (
       AND FAPV.INSTANCESTATE = 'COMPLETE'
       AND EXISTS (
             SELECT 1
-            FROM [SSD].[ssd_person] sp
+            FROM [ssd_person] sp
             WHERE sp.pers_person_id =
                   CONVERT(VARCHAR(48), FAPV.ANSWERFORSUBJECTID)
       )
@@ -232,7 +232,7 @@ CP_PLAN_ROWS AS (
       AND CLA.CLASSIFICATIONPATHID = 51
       AND EXISTS (
             SELECT 1
-            FROM [SSD].[ssd_person] sp
+            FROM [ssd_person] sp
             WHERE sp.pers_person_id =
                   CONVERT(VARCHAR(48), CLA.PERSONID)
       )
@@ -253,7 +253,7 @@ CP_PLAN AS (
     FROM CP_PLAN_TAGGED
     GROUP BY PERSONID, GRP
 )
-INSERT INTO [SSD].[ssd_cp_plans] (
+INSERT INTO [ssd_cp_plans] (
     cppl_cp_plan_id,
     cppl_referral_id,
     cppl_icpc_id,
@@ -311,6 +311,6 @@ OUTER APPLY (
 ) CFIRST
 WHERE EXISTS (
     SELECT 1
-    FROM [SSD].[ssd_person] sp
+    FROM [ssd_person] sp
     WHERE sp.pers_person_id = CP.PERSONID
 );

@@ -5,8 +5,10 @@ import argparse
 
 DEFAULT_GLOB = "deployment_extracts/eclipse/live/ssd_deployment_individual_files_tsql/*.sql"
 
+# search-replace values
 OLD = "[eclipseDelta].[dbo].[ssd_"
-NEW = "[SSD].[ssd_"
+OLD = "[SSD].[ssd_"
+NEW = "[ssd_"
 
 
 def replace_in_file(path: Path, dry_run: bool = False) -> tuple[bool, int]:

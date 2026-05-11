@@ -11,17 +11,17 @@
 IF OBJECT_ID('tempdb..#ssd_immigration_status', 'U') IS NOT NULL
     DROP TABLE #ssd_immigration_status;
 
-IF OBJECT_ID('[SSD].[ssd_immigration_status]', 'U') IS NOT NULL
+IF OBJECT_ID('[ssd_immigration_status]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [SSD].[ssd_immigration_status]
+        FROM [ssd_immigration_status]
     )
-        TRUNCATE TABLE [SSD].[ssd_immigration_status];
+        TRUNCATE TABLE [ssd_immigration_status];
 END
 ELSE
 BEGIN
-    CREATE TABLE [SSD].[ssd_immigration_status] (
+    CREATE TABLE [ssd_immigration_status] (
         immi_immigration_status_id         NVARCHAR(48)  NOT NULL PRIMARY KEY,
         immi_person_id                     NVARCHAR(48)  NULL,
         immi_immigration_status_start_date DATETIME      NULL,
@@ -30,7 +30,7 @@ BEGIN
     );
 END;
 
-INSERT INTO [SSD].[ssd_immigration_status] (
+INSERT INTO [ssd_immigration_status] (
     immi_immigration_status_id,
     immi_person_id,
     immi_immigration_status_start_date,
@@ -50,7 +50,7 @@ WHERE CLA.CLASSIFICATIONPATHID IN (1, 83)
   AND CLA.STATUS <> 'DELETED'
   AND EXISTS (
       SELECT 1
-      FROM [SSD].[ssd_person] sp
+      FROM [ssd_person] sp
       WHERE sp.pers_person_id =
             CONVERT(VARCHAR(48), CLA.PERSONID)
   );

@@ -10,17 +10,17 @@
 -- =============================================================================
 
 IF OBJECT_ID('tempdb..#ssd_address', 'U') IS NOT NULL DROP TABLE #ssd_address;
-IF OBJECT_ID('[SSD].[ssd_address]', 'U') IS NOT NULL
+IF OBJECT_ID('[ssd_address]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [SSD].[ssd_address]
+        FROM [ssd_address]
     )
-        TRUNCATE TABLE [SSD].[ssd_address];
+        TRUNCATE TABLE [ssd_address];
 END
 ELSE
 BEGIN
-    CREATE TABLE [SSD].[ssd_address] (
+    CREATE TABLE [ssd_address] (
         addr_table_id           NVARCHAR(48)   NOT NULL PRIMARY KEY,
         addr_person_id          NVARCHAR(48)   NULL,
         addr_address_type       NVARCHAR(48)   NULL,
@@ -31,7 +31,7 @@ BEGIN
     );
 END;
 
-INSERT INTO [SSD].[ssd_address] (
+INSERT INTO [ssd_address] (
     addr_table_id,
     addr_person_id,
     addr_address_type,
@@ -85,6 +85,6 @@ SELECT
 FROM [SSD].[ADDRESSPERSONVIEW] PERSADDRESS
 WHERE EXISTS (
     SELECT 1
-    FROM [SSD].[ssd_person] SP
+    FROM [ssd_person] SP
     WHERE SP.pers_person_id = CONVERT(VARCHAR(48), PERSADDRESS.PERSONID)
 );

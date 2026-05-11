@@ -22,15 +22,15 @@
 /* META-ELEMENT: {"type": "drop_table"} */
 IF OBJECT_ID('tempdb..#ssd_person', 'U') IS NOT NULL DROP TABLE #ssd_person;
 
-IF OBJECT_ID('[SSD].[ssd_person]', 'U') IS NOT NULL
+IF OBJECT_ID('[ssd_person]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM [SSD].[ssd_person])
-        TRUNCATE TABLE [SSD].[ssd_person];
+    IF EXISTS (SELECT 1 FROM [ssd_person])
+        TRUNCATE TABLE [ssd_person];
 END
 ELSE
 BEGIN
     /* META-ELEMENT: {"type": "create_table"} */
-    CREATE TABLE [SSD].[ssd_person] (
+    CREATE TABLE [ssd_person] (
         pers_legacy_id          NVARCHAR(48),               -- metadata={"item_ref":"PERS014A", "info": "Legacy systems identifier. Common to SystemC"}
         pers_person_id          NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"PERS001A"}
         pers_upn                NVARCHAR(13),               -- metadata={"item_ref":"PERS006A"}
@@ -148,7 +148,7 @@ CLASS_FILTER AS (
     WHERE CPV.classificationpathid IN (17,21,43,50)
       AND CPV.enddate IS NULL
 )
-INSERT INTO [SSD].[ssd_person] (
+INSERT INTO [ssd_person] (
     pers_legacy_id,
     pers_person_id,
     pers_upn,

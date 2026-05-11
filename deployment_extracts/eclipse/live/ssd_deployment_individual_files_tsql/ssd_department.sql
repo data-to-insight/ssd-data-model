@@ -13,17 +13,17 @@
 IF OBJECT_ID('tempdb..#ssd_department', 'U') IS NOT NULL
     DROP TABLE #ssd_department;
 
-IF OBJECT_ID('[SSD].[ssd_department]', 'U') IS NOT NULL
+IF OBJECT_ID('[ssd_department]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [SSD].[ssd_department]
+        FROM [ssd_department]
     )
-        TRUNCATE TABLE [SSD].[ssd_department];
+        TRUNCATE TABLE [ssd_department];
 END
 ELSE
 BEGIN
-    CREATE TABLE [SSD].[ssd_department] (
+    CREATE TABLE [ssd_department] (
         dept_team_id          NVARCHAR(48)  NOT NULL PRIMARY KEY,  -- metadata={"item_ref":"DEPT1001A"}
         dept_team_name        NVARCHAR(255) NULL,                  -- metadata={"item_ref":"DEPT1002A"}
         dept_team_parent_id   NVARCHAR(48)  NULL,                  -- metadata={"item_ref":"DEPT1003A","info":"references ssd_department.dept_team_id"}
@@ -31,7 +31,7 @@ BEGIN
     );
 END;
 
-INSERT INTO [SSD].[ssd_department] (
+INSERT INTO [ssd_department] (
     dept_team_id,
     dept_team_name,
     dept_team_parent_id,

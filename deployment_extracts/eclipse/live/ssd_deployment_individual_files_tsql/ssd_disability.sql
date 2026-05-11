@@ -11,24 +11,24 @@
 IF OBJECT_ID('tempdb..#ssd_disability', 'U') IS NOT NULL
     DROP TABLE #ssd_disability;
 
-IF OBJECT_ID('[SSD].[ssd_disability]', 'U') IS NOT NULL
+IF OBJECT_ID('[ssd_disability]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [SSD].[ssd_disability]
+        FROM [ssd_disability]
     )
-        TRUNCATE TABLE [SSD].[ssd_disability];
+        TRUNCATE TABLE [ssd_disability];
 END
 ELSE
 BEGIN
-    CREATE TABLE [SSD].[ssd_disability] (
+    CREATE TABLE [ssd_disability] (
         disa_table_id        NVARCHAR(48) NOT NULL PRIMARY KEY,
         disa_person_id       NVARCHAR(48) NOT NULL,
         disa_disability_code NVARCHAR(48) NOT NULL
     );
 END;
 
-INSERT INTO [SSD].[ssd_disability] (
+INSERT INTO [ssd_disability] (
     disa_table_id,
     disa_person_id,
     disa_disability_code
@@ -63,7 +63,7 @@ WHERE CLA.STATUS <> 'DELETED'
   AND CLA.CLASSIFICATIONPATHID IN (55, 58, 79, 172, 186)
   AND EXISTS (
       SELECT 1
-      FROM [SSD].[ssd_person] sp
+      FROM [ssd_person] sp
       WHERE sp.pers_person_id =
             CONVERT(VARCHAR(48), CLA.PERSONID)
   );

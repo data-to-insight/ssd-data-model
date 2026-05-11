@@ -14,21 +14,21 @@
 IF OBJECT_ID('tempdb..#ssd_cla_immunisations', 'U') IS NOT NULL
     DROP TABLE #ssd_cla_immunisations;
 
-IF OBJECT_ID('[SSD].[ssd_cla_immunisations]', 'U') IS NOT NULL
+IF OBJECT_ID('[ssd_cla_immunisations]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM [SSD].[ssd_cla_immunisations])
-        TRUNCATE TABLE [SSD].[ssd_cla_immunisations];
+    IF EXISTS (SELECT 1 FROM [ssd_cla_immunisations])
+        TRUNCATE TABLE [ssd_cla_immunisations];
 END
 ELSE
 BEGIN
-    CREATE TABLE [SSD].[ssd_cla_immunisations] (
+    CREATE TABLE [ssd_cla_immunisations] (
         clai_person_id                 NVARCHAR(48) NOT NULL PRIMARY KEY,  -- metadata={"item_ref":"CLAI002A"}
         clai_immunisations_status      NCHAR(1)     NULL,                 -- metadata={"item_ref":"CLAI004A"}
         clai_immunisations_status_date DATETIME     NULL                  -- metadata={"item_ref":"CLAI005A"}
     );
 END;
 
-INSERT INTO [SSD].[ssd_cla_immunisations] (
+INSERT INTO [ssd_cla_immunisations] (
     clai_person_id,
     clai_immunisations_status,
     clai_immunisations_status_date
@@ -53,7 +53,7 @@ WHERE FAPV.DESIGNGUID = '0438ab4f-0d93-40d3-ab73-f97455646041'
   AND FAPV.DESIGNSUBNAME = 'Immunisation check '
   AND EXISTS (
         SELECT 1
-        FROM [SSD].[ssd_person] sp
+        FROM [ssd_person] sp
         WHERE sp.pers_person_id =
               CONVERT(VARCHAR(48), FAPV.ANSWERFORSUBJECTID)
   )

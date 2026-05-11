@@ -15,14 +15,14 @@
 IF OBJECT_ID('tempdb..#ssd_cin_episodes', 'U') IS NOT NULL
     DROP TABLE #ssd_cin_episodes;
 
-IF OBJECT_ID('[SSD].[ssd_cin_episodes]', 'U') IS NOT NULL
+IF OBJECT_ID('[ssd_cin_episodes]', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (SELECT 1 FROM [SSD].[ssd_cin_episodes])
-        TRUNCATE TABLE [SSD].[ssd_cin_episodes];
+    IF EXISTS (SELECT 1 FROM [ssd_cin_episodes])
+        TRUNCATE TABLE [ssd_cin_episodes];
 END
 ELSE
 BEGIN
-    CREATE TABLE [SSD].[ssd_cin_episodes]
+    CREATE TABLE [ssd_cin_episodes]
     (
         cine_referral_id           NVARCHAR(48)   NOT NULL PRIMARY KEY,
         cine_person_id             NVARCHAR(48)   NULL,
@@ -145,11 +145,11 @@ CIN_EPISODE AS (
         ORDER BY R.DATE_OF_REFERRAL DESC
     ) R
 )
-INSERT INTO [SSD].[ssd_cin_episodes]
+INSERT INTO [ssd_cin_episodes]
 SELECT *
 FROM CIN_EPISODE CE
 WHERE EXISTS (
     SELECT 1
-    FROM [SSD].[ssd_person] sp
+    FROM [ssd_person] sp
     WHERE sp.pers_person_id = CONVERT(VARCHAR(48), CE.PERSONID)
 );

@@ -17,17 +17,17 @@
 IF OBJECT_ID('tempdb..#ssd_initial_cp_conference', 'U') IS NOT NULL
     DROP TABLE #ssd_initial_cp_conference;
 
-IF OBJECT_ID('[SSD].[ssd_initial_cp_conference]', 'U') IS NOT NULL
+IF OBJECT_ID('[ssd_initial_cp_conference]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [SSD].[ssd_initial_cp_conference]
+        FROM [ssd_initial_cp_conference]
     )
-        TRUNCATE TABLE [SSD].[ssd_initial_cp_conference];
+        TRUNCATE TABLE [ssd_initial_cp_conference];
 END
 ELSE
 BEGIN
-    CREATE TABLE [SSD].[ssd_initial_cp_conference] (
+    CREATE TABLE [ssd_initial_cp_conference] (
         icpc_icpc_id              NVARCHAR(48)   NOT NULL PRIMARY KEY,
         icpc_icpc_meeting_id      NVARCHAR(48)   NULL,
         icpc_s47_enquiry_id       NVARCHAR(48)   NULL,
@@ -113,7 +113,7 @@ INITIAL_ASSESSMENT AS (
       AND FAPV.DESIGNSUBNAME = 'Child Protection - Initial Conference'
       AND EXISTS (
             SELECT 1
-            FROM [SSD].[ssd_person] sp
+            FROM [ssd_person] sp
             WHERE sp.pers_person_id =
                   CONVERT(VARCHAR(48), FAPV.ANSWERFORSUBJECTID)
       )
@@ -140,7 +140,7 @@ TEAM AS (
     FROM [eclipseDelta].[dbo].[PERSONORGRELATIONSHIPVIEW] PPR
     WHERE PPR.ALLOCATEDTEAMCODE = 'AT'
 )
-INSERT INTO [SSD].[ssd_initial_cp_conference] (
+INSERT INTO [ssd_initial_cp_conference] (
     icpc_icpc_id,
     icpc_icpc_meeting_id,
     icpc_person_id,
@@ -192,6 +192,6 @@ OUTER APPLY (
 ) t
 WHERE EXISTS (
     SELECT 1
-    FROM [SSD].[ssd_person] sp
+    FROM [ssd_person] sp
     WHERE sp.pers_person_id = ia.personid
 );

@@ -13,17 +13,17 @@
 IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL
     DROP TABLE #ssd_missing;
 
-IF OBJECT_ID('[SSD].[ssd_missing]', 'U') IS NOT NULL
+IF OBJECT_ID('[ssd_missing]', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM [SSD].[ssd_missing]
+        FROM [ssd_missing]
     )
-        TRUNCATE TABLE [SSD].[ssd_missing];
+        TRUNCATE TABLE [ssd_missing];
 END
 ELSE
 BEGIN
-    CREATE TABLE [SSD].[ssd_missing] (
+    CREATE TABLE [ssd_missing] (
         miss_table_id                   NVARCHAR(48)  NOT NULL PRIMARY KEY,
         miss_person_id                  NVARCHAR(48)  NULL,
         miss_missing_episode_start_date DATETIME      NULL,
@@ -73,7 +73,7 @@ END;
       AND FAPV.INSTANCESTATE = 'COMPLETE'
       AND EXISTS (
             SELECT 1
-            FROM [SSD].[ssd_person] sp
+            FROM [ssd_person] sp
             WHERE sp.pers_person_id =
                   CONVERT(VARCHAR(48), FAPV.ANSWERFORSUBJECTID)
       )
@@ -82,7 +82,7 @@ END;
         FAPV.SUBJECTID,
         FAPV.PAGETITLE
 )
-INSERT INTO [SSD].[ssd_missing] (
+INSERT INTO [ssd_missing] (
     miss_table_id,
     miss_person_id,
     miss_missing_episode_start_date,
