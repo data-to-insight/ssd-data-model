@@ -48,7 +48,7 @@ SELECT
     CONVERT(NVARCHAR(48), rf.PERSONID) AS fami_person_id   -- metadata={"item_ref":"FAMI002A"}
 FROM [eclipseDelta].[dbo].[GROUPPERSONVIEW] rf
 LEFT JOIN [eclipseDelta].[dbo].[GROUPVIEW] gv
-    ON gv.GROUPID = rf.GROUPID
+    ON CONVERT(VARCHAR(48), gv.GROUPID) = CONVERT(VARCHAR(48), rf.GROUPID)
 WHERE gv.GROUPTYPE = 'Family'
   AND EXISTS (
         SELECT 1

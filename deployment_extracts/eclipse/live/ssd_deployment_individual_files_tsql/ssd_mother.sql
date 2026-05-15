@@ -31,7 +31,7 @@ SELECT
     CAST(PDV.DATEOFBIRTH AS DATETIME)                     AS moth_childs_dob         -- metadata={"item_ref":"MOTH003A"}
 FROM [eclipseDelta].[dbo].[RELATIONSHIPPERSONVIEW] PPR
 LEFT JOIN [eclipseDelta].[dbo].[PERSONDEMOGRAPHICSVIEW] PDV
-       ON PDV.PERSONID = PPR.ROLEBPERSONID
+       ON CONVERT(VARCHAR(48), PDV.PERSONID) = CONVERT(VARCHAR(48), PPR.ROLEBPERSONID)
 WHERE PPR.RELATIONSHIP = 'Mother'
   -- mother in SSD cohort
   AND EXISTS (
