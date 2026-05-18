@@ -5,9 +5,20 @@ meta:
   owner: "Data to Insight"
   status: "Release"
 
-current_version: "1.4.1"
+current_version: "1.4.2"
 
 releases:
+  - version_number: "1.4.2" 
+    release_date: "2025-05-15" 
+    includes_changes: >
+      ssd_development.ssd_person additional person_filtered CTE filter added added in SystemC
+
+    impact_description: >
+      System admin records coming through, added further <> -1, and de-dup filter to person table as CTE. 
+      This change affecting only SystemC users although has possible application in others as reference. 
+    impacts_cms_deployment:
+      - "systemc"
+
   - version_number: "1.4.1" 
     release_date: "2025-04-14" 
     includes_changes: >
