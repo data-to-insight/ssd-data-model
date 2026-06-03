@@ -9,7 +9,7 @@
 -- - GROUPPERSONVIEW
 -- - GROUPVIEW
 -- - ssd_person
---
+-- Notes: 030626 SUCCESSFUL TEST RB|RH 
 -- =============================================================================
 IF OBJECT_ID('tempdb..#ssd_family', 'U') IS NOT NULL
     DROP TABLE #ssd_family;
@@ -48,11 +48,11 @@ SELECT
     CONVERT(NVARCHAR(48), rf.PERSONID) AS fami_person_id   -- metadata={"item_ref":"FAMI002A"}
 FROM [eclipseDelta].[dbo].[GROUPPERSONVIEW] rf
 LEFT JOIN [eclipseDelta].[dbo].[GROUPVIEW] gv
-    ON CONVERT(VARCHAR(48), gv.GROUPID) = CONVERT(VARCHAR(48), rf.GROUPID)
+    ON CONVERT(NVARCHAR(48), gv.GROUPID) = CONVERT(NVARCHAR(48), rf.GROUPID)
 WHERE gv.GROUPTYPE = 'Family'
   AND EXISTS (
         SELECT 1
         FROM [ssd_person] sp
         WHERE sp.pers_person_id =
-              CONVERT(VARCHAR(48), rf.PERSONID)
+              CONVERT(NVARCHAR(48), rf.PERSONID)
       );

@@ -12,7 +12,7 @@
 -- - RELATIONSHIPPROFESSIONALVIEW
 -- - PERSONORGRELATIONSHIPVIEW
 -- - ssd_person
---
+-- Notes: 030626 FAIL TEST RB|RH 
 -- =============================================================================
 IF OBJECT_ID('tempdb..#ssd_initial_cp_conference', 'U') IS NOT NULL
     DROP TABLE #ssd_initial_cp_conference;

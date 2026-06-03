@@ -7,13 +7,13 @@
 -- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies:
 -- - ORGANISATIONVIEW
---
+-- Notes: 030626 FAIL TEST RB|RH 
 -- =============================================================================
 
 IF OBJECT_ID('tempdb..#ssd_department', 'U') IS NOT NULL
     DROP TABLE #ssd_department;
 
-IF OBJECT_ID('[ssd_department]', 'U') IS NOT NULL
+IF OBJECT_ID('ssd_department', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1

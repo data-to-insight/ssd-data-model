@@ -9,12 +9,12 @@
 -- - CLAADOPTIONSVIEW
 -- - CLAPERIODOFCAREVIEW
 -- - ssd_person
---
+-- Notes: 030626 FAIL TEST RB|RH 
 -- =============================================================================
 IF OBJECT_ID('tempdb..#ssd_permanence', 'U') IS NOT NULL
     DROP TABLE #ssd_permanence;
 
-IF OBJECT_ID('[ssd_permanence]', 'U') IS NOT NULL
+IF OBJECT_ID('ssd_permanence', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
@@ -113,7 +113,7 @@ OUTER APPLY (
         CLA2.ADMISSIONDATE,
         CLA2.DISCHARGEDATE
     FROM [eclipseDelta].[dbo].[CLAPERIODOFCAREVIEW] CLA2
-    WHERE CONVERT(VARCHAR(48), CLA2.PERSONID) = CONVERT(VARCHAR(48), ADOP.PERSONID)
+    WHERE CONVERT(NVARCHAR(48), CLA2.PERSONID) = CONVERT(NVARCHAR(48), ADOP.PERSONID)
       AND CLA2.ADMISSIONDATE <= ADOP.DATESHOULDBEPLACED
     ORDER BY CLA2.ADMISSIONDATE DESC
 ) CLA
@@ -121,5 +121,5 @@ WHERE EXISTS (
     SELECT 1
     FROM [ssd_person] sp
     WHERE sp.pers_person_id =
-          CONVERT(VARCHAR(48), ADOP.PERSONID)
+          CONVERT(NVARCHAR(48), ADOP.PERSONID)
 );

@@ -6,7 +6,7 @@
 -- Status: [D]ev
 -- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies: 
---
+-- Notes: 030626 FAIL TEST RB|RH 
 -- =============================================================================
 IF OBJECT_ID('tempdb..#ssd_immigration_status', 'U') IS NOT NULL
     DROP TABLE #ssd_immigration_status;

@@ -10,7 +10,7 @@
 -- - PERSONORGRELATIONSHIPVIEW
 -- - CLASSIFICATIONPERSONVIEW
 -- - ssd_person
---
+-- Notes: 030626 FAIL TEST RB|RH 
 -- =============================================================================
 IF OBJECT_ID('tempdb..#ssd_involvements', 'U') IS NOT NULL
     DROP TABLE #ssd_involvements;

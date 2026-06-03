@@ -8,13 +8,14 @@
 -- Dependencies: 
 -- - FORMANSWERPERSONVIEW
 -- - ssd_person
+-- Notes: 030626 FAIL TEST RB|RH (max?)
 -- =============================================================================
 
 
 IF OBJECT_ID('tempdb..#ssd_assessment_factors', 'U') IS NOT NULL
     DROP TABLE #ssd_assessment_factors;
 
-IF OBJECT_ID('[ssd_assessment_factors]', 'U') IS NOT NULL
+IF OBJECT_ID('ssd_assessment_factors', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
@@ -98,7 +99,7 @@ END;
             SELECT 1
             FROM [ssd_person] sp
             WHERE sp.pers_person_id =
-                  CONVERT(VARCHAR(48), FAPV.ANSWERFORSUBJECTID)
+                  CONVERT(NVARCHAR(48), FAPV.ANSWERFORSUBJECTID)
       )
     GROUP BY
         FAPV.ANSWERFORSUBJECTID,

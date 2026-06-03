@@ -6,12 +6,12 @@
 -- Status: [D]ev
 -- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies: 
---
+-- Notes: 030626 SUCCESSFUL TEST RB|RH
 -- =============================================================================
 IF OBJECT_ID('tempdb..#ssd_disability', 'U') IS NOT NULL
     DROP TABLE #ssd_disability;
 
-IF OBJECT_ID('[ssd_disability]', 'U') IS NOT NULL
+IF OBJECT_ID('ssd_disability', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1

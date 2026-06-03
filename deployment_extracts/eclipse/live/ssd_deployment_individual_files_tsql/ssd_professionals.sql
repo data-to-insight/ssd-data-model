@@ -8,12 +8,12 @@
 -- Dependencies:
 -- - RELATIONSHIPPROFESSIONALVIEW
 -- - REFERENCENUMBERPERSONVIEW
---
+-- Notes: 030626 FAIL TEST RB|RH - PK constraint fail on data 
 -- =============================================================================
 IF OBJECT_ID('tempdb..#ssd_professionals', 'U') IS NOT NULL
     DROP TABLE #ssd_professionals;
 
-IF OBJECT_ID('[ssd_professionals]', 'U') IS NOT NULL
+IF OBJECT_ID('ssd_professionals', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM [ssd_professionals])
         TRUNCATE TABLE [ssd_professionals];
@@ -21,7 +21,7 @@ END
 ELSE
 BEGIN
     CREATE TABLE [ssd_professionals] (
-        prof_professional_id               NVARCHAR(48)  NOT NULL PRIMARY KEY,
+        prof_professional_id               NVARCHAR(48)  NOT NULL, -- removed for Brighton -- PRIMARY KEY,
         prof_staff_id                      NVARCHAR(48)  NULL,
         prof_professional_name             NVARCHAR(300) NULL,
         prof_social_worker_registration_no NVARCHAR(48)  NULL,
@@ -56,5 +56,33 @@ SELECT
     NULL AS prof_full_time_equivalency
 FROM [eclipseDelta].[dbo].[RELATIONSHIPPROFESSIONALVIEW] PPR
 LEFT JOIN [eclipseDelta].[dbo].[REFERENCENUMBERPERSONVIEW] PROFNUM
-       ON CONVERT(VARCHAR(48), PROFNUM.PERSONID) = CONVERT(VARCHAR(48), PPR.PROFESSIONALRELATIONSHIPPERSONID)
+       ON CONVERT(NVARCHAR(48), PROFNUM.PERSONID) = CONVERT(NVARCHAR(48), PPR.PROFESSIONALRELATIONSHIPPERSONID)
       AND PROFNUM.REFERENCETYPE = 'Social Work England number';
+
+-- add:
+-- date range filter
+-- filter out other relationship types
+-- 
+
+
+
+-- -- test professionals source table:
+ 
+-- ;WITH prof_base AS (
+--     SELECT
+--         PPR.PROFESSIONALRELATIONSHIPPERSONID AS prof_professional_id,
+--         PPR.PROFESSIONALRELATIONSHIPPERSONID AS prof_staff_id,
+--         PPR.PROFESSIONALRELATIONSHIPNAME     AS prof_professional_name,
+--         PROFNUM.REFERENCENUMBER              AS prof_social_worker_registration_no
+--     FROM eclipseDelta.dbo.RELATIONSHIPPROFESSIONALVIEW PPR
+--     LEFT JOIN eclipseDelta.dbo.REFERENCENUMBERPERSONVIEW PROFNUM
+--         ON PROFNUM.PERSONID = PPR.PROFESSIONALRELATIONSHIPPERSONID
+--        AND PROFNUM.REFERENCETYPE = 'Social Work England number'
+-- )
+ 
+-- SELECT
+--     prof_professional_id,
+--     COUNT(*) AS record_count
+-- FROM prof_base
+-- GROUP BY prof_professional_id
+-- ORDER BY record_count DESC;

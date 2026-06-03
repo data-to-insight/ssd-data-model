@@ -7,7 +7,7 @@
 -- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies:
 -- - ssd_person
---
+-- Notes: 030626 FAIL TEST RB|RH 
 -- =============================================================================
 IF OBJECT_ID('tempdb..#ssd_pre_proceedings', 'U') IS NOT NULL
     DROP TABLE #ssd_pre_proceedings;

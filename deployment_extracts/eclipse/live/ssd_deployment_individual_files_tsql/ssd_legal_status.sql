@@ -8,12 +8,13 @@
 -- Dependencies:
 -- - CLAEPISODEOFCAREVIEW
 -- - ssd_person
---
+
+-- Notes: 030626 SUCCESSFUL TEST RB|RH 
 -- =============================================================================
 IF OBJECT_ID('tempdb..#ssd_legal_status', 'U') IS NOT NULL
     DROP TABLE #ssd_legal_status;
 
-IF OBJECT_ID('[ssd_legal_status]', 'U') IS NOT NULL
+IF OBJECT_ID('ssd_legal_status', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
@@ -44,7 +45,7 @@ END;
         SELECT 1
         FROM [ssd_person] sp
         WHERE sp.pers_person_id =
-              CONVERT(VARCHAR(48), EPIS.PERSONID)
+              CONVERT(NVARCHAR(48), EPIS.PERSONID)
     )
 ),
 FLAGGED AS (

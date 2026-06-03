@@ -8,7 +8,7 @@
 -- Dependencies:
 -- - FORMANSWERPERSONVIEW
 -- - ssd_person
---
+-- Notes: 030626 FAIL TEST RB|RH 
 -- =============================================================================
 IF OBJECT_ID('tempdb..#ssd_missing', 'U') IS NOT NULL
     DROP TABLE #ssd_missing;

@@ -10,12 +10,12 @@
 -- - CLASSIFICATIONPERSONVIEW
 -- - CLAEPISODEOFCAREVIEW
 -- - ssd_person
---
+-- Notes: 030626 FAIL TEST RB|RH 
 -- =============================================================================
 IF OBJECT_ID('tempdb..#ssd_cp_plans', 'U') IS NOT NULL
     DROP TABLE #ssd_cp_plans;
 
-IF OBJECT_ID('[ssd_cp_plans]', 'U') IS NOT NULL
+IF OBJECT_ID('ssd_cp_plans', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (SELECT 1 FROM [ssd_cp_plans])
         TRUNCATE TABLE [ssd_cp_plans];

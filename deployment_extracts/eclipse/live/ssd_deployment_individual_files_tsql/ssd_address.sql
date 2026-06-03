@@ -10,7 +10,7 @@
 -- =============================================================================
 
 IF OBJECT_ID('tempdb..#ssd_address', 'U') IS NOT NULL DROP TABLE #ssd_address;
-IF OBJECT_ID('[ssd_address]', 'U') IS NOT NULL
+IF OBJECT_ID('ssd_address', 'U') IS NOT NULL
 BEGIN
     IF EXISTS (
         SELECT 1
@@ -82,9 +82,9 @@ SELECT
         + '"NORTHING":""'
         + '}'
     ) AS addr_address_json
-FROM [SSD].[ADDRESSPERSONVIEW] PERSADDRESS
+FROM [eclipseDelta].[dbo].[ADDRESSPERSONVIEW] PERSADDRESS
 WHERE EXISTS (
     SELECT 1
     FROM [ssd_person] SP
-    WHERE SP.pers_person_id = CONVERT(VARCHAR(48), PERSADDRESS.PERSONID)
+    WHERE SP.pers_person_id = CONVERT(NVARCHAR(48), PERSADDRESS.PERSONID)
 );
