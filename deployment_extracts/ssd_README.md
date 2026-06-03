@@ -27,9 +27,10 @@ The extract script
 Recommended approach for initial adoption
 
 - Run initial pilots and trials in non production environments eg. development or test  
-- By default all SSD objects are created under schema `ssd_development`  
+- By default all SSD objects are created under schema `ssd_development` (see below on how to remove)  
   this simplifies early adoption, testing, and review  
-- Once validated, teams can switch to an alternative schema name or to a production database  
+- Once validated, teams can switch to an alternative schema name or to a production database 
+
 
 ## Changing schema name
 
@@ -41,7 +42,7 @@ To change or remove the default `ssd_development` schema reference (applies to S
    `ssd_development.`  
 2. Replace with an empty string ie. ``
 
-This removes the schema prefix and allows use of database default schema  
+This removes the schema prefix and allows use of database/users default schema  
 eg. `dbo`
 
 ### Replace with local schema
