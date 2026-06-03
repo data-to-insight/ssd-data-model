@@ -184,7 +184,7 @@ CLASS_FILTER AS (
     GROUP BY PERSONID
 )
 
-INSERT INTO dbo.ssd_person (
+INSERT INTO ssd_person (
     pers_legacy_id,
     pers_person_id,
     pers_upn,
@@ -252,7 +252,11 @@ SELECT
 
     COALESCE(P.DATEOFBIRTH, P.DUEDATE),
     CONVERT(NVARCHAR(48), P.NHSNUMBER),
-    COALESCE(U.UPN, UU.UN_UPN),
+    CASE
+        WHEN LEN(COALESCE(U.UPN, UU.UN_UPN)) > 6 
+            THEN LEFT(COALESCE(U.UPN, UU.UN_UPN), 6) + '*' -- visible note on truncations for LA ref
+        ELSE COALESCE(U.UPN, UU.UN_UPN)
+    END
     NULL,
     CASE WHEN P.DUEDATE >= SYSDATETIME() THEN P.DUEDATE END,
     P.DIEDDATE,
