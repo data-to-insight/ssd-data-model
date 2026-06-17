@@ -6,16 +6,14 @@
 -- Status: [D]ev
 -- Remarks: [EA_API_PRIORITY_TABLE]
 -- Dependencies: 
---
+-- ADDRESSPERSONVIEW
 -- =============================================================================
 
 IF OBJECT_ID('tempdb..#ssd_address', 'U') IS NOT NULL DROP TABLE #ssd_address;
+
 IF OBJECT_ID('ssd_address', 'U') IS NOT NULL
 BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM [ssd_address]
-    )
+    IF EXISTS (SELECT 1 FROM [ssd_address])
         TRUNCATE TABLE [ssd_address];
 END
 ELSE
@@ -31,6 +29,22 @@ BEGIN
     );
 END;
 
+
+-- rank addresses for most recent (per person)
+;WITH ADDRESS_RANKED AS (
+    SELECT
+        PERSADDRESS.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY PERSADDRESS.PERSONID
+            ORDER BY 
+                CASE WHEN PERSADDRESS.ENDDATE IS NULL THEN 0 ELSE 1 END,
+                PERSADDRESS.ENDDATE DESC,
+                PERSADDRESS.STARTDATE DESC
+        ) AS RN
+    FROM [eclipseDelta].[dbo].[ADDRESSPERSONVIEW] PERSADDRESS
+)
+
+
 INSERT INTO [ssd_address] (
     addr_table_id,
     addr_person_id,
@@ -41,50 +55,52 @@ INSERT INTO [ssd_address] (
     addr_address_json
 )
 SELECT
-    CONVERT(NVARCHAR(48), PERSADDRESS.ADDRESSID) AS addr_table_id,
-    CONVERT(NVARCHAR(48), PERSADDRESS.PERSONID)  AS addr_person_id,
-    CONVERT(NVARCHAR(48), PERSADDRESS.TYPE)      AS addr_address_type,
-    CONVERT(DATETIME,     PERSADDRESS.STARTDATE) AS addr_address_start_date,
-    CONVERT(DATETIME,     PERSADDRESS.ENDDATE)   AS addr_address_end_date,
-    REPLACE(CONVERT(NVARCHAR(15), PERSADDRESS.POSTCODE), ' ', '') AS addr_address_postcode,
+    CONVERT(NVARCHAR(48), A.ADDRESSID),
+    CONVERT(NVARCHAR(48), A.PERSONID),
+    CONVERT(NVARCHAR(48), A.TYPE),
+    CONVERT(DATETIME, A.STARTDATE),
+    CONVERT(DATETIME, A.ENDDATE),
+    REPLACE(CONVERT(NVARCHAR(15), A.POSTCODE), ' ', ''),
     CONVERT(NVARCHAR(1000),
         '{'
         + '"ROOM":"'     
-            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), PERSADDRESS.ROOMDESCRIPTION), ''),  '\', '\\'), '"', '\"')
+            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), A.ROOMDESCRIPTION), ''),  '\', '\\'), '"', '\"')
             + '",'
         + '"FLOOR":"'    
-            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), PERSADDRESS.FLOORDESCRIPTION), ''), '\', '\\'), '"', '\"')
+            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), A.FLOORDESCRIPTION), ''), '\', '\\'), '"', '\"')
             + '",'
         + '"FLAT":"",'
         + '"BUILDING":"' 
-            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), PERSADDRESS.BUILDINGNAMEORNUMBER), ''), '\', '\\'), '"', '\"')
+            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), A.BUILDINGNAMEORNUMBER), ''), '\', '\\'), '"', '\"')
             + '",'
         + '"HOUSE":"'    
-            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), PERSADDRESS.BUILDINGNAMEORNUMBER), ''), '\', '\\'), '"', '\"')
+            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), A.BUILDINGNAMEORNUMBER), ''), '\', '\\'), '"', '\"')
             + '",'
         + '"STREET":"'   
-            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), PERSADDRESS.STREETNAME), ''), '\', '\\'), '"', '\"')
+            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), A.STREETNAME), ''), '\', '\\'), '"', '\"')
             + '",'
         + '"TOWN":"'     
-            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), PERSADDRESS.TOWNORCITY), ''), '\', '\\'), '"', '\"')
+            + REPLACE(REPLACE(ISNULL(CONVERT(NVARCHAR(200), A.TOWNORCITY), ''), '\', '\\'), '"', '\"')
             + '",'
         + '"UPRN":'
             + CASE
-                  WHEN PERSADDRESS.UPRN IS NULL
-                       OR LTRIM(RTRIM(CONVERT(NVARCHAR(100), PERSADDRESS.UPRN))) = ''
+                  WHEN A.UPRN IS NULL
+                       OR LTRIM(RTRIM(CONVERT(NVARCHAR(100), A.UPRN))) = ''
                       THEN 'null'
                   ELSE '"' 
-                       + REPLACE(REPLACE(CONVERT(NVARCHAR(100), PERSADDRESS.UPRN), '\', '\\'), '"', '\"')
+                       + REPLACE(REPLACE(CONVERT(NVARCHAR(100), A.UPRN), '\', '\\'), '"', '\"')
                        + '"'
               END
             + ','
         + '"EASTING":"",'
         + '"NORTHING":""'
         + '}'
-    ) AS addr_address_json
-FROM [eclipseDelta].[dbo].[ADDRESSPERSONVIEW] PERSADDRESS
-WHERE EXISTS (
-    SELECT 1
-    FROM [ssd_person] SP
-    WHERE SP.pers_person_id = CONVERT(NVARCHAR(48), PERSADDRESS.PERSONID)
-);
+    )
+FROM ADDRESS_RANKED A
+WHERE 
+    A.RN = 1  -- only most recent addr
+    AND EXISTS (
+        SELECT 1
+        FROM [ssd_person] SP
+        WHERE SP.pers_person_id = CONVERT(NVARCHAR(48), A.PERSONID)
+    );
