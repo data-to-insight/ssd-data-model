@@ -3,7 +3,8 @@
 -- =============================================================================
 -- Description: Person/child details. 
 -- Author: D2I
--- Version: 0.3 Refactor RH
+-- Version: 0.4 Fix mother relation dup key issue 
+--          0.3 Refactor RH
 --          0.2 Fixed run order and ; use 
 --          0.1: new RH
 -- Status: [D]ev
@@ -160,22 +161,6 @@ UASC AS (
       AND ID = 423
 ),
 
-MOTHER AS (
-    SELECT
-        CONVERT(NVARCHAR(48), PV2.PERSONID) AS PERSONID
-    FROM eclipseDelta.dbo.PERSONDEMOGRAPHICSVIEW PV
-    JOIN eclipseDelta.dbo.PERSON_PER_RELATIONSHIP PPR
-        ON PV.PERSONID = PPR.ROLE_A_PERSON_FK
-    JOIN eclipseDelta.dbo.PERSONVIEW PV2
-        ON PPR.ROLE_B_PERSON_FK = PV2.PERSONID
-    JOIN eclipseDelta.dbo.RELATIONSHIP_TYPE RT
-        ON PPR.PERSON_PER_REL_TYPE_FK = RT.ID
-       AND RT.ID = 17
-    WHERE PV.PERSONID <> PV2.PERSONID
-      AND ISNULL(PV.DATEOFBIRTH, CAST(GETDATE() AS DATE)) >= PV2.DATEOFBIRTH
-      AND PV2.GENDER = 'Female'
-),
-
 CLASS_FILTER AS (
     SELECT PERSONID
     FROM CLASS_BASE
@@ -260,7 +245,21 @@ SELECT
     NULL,
     CASE WHEN P.DUEDATE >= SYSDATETIME() THEN P.DUEDATE END,
     P.DIEDDATE,
-    CASE WHEN M.PERSONID IS NOT NULL THEN 'Y' ELSE 'N' END,
+    CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM eclipseDelta.dbo.PERSON_PER_RELATIONSHIP PPR
+            JOIN eclipseDelta.dbo.PERSONVIEW PV2
+                ON PPR.ROLE_B_PERSON_FK = PV2.PERSONID
+            JOIN eclipseDelta.dbo.RELATIONSHIP_TYPE RT
+                ON PPR.PERSON_PER_REL_TYPE_FK = RT.ID
+            AND RT.ID = 17
+            WHERE PPR.ROLE_A_PERSON_FK <> PV2.PERSONID
+            AND PV2.GENDER = 'Female'
+            AND PV2.PERSONID = P.PERSONID -- AND CONVERT(NVARCHAR(48), PV2.PERSONID) = P.PERSONID_STR
+        )
+        THEN 'Y' ELSE 'N'
+    END,
     CONVERT(NVARCHAR(48), P.COUNTRYOFBIRTHCODE)
 
 FROM PERSON_BASE P
@@ -284,8 +283,6 @@ LEFT JOIN (
 ) UASCPERSON
     ON UASCPERSON.PERSONID = P.PERSONID
 
-LEFT JOIN MOTHER M
-    ON M.PERSONID = P.PERSONID_STR
 -- WHERE
 --     (
 --         NOT EXISTS (SELECT 1 FROM @allowed_persons)
