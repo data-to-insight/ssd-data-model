@@ -21,7 +21,7 @@ TRUNCATE TABLE ssd_sdq_scores;
 
 ;WITH EXCLUSIONS AS (
     SELECT PERSONID
-    FROM PERSONVIEW
+    FROM [eclipseDelta].[dbo].[PERSONVIEW]
     WHERE PERSONID IN (1,2,3,4,5,6)
        OR ISNULL(DUPLICATED, '?') = 'DUPLICATE'
        OR UPPER(FORENAME) LIKE '%DUPLICATE%'
@@ -34,24 +34,24 @@ SDQ_BASE AS (
         FAPV.ANSWERFORSUBJECTID AS person_id,
 
         MAX(CASE
-                WHEN FAPV.CONTROLNAME = '903Return_dateOfLatestSDQRecord'
-                THEN CAST(FAPV.ANSWERVALUE AS DATE)
+                WHEN CAST(FAPV.CONTROLNAME AS VARCHAR(200))= '903Return_dateOfLatestSDQRecord'
+                THEN CAST(FAPV.DATEANSWERVALUE AS DATE)
             END) AS completed_date,
 
         MAX(CASE
-                WHEN FAPV.CONTROLNAME = '903Return_reasonForNotSubmittingStrengthsAndDifficultiesQuestionnaireInPeriod'
-                THEN FAPV.ANSWERVALUE
+                WHEN CAST(FAPV.CONTROLNAME AS VARCHAR(200)) = '903Return_reasonForNotSubmittingStrengthsAndDifficultiesQuestionnaireInPeriod'
+                THEN CAST(FAPV.ANSWERVALUE AS VARCHAR(50))
             END) AS reason,
 
         MAX(CASE
                 WHEN FAPV.CONTROLNAME = 'youngPersonsStrengthsAndDifficultiesQuestionnaireScore'
-                THEN FAPV.ANSWERVALUE
+                THEN CAST(FAPV.ANSWERVALUE AS VARCHAR(50))
             END) AS score
 
-    FROM FORMANSWERPERSONVIEW FAPV
-    WHERE FAPV.DESIGNGUID = 'fb7f6ffc-e8a1-4b45-8eaa-356a5be33895'
-      AND FAPV.INSTANCESTATE = 'COMPLETE'
-      AND FAPV.ANSWERFORSUBJECTID NOT IN (SELECT PERSONID FROM EXCLUSIONS)
+    FROM [eclipseDelta].[dbo].[FORMANSWERPERSONVIEW] FAPV
+    WHERE FAPV.DESIGNGUID = CONVERT(UNIQUEIDENTIFIER, 'fb7f6ffc-e8a1-4b45-8eaa-356a5be33895')
+      AND CAST(FAPV.INSTANCESTATE AS VARCHAR(255)) = 'COMPLETE'
+      AND TRY_CAST(FAPV.ANSWERFORSUBJECTID AS BIGINT) NOT IN (SELECT PERSONID FROM EXCLUSIONS)
     GROUP BY
         FAPV.INSTANCEID,
         FAPV.ANSWERFORSUBJECTID

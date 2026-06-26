@@ -51,22 +51,3 @@ END;
 -- clear down 
 TRUNCATE TABLE ssd_linked_identifiers;
 
--- ============================================================
--- PLACEHOLDER INSERT 
--- ============================================================
-
-INSERT INTO ssd_linked_identifiers (
-    link_table_id,
-    link_person_id,
-    link_identifier_type,
-    link_identifier_value,
-    link_valid_from_date,
-    link_valid_to_date
-)
-SELECT
-    NULL AS link_table_id,
-    NULL AS link_person_id,
-    NULL AS link_identifier_type,
-    NULL AS link_identifier_value,
-    NULL AS link_valid_from_date,
-    NULL AS link_valid_to_date;
