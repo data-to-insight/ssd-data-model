@@ -5,9 +5,29 @@ meta:
   owner: "Data to Insight"
   status: "Release"
 
-current_version: "1.4.2"
+current_version: "1.4.3"
 
 releases:
+  - version_number: "1.4.3" 
+    release_date: "2025-06-26" 
+    includes_changes: >
+      Refactored ssd_development.ssd_cla_reviews load logic in SystemC to address
+      row duplication caused by 1-to-many joins (FACT_MEETING_SUBJECTS and FACT_FORMS).
+      Introduced pre-aggr and pre-filtering
+
+    impact_description: >
+      Resolved PK violations affecting CLA review loads in one LA(known)
+      Root cause likely multiplicative joins at meeting/person level, where multiple
+      subject and form records produced duplicate FACT_CLA_REVIEW_ID rows
+      query re-structured to-
+      - Pre-aggr meeting data to single row per meeting/person
+      - Pre-filter valid form records pre join
+      - Remove child-level attributes from GROUP BY to align with review-level grain
+
+      This change affecting only SystemC users although has possible application in others as reference. 
+    impacts_cms_deployment:
+      - "systemc"
+
   - version_number: "1.4.2" 
     release_date: "2025-05-15" 
     includes_changes: >
