@@ -136,7 +136,6 @@ INSERT INTO ssd_cla_care_plan (
     lacp_cla_care_plan_end_date,
     lacp_cla_care_plan_json
 )
-
 -- #LEGACY-PRE2016
 -- SQL compatible versions <2016
 SELECT
@@ -144,39 +143,122 @@ SELECT
     fcp.DIM_PERSON_ID              AS lacp_person_id,
     fcp.START_DTTM                 AS lacp_cla_care_plan_start_date,
     fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
-    (
-        -- Manual JSON-like concatenation for lacp_cla_care_plan_json
+    /* Manual JSON-like concatenation for lacp_cla_care_plan_json (no aggregates) */
+    LEFT(
         '{' +
-        '"REMAINSUP": "' + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RETURN1M": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RETURN6M": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RETURNEV": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"LTRELFR": "'   + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"LTFOST18": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"RESPLMT": "'   + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"SUPPLIV": "'   + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"ADOPTION": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '", ' +
-        '"OTHERPLN": "'  + ISNULL(TRY_CAST(COALESCE(MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN tmp_cpl.ANSWER ELSE '' END), '') AS NVARCHAR(50)), '') + '"' +
+        '"REMAINSUP": "' + ISNULL(TRY_CAST(a1.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"RETURN1M": "'  + ISNULL(TRY_CAST(a2.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"RETURN6M": "'  + ISNULL(TRY_CAST(a3.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"RETURNEV": "'  + ISNULL(TRY_CAST(a4.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"LTRELFR": "'   + ISNULL(TRY_CAST(a5.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"LTFOST18": "'  + ISNULL(TRY_CAST(a6.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"RESPLMT": "'   + ISNULL(TRY_CAST(a7.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"SUPPLIV": "'   + ISNULL(TRY_CAST(a8.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"ADOPTION": "'  + ISNULL(TRY_CAST(a9.ANSWER  AS NVARCHAR(50)), '') + '", ' +
+        '"OTHERPLN": "'  + ISNULL(TRY_CAST(a10.ANSWER AS NVARCHAR(50)), '') + '"' +
         '}'
-    ) AS lacp_cla_care_plan_json
+    , 1000) AS lacp_cla_care_plan_json
 FROM
     HDM.Child_Social.FACT_CARE_PLANS AS fcp
-LEFT JOIN 
-    ssd_pre_cla_care_plan tmp_cpl 
-    ON tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+
+/* Latest answer per code, per person — no aggrs */
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP1'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a1
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP2'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a2
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP3'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a3
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP4'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a4
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP5'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a5
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP6'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a6
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP7'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a7
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP8'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a8
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP9'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a9
+
+OUTER APPLY (
+    SELECT TOP (1) cpl.ANSWER
+    FROM ssd_pre_cla_care_plan AS cpl
+    WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+      AND cpl.ANSWER_NO = 'CPFUP10'
+      AND cpl.ANSWER IS NOT NULL
+    ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+) AS a10
+
 WHERE 
     fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
     AND EXISTS (
         SELECT 1
         FROM ssd_person p
-        WHERE TRY_CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID -- #DtoI-1799
-    )
-
-GROUP BY
-    fcp.FACT_CARE_PLAN_ID,
-    fcp.DIM_PERSON_ID,
-    fcp.START_DTTM,
-    fcp.END_DTTM;
+        WHERE TRY_CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID  -- #DtoI-1799
+    );
 
 
 
@@ -187,37 +269,121 @@ GROUP BY
 --     fcp.DIM_PERSON_ID              AS lacp_person_id,
 --     fcp.START_DTTM                 AS lacp_cla_care_plan_start_date,
 --     fcp.END_DTTM                   AS lacp_cla_care_plan_end_date,
+
 --     (
---         SELECT  -- Combined _json field with 'ICP' responses
---             -- SSD standard 
---             -- all keys in structure regardless of data presence ISNULL() not NULLIF()
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP1'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS REMAINSUP,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP2'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RETURN1M,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP3'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RETURN6M,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP4'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RETURNEV,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP5'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS LTRELFR,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP6'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS LTFOST18,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP7'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS RESPLMT,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP8'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS SUPPLIV,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP9'  THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS ADOPTION,
---             MAX(CASE WHEN tmp_cpl.ANSWER_NO = 'CPFUP10' THEN ISNULL(tmp_cpl.ANSWER, '') ELSE '' END) AS OTHERPLN
---         FROM
---             -- #ssd_TMP_PRE_cla_care_plan tmp_cpl
---             ssd_pre_cla_care_plan tmp_cpl
---         WHERE
---             tmp_cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
---         GROUP BY tmp_cpl.DIM_PERSON_ID
+--         SELECT
+--             ISNULL(a1.ANSWER,  '') AS REMAINSUP,
+--             ISNULL(a2.ANSWER,  '') AS RETURN1M,
+--             ISNULL(a3.ANSWER,  '') AS RETURN6M,
+--             ISNULL(a4.ANSWER,  '') AS RETURNEV,
+--             ISNULL(a5.ANSWER,  '') AS LTRELFR,
+--             ISNULL(a6.ANSWER,  '') AS LTFOST18,
+--             ISNULL(a7.ANSWER,  '') AS RESPLMT,
+--             ISNULL(a8.ANSWER,  '') AS SUPPLIV,
+--             ISNULL(a9.ANSWER,  '') AS ADOPTION,
+--             ISNULL(a10.ANSWER, '') AS OTHERPLN
 --         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 --     ) AS lacp_cla_care_plan_json
--- FROM
---     HDM.Child_Social.FACT_CARE_PLANS AS fcp
+
+-- FROM HDM.Child_Social.FACT_CARE_PLANS AS fcp
+
+-- /* OUTER APPLY: latest answer per code, no aggr */
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP1'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a1
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP2'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a2
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP3'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a3
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP4'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a4
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP5'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a5
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP6'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a6
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP7'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a7
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP8'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a8
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP9'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a9
+
+-- OUTER APPLY (
+--     SELECT TOP (1) cpl.ANSWER
+--     FROM ssd_pre_cla_care_plan cpl
+--     WHERE cpl.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+--       AND cpl.ANSWER_NO = 'CPFUP10'
+--       AND cpl.ANSWER IS NOT NULL
+--     ORDER BY cpl.FACT_FORM_ID DESC, cpl.LatestResponseDate DESC
+-- ) a10
+
 -- WHERE fcp.DIM_LOOKUP_PLAN_STATUS_ID_CODE = 'A'
---     AND EXISTS (
+--   AND EXISTS (
 --         SELECT 1
 --         FROM ssd_person p
 --         WHERE TRY_CAST(p.pers_person_id AS INT) = fcp.DIM_PERSON_ID -- #DtoI-1799
 --     );
-
 
 
 
@@ -229,6 +395,10 @@ GROUP BY
 -- CREATE NONCLUSTERED INDEX IX_ssd_lacp_person_id ON ssd_cla_care_plan(lacp_person_id);
 -- CREATE NONCLUSTERED INDEX IX_ssd_lacp_care_plan_start_date ON ssd_cla_care_plan(lacp_cla_care_plan_start_date);
 -- CREATE NONCLUSTERED INDEX IX_ssd_lacp_care_plan_end_date ON ssd_cla_care_plan(lacp_cla_care_plan_end_date);
+
+-- -- Additionally towards APPLY lookups:
+-- CREATE INDEX IX_ssd_pre_cla_person_code_form ON ssd_pre_cla_care_plan
+-- (DIM_PERSON_ID, ANSWER_NO, FACT_FORM_ID DESC) INCLUDE (ANSWER, LatestResponseDate);
 
     END TRY
     BEGIN CATCH

@@ -58,6 +58,7 @@ BEGIN
     CREATE TABLE ssd_cla_reviews (
         clar_cla_review_id              NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CLAR001A"}
         clar_cla_id                     NVARCHAR(48),               -- metadata={"item_ref":"CLAR011A"}
+        clar_cla_person_id              NVARCHAR(48),               -- metadata={"item_ref":"CLAR002A"}
         clar_cla_review_due_date        DATETIME,                   -- metadata={"item_ref":"CLAR003A"}
         clar_cla_review_date            DATETIME,                   -- metadata={"item_ref":"CLAR004A"}
         clar_cla_review_cancelled       NCHAR(1),                   -- metadata={"item_ref":"CLAR012A"}
@@ -65,66 +66,84 @@ BEGIN
     );
 END
 
+
+;WITH fms_agg AS (
+    SELECT
+        fms.FACT_MEETINGS_ID,
+        fms.DIM_PERSON_ID,
+        MAX(ISNULL(fms.DIM_LOOKUP_PARTICIPATION_CODE_DESC, '')) AS participation -- collapse rows 1x per meeting+person
+    FROM HDM.Child_Social.FACT_MEETING_SUBJECTS fms
+    GROUP BY
+        fms.FACT_MEETINGS_ID,
+        fms.DIM_PERSON_ID
+    
+),
+ff_filtered AS (
+    SELECT DISTINCT
+        ff.FACT_FORM_ID
+    --   Pre-filter valid form(s) x1
+    FROM HDM.Child_Social.FACT_FORMS ff
+    WHERE ff.DIM_LOOKUP_FORM_TYPE_ID_CODE NOT IN ('1391', '1195', '1377', '1540', '2069', '2340')
+
+)
+
 INSERT INTO ssd_cla_reviews (
     clar_cla_review_id,
     clar_cla_id,
+    clar_cla_person_id,
     clar_cla_review_due_date,
     clar_cla_review_date,
     clar_cla_review_cancelled,
     clar_cla_review_participation
-) 
+)
 SELECT
-    fcr.FACT_CLA_REVIEW_ID                          AS clar_cla_review_id,
-    fcr.FACT_CLA_ID                                 AS clar_cla_id,                
-    fcr.DUE_DTTM                                    AS clar_cla_review_due_date,
-    fcr.MEETING_DTTM                                AS clar_cla_review_date,
-    fm.CANCELLED                                    AS clar_cla_review_cancelled,
- 
-    (SELECT MAX(CASE WHEN fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
-        AND fms.DIM_PERSON_ID = fcr.DIM_PERSON_ID
-        THEN ISNULL(fms.DIM_LOOKUP_PARTICIPATION_CODE_DESC, '') END)) 
-                                                    AS clar_cla_review_participation
- 
-FROM
-    HDM.Child_Social.FACT_CLA_REVIEW AS fcr
- 
-LEFT JOIN
-    HDM.Child_Social.FACT_MEETINGS fm               ON fcr.FACT_MEETING_ID = fm.FACT_MEETING_ID
- 
-LEFT JOIN
-    HDM.Child_Social.FACT_MEETING_SUBJECTS fms      ON fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
-    AND fms.DIM_PERSON_ID = fcr.DIM_PERSON_ID
- 
-LEFT JOIN
-    HDM.Child_Social.FACT_FORMS ff ON fms.FACT_OUTCM_FORM_ID = ff.FACT_FORM_ID
-    AND fms.FACT_OUTCM_FORM_ID <> '1071252'     -- duplicate outcomes form for ESCC causing PK error
- 
-LEFT JOIN
-    HDM.Child_Social.DIM_PERSON p ON fcr.DIM_PERSON_ID = p.DIM_PERSON_ID
- 
-WHERE  ff.DIM_LOOKUP_FORM_TYPE_ID_CODE NOT IN ('1391', '1195', '1377', '1540', '2069', '2340')  -- 'LAC / Adoption Outcome Record'
+    fcr.FACT_CLA_REVIEW_ID                              AS clar_cla_review_id,
+    fcr.FACT_CLA_ID                                     AS clar_cla_id,
+    CAST(fcr.DIM_PERSON_ID AS NVARCHAR(48))             AS clar_cla_person_id,
+    fcr.DUE_DTTM                                        AS clar_cla_review_due_date,
+    fcr.MEETING_DTTM                                    AS clar_cla_review_date,
+    fm.CANCELLED                                        AS clar_cla_review_cancelled,
+    fms_agg.participation                               AS clar_cla_review_participation
 
-AND
-    (fcr.MEETING_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
-    OR fcr.MEETING_DTTM IS NULL)
- 
-AND EXISTS ( -- only ssd relevant records
+FROM HDM.Child_Social.FACT_CLA_REVIEW fcr
+
+LEFT JOIN HDM.Child_Social.FACT_MEETINGS fm
+    ON fcr.FACT_MEETING_ID = fm.FACT_MEETING_ID
+
+LEFT JOIN fms_agg
+    ON fcr.FACT_MEETING_ID = fms_agg.FACT_MEETINGS_ID
+    AND fms_agg.DIM_PERSON_ID = fcr.DIM_PERSON_ID
+
+LEFT JOIN HDM.Child_Social.FACT_MEETING_SUBJECTS fms
+    ON fcr.FACT_MEETING_ID = fms.FACT_MEETINGS_ID
+    AND fms.DIM_PERSON_ID = fcr.DIM_PERSON_ID
+
+LEFT JOIN ff_filtered ff
+    ON fms.FACT_OUTCM_FORM_ID = ff.FACT_FORM_ID
+    AND fms.FACT_OUTCM_FORM_ID <> '1071252'
+
+WHERE
+    ff.FACT_FORM_ID IS NOT NULL     --  requ min 1+ valid FACT_FORM
+                                    
+
+AND (
+    fcr.MEETING_DTTM >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE())
+    OR fcr.MEETING_DTTM IS NULL
+)
+
+AND EXISTS (
     SELECT 1
     FROM ssd_person p
-    WHERE TRY_CAST(p.pers_person_id AS INT) = fcr.DIM_PERSON_ID -- #DtoI-1799
-    )
- 
-GROUP BY fcr.FACT_CLA_REVIEW_ID,
-    fcr.FACT_CLA_ID,                                            
-    fcr.DIM_PERSON_ID,                              
-    fcr.DUE_DTTM,                                    
-    fcr.MEETING_DTTM,                              
+    WHERE TRY_CAST(p.pers_person_id AS INT) = fcr.DIM_PERSON_ID
+)
+GROUP BY
+    fcr.FACT_CLA_REVIEW_ID,
+    fcr.FACT_CLA_ID,
+    fcr.DIM_PERSON_ID,
+    fcr.DUE_DTTM,
+    fcr.MEETING_DTTM,
     fm.CANCELLED,
-    fms.FACT_MEETINGS_ID,
-    ff.FACT_FORM_ID,
-    ff.DIM_LOOKUP_FORM_TYPE_ID_CODE
-    ;
-
+    fms_agg.participation;
 
 
 -- -- META-ELEMENT: {"type": "create_fk"} 
