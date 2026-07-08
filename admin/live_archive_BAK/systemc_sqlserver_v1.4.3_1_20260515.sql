@@ -4509,7 +4509,7 @@ AND (
 
 AND EXISTS (
     SELECT 1
-    FROM ssd_person p
+    FROM ssd_development.ssd_person p
     WHERE TRY_CAST(p.pers_person_id AS INT) = fcr.DIM_PERSON_ID
 )
 GROUP BY
