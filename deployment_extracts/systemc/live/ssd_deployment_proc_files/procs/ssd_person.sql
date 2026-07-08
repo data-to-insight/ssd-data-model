@@ -88,16 +88,30 @@ BEGIN
 END
 
 -- CTE to get no_upn_code 
+
 ;WITH f903_data_CTE AS (
     SELECT 
         -- get most recent no_upn_code if exists
         dim_person_id, 
         no_upn_code,
         ROW_NUMBER() OVER (PARTITION BY dim_person_id ORDER BY no_upn_code DESC) AS rn
-    FROM 
-        HDM.Child_Social.fact_903_data
+    FROM HDM.Child_Social.fact_903_data
+    WHERE no_upn_code IS NOT NULL
+),
+person_filtered AS (
+    SELECT
+        p.*
+    FROM HDM.Child_Social.DIM_PERSON AS p
     WHERE
-        no_upn_code IS NOT NULL -- possible sparse data, filter for performance
+        -- Hard exclusions applied pre cohort EXISTS
+        /* EXCLUSIONS */
+
+        -- p.DIM_PERSON_ID IN (1, 2, 3),  -- hard filter for tiny cohort LA testing [TESTING|DEBUG]
+
+        p.DIM_PERSON_ID IS NOT NULL
+        AND p.DIM_PERSON_ID <> -1
+        AND p.DUPLICATED_DTTM IS NULL
+        -- AND p.BIRTH_DTTM < DATEADD(Y, -100, GETDATE()) -- optional: possible 1900 yr admin records -- #DtoI-1814
 )
 INSERT INTO ssd_person
 SELECT 
@@ -132,7 +146,8 @@ SELECT
     END,                                    -- pers_is_mother
     p.NATNL_CODE                            -- pers_nationality             -- [REVIEW] LEFT(p.NATNL_CODE, 2)    
 FROM
-    HDM.Child_Social.DIM_PERSON AS p
+    person_filtered AS p 
+
 
 -- [TESTING] 903 table refresh only in reporting period?
 LEFT JOIN (
@@ -153,26 +168,16 @@ LEFT JOIN
     HDM.Child_Social.DIM_LOOKUP_DFE_ETHNIC dlde
         ON p.ETHNICITY_MAIN_CODE = dlde.MAIN_CODE
 WHERE
-    /* EXCLUSIONS */
-
-    -- p.DIM_PERSON_ID IN (1, 2, 3)  -- hard filter for tiny cohort LA testing [TESTING|DEBUG]
-
-    p.DIM_PERSON_ID IS NOT NULL
-    AND p.DIM_PERSON_ID <> -1
-    -- AND p.BIRTH_DTTM < DATEADD(Y, -100, GETDATE()) -- hard-filter possible 1900 yr admin records -- #DtoI-1814
 
     /* INCLUSIONS */
 
-    -- /* Optional flags (uncomment to enable|disable) */
-    AND (
-           p.IS_CLIENT = 'Y'        -- Toggle as might not apply to all SystemC LAs [REVIEW]
-    --     OR p.IS_FOSTER = 'Y'
-    --     OR p.WAS_FOSTER = 'Y'
-    --     OR p.IS_ADOPTOR = 'Y'
-    --     OR p.WAS_ADOPTOR = 'Y'
+    (
+        p.IS_CLIENT = 'Y'
+        -- OR p.IS_FOSTER = 'Y'
+        -- OR p.WAS_FOSTER = 'Y'
+        -- OR p.IS_ADOPTOR = 'Y'
+        -- OR p.WAS_ADOPTOR = 'Y'
     )
-    
-
     AND (
         -- Contacts in SSD window
         EXISTS (

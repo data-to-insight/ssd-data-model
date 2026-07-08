@@ -98,8 +98,10 @@ DECLARE @tpl nvarchar(max) = N'
 ;WITH contacts AS (
   SELECT
     TRY_CONVERT(nvarchar(48), c.DIM_PERSON_ID) AS dim_person_id,
-    MAX(TRY_CONVERT(datetime, c.CONTACT_DTTM)) AS last_contact_dttm,
-    MIN(TRY_CONVERT(datetime, c.CONTACT_DTTM)) AS first_contact_dttm
+    MAX(CASE WHEN TRY_CONVERT(datetime, c.CONTACT_DTTM) IS NOT NULL 
+             THEN TRY_CONVERT(datetime, c.CONTACT_DTTM) END) AS last_contact_dttm,
+    MIN(CASE WHEN TRY_CONVERT(datetime, c.CONTACT_DTTM) IS NOT NULL 
+             THEN TRY_CONVERT(datetime, c.CONTACT_DTTM) END) AS first_contact_dttm
   FROM __SRC__FACT_CONTACTS AS c
   WHERE (@ssd_timeframe_years IS NULL
          OR c.CONTACT_DTTM >= DATEADD(year, -@ssd_timeframe_years, CONVERT(datetime, CONVERT(date, GETDATE()))))
@@ -120,8 +122,10 @@ clients AS (
 refs AS (
   SELECT
     TRY_CONVERT(nvarchar(48), r.DIM_PERSON_ID) AS dim_person_id,
-    MAX(TRY_CONVERT(datetime, r.REFRL_START_DTTM)) AS last_ref_dttm,
-    MIN(TRY_CONVERT(datetime, r.REFRL_START_DTTM)) AS first_ref_dttm
+    MAX(CASE WHEN TRY_CONVERT(datetime, r.REFRL_START_DTTM) IS NOT NULL 
+             THEN TRY_CONVERT(datetime, r.REFRL_START_DTTM) END) AS last_ref_dttm,
+    MIN(CASE WHEN TRY_CONVERT(datetime, r.REFRL_START_DTTM) IS NOT NULL 
+             THEN TRY_CONVERT(datetime, r.REFRL_START_DTTM) END) AS first_ref_dttm
   FROM __SRC__FACT_REFERRALS r
   WHERE r.DIM_PERSON_ID <> -1
     AND (
@@ -147,9 +151,10 @@ involvements AS (
   SELECT DISTINCT TRY_CONVERT(nvarchar(48), i.DIM_PERSON_ID) AS dim_person_id
   FROM __SRC__FACT_INVOLVEMENTS i
   WHERE i.DIM_PERSON_ID <> -1
-    AND (i.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE ''KA%'' 
-         OR i.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL
-         OR i.IS_ALLOCATED_CW_FLAG = ''Y'')
+    AND (
+         (i.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE IS NOT NULL AND i.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE NOT LIKE ''KA%'')
+      OR i.IS_ALLOCATED_CW_FLAG = ''Y''
+    )
     AND i.DIM_WORKER_ID <> ''-1''
     AND (i.END_DTTM IS NULL OR i.END_DTTM > GETDATE())
 ),
@@ -185,7 +190,7 @@ INSERT ssd_cohort(
 )
 SELECT
   r.dim_person_id,
-  MAX(dp.LEGACY_ID) AS legacy_id,
+  MAX(CASE WHEN dp.LEGACY_ID IS NOT NULL THEN dp.LEGACY_ID END) AS legacy_id,
   r.has_contact, r.has_referral, r.has_903, r.is_care_leaver, r.has_eligibility,
   r.has_client_flag, r.has_involvement,        
   r.first_activity_dttm, r.last_activity_dttm
@@ -193,22 +198,21 @@ FROM rollup AS r
 LEFT JOIN __SRC__DIM_PERSON AS dp
   ON dp.DIM_PERSON_ID = TRY_CONVERT(int, r.dim_person_id)
 GROUP BY r.dim_person_id, r.has_contact, r.has_referral, r.has_903, r.is_care_leaver,
-         r.has_eligibility, r.has_client_flag, r.has_involvement,  -- <<< keep in GROUP BY too
+         r.has_eligibility, r.has_client_flag, r.has_involvement,
          r.first_activity_dttm, r.last_activity_dttm;
 ';
 
 /* Swap in 3-part prefix once */
 DECLARE @sql nvarchar(max) = REPLACE(@tpl, N'__SRC__', @src3);
 
--- Optional: inspect generated SQL around contacts CTE if needed
--- PRINT LEFT(@sql, 2000);
-
-
+/* Execute */
 -- passing just scalar needed
 EXEC sp_executesql
     @sql,
     N'@ssd_timeframe_years int',
     @ssd_timeframe_years = @ssd_timeframe_years;
+
+
 
 -- -- META-ELEMENT: {"type": "create_idx"}
 -- CREATE INDEX IX_ssd_cohort_has_referral ON ssd_cohort(dim_person_id) WHERE has_referral = 1;
