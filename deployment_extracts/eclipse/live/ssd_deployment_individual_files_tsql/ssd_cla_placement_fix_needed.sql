@@ -10,17 +10,17 @@
    META-ELEMENT: {"type": "create_table"}
    ============================================================================= */
 CREATE TABLE IF NOT EXISTS ssd_cla_placement (
-    clap_cla_placement_id            VARCHAR(48)  PRIMARY KEY,  -- metadata={"item_ref":"CLAP001A"}
-    clap_cla_id                      VARCHAR(48),               -- metadata={"item_ref":"CLAP012A"}
-    clap_person_id                   VARCHAR(48),               -- metadata={"item_ref":"CLAP013A"}
+    clap_cla_placement_id            NVARCHAR(48)  PRIMARY KEY,  -- metadata={"item_ref":"CLAP001A"}
+    clap_cla_id                      NVARCHAR(48),               -- metadata={"item_ref":"CLAP012A"}
+    clap_person_id                   NVARCHAR(48),               -- metadata={"item_ref":"CLAP013A"}
     clap_cla_placement_start_date    TIMESTAMP,                 -- metadata={"item_ref":"CLAP003A"}
-    clap_cla_placement_type          VARCHAR(100),              -- metadata={"item_ref":"CLAP004A"}
-    clap_cla_placement_urn           VARCHAR(48),               -- metadata={"item_ref":"CLAP005A"}
+    clap_cla_placement_type          NVARCHAR(100),              -- metadata={"item_ref":"CLAP004A"}
+    clap_cla_placement_urn           NVARCHAR(48),               -- metadata={"item_ref":"CLAP005A"}
     clap_cla_placement_distance      DOUBLE PRECISION,          -- metadata={"item_ref":"CLAP011A"}
-    clap_cla_placement_provider      VARCHAR(48),               -- metadata={"item_ref":"CLAP007A"}
-    clap_cla_placement_postcode      VARCHAR(8),                -- metadata={"item_ref":"CLAP008A"}
+    clap_cla_placement_provider      NVARCHAR(48),               -- metadata={"item_ref":"CLAP007A"}
+    clap_cla_placement_postcode      NVARCHAR(8),                -- metadata={"item_ref":"CLAP008A"}
     clap_cla_placement_end_date      TIMESTAMP,                 -- metadata={"item_ref":"CLAP009A"}
-    clap_cla_placement_change_reason VARCHAR(100)               -- metadata={"item_ref":"CLAP010A"}
+    clap_cla_placement_change_reason NVARCHAR(100)               -- metadata={"item_ref":"CLAP010A"}
 );
 
 TRUNCATE TABLE ssd_cla_placement;

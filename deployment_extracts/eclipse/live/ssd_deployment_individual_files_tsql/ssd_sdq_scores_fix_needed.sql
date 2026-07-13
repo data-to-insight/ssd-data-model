@@ -2,14 +2,20 @@
    CREATE TABLE
    =========================================== */
 
-IF OBJECT_ID('ssd_sdq_scores', 'U') IS NULL
+
+IF OBJECT_ID('ssd_sdq_scores', 'U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM [ssd_sdq_scores])
+        TRUNCATE TABLE [ssd_sdq_scores];
+END
+ELSE
 BEGIN
     CREATE TABLE ssd_sdq_scores (
-        csdq_table_id           VARCHAR(48) PRIMARY KEY,
-        csdq_person_id          VARCHAR(48),
+        csdq_table_id           NVARCHAR(48) PRIMARY KEY,
+        csdq_person_id          NVARCHAR(48),
         csdq_sdq_completed_date DATETIME,
         csdq_sdq_score          INT,
-        csdq_sdq_reason         VARCHAR(100)
+        csdq_sdq_reason         NVARCHAR(100)
     );
 END;
 
@@ -34,23 +40,23 @@ SDQ_BASE AS (
         FAPV.ANSWERFORSUBJECTID AS person_id,
 
         MAX(CASE
-                WHEN CAST(FAPV.CONTROLNAME AS VARCHAR(200))= '903Return_dateOfLatestSDQRecord'
+                WHEN CONVERT(NVARCHAR(200), FAPV.CONTROLNAME)= '903Return_dateOfLatestSDQRecord'
                 THEN CAST(FAPV.DATEANSWERVALUE AS DATE)
             END) AS completed_date,
 
         MAX(CASE
-                WHEN CAST(FAPV.CONTROLNAME AS VARCHAR(200)) = '903Return_reasonForNotSubmittingStrengthsAndDifficultiesQuestionnaireInPeriod'
-                THEN CAST(FAPV.ANSWERVALUE AS VARCHAR(50))
+                WHEN CONVERT(NVARCHAR(200), FAPV.CONTROLNAME) = '903Return_reasonForNotSubmittingStrengthsAndDifficultiesQuestionnaireInPeriod'
+                THEN CONVERT(NVARCHAR(50), FAPV.ANSWERVALUE)
             END) AS reason,
 
         MAX(CASE
-                WHEN FAPV.CONTROLNAME = 'youngPersonsStrengthsAndDifficultiesQuestionnaireScore'
-                THEN CAST(FAPV.ANSWERVALUE AS VARCHAR(50))
+                WHEN CONVERT(NVARCHAR(200), FAPV.CONTROLNAME) = 'youngPersonsStrengthsAndDifficultiesQuestionnaireScore'
+                THEN CONVERT(NVARCHAR(50), FAPV.ANSWERVALUE)
             END) AS score
 
     FROM [eclipseDelta].[dbo].[FORMANSWERPERSONVIEW] FAPV
     WHERE FAPV.DESIGNGUID = CONVERT(UNIQUEIDENTIFIER, 'fb7f6ffc-e8a1-4b45-8eaa-356a5be33895')
-      AND CAST(FAPV.INSTANCESTATE AS VARCHAR(255)) = 'COMPLETE'
+      AND CONVERT(NVARCHAR(100), FAPV.INSTANCESTATE) = N'COMPLETE'
       AND TRY_CAST(FAPV.ANSWERFORSUBJECTID AS BIGINT) NOT IN (SELECT PERSONID FROM EXCLUSIONS)
     GROUP BY
         FAPV.INSTANCEID,

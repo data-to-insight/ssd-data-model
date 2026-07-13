@@ -13,21 +13,26 @@
    CREATE TABLE
    =========================================== */
 
-IF OBJECT_ID('ssd_care_leavers', 'U') IS NULL
+IF OBJECT_ID('ssd_care_leavers', 'U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM [ssd_care_leavers])
+        TRUNCATE TABLE [ssd_care_leavers];
+END
+
 BEGIN
     CREATE TABLE ssd_care_leavers (
-        clea_table_id                     VARCHAR(48)  PRIMARY KEY,
-        clea_person_id                    VARCHAR(48),
-        clea_care_leaver_eligibility      VARCHAR(100),
-        clea_care_leaver_in_touch         VARCHAR(100),
+        clea_table_id                     NVARCHAR(48)  PRIMARY KEY,
+        clea_person_id                    NVARCHAR(48),
+        clea_care_leaver_eligibility      NVARCHAR(100),
+        clea_care_leaver_in_touch         NVARCHAR(100),
         clea_care_leaver_latest_contact   DATETIME,
-        clea_care_leaver_accommodation    VARCHAR(100),
-        clea_care_leaver_accom_suitable   VARCHAR(100),
-        clea_care_leaver_activity         VARCHAR(100),
+        clea_care_leaver_accommodation    NVARCHAR(100),
+        clea_care_leaver_accom_suitable   NVARCHAR(100),
+        clea_care_leaver_activity         NVARCHAR(100),
         clea_pathway_plan_review_date     DATETIME,
-        clea_care_leaver_personal_advisor VARCHAR(100),
-        clea_care_leaver_allocated_team   VARCHAR(48),
-        clea_care_leaver_worker_id        VARCHAR(100)
+        clea_care_leaver_personal_advisor NVARCHAR(100),
+        clea_care_leaver_allocated_team   NVARCHAR(48),
+        clea_care_leaver_worker_id        NVARCHAR(100)
     );
 END;
 
@@ -102,11 +107,13 @@ CARELEAVER AS (
         ) AS LATEST_RECORD
 
     FROM CLACARELEAVERDETAILSVIEW CL
+
     WHERE EXISTS (
         SELECT 1
         FROM ssd_person sp
-        WHERE sp.pers_person_id = CL.PERSONID
+        WHERE sp.pers_person_id = CONVERT(NVARCHAR(48), CL.PERSONID)
     )
+
 )
 
 -- ============================================================

@@ -62,7 +62,7 @@ CIN_EPISODE_BASE AS (
             SELECT 1
             FROM [ssd_person] sp
             WHERE sp.pers_person_id =
-                  CONVERT(VARCHAR(48), CLA.PERSONID)
+                  CONVERT(NVARCHAR(48), CLA.PERSONID)
       )
 ),
 CIN_EPISODE_ORDERED AS (

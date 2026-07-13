@@ -151,5 +151,7 @@ FROM CIN_EPISODE CE
 WHERE EXISTS (
     SELECT 1
     FROM [ssd_person] sp
-    WHERE sp.pers_person_id = CONVERT(VARCHAR(48), CE.PERSONID)
+    WHERE sp.pers_person_id = CONVERT(NVARCHAR(48), CE.PERSONID)
 );
+
+

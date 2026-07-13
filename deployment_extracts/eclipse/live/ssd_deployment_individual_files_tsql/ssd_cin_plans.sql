@@ -84,7 +84,7 @@ CIN_PLAN_ROWS AS (
       AND EXISTS (
           SELECT 1
           FROM [ssd_person] sp
-          WHERE sp.pers_person_id = CONVERT(VARCHAR(48), CLA.PERSONID)
+          WHERE sp.pers_person_id = CONVERT(NVARCHAR(48), CLA.PERSONID)
       )
 ),
 CIN_PLAN_TAGGED AS (

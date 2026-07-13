@@ -11,15 +11,15 @@
 IF OBJECT_ID('ssd_s47_enquiry', 'U') IS NULL
 BEGIN
     CREATE TABLE ssd_s47_enquiry (
-        s47e_s47_enquiry_id             VARCHAR(48) PRIMARY KEY,
-        s47e_referral_id                VARCHAR(48),
-        s47e_person_id                  VARCHAR(48),
+        s47e_s47_enquiry_id             NVARCHAR(48) PRIMARY KEY,
+        s47e_referral_id                NVARCHAR(48),
+        s47e_person_id                  NVARCHAR(48),
         s47e_s47_start_date             DATETIME,
         s47e_s47_end_date               DATETIME,
         s47e_s47_nfa                    CHAR(1),
-        s47e_s47_outcome_json           VARCHAR(1000),
-        s47e_s47_completed_by_team      VARCHAR(48),
-        s47e_s47_completed_by_worker_id VARCHAR(100)
+        s47e_s47_outcome_json           NVARCHAR(1000),
+        s47e_s47_completed_by_team      NVARCHAR(48),
+        s47e_s47_completed_by_worker_id NVARCHAR(100)
     );
 END;
 

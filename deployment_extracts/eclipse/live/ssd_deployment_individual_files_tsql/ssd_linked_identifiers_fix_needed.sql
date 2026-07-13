@@ -1,9 +1,9 @@
 -- -- META-ELEMENT: {"type": "create_table"}
 -- CREATE TABLE IF NOT EXISTS ssd_linked_identifiers (
---     link_table_id          VARCHAR(48) PRIMARY KEY,  -- metadata={"item_ref":"LINK001A"}
---     link_person_id         VARCHAR(48),              -- metadata={"item_ref":"LINK002A"} 
---     link_identifier_type   VARCHAR(100),             -- metadata={"item_ref":"LINK003A"}
---     link_identifier_value  VARCHAR(100),             -- metadata={"item_ref":"LINK004A"}
+--     link_table_id          NVARCHAR(48) PRIMARY KEY,  -- metadata={"item_ref":"LINK001A"}
+--     link_person_id         NVARCHAR(48),              -- metadata={"item_ref":"LINK002A"} 
+--     link_identifier_type   NVARCHAR(100),             -- metadata={"item_ref":"LINK003A"}
+--     link_identifier_value  NVARCHAR(100),             -- metadata={"item_ref":"LINK004A"}
 --     link_valid_from_date   TIMESTAMP,                -- metadata={"item_ref":"LINK005A"}
 --     link_valid_to_date     TIMESTAMP                 -- metadata={"item_ref":"LINK006A"}
 -- );
@@ -39,10 +39,10 @@
 IF OBJECT_ID('ssd_linked_identifiers', 'U') IS NULL
 BEGIN
     CREATE TABLE ssd_linked_identifiers (
-        link_table_id         VARCHAR(48) PRIMARY KEY,
-        link_person_id        VARCHAR(48),
-        link_identifier_type  VARCHAR(100),
-        link_identifier_value VARCHAR(100),
+        link_table_id         NVARCHAR(48) PRIMARY KEY,
+        link_person_id        NVARCHAR(48),
+        link_identifier_type  NVARCHAR(100),
+        link_identifier_value NVARCHAR(100),
         link_valid_from_date  DATETIME,
         link_valid_to_date    DATETIME
     );

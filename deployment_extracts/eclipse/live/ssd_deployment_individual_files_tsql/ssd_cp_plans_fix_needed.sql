@@ -54,7 +54,7 @@ END;
             SELECT 1
             FROM [ssd_person] sp
             WHERE sp.pers_person_id =
-                  CONVERT(VARCHAR(48), FAPV.ANSWERFORSUBJECTID)
+                  CONVERT(NVARCHAR(48), FAPV.ANSWERFORSUBJECTID)
       )
     GROUP BY
         FAPV.INSTANCEID,
@@ -74,7 +74,7 @@ CP_CATEGORY AS (
             SELECT 1
             FROM [ssd_person] sp
             WHERE sp.pers_person_id =
-                  CONVERT(VARCHAR(48), CPV.PERSONID)
+                  CONVERT(NVARCHAR(48), CPV.PERSONID)
       )
 ),
 ALL_CIN_EPISODES AS (
@@ -92,7 +92,7 @@ ALL_CIN_EPISODES AS (
             SELECT 1
             FROM [ssd_person] sp
             WHERE sp.pers_person_id =
-                  CONVERT(VARCHAR(48), CLA.PERSONID)
+                  CONVERT(NVARCHAR(48), CLA.PERSONID)
       )
 
     UNION ALL
@@ -108,7 +108,7 @@ ALL_CIN_EPISODES AS (
             SELECT 1
             FROM [ssd_person] sp
             WHERE sp.pers_person_id =
-                  CONVERT(VARCHAR(48), CE.PERSONID)
+                  CONVERT(NVARCHAR(48), CE.PERSONID)
       )
 ),
 REFERRAL_BASE AS (
@@ -131,7 +131,7 @@ REFERRAL_BASE AS (
             SELECT 1
             FROM [ssd_person] sp
             WHERE sp.pers_person_id =
-                  CONVERT(VARCHAR(48), FAPV.ANSWERFORSUBJECTID)
+                  CONVERT(NVARCHAR(48), FAPV.ANSWERFORSUBJECTID)
       )
     GROUP BY
         FAPV.ANSWERFORSUBJECTID,
@@ -234,7 +234,7 @@ CP_PLAN_ROWS AS (
             SELECT 1
             FROM [ssd_person] sp
             WHERE sp.pers_person_id =
-                  CONVERT(VARCHAR(48), CLA.PERSONID)
+                  CONVERT(NVARCHAR(48), CLA.PERSONID)
       )
 ),
 CP_PLAN_TAGGED AS (
@@ -312,5 +312,6 @@ OUTER APPLY (
 WHERE EXISTS (
     SELECT 1
     FROM [ssd_person] sp
-    WHERE sp.pers_person_id = CP.PERSONID
+    WHERE sp.pers_person_id = CONVERT(NVARCHAR(48), CP.PERSONID)
 );
+

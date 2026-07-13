@@ -7,16 +7,16 @@
 -- META-ELEMENT: {"type": "create_table"}
 CREATE TABLE IF NOT EXISTS ssd_cin_assessments
 (
-    cina_assessment_id           VARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINA001A"}
-    cina_person_id               VARCHAR(48),               -- metadata={"item_ref":"CINA002A"}
-    cina_referral_id             VARCHAR(48),               -- metadata={"item_ref":"CINA010A"}
+    cina_assessment_id           NVARCHAR(48) PRIMARY KEY,   -- metadata={"item_ref":"CINA001A"}
+    cina_person_id               NVARCHAR(48),               -- metadata={"item_ref":"CINA002A"}
+    cina_referral_id             NVARCHAR(48),               -- metadata={"item_ref":"CINA010A"}
     cina_assessment_start_date   TIMESTAMP,                 -- metadata={"item_ref":"CINA003A"}
     cina_assessment_child_seen   CHAR(1),                   -- metadata={"item_ref":"CINA004A"}
     cina_assessment_auth_date    TIMESTAMP,                 -- metadata={"item_ref":"CINA005A"}             
-    cina_assessment_outcome_json VARCHAR(1000),             -- metadata={"item_ref":"CINA006A"}           
+    cina_assessment_outcome_json NVARCHAR(1000),             -- metadata={"item_ref":"CINA006A"}           
     cina_assessment_outcome_nfa  CHAR(1),                   -- metadata={"item_ref":"CINA009A"}
-    cina_assessment_team         VARCHAR(48),               -- metadata={"item_ref":"CINA007A"}
-    cina_assessment_worker_id    VARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
+    cina_assessment_team         NVARCHAR(48),               -- metadata={"item_ref":"CINA007A"}
+    cina_assessment_worker_id    NVARCHAR(100)               -- metadata={"item_ref":"CINA008A"}
 );
 
 TRUNCATE TABLE ssd_cin_assessments;
@@ -274,8 +274,9 @@ ASSESSMENT AS (
       AND EXISTS (
             SELECT 1
             FROM ssd_person sp
-            WHERE sp.pers_person_id = FAPV.ANSWERFORSUBJECTID
+            WHERE sp.pers_person_id = CONVERT(NVARCHAR(48), FAPV.ANSWERFORSUBJECTID)
         )
+
     GROUP BY FAPV.ANSWERFORSUBJECTID,
              FAPV.INSTANCEID,
              FAPV.DATECOMPLETED 

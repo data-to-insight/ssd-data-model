@@ -75,7 +75,7 @@ END;
             SELECT 1
             FROM [ssd_person] sp
             WHERE sp.pers_person_id =
-                  CONVERT(VARCHAR(48), FAPV.ANSWERFORSUBJECTID)
+                  CONVERT(NVARCHAR(48), FAPV.ANSWERFORSUBJECTID)
       )
     GROUP BY
         FAPV.INSTANCEID,
