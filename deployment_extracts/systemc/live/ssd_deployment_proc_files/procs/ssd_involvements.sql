@@ -92,7 +92,7 @@ SELECT
         WHEN fi.DIM_WORKER_ID IN ('-1', -1) THEN NULL    -- THEN '' (alternative null replacement)
         ELSE fi.DIM_WORKER_ID 
     END                                           AS invo_professional_id,
-    fi.DIM_LOOKUP_INVOLVEMENT_TYPE_DESC           AS invo_professional_role_id,
+    fi.DIM_LOOKUP_INVOLVEMENT_TYPE_CODE           AS invo_professional_role_id,
     
     -- -- use first non-NULL value for prof team, in order of : i)dept, ii)grp, or iii)relevant comment
     -- LEFT(
