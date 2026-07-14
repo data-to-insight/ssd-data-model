@@ -5,9 +5,17 @@ meta:
   owner: "Data to Insight"
   status: "Release"
 
-current_version: "1.4.3"
+current_version: "1.4.4"
 
 releases:
+  - version_number: "1.4.4" 
+    release_date: "2025-07-08" 
+    includes_changes: >
+      Minor fix to address ssd_development.ssd_cla_reviews not being able to reference ssd_person on some deployments 
+      in SystemC due to omitted ssd_development. reference. Impacts only those who were explicitly referencing the SSD
+      table within a named test schema instance. 
+
+
   - version_number: "1.4.3" 
     release_date: "2025-06-26" 
     includes_changes: >
