@@ -5,9 +5,17 @@ meta:
   owner: "Data to Insight"
   status: "Release"
 
-current_version: "1.4.4"
+current_version: "1.4.5"
 
 releases:
+  - version_number: "1.4.5" 
+    release_date: "2025-07-14" 
+    includes_changes: >
+      Fix to address ssd_development.ssd_involvementss not being able to access a more reliable non-str based role type
+      reference coming from the systemC source. Change needed to prevent ambiguity on EA API extract for needed case worker
+      type consistent with 903 requirements. Changing source for invo_professional_role_id to DIM_LOOKUP_INVOLVEMENT_TYPE_CODE 
+      from *_TYPE_DESC. This enables a filter on 'CW' towards 903 and related. 
+
   - version_number: "1.4.4" 
     release_date: "2025-07-08" 
     includes_changes: >

@@ -37,7 +37,7 @@ BEGIN
 -- Version: 1.0
 -- Status: [D]ev-
 -- Remarks: [EA_API_PRIORITY_TABLE]
---          This is an in-Development inclusion for the SSD and as such is being phased in. 
+--          This is an in-DEvelopment inclusion for the SSD and as such is being phased in. 
 --          Added here for both visibility and LA feedback, but --not yet fully integrated--. 
 --          The table expected to replace declarations within: META-ELEMENT: {"type": "ssd_timeframe"}
 -- Dependencies:
