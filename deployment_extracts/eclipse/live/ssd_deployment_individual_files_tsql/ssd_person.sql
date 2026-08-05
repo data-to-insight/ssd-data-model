@@ -3,7 +3,8 @@
 -- =============================================================================
 -- Description: Person/child details. 
 -- Author: D2I
--- Version: 0.4 Fix mother relation dup key issue 
+-- Version: 0.5 Type comparison robustness changes
+--          0.4 Fix mother relation dup key issue 
 --          0.3 Refactor RH
 --          0.2 Fixed run order and ; use 
 --          0.1: new RH
@@ -62,11 +63,12 @@ END
 
 CLASS_BASE AS (
     SELECT
-        PCA.PERSON_FK AS PERSONID,
-        CLA.ID,
-        CLA.CODE,
+        CONVERT(NVARCHAR(48), PCA.PERSON_FK) AS PERSONID,
+        CLA.ID AS ID,
+        CONVERT(NVARCHAR(100), CLA.CODE) AS CODE,
         CG.ID AS GROUP_ID,
-        CG.CODE AS GROUP_CODE,
+        CONVERT(NVARCHAR(100), CG.CODE) AS GROUP_CODE,
+
         CLA_ASSIGN.START_DATE,
         CLA_ASSIGN.END_DATE
     FROM eclipseDelta.dbo.CLASSIFICATION CLA
@@ -74,7 +76,7 @@ CLASS_BASE AS (
         ON CLA.CLASSIFICATION_GROUP_FK = CG.ID
     JOIN eclipseDelta.dbo.CLASSIFICATION_ASSIGNMENT CLA_ASSIGN
         ON CLA.ID = CLA_ASSIGN.CLASSIFICATION_FK
-       AND ISNULL(CLA_ASSIGN.STATUS,'?') <> 'DELETED'
+       AND ISNULL(CONVERT(NVARCHAR(100), CLA_ASSIGN.STATUS), N'?') <> N'DELETED'
     JOIN eclipseDelta.dbo.SUBJECT_CLASSIFICATION_ASSIGNM CLA_SUBJ
         ON CLA_ASSIGN.SUBJECT_CLASSIFICATION_ASSI_FK = CLA_SUBJ.ID
     JOIN eclipseDelta.dbo.PERSON_CLASSIFICATION_ASSIGNME PCA
@@ -84,7 +86,7 @@ CLASS_BASE AS (
 UPN AS (
     SELECT
         CONVERT(NVARCHAR(48), PERSONID) AS PERSONID,
-        REFERENCENUMBER AS UPN,
+        CONVERT(NVARCHAR(48), REFERENCENUMBER) AS UPN,
         ROW_NUMBER() OVER (
             PARTITION BY PERSONID
             ORDER BY
@@ -93,7 +95,7 @@ UPN AS (
                 STARTDATE DESC
         ) AS RN
     FROM eclipseDelta.dbo.REFERENCENUMBERPERSONVIEW
-    WHERE REFERENCETYPECODE = 'UPN'
+    WHERE CONVERT(NVARCHAR(50), REFERENCETYPECODE) = N'UPN'
 ),
 
 UN_UPN_BASE AS (
@@ -107,7 +109,7 @@ UN_UPN_BASE AS (
         ) AS RN
     FROM CLASS_BASE
     WHERE GROUP_ID = 2
-      AND CODE IN ('UN1','UN2','UN3','UN4','UN5')
+      AND CODE IN (N'UN1',N'UN2',N'UN3',N'UN4',N'UN5')
 ),
 
 /* =================================================================
@@ -157,7 +159,7 @@ UASC AS (
             ORDER BY START_DATE DESC
         ) AS RN
     FROM CLASS_BASE
-    WHERE GROUP_CODE = 'ASY_STAT'
+    WHERE GROUP_CODE = N'ASY_STAT'
       AND ID = 423
 ),
 
@@ -255,7 +257,8 @@ SELECT
                 ON PPR.PERSON_PER_REL_TYPE_FK = RT.ID
             AND RT.ID = 17
             WHERE PPR.ROLE_A_PERSON_FK <> PV2.PERSONID
-            AND PV2.GENDER = 'Female'
+            AND CONVERT(NVARCHAR(50), PV2.GENDER) = N'Female'
+            -- possible Eclipse source comparison conflict point / review
             AND PV2.PERSONID = P.PERSONID -- AND CONVERT(NVARCHAR(48), PV2.PERSONID) = P.PERSONID_STR
         )
         THEN 'Y' ELSE 'N'
@@ -265,14 +268,14 @@ SELECT
 FROM PERSON_BASE P
 
 INNER JOIN CLASS_FILTER CF
-    ON CF.PERSONID = P.PERSONID
+    ON CF.PERSONID = P.PERSONID_STR
 
 LEFT JOIN UPN U
     ON P.PERSONID_STR = U.PERSONID
    AND U.RN = 1
 
 LEFT JOIN UN_UPN UU
-    ON P.PERSONID = UU.PERSONID
+    ON P.PERSONID_STR = UU.PERSONID
 
 LEFT JOIN (
     SELECT PERSONID
@@ -281,7 +284,7 @@ LEFT JOIN (
       AND COALESCE(END_DATE, CAST(GETDATE() AS DATE)) >= CAST(GETDATE() AS DATE)
       AND START_DATE <= CAST(GETDATE() AS DATE)
 ) UASCPERSON
-    ON UASCPERSON.PERSONID = P.PERSONID
+    ON UASCPERSON.PERSONID = P.PERSONID_STR
 
 -- WHERE
 --     (
