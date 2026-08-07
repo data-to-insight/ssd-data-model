@@ -1575,17 +1575,18 @@ SELECT
     ims.DIM_PERSON_ID,
     ims.START_DTTM,
     ims.END_DTTM,
-    ims.DIM_LOOKUP_IMMGR_STATUS_DESC
-FROM
-    HDM.Child_Social.FACT_IMMIGRATION_STATUS AS ims
- 
-WHERE
-    EXISTS
-    ( -- only ssd relevant records
-        SELECT 1
-        FROM ssd_development.ssd_person p
-        WHERE TRY_CAST(p.pers_person_id AS INT) = ims.DIM_PERSON_ID -- #DtoI-1799
-    );
+    ims.DIM_LOOKUP_IMMGR_STATUS_CODE    -- uasc code e.g. U|P|R|A
+    -- ims.DIM_LOOKUP_IMMGR_STATUS_DESC -- uasc description e.g. 'Unaccompanied Asylum Seeking Child'
+FROM HDM.Child_Social.FACT_IMMIGRATION_STATUS AS ims
+WHERE EXISTS
+(
+    SELECT 1
+    FROM ssd_development.ssd_person p
+    WHERE TRY_CAST(p.pers_person_id AS INT) = ims.DIM_PERSON_ID
+)
+ORDER BY
+    ims.DIM_PERSON_ID,
+    ims.START_DTTM;
 
 
 
