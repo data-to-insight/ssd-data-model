@@ -5,11 +5,22 @@ meta:
   owner: "Data to Insight"
   status: "Release"
 
-current_version: "1.4.5"
+current_version: "1.4.6"
 
 releases:
+  - version_number: "1.4.6" 
+    release_date: "2025-08-07" 
+    includes_changes: >
+      Change to immi_immigration_status. Previous populated via DIM_LOOKUP_IMMGR_STATUS_DESC, changed to use DIM_LOOKUP_IMMGR_STATUS_CODE
+      mainly due to improved identification of uasc entries for EA API pilot/stat-returns reporting. 
+    impact_description: >
+      Status field now contains single char code e.g U|P|R 
+      Impacts the staging script for EA pilot payload in attributes uasc_flag, uasc_end_date - fix applied. 
+    impacts_cms_deployment:
+      - "systemc"
+
   - version_number: "1.4.5" 
-    release_date: "2025-07-14" 
+    release_date: "2027-07-14" 
     includes_changes: >
       Fix to address ssd_development.ssd_involvementss not being able to access a more reliable non-str based role type
       reference coming from the systemC source. Change needed to prevent ambiguity on EA API extract for needed case worker
@@ -17,7 +28,7 @@ releases:
       from *_TYPE_DESC. This enables a filter on 'CW' towards 903 and related. 
 
   - version_number: "1.4.4" 
-    release_date: "2025-07-08" 
+    release_date: "2027-07-08" 
     includes_changes: >
       Minor fix to address ssd_development.ssd_cla_reviews not being able to reference ssd_person on some deployments 
       in SystemC due to omitted ssd_development. reference. Impacts only those who were explicitly referencing the SSD
@@ -25,7 +36,7 @@ releases:
 
 
   - version_number: "1.4.3" 
-    release_date: "2025-06-26" 
+    release_date: "2026-06-26" 
     includes_changes: >
       Refactored ssd_development.ssd_cla_reviews load logic in SystemC to address
       row duplication caused by 1-to-many joins (FACT_MEETING_SUBJECTS and FACT_FORMS).
@@ -45,7 +56,7 @@ releases:
       - "systemc"
 
   - version_number: "1.4.2" 
-    release_date: "2025-05-15" 
+    release_date: "2026-05-15" 
     includes_changes: >
       ssd_development.ssd_person additional person_filtered CTE filter added added in SystemC
 

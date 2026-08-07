@@ -1527,12 +1527,12 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: (UASC)
 -- Author: D2I
--- Version: 1.0
---             0.9 rem ims.DIM_LOOKUP_IMMGR_STATUS_DESC rpld with _CODE 270324 JH 
+-- Version: 1.1
+--              1.0 rpl/re-apply ims.DIM_LOOKUP_IMMGR_STATUS_DESC with _CODE 070826 RH
+--              0.9 rpl ims.DIM_LOOKUP_IMMGR_STATUS_DESC rpld with _CODE 270324 JH 
 -- Status: [R]elease
 -- Remarks: [EA_API_PRIORITY_TABLE]
---          Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
---             increased field size to 100
+
 -- Dependencies:
 -- - ssd_person
 -- - HDM.Child_Social.FACT_IMMIGRATION_STATUS
@@ -1557,7 +1557,7 @@ BEGIN
         immi_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"IMMI001A"}
         immi_immigration_status_start_date  DATETIME,                   -- metadata={"item_ref":"IMMI003A"}
         immi_immigration_status_end_date    DATETIME,                   -- metadata={"item_ref":"IMMI004A"}
-        immi_immigration_status             NVARCHAR(100)               -- metadata={"item_ref":"IMMI002A"}
+        immi_immigration_status             NVARCHAR(1)                 -- metadata={"item_ref":"IMMI002A"}
     );
 END
 
