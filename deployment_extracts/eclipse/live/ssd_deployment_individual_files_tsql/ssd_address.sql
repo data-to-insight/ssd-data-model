@@ -55,6 +55,7 @@ INSERT INTO [ssd_address] (
     addr_address_json
 )
 SELECT
+    CONCAT(N'ADDR-', CONVERT(NVARCHAR(48), A.PERSONID)), -- addr_table_id
     CONVERT(NVARCHAR(48), A.PERSONID),
     CONVERT(NVARCHAR(48), A.TYPE),
     CONVERT(DATETIME, A.STARTDATE),
