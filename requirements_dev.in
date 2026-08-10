@@ -1,0 +1,16 @@
+-c requirements.txt
+
+pip<26
+pip-tools==7.5.3
+pip-audit
+
+pytest
+ruff
+black
+
+ipykernel
+jupyterlab>=4.6.2
+jupyterlab-git>=0.54.0
+
+nbconvert
+nbdime

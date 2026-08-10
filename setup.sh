@@ -1,28 +1,42 @@
 #!/bin/bash
+
+# Note:
+# pip-tools 7.5.x currently requires pip < 26
+# If regenerating requirements files with pip-compile:
+#
+#   pip install "pip<26"
+#   pip-compile requirements.in
+#   pip-compile requirements_dev.in
+#
+
+
 set -e
 
-# Sys packages
+# System packages
 sudo apt-get update
-sudo apt-get install -y graphviz libgraphviz-dev pkg-config libjpeg-dev zlib1g-dev
+sudo apt-get install -y \
+    graphviz \
+    libgraphviz-dev \
+    pkg-config \
+    libjpeg-dev \
+    zlib1g-dev
 
-# Py dependencies
-pip install -r requirements.txt
-pip install openpyxl
-pip install tabulate
-pip install reportlab
-pip install markdown
-pip install sqlparse
+# # if not in requirements.txt
+# pip install pygraphviz
 
-# if not in requirements.txt
-pip install pygraphviz
-pip install graphviz
 
-# Install|update Poetry
-if ! command -v poetry &>/dev/null; then
-    pip install poetry
+# Python dependencies 
+python -m pip install -r requirements.txt
+
+# Poetry (not yet migrated over to poetry)
+if ! command -v poetry >/dev/null 2>&1; then
+    pip -m install poetry
 else
-    pip install --upgrade poetry
+    pip -m install --upgrade poetry
 fi
 
-# VS Code ext
+# # Install project dependencies
+# poetry install
+
+# VS Code extension
 code --install-extension ms-python.python --force || true
