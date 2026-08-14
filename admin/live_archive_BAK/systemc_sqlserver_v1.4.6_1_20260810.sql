@@ -1282,7 +1282,8 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: Contains full address details for every person 
 -- Author: D2I
--- Version: 1.0
+-- Version: 1.1 added address detail wipe for confidential addr(con)  140826 RH
+--          1.0
 -- Status: [R]elease
 -- Remarks: [EA_API_PRIORITY_TABLE]
 --          Need to verify json obj structure on pre-2014 SQL server instances
@@ -1318,17 +1319,8 @@ BEGIN
     );
 END
 
-
 -- META-ELEMENT: {"type": "insert_data"}
-INSERT INTO ssd_development.ssd_address (
-    addr_table_id, 
-    addr_person_id, 
-    addr_address_type, 
-    addr_address_start_date, 
-    addr_address_end_date, 
-    addr_address_postcode, 
-    addr_address_json
-)
+
 
 -- #LEGACY-PRE2016 
 -- SQL compatible versions <2016

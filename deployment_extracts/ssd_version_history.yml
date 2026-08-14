@@ -5,9 +5,22 @@ meta:
   owner: "Data to Insight"
   status: "Release"
 
-current_version: "1.4.6"
+current_version: "1.4.7"
 
 releases:
+  - version_number: "1.4.7" 
+    release_date: "2025-08-14" 
+    includes_changes: >
+      Change to ssd_address to ensure that restricted address detail no longer populates. Postcode data is replaced with "con" string. 
+      We have re-added postcode as a key:value pair into the address_json, which duplicates the value but now 
+      provides complete addr access in one field where prev would require an avoidable concat of address_json + postcode. 
+    impact_description: >
+      address_json retains key:value structure for con records, but only postcode populated "con"
+      Impacts the staging script for EA pilot payload in attributes postcode. 
+      Change deemed essential as SSD schema retains data outside CMS permissions/protections. 
+    impacts_cms_deployment:
+      - "systemc"
+
   - version_number: "1.4.6" 
     release_date: "2025-08-07" 
     includes_changes: >
