@@ -5,9 +5,21 @@ meta:
   owner: "Data to Insight"
   status: "Release"
 
-current_version: "1.4.7"
+current_version: "1.4.8"
 
 releases:
+  - version_number: "1.4.8" 
+    release_date: "2025-08-21" 
+    includes_changes: >
+      Change to ssd_cla_placement to ensure that restricted address detail no longer populates. 
+      Postcode data is replaced with (upper)"CON" string - ssd_Address adjusted also to reflect this case
+    impact_description: >
+      prev address change now to be reflected in placement data also. Enforce uppercase on CON string
+      Change deemed essential as SSD schema retains data outside CMS permissions/protections. 
+    impacts_cms_deployment:
+      - "systemc"
+
+
   - version_number: "1.4.7" 
     release_date: "2025-08-14" 
     includes_changes: >

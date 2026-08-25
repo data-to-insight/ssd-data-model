@@ -1343,14 +1343,14 @@ END
         END AS IsProtected,
 
         -- Postcode cleanse rules:
-        --   * Protected addresses -> 'con'
+        --   * Protected addresses -> 'CON' 
         --   * All-X postcodes -> ''
         --   * 'nopostcode' -> ''
         --   * Otherwise retain trimmed postcode
         CASE
             WHEN UPPER(ISNULL(pa.CONFIDENTIAL, 'N')) = 'Y'
               OR UPPER(ISNULL(pa.IS_RESTRICTED_FLAG, 'N')) = 'Y'
-                THEN 'con'
+                THEN 'CON' -- confidential/restricted mask
             WHEN REPLACE(pa.POSTCODE, ' ', '') =
                  REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', '')))
                 THEN ''
@@ -4370,9 +4370,10 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: 
 -- Author: D2I
--- Version: 1.0 
---             0.2: 060324 JH
---             0.1: Corrected/removal of placement_la & episode_id 090124 RH
+-- Version: 1.1
+--              1.0 placement_postcode CON mask for restricted address added 210826 RH
+--              0.2: 060324 JH
+--              0.1: Corrected/removal of placement_la & episode_id 090124 RH
 -- Status: [R]elease
 -- Remarks: [EA_API_PRIORITY_TABLE] 
 --          DEV: filtering for OFSTED_URN LIKE 'SC%'
@@ -4445,10 +4446,28 @@ SELECT
     TRY_CAST(fcp.DISTANCE_FROM_HOME AS FLOAT)   AS clap_cla_placement_distance,                         -- convert to FLOAT (source col is nvarchar, also holds nulls/ints)
     fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
  
-    CASE -- removal of common/invalid placeholder data i.e ZZZ, XX
-        WHEN LEN(LTRIM(RTRIM(fcp.POSTCODE))) <= 4 THEN NULL
-        ELSE LTRIM(RTRIM(fcp.POSTCODE))        -- simplistic clean-up
-    END                                         AS clap_cla_placement_postcode,
+    CASE 
+        WHEN EXISTS
+        (
+            SELECT 1
+            -- if child had ANY protected/CON address instance
+            -- we CON mask the placement location
+            FROM HDM.Child_Social.DIM_PERSON_ADDRESS pa
+            WHERE pa.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+            AND (
+                    UPPER(ISNULL(pa.CONFIDENTIAL, 'N')) = 'Y'
+                OR UPPER(ISNULL(pa.IS_RESTRICTED_FLAG, 'N')) = 'Y'
+                )
+        )
+            THEN 'CON'
+
+        -- clean common/invalid placeholder data i.e ZZZ, XX
+        WHEN LEN(LTRIM(RTRIM(fcp.POSTCODE))) <= 4
+            THEN NULL
+
+        ELSE LTRIM(RTRIM(fcp.POSTCODE))
+    END AS clap_cla_placement_postcode,
+
     fcp.END_DTTM                                AS clap_cla_placement_end_date,
     fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE          AS clap_cla_placement_change_reason
  
