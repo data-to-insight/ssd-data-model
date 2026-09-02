@@ -4370,8 +4370,7 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: 
 -- Author: D2I
--- Version: 1.2
---              1.1 placement urn mask for restricted added 020926 RH
+-- Version: 1.1
 --              1.0 placement_postcode CON mask for restricted address added 210826 RH
 --              0.2: 060324 JH
 --              0.1: Corrected/removal of placement_la & episode_id 090124 RH
@@ -4448,7 +4447,6 @@ SELECT
 
     CASE
         -- mask placement postcode when confidential
-        -- confidentiality test evaluated per placement row but driven by child
         WHEN conf.is_confidential = 1
             THEN 'CON'
 
@@ -4467,8 +4465,8 @@ FROM
 
 OUTER APPLY (
     SELECT CAST(
-        -- if child had ANY protected/CONFIDENTIAL address
-        -- CON mask all placement locations
+        -- if child had ANY protected/CONFIDENTIAL address instance
+        -- CON mask placement location
         CASE
             WHEN EXISTS (
                 SELECT 1
