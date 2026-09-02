@@ -1333,7 +1333,7 @@ END
         --   IS_RESTRICTED_FLAG = 'Y'
         --
         -- Protected addresses must not expose address detail
-        -- postcode replaced with 'con' and all address
+        -- postcode replaced with 'CON' and all address
         -- components in the JSON payload blanked out
         CASE
             WHEN UPPER(ISNULL(pa.CONFIDENTIAL, 'N')) = 'Y'
@@ -1448,7 +1448,7 @@ AND EXISTS
 --         --   IS_RESTRICTED_FLAG = 'Y'
 --         --
 --         -- Protected addresses must not expose address detail
---         -- postcode replaced with 'con' and all address
+--         -- postcode replaced with 'CON' and all address
 --         -- components in the JSON payload blanked out
 --         CASE
 --             WHEN UPPER(ISNULL(pa.CONFIDENTIAL, 'N')) = 'Y'
@@ -1458,14 +1458,14 @@ AND EXISTS
 --         END AS IsProtected,
 --
 --         -- Postcode cleanse rules:
---         --   * Protected addresses -> 'con'
+--         --   * Protected addresses -> 'CON'
 --         --   * All-X postcodes -> ''
 --         --   * 'nopostcode' -> ''
 --         --   * Otherwise retain trimmed postcode
 --         CASE
 --             WHEN UPPER(ISNULL(pa.CONFIDENTIAL, 'N')) = 'Y'
 --               OR UPPER(ISNULL(pa.IS_RESTRICTED_FLAG, 'N')) = 'Y'
---                 THEN 'con'
+--                 THEN 'CON'
 --             WHEN REPLACE(pa.POSTCODE, ' ', '') =
 --                  REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', '')))
 --                 THEN ''
