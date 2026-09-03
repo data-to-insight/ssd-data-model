@@ -83,32 +83,68 @@ INSERT INTO ssd_cla_placement (
     clap_cla_placement_change_reason  
 )
 SELECT
-    fcp.FACT_CLA_PLACEMENT_ID                   AS clap_cla_placement_id,
-    fcp.FACT_CLA_ID                             AS clap_cla_id,   
-    fcp.DIM_PERSON_ID                           AS clap_person_id,                             
-    fcp.START_DTTM                              AS clap_cla_placement_start_date,
-    fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE          AS clap_cla_placement_type,
-    (
-        SELECT
-            TOP(1) fce.OFSTED_URN
-            FROM   HDM.Child_Social.FACT_CARE_EPISODES fce
-            WHERE  fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
-            AND    fce.OFSTED_URN LIKE 'SC%'
-            AND fce.OFSTED_URN IS NOT NULL        
-    )                                           AS clap_cla_placement_urn,
- 
-    TRY_CAST(fcp.DISTANCE_FROM_HOME AS FLOAT)   AS clap_cla_placement_distance,                         -- convert to FLOAT (source col is nvarchar, also holds nulls/ints)
-    fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE      AS clap_cla_placement_provider,
- 
-    CASE -- removal of common/invalid placeholder data i.e ZZZ, XX
-        WHEN LEN(LTRIM(RTRIM(fcp.POSTCODE))) <= 4 THEN NULL
-        ELSE LTRIM(RTRIM(fcp.POSTCODE))        -- simplistic clean-up
-    END                                         AS clap_cla_placement_postcode,
-    fcp.END_DTTM                                AS clap_cla_placement_end_date,
-    fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE          AS clap_cla_placement_change_reason
+    fcp.FACT_CLA_PLACEMENT_ID          AS clap_cla_placement_id,
+    fcp.FACT_CLA_ID                    AS clap_cla_id,
+    fcp.DIM_PERSON_ID                  AS clap_person_id,
+    fcp.START_DTTM                     AS clap_cla_placement_start_date,
+    fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE AS clap_cla_placement_type,
+
+    CASE
+        -- mask placement urn when confidential
+        WHEN conf.is_confidential = 1 THEN 'CON'
+        ELSE urn.OFSTED_URN
+    END AS clap_cla_placement_urn,
+
+    TRY_CAST(fcp.DISTANCE_FROM_HOME AS FLOAT) AS clap_cla_placement_distance,
+
+    fcp.DIM_LOOKUP_PLACEMENT_PROVIDER_CODE AS clap_cla_placement_provider,
+
+    CASE
+        -- mask placement postcode when confidential
+        -- confidentiality test evaluated per placement row but driven by child
+        WHEN conf.is_confidential = 1
+            THEN 'CON'
+
+        -- clean common/invalid placeholder data i.e ZZZ, XX
+        WHEN LEN(LTRIM(RTRIM(fcp.POSTCODE))) <= 4
+            THEN NULL
+
+        ELSE LTRIM(RTRIM(fcp.POSTCODE))
+    END AS clap_cla_placement_postcode,
+
+    fcp.END_DTTM                       AS clap_cla_placement_end_date,
+    fcp.DIM_LOOKUP_PLAC_CHNG_REAS_CODE AS clap_cla_placement_change_reason
  
 FROM
     HDM.Child_Social.FACT_CLA_PLACEMENT AS fcp
+
+OUTER APPLY (
+    SELECT CAST(
+        -- if child had ANY protected/CONFIDENTIAL address
+        -- CON mask all placement locations
+        CASE
+            WHEN EXISTS (
+                SELECT 1
+                FROM HDM.Child_Social.DIM_PERSON_ADDRESS pa
+                WHERE pa.DIM_PERSON_ID = fcp.DIM_PERSON_ID
+                  AND (
+                        UPPER(ISNULL(pa.CONFIDENTIAL, 'N')) = 'Y'
+                     OR UPPER(ISNULL(pa.IS_RESTRICTED_FLAG, 'N')) = 'Y'
+                  )
+            )
+            THEN 1
+            ELSE 0
+        END AS bit
+    ) AS is_confidential
+) conf
+OUTER APPLY (
+    SELECT TOP (1)
+        fce.OFSTED_URN
+    FROM HDM.Child_Social.FACT_CARE_EPISODES fce
+    WHERE fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID
+      AND fce.OFSTED_URN LIKE 'SC%'
+      AND fce.OFSTED_URN IS NOT NULL
+) urn
  
 -- JOIN
 --     HDM.Child_Social.FACT_CARE_EPISODES AS fce ON fcp.FACT_CLA_PLACEMENT_ID = fce.FACT_CLA_PLACEMENT_ID    -- [TESTING]
