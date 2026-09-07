@@ -37,8 +37,7 @@ BEGIN
 -- Version: 1.0
 -- Status: [D]ev-
 -- Remarks: [EA_API_PRIORITY_TABLE]
---          Replaced IMMIGRATION_STATUS_CODE with IMMIGRATION_STATUS_DESC and
---             increased field size to 100
+
 -- Dependencies:
 -- - ssd_person
 -- - HDM.Child_Social.FACT_IMMIGRATION_STATUS
@@ -59,7 +58,7 @@ BEGIN
         immi_person_id                      NVARCHAR(48),               -- metadata={"item_ref":"IMMI001A"}
         immi_immigration_status_start_date  DATETIME,                   -- metadata={"item_ref":"IMMI003A"}
         immi_immigration_status_end_date    DATETIME,                   -- metadata={"item_ref":"IMMI004A"}
-        immi_immigration_status             NVARCHAR(100)               -- metadata={"item_ref":"IMMI002A"}
+        immi_immigration_status             NVARCHAR(1)                 -- metadata={"item_ref":"IMMI002A"}
     );
 END
 
@@ -75,17 +74,18 @@ SELECT
     ims.DIM_PERSON_ID,
     ims.START_DTTM,
     ims.END_DTTM,
-    ims.DIM_LOOKUP_IMMGR_STATUS_DESC
-FROM
-    HDM.Child_Social.FACT_IMMIGRATION_STATUS AS ims
- 
-WHERE
-    EXISTS
-    ( -- only ssd relevant records
-        SELECT 1
-        FROM ssd_person p
-        WHERE TRY_CAST(p.pers_person_id AS INT) = ims.DIM_PERSON_ID -- #DtoI-1799
-    );
+    ims.DIM_LOOKUP_IMMGR_STATUS_CODE    -- uasc code e.g. U|P|R|A
+    -- ims.DIM_LOOKUP_IMMGR_STATUS_DESC -- uasc description e.g. 'Unaccompanied Asylum Seeking Child'
+FROM HDM.Child_Social.FACT_IMMIGRATION_STATUS AS ims
+WHERE EXISTS
+(
+    SELECT 1
+    FROM ssd_person p
+    WHERE TRY_CAST(p.pers_person_id AS INT) = ims.DIM_PERSON_ID
+)
+ORDER BY
+    ims.DIM_PERSON_ID,
+    ims.START_DTTM;
 
 
 

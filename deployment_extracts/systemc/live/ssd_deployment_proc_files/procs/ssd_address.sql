@@ -65,102 +65,200 @@ BEGIN
     );
 END
 
-INSERT INTO ssd_address (
-    addr_table_id, 
-    addr_person_id, 
-    addr_address_type, 
-    addr_address_start_date, 
-    addr_address_end_date, 
-    addr_address_postcode, 
+
+-- #LEGACY-PRE2016
+-- SQL compatible versions <2016
+;WITH Addresses AS
+(
+    SELECT
+        pa.*,
+
+        -- protected address is one marked as either:
+        --   CONFIDENTIAL = 'Y'
+        --   IS_RESTRICTED_FLAG = 'Y'
+        --
+        -- Protected addresses must not expose address detail
+        -- postcode replaced with 'CON' and all address
+        -- components in the JSON payload blanked out
+        CASE
+            WHEN UPPER(ISNULL(pa.CONFIDENTIAL, 'N')) = 'Y'
+              OR UPPER(ISNULL(pa.IS_RESTRICTED_FLAG, 'N')) = 'Y'
+            THEN 1
+            ELSE 0
+        END AS IsProtected,
+
+        -- Postcode cleanse rules:
+        --   * Protected addresses -> 'CON' 
+        --   * All-X postcodes -> ''
+        --   * 'nopostcode' -> ''
+        --   * Otherwise retain trimmed postcode
+        CASE
+            WHEN UPPER(ISNULL(pa.CONFIDENTIAL, 'N')) = 'Y'
+              OR UPPER(ISNULL(pa.IS_RESTRICTED_FLAG, 'N')) = 'Y'
+                THEN 'CON' -- confidential/restricted mask
+            WHEN REPLACE(pa.POSTCODE, ' ', '') =
+                 REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', '')))
+                THEN ''
+            WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode'
+                THEN ''
+            ELSE LTRIM(RTRIM(pa.POSTCODE))
+        END AS CleanedPostcode
+
+    FROM HDM.Child_Social.DIM_PERSON_ADDRESS pa
+)
+
+INSERT INTO ssd_address
+(
+    addr_table_id,
+    addr_person_id,
+    addr_address_type,
+    addr_address_start_date,
+    addr_address_end_date,
+    addr_address_postcode,
     addr_address_json
 )
 
--- #LEGACY-PRE2016 
--- SQL compatible versions <2016
-SELECT  
-    pa.DIM_PERSON_ADDRESS_ID,
-    pa.DIM_PERSON_ID, 
-    pa.ADDSS_TYPE_CODE,
-    pa.START_DTTM,
-    pa.END_DTTM,
-    CASE 
-        WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', '')))
-            THEN ''  -- clear postcode containing all X's
-        WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode'
-            THEN ''  -- clear 'nopostcode' strs
+SELECT
+    a.DIM_PERSON_ADDRESS_ID,
+    a.DIM_PERSON_ID,
+    a.ADDSS_TYPE_CODE,
+    a.START_DTTM,
+    a.END_DTTM,
+    a.CleanedPostcode,
+
+    CASE
+        -- Protected addresses:
+        -- retain address entry, but suppress ALL address detail.
+        -- JSON structure retained but prevent disclosure of confidential address infos.
+        WHEN a.IsProtected = 1
+        THEN
+            (
+                '{' +
+                '"ROOM": "", ' +
+                '"FLOOR": "", ' +
+                '"FLAT": "", ' +
+                '"BUILDING": "", ' +
+                '"HOUSE": "", ' +
+                '"STREET": "", ' +
+                '"TOWN": "", ' +
+                '"UPRN": "", ' +
+                '"EASTING": "", ' +
+                '"NORTHING": "", ' +
+                '"POSTCODE": "con"' +
+                '}'
+            )
+
         ELSE
-            LTRIM(RTRIM(pa.POSTCODE))  -- keep internal space(s)
-    END AS CleanedPostcode,
-    (
-        '{' +
-        '"ROOM": "' + ISNULL(TRY_CAST(pa.ROOM_NO AS NVARCHAR(50)), '') + '", ' +
-        '"FLOOR": "' + ISNULL(TRY_CAST(pa.FLOOR_NO AS NVARCHAR(50)), '') + '", ' +
-        '"FLAT": "' + ISNULL(TRY_CAST(pa.FLAT_NO AS NVARCHAR(50)), '') + '", ' +
-        '"BUILDING": "' + ISNULL(pa.BUILDING, '') + '", ' +
-        '"HOUSE": "' + ISNULL(TRY_CAST(pa.HOUSE_NO AS NVARCHAR(50)), '') + '", ' +
-        '"STREET": "' + ISNULL(pa.STREET, '') + '", ' +
-        '"TOWN": "' + ISNULL(pa.TOWN, '') + '", ' +
-        '"UPRN": "' + ISNULL(TRY_CAST(pa.UPRN AS NVARCHAR(50)), '') + '", ' +
-        '"EASTING": "' + ISNULL(TRY_CAST(pa.EASTING AS NVARCHAR(20)), '') + '", ' +
-        '"NORTHING": "' + ISNULL(TRY_CAST(pa.NORTHING AS NVARCHAR(20)), '') + '"' +
-        '}'
-    ) AS addr_address_json
-FROM 
-    HDM.Child_Social.DIM_PERSON_ADDRESS AS pa
+        -- address/record is not confidential or restricted
+            (
+                '{' +
+                '"ROOM": "' + ISNULL(TRY_CAST(a.ROOM_NO AS NVARCHAR(50)), '') + '", ' +
+                '"FLOOR": "' + ISNULL(TRY_CAST(a.FLOOR_NO AS NVARCHAR(50)), '') + '", ' +
+                '"FLAT": "' + ISNULL(TRY_CAST(a.FLAT_NO AS NVARCHAR(50)), '') + '", ' +
+                '"BUILDING": "' + ISNULL(a.BUILDING, '') + '", ' +
+                '"HOUSE": "' + ISNULL(TRY_CAST(a.HOUSE_NO AS NVARCHAR(50)), '') + '", ' +
+                '"STREET": "' + ISNULL(a.STREET, '') + '", ' +
+                '"TOWN": "' + ISNULL(a.TOWN, '') + '", ' +
+                '"UPRN": "' + ISNULL(TRY_CAST(a.UPRN AS NVARCHAR(50)), '') + '", ' +
+                '"EASTING": "' + ISNULL(TRY_CAST(a.EASTING AS NVARCHAR(20)), '') + '", ' +
+                '"NORTHING": "' + ISNULL(TRY_CAST(a.NORTHING AS NVARCHAR(20)), '') + '", ' +
+                '"POSTCODE": "' + ISNULL(a.CleanedPostcode, '') + '"' +
+                '}'
+            )
+    END AS addr_address_json
 
-WHERE pa.DIM_PERSON_ID <> -1
-    AND EXISTS 
-    (   -- only ssd relevant records
-    SELECT 1 
+FROM Addresses a
+
+WHERE a.DIM_PERSON_ID <> -1
+AND EXISTS
+(
+    SELECT 1
     FROM ssd_person p
-    WHERE CAST(p.pers_person_id AS INT) = pa.DIM_PERSON_ID -- #DtoI-1799
-    );
+    WHERE CAST(p.pers_person_id AS INT) = a.DIM_PERSON_ID
+);
 
 
--- -- #LEGACY-PRE2016 
+
+
+-- -- #LEGACY-PRE2016
 -- -- SQL compatible versions >=2016+
--- SELECT 
---     pa.DIM_PERSON_ADDRESS_ID,
---     pa.DIM_PERSON_ID, 
---     pa.ADDSS_TYPE_CODE,
---     pa.START_DTTM,
---     pa.END_DTTM,
---     CASE 
---         WHEN REPLACE(pa.POSTCODE, ' ', '') = REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', '')))
---             THEN ''  -- clear postcode containing all X's
---         WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode'
---             THEN ''  -- clear postcode containing 'nopostcode'
---         ELSE
---             LTRIM(RTRIM(pa.POSTCODE))  -- keep any internal space(s), just trim ends
---     END AS CleanedPostcode,
+--
+-- ;WITH Addresses AS
+-- (
+--     SELECT
+--         pa.*,
+--
+--         -- protected address is one marked as either:
+--         --   CONFIDENTIAL = 'Y'
+--         --   IS_RESTRICTED_FLAG = 'Y'
+--         --
+--         -- Protected addresses must not expose address detail
+--         -- postcode replaced with 'CON' and all address
+--         -- components in the JSON payload blanked out
+--         CASE
+--             WHEN UPPER(ISNULL(pa.CONFIDENTIAL, 'N')) = 'Y'
+--               OR UPPER(ISNULL(pa.IS_RESTRICTED_FLAG, 'N')) = 'Y'
+--             THEN 1
+--             ELSE 0
+--         END AS IsProtected,
+--
+--         -- Postcode cleanse rules:
+--         --   * Protected addresses -> 'CON'
+--         --   * All-X postcodes -> ''
+--         --   * 'nopostcode' -> ''
+--         --   * Otherwise retain trimmed postcode
+--         CASE
+--             WHEN UPPER(ISNULL(pa.CONFIDENTIAL, 'N')) = 'Y'
+--               OR UPPER(ISNULL(pa.IS_RESTRICTED_FLAG, 'N')) = 'Y'
+--                 THEN 'CON'
+--             WHEN REPLACE(pa.POSTCODE, ' ', '') =
+--                  REPLICATE('X', LEN(REPLACE(pa.POSTCODE, ' ', '')))
+--                 THEN ''
+--             WHEN LOWER(REPLACE(pa.POSTCODE, ' ', '')) = 'nopostcode'
+--                 THEN ''
+--             ELSE LTRIM(RTRIM(pa.POSTCODE))
+--         END AS CleanedPostcode
+--
+--     FROM HDM.Child_Social.DIM_PERSON_ADDRESS pa
+-- )
+--
+-- SELECT
+--     a.DIM_PERSON_ADDRESS_ID,
+--     a.DIM_PERSON_ID,
+--     a.ADDSS_TYPE_CODE,
+--     a.START_DTTM,
+--     a.END_DTTM,
+--     a.CleanedPostcode,
+--
 --     (
-    
---     SELECT 
---         -- SSD standard 
---         -- all keys in structure regardless of data presence
---         ISNULL(pa.ROOM_NO, '')    AS ROOM, 
---         ISNULL(pa.FLOOR_NO, '')   AS FLOOR, 
---         ISNULL(pa.FLAT_NO, '')    AS FLAT, 
---         ISNULL(pa.BUILDING, '')   AS BUILDING, 
---         ISNULL(pa.HOUSE_NO, '')   AS HOUSE, 
---         ISNULL(pa.STREET, '')     AS STREET, 
---         ISNULL(pa.TOWN, '')       AS TOWN,
---         ISNULL(pa.UPRN, '')       AS UPRN,
---         ISNULL(pa.EASTING, '')    AS EASTING,
---         ISNULL(pa.NORTHING, '')   AS NORTHING
---     FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+--         SELECT
+--             -- Protected addresses:
+--             -- retain address entry, but suppress ALL address detail.
+--             -- JSON structure retained but prevent disclosure of confidential address infos.
+--             CASE WHEN a.IsProtected = 1 THEN '' ELSE ISNULL(a.ROOM_NO, '') END AS ROOM,
+--             CASE WHEN a.IsProtected = 1 THEN '' ELSE ISNULL(a.FLOOR_NO, '') END AS FLOOR,
+--             CASE WHEN a.IsProtected = 1 THEN '' ELSE ISNULL(a.FLAT_NO, '') END AS FLAT,
+--             CASE WHEN a.IsProtected = 1 THEN '' ELSE ISNULL(a.BUILDING, '') END AS BUILDING,
+--             CASE WHEN a.IsProtected = 1 THEN '' ELSE ISNULL(a.HOUSE_NO, '') END AS HOUSE,
+--             CASE WHEN a.IsProtected = 1 THEN '' ELSE ISNULL(a.STREET, '') END AS STREET,
+--             CASE WHEN a.IsProtected = 1 THEN '' ELSE ISNULL(a.TOWN, '') END AS TOWN,
+--             CASE WHEN a.IsProtected = 1 THEN '' ELSE ISNULL(a.UPRN, '') END AS UPRN,
+--             CASE WHEN a.IsProtected = 1 THEN '' ELSE ISNULL(a.EASTING, '') END AS EASTING,
+--             CASE WHEN a.IsProtected = 1 THEN '' ELSE ISNULL(a.NORTHING, '') END AS NORTHING,
+--             a.CleanedPostcode AS POSTCODE
+--
+--         FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 --     ) AS addr_address_json
--- FROM 
---     HDM.Child_Social.DIM_PERSON_ADDRESS AS pa
-
--- WHERE pa.DIM_PERSON_ID <> -1
---     AND EXISTS 
---     (   -- only ssd relevant records
---     SELECT 1 
+--
+-- FROM Addresses a
+--
+-- WHERE a.DIM_PERSON_ID <> -1
+-- AND EXISTS
+-- (
+--     SELECT 1
 --     FROM ssd_person p
---     WHERE CAST(p.pers_person_id AS INT) = pa.DIM_PERSON_ID -- #DtoI-1799
---     );
-
+--     WHERE CAST(p.pers_person_id AS INT) = a.DIM_PERSON_ID -- #DtoI-1799
+-- );
 
 
 -- -- META-ELEMENT: {"type": "create_fk"}
