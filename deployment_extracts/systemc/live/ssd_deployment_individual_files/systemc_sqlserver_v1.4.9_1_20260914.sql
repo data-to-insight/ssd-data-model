@@ -3919,8 +3919,15 @@ BEGIN
         clae_cla_episode_start_date     datetime,
         clae_cla_episode_start_reason   nvarchar(100),
         clae_cla_primary_need_code      nvarchar(3),
+
         clae_cla_episode_ceased_date    datetime,
         clae_cla_episode_ceased_reason  nvarchar(255),
+
+        -- [REVIEW] RH Sept-2026
+        -- HDM.Child_Social.FACT_CARE_EPISODES.PLACEND)
+        -- placement-ending episode where:CARE_END_DATE = PLACEND
+        -- clae_cla_placement_end_date     datetime,
+
         clae_cla_id                     nvarchar(48),
         clae_referral_id                nvarchar(48),
         clae_cla_last_iro_contact_date  datetime,
@@ -3928,24 +3935,41 @@ BEGIN
     );
 END
 
-
 -- META-ELEMENT: {"type": "insert_data"}
+
 -- filtered source
 ;WITH FilteredData AS (
     SELECT
         fce.FACT_CARE_EPISODES_ID                    AS clae_cla_episode_id,
         TRY_CAST(fce.DIM_PERSON_ID AS nvarchar(48))  AS clae_person_id,
         fce.FACT_CLA_PLACEMENT_ID                    AS clae_cla_placement_id,
+
         fce.CARE_START_DATE                          AS clae_cla_episode_start_date,
-        fce.CARE_REASON_DESC                         AS clae_cla_episode_start_reason,
+        fce.CARE_REASON_CODE                         AS clae_cla_episode_start_reason,
+
         fce.CIN_903_CODE                             AS clae_cla_primary_need_code,
+
         fce.CARE_END_DATE                            AS clae_cla_episode_ceased_date,
-        fce.CARE_REASON_END_DESC                     AS clae_cla_episode_ceased_reason,
+
+        -- opt 1 -- [REVIEW] suggested fix for #290
+        -- Preserve episode end code to avoid downstream parsing
+        fce.CARE_REASON_END_903_CODE                 AS clae_cla_episode_ceased_reason,
+        -- opt 2|3 alternatives -- [REVIEW][LA feedback welcomed]
+        -- CARE_REASON_END_CODE == CARE_REASON_END_903_CODE (but != 27)
+        -- fce.CARE_REASON_END_CODE                 AS clae_cla_episode_ceased_reason,
+        -- fce.CARE_REASON_END_DESC                 AS clae_cla_episode_ceased_reason,
+
+        -- [REVIEW] RH Sept-2026 potentially useful incl. towards #290
+        -- identify placement-ending episode: CARE_END_DATE == PLACEND
+        -- fce.PLACEND                                  AS clae_cla_placement_end_date,
+
         fc.FACT_CLA_ID                               AS clae_cla_id,
         fc.FACT_REFERRAL_ID                          AS clae_referral_id,
         iro.clae_cla_last_iro_contact_date           AS clae_cla_last_iro_contact_date,
         fc.START_DTTM                                AS clae_entered_care_date
+
     FROM HDM.Child_Social.FACT_CARE_EPISODES AS fce
+
     JOIN HDM.Child_Social.FACT_CLA AS fc
       ON fc.FACT_CLA_ID = fce.FACT_CLA_ID
 
@@ -3969,6 +3993,7 @@ END
             OR fce.CARE_END_DATE IS NULL
           )
 )
+
 INSERT INTO ssd_development.ssd_cla_episodes (
     clae_cla_episode_id,
     clae_person_id,
@@ -3978,6 +4003,7 @@ INSERT INTO ssd_development.ssd_cla_episodes (
     clae_cla_primary_need_code,
     clae_cla_episode_ceased_date,
     clae_cla_episode_ceased_reason,
+    -- clae_cla_placement_end_date, -- [REVIEW]
     clae_cla_id,
     clae_referral_id,
     clae_cla_last_iro_contact_date,
@@ -3992,6 +4018,7 @@ SELECT
     clae_cla_primary_need_code,
     clae_cla_episode_ceased_date,
     clae_cla_episode_ceased_reason,
+    -- clae_cla_placement_end_date, -- [REVIEW]
     clae_cla_id,
     clae_referral_id,
     clae_cla_last_iro_contact_date,
@@ -4499,7 +4526,7 @@ OUTER APPLY (
 WHERE fcp.DIM_LOOKUP_PLACEMENT_TYPE_CODE IN ('A1','A2','A3','A4','A5','A6','F1','F2','F3','F4','F5','F6','H1','H2','H3',
                                             'H4','H5','H5a','K1','K2','M2','M3','P1','P2','Q1','Q2','R1','R2','R3',
                                             'R5','S1','T0','T1','U1','U2','U3','U4','U5','U6','Z1')
-
+AND fcp.FACT_CLA_PLACEMENT_ID <> -1 -- filter out admin/sys entries
 AND
     (fcp.END_DTTM  >= DATEADD(YEAR, -@ssd_timeframe_years, GETDATE()) -- #DtoI-1806
     OR fcp.END_DTTM IS NULL);
