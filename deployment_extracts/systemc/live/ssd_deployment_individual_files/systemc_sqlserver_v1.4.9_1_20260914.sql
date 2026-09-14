@@ -3885,7 +3885,8 @@ PRINT 'Table created: ' + @TableName;
 -- =============================================================================
 -- Description: 
 -- Author: D2I
--- Version: 1.1
+-- Version: 1.2
+--          1.1 #290 issue requiring field source change to fce.CARE_REASON_END_903_CODE
 --          1.0 Fix on issues/275 outer apply added to per filter nulls 040326 RH
 -- Status: [R]elease
 -- Remarks: [EA_API_PRIORITY_TABLE]
